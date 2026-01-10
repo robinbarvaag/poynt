@@ -6,7 +6,8 @@
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./utils": "./src/lib/utils.ts"
+    "./utils": "./src/lib/utils.ts",
+    "./button": "./src/components/button.tsx"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.0",
