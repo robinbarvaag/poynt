@@ -1,7 +1,7 @@
 {
   // Enable custom agents in subagents (required for orchestrator delegation)
   "chat.customAgentInSubagent.enabled": true,
-  "chat.useClaudeSkills": true,
   "terminal.integrated.shellIntegration.enabled": true,
-  "chat.agent.maxRequests": 9000
+  "chat.agent.maxRequests": 9000,
+  "chat.useAgentSkills": true
 }

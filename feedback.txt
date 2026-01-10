@@ -1,0 +1,2 @@
+Må få inn noe med shadcn kanskje? Lage et CLI oppå her?
+Få inn en eller anna prompt / feedback på at en alltid må finne siste stable versjon av noe før en lager tips

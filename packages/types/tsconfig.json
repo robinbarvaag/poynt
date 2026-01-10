@@ -1,0 +1,3 @@
+{
+  "extends": "@poynt/typescript-config/base.json"
+}

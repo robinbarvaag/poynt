@@ -1,0 +1,21 @@
+{
+  "name": "@poynt/eslint-config",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    "./next.js": "./next.js"
+  },
+  "dependencies": {
+    "eslint-config-next": "^14.0.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-react": "^7.33.0",
+    "eslint-plugin-turbo": "^1.11.0"
+  },
+  "peerDependencies": {
+    "eslint": "^8.0.0"
+  }
+}
