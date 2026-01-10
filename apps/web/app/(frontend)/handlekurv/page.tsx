@@ -1,7 +1,7 @@
 "use client";
 
 import { useCart } from "@poynt/cart";
-import { Button } from "@poynt/ui/button";
+import { Button } from "@poynt/ui";
 import Link from "next/link";
 import { Trash2 } from "lucide-react";
 import { useState } from "react";

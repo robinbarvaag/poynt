@@ -92,11 +92,7 @@ export async function POST(req: NextRequest) {
 
       // Send bekreftelsesmail
       if (session.customer_email) {
-        await sendOrderConfirmation(
-          session.customer_email,
-          order.id,
-          session.amount_total || 0
-        );
+        await sendOrderConfirmation(session.customer_email, String(order.id));
       }
 
       console.log("Ordre oppretta:", order.id);

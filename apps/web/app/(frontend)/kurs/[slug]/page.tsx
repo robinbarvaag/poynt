@@ -50,7 +50,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         <div>
           <h1 className="text-4xl font-bold mb-4">{product.name}</h1>
           <p className="text-3xl font-bold text-primary mb-6">{priceInKr} kr</p>
-          <AddToCartButton product={product} />
+          <AddToCartButton product={product as any} />
         </div>
       </div>
       {product.description && (

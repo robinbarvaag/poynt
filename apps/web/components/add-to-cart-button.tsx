@@ -1,7 +1,7 @@
 "use client";
 
 import { useCart } from "@poynt/cart";
-import { Button } from "@poynt/ui/button";
+import { Button } from "@poynt/ui";
 import { useState } from "react";
 import { Check } from "lucide-react";
 
@@ -9,6 +9,7 @@ interface Product {
   id: string;
   name: string;
   price: number;
+  slug?: string;
 }
 
 interface AddToCartButtonProps {
@@ -23,11 +24,9 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
 
   const handleAddToCart = () => {
     addItem({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      quantity: 1,
-    });
+      ...product,
+      slug: product.slug || product.id,
+    } as any);
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   };

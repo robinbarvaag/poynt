@@ -18,13 +18,13 @@ export function RenderBlocks({ blocks }: RenderBlocksProps) {
       {blocks.map((block, index) => {
         switch (block.blockType) {
           case "hero":
-            return <HeroBlock key={index} {...block} />;
+            return <HeroBlock key={index} {...(block as any)} />;
           case "content":
-            return <ContentBlock key={index} {...block} />;
+            return <ContentBlock key={index} {...(block as any)} />;
           case "media":
-            return <MediaBlockComponent key={index} {...block} />;
+            return <MediaBlockComponent key={index} {...(block as any)} />;
           case "archive":
-            return <ArchiveBlock key={index} {...block} />;
+            return <ArchiveBlock key={index} {...(block as any)} />;
           default:
             return null;
         }

@@ -1,6 +1,6 @@
-import config from "@payload-config";
-import { PayloadPage } from "@payloadcms/next/views";
+import config from "@/payload.config";
 import { notFound } from "next/navigation";
+import { generatePageMetadata } from "@payloadcms/next/utilities";
 
 interface PageProps {
   params: Promise<{ segments: string[] }>;
@@ -10,9 +10,8 @@ interface PageProps {
 const Page = async ({ params, searchParams }: PageProps) => {
   const { segments } = await params;
 
-  return (
-    <PayloadPage config={config} params={params} searchParams={searchParams} />
-  );
+  // Payload admin UI renders through the layout
+  return null;
 };
 
 export default Page;

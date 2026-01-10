@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Button } from "@poynt/ui/button";
+import { Button } from "@poynt/ui";
 
 interface Product {
   id: string;

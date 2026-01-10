@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCart } from "@poynt/cart";
-import { Button } from "@poynt/ui/button";
+import { Button } from "@poynt/ui";
 import { ShoppingCart } from "lucide-react";
 
 export function Header() {

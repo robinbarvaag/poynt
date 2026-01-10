@@ -4,7 +4,7 @@
   "private": true,
   "main": "./src/index.ts",
   "dependencies": {
-    "stripe": "^14.10.0"
+    "stripe": "^20.1.2"
   },
   "devDependencies": {
     "@poynt/typescript-config": "workspace:*"

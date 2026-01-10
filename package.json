@@ -5,11 +5,16 @@
     "build": "turbo build",
     "dev": "turbo dev",
     "lint": "turbo lint",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "typecheck": "turbo typecheck",
+    "check": "biome check --write .",
+    "check:ci": "biome ci .",
     "clean": "turbo clean"
   },
   "devDependencies": {
     "turbo": "latest",
-    "prettier": "latest"
+    "@biomejs/biome": "^1.9.4"
   },
   "packageManager": "bun@1.2.0",
   "workspaces": [

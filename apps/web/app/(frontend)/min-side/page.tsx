@@ -2,14 +2,14 @@ import { getPayload } from "payload";
 import config from "@/payload.config";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Button } from "@poynt/ui/button";
+import { Button } from "@poynt/ui";
 import Image from "next/image";
 
 export default async function MyAccountPage() {
   const payload = await getPayload({ config });
 
   // Hent innlogga brukar
-  const { user } = await payload.auth();
+  const { user } = await payload.auth({ headers: new Headers() });
 
   if (!user) {
     redirect("/admin/login");
@@ -31,7 +31,7 @@ export default async function MyAccountPage() {
   // Hent alle kjøpte produkt
   const purchasedProductIds = new Set<string>();
   orders.docs.forEach((order) => {
-    order.items.forEach((item) => {
+    order.items.forEach((item: any) => {
       if (typeof item.product === "string") {
         purchasedProductIds.add(item.product);
       } else if (item.product?.id) {

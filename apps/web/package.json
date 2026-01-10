@@ -7,6 +7,7 @@
     "build": "bun --bun next build",
     "start": "bun --bun next start",
     "lint": "bun --bun next lint",
+    "typecheck": "tsc --noEmit",
     "generate:types": "bun --bun payload generate:types",
     "payload": "bun --bun payload"
   },

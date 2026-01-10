@@ -14,7 +14,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
   const payload = await getPayload({ config });
 
   // Hent innlogga brukar
-  const { user } = await payload.auth();
+  const { user } = await payload.auth({ headers: new Headers() });
 
   if (!user) {
     redirect("/admin/login");
@@ -51,7 +51,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
   });
 
   const hasPurchased = orders.docs.some((order) =>
-    order.items.some((item) => {
+    order.items.some((item: any) => {
       const productId =
         typeof item.product === "string" ? item.product : item.product?.id;
       return productId === product.id;
@@ -93,7 +93,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
 
   const content = courseContent.docs[0];
 
-  return <CoursePlayer product={product} content={content} />;
+  return <CoursePlayer product={product as any} content={content as any} />;
 }
 
 export async function generateStaticParams() {

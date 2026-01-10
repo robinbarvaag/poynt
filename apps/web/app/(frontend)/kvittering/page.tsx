@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { useCart } from "@poynt/cart";
 import Link from "next/link";
-import { Button } from "@poynt/ui/button";
+import { Button } from "@poynt/ui";
 import { CheckCircle } from "lucide-react";
 
 export default function ReceiptPage() {
