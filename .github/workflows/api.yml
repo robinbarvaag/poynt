@@ -1,0 +1,51 @@
+name: Deploy API
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/dotnet/JaerenOlje/Api/**"
+      - ".github/workflows/api.yml"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to deploy to"
+        required: true
+        default: "dev"
+        type: choice
+        options:
+          - dev
+          - test
+          - prod
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+
+      - name: Restore dependencies
+        run: dotnet restore src/dotnet/JaerenOlje/Api/Api.csproj
+
+      - name: Build
+        run: dotnet build src/dotnet/JaerenOlje/Api/Api.csproj --configuration Release --no-restore
+
+      - name: Publish
+        run: dotnet publish src/dotnet/JaerenOlje/Api/Api.csproj --configuration Release --no-build --output ${{github.workspace}}/publish
+
+      - name: Log into Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: JaerenOlje-api-${{ github.event.inputs.environment || 'dev' }}
+          package: ${{github.workspace}}/publish
