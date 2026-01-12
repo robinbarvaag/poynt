@@ -1,17 +1,18 @@
-import config from "@/payload.config";
-import { notFound } from "next/navigation";
-import { generatePageMetadata } from "@payloadcms/next/utilities";
+/* THIS FILE WAS GENERATED AUTOMATICALLY BY PAYLOAD. */
+import config from "@payload-config";
+import { RootPage, generatePageMetadata } from "@payloadcms/next/views";
+import type { Metadata } from "next";
+import { importMap } from "../importMap";
 
-interface PageProps {
+type Args = {
   params: Promise<{ segments: string[] }>;
   searchParams: Promise<{ [key: string]: string | string[] }>;
-}
-
-const Page = async ({ params, searchParams }: PageProps) => {
-  const { segments } = await params;
-
-  // Payload admin UI renders through the layout
-  return null;
 };
+
+export const generateMetadata = ({ params, searchParams }: Args): Promise<Metadata> =>
+  generatePageMetadata({ config, params, searchParams });
+
+const Page = ({ params, searchParams }: Args) =>
+  RootPage({ config, importMap, params, searchParams });
 
 export default Page;

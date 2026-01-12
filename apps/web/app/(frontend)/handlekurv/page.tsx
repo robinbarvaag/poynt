@@ -32,7 +32,6 @@ export default function CartPage() {
         throw new Error(data.error || "Noko gjekk gale");
       }
 
-      // Redirect til Stripe Checkout
       if (data.url) {
         window.location.href = data.url;
       }

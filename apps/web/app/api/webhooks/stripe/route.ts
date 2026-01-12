@@ -78,10 +78,17 @@ export async function POST(req: NextRequest) {
       );
 
       // Opprett ordre
+      const userId = session.metadata?.userId;
+      if (!userId) {
+        console.error("Mangler userId i session metadata");
+        return NextResponse.json({ error: "Missing user ID" }, { status: 400 });
+      }
+      
       const order = await payload.create({
         collection: "orders",
+        draft: false,
         data: {
-          user: session.metadata?.userId || "",
+          user: parseInt(userId, 10),
           items: orderItems,
           total: session.amount_total || 0,
           status: "paid",

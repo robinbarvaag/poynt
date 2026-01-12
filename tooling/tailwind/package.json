@@ -7,12 +7,12 @@
     "access": "public"
   },
   "exports": {
-    ".": "./tailwind.config.ts"
+    "./web.css": "./web.css"
   },
   "dependencies": {
-    "tailwindcss": "next",
-    "@tailwindcss/postcss": "next",
+    "@tailwindcss/postcss": "4.0.10",
     "autoprefixer": "^10.4.16",
-    "postcss": "^8.4.32"
+    "tailwindcss": "4.0.10",
+    "tailwindcss-animate": "^1.0.7"
   }
 }

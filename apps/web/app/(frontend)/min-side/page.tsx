@@ -78,7 +78,7 @@ export default async function MyAccountPage() {
                 href={`/min-side/kurs/${product.slug}`}
                 className="group block border rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
               >
-                {product.image && typeof product.image === "object" && (
+                {product.image && typeof product.image === "object" && product.image.url && (
                   <div className="relative aspect-video w-full bg-muted">
                     <Image
                       src={product.image.url}

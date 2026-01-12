@@ -1,4 +1,10 @@
 {
   "extends": "@poynt/typescript-config/react.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
   "include": ["src/**/*"]
 }

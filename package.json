@@ -10,7 +10,8 @@
     "typecheck": "turbo typecheck",
     "check": "biome check --write .",
     "check:ci": "biome ci .",
-    "clean": "turbo clean"
+    "clean": "turbo clean",
+    "nuke": "find . -name 'node_modules' -type d -prune -exec rm -rf {} + && find . -name '.next' -type d -prune -exec rm -rf {} + && rm -rf .turbo && bun install"
   },
   "devDependencies": {
     "turbo": "latest",
