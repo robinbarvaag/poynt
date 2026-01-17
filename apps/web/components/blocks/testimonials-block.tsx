@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { cn } from "@poynt/ui";
-import { Star, Quote } from "lucide-react";
+import { Quote, Star } from "lucide-react";
+import Image from "next/image";
 
 interface Testimonial {
   quote: string;

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { ChevronDown, ChevronRight, Download } from "lucide-react";
+import { useState } from "react";
 
 interface Module {
   title: string;

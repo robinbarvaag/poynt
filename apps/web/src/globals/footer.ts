@@ -47,7 +47,8 @@ export const Footer: GlobalConfig = {
               relationTo: "pages",
               label: "Side",
               admin: {
-                condition: (_, siblingData) => siblingData?.linkType === "internal",
+                condition: (_, siblingData) =>
+                  siblingData?.linkType === "internal",
               },
             },
             {
@@ -55,7 +56,8 @@ export const Footer: GlobalConfig = {
               type: "text",
               label: "URL",
               admin: {
-                condition: (_, siblingData) => siblingData?.linkType === "external",
+                condition: (_, siblingData) =>
+                  siblingData?.linkType === "external",
               },
             },
           ],

@@ -1,9 +1,10 @@
 /* THIS FILE WAS GENERATED AUTOMATICALLY BY PAYLOAD. */
+/* eslint-disable no-restricted-exports */
 import config from "@payload-config";
 import "@payloadcms/next/css";
+import { RootLayout, handleServerFunctions } from "@payloadcms/next/layouts";
 import type { ServerFunctionClient } from "payload";
-import { handleServerFunctions, RootLayout } from "@payloadcms/next/layouts";
-import React from "react";
+import type React from "react";
 import { importMap } from "./admin/importMap";
 
 type Args = {
@@ -20,7 +21,11 @@ const serverFunction: ServerFunctionClient = async function (args) {
 };
 
 const Layout = ({ children }: Args) => (
-  <RootLayout config={config} importMap={importMap} serverFunction={serverFunction}>
+  <RootLayout
+    config={config}
+    importMap={importMap}
+    serverFunction={serverFunction}
+  >
     {children}
   </RootLayout>
 );

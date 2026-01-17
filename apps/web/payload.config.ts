@@ -1,24 +1,25 @@
-import { buildConfig } from "payload";
 import { postgresAdapter } from "@payloadcms/db-postgres";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
+import { buildConfig } from "payload";
 import sharp from "sharp";
 
+import { formBuilderPlugin } from "@payloadcms/plugin-form-builder";
+import { redirectsPlugin } from "@payloadcms/plugin-redirects";
 // Plugins
 import { seoPlugin } from "@payloadcms/plugin-seo";
-import { redirectsPlugin } from "@payloadcms/plugin-redirects";
-import { formBuilderPlugin } from "@payloadcms/plugin-form-builder";
 import { stripePlugin } from "@payloadcms/plugin-stripe";
 
+import { BlogPosts } from "./src/collections/blog-posts";
+import { CourseContent } from "./src/collections/course-content";
+import { Media } from "./src/collections/media";
+import { Orders } from "./src/collections/orders";
+import { Pages } from "./src/collections/pages";
+import { Products } from "./src/collections/products";
 // Collections
 import { Users } from "./src/collections/users";
-import { Products } from "./src/collections/products";
-import { Orders } from "./src/collections/orders";
-import { CourseContent } from "./src/collections/course-content";
-import { Pages } from "./src/collections/pages";
-import { Media } from "./src/collections/media";
 
 // Globals
-import { SiteSettings, Header, Footer } from "./src/globals";
+import { Footer, Header, SiteSettings } from "./src/globals";
 
 const siteUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
 
@@ -30,17 +31,24 @@ export default buildConfig({
     pool: {
       connectionString: process.env.DATABASE_URI || "",
     },
-    push: process.env.NODE_ENV !== "production",
   }),
   sharp,
-  collections: [Users, Products, Orders, CourseContent, Pages, Media],
+  collections: [
+    Users,
+    Products,
+    Orders,
+    CourseContent,
+    Pages,
+    BlogPosts,
+    Media,
+  ],
   globals: [SiteSettings, Header, Footer],
   admin: {
     user: "users",
   },
   plugins: [
     seoPlugin({
-      collections: ["pages", "products"],
+      collections: ["pages", "products", "blog-posts"],
       uploadsCollection: "media",
       generateTitle: ({ doc }) => `${doc.title} | Poynt`,
       generateDescription: ({ doc }) => doc.excerpt || "",
@@ -48,23 +56,51 @@ export default buildConfig({
         if (collectionSlug === "pages") {
           return doc.slug === "forside" ? siteUrl : `${siteUrl}/${doc.slug}`;
         }
+        if (collectionSlug === "blog-posts") {
+          return `${siteUrl}/post/${doc.slug}`;
+        }
         return `${siteUrl}/${collectionSlug}/${doc.slug}`;
       },
       tabbedUI: true,
       fields: ({ defaultFields }) => [
         ...defaultFields,
         {
-          name: "keywords",
-          type: "text",
-          label: "Nøkkelord",
+          name: "noIndex",
+          type: "checkbox",
+          label: "Skjul fra søkemotorer",
+          defaultValue: false,
           admin: {
-            description: "Kommaseparerte nøkkelord",
+            description:
+              "Aktivér for å hindre Google fra å indeksere denne siden",
+          },
+        },
+        {
+          name: "canonicalUrl",
+          type: "text",
+          label: "Canonical URL (valgfritt)",
+          admin: {
+            description:
+              "Overstyr automatisk canonical URL hvis innholdet finnes på en annen URL",
+          },
+        },
+        {
+          name: "ogType",
+          type: "select",
+          label: "Open Graph type",
+          defaultValue: "website",
+          options: [
+            { label: "Nettside", value: "website" },
+            { label: "Artikkel", value: "article" },
+            { label: "Produkt", value: "product" },
+          ],
+          admin: {
+            description: "Brukes av sosiale medier ved deling",
           },
         },
       ],
     }),
     redirectsPlugin({
-      collections: ["pages", "products"],
+      collections: ["pages", "products", "blog-posts"],
       overrides: {
         admin: {
           group: "Innstillinger",

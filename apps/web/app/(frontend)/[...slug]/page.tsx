@@ -1,8 +1,8 @@
+import { RenderBlocks } from "@/components/render-blocks";
+import config from "@/payload.config";
+import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { getPayload } from "payload";
-import config from "@/payload.config";
-import { RenderBlocks } from "@/components/render-blocks";
-import type { Metadata } from "next";
 
 interface PageProps {
   params: Promise<{
@@ -48,7 +48,10 @@ async function checkRedirect(pathname: string) {
 
   if (redirectDoc.to?.type === "custom" && redirectDoc.to?.url) {
     destination = redirectDoc.to.url;
-  } else if (redirectDoc.to?.type === "reference" && redirectDoc.to?.reference) {
+  } else if (
+    redirectDoc.to?.type === "reference" &&
+    redirectDoc.to?.reference
+  ) {
     const ref = redirectDoc.to.reference;
     const value = typeof ref.value === "object" ? ref.value : null;
     if (!value || !("slug" in value)) return null;
@@ -60,7 +63,9 @@ async function checkRedirect(pathname: string) {
   return { destination };
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
   const { slug: slugArray } = await params;
   const slug = slugArray ? slugArray.join("/") : "forside";
 

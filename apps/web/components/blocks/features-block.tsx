@@ -2,16 +2,16 @@
 
 import { cn } from "@poynt/ui";
 import {
+  BarChart3,
   Book,
-  Video,
   Check,
-  Star,
-  Rocket,
-  Shield,
+  Clock,
   Heart,
   MessageCircle,
-  BarChart3,
-  Clock,
+  Rocket,
+  Shield,
+  Star,
+  Video,
 } from "lucide-react";
 
 const iconMap = {
@@ -66,7 +66,9 @@ export function FeaturesBlock({
               </span>
             )}
             {title && (
-              <h2 className="text-3xl md:text-4xl font-bold mt-2 mb-4">{title}</h2>
+              <h2 className="text-3xl md:text-4xl font-bold mt-2 mb-4">
+                {title}
+              </h2>
             )}
             {description && (
               <p className="text-lg text-muted-foreground">{description}</p>
@@ -92,16 +94,22 @@ export function FeaturesBlock({
                   <div
                     className={cn(
                       "inline-flex items-center justify-center rounded-xl bg-primary/10 text-primary",
-                      layout === "list" ? "w-12 h-12 shrink-0" : "w-14 h-14 mx-auto mb-4"
+                      layout === "list"
+                        ? "w-12 h-12 shrink-0"
+                        : "w-14 h-14 mx-auto mb-4"
                     )}
                   >
                     <Icon className="w-6 h-6" />
                   </div>
                 )}
                 <div>
-                  <h3 className="font-semibold text-lg mb-2">{feature.title}</h3>
+                  <h3 className="font-semibold text-lg mb-2">
+                    {feature.title}
+                  </h3>
                   {feature.description && (
-                    <p className="text-muted-foreground">{feature.description}</p>
+                    <p className="text-muted-foreground">
+                      {feature.description}
+                    </p>
                   )}
                 </div>
               </div>

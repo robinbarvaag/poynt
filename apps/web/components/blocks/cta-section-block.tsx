@@ -1,7 +1,7 @@
-import Image from "next/image";
-import Link from "next/link";
 import { Button } from "@poynt/ui";
 import { cn } from "@poynt/ui";
+import Image from "next/image";
+import Link from "next/link";
 
 interface CtaSectionBlockProps {
   variant?: "simple" | "colored" | "image";
@@ -52,7 +52,8 @@ export function CtaSectionBlock({
               size="lg"
               variant="outline"
               className={cn(
-                variant === "image" && "border-white text-white hover:bg-white/10"
+                variant === "image" &&
+                  "border-white text-white hover:bg-white/10"
               )}
             >
               {secondaryCta.text}

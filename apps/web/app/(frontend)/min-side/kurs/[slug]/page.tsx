@@ -1,7 +1,7 @@
-import { getPayload } from "payload";
-import config from "@/payload.config";
-import { redirect, notFound } from "next/navigation";
 import { CoursePlayer } from "@/components/course-player";
+import config from "@/payload.config";
+import { notFound, redirect } from "next/navigation";
+import { getPayload } from "payload";
 
 interface CoursePageProps {
   params: Promise<{

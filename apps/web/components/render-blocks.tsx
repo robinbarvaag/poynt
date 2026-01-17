@@ -1,10 +1,10 @@
-import { HeroBlock } from "./blocks/hero-block";
-import { ContentBlock } from "./blocks/content-block";
-import { MediaBlockComponent } from "./blocks/media-block";
 import { ArchiveBlock } from "./blocks/archive-block";
-import { FeaturesBlock } from "./blocks/features-block";
-import { TestimonialsBlock } from "./blocks/testimonials-block";
+import { ContentBlock } from "./blocks/content-block";
 import { CtaSectionBlock } from "./blocks/cta-section-block";
+import { FeaturesBlock } from "./blocks/features-block";
+import { HeroBlock } from "./blocks/hero-block";
+import { MediaBlockComponent } from "./blocks/media-block";
+import { TestimonialsBlock } from "./blocks/testimonials-block";
 
 interface Block {
   blockType: string;

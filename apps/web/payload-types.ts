@@ -72,6 +72,7 @@ export interface Config {
     orders: Order;
     'course-content': CourseContent;
     pages: Page;
+    'blog-posts': BlogPost;
     media: Media;
     redirects: Redirect;
     forms: Form;
@@ -88,6 +89,7 @@ export interface Config {
     orders: OrdersSelect<false> | OrdersSelect<true>;
     'course-content': CourseContentSelect<false> | CourseContentSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
+    'blog-posts': BlogPostsSelect<false> | BlogPostsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
@@ -224,9 +226,17 @@ export interface Product {
      */
     image?: (number | null) | Media;
     /**
-     * Kommaseparerte nøkkelord
+     * Aktivér for å hindre Google fra å indeksere denne siden
      */
-    keywords?: string | null;
+    noIndex?: boolean | null;
+    /**
+     * Overstyr automatisk canonical URL hvis innholdet finnes på en annen URL
+     */
+    canonicalUrl?: string | null;
+    /**
+     * Brukes av sosiale medier ved deling
+     */
+    ogType?: ('website' | 'article' | 'product') | null;
   };
   stripeID?: string | null;
   skipSync?: boolean | null;
@@ -325,7 +335,16 @@ export interface Page {
    */
   excerpt?: string | null;
   layout?:
-    | (HeroBlock | ContentBlock | MediaBlock | ArchiveBlock | FeaturesBlock | TestimonialsBlock | CtaSectionBlock)[]
+    | (
+        | HeroBlock
+        | ContentBlock
+        | MediaBlock
+        | ArchiveBlock
+        | FeaturesBlock
+        | TestimonialsBlock
+        | CtaSectionBlock
+        | SpotifyEmbedBlock
+      )[]
     | null;
   publishedAt?: string | null;
   meta?: {
@@ -336,9 +355,17 @@ export interface Page {
      */
     image?: (number | null) | Media;
     /**
-     * Kommaseparerte nøkkelord
+     * Aktivér for å hindre Google fra å indeksere denne siden
      */
-    keywords?: string | null;
+    noIndex?: boolean | null;
+    /**
+     * Overstyr automatisk canonical URL hvis innholdet finnes på en annen URL
+     */
+    canonicalUrl?: string | null;
+    /**
+     * Brukes av sosiale medier ved deling
+     */
+    ogType?: ('website' | 'article' | 'product') | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -483,6 +510,90 @@ export interface CtaSectionBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SpotifyEmbedBlock".
+ */
+export interface SpotifyEmbedBlock {
+  embedType: 'episode' | 'show' | 'playlist';
+  /**
+   * Lim inn lenke fra Spotify (f.eks. https://open.spotify.com/episode/...)
+   */
+  spotifyUrl: string;
+  /**
+   * Overskrift som vises over spilleren
+   */
+  title?: string | null;
+  height?: ('compact' | 'standard' | 'large') | null;
+  theme?: ('auto' | 'light' | 'dark') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'spotify-embed';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blog-posts".
+ */
+export interface BlogPost {
+  id: number;
+  title: string;
+  /**
+   * Genereres automatisk fra tittel
+   */
+  slug: string;
+  /**
+   * Kort beskrivelse som vises i listeoversikter og SEO
+   */
+  excerpt?: string | null;
+  featuredImage?: (number | null) | Media;
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  author?: (number | null) | User;
+  categories?:
+    | {
+        category?: ('instagram' | 'linkedin' | 'pinterest' | 'markedsforing' | 'sosiale-medier' | 'tips') | null;
+        id?: string | null;
+      }[]
+    | null;
+  publishedAt: string;
+  relatedPosts?: (number | BlogPost)[] | null;
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+    /**
+     * Aktivér for å hindre Google fra å indeksere denne siden
+     */
+    noIndex?: boolean | null;
+    /**
+     * Overstyr automatisk canonical URL hvis innholdet finnes på en annen URL
+     */
+    canonicalUrl?: string | null;
+    /**
+     * Brukes av sosiale medier ved deling
+     */
+    ogType?: ('website' | 'article' | 'product') | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
 export interface Redirect {
@@ -498,6 +609,10 @@ export interface Redirect {
       | ({
           relationTo: 'products';
           value: number | Product;
+        } | null)
+      | ({
+          relationTo: 'blog-posts';
+          value: number | BlogPost;
         } | null);
     url?: string | null;
   };
@@ -740,6 +855,10 @@ export interface PayloadLockedDocument {
         value: number | Page;
       } | null)
     | ({
+        relationTo: 'blog-posts';
+        value: number | BlogPost;
+      } | null)
+    | ({
         relationTo: 'media';
         value: number | Media;
       } | null)
@@ -842,7 +961,9 @@ export interface ProductsSelect<T extends boolean = true> {
         title?: T;
         description?: T;
         image?: T;
-        keywords?: T;
+        noIndex?: T;
+        canonicalUrl?: T;
+        ogType?: T;
       };
   stripeID?: T;
   skipSync?: T;
@@ -911,6 +1032,7 @@ export interface PagesSelect<T extends boolean = true> {
         features?: T | FeaturesBlockSelect<T>;
         testimonials?: T | TestimonialsBlockSelect<T>;
         ctaSection?: T | CtaSectionBlockSelect<T>;
+        'spotify-embed'?: T | SpotifyEmbedBlockSelect<T>;
       };
   publishedAt?: T;
   meta?:
@@ -919,7 +1041,9 @@ export interface PagesSelect<T extends boolean = true> {
         title?: T;
         description?: T;
         image?: T;
-        keywords?: T;
+        noIndex?: T;
+        canonicalUrl?: T;
+        ogType?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -1043,6 +1167,52 @@ export interface CtaSectionBlockSelect<T extends boolean = true> {
       };
   id?: T;
   blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SpotifyEmbedBlock_select".
+ */
+export interface SpotifyEmbedBlockSelect<T extends boolean = true> {
+  embedType?: T;
+  spotifyUrl?: T;
+  title?: T;
+  height?: T;
+  theme?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blog-posts_select".
+ */
+export interface BlogPostsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  excerpt?: T;
+  featuredImage?: T;
+  content?: T;
+  author?: T;
+  categories?:
+    | T
+    | {
+        category?: T;
+        id?: T;
+      };
+  publishedAt?: T;
+  relatedPosts?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+        noIndex?: T;
+        canonicalUrl?: T;
+        ogType?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -40,8 +40,8 @@ async function getBodyDimensions(page) {
     const style = window.getComputedStyle(body);
 
     return {
-      width: parseFloat(style.width),
-      height: parseFloat(style.height),
+      width: Number.parseFloat(style.width),
+      height: Number.parseFloat(style.height),
       scrollWidth: body.scrollWidth,
       scrollHeight: body.scrollHeight,
     };
@@ -139,7 +139,7 @@ function validateTextBoxPosition(slideData, bodyDimensions) {
 // Helper: Add background to slide
 async function addBackground(slideData, targetSlide, tmpDir) {
   if (slideData.background.type === "image" && slideData.background.path) {
-    let imagePath = slideData.background.path.startsWith("file://")
+    const imagePath = slideData.background.path.startsWith("file://")
       ? slideData.background.path.replace("file://", "")
       : slideData.background.path;
     targetSlide.background = { path: imagePath };
@@ -155,7 +155,7 @@ async function addBackground(slideData, targetSlide, tmpDir) {
 function addElements(slideData, targetSlide, pres) {
   for (const el of slideData.elements) {
     if (el.type === "image") {
-      let imagePath = el.src.startsWith("file://")
+      const imagePath = el.src.startsWith("file://")
         ? el.src.replace("file://", "")
         : el.src;
       targetSlide.addImage({
@@ -293,7 +293,7 @@ async function extractSlideData(page) {
 
     // Unit conversion helpers
     const pxToInch = (px) => px / PX_PER_IN;
-    const pxToPoints = (pxStr) => parseFloat(pxStr) * PT_PER_PX;
+    const pxToPoints = (pxStr) => Number.parseFloat(pxStr) * PT_PER_PX;
     const rgbToHex = (rgbStr) => {
       // Handle transparent backgrounds by defaulting to white
       if (rgbStr === "rgba(0, 0, 0, 0)" || rgbStr === "transparent")
@@ -303,14 +303,14 @@ async function extractSlideData(page) {
       if (!match) return "FFFFFF";
       return match
         .slice(1)
-        .map((n) => parseInt(n).toString(16).padStart(2, "0"))
+        .map((n) => Number.parseInt(n).toString(16).padStart(2, "0"))
         .join("");
     };
 
     const extractAlpha = (rgbStr) => {
       const match = rgbStr.match(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)/);
       if (!match || !match[4]) return null;
-      const alpha = parseFloat(match[4]);
+      const alpha = Number.parseFloat(match[4]);
       return Math.round((1 - alpha) * 100);
     };
 
@@ -343,12 +343,12 @@ async function extractSlideData(page) {
         // Try to match rotate() function
         const rotateMatch = transform.match(/rotate\((-?\d+(?:\.\d+)?)deg\)/);
         if (rotateMatch) {
-          angle += parseFloat(rotateMatch[1]);
+          angle += Number.parseFloat(rotateMatch[1]);
         } else {
           // Browser may compute as matrix - extract rotation from matrix
           const matrixMatch = transform.match(/matrix\(([^)]+)\)/);
           if (matrixMatch) {
-            const values = matrixMatch[1].split(",").map(parseFloat);
+            const values = matrixMatch[1].split(",").map(Number.parseFloat);
             // matrix(a, b, c, d, e, f) where rotation = atan2(b, a)
             const matrixAngle =
               Math.atan2(values[1], values[0]) * (180 / Math.PI);
@@ -421,9 +421,9 @@ async function extractSlideData(page) {
 
       if (!parts || parts.length < 2) return null;
 
-      const offsetX = parseFloat(parts[0]);
-      const offsetY = parseFloat(parts[1]);
-      const blur = parts.length > 2 ? parseFloat(parts[2]) : 0;
+      const offsetX = Number.parseFloat(parts[0]);
+      const offsetY = Number.parseFloat(parts[1]);
+      const blur = parts.length > 2 ? Number.parseFloat(parts[2]) : 0;
 
       // Calculate angle from offsets (in degrees, 0 = right, 90 = down)
       let angle = 0;
@@ -441,7 +441,7 @@ async function extractSlideData(page) {
       if (colorMatch) {
         const opacityMatch = colorMatch[0].match(/[\d.]+\)$/);
         if (opacityMatch) {
-          opacity = parseFloat(opacityMatch[0].replace(")", ""));
+          opacity = Number.parseFloat(opacityMatch[0].replace(")", ""));
         }
       }
 
@@ -498,7 +498,7 @@ async function extractSlideData(page) {
           ) {
             const isBold =
               computed.fontWeight === "bold" ||
-              parseInt(computed.fontWeight) >= 600;
+              Number.parseInt(computed.fontWeight) >= 600;
             if (isBold && !shouldSkipBold(computed.fontFamily))
               options.bold = true;
             if (computed.fontStyle === "italic") options.italic = true;
@@ -522,24 +522,33 @@ async function extractSlideData(page) {
             }
 
             // Validate: Check for margins on inline elements
-            if (computed.marginLeft && parseFloat(computed.marginLeft) > 0) {
+            if (
+              computed.marginLeft &&
+              Number.parseFloat(computed.marginLeft) > 0
+            ) {
               errors.push(
                 `Inline element <${node.tagName.toLowerCase()}> has margin-left which is not supported in PowerPoint. Remove margin from inline elements.`
               );
             }
-            if (computed.marginRight && parseFloat(computed.marginRight) > 0) {
+            if (
+              computed.marginRight &&
+              Number.parseFloat(computed.marginRight) > 0
+            ) {
               errors.push(
                 `Inline element <${node.tagName.toLowerCase()}> has margin-right which is not supported in PowerPoint. Remove margin from inline elements.`
               );
             }
-            if (computed.marginTop && parseFloat(computed.marginTop) > 0) {
+            if (
+              computed.marginTop &&
+              Number.parseFloat(computed.marginTop) > 0
+            ) {
               errors.push(
                 `Inline element <${node.tagName.toLowerCase()}> has margin-top which is not supported in PowerPoint. Remove margin from inline elements.`
               );
             }
             if (
               computed.marginBottom &&
-              parseFloat(computed.marginBottom) > 0
+              Number.parseFloat(computed.marginBottom) > 0
             ) {
               errors.push(
                 `Inline element <${node.tagName.toLowerCase()}> has margin-bottom which is not supported in PowerPoint. Remove margin from inline elements.`
@@ -636,15 +645,16 @@ async function extractSlideData(page) {
           computed.backgroundColor &&
           computed.backgroundColor !== "rgba(0, 0, 0, 0)";
         const hasBorder =
-          (computed.borderWidth && parseFloat(computed.borderWidth) > 0) ||
+          (computed.borderWidth &&
+            Number.parseFloat(computed.borderWidth) > 0) ||
           (computed.borderTopWidth &&
-            parseFloat(computed.borderTopWidth) > 0) ||
+            Number.parseFloat(computed.borderTopWidth) > 0) ||
           (computed.borderRightWidth &&
-            parseFloat(computed.borderRightWidth) > 0) ||
+            Number.parseFloat(computed.borderRightWidth) > 0) ||
           (computed.borderBottomWidth &&
-            parseFloat(computed.borderBottomWidth) > 0) ||
+            Number.parseFloat(computed.borderBottomWidth) > 0) ||
           (computed.borderLeftWidth &&
-            parseFloat(computed.borderLeftWidth) > 0);
+            Number.parseFloat(computed.borderLeftWidth) > 0);
         const hasShadow = computed.boxShadow && computed.boxShadow !== "none";
 
         if (hasBg || hasBorder || hasShadow) {
@@ -733,7 +743,7 @@ async function extractSlideData(page) {
         const borderBottom = computed.borderBottomWidth;
         const borderLeft = computed.borderLeftWidth;
         const borders = [borderTop, borderRight, borderBottom, borderLeft].map(
-          (b) => parseFloat(b) || 0
+          (b) => Number.parseFloat(b) || 0
         );
         const hasBorder = borders.some((b) => b > 0);
         const hasUniformBorder =
@@ -748,7 +758,7 @@ async function extractSlideData(page) {
           const h = pxToInch(rect.height);
 
           // Collect lines to add after shape (inset by half the line width to center on edge)
-          if (parseFloat(borderTop) > 0) {
+          if (Number.parseFloat(borderTop) > 0) {
             const widthPt = pxToPoints(borderTop);
             const inset = widthPt / 72 / 2; // Convert points to inches, then half
             borderLines.push({
@@ -761,7 +771,7 @@ async function extractSlideData(page) {
               color: rgbToHex(computed.borderTopColor),
             });
           }
-          if (parseFloat(borderRight) > 0) {
+          if (Number.parseFloat(borderRight) > 0) {
             const widthPt = pxToPoints(borderRight);
             const inset = widthPt / 72 / 2;
             borderLines.push({
@@ -774,7 +784,7 @@ async function extractSlideData(page) {
               color: rgbToHex(computed.borderRightColor),
             });
           }
-          if (parseFloat(borderBottom) > 0) {
+          if (Number.parseFloat(borderBottom) > 0) {
             const widthPt = pxToPoints(borderBottom);
             const inset = widthPt / 72 / 2;
             borderLines.push({
@@ -787,7 +797,7 @@ async function extractSlideData(page) {
               color: rgbToHex(computed.borderBottomColor),
             });
           }
-          if (parseFloat(borderLeft) > 0) {
+          if (Number.parseFloat(borderLeft) > 0) {
             const widthPt = pxToPoints(borderLeft);
             const inset = widthPt / 72 / 2;
             borderLines.push({
@@ -835,7 +845,7 @@ async function extractSlideData(page) {
                   // px values: divide by 96 (96px = 1 inch)
                   rectRadius: (() => {
                     const radius = computed.borderRadius;
-                    const radiusValue = parseFloat(radius);
+                    const radiusValue = Number.parseFloat(radius);
                     if (radiusValue === 0) return 0;
 
                     if (radius.includes("%")) {
@@ -1011,7 +1021,7 @@ async function extractSlideData(page) {
 
         const isBold =
           computed.fontWeight === "bold" ||
-          parseInt(computed.fontWeight) >= 600;
+          Number.parseInt(computed.fontWeight) >= 600;
 
         elements.push({
           type: el.tagName.toLowerCase(),

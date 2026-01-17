@@ -1,8 +1,8 @@
-import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
-import { getPayload } from "payload";
+import { Header } from "@/components/header";
 import config from "@payload-config";
 import { unstable_cache } from "next/cache";
+import { getPayload } from "payload";
 
 async function getGlobals() {
   const payload = await getPayload({ config });
@@ -46,11 +46,15 @@ export default async function FrontendLayout({
         bottomText={footer?.bottomText ?? undefined}
         showSocialLinks={footer?.showSocialLinks ?? true}
         socialLinks={siteSettings?.socialLinks as FooterProps["socialLinks"]}
-        newsletter={footer?.showNewsletter ? {
-          enabled: footer.showNewsletter,
-          title: footer.newsletterTitle ?? undefined,
-          description: footer.newsletterDescription ?? undefined,
-        } : undefined}
+        newsletter={
+          footer?.showNewsletter
+            ? {
+                enabled: footer.showNewsletter,
+                title: footer.newsletterTitle ?? undefined,
+                description: footer.newsletterDescription ?? undefined,
+              }
+            : undefined
+        }
       />
     </>
   );
@@ -90,7 +94,13 @@ interface FooterProps {
     }[];
   }[];
   socialLinks?: {
-    platform: "facebook" | "instagram" | "twitter" | "linkedin" | "youtube" | "tiktok";
+    platform:
+      | "facebook"
+      | "instagram"
+      | "twitter"
+      | "linkedin"
+      | "youtube"
+      | "tiktok";
     url: string;
   }[];
 }

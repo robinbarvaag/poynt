@@ -1,5 +1,5 @@
-import { getPayload } from "payload";
 import config from "@/payload.config";
+import { getPayload } from "payload";
 import { ProductCard } from "../product-card";
 
 interface ArchiveBlockProps {

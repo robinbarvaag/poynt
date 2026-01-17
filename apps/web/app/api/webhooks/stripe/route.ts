@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getPayload } from "payload";
 import config from "@/payload.config";
-import { stripe } from "@poynt/stripe";
 import { sendOrderConfirmation } from "@poynt/email";
-import Stripe from "stripe";
+import { stripe } from "@poynt/stripe";
+import { type NextRequest, NextResponse } from "next/server";
+import { getPayload } from "payload";
+import type Stripe from "stripe";
 
 export async function POST(req: NextRequest) {
   const body = await req.text();
@@ -83,12 +83,12 @@ export async function POST(req: NextRequest) {
         console.error("Mangler userId i session metadata");
         return NextResponse.json({ error: "Missing user ID" }, { status: 400 });
       }
-      
+
       const order = await payload.create({
         collection: "orders",
         draft: false,
         data: {
-          user: parseInt(userId, 10),
+          user: Number.parseInt(userId, 10),
           items: orderItems,
           total: session.amount_total || 0,
           status: "paid",

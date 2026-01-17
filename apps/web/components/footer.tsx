@@ -1,9 +1,9 @@
-import Link from "next/link";
-import Image from "next/image";
-import { Facebook, Instagram, Linkedin, Twitter, Youtube } from "lucide-react";
-import { Button } from "@poynt/ui";
-import { RichText } from "@payloadcms/richtext-lexical/react";
 import type { SerializedEditorState } from "@payloadcms/richtext-lexical/lexical";
+import { RichText } from "@payloadcms/richtext-lexical/react";
+import { Button } from "@poynt/ui";
+import { Facebook, Instagram, Linkedin, Twitter, Youtube } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 
 interface FooterLink {
   label: string;
@@ -19,7 +19,13 @@ interface FooterColumn {
 }
 
 interface SocialLink {
-  platform: "facebook" | "instagram" | "twitter" | "linkedin" | "youtube" | "tiktok";
+  platform:
+    | "facebook"
+    | "instagram"
+    | "twitter"
+    | "linkedin"
+    | "youtube"
+    | "tiktok";
   url: string;
 }
 
@@ -38,7 +44,11 @@ interface FooterProps {
   };
 }
 
-function getHref(item: { linkType: string; page?: { slug: string } | null; url?: string }): string {
+function getHref(item: {
+  linkType: string;
+  page?: { slug: string } | null;
+  url?: string;
+}): string {
   if (item.linkType === "internal" && item.page) {
     return item.page.slug === "forside" ? "/" : `/${item.page.slug}`;
   }
@@ -80,7 +90,9 @@ export function Footer({
                 {newsletter.title || "Meld deg på nyhetsbrevet"}
               </h3>
               {newsletter.description && (
-                <p className="text-muted-foreground mb-6">{newsletter.description}</p>
+                <p className="text-muted-foreground mb-6">
+                  {newsletter.description}
+                </p>
               )}
               <form className="flex gap-2 max-w-md mx-auto">
                 <input
@@ -143,7 +155,9 @@ export function Footer({
                     <Link
                       href={getHref(link)}
                       target={link.openInNewTab ? "_blank" : undefined}
-                      rel={link.openInNewTab ? "noopener noreferrer" : undefined}
+                      rel={
+                        link.openInNewTab ? "noopener noreferrer" : undefined
+                      }
                       className="text-muted-foreground hover:text-foreground transition-colors"
                     >
                       {link.label}
@@ -161,7 +175,9 @@ export function Footer({
             {bottomText ? (
               <RichText data={bottomText} />
             ) : (
-              <p>© {currentYear} {siteName}. Alle rettigheter reservert.</p>
+              <p>
+                © {currentYear} {siteName}. Alle rettigheter reservert.
+              </p>
             )}
           </div>
         </div>

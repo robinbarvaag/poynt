@@ -2,8 +2,8 @@
 
 import { useCart } from "@poynt/cart";
 import { Button } from "@poynt/ui";
-import { useState } from "react";
 import { Check } from "lucide-react";
+import { useState } from "react";
 
 interface Product {
   id: string;

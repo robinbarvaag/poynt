@@ -1,9 +1,9 @@
-import { getPayload } from "payload";
 import config from "@/payload.config";
-import { redirect } from "next/navigation";
-import Link from "next/link";
 import { Button } from "@poynt/ui";
 import Image from "next/image";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getPayload } from "payload";
 
 export default async function MyAccountPage() {
   const payload = await getPayload({ config });
@@ -78,16 +78,18 @@ export default async function MyAccountPage() {
                 href={`/min-side/kurs/${product.slug}`}
                 className="group block border rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
               >
-                {product.image && typeof product.image === "object" && product.image.url && (
-                  <div className="relative aspect-video w-full bg-muted">
-                    <Image
-                      src={product.image.url}
-                      alt={product.image.alt || product.name}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform"
-                    />
-                  </div>
-                )}
+                {product.image &&
+                  typeof product.image === "object" &&
+                  product.image.url && (
+                    <div className="relative aspect-video w-full bg-muted">
+                      <Image
+                        src={product.image.url}
+                        alt={product.image.alt || product.name}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform"
+                      />
+                    </div>
+                  )}
                 <div className="p-4">
                   <h3 className="text-xl font-semibold mb-2">{product.name}</h3>
                   <Button className="w-full mt-4" variant="default">

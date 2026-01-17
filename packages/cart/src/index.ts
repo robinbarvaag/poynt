@@ -1,6 +1,6 @@
+import type { Product } from "@poynt/types";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { Product } from "@poynt/types";
 
 export interface CartItem {
   id: string;

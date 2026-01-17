@@ -1,7 +1,7 @@
-import Image from "next/image";
-import Link from "next/link";
 import { Button } from "@poynt/ui";
 import { cn } from "@poynt/ui";
+import Image from "next/image";
+import Link from "next/link";
 
 interface HeroBlockProps {
   variant?: "centered" | "left" | "split" | "fullscreen";
@@ -68,7 +68,11 @@ export function HeroBlock({
             )}
             {secondaryCta?.text && secondaryCta?.url && (
               <Link href={secondaryCta.url}>
-                <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-white text-white hover:bg-white/10"
+                >
                   {secondaryCta.text}
                 </Button>
               </Link>

@@ -1,24 +1,18 @@
-"use client";
-
-import { useEffect } from "react";
-import { useSearchParams } from "next/navigation";
-import { useCart } from "@poynt/cart";
-import Link from "next/link";
+import { ClearCart } from "@/components/clear-cart";
 import { Button } from "@poynt/ui";
 import { CheckCircle } from "lucide-react";
+import Link from "next/link";
 
-export default function ReceiptPage() {
-  const searchParams = useSearchParams();
-  const sessionId = searchParams.get("session_id");
-  const { clearCart } = useCart();
+interface Props {
+  searchParams: Promise<{ session_id?: string }>;
+}
 
-  useEffect(() => {
-    // Tøm handlekurven når kvitteringssida vert lasta
-    clearCart();
-  }, [clearCart]);
+export default async function ReceiptPage({ searchParams }: Props) {
+  const { session_id: sessionId } = await searchParams;
 
   return (
     <div className="max-w-2xl mx-auto text-center py-16">
+      <ClearCart />
       <div className="mb-8 flex justify-center">
         <CheckCircle className="h-24 w-24 text-green-500" />
       </div>

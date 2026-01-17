@@ -1,11 +1,11 @@
 "use client";
 
-import Link from "next/link";
-import Image from "next/image";
-import { useState } from "react";
 import { useCart } from "@poynt/cart";
 import { Button, cn } from "@poynt/ui";
-import { Menu, X, Search, User, ChevronDown, ShoppingCart } from "lucide-react";
+import { ChevronDown, Menu, Search, ShoppingCart, User, X } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
 
 interface NavItem {
   label: string;
@@ -34,7 +34,11 @@ interface HeaderProps {
   navItems?: NavItem[];
 }
 
-function getHref(item: { linkType: string; page?: { slug: string } | null; url?: string }): string {
+function getHref(item: {
+  linkType: string;
+  page?: { slug: string } | null;
+  url?: string;
+}): string {
   if (item.linkType === "internal" && item.page) {
     return item.page.slug === "forside" ? "/" : `/${item.page.slug}`;
   }
@@ -79,7 +83,9 @@ export function Header({
               <div
                 key={index}
                 className="relative"
-                onMouseEnter={() => item.subItems?.length && setOpenDropdown(index)}
+                onMouseEnter={() =>
+                  item.subItems?.length && setOpenDropdown(index)
+                }
                 onMouseLeave={() => setOpenDropdown(null)}
               >
                 <Link
@@ -96,26 +102,28 @@ export function Header({
                 </Link>
 
                 {/* Dropdown */}
-                {item.subItems && item.subItems.length > 0 && openDropdown === index && (
-                  <div className="absolute top-full left-0 pt-2 w-64">
-                    <div className="rounded-lg border bg-background p-2 shadow-lg">
-                      {item.subItems.map((subItem, subIndex) => (
-                        <Link
-                          key={subIndex}
-                          href={getHref(subItem)}
-                          className="block rounded-md px-3 py-2 hover:bg-muted"
-                        >
-                          <div className="font-medium">{subItem.label}</div>
-                          {subItem.description && (
-                            <div className="text-sm text-muted-foreground">
-                              {subItem.description}
-                            </div>
-                          )}
-                        </Link>
-                      ))}
+                {item.subItems &&
+                  item.subItems.length > 0 &&
+                  openDropdown === index && (
+                    <div className="absolute top-full left-0 pt-2 w-64">
+                      <div className="rounded-lg border bg-background p-2 shadow-lg">
+                        {item.subItems.map((subItem, subIndex) => (
+                          <Link
+                            key={subIndex}
+                            href={getHref(subItem)}
+                            className="block rounded-md px-3 py-2 hover:bg-muted"
+                          >
+                            <div className="font-medium">{subItem.label}</div>
+                            {subItem.description && (
+                              <div className="text-sm text-muted-foreground">
+                                {subItem.description}
+                              </div>
+                            )}
+                          </Link>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
               </div>
             ))}
           </nav>

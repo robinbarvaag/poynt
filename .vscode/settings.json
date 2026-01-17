@@ -4,7 +4,7 @@
   "terminal.integrated.shellIntegration.enabled": true,
   "chat.agent.maxRequests": 9000,
   "chat.useAgentSkills": true,
-  
+
   // Biome formatter settings
   "editor.defaultFormatter": "biomejs.biome",
   "editor.formatOnSave": true,

@@ -1,11 +1,12 @@
 import type { CollectionConfig } from "payload";
-import { Hero } from "../blocks/hero";
-import { Content } from "../blocks/content";
-import { MediaBlock } from "../blocks/media";
 import { Archive } from "../blocks/archive";
-import { Features } from "../blocks/features";
-import { Testimonials } from "../blocks/testimonials";
+import { Content } from "../blocks/content";
 import { CtaSection } from "../blocks/cta-section";
+import { Features } from "../blocks/features";
+import { Hero } from "../blocks/hero";
+import { MediaBlock } from "../blocks/media";
+import { SpotifyEmbed } from "../blocks/spotify-embed";
+import { Testimonials } from "../blocks/testimonials";
 
 // Utility for å generere slug
 function generateSlug(text: string): string {
@@ -28,7 +29,8 @@ export const Pages: CollectionConfig = {
     livePreview: {
       url: ({ data }) => {
         const slug = data?.slug;
-        if (slug === "forside") return process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
+        if (slug === "forside")
+          return process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
         return `${process.env.NEXT_PUBLIC_URL || "http://localhost:3000"}/${slug}`;
       },
     },
@@ -69,7 +71,8 @@ export const Pages: CollectionConfig = {
       label: "URL-slug",
       admin: {
         position: "sidebar",
-        description: "Genereres automatisk fra tittel. Bruk 'forside' for forsida.",
+        description:
+          "Genereres automatisk fra tittel. Bruk 'forside' for forsida.",
       },
     },
     {
@@ -84,7 +87,16 @@ export const Pages: CollectionConfig = {
       name: "layout",
       type: "blocks",
       label: "Sidelayout",
-      blocks: [Hero, Content, MediaBlock, Archive, Features, Testimonials, CtaSection],
+      blocks: [
+        Hero,
+        Content,
+        MediaBlock,
+        Archive,
+        Features,
+        Testimonials,
+        CtaSection,
+        SpotifyEmbed,
+      ],
     },
     // SEO-felt kommer automatisk fra seoPlugin
     {

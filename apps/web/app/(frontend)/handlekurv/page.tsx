@@ -2,8 +2,8 @@
 
 import { useCart } from "@poynt/cart";
 import { Button } from "@poynt/ui";
-import Link from "next/link";
 import { Trash2 } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 
 export default function CartPage() {
