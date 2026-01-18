@@ -1,8 +1,41 @@
+import "@poynt/tailwind-config/web.css";
+import { cn } from "@poynt/ui";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import config from "@payload-config";
+import type { Metadata } from "next";
 import { unstable_cache } from "next/cache";
 import { getPayload } from "payload";
+
+const siteName = "Poynt";
+const siteDescription = "Din læringsplattform for kurs og opplæring";
+const siteUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
+
+export const metadata: Metadata = {
+  title: {
+    default: siteName,
+    template: `%s | ${siteName}`,
+  },
+  description: siteDescription,
+  metadataBase: new URL(siteUrl),
+  openGraph: {
+    type: "website",
+    locale: "nb_NO",
+    url: siteUrl,
+    siteName,
+    title: siteName,
+    description: siteDescription,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteName,
+    description: siteDescription,
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+};
 
 async function getGlobals() {
   const payload = await getPayload({ config });
@@ -29,8 +62,9 @@ export default async function FrontendLayout({
   const { siteSettings, header, footer } = await getCachedGlobals();
 
   return (
-    <>
-      <Header
+    <html lang="no">
+      <body className={cn("min-h-screen bg-background font-sans antialiased")}>
+        <Header
         siteName={siteSettings?.siteName || "Poynt"}
         logo={siteSettings?.logo as { url: string; alt?: string } | null}
         showSearch={header?.showSearch ?? true}
@@ -56,7 +90,8 @@ export default async function FrontendLayout({
             : undefined
         }
       />
-    </>
+      </body>
+    </html>
   );
 }
 
