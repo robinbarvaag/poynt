@@ -2,11 +2,12 @@ import { Button } from "@poynt/ui";
 import { cn } from "@poynt/ui";
 import Image from "next/image";
 import Link from "next/link";
+import { RichText } from '@payloadcms/richtext-lexical/react'
 
 interface HeroBlockProps {
   variant?: "centered" | "left" | "split" | "fullscreen";
   title: string;
-  subtitle?: string;
+  subtitle?: any;
   image?: {
     url: string;
     alt?: string;
@@ -21,7 +22,6 @@ interface HeroBlockProps {
     text?: string;
     url?: string;
   };
-  // Bakoverkompatibilitet
   cta?: {
     text?: string;
     url?: string;
@@ -37,7 +37,6 @@ export function HeroBlock({
   secondaryCta,
   cta,
 }: HeroBlockProps) {
-  // Støtt gammel cta-struktur
   const mainCta = primaryCta?.text ? primaryCta : cta;
 
   if (variant === "fullscreen") {
@@ -51,6 +50,7 @@ export function HeroBlock({
               fill
               className="object-cover"
               priority
+              unoptimized={process.env.NODE_ENV === 'development'}
             />
             <div className="absolute inset-0 bg-black/50" />
           </div>
@@ -58,7 +58,9 @@ export function HeroBlock({
         <div className="relative text-center text-white px-4 max-w-4xl mx-auto">
           <h1 className="text-5xl md:text-7xl font-bold mb-6">{title}</h1>
           {subtitle && (
-            <p className="text-xl md:text-2xl mb-8 opacity-90">{subtitle}</p>
+            <div className="text-xl md:text-2xl mb-8">
+              <RichText data={subtitle} />
+            </div>
           )}
           <div className="flex gap-4 justify-center flex-wrap">
             {mainCta?.text && mainCta?.url && (
@@ -91,7 +93,9 @@ export function HeroBlock({
             <div>
               <h1 className="text-4xl md:text-5xl font-bold mb-6">{title}</h1>
               {subtitle && (
-                <p className="text-xl text-muted-foreground mb-8">{subtitle}</p>
+                <div className="text-xl text-muted-foreground mb-8">
+                  <RichText data={subtitle} />
+                </div>
               )}
               <div className="flex gap-4 flex-wrap">
                 {mainCta?.text && mainCta?.url && (
@@ -115,6 +119,7 @@ export function HeroBlock({
                   alt={image.alt || ""}
                   fill
                   className="object-cover"
+                  unoptimized={process.env.NODE_ENV === 'development'}
                 />
               </div>
             )}
@@ -134,6 +139,7 @@ export function HeroBlock({
             alt={image.alt || ""}
             fill
             className="object-cover opacity-10"
+            unoptimized={process.env.NODE_ENV === 'development'}
           />
         </div>
       )}
@@ -145,8 +151,10 @@ export function HeroBlock({
       >
         <h1 className="text-4xl md:text-6xl font-bold mb-6">{title}</h1>
         {subtitle && (
-          <p className="text-xl text-muted-foreground mb-8">{subtitle}</p>
-        )}
+          <div className="text-xl text-muted-foreground mb-8">
+            <RichText data={subtitle} />
+          </div>
+        )} 
         <div
           className={cn(
             "flex gap-4 flex-wrap",

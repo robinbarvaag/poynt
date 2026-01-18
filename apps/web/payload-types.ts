@@ -380,7 +380,21 @@ export interface Page {
 export interface HeroBlock {
   variant?: ('centered' | 'left' | 'split' | 'fullscreen') | null;
   title: string;
-  subtitle?: string | null;
+  subtitle?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   image?: (number | null) | Media;
   primaryCta?: {
     text?: string | null;

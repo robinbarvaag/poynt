@@ -104,3 +104,5 @@ dist
 # Bun
 .bun/
 bun.lockb
+
+media

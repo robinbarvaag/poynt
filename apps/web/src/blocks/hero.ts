@@ -1,3 +1,4 @@
+import { lexicalEditor } from "@payloadcms/richtext-lexical";
 import type { Block } from "payload";
 
 export const Hero: Block = {
@@ -28,8 +29,9 @@ export const Hero: Block = {
     },
     {
       name: "subtitle",
-      type: "textarea",
+      type: "richText",
       label: "Undertekst",
+      editor: lexicalEditor({}),
     },
     {
       name: "image",

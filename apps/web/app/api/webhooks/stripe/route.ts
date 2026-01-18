@@ -6,6 +6,7 @@ import { getPayload } from "payload";
 import type Stripe from "stripe";
 
 export async function POST(req: NextRequest) {
+  console.log("Mottatt Stripe webhook");
   const body = await req.text();
   const signature = req.headers.get("stripe-signature");
 

@@ -140,8 +140,7 @@ export default buildConfig({
           stripeResourceType: "products",
           stripeResourceTypeSingular: "product",
           fields: [
-            { fieldPath: "title", stripeProperty: "name" },
-            { fieldPath: "description", stripeProperty: "description" },
+            { fieldPath: "name", stripeProperty: "name" },
           ],
         },
       ],
