@@ -1,8 +1,8 @@
 import "@poynt/tailwind-config/web.css";
-import { cn } from "@poynt/ui";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import config from "@payload-config";
+import { cn } from "@poynt/ui";
 import type { Metadata } from "next";
 import { unstable_cache } from "next/cache";
 import { getPayload } from "payload";
@@ -65,31 +65,31 @@ export default async function FrontendLayout({
     <html lang="no">
       <body className={cn("min-h-screen bg-background font-sans antialiased")}>
         <Header
-        siteName={siteSettings?.siteName || "Poynt"}
-        logo={siteSettings?.logo as { url: string; alt?: string } | null}
-        showSearch={header?.showSearch ?? true}
-        showLogin={header?.showLogin ?? true}
-        ctaButton={header?.ctaButton as HeaderProps["ctaButton"]}
-        navItems={header?.navItems as HeaderProps["navItems"]}
-      />
-      <main className="min-h-screen">{children}</main>
-      <Footer
-        siteName={siteSettings?.siteName || "Poynt"}
-        logo={siteSettings?.logo as { url: string; alt?: string } | null}
-        columns={footer?.columns as FooterProps["columns"]}
-        bottomText={footer?.bottomText ?? undefined}
-        showSocialLinks={footer?.showSocialLinks ?? true}
-        socialLinks={siteSettings?.socialLinks as FooterProps["socialLinks"]}
-        newsletter={
-          footer?.showNewsletter
-            ? {
-                enabled: footer.showNewsletter,
-                title: footer.newsletterTitle ?? undefined,
-                description: footer.newsletterDescription ?? undefined,
-              }
-            : undefined
-        }
-      />
+          siteName={siteSettings?.siteName || "Poynt"}
+          logo={siteSettings?.logo as { url: string; alt?: string } | null}
+          showSearch={header?.showSearch ?? true}
+          showLogin={header?.showLogin ?? true}
+          ctaButton={header?.ctaButton as HeaderProps["ctaButton"]}
+          navItems={header?.navItems as HeaderProps["navItems"]}
+        />
+        <main className="min-h-screen">{children}</main>
+        <Footer
+          siteName={siteSettings?.siteName || "Poynt"}
+          logo={siteSettings?.logo as { url: string; alt?: string } | null}
+          columns={footer?.columns as FooterProps["columns"]}
+          bottomText={footer?.bottomText ?? undefined}
+          showSocialLinks={footer?.showSocialLinks ?? true}
+          socialLinks={siteSettings?.socialLinks as FooterProps["socialLinks"]}
+          newsletter={
+            footer?.showNewsletter
+              ? {
+                  enabled: footer.showNewsletter,
+                  title: footer.newsletterTitle ?? undefined,
+                  description: footer.newsletterDescription ?? undefined,
+                }
+              : undefined
+          }
+        />
       </body>
     </html>
   );

@@ -107,11 +107,13 @@ export interface Config {
     'site-settings': SiteSetting;
     header: Header;
     footer: Footer;
+    homepage: Homepage;
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
+    homepage: HomepageSelect<false> | HomepageSelect<true>;
   };
   locale: null;
   user: User & {
@@ -1587,6 +1589,45 @@ export interface Footer {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "homepage".
+ */
+export interface Homepage {
+  id: number;
+  layout?:
+    | (
+        | HeroBlock
+        | ContentBlock
+        | MediaBlock
+        | ArchiveBlock
+        | FeaturesBlock
+        | TestimonialsBlock
+        | CtaSectionBlock
+        | SpotifyEmbedBlock
+      )[]
+    | null;
+  meta?: {
+    /**
+     * Vises i nettleser-fanen og i søkeresultater
+     */
+    title?: string | null;
+    /**
+     * Kort beskrivelse som vises i søkeresultater (maks 160 tegn)
+     */
+    description?: string | null;
+    /**
+     * Bilde som vises ved deling på sosiale medier (1200x630px anbefalt)
+     */
+    image?: (number | null) | Media;
+    /**
+     * Aktivér for å hindre Google fra å indeksere forsiden
+     */
+    noIndex?: boolean | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings_select".
  */
 export interface SiteSettingsSelect<T extends boolean = true> {
@@ -1671,6 +1712,35 @@ export interface FooterSelect<T extends boolean = true> {
   showNewsletter?: T;
   newsletterTitle?: T;
   newsletterDescription?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "homepage_select".
+ */
+export interface HomepageSelect<T extends boolean = true> {
+  layout?:
+    | T
+    | {
+        hero?: T | HeroBlockSelect<T>;
+        content?: T | ContentBlockSelect<T>;
+        media?: T | MediaBlockSelect<T>;
+        archive?: T | ArchiveBlockSelect<T>;
+        features?: T | FeaturesBlockSelect<T>;
+        testimonials?: T | TestimonialsBlockSelect<T>;
+        ctaSection?: T | CtaSectionBlockSelect<T>;
+        'spotify-embed'?: T | SpotifyEmbedBlockSelect<T>;
+      };
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+        noIndex?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
