@@ -1,6 +1,6 @@
 import type { SerializedEditorState } from "@payloadcms/richtext-lexical/lexical";
 import { RichText } from "@payloadcms/richtext-lexical/react";
-import { Button } from "@poynt/ui";
+import { Button, H3, Text } from "@poynt/ui";
 import { Facebook, Instagram, Linkedin, Twitter, Youtube } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -80,25 +80,25 @@ export function Footer({
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="border-t bg-muted/30">
-      <div className="container mx-auto px-4 py-12">
+    <footer className="border-t border-border bg-muted/30">
+      <div className="mx-auto max-w-6xl px-4 py-12 md:py-16">
         {/* Newsletter section */}
         {newsletter?.enabled && (
-          <div className="mb-12 pb-12 border-b">
+          <div className="mb-12 pb-12 border-b border-border">
             <div className="max-w-xl mx-auto text-center">
-              <h3 className="text-2xl font-bold mb-2">
+              <H3 className="mb-2">
                 {newsletter.title || "Meld deg på nyhetsbrevet"}
-              </h3>
+              </H3>
               {newsletter.description && (
-                <p className="text-muted-foreground mb-6">
+                <Text variant="muted" className="mb-6">
                   {newsletter.description}
-                </p>
+                </Text>
               )}
               <form className="flex gap-2 max-w-md mx-auto">
                 <input
                   type="email"
                   placeholder="Din e-postadresse"
-                  className="flex-1 px-4 py-2 rounded-md border bg-background"
+                  className="flex-1 px-4 py-2 rounded-md border border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                 />
                 <Button type="submit">
                   {newsletter.buttonText || "Abonner"}
@@ -122,11 +122,11 @@ export function Footer({
                   className="h-8 w-auto"
                 />
               ) : (
-                <span className="text-xl font-bold">{siteName}</span>
+                <span className="text-xl font-bold text-foreground">{siteName}</span>
               )}
             </Link>
             {showSocialLinks && socialLinks.length > 0 && (
-              <div className="flex gap-4 mt-4">
+              <div className="flex gap-3 mt-4">
                 {socialLinks.map((social, index) => {
                   const Icon = socialIcons[social.platform];
                   return (
@@ -135,7 +135,7 @@ export function Footer({
                       href={social.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-muted-foreground hover:text-foreground transition-colors"
+                      className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
                     >
                       <Icon className="h-5 w-5" />
                     </a>
@@ -148,17 +148,17 @@ export function Footer({
           {/* Footer columns */}
           {columns.map((column, index) => (
             <div key={index}>
-              <h4 className="font-semibold mb-4">{column.title}</h4>
+              <Text as="p" className="font-semibold mb-4">
+                {column.title}
+              </Text>
               <ul className="space-y-2">
                 {column.links?.map((link, linkIndex) => (
                   <li key={linkIndex}>
                     <Link
                       href={getHref(link)}
                       target={link.openInNewTab ? "_blank" : undefined}
-                      rel={
-                        link.openInNewTab ? "noopener noreferrer" : undefined
-                      }
-                      className="text-muted-foreground hover:text-foreground transition-colors"
+                      rel={link.openInNewTab ? "noopener noreferrer" : undefined}
+                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                     >
                       {link.label}
                     </Link>
@@ -170,14 +170,14 @@ export function Footer({
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-12 pt-8 border-t flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="mt-12 pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="text-sm text-muted-foreground">
             {bottomText ? (
               <RichText data={bottomText} />
             ) : (
-              <p>
+              <Text variant="subtle">
                 © {currentYear} {siteName}. Alle rettigheter reservert.
-              </p>
+              </Text>
             )}
           </div>
         </div>

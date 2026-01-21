@@ -4,6 +4,7 @@ import { CtaSectionBlock } from "./blocks/cta-section-block";
 import { FeaturesBlock } from "./blocks/features-block";
 import { HeroBlock } from "./blocks/hero-block";
 import { MediaBlockComponent } from "./blocks/media-block";
+import { SpotifyEmbedBlock } from "./blocks/spotify-embed-block";
 import { TestimonialsBlock } from "./blocks/testimonials-block";
 
 interface Block {
@@ -34,6 +35,8 @@ export function RenderBlocks({ blocks }: RenderBlocksProps) {
             return <TestimonialsBlock key={index} {...(block as any)} />;
           case "ctaSection":
             return <CtaSectionBlock key={index} {...(block as any)} />;
+          case "spotify-embed":
+            return <SpotifyEmbedBlock key={index} {...(block as any)} />;
           default:
             return null;
         }

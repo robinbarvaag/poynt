@@ -1,7 +1,7 @@
 "use client";
 
 import { useCart } from "@poynt/cart";
-import { Button, cn } from "@poynt/ui";
+import { Button, cn, Text } from "@poynt/ui";
 import { ChevronDown, Menu, Search, ShoppingCart, User, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -9,15 +9,21 @@ import { useState } from "react";
 
 interface NavItem {
   label: string;
-  linkType: "internal" | "external";
-  page?: { slug: string } | null;
+  linkType: "custom" | "page" | "blog" | "product";
   url?: string;
+  page?: { slug: string } | null;
+  blogPost?: { slug: string } | null;
+  product?: { slug: string } | null;
+  openInNewTab?: boolean;
   subItems?: {
     label: string;
     description?: string;
-    linkType: "internal" | "external";
-    page?: { slug: string } | null;
+    linkType: "custom" | "page" | "blog" | "product";
     url?: string;
+    page?: { slug: string } | null;
+    blogPost?: { slug: string } | null;
+    product?: { slug: string } | null;
+    openInNewTab?: boolean;
   }[];
 }
 
@@ -36,11 +42,30 @@ interface HeaderProps {
 
 function getHref(item: {
   linkType: string;
-  page?: { slug: string } | null;
   url?: string;
+  page?: { slug: string } | null;
+  blogPost?: { slug: string } | null;
+  product?: { slug: string } | null;
 }): string {
-  if (item.linkType === "internal" && item.page) {
-    return item.page.slug === "forside" ? "/" : `/${item.page.slug}`;
+  switch (item.linkType) {
+    case "page":
+      if (item.page) {
+        return item.page.slug === "forside" ? "/" : `/${item.page.slug}`;
+      }
+      break;
+    case "blog":
+      if (item.blogPost) {
+        return `/post/${item.blogPost.slug}`;
+      }
+      break;
+    case "product":
+      if (item.product) {
+        return `/produkter/${item.product.slug}`;
+      }
+      break;
+    case "custom":
+    default:
+      return item.url || "#";
   }
   return item.url || "#";
 }
@@ -59,8 +84,8 @@ export function Header({
   const itemCount = items.length;
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
-      <div className="container mx-auto px-4">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
+      <div className="mx-auto max-w-6xl px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
@@ -73,12 +98,12 @@ export function Header({
                 className="h-8 w-auto"
               />
             ) : (
-              <span className="text-xl font-bold">{siteName}</span>
+              <span className="text-xl font-bold text-foreground">{siteName}</span>
             )}
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-6">
+          <nav className="hidden md:flex items-center gap-1">
             {navItems.map((item, index) => (
               <div
                 key={index}
@@ -90,9 +115,12 @@ export function Header({
               >
                 <Link
                   href={getHref(item)}
+                  target={item.openInNewTab ? "_blank" : undefined}
+                  rel={item.openInNewTab ? "noopener noreferrer" : undefined}
                   className={cn(
-                    "flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary",
-                    openDropdown === index && "text-primary"
+                    "flex items-center gap-1 px-4 py-2 text-sm font-medium rounded-md transition-colors",
+                    "text-foreground hover:bg-accent hover:text-accent-foreground",
+                    openDropdown === index && "bg-accent text-accent-foreground"
                   )}
                 >
                   {item.label}
@@ -105,19 +133,23 @@ export function Header({
                 {item.subItems &&
                   item.subItems.length > 0 &&
                   openDropdown === index && (
-                    <div className="absolute top-full left-0 pt-2 w-64">
-                      <div className="rounded-lg border bg-background p-2 shadow-lg">
+                    <div className="absolute top-full left-0 pt-2 w-72">
+                      <div className="rounded-lg border border-border bg-card p-2 shadow-lg">
                         {item.subItems.map((subItem, subIndex) => (
                           <Link
                             key={subIndex}
                             href={getHref(subItem)}
-                            className="block rounded-md px-3 py-2 hover:bg-muted"
+                            target={subItem.openInNewTab ? "_blank" : undefined}
+                            rel={subItem.openInNewTab ? "noopener noreferrer" : undefined}
+                            className="block rounded-md px-3 py-2 hover:bg-accent transition-colors"
                           >
-                            <div className="font-medium">{subItem.label}</div>
+                            <Text as="span" className="font-medium block">
+                              {subItem.label}
+                            </Text>
                             {subItem.description && (
-                              <div className="text-sm text-muted-foreground">
+                              <Text as="span" variant="subtle" className="block mt-0.5">
                                 {subItem.description}
-                              </div>
+                              </Text>
                             )}
                           </Link>
                         ))}
@@ -129,12 +161,12 @@ export function Header({
           </nav>
 
           {/* Right side actions */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
             {showSearch && (
-              <button className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <Button variant="ghost" size="sm" className="hidden sm:flex gap-2">
                 <Search className="h-4 w-4" />
                 <span className="hidden lg:inline">Søk</span>
-              </button>
+              </Button>
             )}
 
             {showLogin && (
@@ -147,10 +179,10 @@ export function Header({
             )}
 
             <Link href="/handlekurv">
-              <Button variant="outline" size="sm" className="relative">
+              <Button variant="outline" size="icon" className="relative">
                 <ShoppingCart className="h-4 w-4" />
                 {itemCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                  <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs font-medium">
                     {itemCount}
                   </span>
                 )}
@@ -166,39 +198,45 @@ export function Header({
             )}
 
             {/* Mobile menu button */}
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               className="md:hidden"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               {mobileMenuOpen ? (
-                <X className="h-6 w-6" />
+                <X className="h-5 w-5" />
               ) : (
-                <Menu className="h-6 w-6" />
+                <Menu className="h-5 w-5" />
               )}
-            </button>
+            </Button>
           </div>
         </div>
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t">
-            <nav className="flex flex-col gap-4">
+          <div className="md:hidden py-4 border-t border-border">
+            <nav className="flex flex-col gap-1">
               {navItems.map((item, index) => (
                 <div key={index}>
                   <Link
                     href={getHref(item)}
-                    className="block py-2 font-medium"
+                    target={item.openInNewTab ? "_blank" : undefined}
+                    rel={item.openInNewTab ? "noopener noreferrer" : undefined}
+                    className="block py-2 px-3 rounded-md font-medium hover:bg-accent transition-colors"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     {item.label}
                   </Link>
                   {item.subItems && item.subItems.length > 0 && (
-                    <div className="pl-4 border-l">
+                    <div className="ml-4 pl-3 border-l border-border">
                       {item.subItems.map((subItem, subIndex) => (
                         <Link
                           key={subIndex}
                           href={getHref(subItem)}
-                          className="block py-2 text-sm text-muted-foreground"
+                          target={subItem.openInNewTab ? "_blank" : undefined}
+                          rel={subItem.openInNewTab ? "noopener noreferrer" : undefined}
+                          className="block py-2 px-3 text-sm text-muted-foreground hover:text-foreground transition-colors"
                           onClick={() => setMobileMenuOpen(false)}
                         >
                           {subItem.label}
@@ -208,10 +246,11 @@ export function Header({
                   )}
                 </div>
               ))}
-              <div className="flex gap-2 pt-4 border-t">
+              <div className="flex gap-2 pt-4 mt-4 border-t border-border">
                 {showLogin && (
                   <Link href="/min-side" className="flex-1">
                     <Button variant="outline" className="w-full">
+                      <User className="h-4 w-4 mr-2" />
                       Logg inn
                     </Button>
                   </Link>

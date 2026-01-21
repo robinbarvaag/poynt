@@ -23,7 +23,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Link
-      href={`/kurs/${product.slug}`}
+      href={`/produkter/${product.slug}`}
       className="group block border rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
     >
       {product.image && (

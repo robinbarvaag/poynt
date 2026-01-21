@@ -19,7 +19,7 @@ import { Products } from "./src/collections/products";
 import { Users } from "./src/collections/users";
 
 // Globals
-import { Footer, Header, SiteSettings, Homepage } from "./src/globals";
+import { Footer, Header, SiteSettings, Homepage, BlogPage } from "./src/globals";
 
 const siteUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
 
@@ -42,7 +42,7 @@ export default buildConfig({
     BlogPosts,
     Media,
   ],
-  globals: [SiteSettings, Header, Footer, Homepage],
+  globals: [SiteSettings, Header, Footer, Homepage, BlogPage],
   admin: {
     user: "users",
   },

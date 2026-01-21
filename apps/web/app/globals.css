@@ -1,0 +1,65 @@
+@import "tailwindcss";
+@import "@poynt/tailwind-config/web.css";
+@source "../../../packages/ui/";
+
+/* Rich text styling for Lexical content */
+.rich-text {
+  p {
+    margin-bottom: 1em;
+  }
+
+  p:last-child {
+    margin-bottom: 0;
+  }
+
+  strong, b {
+    font-weight: 600;
+    color: var(--foreground);
+  }
+
+  ul, ol {
+    margin-top: 0.5em;
+    margin-bottom: 1em;
+    padding-left: 1.5em;
+  }
+
+  ul {
+    list-style-type: disc;
+  }
+
+  ol {
+    list-style-type: decimal;
+  }
+
+  li {
+    margin-bottom: 0.25em;
+  }
+
+  a {
+    color: var(--primary);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  a:hover {
+    opacity: 0.8;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    color: var(--foreground);
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+  }
+
+  h1:first-child, h2:first-child, h3:first-child, h4:first-child {
+    margin-top: 0;
+  }
+
+  blockquote {
+    border-left: 3px solid var(--border);
+    padding-left: 1em;
+    margin: 1em 0;
+    font-style: italic;
+  }
+}

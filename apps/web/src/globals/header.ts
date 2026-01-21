@@ -58,21 +58,17 @@ export const Header: GlobalConfig = {
         },
         {
           name: "linkType",
-          type: "radio",
-          defaultValue: "internal",
+          type: "select",
+          defaultValue: "custom",
           options: [
-            { label: "Intern side", value: "internal" },
-            { label: "Ekstern URL", value: "external" },
+            { label: "Egendefinert URL", value: "custom" },
+            { label: "CMS-side", value: "page" },
+            { label: "Blogginnlegg", value: "blog" },
+            { label: "Produkt", value: "product" },
           ],
-          label: "Type",
-        },
-        {
-          name: "page",
-          type: "relationship",
-          relationTo: "pages",
-          label: "Side",
+          label: "Lenketype",
           admin: {
-            condition: (_, siblingData) => siblingData?.linkType === "internal",
+            description: "Velg type lenke. Bruk 'Egendefinert URL' for /blogg, /produkter eller eksterne lenker.",
           },
         },
         {
@@ -80,8 +76,42 @@ export const Header: GlobalConfig = {
           type: "text",
           label: "URL",
           admin: {
-            condition: (_, siblingData) => siblingData?.linkType === "external",
+            condition: (_, siblingData) => siblingData?.linkType === "custom",
+            description: "F.eks. /blogg, /produkter, eller https://ekstern-side.no",
           },
+        },
+        {
+          name: "page",
+          type: "relationship",
+          relationTo: "pages",
+          label: "Velg side",
+          admin: {
+            condition: (_, siblingData) => siblingData?.linkType === "page",
+          },
+        },
+        {
+          name: "blogPost",
+          type: "relationship",
+          relationTo: "blog-posts",
+          label: "Velg blogginnlegg",
+          admin: {
+            condition: (_, siblingData) => siblingData?.linkType === "blog",
+          },
+        },
+        {
+          name: "product",
+          type: "relationship",
+          relationTo: "products",
+          label: "Velg produkt",
+          admin: {
+            condition: (_, siblingData) => siblingData?.linkType === "product",
+          },
+        },
+        {
+          name: "openInNewTab",
+          type: "checkbox",
+          label: "Åpne i ny fane",
+          defaultValue: false,
         },
         {
           name: "subItems",
@@ -102,32 +132,56 @@ export const Header: GlobalConfig = {
             },
             {
               name: "linkType",
-              type: "radio",
-              defaultValue: "internal",
+              type: "select",
+              defaultValue: "custom",
               options: [
-                { label: "Intern side", value: "internal" },
-                { label: "Ekstern URL", value: "external" },
+                { label: "Egendefinert URL", value: "custom" },
+                { label: "CMS-side", value: "page" },
+                { label: "Blogginnlegg", value: "blog" },
+                { label: "Produkt", value: "product" },
               ],
-              label: "Type",
-            },
-            {
-              name: "page",
-              type: "relationship",
-              relationTo: "pages",
-              label: "Side",
-              admin: {
-                condition: (_, siblingData) =>
-                  siblingData?.linkType === "internal",
-              },
+              label: "Lenketype",
             },
             {
               name: "url",
               type: "text",
               label: "URL",
               admin: {
-                condition: (_, siblingData) =>
-                  siblingData?.linkType === "external",
+                condition: (_, siblingData) => siblingData?.linkType === "custom",
               },
+            },
+            {
+              name: "page",
+              type: "relationship",
+              relationTo: "pages",
+              label: "Velg side",
+              admin: {
+                condition: (_, siblingData) => siblingData?.linkType === "page",
+              },
+            },
+            {
+              name: "blogPost",
+              type: "relationship",
+              relationTo: "blog-posts",
+              label: "Velg blogginnlegg",
+              admin: {
+                condition: (_, siblingData) => siblingData?.linkType === "blog",
+              },
+            },
+            {
+              name: "product",
+              type: "relationship",
+              relationTo: "products",
+              label: "Velg produkt",
+              admin: {
+                condition: (_, siblingData) => siblingData?.linkType === "product",
+              },
+            },
+            {
+              name: "openInNewTab",
+              type: "checkbox",
+              label: "Åpne i ny fane",
+              defaultValue: false,
             },
           ],
         },

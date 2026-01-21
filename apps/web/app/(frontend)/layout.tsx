@@ -1,11 +1,19 @@
-import "@poynt/tailwind-config/web.css";
+import "../globals.css";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import config from "@payload-config";
 import { cn } from "@poynt/ui";
 import type { Metadata } from "next";
+import { Poppins } from "next/font/google";
 import { unstable_cache } from "next/cache";
 import { getPayload } from "payload";
+
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-poppins",
+  display: "swap",
+});
 
 const siteName = "Poynt";
 const siteDescription = "Din læringsplattform for kurs og opplæring";
@@ -62,15 +70,15 @@ export default async function FrontendLayout({
   const { siteSettings, header, footer } = await getCachedGlobals();
 
   return (
-    <html lang="no">
-      <body className={cn("min-h-screen bg-background font-sans antialiased")}>
+    <html lang="no" className={poppins.variable}>
+      <body className={cn("min-h-screen bg-background font-sans antialiased", poppins.className)}>
         <Header
           siteName={siteSettings?.siteName || "Poynt"}
           logo={siteSettings?.logo as { url: string; alt?: string } | null}
           showSearch={header?.showSearch ?? true}
           showLogin={header?.showLogin ?? true}
           ctaButton={header?.ctaButton as HeaderProps["ctaButton"]}
-          navItems={header?.navItems as HeaderProps["navItems"]}
+          navItems={header?.navItems as unknown as HeaderProps["navItems"]}
         />
         <main className="min-h-screen">{children}</main>
         <Footer
@@ -104,15 +112,21 @@ interface HeaderProps {
   };
   navItems?: {
     label: string;
-    linkType: "internal" | "external";
-    page?: { slug: string } | null;
+    linkType: "custom" | "page" | "blog" | "product";
     url?: string;
+    page?: { slug: string } | null;
+    blogPost?: { slug: string } | null;
+    product?: { slug: string } | null;
+    openInNewTab?: boolean;
     subItems?: {
       label: string;
       description?: string;
-      linkType: "internal" | "external";
-      page?: { slug: string } | null;
+      linkType: "custom" | "page" | "blog" | "product";
       url?: string;
+      page?: { slug: string } | null;
+      blogPost?: { slug: string } | null;
+      product?: { slug: string } | null;
+      openInNewTab?: boolean;
     }[];
   }[];
 }

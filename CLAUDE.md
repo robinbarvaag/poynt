@@ -57,7 +57,6 @@ tooling/
 - **Users**: Auth with roles (admin/customer), Stripe customer ID
 - **Products**: Digital products synced to Stripe (courses, PDFs, bundles)
 - **Orders**: Purchase records with Stripe payment IDs
-- **CourseContent**: Course modules (video URLs, resources)
 - **Pages**: Dynamic pages with block-based builder
 - **Media**: File uploads
 

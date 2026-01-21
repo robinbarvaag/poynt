@@ -18,8 +18,12 @@ export const Hero: Block = {
         { label: "Venstre-justert", value: "left" },
         { label: "Med bilde til høyre", value: "split" },
         { label: "Fullskjerm med bakgrunnsbilde", value: "fullscreen" },
+        { label: "Gradient bakgrunn", value: "gradient" },
       ],
       label: "Variant",
+      admin: {
+        description: "Velg utseende på hero-seksjonen",
+      },
     },
     {
       name: "title",

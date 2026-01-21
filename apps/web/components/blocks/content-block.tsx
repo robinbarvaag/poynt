@@ -1,15 +1,21 @@
+import { RichText } from "@payloadcms/richtext-lexical/react";
+
 interface ContentBlockProps {
   richText: any; // Lexical JSON
 }
 
 export function ContentBlock({ richText }: ContentBlockProps) {
-  // TODO: Implementer Lexical renderer
-  // For no brukar me ein enkel placeholder
+  if (!richText) {
+    return null;
+  }
+
   return (
-    <div className="prose prose-lg max-w-none">
-      <p className="text-muted-foreground">
-        [Rich text content vil bli rendera her med Lexical]
-      </p>
-    </div>
+    <section className="py-12 md:py-16">
+      <div className="container mx-auto px-4">
+        <div className="max-w-4xl mx-auto text-lg text-muted-foreground rich-text">
+          <RichText data={richText} />
+        </div>
+      </div>
+    </section>
   );
 }
