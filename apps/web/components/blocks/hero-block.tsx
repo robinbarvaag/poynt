@@ -1,3 +1,4 @@
+import { getMediaUrl } from "@/lib/media-url";
 import { Button, cn, Heading, Lead } from "@poynt/ui";
 import Image from "next/image";
 import Link from "next/link";
@@ -46,7 +47,7 @@ export function HeroBlock({
         {image && (
           <div className="absolute inset-0 -z-10">
             <Image
-              src={image.url}
+              src={getMediaUrl(image.url)}
               alt={image.alt || ""}
               fill
               className="object-cover scale-105"
@@ -132,7 +133,7 @@ export function HeroBlock({
                 <div className="absolute -inset-4 bg-accent/30 rounded-3xl -rotate-3 -z-10" />
                 <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl">
                   <Image
-                    src={image.url}
+                    src={getMediaUrl(image.url)}
                     alt={image.alt || ""}
                     fill
                     className="object-cover"
@@ -191,7 +192,7 @@ export function HeroBlock({
               <div className="absolute -inset-4 bg-gradient-to-t from-background via-transparent to-transparent z-10 pointer-events-none" />
               <div className="relative aspect-video rounded-2xl overflow-hidden shadow-2xl border border-border">
                 <Image
-                  src={image.url}
+                  src={getMediaUrl(image.url)}
                   alt={image.alt || ""}
                   fill
                   className="object-cover"
@@ -212,7 +213,7 @@ export function HeroBlock({
       {image && variant === "centered" && (
         <div className="absolute inset-0 -z-10">
           <Image
-            src={image.url}
+            src={getMediaUrl(image.url)}
             alt={image.alt || ""}
             fill
             className="object-cover opacity-5"

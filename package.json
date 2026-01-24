@@ -14,8 +14,9 @@
     "nuke": "find . -name 'node_modules' -type d -prune -exec rm -rf {} + && find . -name '.next' -type d -prune -exec rm -rf {} + && rm -rf .turbo && bun install"
   },
   "devDependencies": {
-    "turbo": "latest",
-    "@biomejs/biome": "^1.9.4"
+    "@biomejs/biome": "^1.9.4",
+    "puppeteer": "^24.36.0",
+    "turbo": "latest"
   },
   "packageManager": "bun@1.2.0",
   "workspaces": ["apps/*", "packages/*", "tooling/*"]

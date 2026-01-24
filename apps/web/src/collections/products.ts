@@ -1,14 +1,43 @@
-import { stripe } from "@poynt/stripe";
 import type { CollectionConfig } from "payload";
+
+function generateSlug(text: string): string {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[æ]/g, "ae")
+    .replace(/[ø]/g, "o")
+    .replace(/[å]/g, "a")
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
 
 export const Products: CollectionConfig = {
   slug: "products",
+  labels: {
+    singular: "Produkt",
+    plural: "Produkter",
+  },
+  admin: {
+    useAsTitle: "name",
+    defaultColumns: ["name", "type", "price", "active", "updatedAt"],
+    group: "Butikk",
+  },
   hooks: {
+    beforeChange: [
+      async ({ data }) => {
+        if (!data.slug && data.name) {
+          data.slug = generateSlug(data.name);
+        }
+        return data;
+      },
+    ],
     afterChange: [
       async ({ doc, operation, req }) => {
-        console.log("AfterChange hook triggered for product:", doc.id, "Operation:", operation);
         if (doc.stripeID && !doc.stripePriceId) {
           try {
+            const { getStripe } = await import("@poynt/stripe");
+            const stripe = getStripe();
             const price = await stripe.prices.create({
               product: doc.stripeID,
               unit_amount: doc.price,
@@ -30,9 +59,6 @@ export const Products: CollectionConfig = {
       },
     ],
   },
-  admin: {
-    useAsTitle: "name",
-  },
   fields: [
     {
       name: "name",
@@ -45,18 +71,11 @@ export const Products: CollectionConfig = {
       type: "text",
       required: true,
       unique: true,
+      index: true,
       label: "URL-slug",
       admin: {
         position: "sidebar",
-      },
-    },
-    {
-      name: "price",
-      type: "number",
-      required: true,
-      label: "Pris (øre)",
-      admin: {
-        description: "Pris i øre (100 = 1 kr)",
+        description: "Genereres automatisk fra produktnavn",
       },
     },
     {
@@ -69,31 +88,73 @@ export const Products: CollectionConfig = {
         { label: "Bundle", value: "bundle" },
       ],
       label: "Produkttype",
-    },
-    {
-      name: "description",
-      type: "richText",
-      label: "Beskriving",
-    },
-    {
-      name: "image",
-      type: "upload",
-      relationTo: "media",
-      label: "Produktbilde",
-    },
-    {
-      name: "stripePriceId",
-      type: "text",
-      label: "Stripe Price ID",
       admin: {
         position: "sidebar",
       },
     },
     {
-      name: "stripeProductId",
-      type: "text",
-      label: "Stripe Product ID",
+      name: "shortDescription",
+      type: "textarea",
+      label: "Kort beskrivelse",
       admin: {
+        description: "Vises i produktoversikter og som meta-beskrivelse",
+      },
+    },
+    {
+      name: "description",
+      type: "richText",
+      label: "Detaljert beskrivelse",
+      admin: {
+        description: "Full produktbeskrivelse som vises på produktsiden",
+      },
+    },
+    {
+      name: "featuredImage",
+      type: "upload",
+      relationTo: "media",
+      label: "Hovedbilde",
+      admin: {
+        description: "Hovedbilde som vises i oversikter og øverst på produktsiden",
+      },
+    },
+    {
+      name: "gallery",
+      type: "array",
+      label: "Bildegalleri",
+      admin: {
+        description: "Ekstra bilder som vises på produktsiden",
+      },
+      fields: [
+        {
+          name: "image",
+          type: "upload",
+          relationTo: "media",
+          required: true,
+          label: "Bilde",
+        },
+        {
+          name: "caption",
+          type: "text",
+          label: "Bildetekst",
+        },
+      ],
+    },
+    {
+      name: "price",
+      type: "number",
+      required: true,
+      label: "Pris (øre)",
+      admin: {
+        description: "Pris i øre (100 = 1 kr)",
+        position: "sidebar",
+      },
+    },
+    {
+      name: "compareAtPrice",
+      type: "number",
+      label: "Sammenlign med pris (øre)",
+      admin: {
+        description: "Valgfri førpris for å vise rabatt",
         position: "sidebar",
       },
     },
@@ -104,6 +165,43 @@ export const Products: CollectionConfig = {
       label: "Aktiv",
       admin: {
         position: "sidebar",
+        description: "Deaktiver for å skjule produktet",
+      },
+    },
+    {
+      name: "benefits",
+      type: "json",
+      label: "Fordeler",
+      admin: {
+        description: "Velg fordeler som gjelder for dette produktet (hentes fra Produktinnstillinger)",
+      },
+    },
+    {
+      name: "categories",
+      type: "relationship",
+      relationTo: "categories",
+      hasMany: true,
+      label: "Kategorier",
+      admin: {
+        position: "sidebar",
+      },
+    },
+    {
+      name: "stripePriceId",
+      type: "text",
+      label: "Stripe Price ID",
+      admin: {
+        position: "sidebar",
+        readOnly: true,
+      },
+    },
+    {
+      name: "stripeProductId",
+      type: "text",
+      label: "Stripe Product ID",
+      admin: {
+        position: "sidebar",
+        readOnly: true,
       },
     },
   ],

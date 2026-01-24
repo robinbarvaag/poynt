@@ -54,10 +54,19 @@ export const Testimonials: Block = {
           label: "Selskap",
         },
         {
+          name: "logo",
+          type: "upload",
+          relationTo: "media",
+          label: "Kundelogo",
+          admin: {
+            description: "Firmalogo som vises over sitatet",
+          },
+        },
+        {
           name: "avatar",
           type: "upload",
           relationTo: "media",
-          label: "Bilde",
+          label: "Personbilde",
         },
         {
           name: "rating",

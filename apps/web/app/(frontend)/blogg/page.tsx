@@ -139,11 +139,15 @@ export default async function BlogPage() {
                   {/* Categories */}
                   {post.categories && post.categories.length > 0 && (
                     <div className="flex gap-2 mb-3">
-                      {post.categories.slice(0, 2).map((cat, index) => (
-                        <Badge key={index} variant="muted" size="sm">
-                          {categoryLabels[cat.category || ""] || cat.category}
-                        </Badge>
-                      ))}
+                      {post.categories.slice(0, 2).map((cat, index) => {
+                        const categoryName = typeof cat === "object" ? cat.name : null;
+                        if (!categoryName) return null;
+                        return (
+                          <Badge key={index} variant="muted" size="sm">
+                            {categoryName}
+                          </Badge>
+                        );
+                      })}
                     </div>
                   )}
 

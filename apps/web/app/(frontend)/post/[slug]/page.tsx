@@ -101,11 +101,15 @@ export default async function PostPage({ params }: PostPageProps) {
         <header className="mb-8">
           {post.categories && post.categories.length > 0 && (
             <div className="flex gap-2 mb-4">
-              {post.categories.map((cat, index) => (
-                <Badge key={index} variant="accent">
-                  {cat.category}
-                </Badge>
-              ))}
+              {post.categories.map((cat, index) => {
+                const categoryName = typeof cat === "object" ? cat.name : null;
+                if (!categoryName) return null;
+                return (
+                  <Badge key={index} variant="accent">
+                    {categoryName}
+                  </Badge>
+                );
+              })}
             </div>
           )}
 

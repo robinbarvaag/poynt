@@ -10,16 +10,19 @@ import { seoPlugin } from "@payloadcms/plugin-seo";
 import { stripePlugin } from "@payloadcms/plugin-stripe";
 
 import { BlogPosts } from "./src/collections/blog-posts";
+import { Categories } from "./src/collections/categories";
 import { CourseContent } from "./src/collections/course-content";
 import { Media } from "./src/collections/media";
 import { Orders } from "./src/collections/orders";
 import { Pages } from "./src/collections/pages";
+import { Podcasts } from "./src/collections/podcasts";
 import { Products } from "./src/collections/products";
+import { Services } from "./src/collections/services";
 // Collections
 import { Users } from "./src/collections/users";
 
 // Globals
-import { Footer, Header, SiteSettings, Homepage, BlogPage } from "./src/globals";
+import { Footer, Header, SiteSettings, Homepage, BlogPage, PodcastPage, ProductsPage, ServicesPage, ProductSettings } from "./src/globals";
 
 const siteUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
 
@@ -40,9 +43,12 @@ export default buildConfig({
     CourseContent,
     Pages,
     BlogPosts,
+    Podcasts,
+    Services,
+    Categories,
     Media,
   ],
-  globals: [SiteSettings, Header, Footer, Homepage, BlogPage],
+  globals: [SiteSettings, Header, Footer, Homepage, BlogPage, PodcastPage, ProductsPage, ServicesPage, ProductSettings],
   admin: {
     user: "users",
   },

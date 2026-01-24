@@ -73,6 +73,9 @@ export interface Config {
     'course-content': CourseContent;
     pages: Page;
     'blog-posts': BlogPost;
+    podcasts: Podcast;
+    services: Service;
+    categories: Category;
     media: Media;
     redirects: Redirect;
     forms: Form;
@@ -90,6 +93,9 @@ export interface Config {
     'course-content': CourseContentSelect<false> | CourseContentSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     'blog-posts': BlogPostsSelect<false> | BlogPostsSelect<true>;
+    podcasts: PodcastsSelect<false> | PodcastsSelect<true>;
+    services: ServicesSelect<false> | ServicesSelect<true>;
+    categories: CategoriesSelect<false> | CategoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
@@ -108,12 +114,22 @@ export interface Config {
     header: Header;
     footer: Footer;
     homepage: Homepage;
+    blogpage: Blogpage;
+    podcastpage: Podcastpage;
+    productspage: Productspage;
+    servicespage: Servicespage;
+    productSettings: ProductSetting;
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
     homepage: HomepageSelect<false> | HomepageSelect<true>;
+    blogpage: BlogpageSelect<false> | BlogpageSelect<true>;
+    podcastpage: PodcastpageSelect<false> | PodcastpageSelect<true>;
+    productspage: ProductspageSelect<false> | ProductspageSelect<true>;
+    servicespage: ServicespageSelect<false> | ServicespageSelect<true>;
+    productSettings: ProductSettingsSelect<false> | ProductSettingsSelect<true>;
   };
   locale: null;
   user: User & {
@@ -195,12 +211,18 @@ export interface Order {
 export interface Product {
   id: number;
   name: string;
-  slug: string;
   /**
-   * Pris i øre (100 = 1 kr)
+   * Genereres automatisk fra produktnavn
    */
-  price: number;
+  slug: string;
   type: 'course' | 'pdf' | 'bundle';
+  /**
+   * Vises i produktoversikter og som meta-beskrivelse
+   */
+  shortDescription?: string | null;
+  /**
+   * Full produktbeskrivelse som vises på produktsiden
+   */
   description?: {
     root: {
       type: string;
@@ -216,10 +238,47 @@ export interface Product {
     };
     [k: string]: unknown;
   } | null;
-  image?: (number | null) | Media;
+  /**
+   * Hovedbilde som vises i oversikter og øverst på produktsiden
+   */
+  featuredImage?: (number | null) | Media;
+  /**
+   * Ekstra bilder som vises på produktsiden
+   */
+  gallery?:
+    | {
+        image: number | Media;
+        caption?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Pris i øre (100 = 1 kr)
+   */
+  price: number;
+  /**
+   * Valgfri førpris for å vise rabatt
+   */
+  compareAtPrice?: number | null;
+  /**
+   * Deaktiver for å skjule produktet
+   */
+  active?: boolean | null;
+  /**
+   * Velg fordeler som gjelder for dette produktet (hentes fra Produktinnstillinger)
+   */
+  benefits?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  categories?: (number | Category)[] | null;
   stripePriceId?: string | null;
   stripeProductId?: string | null;
-  active?: boolean | null;
   meta?: {
     title?: string | null;
     description?: string | null;
@@ -292,6 +351,24 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories".
+ */
+export interface Category {
+  id: number;
+  name: string;
+  /**
+   * Genereres automatisk fra navn
+   */
+  slug: string;
+  /**
+   * Valgfri beskrivelse av kategorien
+   */
+  description?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "course-content".
  */
 export interface CourseContent {
@@ -336,13 +413,18 @@ export interface Page {
    * Kort beskrivelse som brukes til SEO og deling
    */
   excerpt?: string | null;
+  /**
+   * Bygg siden med blokker. Hero = stor intro-seksjon, Innholdsblokk = rik tekst, Mediablokk = bilde/video, Skjema = kontaktskjema, Produkter/Tjenester/Podcast = lister fra databasen, Anmeldelser = kundeomtaler, CTA = handlingsoppfordring, Spotify = podcast-spiller.
+   */
   layout?:
     | (
         | HeroBlock
         | ContentBlock
         | MediaBlock
-        | ArchiveBlock
-        | FeaturesBlock
+        | FormBlock
+        | ProductArchiveBlock
+        | PodcastArchiveBlock
+        | ServicesArchiveBlock
         | TestimonialsBlock
         | CtaSectionBlock
         | SpotifyEmbedBlock
@@ -378,7 +460,10 @@ export interface Page {
  * via the `definition` "HeroBlock".
  */
 export interface HeroBlock {
-  variant?: ('centered' | 'left' | 'split' | 'fullscreen') | null;
+  /**
+   * Velg utseende på hero-seksjonen
+   */
+  variant?: ('centered' | 'left' | 'split' | 'fullscreen' | 'gradient') | null;
   title: string;
   subtitle?: {
     root: {
@@ -445,195 +530,27 @@ export interface MediaBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ArchiveBlock".
+ * via the `definition` "FormBlock".
  */
-export interface ArchiveBlock {
-  title?: string | null;
-  populateBy?: ('selection' | 'all') | null;
-  selectedProducts?: (number | Product)[] | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'archive';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "FeaturesBlock".
- */
-export interface FeaturesBlock {
+export interface FormBlock {
   /**
-   * Liten tekst over tittelen, f.eks. 'Hvorfor velge oss'
+   * Velg et skjema du har opprettet. Gå til 'Skjemaer' i menyen for å opprette nye skjemaer.
    */
-  eyebrow?: string | null;
+  form: number | Form;
+  /**
+   * Overstyr skjemaets tittel på denne siden
+   */
   title?: string | null;
+  /**
+   * Tekst som vises over skjemaet
+   */
   description?: string | null;
-  layout?: ('grid-3' | 'grid-2' | 'grid-4' | 'list') | null;
-  features?:
-    | {
-        icon?:
-          | ('book' | 'video' | 'check' | 'star' | 'rocket' | 'shield' | 'heart' | 'message' | 'chart' | 'clock')
-          | null;
-        title: string;
-        description?: string | null;
-        id?: string | null;
-      }[]
-    | null;
+  variant?: ('default' | 'card' | 'bordered') | null;
+  alignment?: ('left' | 'center') | null;
+  maxWidth?: ('sm' | 'md' | 'lg' | 'full') | null;
   id?: string | null;
   blockName?: string | null;
-  blockType: 'features';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TestimonialsBlock".
- */
-export interface TestimonialsBlock {
-  title?: string | null;
-  layout?: ('cards' | 'slider' | 'quote') | null;
-  testimonials?:
-    | {
-        quote: string;
-        author: string;
-        role?: string | null;
-        company?: string | null;
-        avatar?: (number | null) | Media;
-        rating?: number | null;
-        id?: string | null;
-      }[]
-    | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'testimonials';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "CtaSectionBlock".
- */
-export interface CtaSectionBlock {
-  variant?: ('simple' | 'colored' | 'image') | null;
-  title: string;
-  description?: string | null;
-  backgroundImage?: (number | null) | Media;
-  primaryCta: {
-    text: string;
-    url: string;
-  };
-  secondaryCta?: {
-    text?: string | null;
-    url?: string | null;
-  };
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'ctaSection';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "SpotifyEmbedBlock".
- */
-export interface SpotifyEmbedBlock {
-  embedType: 'episode' | 'show' | 'playlist';
-  /**
-   * Lim inn lenke fra Spotify (f.eks. https://open.spotify.com/episode/...)
-   */
-  spotifyUrl: string;
-  /**
-   * Overskrift som vises over spilleren
-   */
-  title?: string | null;
-  height?: ('compact' | 'standard' | 'large') | null;
-  theme?: ('auto' | 'light' | 'dark') | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'spotify-embed';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "blog-posts".
- */
-export interface BlogPost {
-  id: number;
-  title: string;
-  /**
-   * Genereres automatisk fra tittel
-   */
-  slug: string;
-  /**
-   * Kort beskrivelse som vises i listeoversikter og SEO
-   */
-  excerpt?: string | null;
-  featuredImage?: (number | null) | Media;
-  content: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
-  author?: (number | null) | User;
-  categories?:
-    | {
-        category?: ('instagram' | 'linkedin' | 'pinterest' | 'markedsforing' | 'sosiale-medier' | 'tips') | null;
-        id?: string | null;
-      }[]
-    | null;
-  publishedAt: string;
-  relatedPosts?: (number | BlogPost)[] | null;
-  meta?: {
-    title?: string | null;
-    description?: string | null;
-    /**
-     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
-     */
-    image?: (number | null) | Media;
-    /**
-     * Aktivér for å hindre Google fra å indeksere denne siden
-     */
-    noIndex?: boolean | null;
-    /**
-     * Overstyr automatisk canonical URL hvis innholdet finnes på en annen URL
-     */
-    canonicalUrl?: string | null;
-    /**
-     * Brukes av sosiale medier ved deling
-     */
-    ogType?: ('website' | 'article' | 'product') | null;
-  };
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "redirects".
- */
-export interface Redirect {
-  id: number;
-  from: string;
-  to?: {
-    type?: ('reference' | 'custom') | null;
-    reference?:
-      | ({
-          relationTo: 'pages';
-          value: number | Page;
-        } | null)
-      | ({
-          relationTo: 'products';
-          value: number | Product;
-        } | null)
-      | ({
-          relationTo: 'blog-posts';
-          value: number | BlogPost;
-        } | null);
-    url?: string | null;
-  };
-  updatedAt: string;
-  createdAt: string;
+  blockType: 'formBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -811,6 +728,332 @@ export interface Form {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProductArchiveBlock".
+ */
+export interface ProductArchiveBlock {
+  title?: string | null;
+  description?: string | null;
+  selectionMode?: ('auto' | 'manual') | null;
+  /**
+   * Velg hvilke produkter som skal vises
+   */
+  selectedProducts?: (number | Product)[] | null;
+  filterByType?: ('all' | 'course' | 'pdf' | 'bundle') | null;
+  /**
+   * La stå tom for å vise alle
+   */
+  limit?: number | null;
+  layout?: ('grid' | 'grid-4' | 'carousel') | null;
+  showMoreLink?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'productArchive';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PodcastArchiveBlock".
+ */
+export interface PodcastArchiveBlock {
+  title?: string | null;
+  description?: string | null;
+  /**
+   * Maks antall episoder som vises (0 = vis alle)
+   */
+  limit?: number | null;
+  showMoreLink?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'podcastArchive';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ServicesArchiveBlock".
+ */
+export interface ServicesArchiveBlock {
+  title?: string | null;
+  description?: string | null;
+  layout?: ('grid' | 'list') | null;
+  showMoreLink?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'servicesArchive';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TestimonialsBlock".
+ */
+export interface TestimonialsBlock {
+  title?: string | null;
+  layout?: ('cards' | 'slider' | 'quote') | null;
+  testimonials?:
+    | {
+        quote: string;
+        author: string;
+        role?: string | null;
+        company?: string | null;
+        /**
+         * Firmalogo som vises over sitatet
+         */
+        logo?: (number | null) | Media;
+        avatar?: (number | null) | Media;
+        rating?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'testimonials';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CtaSectionBlock".
+ */
+export interface CtaSectionBlock {
+  variant?: ('simple' | 'colored' | 'image') | null;
+  title: string;
+  description?: string | null;
+  backgroundImage?: (number | null) | Media;
+  primaryCta: {
+    text: string;
+    url: string;
+  };
+  secondaryCta?: {
+    text?: string | null;
+    url?: string | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'ctaSection';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SpotifyEmbedBlock".
+ */
+export interface SpotifyEmbedBlock {
+  embedType: 'episode' | 'show' | 'playlist';
+  /**
+   * Lim inn lenke fra Spotify (f.eks. https://open.spotify.com/episode/...)
+   */
+  spotifyUrl: string;
+  /**
+   * Overskrift som vises over spilleren
+   */
+  title?: string | null;
+  height?: ('compact' | 'standard' | 'large') | null;
+  theme?: ('auto' | 'light' | 'dark') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'spotify-embed';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blog-posts".
+ */
+export interface BlogPost {
+  id: number;
+  title: string;
+  /**
+   * Genereres automatisk fra tittel
+   */
+  slug: string;
+  /**
+   * Kort beskrivelse som vises i listeoversikter og SEO
+   */
+  excerpt?: string | null;
+  featuredImage?: (number | null) | Media;
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  author?: (number | null) | User;
+  categories?: (number | Category)[] | null;
+  publishedAt: string;
+  relatedPosts?: (number | BlogPost)[] | null;
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+    /**
+     * Aktivér for å hindre Google fra å indeksere denne siden
+     */
+    noIndex?: boolean | null;
+    /**
+     * Overstyr automatisk canonical URL hvis innholdet finnes på en annen URL
+     */
+    canonicalUrl?: string | null;
+    /**
+     * Brukes av sosiale medier ved deling
+     */
+    ogType?: ('website' | 'article' | 'product') | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "podcasts".
+ */
+export interface Podcast {
+  id: number;
+  title: string;
+  /**
+   * Genereres automatisk fra tittel
+   */
+  slug: string;
+  /**
+   * Vises i oversikten og brukes til SEO
+   */
+  description?: string | null;
+  /**
+   * Valgfritt - vises på episode-siden
+   */
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Full Spotify-URL til episoden (f.eks. https://open.spotify.com/episode/...)
+   */
+  spotifyUrl: string;
+  /**
+   * Episodebilde - vises i oversikten
+   */
+  coverImage?: (number | null) | Media;
+  /**
+   * Valgfritt - legg til gjester i episoden
+   */
+  guests?:
+    | {
+        name: string;
+        title?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * F.eks. '45 min'
+   */
+  duration?: string | null;
+  episodeNumber?: number | null;
+  publishedAt: string;
+  categories?: (number | Category)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "services".
+ */
+export interface Service {
+  id: number;
+  name: string;
+  /**
+   * Genereres automatisk fra navn
+   */
+  slug: string;
+  /**
+   * Vises i tjenesteoversikten
+   */
+  image?: (number | null) | Media;
+  /**
+   * Vises i oversikten på forsiden
+   */
+  shortDescription: string;
+  /**
+   * Valgfritt - vises på tjenestesiden
+   */
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  priceType: 'fixed' | 'from' | 'monthly' | 'contact';
+  /**
+   * Pris i hele kroner (eks. mva)
+   */
+  price?: number | null;
+  includesVat?: boolean | null;
+  ctaText?: string | null;
+  /**
+   * Valgfritt - overstyr standard lenke til tjenestesiden
+   */
+  ctaLink?: string | null;
+  /**
+   * Lavere tall vises først
+   */
+  sortOrder?: number | null;
+  /**
+   * Deaktiver for å skjule tjenesten
+   */
+  active?: boolean | null;
+  categories?: (number | Category)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "redirects".
+ */
+export interface Redirect {
+  id: number;
+  from: string;
+  to?: {
+    type?: ('reference' | 'custom') | null;
+    reference?:
+      | ({
+          relationTo: 'pages';
+          value: number | Page;
+        } | null)
+      | ({
+          relationTo: 'products';
+          value: number | Product;
+        } | null)
+      | ({
+          relationTo: 'blog-posts';
+          value: number | BlogPost;
+        } | null);
+    url?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "form-submissions".
  */
 export interface FormSubmission {
@@ -873,6 +1116,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'blog-posts';
         value: number | BlogPost;
+      } | null)
+    | ({
+        relationTo: 'podcasts';
+        value: number | Podcast;
+      } | null)
+    | ({
+        relationTo: 'services';
+        value: number | Service;
+      } | null)
+    | ({
+        relationTo: 'categories';
+        value: number | Category;
       } | null)
     | ({
         relationTo: 'media';
@@ -964,13 +1219,24 @@ export interface UsersSelect<T extends boolean = true> {
 export interface ProductsSelect<T extends boolean = true> {
   name?: T;
   slug?: T;
-  price?: T;
   type?: T;
+  shortDescription?: T;
   description?: T;
-  image?: T;
+  featuredImage?: T;
+  gallery?:
+    | T
+    | {
+        image?: T;
+        caption?: T;
+        id?: T;
+      };
+  price?: T;
+  compareAtPrice?: T;
+  active?: T;
+  benefits?: T;
+  categories?: T;
   stripePriceId?: T;
   stripeProductId?: T;
-  active?: T;
   meta?:
     | T
     | {
@@ -1044,8 +1310,10 @@ export interface PagesSelect<T extends boolean = true> {
         hero?: T | HeroBlockSelect<T>;
         content?: T | ContentBlockSelect<T>;
         media?: T | MediaBlockSelect<T>;
-        archive?: T | ArchiveBlockSelect<T>;
-        features?: T | FeaturesBlockSelect<T>;
+        formBlock?: T | FormBlockSelect<T>;
+        productArchive?: T | ProductArchiveBlockSelect<T>;
+        podcastArchive?: T | PodcastArchiveBlockSelect<T>;
+        servicesArchive?: T | ServicesArchiveBlockSelect<T>;
         testimonials?: T | TestimonialsBlockSelect<T>;
         ctaSection?: T | CtaSectionBlockSelect<T>;
         'spotify-embed'?: T | SpotifyEmbedBlockSelect<T>;
@@ -1110,32 +1378,55 @@ export interface MediaBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ArchiveBlock_select".
+ * via the `definition` "FormBlock_select".
  */
-export interface ArchiveBlockSelect<T extends boolean = true> {
+export interface FormBlockSelect<T extends boolean = true> {
+  form?: T;
   title?: T;
-  populateBy?: T;
-  selectedProducts?: T;
+  description?: T;
+  variant?: T;
+  alignment?: T;
+  maxWidth?: T;
   id?: T;
   blockName?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "FeaturesBlock_select".
+ * via the `definition` "ProductArchiveBlock_select".
  */
-export interface FeaturesBlockSelect<T extends boolean = true> {
-  eyebrow?: T;
+export interface ProductArchiveBlockSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  selectionMode?: T;
+  selectedProducts?: T;
+  filterByType?: T;
+  limit?: T;
+  layout?: T;
+  showMoreLink?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PodcastArchiveBlock_select".
+ */
+export interface PodcastArchiveBlockSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  limit?: T;
+  showMoreLink?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ServicesArchiveBlock_select".
+ */
+export interface ServicesArchiveBlockSelect<T extends boolean = true> {
   title?: T;
   description?: T;
   layout?: T;
-  features?:
-    | T
-    | {
-        icon?: T;
-        title?: T;
-        description?: T;
-        id?: T;
-      };
+  showMoreLink?: T;
   id?: T;
   blockName?: T;
 }
@@ -1153,6 +1444,7 @@ export interface TestimonialsBlockSelect<T extends boolean = true> {
         author?: T;
         role?: T;
         company?: T;
+        logo?: T;
         avatar?: T;
         rating?: T;
         id?: T;
@@ -1208,12 +1500,7 @@ export interface BlogPostsSelect<T extends boolean = true> {
   featuredImage?: T;
   content?: T;
   author?: T;
-  categories?:
-    | T
-    | {
-        category?: T;
-        id?: T;
-      };
+  categories?: T;
   publishedAt?: T;
   relatedPosts?: T;
   meta?:
@@ -1229,6 +1516,63 @@ export interface BlogPostsSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "podcasts_select".
+ */
+export interface PodcastsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  description?: T;
+  content?: T;
+  spotifyUrl?: T;
+  coverImage?: T;
+  guests?:
+    | T
+    | {
+        name?: T;
+        title?: T;
+        id?: T;
+      };
+  duration?: T;
+  episodeNumber?: T;
+  publishedAt?: T;
+  categories?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "services_select".
+ */
+export interface ServicesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  image?: T;
+  shortDescription?: T;
+  content?: T;
+  priceType?: T;
+  price?: T;
+  includesVat?: T;
+  ctaText?: T;
+  ctaLink?: T;
+  sortOrder?: T;
+  active?: T;
+  categories?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories_select".
+ */
+export interface CategoriesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  description?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1533,16 +1877,28 @@ export interface Header {
   navItems?:
     | {
         label: string;
-        linkType?: ('internal' | 'external') | null;
-        page?: (number | null) | Page;
+        /**
+         * Velg type lenke. Bruk 'Egendefinert URL' for /blogg, /produkter eller eksterne lenker.
+         */
+        linkType?: ('custom' | 'page' | 'blog' | 'product') | null;
+        /**
+         * F.eks. /blogg, /produkter, eller https://ekstern-side.no
+         */
         url?: string | null;
+        page?: (number | null) | Page;
+        blogPost?: (number | null) | BlogPost;
+        product?: (number | null) | Product;
+        openInNewTab?: boolean | null;
         subItems?:
           | {
               label: string;
               description?: string | null;
-              linkType?: ('internal' | 'external') | null;
-              page?: (number | null) | Page;
+              linkType?: ('custom' | 'page' | 'blog' | 'product') | null;
               url?: string | null;
+              page?: (number | null) | Page;
+              blogPost?: (number | null) | BlogPost;
+              product?: (number | null) | Product;
+              openInNewTab?: boolean | null;
               id?: string | null;
             }[]
           | null;
@@ -1607,13 +1963,18 @@ export interface Footer {
  */
 export interface Homepage {
   id: number;
+  /**
+   * Bygg forsiden med blokker. Hero = stor intro, Innhold = tekst, Media = bilde/video, Skjema = kontaktskjema, Produkter/Tjenester/Podcast = automatiske lister, Anmeldelser = kundeomtaler, CTA = handlingsoppfordring.
+   */
   layout?:
     | (
         | HeroBlock
         | ContentBlock
         | MediaBlock
-        | ArchiveBlock
-        | FeaturesBlock
+        | FormBlock
+        | PodcastArchiveBlock
+        | ProductArchiveBlock
+        | ServicesArchiveBlock
         | TestimonialsBlock
         | CtaSectionBlock
         | SpotifyEmbedBlock
@@ -1637,6 +1998,190 @@ export interface Homepage {
      */
     noIndex?: boolean | null;
   };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blogpage".
+ */
+export interface Blogpage {
+  id: number;
+  /**
+   * Hovedoverskrift på bloggsiden
+   */
+  title: string;
+  /**
+   * Kort beskrivelse som vises under tittelen
+   */
+  description?: string | null;
+  /**
+   * Tekst som vises når det ikke finnes noen publiserte innlegg
+   */
+  emptyStateText?: string | null;
+  meta?: {
+    /**
+     * Vises i nettleser-fanen og i søkeresultater
+     */
+    title?: string | null;
+    /**
+     * Kort beskrivelse som vises i søkeresultater (maks 160 tegn)
+     */
+    description?: string | null;
+    /**
+     * Bilde som vises ved deling på sosiale medier (1200x630px anbefalt)
+     */
+    image?: (number | null) | Media;
+    /**
+     * Aktivér for å hindre Google fra å indeksere bloggsiden
+     */
+    noIndex?: boolean | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "podcastpage".
+ */
+export interface Podcastpage {
+  id: number;
+  hero?: {
+    enabled?: boolean | null;
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Valgfritt bakgrunnsbilde for Hero-seksjonen
+     */
+    image?: (number | null) | Media;
+  };
+  /**
+   * Tekst som vises når det ikke finnes noen publiserte episoder
+   */
+  emptyStateText?: string | null;
+  meta?: {
+    /**
+     * Vises i nettleser-fanen og i søkeresultater
+     */
+    title?: string | null;
+    /**
+     * Kort beskrivelse som vises i søkeresultater (maks 160 tegn)
+     */
+    description?: string | null;
+    /**
+     * Bilde som vises ved deling på sosiale medier (1200x630px anbefalt)
+     */
+    image?: (number | null) | Media;
+    /**
+     * Aktivér for å hindre Google fra å indeksere podkastsiden
+     */
+    noIndex?: boolean | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "productspage".
+ */
+export interface Productspage {
+  id: number;
+  hero?: {
+    enabled?: boolean | null;
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Valgfritt bakgrunnsbilde for Hero-seksjonen
+     */
+    image?: (number | null) | Media;
+  };
+  /**
+   * Tekst som vises når det ikke finnes noen aktive produkter
+   */
+  emptyStateText?: string | null;
+  meta?: {
+    /**
+     * Vises i nettleser-fanen og i søkeresultater
+     */
+    title?: string | null;
+    /**
+     * Kort beskrivelse som vises i søkeresultater (maks 160 tegn)
+     */
+    description?: string | null;
+    /**
+     * Bilde som vises ved deling på sosiale medier (1200x630px anbefalt)
+     */
+    image?: (number | null) | Media;
+    /**
+     * Aktivér for å hindre Google fra å indeksere produktsiden
+     */
+    noIndex?: boolean | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "servicespage".
+ */
+export interface Servicespage {
+  id: number;
+  hero?: {
+    enabled?: boolean | null;
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Valgfritt bakgrunnsbilde for Hero-seksjonen
+     */
+    image?: (number | null) | Media;
+  };
+  /**
+   * Tekst som vises når det ikke finnes noen aktive tjenester
+   */
+  emptyStateText?: string | null;
+  meta?: {
+    /**
+     * Vises i nettleser-fanen og i søkeresultater
+     */
+    title?: string | null;
+    /**
+     * Kort beskrivelse som vises i søkeresultater (maks 160 tegn)
+     */
+    description?: string | null;
+    /**
+     * Bilde som vises ved deling på sosiale medier (1200x630px anbefalt)
+     */
+    image?: (number | null) | Media;
+    /**
+     * Aktivér for å hindre Google fra å indeksere tjenestesiden
+     */
+    noIndex?: boolean | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "productSettings".
+ */
+export interface ProductSetting {
+  id: number;
+  /**
+   * Definer fordeler som kan velges på produkter (f.eks. 'Livstidstilgang', 'PDF-nedlasting')
+   */
+  benefits?:
+    | {
+        /**
+         * Teksten som vises til kunden
+         */
+        label: string;
+        /**
+         * Unik identifikator (f.eks. 'lifetime-access')
+         */
+        key: string;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1683,16 +2228,22 @@ export interface HeaderSelect<T extends boolean = true> {
     | {
         label?: T;
         linkType?: T;
-        page?: T;
         url?: T;
+        page?: T;
+        blogPost?: T;
+        product?: T;
+        openInNewTab?: T;
         subItems?:
           | T
           | {
               label?: T;
               description?: T;
               linkType?: T;
-              page?: T;
               url?: T;
+              page?: T;
+              blogPost?: T;
+              product?: T;
+              openInNewTab?: T;
               id?: T;
             };
         id?: T;
@@ -1741,8 +2292,10 @@ export interface HomepageSelect<T extends boolean = true> {
         hero?: T | HeroBlockSelect<T>;
         content?: T | ContentBlockSelect<T>;
         media?: T | MediaBlockSelect<T>;
-        archive?: T | ArchiveBlockSelect<T>;
-        features?: T | FeaturesBlockSelect<T>;
+        formBlock?: T | FormBlockSelect<T>;
+        podcastArchive?: T | PodcastArchiveBlockSelect<T>;
+        productArchive?: T | ProductArchiveBlockSelect<T>;
+        servicesArchive?: T | ServicesArchiveBlockSelect<T>;
         testimonials?: T | TestimonialsBlockSelect<T>;
         ctaSection?: T | CtaSectionBlockSelect<T>;
         'spotify-embed'?: T | SpotifyEmbedBlockSelect<T>;
@@ -1754,6 +2307,120 @@ export interface HomepageSelect<T extends boolean = true> {
         description?: T;
         image?: T;
         noIndex?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blogpage_select".
+ */
+export interface BlogpageSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  emptyStateText?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+        noIndex?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "podcastpage_select".
+ */
+export interface PodcastpageSelect<T extends boolean = true> {
+  hero?:
+    | T
+    | {
+        enabled?: T;
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  emptyStateText?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+        noIndex?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "productspage_select".
+ */
+export interface ProductspageSelect<T extends boolean = true> {
+  hero?:
+    | T
+    | {
+        enabled?: T;
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  emptyStateText?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+        noIndex?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "servicespage_select".
+ */
+export interface ServicespageSelect<T extends boolean = true> {
+  hero?:
+    | T
+    | {
+        enabled?: T;
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  emptyStateText?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+        noIndex?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "productSettings_select".
+ */
+export interface ProductSettingsSelect<T extends boolean = true> {
+  benefits?:
+    | T
+    | {
+        label?: T;
+        key?: T;
+        id?: T;
       };
   updatedAt?: T;
   createdAt?: T;

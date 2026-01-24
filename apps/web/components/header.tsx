@@ -1,11 +1,12 @@
 "use client";
 
-import { useCart } from "@poynt/cart";
 import { Button, cn, Text } from "@poynt/ui";
-import { ChevronDown, Menu, Search, ShoppingCart, User, X } from "lucide-react";
+import { ChevronDown, Menu, Search, User, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { getMediaUrl } from "@/lib/media-url";
+import { CartDrawer } from "./cart-drawer";
 
 interface NavItem {
   label: string;
@@ -80,8 +81,6 @@ export function Header({
 }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<number | null>(null);
-  const { items } = useCart();
-  const itemCount = items.length;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
@@ -91,7 +90,7 @@ export function Header({
           <Link href="/" className="flex items-center gap-2">
             {logo ? (
               <Image
-                src={logo.url}
+                src={getMediaUrl(logo.url)}
                 alt={logo.alt || siteName}
                 width={120}
                 height={40}
@@ -178,16 +177,7 @@ export function Header({
               </Link>
             )}
 
-            <Link href="/handlekurv">
-              <Button variant="outline" size="icon" className="relative">
-                <ShoppingCart className="h-4 w-4" />
-                {itemCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs font-medium">
-                    {itemCount}
-                  </span>
-                )}
-              </Button>
-            </Link>
+            <CartDrawer />
 
             {ctaButton?.show && ctaButton.text && ctaButton.url && (
               <Link href={ctaButton.url}>

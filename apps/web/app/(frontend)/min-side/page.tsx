@@ -1,4 +1,5 @@
 import config from "@/payload.config";
+import { getMediaUrl } from "@/lib/media-url";
 import { Button } from "@poynt/ui";
 import Image from "next/image";
 import Link from "next/link";
@@ -78,13 +79,13 @@ export default async function MyAccountPage() {
                 href={`/min-side/kurs/${product.slug}`}
                 className="group block border rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
               >
-                {product.image &&
-                  typeof product.image === "object" &&
-                  product.image.url && (
+                {product.featuredImage &&
+                  typeof product.featuredImage === "object" &&
+                  product.featuredImage.url && (
                     <div className="relative aspect-video w-full bg-muted">
                       <Image
-                        src={product.image.url}
-                        alt={product.image.alt || product.name}
+                        src={getMediaUrl(product.featuredImage.url)}
+                        alt={product.featuredImage.alt || product.name}
                         fill
                         className="object-cover group-hover:scale-105 transition-transform"
                       />

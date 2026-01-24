@@ -3,6 +3,10 @@ import type { Block } from "payload";
 export const MediaBlock: Block = {
   slug: "media",
   interfaceName: "MediaBlock",
+  labels: {
+    singular: "Mediablokk",
+    plural: "Mediablokker",
+  },
   fields: [
     {
       name: "media",

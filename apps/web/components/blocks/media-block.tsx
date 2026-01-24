@@ -1,3 +1,4 @@
+import { getMediaUrl } from "@/lib/media-url";
 import Image from "next/image";
 
 interface MediaBlockProps {
@@ -15,7 +16,7 @@ export function MediaBlockComponent({ media, caption }: MediaBlockProps) {
     <figure className="my-8">
       <div className="relative aspect-video w-full overflow-hidden rounded-lg">
         <Image
-          src={media.url}
+          src={getMediaUrl(media.url)}
           alt={media.alt || caption || ""}
           fill
           className="object-cover"

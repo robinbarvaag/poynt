@@ -68,7 +68,7 @@ export default async function FrontendLayout({
   children: React.ReactNode;
 }) {
   const { siteSettings, header, footer } = await getCachedGlobals();
-
+  
   return (
     <html lang="no" className={poppins.variable}>
       <body className={cn("min-h-screen bg-background font-sans antialiased", poppins.className)}>

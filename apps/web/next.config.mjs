@@ -6,20 +6,21 @@ const nextConfig = {
   // reactCompiler: true, // Disabled - not compatible with Payload CMS yet
   turbopack: false,
   images: {
-    remotePatterns: [
-     {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '3000',
-        pathname: '/api/media/file/**',
-      },
-      {
-        protocol: 'http',
-        hostname: '127.0.0.1',
-        port: '3000',
-        pathname: '/api/media/file/**',
-      },
-    ],
+    unoptimized: true,
+    // remotePatterns: [
+    //  {
+    //     protocol: 'http',
+    //     hostname: 'localhost',
+    //     port: '3000',
+    //     pathname: '/api/media/file/**',
+    //   },
+    //   {
+    //     protocol: 'http',
+    //     hostname: '127.0.0.1',
+    //     port: '3000',
+    //     pathname: '/api/media/file/**',
+    //   },
+    // ],
   },
 };
 

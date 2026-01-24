@@ -1,10 +1,12 @@
 import type { CollectionConfig } from "payload";
-import { Archive } from "../blocks/archive";
 import { Content } from "../blocks/content";
 import { CtaSection } from "../blocks/cta-section";
-import { Features } from "../blocks/features";
+import { FormBlock } from "../blocks/form";
 import { Hero } from "../blocks/hero";
 import { MediaBlock } from "../blocks/media";
+import { PodcastArchive } from "../blocks/podcast-archive";
+import { ProductArchive } from "../blocks/product-archive";
+import { ServicesArchive } from "../blocks/services-archive";
 import { SpotifyEmbed } from "../blocks/spotify-embed";
 import { Testimonials } from "../blocks/testimonials";
 
@@ -87,12 +89,18 @@ export const Pages: CollectionConfig = {
       name: "layout",
       type: "blocks",
       label: "Sidelayout",
+      admin: {
+        description:
+          "Bygg siden med blokker. Hero = stor intro-seksjon, Innholdsblokk = rik tekst, Mediablokk = bilde/video, Skjema = kontaktskjema, Produkter/Tjenester/Podcast = lister fra databasen, Anmeldelser = kundeomtaler, CTA = handlingsoppfordring, Spotify = podcast-spiller.",
+      },
       blocks: [
         Hero,
         Content,
         MediaBlock,
-        Archive,
-        Features,
+        FormBlock,
+        ProductArchive,
+        PodcastArchive,
+        ServicesArchive,
         Testimonials,
         CtaSection,
         SpotifyEmbed,

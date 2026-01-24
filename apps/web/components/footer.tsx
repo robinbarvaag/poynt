@@ -4,6 +4,8 @@ import { Button, H3, Text } from "@poynt/ui";
 import { Facebook, Instagram, Linkedin, Twitter, Youtube } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { FloatingShapes } from "./decorative/floating-shapes";
+import { getMediaUrl } from "@/lib/media-url";
 
 interface FooterLink {
   label: string;
@@ -80,8 +82,18 @@ export function Footer({
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-border bg-muted/30">
-      <div className="mx-auto max-w-6xl px-4 py-12 md:py-16">
+    <footer className="relative mt-20 overflow-hidden">
+      {/* Gradient transition from page to footer */}
+      <div className="absolute -top-20 left-0 right-0 h-20 bg-gradient-to-b from-transparent to-muted/40 pointer-events-none" />
+
+      {/* Main footer background */}
+      <div className="absolute inset-0 bg-muted/40" />
+
+      {/* Subtle floating shapes */}
+      <FloatingShapes variant="subtle" />
+
+      {/* Content */}
+      <div className="relative z-10 mx-auto max-w-6xl px-4 py-12 md:py-16">
         {/* Newsletter section */}
         {newsletter?.enabled && (
           <div className="mb-12 pb-12 border-b border-border">
@@ -115,7 +127,7 @@ export function Footer({
             <Link href="/" className="inline-block mb-4">
               {logo ? (
                 <Image
-                  src={logo.url}
+                  src={getMediaUrl(logo.url)}
                   alt={logo.alt || siteName}
                   width={120}
                   height={40}
@@ -135,7 +147,7 @@ export function Footer({
                       href={social.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                      className="p-2 rounded-md text-muted-foreground hover:text-primary hover:bg-accent transition-all duration-300 hover:scale-110"
                     >
                       <Icon className="h-5 w-5" />
                     </a>

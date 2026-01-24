@@ -1,3 +1,4 @@
+import { getMediaUrl } from "@/lib/media-url";
 import { Button } from "@poynt/ui";
 import { cn } from "@poynt/ui";
 import Image from "next/image";
@@ -69,7 +70,7 @@ export function CtaSectionBlock({
       <section className="relative py-20 md:py-28">
         <div className="absolute inset-0 -z-10">
           <Image
-            src={backgroundImage.url}
+            src={getMediaUrl(backgroundImage.url)}
             alt={backgroundImage.alt || ""}
             fill
             className="object-cover"

@@ -13,7 +13,8 @@
     "migrate:create": "bun run payload migrate:create",
     "migrate": "bun run payload migrate",
     "payload:importmap": "payload generate:importmap",
-    "payload": "payload"
+    "payload": "payload",
+    "payload:types": "payload generate:types"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "3.70.0",

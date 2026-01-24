@@ -4,6 +4,7 @@ export const Media: CollectionConfig = {
   slug: "media",
   upload: {
     staticDir: "media",
+    focalPoint: true,
     imageSizes: [
       {
         name: "thumbnail",

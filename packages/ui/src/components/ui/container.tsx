@@ -12,10 +12,10 @@ const containerVariants = cva("mx-auto w-full px-4", {
     },
     padding: {
       none: "py-0",
-      sm: "py-8",
-      default: "py-12 md:py-16",
-      lg: "py-16 md:py-24",
-      xl: "py-24 md:py-32",
+      sm: "py-2",
+      default: "py-4 md:py-8",
+      lg: "py-8 md:py-12",
+      xl: "py-12 md:py-24",
     },
   },
   defaultVariants: {

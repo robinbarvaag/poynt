@@ -93,25 +93,13 @@ export const BlogPosts: CollectionConfig = {
     },
     {
       name: "categories",
-      type: "array",
+      type: "relationship",
+      relationTo: "categories",
+      hasMany: true,
       label: "Kategorier",
       admin: {
         position: "sidebar",
       },
-      fields: [
-        {
-          name: "category",
-          type: "select",
-          options: [
-            { label: "Instagram", value: "instagram" },
-            { label: "LinkedIn", value: "linkedin" },
-            { label: "Pinterest", value: "pinterest" },
-            { label: "Markedsføring", value: "markedsforing" },
-            { label: "Sosiale medier", value: "sosiale-medier" },
-            { label: "Tips & triks", value: "tips" },
-          ],
-        },
-      ],
     },
     {
       name: "publishedAt",

@@ -1,5 +1,6 @@
 "use client";
 
+import { getMediaUrl } from "@/lib/media-url";
 import { cn } from "@poynt/ui";
 import { Quote, Star } from "lucide-react";
 import Image from "next/image";
@@ -9,6 +10,10 @@ interface Testimonial {
   author: string;
   role?: string;
   company?: string;
+  logo?: {
+    url: string;
+    alt?: string;
+  };
   avatar?: {
     url: string;
     alt?: string;
@@ -40,35 +45,35 @@ function StarRating({ rating }: { rating: number }) {
 
 function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
   return (
-    <div className="bg-muted/50 rounded-2xl p-6 md:p-8">
+    <div className="bg-muted/50 rounded-2xl p-6 md:p-8 flex flex-col">
+      {testimonial.logo && (
+        <div className="relative h-12 w-32 mb-6">
+          <Image
+            src={getMediaUrl(testimonial.logo.url)}
+            alt={testimonial.logo.alt || testimonial.company || "Logo"}
+            fill
+            className="object-contain object-left"
+          />
+        </div>
+      )}
       {testimonial.rating && (
         <div className="mb-4">
           <StarRating rating={testimonial.rating} />
         </div>
       )}
-      <blockquote className="text-lg mb-6">"{testimonial.quote}"</blockquote>
-      <div className="flex items-center gap-4">
-        {testimonial.avatar && (
-          <div className="relative w-12 h-12 rounded-full overflow-hidden">
-            <Image
-              src={testimonial.avatar.url}
-              alt={testimonial.avatar.alt || testimonial.author}
-              fill
-              className="object-cover"
-            />
+      <div className="mb-6">
+        <div className="font-semibold text-primary">{testimonial.author}</div>
+        {(testimonial.role || testimonial.company) && (
+          <div className="text-sm text-muted-foreground">
+            {testimonial.role}
+            {testimonial.role && testimonial.company && ", "}
+            {testimonial.company}
           </div>
         )}
-        <div>
-          <div className="font-semibold">{testimonial.author}</div>
-          {(testimonial.role || testimonial.company) && (
-            <div className="text-sm text-muted-foreground">
-              {testimonial.role}
-              {testimonial.role && testimonial.company && " · "}
-              {testimonial.company}
-            </div>
-          )}
-        </div>
       </div>
+      <blockquote className="text-base text-muted-foreground flex-1">
+        "{testimonial.quote}"
+      </blockquote>
     </div>
   );
 }
@@ -83,6 +88,16 @@ export function TestimonialsBlock({
     return (
       <section className="py-16 md:py-24 bg-muted/30">
         <div className="container mx-auto px-4 max-w-4xl text-center">
+          {testimonial.logo && (
+            <div className="relative h-16 w-40 mx-auto mb-8">
+              <Image
+                src={getMediaUrl(testimonial.logo.url)}
+                alt={testimonial.logo.alt || testimonial.company || "Logo"}
+                fill
+                className="object-contain"
+              />
+            </div>
+          )}
           <Quote className="w-12 h-12 mx-auto mb-6 text-primary/50" />
           <blockquote className="text-2xl md:text-3xl font-medium mb-8 leading-relaxed">
             "{testimonial.quote}"
@@ -91,7 +106,7 @@ export function TestimonialsBlock({
             {testimonial.avatar && (
               <div className="relative w-16 h-16 rounded-full overflow-hidden">
                 <Image
-                  src={testimonial.avatar.url}
+                  src={getMediaUrl(testimonial.avatar.url)}
                   alt={testimonial.avatar.alt || testimonial.author}
                   fill
                   className="object-cover"
