@@ -1,4 +1,5 @@
 import config from "@/payload.config";
+import { Heading } from "@poynt/ui";
 import { notFound, redirect } from "next/navigation";
 import { getPayload } from "payload";
 
@@ -57,7 +58,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
   if (!hasPurchased) {
     return (
       <div className="max-w-2xl mx-auto text-center py-16">
-        <h1 className="text-3xl font-bold mb-4">Ingen tilgang</h1>
+        <Heading size="h1" className="mb-4">Ingen tilgang</Heading>
         <p className="text-muted-foreground mb-8">
           Du må kjøpe dette kurset for å få tilgang til innhaldet.
         </p>

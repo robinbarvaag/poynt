@@ -38,6 +38,30 @@ export const Hero: Block = {
       editor: lexicalEditor({}),
     },
     {
+      name: "tagsLabel",
+      type: "text",
+      label: "Tags overskrift",
+      admin: {
+        description: "F.eks. 'Jeg tilbyr:' eller 'Tjenester:'",
+      },
+    },
+    {
+      name: "tags",
+      type: "array",
+      label: "Tags",
+      admin: {
+        description: "Vises som horisontale badges/tags",
+      },
+      fields: [
+        {
+          name: "label",
+          type: "text",
+          required: true,
+          label: "Tag",
+        },
+      ],
+    },
+    {
       name: "image",
       type: "upload",
       relationTo: "media",

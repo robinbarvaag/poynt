@@ -1,7 +1,7 @@
 "use client";
 
 import { getMediaUrl } from "@/lib/media-url";
-import { cn } from "@poynt/ui";
+import { cn, Heading } from "@poynt/ui";
 import { Quote, Star } from "lucide-react";
 import Image from "next/image";
 
@@ -134,9 +134,9 @@ export function TestimonialsBlock({
     <section className="py-16 md:py-24">
       <div className="container mx-auto px-4">
         {title && (
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+          <Heading size="h2" className="text-center mb-12">
             {title}
-          </h2>
+          </Heading>
         )}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {testimonials?.map((testimonial, index) => (

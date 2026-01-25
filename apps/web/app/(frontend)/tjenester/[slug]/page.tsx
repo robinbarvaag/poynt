@@ -101,7 +101,7 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
   const service = services.docs[0];
 
   return (
-    <Container size="sm" padding="lg">
+    <Container size="sm" padding="default">
       <article>
         {/* Back link */}
         <Link

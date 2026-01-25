@@ -1,11 +1,12 @@
 import type { SerializedEditorState } from "@payloadcms/richtext-lexical/lexical";
 import { RichText } from "@payloadcms/richtext-lexical/react";
-import { Button, H3, Text } from "@poynt/ui";
+import { H3, Text } from "@poynt/ui";
 import { Facebook, Instagram, Linkedin, Twitter, Youtube } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { FloatingShapes } from "./decorative/floating-shapes";
 import { getMediaUrl } from "@/lib/media-url";
+import { NewsletterForm } from "./newsletter-form";
 
 interface FooterLink {
   label: string;
@@ -106,16 +107,7 @@ export function Footer({
                   {newsletter.description}
                 </Text>
               )}
-              <form className="flex gap-2 max-w-md mx-auto">
-                <input
-                  type="email"
-                  placeholder="Din e-postadresse"
-                  className="flex-1 px-4 py-2 rounded-md border border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                />
-                <Button type="submit">
-                  {newsletter.buttonText || "Abonner"}
-                </Button>
-              </form>
+              <NewsletterForm buttonText={newsletter.buttonText} />
             </div>
           </div>
         )}

@@ -1,9 +1,16 @@
 import config from "@/payload.config";
+import { CategoryFilter } from "@/components/category-filter";
 import { PageHero } from "@/components/page-hero";
 import { ProductCard } from "@/components/product-card";
-import { Container } from "@poynt/ui";
+import { Container, Text } from "@poynt/ui";
 import type { Metadata } from "next";
 import { getPayload } from "payload";
+
+const productTypes = [
+  { value: "course", label: "Kurs" },
+  { value: "pdf", label: "PDF" },
+  { value: "bundle", label: "Pakker" },
+];
 
 export async function generateMetadata(): Promise<Metadata> {
   const payload = await getPayload({ config });
@@ -36,7 +43,12 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function ProductsPage() {
+interface PageProps {
+  searchParams: Promise<{ type?: string }>;
+}
+
+export default async function ProductsPage({ searchParams }: PageProps) {
+  const { type } = await searchParams;
   const payload = await getPayload({ config });
 
   const [pageConfig, products] = await Promise.all([
@@ -44,9 +56,8 @@ export default async function ProductsPage() {
     payload.find({
       collection: "products",
       where: {
-        active: {
-          equals: true,
-        },
+        active: { equals: true },
+        ...(type && { type: { equals: type } }),
       },
       sort: "-createdAt",
       limit: 100,
@@ -71,10 +82,19 @@ export default async function ProductsPage() {
           title={heroTitle}
           description={heroDescription}
           image={heroImage}
-        />
+          size="large"
+        >
+          <div className="mt-8">
+            <CategoryFilter
+              categories={productTypes}
+              paramName="type"
+              allLabel="Alle produkter"
+            />
+          </div>
+        </PageHero>
       )}
 
-      <Container padding="lg" className={heroEnabled ? "pt-0" : ""}>
+      <Container padding="default" className={heroEnabled ? "pt-0" : ""}>
         {products.docs.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {products.docs.map((product) => (
@@ -82,7 +102,7 @@ export default async function ProductsPage() {
             ))}
           </div>
         ) : (
-          <p className="text-muted-foreground text-center">{emptyStateText}</p>
+          <Text variant="muted" className="text-center py-12">{emptyStateText}</Text>
         )}
       </Container>
     </>

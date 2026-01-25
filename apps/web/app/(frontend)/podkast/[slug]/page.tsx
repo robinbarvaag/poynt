@@ -94,7 +94,7 @@ export default async function PodcastDetailPage({ params }: PodcastPageProps) {
   };
 
   return (
-    <Container size="sm" padding="lg">
+    <Container size="sm" padding="default">
       <article>
         {/* Back link */}
         <Link

@@ -30,3 +30,43 @@ export async function sendOrderConfirmation(email: string, orderId: string) {
     html: `<p>Takk for din bestilling!</p>`,
   });
 }
+
+/**
+ * Subscribe an email to the newsletter audience in Resend
+ */
+export async function subscribeToNewsletter(email: string): Promise<{ success: boolean; error?: string }> {
+  const apiKey = process.env.RESEND_API_KEY;
+  const audienceId = process.env.RESEND_AUDIENCE_ID;
+
+  if (!apiKey) {
+    return { success: false, error: "RESEND_API_KEY is not configured" };
+  }
+
+  if (!audienceId) {
+    return { success: false, error: "RESEND_AUDIENCE_ID is not configured" };
+  }
+
+  try {
+    const result = await getResend().contacts.create({
+      audienceId,
+      email,
+      unsubscribed: false,
+    });
+
+    if (result.error) {
+      // Handle "already exists" as success
+      if (result.error.message?.includes("already exists")) {
+        return { success: true };
+      }
+      return { success: false, error: result.error.message };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("Newsletter subscription error:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Ukjent feil"
+    };
+  }
+}

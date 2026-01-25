@@ -1,6 +1,6 @@
 import config from "@/payload.config";
 import { getMediaUrl } from "@/lib/media-url";
-import { Button } from "@poynt/ui";
+import { Button, Heading } from "@poynt/ui";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -52,16 +52,16 @@ export default async function MyAccountPage() {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <h1 className="text-4xl font-bold mb-2">Min side</h1>
+      <Heading size="h1" className="mb-2">Min side</Heading>
       <p className="text-muted-foreground mb-8">
         Velkommen tilbake, {user.email}
       </p>
 
       {products.docs.length === 0 ? (
         <div className="text-center py-16 border rounded-lg">
-          <h2 className="text-2xl font-semibold mb-4">
+          <Heading size="h2" className="mb-4">
             Du har ikkje kjøpt nokon kurs enno
-          </h2>
+          </Heading>
           <p className="text-muted-foreground mb-8">
             Utforsk kursa våre og start læringa i dag!
           </p>
@@ -71,7 +71,7 @@ export default async function MyAccountPage() {
         </div>
       ) : (
         <div>
-          <h2 className="text-2xl font-semibold mb-6">Mine kurs</h2>
+          <Heading size="h2" className="mb-6">Mine kurs</Heading>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {products.docs.map((product) => (
               <Link

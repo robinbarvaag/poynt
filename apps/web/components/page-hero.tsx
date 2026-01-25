@@ -1,5 +1,5 @@
 import { getMediaUrl } from "@/lib/media-url";
-import { Container, H1, Lead } from "@poynt/ui";
+import { Container, H1, Lead, cn } from "@poynt/ui";
 import Image from "next/image";
 
 interface PageHeroProps {
@@ -9,11 +9,16 @@ interface PageHeroProps {
     url: string;
     alt?: string;
   } | null;
+  children?: React.ReactNode;
+  size?: "default" | "large";
 }
 
-export function PageHero({ title, description, image }: PageHeroProps) {
+export function PageHero({ title, description, image, children, size = "default" }: PageHeroProps) {
   return (
-    <section className="relative py-16 md:py-24 overflow-hidden">
+    <section className={cn(
+      "relative overflow-hidden",
+      size === "large" ? "py-12 md:py-20" : "py-8 md:py-12"
+    )}>
       {/* Background image with overlay */}
       {image && (
         <div className="absolute inset-0 -z-10">
@@ -28,14 +33,21 @@ export function PageHero({ title, description, image }: PageHeroProps) {
         </div>
       )}
 
-      {/* Decorative background circles */}
-      <div className="absolute top-10 right-10 w-64 h-64 bg-accent/20 rounded-full blur-3xl -z-10" />
-      <div className="absolute bottom-10 left-10 w-64 h-64 bg-primary/10 rounded-full blur-3xl -z-10" />
+      {/* Animated decorative elements - larger and more visible */}
+      <div className="absolute top-10 right-[12%] w-24 h-24 bg-accent/30 rounded-full -z-10 blur-xl animate-float-slow" />
+      <div className="absolute top-20 left-[8%] w-32 h-32 bg-primary/20 rounded-full -z-10 blur-2xl animate-float-medium" />
+      <div className="absolute bottom-10 right-[18%] w-20 h-20 bg-accent/25 rounded-full -z-10 blur-lg animate-float-fast" />
+      <div className="absolute bottom-16 left-[20%] w-16 h-16 bg-primary/15 rounded-full -z-10 blur-xl animate-float-slow" />
+
+      {/* Smaller accent dots for detail */}
+      <div className="absolute top-1/3 right-[25%] w-3 h-3 bg-accent/50 rounded-full -z-10 animate-float-medium" />
+      <div className="absolute bottom-1/3 left-[15%] w-2 h-2 bg-primary/40 rounded-full -z-10 animate-float-fast" />
 
       <Container>
         <div className="text-center max-w-3xl mx-auto">
           <H1 className="mb-4">{title}</H1>
-          {description && <Lead>{description}</Lead>}
+          {description && <Lead className="mb-6">{description}</Lead>}
+          {children}
         </div>
       </Container>
     </section>

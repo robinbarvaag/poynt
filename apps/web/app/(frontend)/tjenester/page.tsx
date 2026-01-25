@@ -1,7 +1,7 @@
 import config from "@/payload.config";
 import { PageHero } from "@/components/page-hero";
 import { ServiceCard } from "@/components/service-card";
-import { Container } from "@poynt/ui";
+import { Container, Text } from "@poynt/ui";
 import type { Metadata } from "next";
 import { getPayload } from "payload";
 
@@ -71,10 +71,11 @@ export default async function ServicesPage() {
           title={heroTitle}
           description={heroDescription}
           image={heroImage}
+          size="large"
         />
       )}
 
-      <Container padding="lg" className={heroEnabled ? "pt-0" : ""}>
+      <Container padding="default" className={heroEnabled ? "pt-0" : ""}>
         {services.docs.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {services.docs.map((service) => (
@@ -82,7 +83,7 @@ export default async function ServicesPage() {
             ))}
           </div>
         ) : (
-          <p className="text-muted-foreground text-center">{emptyStateText}</p>
+          <Text variant="muted" className="text-center py-12">{emptyStateText}</Text>
         )}
       </Container>
     </>

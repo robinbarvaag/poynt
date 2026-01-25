@@ -1,5 +1,5 @@
 import { ClearCart } from "@/components/clear-cart";
-import { Button } from "@poynt/ui";
+import { Button, Heading } from "@poynt/ui";
 import { CheckCircle } from "lucide-react";
 import Link from "next/link";
 
@@ -16,7 +16,7 @@ export default async function ReceiptPage({ searchParams }: Props) {
       <div className="mb-8 flex justify-center">
         <CheckCircle className="h-24 w-24 text-green-500" />
       </div>
-      <h1 className="text-4xl font-bold mb-4">Takk for kjøpet!</h1>
+      <Heading size="h1" className="mb-4">Takk for kjøpet!</Heading>
       <p className="text-xl text-muted-foreground mb-8">
         Orderen din er bekrefta. Du vil motta ein e-post med detaljar og tilgang
         til kurset ditt.

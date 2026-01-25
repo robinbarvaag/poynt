@@ -1,7 +1,7 @@
 "use client";
 
 import { useCart } from "@poynt/cart";
-import { Button } from "@poynt/ui";
+import { Button, Heading } from "@poynt/ui";
 import { Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -45,7 +45,7 @@ export default function CartPage() {
   if (items.length === 0) {
     return (
       <div className="max-w-2xl mx-auto text-center py-16">
-        <h1 className="text-3xl font-bold mb-4">Handlekurven din er tom</h1>
+        <Heading size="h1" className="mb-4">Handlekurven din er tom</Heading>
         <p className="text-muted-foreground mb-8">
           Legg til produkt for å starte handelen.
         </p>
@@ -60,7 +60,7 @@ export default function CartPage() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8">Handlekurv</h1>
+      <Heading size="h1" className="mb-8">Handlekurv</Heading>
       <div className="space-y-4 mb-8">
         {items.map((item) => {
           const priceInKr = (item.price / 100).toFixed(2);

@@ -1,4 +1,5 @@
 import config from "@/payload.config";
+import { Heading } from "@poynt/ui";
 import { getPayload } from "payload";
 import { ProductCard } from "../product-card";
 
@@ -33,7 +34,7 @@ export async function ArchiveBlock({
 
   return (
     <section className="py-8">
-      {title && <h2 className="text-3xl font-bold mb-6">{title}</h2>}
+      {title && <Heading size="h2" className="mb-6">{title}</Heading>}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {products.docs.map((product) => (
           <ProductCard key={product.id} product={product as any} />

@@ -1,6 +1,6 @@
 import config from "@/payload.config";
 import type { Product } from "@/payload-types";
-import { cn } from "@poynt/ui";
+import { cn, Heading } from "@poynt/ui";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { getPayload, Where } from "payload";
@@ -83,7 +83,7 @@ export async function ProductArchiveBlock({
         {(title || description) && (
           <div className="mb-8 md:mb-12">
             {title && (
-              <h2 className="text-3xl md:text-4xl font-bold mb-3">{title}</h2>
+              <Heading size="h2" className="mb-3">{title}</Heading>
             )}
             {description && (
               <p className="text-lg text-muted-foreground max-w-2xl">

@@ -68,7 +68,7 @@ export default async function PodcastPage() {
         />
       )}
 
-      <Container padding="lg" className={heroEnabled ? "pt-0" : ""}>
+      <Container padding="default" className={heroEnabled ? "pt-0" : ""}>
         {podcasts.docs.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {podcasts.docs.map((podcast) => (

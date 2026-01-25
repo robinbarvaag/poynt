@@ -1,6 +1,5 @@
 import { getMediaUrl } from "@/lib/media-url";
-import { Button } from "@poynt/ui";
-import { cn } from "@poynt/ui";
+import { Button, cn, Heading } from "@poynt/ui";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -32,7 +31,7 @@ export function CtaSectionBlock({
 }: CtaSectionBlockProps) {
   const content = (
     <div className="text-center max-w-2xl mx-auto">
-      <h2 className="text-3xl md:text-4xl font-bold mb-4">{title}</h2>
+      <Heading size="h2" className="mb-4">{title}</Heading>
       {description && (
         <p
           className={cn(

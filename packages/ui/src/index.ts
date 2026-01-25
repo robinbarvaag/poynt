@@ -56,3 +56,9 @@ export {
   SheetTitle,
   SheetTrigger,
 } from "./components/ui/sheet";
+
+export {
+  Avatar,
+  AvatarImage,
+  AvatarFallback,
+} from "./components/ui/avatar";

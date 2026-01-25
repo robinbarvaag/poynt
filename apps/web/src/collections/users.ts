@@ -5,8 +5,38 @@ export const Users: CollectionConfig = {
   auth: true,
   admin: {
     useAsTitle: "email",
+    defaultColumns: ["email", "firstName", "lastName", "role"],
   },
   fields: [
+    {
+      type: "row",
+      fields: [
+        {
+          name: "firstName",
+          type: "text",
+          label: "Fornavn",
+        },
+        {
+          name: "lastName",
+          type: "text",
+          label: "Etternavn",
+        },
+      ],
+    },
+    {
+      name: "avatar",
+      type: "upload",
+      relationTo: "media",
+      label: "Profilbilde",
+    },
+    {
+      name: "bio",
+      type: "textarea",
+      label: "Biografi",
+      admin: {
+        description: "Kort beskrivelse som vises på blogginnlegg",
+      },
+    },
     {
       name: "role",
       type: "select",
@@ -16,6 +46,9 @@ export const Users: CollectionConfig = {
         { label: "Admin", value: "admin" },
         { label: "Kunde", value: "customer" },
       ],
+      admin: {
+        position: "sidebar",
+      },
     },
     {
       name: "stripeCustomerId",
@@ -32,6 +65,9 @@ export const Users: CollectionConfig = {
       relationTo: "orders",
       hasMany: true,
       label: "Kjøp",
+      admin: {
+        position: "sidebar",
+      },
     },
   ],
 };

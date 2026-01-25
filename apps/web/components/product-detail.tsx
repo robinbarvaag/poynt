@@ -2,7 +2,7 @@
 import { AddToCartButton } from "@/components/add-to-cart-button";
 import { getMediaUrl } from "@/lib/media-url";
 import { Product } from "@/payload-types";
-import { Badge, Container } from "@poynt/ui";
+import { Badge, Container, Heading } from "@poynt/ui";
 import { RichText } from "@payloadcms/richtext-lexical/react";
 import { ArrowLeft, Check } from "lucide-react";
 import Image from "next/image";
@@ -52,7 +52,7 @@ function ProductDetailClient({ product, benefits = [] }: ProductDetailClientProp
   const currentImage = images[selectedImage];
 
   return (
-    <Container padding="lg">
+    <Container padding="default">
       {/* Back link */}
       <Link
         href="/produkter"
@@ -126,7 +126,7 @@ function ProductDetailClient({ product, benefits = [] }: ProductDetailClientProp
           </div>
 
           {/* Title */}
-          <h1 className="text-3xl md:text-4xl font-bold mb-4">{product.name}</h1>
+          <Heading size="h1" className="mb-4">{product.name}</Heading>
 
           {/* Short description */}
           {product.shortDescription && (
@@ -175,7 +175,7 @@ function ProductDetailClient({ product, benefits = [] }: ProductDetailClientProp
       {/* Description section */}
       {product.description && (
         <div className="mt-16 pt-16 border-t border-border">
-          <h2 className="text-2xl font-bold mb-6">Om produktet</h2>
+          <Heading size="h2" className="mb-6">Om produktet</Heading>
           <div className="prose prose-lg max-w-none prose-headings:text-foreground prose-p:text-foreground prose-a:text-primary prose-strong:text-foreground rich-text">
             <RichText data={product.description} />
           </div>

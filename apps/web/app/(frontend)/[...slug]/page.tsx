@@ -1,4 +1,5 @@
 import { RenderBlocks } from "@/components/render-blocks";
+import { PageHero } from "@/components/page-hero";
 import config from "@/payload.config";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
@@ -8,7 +9,7 @@ interface PageProps {
   params: Promise<{
     slug?: string[];
   }>;
-}
+}1
 
 async function getPage(slug: string) {
   const payload = await getPayload({ config });
@@ -126,15 +127,23 @@ export default async function Page({ params }: PageProps) {
 
   const page = await getPage(slug);
 
+
+
   if (!page) {
     notFound();
   }
 
+  // Sjekk om første blokk er en hero - da viser vi ikke egen page hero
+  const firstBlock = page.layout?.[0];
+  const hasHeroBlock = firstBlock?.blockType === "hero";
+
   return (
-    <div>
-      <h1 className="text-4xl font-bold mb-8">{page.title}</h1>
+    <>
+      {!hasHeroBlock && (
+        <PageHero title={page.title} size="large" />
+      )}
       {page.layout && <RenderBlocks blocks={page.layout} />}
-    </div>
+    </>
   );
 }
 
