@@ -1,0 +1,34 @@
+{
+  "name": "@poynt/planner-api",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./trpc": {
+      "types": "./src/trpc.ts",
+      "default": "./src/trpc.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@trpc/server": "^11.0.0",
+    "@poynt/planner-validators": "workspace:*",
+    "@poynt/planner-db": "workspace:*",
+    "ai": "^6.0.5",
+    "@ai-sdk/openai": "^3.0.2",
+    "drizzle-orm": "^0.38.3",
+    "nanoid": "^5.0.9",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@poynt/typescript-config": "workspace:*",
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}
