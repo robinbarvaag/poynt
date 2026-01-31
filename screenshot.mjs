@@ -15,7 +15,7 @@ const cartButton = await page.$('button[class*="relative"]');
 if (cartButton) {
   await cartButton.click();
   await wait(500); // Wait for animation
-  await page.screenshot({ path: 'screenshot-cart-open.png', fullPage: false });
+  await page.screenshot({ path: 'screenshots/screenshot-cart-open.png', fullPage: false });
   console.log('✓ Cart drawer screenshot saved');
 } else {
   console.log('✗ Could not find cart button');
@@ -24,7 +24,7 @@ if (cartButton) {
 // Close and take regular screenshot
 await page.keyboard.press('Escape');
 await wait(300);
-await page.screenshot({ path: 'screenshot-desktop-fold.png', fullPage: false });
+await page.screenshot({ path: 'screenshots/screenshot-desktop-fold.png', fullPage: false });
 console.log('✓ Desktop above-fold screenshot saved');
 
 // Mobile with cart open
@@ -36,7 +36,7 @@ const mobileCartButton = await page.$('button[class*="relative"]');
 if (mobileCartButton) {
   await mobileCartButton.click();
   await wait(500);
-  await page.screenshot({ path: 'screenshot-cart-mobile.png', fullPage: false });
+  await page.screenshot({ path: 'screenshots/screenshot-cart-mobile.png', fullPage: false });
   console.log('✓ Mobile cart drawer screenshot saved');
 }
 

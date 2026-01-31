@@ -5,36 +5,36 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./src/index.ts",
-      "types": "./src/index.ts"
+      "import": "./index.ts",
+      "types": "./index.ts"
     },
     "./decline": {
-      "import": "./src/decline.ts",
-      "types": "./src/decline.ts"
+      "import": "./decline.ts",
+      "types": "./decline.ts"
     },
     "./channel-guide": {
-      "import": "./src/channel-guide.ts",
-      "types": "./src/channel-guide.ts"
+      "import": "./channel-guide.ts",
+      "types": "./channel-guide.ts"
     },
     "./marketing-plan": {
-      "import": "./src/marketing-plan.ts",
-      "types": "./src/marketing-plan.ts"
+      "import": "./marketing-plan.ts",
+      "types": "./marketing-plan.ts"
     },
     "./yearly-planner": {
-      "import": "./src/yearly-planner.ts",
-      "types": "./src/yearly-planner.ts"
+      "import": "./yearly-planner.ts",
+      "types": "./yearly-planner.ts"
     },
     "./workspace": {
-      "import": "./src/workspace.ts",
-      "types": "./src/workspace.ts"
+      "import": "./workspace.ts",
+      "types": "./workspace.ts"
     },
     "./workspace-profile": {
-      "import": "./src/workspace-profile.ts",
-      "types": "./src/workspace-profile.ts"
+      "import": "./workspace-profile.ts",
+      "types": "./workspace-profile.ts"
     },
     "./admin": {
-      "import": "./src/admin.ts",
-      "types": "./src/admin.ts"
+      "import": "./admin.ts",
+      "types": "./admin.ts"
     }
   },
   "scripts": {

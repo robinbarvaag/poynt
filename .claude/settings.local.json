@@ -3,7 +3,8 @@
     "allow": [
       "Bash(bun run:*)",
       "Bash(find:*)",
-      "Bash(node screenshot.mjs:*)"
+      "Bash(node screenshot.mjs:*)",
+      "Bash(bun install)"
     ]
   }
 }

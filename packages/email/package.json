@@ -2,7 +2,7 @@
   "name": "@poynt/email",
   "version": "0.0.0",
   "private": true,
-  "main": "./src/index.ts",
+  "main": "./index.ts",
   "dependencies": {
     "resend": "^6.7.0"
   },

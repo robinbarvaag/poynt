@@ -1,6 +1,8 @@
 import { auth } from "@poynt/planner-auth/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { SidebarProvider, SidebarInset, Toaster } from "@poynt/ui";
+import { AppSidebar } from "@/components/planner";
 
 export default async function PlannerAppLayout({
   children,
@@ -16,9 +18,12 @@ export default async function PlannerAppLayout({
   }
 
   return (
-    <div className="flex min-h-screen">
-      {/* Sidebar will be added from components/planner */}
-      <main className="flex-1">{children}</main>
-    </div>
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        <main className="flex-1 p-4 md:p-6">{children}</main>
+      </SidebarInset>
+      <Toaster />
+    </SidebarProvider>
   );
 }
