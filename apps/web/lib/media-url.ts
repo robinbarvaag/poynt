@@ -6,20 +6,27 @@
 export function getMediaUrl(url: string | undefined | null): string {
   if (!url) return "";
 
-  // If it's an absolute URL, extract just the pathname
-  if (url.startsWith("http://") || url.startsWith("https://")) {
-    try {
-      const urlObj = new URL(url);
-      // Decode the pathname to avoid double-encoding in Next.js Image
-      return decodeURIComponent(urlObj.pathname);
-    } catch {
-      return url;
-    }
-  }
-
-  // If it's already relative, just decode it
+  // Trekk alltid ut filnavnet og returner public /media/ path
+  let filename = "";
   try {
-    return decodeURIComponent(url);
+    if (url.startsWith("http://") || url.startsWith("https://")) {
+      const urlObj = new URL(url);
+      const parts = urlObj.pathname.split("/");
+      filename = parts[parts.length - 1];
+    } else if (url.startsWith("/api/media/file/")) {
+      const parts = url.split("/");
+      filename = parts[parts.length - 1];
+    } else if (url.startsWith("/media/")) {
+      const parts = url.split("/");
+      filename = parts[parts.length - 1];
+    } else if (!url.includes("/")) {
+      filename = url;
+    } else {
+      // fallback: trekk ut siste del
+      const parts = url.split("/");
+      filename = parts[parts.length - 1];
+    }
+    return `/media/${decodeURIComponent(filename)}`;
   } catch {
     return url;
   }
