@@ -1,5 +1,4 @@
 import { getMediaUrl } from "@/lib/media-url";
-import { Badge, Button, cn } from "@poynt/ui";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -15,7 +14,6 @@ interface Product {
     url: string;
     alt?: string;
   };
-  // Legacy support
   image?: {
     url: string;
     alt?: string;
@@ -29,7 +27,7 @@ interface ProductCardProps {
 const typeLabels: Record<string, string> = {
   course: "Kurs",
   pdf: "PDF",
-  bundle: "Bundle",
+  bundle: "Pakke",
 };
 
 export function ProductCard({ product }: ProductCardProps) {
@@ -38,65 +36,64 @@ export function ProductCard({ product }: ProductCardProps) {
     ? (product.compareAtPrice / 100).toLocaleString("nb-NO")
     : null;
 
-  const hasDiscount = compareAtPriceInKr && product.compareAtPrice! > product.price;
+  const hasDiscount =
+    compareAtPriceInKr && product.compareAtPrice! > product.price;
 
-  // Support both new schema (featuredImage) and old schema (image)
   const productImage = product.featuredImage || product.image;
 
   return (
-    <Link
-      href={`/produkter/${product.slug}`}
-      className="group flex flex-col bg-card border border-border rounded-2xl overflow-hidden hover:shadow-lg hover:border-primary/20 transition-all"
-    >
-      <div className="relative aspect-[4/3] w-full bg-muted">
+    <Link href={`/produkter/${product.slug}`} className="group block">
+      <div className="relative aspect-[4/3] rounded-lg overflow-hidden bg-muted mb-3">
         {productImage ? (
           <Image
             src={getMediaUrl(productImage.url)}
             alt={productImage.alt || product.name}
             fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
           />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center bg-primary/5">
-            <span className="text-4xl">📦</span>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-full bg-muted-foreground/10 flex items-center justify-center">
+              <span className="text-muted-foreground/40 text-lg">
+                {typeLabels[product.type]?.[0] || "P"}
+              </span>
+            </div>
           </div>
         )}
 
-        {/* Type badge */}
-        <div className="absolute top-3 left-3">
-          <Badge variant="secondary" className="bg-background/90 backdrop-blur-sm">
-            {typeLabels[product.type] || product.type}
-          </Badge>
-        </div>
-
-        {/* Discount badge */}
         {hasDiscount && (
-          <div className="absolute top-3 right-3">
-            <Badge variant="destructive">Tilbud</Badge>
+          <div className="absolute top-2 right-2">
+            <span className="px-2 py-0.5 text-xs font-medium bg-foreground text-background rounded">
+              Tilbud
+            </span>
           </div>
         )}
       </div>
 
-      <div className="flex flex-col flex-1 p-4">
-        <h3 className="font-semibold text-lg mb-1 line-clamp-2 group-hover:text-primary transition-colors">
+      <div className="space-y-1">
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground uppercase tracking-wide">
+            {typeLabels[product.type] || product.type}
+          </span>
+        </div>
+
+        <h3 className="font-medium leading-snug group-hover:text-primary transition-colors line-clamp-2">
           {product.name}
         </h3>
 
         {product.shortDescription && (
-          <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+          <p className="text-sm text-muted-foreground line-clamp-1">
             {product.shortDescription}
           </p>
         )}
 
-        <div className="mt-auto pt-3 border-t border-border">
-          <div className="flex items-baseline gap-2">
-            <span className="text-xl font-bold text-primary">{priceInKr} kr</span>
-            {hasDiscount && (
-              <span className="text-sm text-muted-foreground line-through">
-                {compareAtPriceInKr} kr
-              </span>
-            )}
-          </div>
+        <div className="flex items-baseline gap-2 pt-1">
+          <span className="font-semibold">{priceInKr} kr</span>
+          {hasDiscount && (
+            <span className="text-sm text-muted-foreground line-through">
+              {compareAtPriceInKr} kr
+            </span>
+          )}
         </div>
       </div>
     </Link>

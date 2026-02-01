@@ -6,21 +6,15 @@ const nextConfig = {
   // reactCompiler: true, // Disabled - not compatible with Payload CMS yet
   turbopack: false,
   images: {
-    unoptimized: true,
-    // remotePatterns: [
-    //  {
-    //     protocol: 'http',
-    //     hostname: 'localhost',
-    //     port: '3000',
-    //     pathname: '/api/media/file/**',
-    //   },
-    //   {
-    //     protocol: 'http',
-    //     hostname: '127.0.0.1',
-    //     port: '3000',
-    //     pathname: '/api/media/file/**',
-    //   },
-    // ],
+    // Bruk optimalisering i produksjon, unoptimized lokalt for raskere dev
+    unoptimized: process.env.NODE_ENV === "development",
+    remotePatterns: [
+      {
+        // Vercel Blob Storage CDN
+        protocol: "https",
+        hostname: "*.public.blob.vercel-storage.com",
+      },
+    ],
   },
 };
 

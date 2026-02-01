@@ -1,10 +1,14 @@
-import { z } from "zod";
-import { router, protectedProcedure } from "../trpc";
 import { db } from "@poynt/planner-db";
-import { plannerDeclineGeneratorFeedback, plannerToolResult, plannerWorkspaceMember } from "@poynt/planner-db/schema";
+import {
+  plannerDeclineGeneratorFeedback,
+  plannerToolResult,
+  plannerWorkspaceMember,
+} from "@poynt/planner-db/schema";
+import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
-import { TRPCError } from "@trpc/server";
+import { z } from "zod";
+import { protectedProcedure, router } from "../trpc";
 
 /**
  * Helper to get active workspace ID for user
@@ -52,9 +56,11 @@ export const declineFeedbackRouter = router({
       }
 
       // Check if feedback already exists
-      const existing = await db.query.plannerDeclineGeneratorFeedback.findFirst({
-        where: eq(plannerDeclineGeneratorFeedback.toolResultId, toolResultId),
-      });
+      const existing = await db.query.plannerDeclineGeneratorFeedback.findFirst(
+        {
+          where: eq(plannerDeclineGeneratorFeedback.toolResultId, toolResultId),
+        }
+      );
 
       if (existing) {
         // Update existing
@@ -104,9 +110,11 @@ export const declineFeedbackRouter = router({
       }
 
       // Check if feedback already exists
-      const existing = await db.query.plannerDeclineGeneratorFeedback.findFirst({
-        where: eq(plannerDeclineGeneratorFeedback.toolResultId, toolResultId),
-      });
+      const existing = await db.query.plannerDeclineGeneratorFeedback.findFirst(
+        {
+          where: eq(plannerDeclineGeneratorFeedback.toolResultId, toolResultId),
+        }
+      );
 
       if (existing) {
         // Update existing
@@ -114,8 +122,12 @@ export const declineFeedbackRouter = router({
           .update(plannerDeclineGeneratorFeedback)
           .set({
             worked: worked !== undefined ? worked : existing.worked,
-            feedbackText: feedbackText !== undefined ? feedbackText : existing.feedbackText,
-            customVersion: customVersion !== undefined ? customVersion : existing.customVersion,
+            feedbackText:
+              feedbackText !== undefined ? feedbackText : existing.feedbackText,
+            customVersion:
+              customVersion !== undefined
+                ? customVersion
+                : existing.customVersion,
           })
           .where(eq(plannerDeclineGeneratorFeedback.id, existing.id));
         return { success: true };
@@ -158,9 +170,11 @@ export const declineFeedbackRouter = router({
         });
       }
 
-      const feedback = await db.query.plannerDeclineGeneratorFeedback.findFirst({
-        where: eq(plannerDeclineGeneratorFeedback.toolResultId, toolResultId),
-      });
+      const feedback = await db.query.plannerDeclineGeneratorFeedback.findFirst(
+        {
+          where: eq(plannerDeclineGeneratorFeedback.toolResultId, toolResultId),
+        }
+      );
 
       return feedback || null;
     }),

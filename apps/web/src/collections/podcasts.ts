@@ -74,7 +74,8 @@ export const Podcasts: CollectionConfig = {
       required: true,
       label: "Spotify-lenke",
       admin: {
-        description: "Full Spotify-URL til episoden (f.eks. https://open.spotify.com/episode/...)",
+        description:
+          "Full Spotify-URL til episoden (f.eks. https://open.spotify.com/episode/...)",
       },
     },
     {

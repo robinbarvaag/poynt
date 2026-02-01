@@ -10,9 +10,9 @@ interface BlobShapeProps {
 }
 
 const colorMap: Record<BlobColor, string> = {
-  salmon: "fill-[oklch(0.793_0.124_7.590)]", // Salmon Pink
-  saffron: "fill-[oklch(0.830_0.155_93.127)]", // Saffron
-  mint: "fill-[oklch(0.959_0.049_201.168)]", // Mint Green
+  salmon: "fill-[oklch(0.793_0.124_7.590)]",
+  saffron: "fill-[oklch(0.830_0.155_93.127)]",
+  mint: "fill-[oklch(0.959_0.049_201.168)]",
   accent: "fill-accent",
   primary: "fill-primary",
 };
@@ -32,11 +32,7 @@ export function BlobShape({
   return (
     <svg
       viewBox="0 0 200 200"
-      className={cn(
-        sizeMap[size],
-        animate && "animate-blob",
-        className
-      )}
+      className={cn(sizeMap[size], animate && "animate-blob", className)}
       aria-hidden="true"
     >
       <path

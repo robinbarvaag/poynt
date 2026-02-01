@@ -16,7 +16,9 @@ export default async function ReceiptPage({ searchParams }: Props) {
       <div className="mb-8 flex justify-center">
         <CheckCircle className="h-24 w-24 text-green-500" />
       </div>
-      <Heading size="h1" className="mb-4">Takk for kjøpet!</Heading>
+      <Heading size="h1" className="mb-4">
+        Takk for kjøpet!
+      </Heading>
       <p className="text-xl text-muted-foreground mb-8">
         Orderen din er bekrefta. Du vil motta ein e-post med detaljar og tilgang
         til kurset ditt.

@@ -1,14 +1,14 @@
-import { z } from "zod";
-import { TRPCError } from "@trpc/server";
-import { router, protectedProcedure, adminProcedure } from "../trpc";
 import { db } from "@poynt/planner-db";
 import { plannerIndustry } from "@poynt/planner-db/schema";
-import { eq, asc } from "drizzle-orm";
 import {
   createIndustrySchema,
-  updateIndustrySchema,
   defaultIndustries,
+  updateIndustrySchema,
 } from "@poynt/planner-validators";
+import { TRPCError } from "@trpc/server";
+import { asc, eq } from "drizzle-orm";
+import { z } from "zod";
+import { adminProcedure, protectedProcedure, router } from "../trpc";
 
 export const industryRouter = router({
   /**
@@ -17,9 +17,11 @@ export const industryRouter = router({
    */
   list: protectedProcedure
     .input(
-      z.object({
-        includeInactive: z.boolean().optional().default(false),
-      }).optional()
+      z
+        .object({
+          includeInactive: z.boolean().optional().default(false),
+        })
+        .optional()
     )
     .query(async ({ input }) => {
       const includeInactive = input?.includeInactive ?? false;
@@ -148,7 +150,10 @@ export const industryRouter = router({
    * Only inserts if no industries exist
    */
   seed: adminProcedure.mutation(async () => {
-    const existing = await db.select({ id: plannerIndustry.id }).from(plannerIndustry).limit(1);
+    const existing = await db
+      .select({ id: plannerIndustry.id })
+      .from(plannerIndustry)
+      .limit(1);
 
     if (existing.length > 0) {
       throw new TRPCError({

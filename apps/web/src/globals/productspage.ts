@@ -60,7 +60,8 @@ export const ProductsPage: GlobalConfig = {
               label: "Tekst ved ingen produkter",
               defaultValue: "Ingen produkter tilgjengelig for øyeblikket.",
               admin: {
-                description: "Tekst som vises når det ikke finnes noen aktive produkter",
+                description:
+                  "Tekst som vises når det ikke finnes noen aktive produkter",
               },
             },
           ],
@@ -86,7 +87,8 @@ export const ProductsPage: GlobalConfig = {
                   type: "textarea",
                   label: "Meta-beskrivelse",
                   admin: {
-                    description: "Kort beskrivelse som vises i søkeresultater (maks 160 tegn)",
+                    description:
+                      "Kort beskrivelse som vises i søkeresultater (maks 160 tegn)",
                   },
                 },
                 {
@@ -95,7 +97,8 @@ export const ProductsPage: GlobalConfig = {
                   relationTo: "media",
                   label: "Dellingsbilde",
                   admin: {
-                    description: "Bilde som vises ved deling på sosiale medier (1200x630px anbefalt)",
+                    description:
+                      "Bilde som vises ved deling på sosiale medier (1200x630px anbefalt)",
                   },
                 },
                 {
@@ -104,7 +107,8 @@ export const ProductsPage: GlobalConfig = {
                   label: "Skjul fra søkemotorer",
                   defaultValue: false,
                   admin: {
-                    description: "Aktivér for å hindre Google fra å indeksere produktsiden",
+                    description:
+                      "Aktivér for å hindre Google fra å indeksere produktsiden",
                   },
                 },
               ],

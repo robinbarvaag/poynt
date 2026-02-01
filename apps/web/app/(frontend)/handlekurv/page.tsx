@@ -45,7 +45,9 @@ export default function CartPage() {
   if (items.length === 0) {
     return (
       <div className="max-w-2xl mx-auto text-center py-16">
-        <Heading size="h1" className="mb-4">Handlekurven din er tom</Heading>
+        <Heading size="h1" className="mb-4">
+          Handlekurven din er tom
+        </Heading>
         <p className="text-muted-foreground mb-8">
           Legg til produkt for å starte handelen.
         </p>
@@ -60,7 +62,9 @@ export default function CartPage() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <Heading size="h1" className="mb-8">Handlekurv</Heading>
+      <Heading size="h1" className="mb-8">
+        Handlekurv
+      </Heading>
       <div className="space-y-4 mb-8">
         {items.map((item) => {
           const priceInKr = (item.price / 100).toFixed(2);

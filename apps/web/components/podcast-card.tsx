@@ -27,49 +27,51 @@ export function PodcastCard({ podcast }: PodcastCardProps) {
     {
       day: "numeric",
       month: "short",
-      year: "numeric",
     }
   );
 
   return (
-    <Link
-      href={`/podkast/${podcast.slug}`}
-      className="group block bg-muted/50 rounded-2xl overflow-hidden hover:bg-muted transition-colors"
-    >
-      <div className="relative aspect-square w-full bg-muted">
+    <Link href={`/podkast/${podcast.slug}`} className="group block">
+      <div className="relative aspect-square rounded-lg overflow-hidden bg-muted mb-3">
         {podcast.coverImage ? (
           <Image
             src={getMediaUrl(podcast.coverImage.url)}
             alt={podcast.coverImage.alt || podcast.title}
             fill
-            className="object-cover group-hover:scale-105 transition-transform"
+            className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
           />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center bg-primary/10">
-            <Play className="w-12 h-12 text-primary" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-full bg-muted-foreground/10 flex items-center justify-center">
+              <Play className="w-5 h-5 text-muted-foreground/40 ml-0.5" />
+            </div>
           </div>
         )}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-          <div className="w-14 h-14 rounded-full bg-primary/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-            <Play className="w-6 h-6 text-primary-foreground ml-1" />
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="w-12 h-12 rounded-full bg-foreground flex items-center justify-center">
+            <Play className="w-5 h-5 text-background ml-0.5" />
           </div>
         </div>
       </div>
-      <div className="p-4">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+
+      <div className="space-y-1">
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           {podcast.episodeNumber && <span>Ep. {podcast.episodeNumber}</span>}
           {podcast.episodeNumber && podcast.duration && <span>·</span>}
           {podcast.duration && <span>{podcast.duration}</span>}
+          {(podcast.episodeNumber || podcast.duration) && <span>·</span>}
+          <span>{formattedDate}</span>
         </div>
-        <h3 className="font-semibold mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+
+        <h3 className="font-medium leading-snug line-clamp-2 group-hover:text-primary transition-colors">
           {podcast.title}
         </h3>
+
         {podcast.description && (
-          <p className="text-sm text-muted-foreground line-clamp-2">
+          <p className="text-sm text-muted-foreground line-clamp-1">
             {podcast.description}
           </p>
         )}
-        <p className="text-xs text-muted-foreground mt-3">{formattedDate}</p>
       </div>
     </Link>
   );

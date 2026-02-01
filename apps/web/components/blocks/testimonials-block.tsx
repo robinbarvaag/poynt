@@ -1,7 +1,7 @@
 "use client";
 
 import { getMediaUrl } from "@/lib/media-url";
-import { cn, Heading } from "@poynt/ui";
+import { Heading, cn } from "@poynt/ui";
 import { Quote, Star } from "lucide-react";
 import Image from "next/image";
 

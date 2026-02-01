@@ -4,8 +4,8 @@ import { Header } from "@/components/header";
 import config from "@payload-config";
 import { cn } from "@poynt/ui";
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google";
 import { unstable_cache } from "next/cache";
+import { Poppins } from "next/font/google";
 import { getPayload } from "payload";
 
 const poppins = Poppins({
@@ -68,10 +68,15 @@ export default async function FrontendLayout({
   children: React.ReactNode;
 }) {
   const { siteSettings, header, footer } = await getCachedGlobals();
-  
+
   return (
     <html lang="no" className={poppins.variable}>
-      <body className={cn("min-h-screen bg-background font-sans antialiased", poppins.className)}>
+      <body
+        className={cn(
+          "min-h-screen bg-background font-sans antialiased",
+          poppins.className
+        )}
+      >
         <Header
           siteName={siteSettings?.siteName || "Poynt"}
           logo={siteSettings?.logo as { url: string; alt?: string } | null}

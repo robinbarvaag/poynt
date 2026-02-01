@@ -1,15 +1,40 @@
-export default function DeclineGeneratorPage() {
-  return (
-    <div className="min-h-screen bg-slate-50 p-8">
-      <div className="mx-auto max-w-2xl">
-        <h1 className="mb-2 text-2xl font-bold text-slate-900">Avslå-generator</h1>
-        <p className="mb-8 text-slate-600">
-          Skriv profesjonelle avslag uten dårlig samvittighet
-        </p>
-        <p className="text-slate-500">
-          Decline generator komponent kommer her.
-        </p>
-      </div>
-    </div>
-  );
+import { createServerCaller } from "@/lib/planner/trpc-server";
+import { DeclineGeneratorClient } from "./decline-generator-client";
+
+interface SavedResult {
+  id: string;
+  text: string;
+  title: string | null;
+  createdAt: Date;
+}
+
+export default async function DeclineGeneratorPage() {
+  const trpc = await createServerCaller();
+
+  // Server-side data fetching
+  let initialSavedResult: SavedResult | null = null;
+
+  try {
+    const saved = await trpc.toolResult.list({
+      toolId: "decline-generator",
+      limit: 1,
+    });
+
+    const firstResult = saved[0];
+    if (firstResult?.result) {
+      const resultData = firstResult.result as { text?: string };
+      if (resultData.text) {
+        initialSavedResult = {
+          id: firstResult.id,
+          text: resultData.text,
+          title: firstResult.title,
+          createdAt: new Date(firstResult.createdAt),
+        };
+      }
+    }
+  } catch (error) {
+    console.error("Could not fetch saved results:", error);
+  }
+
+  return <DeclineGeneratorClient initialSavedResult={initialSavedResult} />;
 }

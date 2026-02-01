@@ -37,7 +37,8 @@ export const BlogPage: GlobalConfig = {
               label: "Tekst ved ingen innlegg",
               defaultValue: "Ingen publiserte innlegg ennå. Kom tilbake snart!",
               admin: {
-                description: "Tekst som vises når det ikke finnes noen publiserte innlegg",
+                description:
+                  "Tekst som vises når det ikke finnes noen publiserte innlegg",
               },
             },
           ],
@@ -63,7 +64,8 @@ export const BlogPage: GlobalConfig = {
                   type: "textarea",
                   label: "Meta-beskrivelse",
                   admin: {
-                    description: "Kort beskrivelse som vises i søkeresultater (maks 160 tegn)",
+                    description:
+                      "Kort beskrivelse som vises i søkeresultater (maks 160 tegn)",
                   },
                 },
                 {
@@ -72,7 +74,8 @@ export const BlogPage: GlobalConfig = {
                   relationTo: "media",
                   label: "Dellingsbilde",
                   admin: {
-                    description: "Bilde som vises ved deling på sosiale medier (1200x630px anbefalt)",
+                    description:
+                      "Bilde som vises ved deling på sosiale medier (1200x630px anbefalt)",
                   },
                 },
                 {
@@ -81,7 +84,8 @@ export const BlogPage: GlobalConfig = {
                   label: "Skjul fra søkemotorer",
                   defaultValue: false,
                   admin: {
-                    description: "Aktivér for å hindre Google fra å indeksere bloggsiden",
+                    description:
+                      "Aktivér for å hindre Google fra å indeksere bloggsiden",
                   },
                 },
               ],

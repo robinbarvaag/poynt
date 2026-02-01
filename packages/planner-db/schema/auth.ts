@@ -1,5 +1,5 @@
-import { pgTable, text, timestamp, boolean, index } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
+import { boolean, index, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
 /**
  * User roles for admin access

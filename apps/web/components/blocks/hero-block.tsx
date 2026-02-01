@@ -1,9 +1,9 @@
 import { getMediaUrl } from "@/lib/media-url";
-import { Button, cn, Heading, Lead } from "@poynt/ui";
+import { RichText } from "@payloadcms/richtext-lexical/react";
+import { Button, Heading, Lead, cn } from "@poynt/ui";
+import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { RichText } from "@payloadcms/richtext-lexical/react";
-import { ArrowRight } from "lucide-react";
 
 interface HeroBlockProps {
   variant?: "centered" | "left" | "split" | "fullscreen" | "gradient";
@@ -44,9 +44,7 @@ function HeroTags({
 
   return (
     <div className={cn("mb-8", centered && "text-center")}>
-      {label && (
-        <p className="text-sm text-muted-foreground mb-3">{label}</p>
-      )}
+      {label && <p className="text-sm text-muted-foreground mb-3">{label}</p>}
       <div className={cn("flex flex-wrap gap-2", centered && "justify-center")}>
         {tags.map((tag, index) => (
           <span
@@ -285,7 +283,11 @@ export function HeroBlock({
             )}
             {secondaryCta?.text && secondaryCta?.url && (
               <Link href={secondaryCta.url}>
-                <Button size="lg" variant="secondary" className="px-8 shadow-lg">
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  className="px-8 shadow-lg"
+                >
                   {secondaryCta.text}
                 </Button>
               </Link>

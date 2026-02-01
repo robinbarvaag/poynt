@@ -1,7 +1,7 @@
-import { betterAuth } from "better-auth";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "@poynt/planner-db";
 import * as schema from "@poynt/planner-db/schema";
+import { betterAuth } from "better-auth";
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
 
 export const auth = betterAuth({
   appName: "MarkedsPilot",

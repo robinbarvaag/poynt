@@ -1,4 +1,8 @@
-import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres'
+import {
+  type MigrateDownArgs,
+  type MigrateUpArgs,
+  sql,
+} from "@payloadcms/db-postgres";
 
 export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   await db.execute(sql`
@@ -785,10 +789,14 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   ALTER TABLE "redirects" DROP COLUMN "active";
   DROP TYPE "public"."enum_pages_seo_twitter_card";
   DROP TYPE "public"."enum__pages_v_version_seo_twitter_card";
-  DROP TYPE "public"."enum_redirects_status_code";`)
+  DROP TYPE "public"."enum_redirects_status_code";`);
 }
 
-export async function down({ db, payload, req }: MigrateDownArgs): Promise<void> {
+export async function down({
+  db,
+  payload,
+  req,
+}: MigrateDownArgs): Promise<void> {
   await db.execute(sql`
    CREATE TYPE "public"."enum_pages_seo_twitter_card" AS ENUM('summary', 'summary_large_image');
   CREATE TYPE "public"."enum__pages_v_version_seo_twitter_card" AS ENUM('summary', 'summary_large_image');
@@ -998,5 +1006,5 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   DROP TYPE "public"."enum_site_settings_social_links_platform";
   DROP TYPE "public"."enum_header_nav_items_sub_items_link_type";
   DROP TYPE "public"."enum_header_nav_items_link_type";
-  DROP TYPE "public"."enum_footer_columns_links_link_type";`)
+  DROP TYPE "public"."enum_footer_columns_links_link_type";`);
 }

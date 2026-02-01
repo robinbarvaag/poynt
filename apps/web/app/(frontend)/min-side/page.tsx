@@ -1,5 +1,5 @@
-import config from "@/payload.config";
 import { getMediaUrl } from "@/lib/media-url";
+import config from "@/payload.config";
 import { Button, Heading } from "@poynt/ui";
 import Image from "next/image";
 import Link from "next/link";
@@ -52,7 +52,9 @@ export default async function MyAccountPage() {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <Heading size="h1" className="mb-2">Min side</Heading>
+      <Heading size="h1" className="mb-2">
+        Min side
+      </Heading>
       <p className="text-muted-foreground mb-8">
         Velkommen tilbake, {user.email}
       </p>
@@ -71,7 +73,9 @@ export default async function MyAccountPage() {
         </div>
       ) : (
         <div>
-          <Heading size="h2" className="mb-6">Mine kurs</Heading>
+          <Heading size="h2" className="mb-6">
+            Mine kurs
+          </Heading>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {products.docs.map((product) => (
               <Link

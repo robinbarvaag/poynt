@@ -1,12 +1,22 @@
 import config from "@/payload.config";
-import { Badge, Button, Card, CardContent, Container, H1, H2, Lead, Text } from "@poynt/ui";
+import { RichText } from "@payloadcms/richtext-lexical/react";
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  Container,
+  H1,
+  H2,
+  Lead,
+  Text,
+} from "@poynt/ui";
+import { ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPayload } from "payload";
-import { RichText } from "@payloadcms/richtext-lexical/react";
-import { ArrowLeft } from "lucide-react";
 
 interface PostPageProps {
   params: Promise<{
@@ -115,17 +125,13 @@ export default async function PostPage({ params }: PostPageProps) {
 
           <H1 className="mb-4">{post.title}</H1>
 
-          {post.excerpt && (
-            <Lead className="mb-6">{post.excerpt}</Lead>
-          )}
+          {post.excerpt && <Lead className="mb-6">{post.excerpt}</Lead>}
 
           <div className="flex items-center gap-4">
             {post.author && typeof post.author === "object" && (
               <Text variant="subtle">Av {post.author.email}</Text>
             )}
-            <Text variant="subtle">
-              {formatDate(post.publishedAt)}
-            </Text>
+            <Text variant="subtle">{formatDate(post.publishedAt)}</Text>
           </div>
         </header>
 
@@ -162,14 +168,21 @@ export default async function PostPage({ params }: PostPageProps) {
                     href={`/post/${relatedPost.slug}`}
                     className="group"
                   >
-                    <Card variant="interactive" padding="none" className="overflow-hidden">
+                    <Card
+                      variant="interactive"
+                      padding="none"
+                      className="overflow-hidden"
+                    >
                       {relatedPost.featuredImage &&
                         typeof relatedPost.featuredImage === "object" &&
                         relatedPost.featuredImage.url && (
                           <div className="relative aspect-video bg-muted">
                             <Image
                               src={relatedPost.featuredImage.url}
-                              alt={relatedPost.featuredImage.alt || relatedPost.title}
+                              alt={
+                                relatedPost.featuredImage.alt ||
+                                relatedPost.title
+                              }
                               fill
                               className="object-cover group-hover:scale-105 transition-transform duration-300"
                             />

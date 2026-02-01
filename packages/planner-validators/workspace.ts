@@ -92,7 +92,10 @@ export const createWorkspaceSchema = z.object({
     .string()
     .min(2, "Navn må være minst 2 tegn")
     .max(100, "Navn kan maks være 100 tegn"),
-  description: z.string().max(500, "Beskrivelse kan maks være 500 tegn").optional(),
+  description: z
+    .string()
+    .max(500, "Beskrivelse kan maks være 500 tegn")
+    .optional(),
 });
 
 export type CreateWorkspaceInput = z.infer<typeof createWorkspaceSchema>;
@@ -104,7 +107,10 @@ export const updateWorkspaceSchema = z.object({
     .min(2, "Navn må være minst 2 tegn")
     .max(100, "Navn kan maks være 100 tegn")
     .optional(),
-  description: z.string().max(500, "Beskrivelse kan maks være 500 tegn").optional(),
+  description: z
+    .string()
+    .max(500, "Beskrivelse kan maks være 500 tegn")
+    .optional(),
   image: z.string().url("Ugyldig bilde-URL").optional().nullable(),
 });
 

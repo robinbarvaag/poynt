@@ -46,6 +46,7 @@ import {
   Linkedin,
   Loader2,
   LogOut,
+  type LucideProps,
   Mail,
   Medal,
   Megaphone,
@@ -57,8 +58,8 @@ import {
   Music,
   Newspaper,
   Palette,
-  Pencil,
   PenTool,
+  Pencil,
   Plus,
   RefreshCcw,
   Rocket,
@@ -69,9 +70,9 @@ import {
   Sparkles,
   Sun,
   Target,
-  Timer,
   ThumbsDown,
   ThumbsUp,
+  Timer,
   Trash2,
   Trophy,
   User,
@@ -83,7 +84,6 @@ import {
   X,
   Youtube,
   Zap,
-  type LucideProps,
 } from "lucide-react";
 
 /**

@@ -68,7 +68,8 @@ export const Header: GlobalConfig = {
           ],
           label: "Lenketype",
           admin: {
-            description: "Velg type lenke. Bruk 'Egendefinert URL' for /blogg, /produkter eller eksterne lenker.",
+            description:
+              "Velg type lenke. Bruk 'Egendefinert URL' for /blogg, /produkter eller eksterne lenker.",
           },
         },
         {
@@ -77,7 +78,8 @@ export const Header: GlobalConfig = {
           label: "URL",
           admin: {
             condition: (_, siblingData) => siblingData?.linkType === "custom",
-            description: "F.eks. /blogg, /produkter, eller https://ekstern-side.no",
+            description:
+              "F.eks. /blogg, /produkter, eller https://ekstern-side.no",
           },
         },
         {
@@ -147,7 +149,8 @@ export const Header: GlobalConfig = {
               type: "text",
               label: "URL",
               admin: {
-                condition: (_, siblingData) => siblingData?.linkType === "custom",
+                condition: (_, siblingData) =>
+                  siblingData?.linkType === "custom",
               },
             },
             {
@@ -174,7 +177,8 @@ export const Header: GlobalConfig = {
               relationTo: "products",
               label: "Velg produkt",
               admin: {
-                condition: (_, siblingData) => siblingData?.linkType === "product",
+                condition: (_, siblingData) =>
+                  siblingData?.linkType === "product",
               },
             },
             {

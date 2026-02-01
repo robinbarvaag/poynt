@@ -1,21 +1,21 @@
 "use client";
 
-import * as React from "react";
+import { trpc } from "@/lib/planner/trpc";
 import {
-  Icon,
-  cn,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  Icon,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
   Skeleton,
+  cn,
+  useSidebar,
 } from "@poynt/ui";
-import { trpc } from "@/lib/planner/trpc";
+import * as React from "react";
 import { CreateWorkspaceDialog } from "./create-workspace-dialog";
 
 interface Workspace {

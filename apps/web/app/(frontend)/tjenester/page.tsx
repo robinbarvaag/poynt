@@ -1,6 +1,6 @@
-import config from "@/payload.config";
 import { PageHero } from "@/components/page-hero";
 import { ServiceCard } from "@/components/service-card";
+import config from "@/payload.config";
 import { Container, Text } from "@poynt/ui";
 import type { Metadata } from "next";
 import { getPayload } from "payload";
@@ -13,8 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     title: pageConfig?.meta?.title || "Tjenester | Poynt",
-    description:
-      pageConfig?.meta?.description || "Se alle tjenester vi tilbyr",
+    description: pageConfig?.meta?.description || "Se alle tjenester vi tilbyr",
     alternates: {
       canonical: `${baseUrl}/tjenester`,
     },
@@ -58,8 +57,13 @@ export default async function ServicesPage() {
   const heroDescription =
     pageConfig?.hero?.description || "Se hva vi kan hjelpe deg med";
   const heroImage =
-    pageConfig?.hero?.image && typeof pageConfig.hero.image === "object" && pageConfig.hero.image.url
-      ? { url: pageConfig.hero.image.url, alt: pageConfig.hero.image.alt ?? undefined }
+    pageConfig?.hero?.image &&
+    typeof pageConfig.hero.image === "object" &&
+    pageConfig.hero.image.url
+      ? {
+          url: pageConfig.hero.image.url,
+          alt: pageConfig.hero.image.alt ?? undefined,
+        }
       : null;
   const emptyStateText =
     pageConfig?.emptyStateText || "Ingen tjenester tilgjengelig.";
@@ -83,7 +87,9 @@ export default async function ServicesPage() {
             ))}
           </div>
         ) : (
-          <Text variant="muted" className="text-center py-12">{emptyStateText}</Text>
+          <Text variant="muted" className="text-center py-12">
+            {emptyStateText}
+          </Text>
         )}
       </Container>
     </>

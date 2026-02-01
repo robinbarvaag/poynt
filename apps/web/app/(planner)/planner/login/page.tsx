@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { signIn } from "@poynt/planner-auth/client";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function PlannerLoginPage() {
   const router = useRouter();
@@ -53,7 +53,10 @@ export default function PlannerLoginPage() {
           )}
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-slate-700">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-slate-700"
+            >
               E-post
             </label>
             <input
@@ -68,7 +71,10 @@ export default function PlannerLoginPage() {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-slate-700">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-slate-700"
+            >
               Passord
             </label>
             <input
@@ -93,7 +99,10 @@ export default function PlannerLoginPage() {
 
         <p className="mt-6 text-center text-sm text-slate-600">
           Har du ikke konto?{" "}
-          <Link href="/planner/signup" className="font-medium text-slate-900 hover:underline">
+          <Link
+            href="/planner/signup"
+            className="font-medium text-slate-900 hover:underline"
+          >
             Registrer deg
           </Link>
         </p>

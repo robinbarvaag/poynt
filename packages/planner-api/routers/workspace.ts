@@ -1,26 +1,26 @@
-import { TRPCError } from "@trpc/server";
-import { eq, and, desc } from "drizzle-orm";
-import { nanoid } from "nanoid";
-import { router, protectedProcedure } from "../trpc";
 import { db } from "@poynt/planner-db";
 import {
-  plannerWorkspace,
-  plannerWorkspaceMember,
-  plannerWorkspaceInvitation,
   plannerSubscription,
   plannerUserPreferences,
+  plannerWorkspace,
+  plannerWorkspaceInvitation,
+  plannerWorkspaceMember,
 } from "@poynt/planner-db/schema";
 import {
-  createWorkspaceSchema,
-  updateWorkspaceSchema,
-  inviteMemberSchema,
-  updateMemberRoleSchema,
-  removeMemberSchema,
   acceptInvitationSchema,
-  switchWorkspaceSchema,
+  createWorkspaceSchema,
+  inviteMemberSchema,
+  removeMemberSchema,
   subscriptionTierLimits,
+  switchWorkspaceSchema,
+  updateMemberRoleSchema,
+  updateWorkspaceSchema,
 } from "@poynt/planner-validators";
+import { TRPCError } from "@trpc/server";
+import { and, desc, eq } from "drizzle-orm";
+import { nanoid } from "nanoid";
 import { z } from "zod";
+import { protectedProcedure, router } from "../trpc";
 
 // Define tier type locally since we need it for the lookup
 type TierKey = "free" | "pro" | "business";
@@ -119,7 +119,7 @@ export const workspaceRouter = router({
 
       // Generate unique slug
       let slug = generateSlug(input.name);
-      let slugExists = await db.query.plannerWorkspace.findFirst({
+      const slugExists = await db.query.plannerWorkspace.findFirst({
         where: eq(plannerWorkspace.slug, slug),
       });
 
@@ -253,7 +253,9 @@ export const workspaceRouter = router({
 
       await checkWorkspaceAccess(userId, input.id, ["owner"]);
 
-      await db.delete(plannerWorkspace).where(eq(plannerWorkspace.id, input.id));
+      await db
+        .delete(plannerWorkspace)
+        .where(eq(plannerWorkspace.id, input.id));
 
       return { success: true };
     }),
@@ -304,12 +306,13 @@ export const workspaceRouter = router({
       await checkWorkspaceAccess(userId, input.workspaceId, ["owner", "admin"]);
 
       // Check if already invited
-      const existingInvite = await db.query.plannerWorkspaceInvitation.findFirst({
-        where: and(
-          eq(plannerWorkspaceInvitation.workspaceId, input.workspaceId),
-          eq(plannerWorkspaceInvitation.email, input.email)
-        ),
-      });
+      const existingInvite =
+        await db.query.plannerWorkspaceInvitation.findFirst({
+          where: and(
+            eq(plannerWorkspaceInvitation.workspaceId, input.workspaceId),
+            eq(plannerWorkspaceInvitation.email, input.email)
+          ),
+        });
 
       if (existingInvite) {
         throw new TRPCError({
@@ -513,7 +516,10 @@ export const workspaceRouter = router({
     .mutation(async ({ input, ctx }) => {
       const currentUserId = ctx.userId;
 
-      await checkWorkspaceAccess(currentUserId, input.workspaceId, ["owner", "admin"]);
+      await checkWorkspaceAccess(currentUserId, input.workspaceId, [
+        "owner",
+        "admin",
+      ]);
 
       // Find the target member by userId and workspaceId
       const targetMember = await db.query.plannerWorkspaceMember.findFirst({
@@ -649,7 +655,9 @@ export const workspaceRouter = router({
         workspaces: {
           current: workspaceCount,
           limit: limits.maxWorkspaces,
-          canCreate: limits.maxWorkspaces === -1 || workspaceCount < limits.maxWorkspaces,
+          canCreate:
+            limits.maxWorkspaces === -1 ||
+            workspaceCount < limits.maxWorkspaces,
         },
       },
     };

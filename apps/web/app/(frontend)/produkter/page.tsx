@@ -1,7 +1,7 @@
-import config from "@/payload.config";
 import { CategoryFilter } from "@/components/category-filter";
 import { PageHero } from "@/components/page-hero";
 import { ProductCard } from "@/components/product-card";
+import config from "@/payload.config";
 import { Container, Text } from "@poynt/ui";
 import type { Metadata } from "next";
 import { getPayload } from "payload";
@@ -69,8 +69,13 @@ export default async function ProductsPage({ searchParams }: PageProps) {
   const heroDescription =
     pageConfig?.hero?.description || "Utforsk våre digitale produkter";
   const heroImage =
-    pageConfig?.hero?.image && typeof pageConfig.hero.image === "object" && pageConfig.hero.image.url
-      ? { url: pageConfig.hero.image.url, alt: pageConfig.hero.image.alt ?? undefined }
+    pageConfig?.hero?.image &&
+    typeof pageConfig.hero.image === "object" &&
+    pageConfig.hero.image.url
+      ? {
+          url: pageConfig.hero.image.url,
+          alt: pageConfig.hero.image.alt ?? undefined,
+        }
       : null;
   const emptyStateText =
     pageConfig?.emptyStateText || "Ingen produkter tilgjengelig.";
@@ -78,31 +83,26 @@ export default async function ProductsPage({ searchParams }: PageProps) {
   return (
     <>
       {heroEnabled && (
-        <PageHero
-          title={heroTitle}
-          description={heroDescription}
-          image={heroImage}
-          size="large"
-        >
-          <div className="mt-8">
-            <CategoryFilter
-              categories={productTypes}
-              paramName="type"
-              allLabel="Alle produkter"
-            />
-          </div>
+        <PageHero title={heroTitle} description={heroDescription} size="large">
+          <CategoryFilter
+            categories={productTypes}
+            paramName="type"
+            allLabel="Alle"
+          />
         </PageHero>
       )}
 
-      <Container padding="default" className={heroEnabled ? "pt-0" : ""}>
+      <Container padding="default" className="py-8">
         {products.docs.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8">
             {products.docs.map((product) => (
               <ProductCard key={product.id} product={product as any} />
             ))}
           </div>
         ) : (
-          <Text variant="muted" className="text-center py-12">{emptyStateText}</Text>
+          <Text variant="muted" className="text-center py-12">
+            {emptyStateText}
+          </Text>
         )}
       </Container>
     </>

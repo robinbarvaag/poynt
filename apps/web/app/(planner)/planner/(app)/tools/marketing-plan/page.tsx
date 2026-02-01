@@ -1,15 +1,80 @@
-export default function MarketingPlanPage() {
+import { createServerCaller } from "@/lib/planner/trpc-server";
+import { MarketingPlanClient } from "./marketing-plan-client";
+import type { MarketingPlan } from "@poynt/planner-validators";
+
+interface SavedPlan {
+  id: string;
+  plan: MarketingPlan;
+  createdAt: Date;
+}
+
+interface Industry {
+  id: string;
+  name: string;
+  icon: string | null;
+  isActive: boolean;
+}
+
+// Company size type (same as profile)
+type CompanySize = "solo" | "small" | "medium" | "large";
+
+export default async function MarketingPlanPage() {
+  const trpc = await createServerCaller();
+
+  // Server-side data fetching in parallel
+  const [savedResults, industries, workspaceProfile] = await Promise.all([
+    trpc.toolResult.list({ toolId: "marketing-plan", limit: 1 }).catch(() => []),
+    trpc.industry.list().catch(() => []),
+    trpc.workspaceProfile.get().catch(() => null),
+  ]);
+
+  // Parse saved plan
+  let initialSavedPlan: SavedPlan | null = null;
+  const firstResult = savedResults[0];
+  if (firstResult?.result) {
+    const result = firstResult.result as { plan?: MarketingPlan };
+    if (result.plan) {
+      initialSavedPlan = {
+        id: firstResult.id,
+        plan: result.plan,
+        createdAt: new Date(firstResult.createdAt),
+      };
+    }
+  }
+
+  // Fetch progress if we have a saved plan
+  let initialProgress: any[] = [];
+  if (initialSavedPlan) {
+    try {
+      initialProgress = await trpc.marketingPlanProgress.getProgress({
+        toolResultId: initialSavedPlan.id,
+      });
+    } catch {
+      initialProgress = [];
+    }
+  }
+
+  // Get active industries
+  const activeIndustries = industries.filter((i: Industry) => i.isActive);
+
+  // Find initial industry name from profile
+  const initialIndustry = workspaceProfile?.industryId
+    ? activeIndustries.find((i: Industry) => i.id === workspaceProfile.industryId)?.name ?? null
+    : null;
+
+  // Get company size directly from profile (same values)
+  const initialCompanySize = (workspaceProfile?.companySize as CompanySize) ?? null;
+
+  // Get target audience description from profile
+  const initialTargetAudience = workspaceProfile?.targetAudience ?? null;
+
   return (
-    <div className="min-h-screen bg-slate-50 p-8">
-      <div className="mx-auto max-w-2xl">
-        <h1 className="mb-2 text-2xl font-bold text-slate-900">Markedsplan</h1>
-        <p className="mb-8 text-slate-600">
-          Få en skreddersydd markedsplan for din bedrift
-        </p>
-        <p className="text-slate-500">
-          Marketing plan komponent kommer her.
-        </p>
-      </div>
-    </div>
+    <MarketingPlanClient
+      initialSavedPlan={initialSavedPlan}
+      initialIndustry={initialIndustry}
+      initialCompanySize={initialCompanySize}
+      initialTargetAudience={initialTargetAudience}
+      initialProgress={initialProgress}
+    />
   );
 }

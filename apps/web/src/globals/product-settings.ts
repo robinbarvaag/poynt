@@ -12,7 +12,8 @@ export const ProductSettings: GlobalConfig = {
       type: "array",
       label: "Tilgjengelige fordeler",
       admin: {
-        description: "Definer fordeler som kan velges på produkter (f.eks. 'Livstidstilgang', 'PDF-nedlasting')",
+        description:
+          "Definer fordeler som kan velges på produkter (f.eks. 'Livstidstilgang', 'PDF-nedlasting')",
       },
       fields: [
         {

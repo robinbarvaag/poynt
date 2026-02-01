@@ -6,13 +6,11 @@ import {
   Sheet,
   SheetContent,
   SheetDescription,
-  SheetFooter,
   SheetHeader,
   SheetTitle,
   Text,
 } from "@poynt/ui";
-import { Minus, ShoppingBag, ShoppingCart, Trash2 } from "lucide-react";
-import Image from "next/image";
+import { ShoppingBag, ShoppingCart, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 

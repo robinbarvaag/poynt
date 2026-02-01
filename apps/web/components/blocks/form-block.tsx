@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, cn, Container, H2, Text } from "@poynt/ui";
+import { Button, Container, H2, Text, cn } from "@poynt/ui";
 import { useState } from "react";
 import type { Form as PayloadForm } from "../../payload-types";
 
@@ -158,90 +158,92 @@ export function FormBlockComponent({
                 const fieldName = field.name;
                 const fieldLabel =
                   "label" in field ? field.label || field.name : field.name;
-                const isRequired = "required" in field ? field.required ?? false : false;
-                const fieldWidth = "width" in field ? field.width ?? 100 : 100;
+                const isRequired =
+                  "required" in field ? (field.required ?? false) : false;
+                const fieldWidth =
+                  "width" in field ? (field.width ?? 100) : 100;
 
                 return (
-                <div
-                  key={index}
-                  className={cn(
-                    fieldWidth === 50 ? "md:col-span-1" : "md:col-span-2"
-                  )}
-                >
-                  <label className="block mb-1.5">
-                    <Text as="span" className="font-medium text-sm">
-                      {fieldLabel}
-                      {isRequired && (
-                        <span className="text-destructive ml-1">*</span>
-                      )}
-                    </Text>
-                  </label>
-
-                  {field.blockType === "text" && (
-                    <input
-                      type="text"
-                      name={fieldName}
-                      required={isRequired}
-                      className="w-full px-4 py-2.5 rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring"
-                    />
-                  )}
-
-                  {field.blockType === "email" && (
-                    <input
-                      type="email"
-                      name={fieldName}
-                      required={isRequired}
-                      className="w-full px-4 py-2.5 rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring"
-                    />
-                  )}
-
-                  {field.blockType === "number" && (
-                    <input
-                      type="number"
-                      name={fieldName}
-                      required={isRequired}
-                      className="w-full px-4 py-2.5 rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring"
-                    />
-                  )}
-
-                  {field.blockType === "textarea" && (
-                    <textarea
-                      name={fieldName}
-                      required={isRequired}
-                      rows={4}
-                      className="w-full px-4 py-2.5 rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none"
-                    />
-                  )}
-
-                  {field.blockType === "select" && "options" in field && (
-                    <select
-                      name={fieldName}
-                      required={isRequired}
-                      className="w-full px-4 py-2.5 rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring"
-                    >
-                      <option value="">Velg...</option>
-                      {field.options?.map((option, optIndex) => (
-                        <option key={optIndex} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-
-                  {field.blockType === "checkbox" && (
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        name={fieldName}
-                        required={isRequired}
-                        className="w-4 h-4 rounded border-input"
-                      />
-                      <Text as="span" variant="subtle">
+                  <div
+                    key={index}
+                    className={cn(
+                      fieldWidth === 50 ? "md:col-span-1" : "md:col-span-2"
+                    )}
+                  >
+                    <label className="block mb-1.5">
+                      <Text as="span" className="font-medium text-sm">
                         {fieldLabel}
+                        {isRequired && (
+                          <span className="text-destructive ml-1">*</span>
+                        )}
                       </Text>
                     </label>
-                  )}
-                </div>
+
+                    {field.blockType === "text" && (
+                      <input
+                        type="text"
+                        name={fieldName}
+                        required={isRequired}
+                        className="w-full px-4 py-2.5 rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+                      />
+                    )}
+
+                    {field.blockType === "email" && (
+                      <input
+                        type="email"
+                        name={fieldName}
+                        required={isRequired}
+                        className="w-full px-4 py-2.5 rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+                      />
+                    )}
+
+                    {field.blockType === "number" && (
+                      <input
+                        type="number"
+                        name={fieldName}
+                        required={isRequired}
+                        className="w-full px-4 py-2.5 rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+                      />
+                    )}
+
+                    {field.blockType === "textarea" && (
+                      <textarea
+                        name={fieldName}
+                        required={isRequired}
+                        rows={4}
+                        className="w-full px-4 py-2.5 rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+                      />
+                    )}
+
+                    {field.blockType === "select" && "options" in field && (
+                      <select
+                        name={fieldName}
+                        required={isRequired}
+                        className="w-full px-4 py-2.5 rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+                      >
+                        <option value="">Velg...</option>
+                        {field.options?.map((option, optIndex) => (
+                          <option key={optIndex} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+
+                    {field.blockType === "checkbox" && (
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          name={fieldName}
+                          required={isRequired}
+                          className="w-4 h-4 rounded border-input"
+                        />
+                        <Text as="span" variant="subtle">
+                          {fieldLabel}
+                        </Text>
+                      </label>
+                    )}
+                  </div>
                 );
               })}
           </div>
@@ -252,7 +254,11 @@ export function FormBlockComponent({
             </div>
           )}
 
-          <Button type="submit" disabled={isSubmitting} className="w-full md:w-auto">
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full md:w-auto"
+          >
             {isSubmitting
               ? "Sender..."
               : formData.submitButtonLabel || "Send inn"}

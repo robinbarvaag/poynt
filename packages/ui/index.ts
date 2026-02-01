@@ -1,3 +1,5 @@
+import { Switch } from "./components/switch";
+
 // Utils
 export { cn } from "./lib/utils";
 
@@ -6,7 +8,7 @@ export {
   Button,
   buttonVariants,
   type ButtonProps,
-} from "./components/ui/button";
+} from "./components/button";
 
 export {
   Heading,
@@ -21,7 +23,7 @@ export {
   Muted,
   type HeadingProps,
   type TextProps,
-} from "./components/ui/typography";
+} from "./components/typography";
 
 export {
   Card,
@@ -33,20 +35,20 @@ export {
   CardImage,
   cardVariants,
   type CardProps,
-} from "./components/ui/card";
+} from "./components/card";
 
 export {
   Container,
   containerVariants,
   Section,
   type ContainerProps,
-} from "./components/ui/container";
+} from "./components/container";
 
 export {
   Badge,
   badgeVariants,
   type BadgeProps,
-} from "./components/ui/badge";
+} from "./components/badge";
 
 export {
   Sheet,
@@ -59,27 +61,27 @@ export {
   SheetPortal,
   SheetTitle,
   SheetTrigger,
-} from "./components/ui/sheet";
+} from "./components/sheet";
 
 export {
   Avatar,
   AvatarImage,
   AvatarFallback,
-} from "./components/ui/avatar";
+} from "./components/avatar";
 
-export { Skeleton } from "./components/ui/skeleton";
-export { Separator } from "./components/ui/separator";
-export { Input } from "./components/ui/input";
-export { Textarea } from "./components/ui/textarea";
-export { Label } from "./components/ui/label";
-export { Progress } from "./components/ui/progress";
+export { Skeleton } from "./components/skeleton";
+export { Separator } from "./components/separator";
+export { Input } from "./components/input";
+export { Textarea } from "./components/textarea";
+export { Label } from "./components/label";
+export { Progress } from "./components/progress";
 
 export {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
   TooltipProvider,
-} from "./components/ui/tooltip";
+} from "./components/tooltip";
 
 export {
   DropdownMenu,
@@ -97,7 +99,7 @@ export {
   DropdownMenuSub,
   DropdownMenuSubTrigger,
   DropdownMenuSubContent,
-} from "./components/ui/dropdown-menu";
+} from "./components/dropdown-menu";
 
 export {
   Dialog,
@@ -110,7 +112,7 @@ export {
   DialogFooter,
   DialogTitle,
   DialogDescription,
-} from "./components/ui/dialog";
+} from "./components/dialog";
 
 export {
   useFormField,
@@ -121,9 +123,9 @@ export {
   FormDescription,
   FormMessage,
   FormField,
-} from "./components/ui/form";
+} from "./components/form";
 
-export { Toaster, toast } from "./components/ui/sonner";
+export { Toaster, toast } from "./components/sonner";
 
 export {
   Sidebar,
@@ -150,9 +152,40 @@ export {
   SidebarSeparator,
   SidebarTrigger,
   useSidebar,
-} from "./components/ui/sidebar";
+} from "./components/sidebar";
 
-// Icons
+export {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from "./components/tabs";
+
+export {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./components/select"
+
+export {
+  RadioGroup,
+  RadioGroupItem,
+} from "./components/radio-group";
+
+export {
+  Checkbox,
+} from "./components/checkbox";
+
+export {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "./components/accordion";
+
 export {
   Icon,
   getIconComponent,
@@ -162,5 +195,12 @@ export {
   type IconProps,
 } from "./icons";
 
-// Hooks
+export {
+  StepContainer, OptionCard, PrefilledBadge
+} from "./components/tool-form";
+
+export {
+  Switch
+}
+
 export { useIsMobile } from "./hooks/use-mobile";

@@ -8,8 +8,8 @@ export default function PlannerLandingPage() {
           MarkedsPilot
         </h1>
         <p className="mx-auto mb-8 max-w-2xl text-lg text-slate-600">
-          AI-drevne markedsføringsverktøy for gründere og småbedrifter.
-          Få personlige anbefalinger, markedsplaner og innholdsstrategier.
+          AI-drevne markedsføringsverktøy for gründere og småbedrifter. Få
+          personlige anbefalinger, markedsplaner og innholdsstrategier.
         </p>
         <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
           <Link

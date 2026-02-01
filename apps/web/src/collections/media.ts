@@ -2,8 +2,19 @@ import type { CollectionConfig } from "payload";
 
 export const Media: CollectionConfig = {
   slug: "media",
+  access: {
+    read: ({ req: { user } }) => {
+      // Innloggede brukere kan se alt
+      if (user) return true;
+      // Anonyme brukere kan bare se public bilder
+      return {
+        isPrivate: {
+          not_equals: true,
+        },
+      };
+    },
+  },
   upload: {
-    staticDir: "media",
     focalPoint: true,
     imageSizes: [
       {
@@ -33,6 +44,16 @@ export const Media: CollectionConfig = {
       name: "alt",
       type: "text",
       label: "Alt-tekst",
+    },
+    {
+      name: "isPrivate",
+      type: "checkbox",
+      label: "Privat bilde",
+      defaultValue: false,
+      admin: {
+        description: "Kun synlig for innloggede brukere",
+        position: "sidebar",
+      },
     },
   ],
 };

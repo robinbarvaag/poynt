@@ -88,9 +88,7 @@ export const yearlyPlannerRequestSchema = z.object({
     .string()
     .min(1, "Beskriv hvilken bransje du jobber i")
     .max(200, "Maks 200 tegn"),
-  channels: z
-    .array(z.enum(publishChannelTypes))
-    .min(1, "Velg minst én kanal"),
+  channels: z.array(z.enum(publishChannelTypes)).min(1, "Velg minst én kanal"),
   frequency: z.enum(frequencyTypes, {
     required_error: "Velg publiseringsfrekvens",
   }),

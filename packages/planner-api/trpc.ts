@@ -1,6 +1,6 @@
-import { initTRPC, TRPCError } from "@trpc/server";
 import { db } from "@poynt/planner-db";
 import { plannerUser } from "@poynt/planner-db/schema";
+import { TRPCError, initTRPC } from "@trpc/server";
 import { eq } from "drizzle-orm";
 
 /**

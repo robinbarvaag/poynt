@@ -1,11 +1,11 @@
 "use client";
 
-import { Button, cn, Text } from "@poynt/ui";
+import { getMediaUrl } from "@/lib/media-url";
+import { Button, Text, cn } from "@poynt/ui";
 import { ChevronDown, Menu, Search, User, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { getMediaUrl } from "@/lib/media-url";
 import { CartDrawer } from "./cart-drawer";
 
 interface NavItem {
@@ -97,7 +97,9 @@ export function Header({
                 className="h-8 w-auto"
               />
             ) : (
-              <span className="text-xl font-bold text-foreground">{siteName}</span>
+              <span className="text-xl font-bold text-foreground">
+                {siteName}
+              </span>
             )}
           </Link>
 
@@ -139,14 +141,22 @@ export function Header({
                             key={subIndex}
                             href={getHref(subItem)}
                             target={subItem.openInNewTab ? "_blank" : undefined}
-                            rel={subItem.openInNewTab ? "noopener noreferrer" : undefined}
+                            rel={
+                              subItem.openInNewTab
+                                ? "noopener noreferrer"
+                                : undefined
+                            }
                             className="block rounded-md px-3 py-2 hover:bg-accent transition-colors"
                           >
                             <Text as="span" className="font-medium block">
                               {subItem.label}
                             </Text>
                             {subItem.description && (
-                              <Text as="span" variant="subtle" className="block mt-0.5">
+                              <Text
+                                as="span"
+                                variant="subtle"
+                                className="block mt-0.5"
+                              >
                                 {subItem.description}
                               </Text>
                             )}
@@ -162,7 +172,11 @@ export function Header({
           {/* Right side actions */}
           <div className="flex items-center gap-2">
             {showSearch && (
-              <Button variant="ghost" size="sm" className="hidden sm:flex gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="hidden sm:flex gap-2"
+              >
                 <Search className="h-4 w-4" />
                 <span className="hidden lg:inline">Søk</span>
               </Button>
@@ -225,7 +239,11 @@ export function Header({
                           key={subIndex}
                           href={getHref(subItem)}
                           target={subItem.openInNewTab ? "_blank" : undefined}
-                          rel={subItem.openInNewTab ? "noopener noreferrer" : undefined}
+                          rel={
+                            subItem.openInNewTab
+                              ? "noopener noreferrer"
+                              : undefined
+                          }
                           className="block py-2 px-3 text-sm text-muted-foreground hover:text-foreground transition-colors"
                           onClick={() => setMobileMenuOpen(false)}
                         >

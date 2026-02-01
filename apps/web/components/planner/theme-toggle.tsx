@@ -1,6 +1,6 @@
 "use client";
 
-import { Icon, Button } from "@poynt/ui";
+import { Button, Icon } from "@poynt/ui";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function PlannerOnboardingPage() {
   const router = useRouter();
@@ -29,7 +29,9 @@ export default function PlannerOnboardingPage() {
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
       <div className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
         <div className="mb-6 text-center">
-          <h1 className="text-2xl font-bold text-slate-900">Opprett din bedrift</h1>
+          <h1 className="text-2xl font-bold text-slate-900">
+            Opprett din bedrift
+          </h1>
           <p className="mt-2 text-sm text-slate-600">
             Gi bedriften din et navn for å komme i gang
           </p>
@@ -43,7 +45,10 @@ export default function PlannerOnboardingPage() {
           )}
 
           <div>
-            <label htmlFor="workspaceName" className="block text-sm font-medium text-slate-700">
+            <label
+              htmlFor="workspaceName"
+              className="block text-sm font-medium text-slate-700"
+            >
               Bedriftsnavn
             </label>
             <input

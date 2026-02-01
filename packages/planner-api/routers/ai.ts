@@ -1,35 +1,35 @@
-import { generateText } from "ai";
 import { openai } from "@ai-sdk/openai";
-import { eq } from "drizzle-orm";
 import { db } from "@poynt/planner-db";
 import { plannerIndustry } from "@poynt/planner-db/schema";
 import {
-  declineRequestSchema,
-  situationTypeLabels,
-  relationshipTypeLabels,
-  toneTypeLabels,
-  channelGuideRequestSchema,
-  targetAudienceLabels,
-  mainGoalLabels,
-  weeklyTimeLabels,
-  strengthLabels,
-  previousChannelLabels,
-  marketingPlanRequestSchema,
-  companySizeLabels,
-  timeframeLabels,
-  budgetLabels,
-  marketingGoalLabels,
-  existingActivityLabels,
-  yearlyPlannerRequestSchema,
-  publishChannelLabels,
-  frequencyLabels,
-  audienceLabels,
-  contentToneLabels,
-  type DeclineResponse,
   type ChannelGuideResponse,
+  type DeclineResponse,
   type MarketingPlanResponse,
   type YearlyPlannerResponse,
+  audienceLabels,
+  budgetLabels,
+  channelGuideRequestSchema,
+  companySizeLabels,
+  contentToneLabels,
+  declineRequestSchema,
+  existingActivityLabels,
+  frequencyLabels,
+  mainGoalLabels,
+  marketingGoalLabels,
+  marketingPlanRequestSchema,
+  previousChannelLabels,
+  publishChannelLabels,
+  relationshipTypeLabels,
+  situationTypeLabels,
+  strengthLabels,
+  targetAudienceLabels,
+  timeframeLabels,
+  toneTypeLabels,
+  weeklyTimeLabels,
+  yearlyPlannerRequestSchema,
 } from "@poynt/planner-validators";
+import { generateText } from "ai";
+import { eq } from "drizzle-orm";
 import { publicProcedure, router } from "../trpc";
 
 const systemPrompt = `Du er en erfaren kommunikasjonsrådgiver som hjelper gründere og småbedriftseiere med å si nei på en profesjonell og hyggelig måte.
@@ -268,12 +268,9 @@ EKSEMPEL PÅ DÅRLIG REASON (IKKE gjør dette):
 
 Kanaler å velge mellom: LinkedIn, Instagram, Facebook, TikTok, YouTube, E-post/Nyhetsbrev, Podcast, Google Ads, Blogg/SEO, Twitter/X`;
 
-
       const previousChannelsText =
         previousChannels && previousChannels.length > 0
-          ? previousChannels
-              .map((c) => previousChannelLabels[c])
-              .join(", ")
+          ? previousChannels.map((c) => previousChannelLabels[c]).join(", ")
           : "Ingen";
 
       const prompt = `
@@ -430,9 +427,7 @@ TILPASS TIL:
 
       const existingActivitiesText =
         existingActivities && existingActivities.length > 0
-          ? existingActivities
-              .map((a) => existingActivityLabels[a])
-              .join(", ")
+          ? existingActivities.map((a) => existingActivityLabels[a]).join(", ")
           : "Ingen fast aktivitet";
 
       const prompt = `
@@ -565,7 +560,11 @@ Lag en praktisk årsplan med konkrete innholdsideer for hver måned, tilpasset b
         // Parse JSON-responsen
         const parsed = JSON.parse(text);
 
-        if (!parsed.summary || !parsed.months || !Array.isArray(parsed.months)) {
+        if (
+          !parsed.summary ||
+          !parsed.months ||
+          !Array.isArray(parsed.months)
+        ) {
           return {
             success: false,
             error: "Uventet format fra AI. Prøv igjen.",

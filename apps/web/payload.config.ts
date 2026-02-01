@@ -1,5 +1,6 @@
 import { postgresAdapter } from "@payloadcms/db-postgres";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
+import { vercelBlobStorage } from "@payloadcms/storage-vercel-blob";
 import { buildConfig } from "payload";
 import sharp from "sharp";
 
@@ -22,7 +23,17 @@ import { Services } from "./src/collections/services";
 import { Users } from "./src/collections/users";
 
 // Globals
-import { Footer, Header, SiteSettings, Homepage, BlogPage, PodcastPage, ProductsPage, ServicesPage, ProductSettings } from "./src/globals";
+import {
+  BlogPage,
+  Footer,
+  Header,
+  Homepage,
+  PodcastPage,
+  ProductSettings,
+  ProductsPage,
+  ServicesPage,
+  SiteSettings,
+} from "./src/globals";
 
 const siteUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
 
@@ -34,6 +45,8 @@ export default buildConfig({
     pool: {
       connectionString: process.env.DATABASE_URI || "",
     },
+    // Disable auto-push to prevent conflicts with planner tables (managed by Drizzle)
+    push: false,
   }),
   sharp,
   collections: [
@@ -48,11 +61,32 @@ export default buildConfig({
     Categories,
     Media,
   ],
-  globals: [SiteSettings, Header, Footer, Homepage, BlogPage, PodcastPage, ProductsPage, ServicesPage, ProductSettings],
+  globals: [
+    SiteSettings,
+    Header,
+    Footer,
+    Homepage,
+    BlogPage,
+    PodcastPage,
+    ProductsPage,
+    ServicesPage,
+    ProductSettings,
+  ],
   admin: {
     user: "users",
   },
   plugins: [
+    // Vercel Blob Storage - CDN for alle media filer
+    ...(process.env.BLOB_READ_WRITE_TOKEN
+      ? [
+          vercelBlobStorage({
+            collections: {
+              media: true,
+            },
+            token: process.env.BLOB_READ_WRITE_TOKEN,
+          }),
+        ]
+      : []),
     seoPlugin({
       collections: ["pages", "products", "blog-posts"],
       uploadsCollection: "media",
@@ -145,9 +179,7 @@ export default buildConfig({
           collection: "products",
           stripeResourceType: "products",
           stripeResourceTypeSingular: "product",
-          fields: [
-            { fieldPath: "name", stripeProperty: "name" },
-          ],
+          fields: [{ fieldPath: "name", stripeProperty: "name" }],
         },
       ],
     }),

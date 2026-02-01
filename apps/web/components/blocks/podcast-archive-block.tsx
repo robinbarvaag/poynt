@@ -36,7 +36,9 @@ export async function PodcastArchiveBlock({
         {(title || description) && (
           <div className="mb-8 md:mb-12">
             {title && (
-              <Heading size="h2" className="mb-3">{title}</Heading>
+              <Heading size="h2" className="mb-3">
+                {title}
+              </Heading>
             )}
             {description && (
               <p className="text-lg text-muted-foreground max-w-2xl">

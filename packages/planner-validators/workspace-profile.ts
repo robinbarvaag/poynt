@@ -3,7 +3,12 @@ import { z } from "zod";
 /**
  * Company size options
  */
-export const profileCompanySizes = ["solo", "small", "medium", "large"] as const;
+export const profileCompanySizes = [
+  "solo",
+  "small",
+  "medium",
+  "large",
+] as const;
 export type ProfileCompanySize = (typeof profileCompanySizes)[number];
 
 export const profileCompanySizeLabels: Record<ProfileCompanySize, string> = {
@@ -52,7 +57,9 @@ export const updateWorkspaceProfileSchema = z.object({
   customContext: z.string().nullable().optional(),
 });
 
-export type UpdateWorkspaceProfileInput = z.infer<typeof updateWorkspaceProfileSchema>;
+export type UpdateWorkspaceProfileInput = z.infer<
+  typeof updateWorkspaceProfileSchema
+>;
 
 /**
  * Tool Result Schemas

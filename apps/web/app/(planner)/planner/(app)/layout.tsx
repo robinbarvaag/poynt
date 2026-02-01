@@ -1,8 +1,8 @@
+import { AppSidebar } from "@/components/planner/app-sidebar";
 import { auth } from "@poynt/planner-auth/server";
+import { SidebarInset, SidebarProvider, Toaster } from "@poynt/ui";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { SidebarProvider, SidebarInset, Toaster } from "@poynt/ui";
-import { AppSidebar } from "@/components/planner";
 
 export default async function PlannerAppLayout({
   children,

@@ -1,4 +1,11 @@
-import { pgTable, text, timestamp, boolean, integer, jsonb } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  integer,
+  jsonb,
+  pgTable,
+  text,
+  timestamp,
+} from "drizzle-orm/pg-core";
 
 /**
  * Industries - Administreres via admin-panel
@@ -45,4 +52,5 @@ export const plannerPromptTemplate = pgTable("planner_prompt_template", {
 export type PlannerIndustry = typeof plannerIndustry.$inferSelect;
 export type NewPlannerIndustry = typeof plannerIndustry.$inferInsert;
 export type PlannerPromptTemplate = typeof plannerPromptTemplate.$inferSelect;
-export type NewPlannerPromptTemplate = typeof plannerPromptTemplate.$inferInsert;
+export type NewPlannerPromptTemplate =
+  typeof plannerPromptTemplate.$inferInsert;

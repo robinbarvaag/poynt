@@ -1,10 +1,16 @@
-import { z } from "zod";
-import { TRPCError } from "@trpc/server";
-import { eq, and, desc } from "drizzle-orm";
-import { protectedProcedure, router } from "../trpc";
 import { db } from "@poynt/planner-db";
-import { plannerToolResult, plannerWorkspaceMember } from "@poynt/planner-db/schema";
-import { createToolResultSchema, updateToolResultSchema } from "@poynt/planner-validators";
+import {
+  plannerToolResult,
+  plannerWorkspaceMember,
+} from "@poynt/planner-db/schema";
+import {
+  createToolResultSchema,
+  updateToolResultSchema,
+} from "@poynt/planner-validators";
+import { TRPCError } from "@trpc/server";
+import { and, desc, eq } from "drizzle-orm";
+import { z } from "zod";
+import { protectedProcedure, router } from "../trpc";
 
 /**
  * Helper to get active workspace ID for user
@@ -31,10 +37,12 @@ export const toolResultRouter = router({
    */
   list: protectedProcedure
     .input(
-      z.object({
-        toolId: z.string().optional(),
-        limit: z.number().min(1).max(100).default(20),
-      }).optional()
+      z
+        .object({
+          toolId: z.string().optional(),
+          limit: z.number().min(1).max(100).default(20),
+        })
+        .optional()
     )
     .query(async ({ ctx, input }) => {
       const workspaceId = await getActiveWorkspaceId(ctx.userId);
@@ -163,7 +171,9 @@ export const toolResultRouter = router({
         });
       }
 
-      await db.delete(plannerToolResult).where(eq(plannerToolResult.id, input.id));
+      await db
+        .delete(plannerToolResult)
+        .where(eq(plannerToolResult.id, input.id));
 
       return { success: true };
     }),

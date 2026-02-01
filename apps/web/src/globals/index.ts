@@ -6,4 +6,4 @@ export { BlogPage } from "./blogpage";
 export { PodcastPage } from "./podcastpage";
 export { ProductsPage } from "./productspage";
 export { ServicesPage } from "./servicespage";
-export { ProductSettings } from "./product-settings";  
+export { ProductSettings } from "./product-settings";

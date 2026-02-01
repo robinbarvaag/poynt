@@ -1,6 +1,6 @@
 import config from "@/payload.config";
-import { Container, H1, Lead } from "@poynt/ui";
 import { RichText } from "@payloadcms/richtext-lexical/react";
+import { Container, H1, Lead } from "@poynt/ui";
 import { ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
@@ -108,7 +108,9 @@ export default async function PodcastDetailPage({ params }: PodcastPageProps) {
         {/* Header */}
         <header className="mb-8">
           <div className="flex items-center gap-3 text-sm text-muted-foreground mb-4">
-            {podcast.episodeNumber && <span>Episode {podcast.episodeNumber}</span>}
+            {podcast.episodeNumber && (
+              <span>Episode {podcast.episodeNumber}</span>
+            )}
             {podcast.episodeNumber && podcast.duration && <span>·</span>}
             {podcast.duration && <span>{podcast.duration}</span>}
             <span>·</span>

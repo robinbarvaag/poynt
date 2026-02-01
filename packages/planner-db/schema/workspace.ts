@@ -1,16 +1,16 @@
+import { relations } from "drizzle-orm";
 import {
+  boolean,
+  index,
+  jsonb,
+  pgEnum,
   pgTable,
   text,
   timestamp,
-  boolean,
-  index,
   uniqueIndex,
-  pgEnum,
-  jsonb,
 } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
-import { plannerUser } from "./auth";
 import { plannerIndustry } from "./admin";
+import { plannerUser } from "./auth";
 
 /**
  * Workspace roles
@@ -38,30 +38,28 @@ export const plannerSubscriptionTierEnum = pgEnum("planner_subscription_tier", [
 /**
  * Subscription status
  */
-export const plannerSubscriptionStatusEnum = pgEnum("planner_subscription_status", [
-  "active",
-  "canceled",
-  "past_due",
-  "trialing",
-]);
+export const plannerSubscriptionStatusEnum = pgEnum(
+  "planner_subscription_status",
+  ["active", "canceled", "past_due", "trialing"]
+);
 
 /**
  * Company size options for workspace profile
  */
 export const plannerCompanySizeEnum = pgEnum("planner_company_size", [
-  "solo",      // Enmannsbedrift
-  "small",     // 2-10 ansatte
-  "medium",    // 11-50 ansatte
-  "large",     // 50+ ansatte
+  "solo", // Enmannsbedrift
+  "small", // 2-10 ansatte
+  "medium", // 11-50 ansatte
+  "large", // 50+ ansatte
 ]);
 
 /**
  * Audience type - B2B, B2C or both
  */
 export const plannerAudienceTypeEnum = pgEnum("planner_audience_type", [
-  "b2b",       // Bedrifter
-  "b2c",       // Forbrukere
-  "both",      // Begge deler
+  "b2b", // Bedrifter
+  "b2c", // Forbrukere
+  "both", // Begge deler
 ]);
 
 /**
@@ -81,9 +79,7 @@ export const plannerWorkspace = pgTable(
       .$onUpdate(() => new Date())
       .notNull(),
   },
-  (table) => [
-    index("planner_workspace_slug_idx").on(table.slug),
-  ]
+  (table) => [index("planner_workspace_slug_idx").on(table.slug)]
 );
 
 /**
@@ -167,7 +163,9 @@ export const plannerSubscription = pgTable(
   },
   (table) => [
     index("planner_subscription_user_idx").on(table.userId),
-    index("planner_subscription_stripe_customer_idx").on(table.stripeCustomerId),
+    index("planner_subscription_stripe_customer_idx").on(
+      table.stripeCustomerId
+    ),
   ]
 );
 
@@ -180,9 +178,12 @@ export const plannerUserPreferences = pgTable("planner_user_preferences", {
     .notNull()
     .references(() => plannerUser.id, { onDelete: "cascade" })
     .unique(),
-  activeWorkspaceId: text("active_workspace_id").references(() => plannerWorkspace.id, {
-    onDelete: "set null",
-  }),
+  activeWorkspaceId: text("active_workspace_id").references(
+    () => plannerWorkspace.id,
+    {
+      onDelete: "set null",
+    }
+  ),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
     .defaultNow()
@@ -202,8 +203,9 @@ export const plannerWorkspaceProfile = pgTable(
       .notNull()
       .references(() => plannerWorkspace.id, { onDelete: "cascade" })
       .unique(), // 1:1 relationship with workspace
-    industryId: text("industry_id")
-      .references(() => plannerIndustry.id, { onDelete: "set null" }),
+    industryId: text("industry_id").references(() => plannerIndustry.id, {
+      onDelete: "set null",
+    }),
     targetAudience: text("target_audience"), // Freetext description of target customers
     audienceType: plannerAudienceTypeEnum("audience_type"), // B2B, B2C or both
     companySize: plannerCompanySizeEnum("company_size"),
@@ -264,7 +266,9 @@ export const plannerMarketingPlanProgress = pgTable(
     completedAt: timestamp("completed_at").defaultNow().notNull(),
   },
   (table) => [
-    index("planner_marketing_plan_progress_tool_result_idx").on(table.toolResultId),
+    index("planner_marketing_plan_progress_tool_result_idx").on(
+      table.toolResultId
+    ),
     uniqueIndex("planner_marketing_plan_progress_unique_task").on(
       table.toolResultId,
       table.type,
@@ -296,12 +300,15 @@ export const plannerDeclineGeneratorFeedback = pgTable(
 );
 
 // Relations
-export const plannerWorkspaceRelations = relations(plannerWorkspace, ({ many, one }) => ({
-  members: many(plannerWorkspaceMember),
-  invitations: many(plannerWorkspaceInvitation),
-  profile: one(plannerWorkspaceProfile),
-  toolResults: many(plannerToolResult),
-}));
+export const plannerWorkspaceRelations = relations(
+  plannerWorkspace,
+  ({ many, one }) => ({
+    members: many(plannerWorkspaceMember),
+    invitations: many(plannerWorkspaceInvitation),
+    profile: one(plannerWorkspaceProfile),
+    toolResults: many(plannerToolResult),
+  })
+);
 
 export const plannerWorkspaceMemberRelations = relations(
   plannerWorkspaceMember,
@@ -331,12 +338,15 @@ export const plannerWorkspaceInvitationRelations = relations(
   })
 );
 
-export const plannerSubscriptionRelations = relations(plannerSubscription, ({ one }) => ({
-  user: one(plannerUser, {
-    fields: [plannerSubscription.userId],
-    references: [plannerUser.id],
-  }),
-}));
+export const plannerSubscriptionRelations = relations(
+  plannerSubscription,
+  ({ one }) => ({
+    user: one(plannerUser, {
+      fields: [plannerSubscription.userId],
+      references: [plannerUser.id],
+    }),
+  })
+);
 
 export const plannerUserPreferencesRelations = relations(
   plannerUserPreferences,
@@ -366,14 +376,17 @@ export const plannerWorkspaceProfileRelations = relations(
   })
 );
 
-export const plannerToolResultRelations = relations(plannerToolResult, ({ one, many }) => ({
-  workspace: one(plannerWorkspace, {
-    fields: [plannerToolResult.workspaceId],
-    references: [plannerWorkspace.id],
-  }),
-  progress: many(plannerMarketingPlanProgress),
-  feedback: many(plannerDeclineGeneratorFeedback),
-}));
+export const plannerToolResultRelations = relations(
+  plannerToolResult,
+  ({ one, many }) => ({
+    workspace: one(plannerWorkspace, {
+      fields: [plannerToolResult.workspaceId],
+      references: [plannerWorkspace.id],
+    }),
+    progress: many(plannerMarketingPlanProgress),
+    feedback: many(plannerDeclineGeneratorFeedback),
+  })
+);
 
 export const plannerMarketingPlanProgressRelations = relations(
   plannerMarketingPlanProgress,
@@ -399,18 +412,28 @@ export const plannerDeclineGeneratorFeedbackRelations = relations(
 export type PlannerWorkspace = typeof plannerWorkspace.$inferSelect;
 export type NewPlannerWorkspace = typeof plannerWorkspace.$inferInsert;
 export type PlannerWorkspaceMember = typeof plannerWorkspaceMember.$inferSelect;
-export type NewPlannerWorkspaceMember = typeof plannerWorkspaceMember.$inferInsert;
-export type PlannerWorkspaceInvitation = typeof plannerWorkspaceInvitation.$inferSelect;
-export type NewPlannerWorkspaceInvitation = typeof plannerWorkspaceInvitation.$inferInsert;
+export type NewPlannerWorkspaceMember =
+  typeof plannerWorkspaceMember.$inferInsert;
+export type PlannerWorkspaceInvitation =
+  typeof plannerWorkspaceInvitation.$inferSelect;
+export type NewPlannerWorkspaceInvitation =
+  typeof plannerWorkspaceInvitation.$inferInsert;
 export type PlannerSubscription = typeof plannerSubscription.$inferSelect;
 export type NewPlannerSubscription = typeof plannerSubscription.$inferInsert;
 export type PlannerUserPreferences = typeof plannerUserPreferences.$inferSelect;
-export type NewPlannerUserPreferences = typeof plannerUserPreferences.$inferInsert;
-export type PlannerWorkspaceProfile = typeof plannerWorkspaceProfile.$inferSelect;
-export type NewPlannerWorkspaceProfile = typeof plannerWorkspaceProfile.$inferInsert;
+export type NewPlannerUserPreferences =
+  typeof plannerUserPreferences.$inferInsert;
+export type PlannerWorkspaceProfile =
+  typeof plannerWorkspaceProfile.$inferSelect;
+export type NewPlannerWorkspaceProfile =
+  typeof plannerWorkspaceProfile.$inferInsert;
 export type PlannerToolResult = typeof plannerToolResult.$inferSelect;
 export type NewPlannerToolResult = typeof plannerToolResult.$inferInsert;
-export type PlannerMarketingPlanProgress = typeof plannerMarketingPlanProgress.$inferSelect;
-export type NewPlannerMarketingPlanProgress = typeof plannerMarketingPlanProgress.$inferInsert;
-export type PlannerDeclineGeneratorFeedback = typeof plannerDeclineGeneratorFeedback.$inferSelect;
-export type NewPlannerDeclineGeneratorFeedback = typeof plannerDeclineGeneratorFeedback.$inferInsert;
+export type PlannerMarketingPlanProgress =
+  typeof plannerMarketingPlanProgress.$inferSelect;
+export type NewPlannerMarketingPlanProgress =
+  typeof plannerMarketingPlanProgress.$inferInsert;
+export type PlannerDeclineGeneratorFeedback =
+  typeof plannerDeclineGeneratorFeedback.$inferSelect;
+export type NewPlannerDeclineGeneratorFeedback =
+  typeof plannerDeclineGeneratorFeedback.$inferInsert;

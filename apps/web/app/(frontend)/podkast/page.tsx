@@ -1,6 +1,6 @@
-import config from "@/payload.config";
 import { PageHero } from "@/components/page-hero";
 import { PodcastCard } from "@/components/podcast-card";
+import config from "@/payload.config";
 import { Container } from "@poynt/ui";
 import type { Metadata } from "next";
 import { getPayload } from "payload";
@@ -14,14 +14,16 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: pageConfig?.meta?.title || "Podkast | Poynt",
     description:
-      pageConfig?.meta?.description || "Lytt til alle episoder av Poynt-podkasten",
+      pageConfig?.meta?.description ||
+      "Lytt til alle episoder av Poynt-podkasten",
     alternates: {
       canonical: `${baseUrl}/podkast`,
     },
     openGraph: {
       title: pageConfig?.meta?.title || "Podkast | Poynt",
       description:
-        pageConfig?.meta?.description || "Lytt til alle episoder av Poynt-podkasten",
+        pageConfig?.meta?.description ||
+        "Lytt til alle episoder av Poynt-podkasten",
       url: `${baseUrl}/podkast`,
       type: "website",
       ...(pageConfig?.meta?.image &&
@@ -50,10 +52,16 @@ export default async function PodcastPage() {
 
   const heroEnabled = pageConfig?.hero?.enabled ?? true;
   const heroTitle = pageConfig?.hero?.title || "Podkast";
-  const heroDescription = pageConfig?.hero?.description || "Lytt til alle episoder";
+  const heroDescription =
+    pageConfig?.hero?.description || "Lytt til alle episoder";
   const heroImage =
-    pageConfig?.hero?.image && typeof pageConfig.hero.image === "object" && pageConfig.hero.image.url
-      ? { url: pageConfig.hero.image.url, alt: pageConfig.hero.image.alt ?? undefined }
+    pageConfig?.hero?.image &&
+    typeof pageConfig.hero.image === "object" &&
+    pageConfig.hero.image.url
+      ? {
+          url: pageConfig.hero.image.url,
+          alt: pageConfig.hero.image.alt ?? undefined,
+        }
       : null;
   const emptyStateText =
     pageConfig?.emptyStateText || "Ingen episoder publisert ennå.";
@@ -61,22 +69,20 @@ export default async function PodcastPage() {
   return (
     <>
       {heroEnabled && (
-        <PageHero
-          title={heroTitle}
-          description={heroDescription}
-          image={heroImage}
-        />
+        <PageHero title={heroTitle} description={heroDescription} />
       )}
 
-      <Container padding="default" className={heroEnabled ? "pt-0" : ""}>
+      <Container padding="default" className="py-8">
         {podcasts.docs.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8">
             {podcasts.docs.map((podcast) => (
               <PodcastCard key={podcast.id} podcast={podcast as any} />
             ))}
           </div>
         ) : (
-          <p className="text-muted-foreground text-center">{emptyStateText}</p>
+          <p className="text-muted-foreground text-center py-12">
+            {emptyStateText}
+          </p>
         )}
       </Container>
     </>

@@ -1,11 +1,11 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { trpc } from "@/lib/planner/trpc";
 import {
   Icon,
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -13,15 +13,15 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarFooter,
   SidebarRail,
   SidebarSeparator,
 } from "@poynt/ui";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { mainNavItems, settingsNavItems } from "@/lib/constants";
 import { NavUser } from "./nav-user";
 import { WorkspaceSwitcher } from "./workspace-switcher";
-import { trpc } from "@/lib/planner/trpc";
-import { useEffect, useState } from "react";
-import { mainNavItems, settingsNavItems } from "./constants";
 
 export function AppSidebar() {
   const pathname = usePathname();

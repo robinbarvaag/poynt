@@ -39,14 +39,14 @@ export function CategoryFilter({
   );
 
   return (
-    <div className="flex flex-wrap gap-2 justify-center">
+    <div className="flex items-center gap-1">
       <button
         onClick={() => handleCategoryClick(null)}
         className={cn(
-          "px-4 py-2 rounded-full text-sm font-medium transition-all",
+          "px-3 py-1.5 text-sm rounded-md transition-colors",
           !currentCategory
-            ? "bg-primary text-primary-foreground shadow-md"
-            : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+            ? "bg-foreground text-background font-medium"
+            : "text-muted-foreground hover:text-foreground hover:bg-muted"
         )}
       >
         {allLabel}
@@ -56,15 +56,15 @@ export function CategoryFilter({
           key={category.value}
           onClick={() => handleCategoryClick(category.value)}
           className={cn(
-            "px-4 py-2 rounded-full text-sm font-medium transition-all",
+            "px-3 py-1.5 text-sm rounded-md transition-colors",
             currentCategory === category.value
-              ? "bg-primary text-primary-foreground shadow-md"
-              : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+              ? "bg-foreground text-background font-medium"
+              : "text-muted-foreground hover:text-foreground hover:bg-muted"
           )}
         >
           {category.label}
           {category.count !== undefined && (
-            <span className="ml-1.5 opacity-70">({category.count})</span>
+            <span className="ml-1 text-xs opacity-60">{category.count}</span>
           )}
         </button>
       ))}

@@ -1,9 +1,12 @@
+import { db } from "@poynt/planner-db";
+import {
+  plannerWorkspaceMember,
+  plannerWorkspaceProfile,
+} from "@poynt/planner-db/schema";
+import { updateWorkspaceProfileSchema } from "@poynt/planner-validators";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { protectedProcedure, router } from "../trpc";
-import { db } from "@poynt/planner-db";
-import { plannerWorkspaceProfile, plannerWorkspaceMember } from "@poynt/planner-db/schema";
-import { updateWorkspaceProfileSchema } from "@poynt/planner-validators";
 
 /**
  * Helper to get active workspace ID for user

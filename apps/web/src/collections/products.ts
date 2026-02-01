@@ -41,19 +41,21 @@ export const Products: CollectionConfig = {
             const price = await stripe.prices.create({
               product: doc.stripeID,
               unit_amount: doc.price,
-              currency: 'nok',
-            })
+              currency: "nok",
+            });
 
             await req.payload.update({
-              collection: 'products',
+              collection: "products",
               id: doc.id,
               data: {
                 stripePriceId: price.id,
                 stripeProductId: doc.stripeID,
               },
-            })
+            });
           } catch (error) {
-            req.payload.logger.error(`Klarte ikke opprette pris i Stripe: ${error}`)
+            req.payload.logger.error(
+              `Klarte ikke opprette pris i Stripe: ${error}`
+            );
           }
         }
       },
@@ -114,7 +116,8 @@ export const Products: CollectionConfig = {
       relationTo: "media",
       label: "Hovedbilde",
       admin: {
-        description: "Hovedbilde som vises i oversikter og øverst på produktsiden",
+        description:
+          "Hovedbilde som vises i oversikter og øverst på produktsiden",
       },
     },
     {
@@ -173,7 +176,8 @@ export const Products: CollectionConfig = {
       type: "json",
       label: "Fordeler",
       admin: {
-        description: "Velg fordeler som gjelder for dette produktet (hentes fra Produktinnstillinger)",
+        description:
+          "Velg fordeler som gjelder for dette produktet (hentes fra Produktinnstillinger)",
       },
     },
     {

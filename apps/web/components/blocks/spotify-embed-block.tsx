@@ -74,7 +74,8 @@ export function SpotifyEmbedBlock({
   }
 
   const embedHeight = getHeightValue(height);
-  const themeParam = theme !== "auto" ? `&theme=${theme === "dark" ? "0" : "1"}` : "";
+  const themeParam =
+    theme !== "auto" ? `&theme=${theme === "dark" ? "0" : "1"}` : "";
   const embedUrl = `https://open.spotify.com/embed/${extracted.type}/${extracted.id}?utm_source=generator${themeParam}`;
 
   const isCompact = height === "compact";

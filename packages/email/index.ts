@@ -34,7 +34,9 @@ export async function sendOrderConfirmation(email: string, orderId: string) {
 /**
  * Subscribe an email to the newsletter audience in Resend
  */
-export async function subscribeToNewsletter(email: string): Promise<{ success: boolean; error?: string }> {
+export async function subscribeToNewsletter(
+  email: string
+): Promise<{ success: boolean; error?: string }> {
   const apiKey = process.env.RESEND_API_KEY;
   const audienceId = process.env.RESEND_AUDIENCE_ID;
 
@@ -66,7 +68,7 @@ export async function subscribeToNewsletter(email: string): Promise<{ success: b
     console.error("Newsletter subscription error:", error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Ukjent feil"
+      error: error instanceof Error ? error.message : "Ukjent feil",
     };
   }
 }

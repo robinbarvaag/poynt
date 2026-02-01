@@ -1,3 +1,4 @@
+import { getMediaUrl } from "@/lib/media-url";
 import type { SerializedEditorState } from "@payloadcms/richtext-lexical/lexical";
 import { RichText } from "@payloadcms/richtext-lexical/react";
 import { H3, Text } from "@poynt/ui";
@@ -5,7 +6,6 @@ import { Facebook, Instagram, Linkedin, Twitter, Youtube } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { FloatingShapes } from "./decorative/floating-shapes";
-import { getMediaUrl } from "@/lib/media-url";
 import { NewsletterForm } from "./newsletter-form";
 
 interface FooterLink {
@@ -126,7 +126,9 @@ export function Footer({
                   className="h-8 w-auto"
                 />
               ) : (
-                <span className="text-xl font-bold text-foreground">{siteName}</span>
+                <span className="text-xl font-bold text-foreground">
+                  {siteName}
+                </span>
               )}
             </Link>
             {showSocialLinks && socialLinks.length > 0 && (
@@ -161,7 +163,9 @@ export function Footer({
                     <Link
                       href={getHref(link)}
                       target={link.openInNewTab ? "_blank" : undefined}
-                      rel={link.openInNewTab ? "noopener noreferrer" : undefined}
+                      rel={
+                        link.openInNewTab ? "noopener noreferrer" : undefined
+                      }
                       className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                     >
                       {link.label}

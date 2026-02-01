@@ -1,5 +1,5 @@
-import { RenderBlocks } from "@/components/render-blocks";
 import { PageHero } from "@/components/page-hero";
+import { RenderBlocks } from "@/components/render-blocks";
 import config from "@/payload.config";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
@@ -9,7 +9,8 @@ interface PageProps {
   params: Promise<{
     slug?: string[];
   }>;
-}1
+}
+1;
 
 async function getPage(slug: string) {
   const payload = await getPayload({ config });
@@ -127,8 +128,6 @@ export default async function Page({ params }: PageProps) {
 
   const page = await getPage(slug);
 
-
-
   if (!page) {
     notFound();
   }
@@ -139,9 +138,7 @@ export default async function Page({ params }: PageProps) {
 
   return (
     <>
-      {!hasHeroBlock && (
-        <PageHero title={page.title} size="large" />
-      )}
+      {!hasHeroBlock && <PageHero title={page.title} size="large" />}
       {page.layout && <RenderBlocks blocks={page.layout} />}
     </>
   );

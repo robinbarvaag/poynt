@@ -1,6 +1,6 @@
 import config from "@/payload.config";
-import { Button, Container, H1, Lead } from "@poynt/ui";
 import { RichText } from "@payloadcms/richtext-lexical/react";
+import { Button, Container, H1, Lead } from "@poynt/ui";
 import { ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";

@@ -1,8 +1,8 @@
+import { ProductDetailClient } from "@/components/product-detail";
 import config from "@/payload.config";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getPayload } from "payload";
-import type { Metadata } from "next";
-import { ProductDetailClient } from "@/components/product-detail";
 
 interface ProductPageProps {
   params: Promise<{

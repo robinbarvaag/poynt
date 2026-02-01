@@ -1,9 +1,9 @@
 "use client";
 import { AddToCartButton } from "@/components/add-to-cart-button";
 import { getMediaUrl } from "@/lib/media-url";
-import { Product } from "@/payload-types";
-import { Badge, Container, Heading } from "@poynt/ui";
+import type { Product } from "@/payload-types";
 import { RichText } from "@payloadcms/richtext-lexical/react";
+import { Badge, Container, Heading } from "@poynt/ui";
 import { ArrowLeft, Check } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -20,14 +20,18 @@ const typeLabels: Record<string, string> = {
   bundle: "Bundle",
 };
 
-function ProductDetailClient({ product, benefits = [] }: ProductDetailClientProps) {
+function ProductDetailClient({
+  product,
+  benefits = [],
+}: ProductDetailClientProps) {
   const [selectedImage, setSelectedImage] = useState(0);
 
   const priceInKr = (product.price / 100).toLocaleString("nb-NO");
   const compareAtPriceInKr = product.compareAtPrice
     ? (product.compareAtPrice / 100).toLocaleString("nb-NO")
     : null;
-  const hasDiscount = compareAtPriceInKr && product.compareAtPrice! > product.price;
+  const hasDiscount =
+    compareAtPriceInKr && product.compareAtPrice! > product.price;
 
   // Build image array from featuredImage and gallery
   const images: { url: string; alt?: string; caption?: string }[] = [];
@@ -126,7 +130,9 @@ function ProductDetailClient({ product, benefits = [] }: ProductDetailClientProp
           </div>
 
           {/* Title */}
-          <Heading size="h1" className="mb-4">{product.name}</Heading>
+          <Heading size="h1" className="mb-4">
+            {product.name}
+          </Heading>
 
           {/* Short description */}
           {product.shortDescription && (
@@ -138,7 +144,9 @@ function ProductDetailClient({ product, benefits = [] }: ProductDetailClientProp
           {/* Price */}
           <div className="mb-8">
             <div className="flex items-baseline gap-3">
-              <span className="text-4xl font-bold text-primary">{priceInKr} kr</span>
+              <span className="text-4xl font-bold text-primary">
+                {priceInKr} kr
+              </span>
               {hasDiscount && (
                 <span className="text-xl text-muted-foreground line-through">
                   {compareAtPriceInKr} kr
@@ -175,7 +183,9 @@ function ProductDetailClient({ product, benefits = [] }: ProductDetailClientProp
       {/* Description section */}
       {product.description && (
         <div className="mt-16 pt-16 border-t border-border">
-          <Heading size="h2" className="mb-6">Om produktet</Heading>
+          <Heading size="h2" className="mb-6">
+            Om produktet
+          </Heading>
           <div className="prose prose-lg max-w-none prose-headings:text-foreground prose-p:text-foreground prose-a:text-primary prose-strong:text-foreground rich-text">
             <RichText data={product.description} />
           </div>

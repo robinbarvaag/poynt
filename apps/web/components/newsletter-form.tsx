@@ -8,9 +8,13 @@ interface NewsletterFormProps {
   buttonText?: string;
 }
 
-export function NewsletterForm({ buttonText = "Abonner" }: NewsletterFormProps) {
+export function NewsletterForm({
+  buttonText = "Abonner",
+}: NewsletterFormProps) {
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [status, setStatus] = useState<
+    "idle" | "loading" | "success" | "error"
+  >("idle");
   const [errorMessage, setErrorMessage] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {

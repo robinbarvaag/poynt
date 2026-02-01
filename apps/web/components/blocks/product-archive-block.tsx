@@ -1,9 +1,9 @@
-import config from "@/payload.config";
 import type { Product } from "@/payload-types";
-import { cn, Heading } from "@poynt/ui";
+import config from "@/payload.config";
+import { Heading, cn } from "@poynt/ui";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { getPayload, Where } from "payload";
+import { type Where, getPayload } from "payload";
 import { ProductCard } from "../product-card";
 
 interface ProductArchiveBlockProps {
@@ -83,7 +83,9 @@ export async function ProductArchiveBlock({
         {(title || description) && (
           <div className="mb-8 md:mb-12">
             {title && (
-              <Heading size="h2" className="mb-3">{title}</Heading>
+              <Heading size="h2" className="mb-3">
+                {title}
+              </Heading>
             )}
             {description && (
               <p className="text-lg text-muted-foreground max-w-2xl">
