@@ -23,6 +23,7 @@
     "@payloadcms/richtext-lexical": "3.70.0",
     "@payloadcms/plugin-form-builder": "3.70.0",
     "@payloadcms/plugin-redirects": "3.70.0",
+    "@payloadcms/plugin-seo": "3.70.0",
     "@payloadcms/ui": "3.70.0",
     "@poynt/cart": "workspace:*",
     "@poynt/email": "workspace:*",
