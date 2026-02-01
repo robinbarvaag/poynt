@@ -1,48 +1,20 @@
 "use client";
 
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { GuideQuiz } from "@/components/channel-guide/guide-quiz";
 import { GuideResult } from "@/components/channel-guide/guide-result";
 import { trpc } from "@/lib/planner/trpc";
-import type { ChannelGuideRequest } from "@poynt/planner-validators";
+import type {
+  ChannelGuideClientProps,
+  SavedResult,
+  ViewState,
+} from "@/lib/types";
+import type {
+  ChannelGuideRequest,
+  ChannelRecommendation,
+} from "@poynt/planner-validators";
 import { toast } from "@poynt/ui";
-import type { Industry } from "./page";
-
-interface ChannelRecommendation {
-  name: string;
-  matchPercent: number;
-  reason: string;
-}
-
-interface SavedResult {
-  id: string;
-  channels: ChannelRecommendation[];
-  reasoning?: string;
-  createdAt: Date;
-}
-
-type ViewState = "intro" | "saved" | "quiz" | "result";
-
-// Medal config for the 3 channels
-type MedalConfig = {
-  icon: "trophy" | "medal" | "award";
-  color: string;
-  bg: string;
-};
-
-const medalConfigs: MedalConfig[] = [
-  { icon: "trophy", color: "text-yellow-500", bg: "bg-yellow-500/10" },
-  { icon: "medal", color: "text-slate-400", bg: "bg-slate-400/10" },
-  { icon: "award", color: "text-amber-600", bg: "bg-amber-600/10" },
-];
-
-interface ChannelGuideClientProps {
-  initialSavedResult: SavedResult | null;
-  industries: Industry[];
-  initialIndustryId: string | null;
-  initialTargetAudience: "b2b" | "b2c" | "both" | null;
-}
+import { AnimatePresence, motion } from "framer-motion";
+import { useState } from "react";
 
 export function ChannelGuideClient({
   initialSavedResult,
@@ -56,7 +28,9 @@ export function ChannelGuideClient({
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<ChannelRecommendation[] | null>(null);
   const [reasoning, setReasoning] = useState<string | null>(null);
-  const [savedResult, setSavedResult] = useState<SavedResult | null>(initialSavedResult);
+  const [savedResult, setSavedResult] = useState<SavedResult | null>(
+    initialSavedResult
+  );
 
   async function handleSubmit(data: ChannelGuideRequest) {
     setIsLoading(true);
@@ -109,22 +83,6 @@ export function ChannelGuideClient({
 
   function startQuiz() {
     setView("quiz");
-  }
-
-  function viewSavedResult() {
-    if (savedResult) {
-      setResults(savedResult.channels);
-      setReasoning(savedResult.reasoning || null);
-      setView("result");
-    }
-  }
-
-  function formatDate(date: Date) {
-    return new Intl.DateTimeFormat("nb-NO", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    }).format(new Date(date));
   }
 
   const fadeIn = {

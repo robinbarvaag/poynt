@@ -31,13 +31,11 @@ interface Workspace {
 interface WorkspaceGeneralFormProps {
   workspace: Workspace;
   disabled?: boolean;
-  onUpdate: (workspace: Partial<Workspace>) => void;
 }
 
 export function WorkspaceGeneralForm({
   workspace,
   disabled = false,
-  onUpdate,
 }: WorkspaceGeneralFormProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
@@ -57,7 +55,6 @@ export function WorkspaceGeneralForm({
       const result = await trpc.workspace.update.mutate(data);
       if (result) {
         toast.success("Innstillinger oppdatert");
-        onUpdate(result);
       }
     } catch (error: unknown) {
       const errorMessage =

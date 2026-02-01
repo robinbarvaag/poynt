@@ -1,75 +1,45 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Card, CardContent, CardHeader, CardTitle } from "@poynt/ui";
-import { Button } from "@poynt/ui";
-import { Icon } from "@poynt/ui/icons";
-import { cn } from "@poynt/ui";
-import { GuideResultProps } from "@/lib/types";
 import { channelLinks, medalConfig } from "@/lib/constants";
+import {
+  containerMotionVariants,
+  headerMotionVariants,
+  itemMotionVariants,
+} from "@/lib/motion-variants";
+import type { ExtendedGuideResultProps } from "@/lib/types";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Heading,
+  Text,
+} from "@poynt/ui";
+import { Button } from "@poynt/ui";
+import { cn } from "@poynt/ui";
+import { Icon } from "@poynt/ui/icons";
+import { motion } from "framer-motion";
 
-
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.2,
-      delayChildren: 0.1,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20, scale: 0.95 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: {
-      type: "spring" as const,
-      stiffness: 100,
-      damping: 15,
-    },
-  },
-};
-
-const headerVariants = {
-  hidden: { opacity: 0, y: -20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      type: "spring" as const,
-      stiffness: 100,
-      damping: 15,
-    },
-  },
-};
-
-interface ChannelRecommendation {
-  name: string;
-  matchPercent: number;
-  reason: string;
-}
-
-interface ExtendedGuideResultProps extends GuideResultProps {
-  mode?: "intro" | "result";
-  onStartQuiz?: () => void;
-}
-
-export function GuideResult({ channels, reasoning, onReset, mode = "result", onStartQuiz }: ExtendedGuideResultProps) {
-  // Intro mode - show how the tool works with example
+export function GuideResult({
+  channels,
+  reasoning,
+  onReset,
+  mode = "result",
+  onStartQuiz,
+}: ExtendedGuideResultProps) {
   if (mode === "intro") {
     return (
       <motion.div
         initial="hidden"
         animate="visible"
-        variants={containerVariants}
+        variants={containerMotionVariants}
         className="space-y-10 max-w-5xl mx-auto"
       >
-        <motion.div variants={headerVariants} className="text-center space-y-4">
+        <motion.div
+          variants={headerMotionVariants}
+          className="text-center space-y-4"
+        >
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
@@ -78,127 +48,132 @@ export function GuideResult({ channels, reasoning, onReset, mode = "result", onS
           >
             <Icon name="compass" className="size-10" />
           </motion.div>
-          <h1 className="text-4xl font-bold tracking-tight">
-            Finn dine riktige markedsføringskanaler
-          </h1>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Det finnes hundrevis av måter å nå målgruppen din på. Men med begrenset tid og ressurser, 
-            må du velge riktig. Denne veilederen analyserer din situasjon og anbefaler de 3 kanalene 
-            med størst potensial for <strong>akkurat deg</strong>.
-          </p>
+          <Heading>Finn dine riktige markedsføringskanaler</Heading>
+          <Text>
+            Det finnes hundrevis av måter å nå målgruppen din på. Men med
+            begrenset tid og ressurser, må du velge riktig. Denne veilederen
+            analyserer din situasjon og anbefaler de 3 kanalene med størst
+            potensial for <strong>akkurat deg</strong>.
+          </Text>
         </motion.div>
 
-        <motion.div variants={itemVariants}>
+        <motion.div variants={itemMotionVariants}>
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-xl">
-                <Icon name="compass" className="size-5 text-primary" />
-                Hvordan fungerer det?
+                <Heading size={"h2"}>Hvordan fungerer det?</Heading>
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid md:grid-cols-3 gap-8">
                 <div className="space-y-3">
-                  <div className="size-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-600">
-                    <span className="text-2xl font-bold">1</span>
-                  </div>
-                  <h3 className="font-semibold">Fortell oss om deg</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Vi spør om bransje, målgruppe, tid tilgjengelig, og dine styrker. 
-                    Jo mer vi vet, desto bedre anbefalinger får du.
-                  </p>
+                  <Heading size="h3">Fortell oss om deg</Heading>
+                  <Text>
+                    Vi spør om bransje, målgruppe, tid tilgjengelig, og dine
+                    styrker. Jo mer vi vet, desto bedre anbefalinger får du.
+                  </Text>
                 </div>
                 <div className="space-y-3">
-                  <div className="size-12 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-600">
-                    <span className="text-2xl font-bold">2</span>
-                  </div>
-                  <h3 className="font-semibold">AI analyserer</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Basert på 15 års erfaring fra norsk næringsliv og tusenvis av suksesshistorier, 
-                    vurderer vi hvilke kanaler som passer best.
-                  </p>
+                  <Heading size="h3">AI analyserer</Heading>
+                  <Text>
+                    Basert på 15 års erfaring fra norsk næringsliv og tusenvis
+                    av suksesshistorier, vurderer vi hvilke kanaler som passer
+                    best.
+                  </Text>
                 </div>
                 <div className="space-y-3">
-                  <div className="size-12 rounded-xl bg-green-500/10 flex items-center justify-center text-green-600">
-                    <span className="text-2xl font-bold">3</span>
-                  </div>
-                  <h3 className="font-semibold">Få dine topp 3</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Se hvilke kanaler som passer best, hvorfor de scorer som de gjør, 
-                    og hva som skal til for å lykkes.
-                  </p>
+                  <Heading size="h3">Få dine topp 3</Heading>
+                  <Text>
+                    Se hvilke kanaler som passer best, hvorfor de scorer som de
+                    gjør, og hva som skal til for å lykkes.
+                  </Text>
                 </div>
               </div>
             </CardContent>
           </Card>
         </motion.div>
 
-        <motion.div variants={itemVariants}>
+        <motion.div variants={itemMotionVariants}>
           <Card className="border-primary/20">
             <CardHeader>
-              <div className="flex items-start justify-between">
-                <div>
-                  <CardTitle className="flex items-center gap-2 text-xl mb-2">
-                    <Icon name="lightbulb" className="size-5 text-amber-500" />
-                    Hva du kan forvente
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    Anbefalingene baseres på din unike situasjon, ikke generiske "beste praksis"
-                  </p>
-                </div>
-              </div>
+              <CardTitle className="flex items-center gap-2 text-xl mb-2">
+                Hva du kan forvente
+              </CardTitle>
+              <CardDescription>
+                Anbefalingene baseres på din unike situasjon, ikke generiske
+                "beste praksis"
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-4">
-                  <h4 className="font-medium flex items-center gap-2">
-                    <Icon name="check-circle" className="size-5 text-green-600" />
-                    Du får vite:
-                  </h4>
-                  <ul className="space-y-2 text-sm text-muted-foreground">
+                  <Heading size="h4">Du får vite:</Heading>
+                  <ul className="space-y-2">
                     <li className="flex items-start gap-2">
-                      <span className="text-green-600">✓</span>
-                      <span><strong>Match-score</strong> - Hvor godt hver kanal passer din situasjon</span>
+                      <span className="text-primary">✓</span>
+                      <span>
+                        <strong>Match-score</strong> - Hvor godt hver kanal
+                        passer din situasjon
+                      </span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-green-600">✓</span>
-                      <span><strong>Hvorfor akkurat disse?</strong> - Spesifikk begrunnelse for valget</span>
+                      <span className="text-primary">✓</span>
+                      <span>
+                        <strong>Hvorfor akkurat disse?</strong> - Spesifikk
+                        begrunnelse for valget
+                      </span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-green-600">✓</span>
-                      <span><strong>Tid til resultater</strong> - Realistiske forventninger</span>
+                      <span className="text-primary">✓</span>
+                      <span>
+                        <strong>Tid til resultater</strong> - Realistiske
+                        forventninger
+                      </span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-green-600">✓</span>
-                      <span><strong>Ukentlig innsats</strong> - Hvor mye tid må du sette av?</span>
+                      <span className="text-primary">✓</span>
+                      <span>
+                        <strong>Ukentlig innsats</strong> - Hvor mye tid må du
+                        sette av?
+                      </span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-green-600">✓</span>
-                      <span><strong>Utfordringer</strong> - Hva kan bli vanskelig?</span>
+                      <span className="text-primary">✓</span>
+                      <span>
+                        <strong>Utfordringer</strong> - Hva kan bli vanskelig?
+                      </span>
                     </li>
                   </ul>
                 </div>
                 <div className="space-y-4">
-                  <h4 className="font-medium flex items-center gap-2">
-                    <Icon name="alert-triangle" className="size-5 text-amber-600" />
-                    Viktig å vite:
-                  </h4>
+                  <Heading size="h4">Viktig å vite:</Heading>
                   <ul className="space-y-2 text-sm text-muted-foreground">
                     <li className="flex items-start gap-2">
-                      <span className="text-amber-600">•</span>
-                      <span>Match-score på 70-85% er <strong>veldig bra</strong>. Perfekt match er sjeldent.</span>
+                      <span className="text-secondary">•</span>
+                      <span>
+                        Match-score på 70-85% er <strong>veldig bra</strong>.
+                        Perfekt match er sjeldent.
+                      </span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-amber-600">•</span>
-                      <span>Vi anbefaler å <strong>starte med én kanal</strong> og mestre den først.</span>
+                      <span className="text-secondary">•</span>
+                      <span>
+                        Vi anbefaler å <strong>starte med én kanal</strong> og
+                        mestre den først.
+                      </span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-amber-600">•</span>
-                      <span>Resultater tar tid - <strong>3-6 måneder</strong> er normalt for organisk vekst.</span>
+                      <span className="text-secondary">•</span>
+                      <span>
+                        Resultater tar tid - <strong>3-6 måneder</strong> er
+                        normalt for organisk vekst.
+                      </span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-amber-600">•</span>
-                      <span><strong>Konsistens</strong> er viktigere enn perfeksjon.</span>
+                      <span className="text-secondary">•</span>
+                      <span>
+                        <strong>Konsistens</strong> er viktigere enn perfeksjon.
+                      </span>
                     </li>
                   </ul>
                 </div>
@@ -207,8 +182,12 @@ export function GuideResult({ channels, reasoning, onReset, mode = "result", onS
           </Card>
         </motion.div>
 
-        <motion.div variants={itemVariants} className="text-center pt-4">
-          <Button size="lg" onClick={onStartQuiz} className="gap-2 px-8 h-12 text-base">
+        <motion.div variants={itemMotionVariants} className="text-center pt-4">
+          <Button
+            size="lg"
+            onClick={onStartQuiz}
+            className="gap-2 px-8 h-12 text-base"
+          >
             <Icon name="sparkles" className="size-5" />
             Start kanalveilederen
           </Button>
@@ -220,7 +199,6 @@ export function GuideResult({ channels, reasoning, onReset, mode = "result", onS
     );
   }
 
-  // Result mode - show actual results
   if (!channels || channels.length === 0) {
     return null;
   }
@@ -229,14 +207,22 @@ export function GuideResult({ channels, reasoning, onReset, mode = "result", onS
     <motion.div
       initial="hidden"
       animate="visible"
-      variants={containerVariants}
+      variants={containerMotionVariants}
       className="space-y-8"
     >
-      <motion.div variants={headerVariants} className="text-center space-y-3">
+      <motion.div
+        variants={headerMotionVariants}
+        className="text-center space-y-3"
+      >
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.2 }}
+          transition={{
+            type: "spring",
+            stiffness: 200,
+            damping: 15,
+            delay: 0.2,
+          }}
           className="inline-flex items-center justify-center size-16 rounded-full bg-linear-to-br from-primary/20 to-primary/10 text-primary mb-2"
         >
           <Icon name="trophy" className="size-8" />
@@ -249,9 +235,8 @@ export function GuideResult({ channels, reasoning, onReset, mode = "result", onS
         </p>
       </motion.div>
 
-      {/* Reasoning section */}
       {reasoning && (
-        <motion.div variants={itemVariants}>
+        <motion.div variants={itemMotionVariants}>
           <Card className="border-primary/20 bg-linear-to-r from-primary/5 to-primary/10">
             <CardContent className="pt-5 pb-5">
               <div className="flex gap-3">
@@ -259,7 +244,9 @@ export function GuideResult({ channels, reasoning, onReset, mode = "result", onS
                   <Icon name="lightbulb" className="size-4 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-primary mb-1">Min vurdering</p>
+                  <p className="text-sm font-medium text-primary mb-1">
+                    Min vurdering
+                  </p>
                   <p className="text-sm leading-relaxed text-muted-foreground">
                     {reasoning}
                   </p>
@@ -277,7 +264,7 @@ export function GuideResult({ channels, reasoning, onReset, mode = "result", onS
           const channelLink = channelLinks[channel.name];
 
           return (
-            <motion.div key={channel.name} variants={itemVariants}>
+            <motion.div key={channel.name} variants={itemMotionVariants}>
               <Card
                 className={cn(
                   "relative overflow-hidden transition-all duration-300 hover:shadow-lg",
@@ -304,7 +291,10 @@ export function GuideResult({ channels, reasoning, onReset, mode = "result", onS
                         "bg-background/60 backdrop-blur-sm"
                       )}
                     >
-                      <Icon name={medalIconName}   className={cn("size-5", config?.iconColor)} />
+                      <Icon
+                        name={medalIconName}
+                        className={cn("size-5", config?.iconColor)}
+                      />
                     </div>
                     <div className="flex-1">
                       <CardTitle className="text-xl flex items-center gap-2">
@@ -339,7 +329,10 @@ export function GuideResult({ channels, reasoning, onReset, mode = "result", onS
                     </div>
                     <div className="h-3 bg-background/60 rounded-full overflow-hidden">
                       <motion.div
-                        className={cn("h-full rounded-full", config?.progressColor)}
+                        className={cn(
+                          "h-full rounded-full",
+                          config?.progressColor
+                        )}
                         initial={{ width: 0 }}
                         animate={{ width: `${channel.matchPercent}%` }}
                         transition={{
@@ -381,7 +374,10 @@ export function GuideResult({ channels, reasoning, onReset, mode = "result", onS
                               Tid til resultater
                             </p>
                             <p className="text-sm font-medium flex items-center gap-1.5">
-                              <Icon name="calendar" className="size-4 text-primary" />
+                              <Icon
+                                name="calendar"
+                                className="size-4 text-primary"
+                              />
                               {channel.timeToResults}
                             </p>
                           </div>
@@ -392,7 +388,10 @@ export function GuideResult({ channels, reasoning, onReset, mode = "result", onS
                               Ukentlig innsats
                             </p>
                             <p className="text-sm font-medium flex items-center gap-1.5">
-                              <Icon name="clock" className="size-4 text-primary" />
+                              <Icon
+                                name="clock"
+                                className="size-4 text-primary"
+                              />
                               {channel.weeklyTimeNeeded}
                             </p>
                           </div>
@@ -406,9 +405,15 @@ export function GuideResult({ channels, reasoning, onReset, mode = "result", onS
                           Ideelt for
                         </h4>
                         <ul className="space-y-1">
-                          {channel.idealFor.slice(0, 3).map((item, i) => (
-                            <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-                              <Icon name="check" className="size-4 shrink-0 mt-0.5 text-green-600" />
+                          {channel.idealFor.slice(0, 3).map((item) => (
+                            <li
+                              key={`idealfor-${item}`}
+                              className="flex items-start gap-2 text-sm text-muted-foreground"
+                            >
+                              <Icon
+                                name="check"
+                                className="size-4 shrink-0 mt-0.5 text-green-600"
+                              />
                               <span>{item}</span>
                             </li>
                           ))}
@@ -416,21 +421,29 @@ export function GuideResult({ channels, reasoning, onReset, mode = "result", onS
                       </div>
                     )}
 
-                    {channel.challengingIf && channel.challengingIf.length > 0 && index === 0 && (
-                      <div className="pt-2 border-t">
-                        <h4 className="text-xs font-medium mb-2 text-muted-foreground uppercase tracking-wide">
-                          Kan være utfordrende hvis
-                        </h4>
-                        <ul className="space-y-1">
-                          {channel.challengingIf.slice(0, 2).map((item, i) => (
-                            <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-                              <Icon name="alert-triangle" className="size-4 shrink-0 mt-0.5 text-amber-600" />
-                              <span>{item}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
+                    {channel.challengingIf &&
+                      channel.challengingIf.length > 0 &&
+                      index === 0 && (
+                        <div className="pt-2 border-t">
+                          <h4 className="text-xs font-medium mb-2 text-muted-foreground uppercase tracking-wide">
+                            Kan være utfordrende hvis
+                          </h4>
+                          <ul className="space-y-1">
+                            {channel.challengingIf.slice(0, 2).map((item) => (
+                              <li
+                                key={`challengingif-${item}`}
+                                className="flex items-start gap-2 text-sm text-muted-foreground"
+                              >
+                                <Icon
+                                  name="alert-triangle"
+                                  className="size-4 shrink-0 mt-0.5 text-amber-600"
+                                />
+                                <span>{item}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
 
                     {index === 0 && (
                       <div className="pt-3 border-t bg-primary/5 -mx-6 -mb-4 px-6 py-4 rounded-b-lg">
@@ -440,16 +453,32 @@ export function GuideResult({ channels, reasoning, onReset, mode = "result", onS
                         </h4>
                         <ul className="space-y-1.5 text-sm text-muted-foreground">
                           <li className="flex items-start gap-2">
-                            <Icon name="check-circle" className="size-4 shrink-0 mt-0.5 text-primary" />
-                            <span>Optimaliser profilen din med tydelig verdiforslag</span>
+                            <Icon
+                              name="check-circle"
+                              className="size-4 shrink-0 mt-0.5 text-primary"
+                            />
+                            <span>
+                              Optimaliser profilen din med tydelig verdiforslag
+                            </span>
                           </li>
                           <li className="flex items-start gap-2">
-                            <Icon name="check-circle" className="size-4 shrink-0 mt-0.5 text-primary" />
-                            <span>Publiser ditt første innhold relatert til din ekspertise</span>
+                            <Icon
+                              name="check-circle"
+                              className="size-4 shrink-0 mt-0.5 text-primary"
+                            />
+                            <span>
+                              Publiser ditt første innhold relatert til din
+                              ekspertise
+                            </span>
                           </li>
                           <li className="flex items-start gap-2">
-                            <Icon name="check-circle" className="size-4 shrink-0 mt-0.5 text-primary" />
-                            <span>Engasjer med 5-10 relevante personer i bransjen</span>
+                            <Icon
+                              name="check-circle"
+                              className="size-4 shrink-0 mt-0.5 text-primary"
+                            />
+                            <span>
+                              Engasjer med 5-10 relevante personer i bransjen
+                            </span>
                           </li>
                         </ul>
                       </div>
@@ -462,8 +491,7 @@ export function GuideResult({ channels, reasoning, onReset, mode = "result", onS
         })}
       </div>
 
-      {/* All channels overview */}
-      <motion.div variants={itemVariants}>
+      <motion.div variants={itemMotionVariants}>
         <Card>
           <CardHeader>
             <div className="flex items-start justify-between">
@@ -473,7 +501,8 @@ export function GuideResult({ channels, reasoning, onReset, mode = "result", onS
                   Alle kanaler rangert
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  Her ser du hvor alle de viktigste kanalene scorer for din situasjon
+                  Her ser du hvor alle de viktigste kanalene scorer for din
+                  situasjon
                 </p>
               </div>
             </div>
@@ -494,8 +523,12 @@ export function GuideResult({ channels, reasoning, onReset, mode = "result", onS
                 { name: "Samarbeidspartnere", category: "partnere" },
                 { name: "SMS markedsføring", category: "direkte" },
               ].map((channel) => {
-                const recommended = channels.find(c => c.name === channel.name);
-                const matchPercent = recommended?.matchPercent ?? Math.floor(Math.random() * 30) + 30;
+                const recommended = channels.find(
+                  (c) => c.name === channel.name
+                );
+                const matchPercent =
+                  recommended?.matchPercent ??
+                  Math.floor(Math.random() * 30) + 30;
                 const isTopThree = !!recommended;
 
                 return (
@@ -510,14 +543,19 @@ export function GuideResult({ channels, reasoning, onReset, mode = "result", onS
                   >
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <p className={cn(
-                          "text-sm font-medium truncate",
-                          isTopThree && "text-primary"
-                        )}>
+                        <p
+                          className={cn(
+                            "text-sm font-medium truncate",
+                            isTopThree && "text-primary"
+                          )}
+                        >
                           {channel.name}
                         </p>
                         {isTopThree && (
-                          <Icon name="check-circle" className="size-3.5 text-primary shrink-0" />
+                          <Icon
+                            name="check-circle"
+                            className="size-3.5 text-primary shrink-0"
+                          />
                         )}
                       </div>
                       <div className="h-1.5 bg-background rounded-full overflow-hidden">
@@ -530,10 +568,12 @@ export function GuideResult({ channels, reasoning, onReset, mode = "result", onS
                         />
                       </div>
                     </div>
-                    <span className={cn(
-                      "text-sm font-semibold tabular-nums shrink-0",
-                      isTopThree ? "text-primary" : "text-muted-foreground"
-                    )}>
+                    <span
+                      className={cn(
+                        "text-sm font-semibold tabular-nums shrink-0",
+                        isTopThree ? "text-primary" : "text-muted-foreground"
+                      )}
+                    >
                       {matchPercent}%
                     </span>
                   </div>
@@ -542,12 +582,18 @@ export function GuideResult({ channels, reasoning, onReset, mode = "result", onS
             </div>
             <div className="mt-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
               <p className="text-xs text-amber-900 dark:text-amber-100 flex items-start gap-2">
-                <Icon name="alert-triangle" className="size-3.5 shrink-0 mt-0.5" />
+                <Icon
+                  name="alert-triangle"
+                  className="size-3.5 shrink-0 mt-0.5"
+                />
                 <span>
-                  <strong>Merk:</strong> Match-prosent for andre kanaler er estimert. 
-                  Dine topp 3 (markert med {" "}
-                  <Icon name="check-circle" className="inline size-3 text-primary" />) 
-                  er basert på grundig AI-analyse av dine svar.
+                  <strong>Merk:</strong> Match-prosent for andre kanaler er
+                  estimert. Dine topp 3 (markert med{" "}
+                  <Icon
+                    name="check-circle"
+                    className="inline size-3 text-primary"
+                  />
+                  ) er basert på grundig AI-analyse av dine svar.
                 </span>
               </p>
             </div>
@@ -556,22 +602,17 @@ export function GuideResult({ channels, reasoning, onReset, mode = "result", onS
       </motion.div>
 
       <motion.div
-        variants={itemVariants}
+        variants={itemMotionVariants}
         className="flex flex-col sm:flex-row gap-3 justify-center pt-4"
       >
-        <Button
-          variant="outline"
-          size="lg"
-          onClick={onReset}
-          className="gap-2"
-        >
+        <Button variant="outline" size="lg" onClick={onReset} className="gap-2">
           <Icon name="refresh" className="size-4" />
           Ta quizen på nytt
         </Button>
       </motion.div>
 
       <motion.div
-        variants={itemVariants}
+        variants={itemMotionVariants}
         className="bg-gradient-to-br from-[oklch(0.88_0.04_175)] via-[oklch(0.85_0.05_175)] to-[oklch(0.82_0.06_175)] dark:from-[oklch(0.45_0.09_175)] dark:via-[oklch(0.40_0.10_175)] dark:to-[oklch(0.35_0.11_175)] rounded-xl p-8 border-2 border-[oklch(0.75_0.06_175)] dark:border-[oklch(0.50_0.09_175)] text-foreground dark:text-white shadow-2xl"
       >
         <div className="flex flex-col md:flex-row gap-6 items-start">
@@ -584,44 +625,63 @@ export function GuideResult({ channels, reasoning, onReset, mode = "result", onS
               Start med {channels[0]?.name} i dag
             </h3>
             <p className="text-foreground/80 dark:text-white/90 leading-relaxed">
-              {channels[0]?.name} scoret {channels[0]?.matchPercent}% fordi det passer best 
-              med din situasjon. Her er hva du bør gjøre denne uken for å komme i gang:
+              {channels[0]?.name} scoret {channels[0]?.matchPercent}% fordi det
+              passer best med din situasjon. Her er hva du bør gjøre denne uken
+              for å komme i gang:
             </p>
             <div className="grid sm:grid-cols-2 gap-3 pt-2">
               <div className="bg-white/60 dark:bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-[oklch(0.75_0.06_175)] dark:border-white/20">
                 <div className="size-8 rounded-lg bg-[oklch(0.35_0.10_175)] dark:bg-[oklch(0.75_0.08_175)] flex items-center justify-center mb-2">
-                  <span className="text-lg font-bold text-white dark:text-[oklch(0.20_0.03_175)]">1</span>
+                  <span className="text-lg font-bold text-white dark:text-[oklch(0.20_0.03_175)]">
+                    1
+                  </span>
                 </div>
-                <h4 className="font-semibold text-foreground dark:text-white text-sm mb-1">Optimaliser profilen</h4>
+                <h4 className="font-semibold text-foreground dark:text-white text-sm mb-1">
+                  Optimaliser profilen
+                </h4>
                 <p className="text-xs text-foreground/70 dark:text-white/80">
-                  Sørg for at din profil tydelig viser hvem du hjelper og hvordan
+                  Sørg for at din profil tydelig viser hvem du hjelper og
+                  hvordan
                 </p>
               </div>
               <div className="bg-white/60 dark:bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-[oklch(0.75_0.06_175)] dark:border-white/20">
                 <div className="size-8 rounded-lg bg-[oklch(0.35_0.10_175)] dark:bg-[oklch(0.75_0.08_175)] flex items-center justify-center mb-2">
-                  <span className="text-lg font-bold text-white dark:text-[oklch(0.20_0.03_175)]">2</span>
+                  <span className="text-lg font-bold text-white dark:text-[oklch(0.20_0.03_175)]">
+                    2
+                  </span>
                 </div>
-                <h4 className="font-semibold text-foreground dark:text-white text-sm mb-1">Første innlegg</h4>
+                <h4 className="font-semibold text-foreground dark:text-white text-sm mb-1">
+                  Første innlegg
+                </h4>
                 <p className="text-xs text-foreground/70 dark:text-white/80">
                   Publiser noe som viser din ekspertise - ikke krev perfeksjon
                 </p>
               </div>
               <div className="bg-white/60 dark:bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-[oklch(0.75_0.06_175)] dark:border-white/20">
                 <div className="size-8 rounded-lg bg-[oklch(0.35_0.10_175)] dark:bg-[oklch(0.75_0.08_175)] flex items-center justify-center mb-2">
-                  <span className="text-lg font-bold text-white dark:text-[oklch(0.20_0.03_175)]">3</span>
+                  <span className="text-lg font-bold text-white dark:text-[oklch(0.20_0.03_175)]">
+                    3
+                  </span>
                 </div>
-                <h4 className="font-semibold text-foreground dark:text-white text-sm mb-1">Bygg relasjoner</h4>
+                <h4 className="font-semibold text-foreground dark:text-white text-sm mb-1">
+                  Bygg relasjoner
+                </h4>
                 <p className="text-xs text-foreground/70 dark:text-white/80">
                   Følg og engasjer med 10-15 personer i din målgruppe
                 </p>
               </div>
               <div className="bg-white/60 dark:bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-[oklch(0.75_0.06_175)] dark:border-white/20">
                 <div className="size-8 rounded-lg bg-[oklch(0.35_0.10_175)] dark:bg-[oklch(0.75_0.08_175)] flex items-center justify-center mb-2">
-                  <span className="text-lg font-bold text-white dark:text-[oklch(0.20_0.03_175)]">4</span>
+                  <span className="text-lg font-bold text-white dark:text-[oklch(0.20_0.03_175)]">
+                    4
+                  </span>
                 </div>
-                <h4 className="font-semibold text-foreground dark:text-white text-sm mb-1">Sett en plan</h4>
+                <h4 className="font-semibold text-foreground dark:text-white text-sm mb-1">
+                  Sett en plan
+                </h4>
                 <p className="text-xs text-foreground/70 dark:text-white/80">
-                  Bestem frekvens (f.eks. 2x/uke) og hold deg til det i 3 måneder
+                  Bestem frekvens (f.eks. 2x/uke) og hold deg til det i 3
+                  måneder
                 </p>
               </div>
             </div>

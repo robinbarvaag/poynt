@@ -14,7 +14,7 @@ export default async function PlannerAppLayout({
   });
 
   if (!session) {
-    redirect("/planner/login");
+    redirect("/on-poynt/innlogging");
   }
 
   return (

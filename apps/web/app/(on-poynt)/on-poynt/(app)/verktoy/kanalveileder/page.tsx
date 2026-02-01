@@ -1,37 +1,15 @@
 import { createServerCaller } from "@/lib/planner/trpc-server";
+import type { ChannelRecommendation, SavedResult } from "@/lib/types";
 import { ChannelGuideClient } from "./channel-guide-client";
-
-interface ChannelRecommendation {
-  name: string;
-  matchPercent: number;
-  reason: string;
-}
-
-interface SavedResult {
-  id: string;
-  channels: ChannelRecommendation[];
-  reasoning?: string;
-  createdAt: Date;
-}
-
-export interface Industry {
-  id: string;
-  name: string;
-  icon: string | null;
-  isActive: boolean;
-}
 
 export default async function ChannelGuidePage() {
   const trpc = await createServerCaller();
-
-  // Fetch all data in parallel server-side
   const [savedResults, industries, workspaceProfile] = await Promise.all([
     trpc.toolResult.list({ toolId: "channel-guide", limit: 1 }).catch(() => []),
     trpc.industry.list().catch(() => []),
     trpc.workspaceProfile.get().catch(() => null),
   ]);
 
-  // Process saved result
   let initialSavedResult: SavedResult | null = null;
   const firstResult = savedResults[0];
   if (firstResult?.result) {
@@ -49,13 +27,8 @@ export default async function ChannelGuidePage() {
     }
   }
 
-  // Filter active industries
   const activeIndustries = industries.filter((i) => i.isActive);
-
-  // Get initial industry from workspace profile
   const initialIndustryId = workspaceProfile?.industryId ?? null;
-
-  // Get initial target audience from workspace profile
   const initialTargetAudience = workspaceProfile?.audienceType ?? null;
 
   return (
@@ -67,4 +40,3 @@ export default async function ChannelGuidePage() {
     />
   );
 }
-

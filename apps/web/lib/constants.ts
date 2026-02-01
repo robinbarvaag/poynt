@@ -1,77 +1,50 @@
-import { IconName } from "@poynt/ui/icons";
-import { MedalConfigItem, Tool } from "./types";
+import type { IconName } from "@poynt/ui/icons";
+import type { MedalConfigItem } from "./types";
 
 export const mainNavItems: { title: string; url: string; icon: IconName }[] = [
   {
     title: "Hjem",
-    url: "/dashboard",
+    url: "/on-poynt/oversikt",
     icon: "home",
   },
   {
     title: "Kanalveileder",
-    url: "/planner/tools/channel-guide",
+    url: "/on-poynt/verktoy/kanalveileder",
     icon: "compass",
   },
   {
     title: "Markedsplan",
-    url: "/planner/tools/marketing-plan",
+    url: "/on-poynt/verktoy/markedsplan",
     icon: "bar-chart",
   },
   {
     title: "Si nei-generator",
-    url: "/planner/tools/decline-generator",
+    url: "/on-poynt/verktoy/avslag-generator",
     icon: "hand-metal",
   },
   {
     title: "Årshjul",
-    url: "/planner/tools/yearly-planner",
+    url: "/on-poynt/verktoy/arsplanlegger",
     icon: "calendar-days",
   },
 ];
 
-export const settingsNavItems: { title: string; url: string; icon: IconName }[] = [
+export const settingsNavItems: {
+  title: string;
+  url: string;
+  icon: IconName;
+}[] = [
   {
     title: "Bedrift",
-    url: "/planner/settings/workspace",
+    url: "/on-poynt/innstillinger/arbeidsomrade",
     icon: "building-2",
   },
   {
     title: "Abonnement",
-    url: "/planner/settings/subscription",
+    url: "/on-poynt/innstillinger/medlemskap",
     icon: "credit-card",
   },
 ];
-
-export const tools = [
-  {
-    icon: "compass",
-    title: "Kanalveileder",
-    description: "Finn de beste markedsføringskanalene for din bedrift",
-    href: "/planner/tools/channel-guide",
-    available: true,
-  },
-  {
-    icon: "file-text",
-    title: "Markedsplan-generator",
-    description: "Lag en komplett markedsplan med AI",
-    href: "/planner/tools/marketing-plan",
-    available: true,
-  },
-  {
-    icon: "hand-metal",
-    title: "Si nei-generator",
-    description: "Avslå forespørsler profesjonelt",
-    href: "/planner/tools/decline-generator",
-    available: true,
-  },
-  {
-    icon: "calendar",
-    title: "Årshjul",
-    description: "Planlegg innholdet ditt gjennom året",
-    href: "/planner/tools/yearly-planner",
-    available: true,
-  },
-] as Tool[];
 
 export const tierConfig = {
   free: {
@@ -91,7 +64,84 @@ export const tierConfig = {
   },
 };
 
-export const adminNavItems: { title: string; href: string; icon: IconName; disabled?: boolean }[] = [
+export const tools: {
+  icon: IconName;
+  title: string;
+  description: string;
+  href: string;
+  gradient: string;
+  benefits: string[];
+}[] = [
+  {
+    icon: "compass",
+    title: "Kanalveileder",
+    description:
+      "Finn de beste markedsføringskanalene for din bedrift basert på målgruppe og ressurser.",
+    href: "/on-poynt/verktoy/kanalveileder",
+    gradient: "from-sky-400/80 to-teal-400/80",
+    benefits: ["Personlig analyse", "Prioritert liste"],
+  },
+  {
+    icon: "file-text",
+    title: "Markedsplan-generator",
+    description:
+      "Lag en komplett markedsplan med innholdsstrategi og publiseringsfrekvens.",
+    href: "/on-poynt/verktoy/markedsplan",
+    gradient: "from-violet-400/80 to-indigo-400/80",
+    benefits: ["Skreddersydd", "Ukentlig plan"],
+  },
+  {
+    icon: "hand-metal",
+    title: "Si nei-generator",
+    description: "Avslå forespørsler profesjonelt uten å brenne broer.",
+    href: "/on-poynt/verktoy/avslag-generator",
+    gradient: "from-amber-400/80 to-orange-400/80",
+    benefits: ["Profesjonelt", "Vennlig tone"],
+  },
+  {
+    icon: "calendar",
+    title: "Årshjul",
+    description:
+      "Planlegg innholdet ditt gjennom året med AI-genererte forslag.",
+    href: "/on-poynt/verktoy/arsplanlegger",
+    gradient: "from-emerald-400/80 to-teal-400/80",
+    benefits: ["12 måneder", "Sesongbasert"],
+  },
+];
+
+export const quickActions = [
+  {
+    title: "Lag avslag",
+    description: "Profesjonelt nei",
+    href: "/on-poynt/verktoy/avslag-generator",
+    icon: "hand-metal" as IconName,
+  },
+  {
+    title: "Ny markedsplan",
+    description: "Komplett strategi",
+    href: "/on-poynt/verktoy/markedsplan",
+    icon: "file-text" as IconName,
+  },
+  {
+    title: "Finn kanaler",
+    description: "Beste plattformer",
+    href: "/on-poynt/verktoy/kanalveileder",
+    icon: "compass" as IconName,
+  },
+  {
+    title: "Planlegg året",
+    description: "Innholdskalender",
+    href: "/on-poynt/verktoy/arsplanlegger",
+    icon: "calendar" as IconName,
+  },
+];
+
+export const adminNavItems: {
+  title: string;
+  href: string;
+  icon: IconName;
+  disabled?: boolean;
+}[] = [
   {
     title: "Oversikt",
     href: "/admin",
@@ -116,7 +166,14 @@ export const adminNavItems: { title: string; href: string; icon: IconName; disab
   },
 ];
 
-export const stats: { title: string; value: string; description: string; href: string; icon: IconName; disabled?: boolean }[] = [
+export const stats: {
+  title: string;
+  value: string;
+  description: string;
+  href: string;
+  icon: IconName;
+  disabled?: boolean;
+}[] = [
   {
     title: "Bransjer",
     value: "20",

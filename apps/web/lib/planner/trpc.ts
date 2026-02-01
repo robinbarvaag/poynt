@@ -16,7 +16,7 @@ function getBaseUrl() {
 export const trpc = createTRPCClient<AppRouter>({
   links: [
     httpBatchLink({
-      url: `${getBaseUrl()}/planner/api/trpc`,
+      url: `${getBaseUrl()}/on-poynt/api/trpc`,
     }),
   ],
 });

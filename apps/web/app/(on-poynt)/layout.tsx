@@ -11,8 +11,8 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "Poynt Planner",
-    template: "%s | Poynt Planner",
+    default: "On Poynt",
+    template: "%s | On Poynt",
   },
   description: "Planlegg og organiser markedsføringen din",
   robots: {

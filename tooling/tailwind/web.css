@@ -30,6 +30,53 @@
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
 
+  /* Heading sizes */
+--text-h1-desktop: 3.4375rem;               /* 55px */
+--text-h1-desktop--line-height: 4.25rem;
+--text-h1-mobile: 1.75rem;                  /* 28px */
+--text-h1-mobile--line-height: 2.0625rem;
+
+--text-h2-desktop: 2.1875rem;               /* 35px */
+--text-h2-desktop--line-height: 2.625rem;
+--text-h2-mobile: 1.5rem;                   /* 24px */
+--text-h2-mobile--line-height: 2rem;
+
+--text-h3-desktop: 1.25rem;                 /* 20px */
+--text-h3-desktop--line-height: 1.5625rem;
+--text-h3-mobile: 1.25rem;                  /* 20px */
+--text-h3-mobile--line-height: 1.5625rem;
+
+--text-h4-desktop: 1.125rem;                /* 18px - NY */
+--text-h4-desktop--line-height: 1.5rem;
+--text-h4-mobile: 1rem;                     /* 16px - NY */
+--text-h4-mobile--line-height: 1.375rem;
+
+--text-h3-special-desktop: 1.625rem;        /* 26px */
+--text-h3-special-desktop--line-height: 1.875rem;
+--text-h3-special-mobile: 1rem;             /* 16px */
+--text-h3-special-mobile--line-height: 1.4375rem;
+
+/* Body sizes */
+--text-body-heading-desktop: 1.125rem;      /* 18px */
+--text-body-heading-desktop--line-height: 1.6875rem;
+--text-body-heading-mobile: 0.875rem;       /* 14px */
+--text-body-heading-mobile--line-height: 1.25rem;
+
+--text-body-desktop: 1rem;                  /* 16px */
+--text-body-desktop--line-height: 1.5rem;
+--text-body-mobile: 1rem;                   /* 16px */
+--text-body-mobile--line-height: 1.5rem;
+
+--text-body-small-desktop: 0.875rem;        /* 14px */
+--text-body-small-desktop--line-height: 1.3125rem;
+--text-body-small-mobile: 0.875rem;         /* 14px */
+--text-body-small-mobile--line-height: 1.3125rem;
+
+--text-body-detail-desktop: 0.75rem;        /* 12px */
+--text-body-detail-desktop--line-height: 1.125rem;
+--text-body-detail-mobile: 0.75rem;         /* 12px */
+--text-body-detail-mobile--line-height: 1.125rem;
+
   @keyframes accordion-down {
     from {
       height: 0;

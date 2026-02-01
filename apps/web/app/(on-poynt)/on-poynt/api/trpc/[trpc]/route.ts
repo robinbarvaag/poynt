@@ -9,7 +9,7 @@ const handler = async (req: Request) => {
   });
 
   return fetchRequestHandler({
-    endpoint: "/planner/api/trpc",
+    endpoint: "/on-poynt/api/trpc",
     req,
     router: appRouter,
     createContext: () => ({

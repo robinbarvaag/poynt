@@ -6,13 +6,12 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 export const auth = betterAuth({
   appName: "MarkedsPilot",
   baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
-  basePath: "/planner/api/auth", // Planner-specific auth path
+  basePath: "/on-poynt/api/auth",
   secret: process.env.BETTER_AUTH_SECRET,
 
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: {
-      // Map better-auth expected names to our prefixed tables
       user: schema.plannerUser,
       session: schema.plannerSession,
       account: schema.plannerAccount,
