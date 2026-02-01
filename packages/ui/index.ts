@@ -15,14 +15,15 @@ export {
   headingVariants,
   Text,
   textVariants,
-  H1,
-  H2,
-  H3,
-  H4,
-  Lead,
-  Muted,
-  type HeadingProps,
-  type TextProps,
+  Blockquote,
+  blockquoteVariants,
+  Code,
+  codeVariants,
+  List,
+  listVariants,
+  sizeVariants,
+  colorVariants,
+  weightVariants,
 } from "./components/typography";
 
 export {
@@ -32,9 +33,6 @@ export {
   CardDescription,
   CardContent,
   CardFooter,
-  CardImage,
-  cardVariants,
-  type CardProps,
 } from "./components/card";
 
 export {
@@ -168,16 +166,14 @@ export {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./components/select"
+} from "./components/select";
 
 export {
   RadioGroup,
   RadioGroupItem,
 } from "./components/radio-group";
 
-export {
-  Checkbox,
-} from "./components/checkbox";
+export { Checkbox } from "./components/checkbox";
 
 export {
   Accordion,
@@ -196,11 +192,11 @@ export {
 } from "./icons";
 
 export {
-  StepContainer, OptionCard, PrefilledBadge
+  StepContainer,
+  OptionCard,
+  PrefilledBadge,
 } from "./components/tool-form";
 
-export {
-  Switch
-}
+export { Switch };
 
 export { useIsMobile } from "./hooks/use-mobile";

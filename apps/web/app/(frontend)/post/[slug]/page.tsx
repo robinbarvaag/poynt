@@ -2,14 +2,11 @@ import config from "@/payload.config";
 import { RichText } from "@payloadcms/richtext-lexical/react";
 import {
   Badge,
-  Button,
   Card,
   CardContent,
   Container,
-  H1,
-  H2,
-  Lead,
   Text,
+  Heading
 } from "@poynt/ui";
 import { ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
@@ -98,7 +95,6 @@ export default async function PostPage({ params }: PostPageProps) {
   return (
     <Container size="sm" padding="default">
       <article>
-        {/* Back link */}
         <Link
           href="/blogg"
           className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8"
@@ -107,7 +103,6 @@ export default async function PostPage({ params }: PostPageProps) {
           <span>Tilbake til bloggen</span>
         </Link>
 
-        {/* Header */}
         <header className="mb-8">
           {post.categories && post.categories.length > 0 && (
             <div className="flex gap-2 mb-4">
@@ -123,19 +118,18 @@ export default async function PostPage({ params }: PostPageProps) {
             </div>
           )}
 
-          <H1 className="mb-4">{post.title}</H1>
+          <Heading size="h1">{post.title}</Heading>
 
-          {post.excerpt && <Lead className="mb-6">{post.excerpt}</Lead>}
+          {post.excerpt && <Text variant="lead">{post.excerpt}</Text>}
 
           <div className="flex items-center gap-4">
             {post.author && typeof post.author === "object" && (
-              <Text variant="subtle">Av {post.author.email}</Text>
+              <Text variant="muted">Av {post.author.email}</Text>
             )}
-            <Text variant="subtle">{formatDate(post.publishedAt)}</Text>
+            <Text variant="muted">{formatDate(post.publishedAt)}</Text>
           </div>
         </header>
 
-        {/* Featured Image */}
         {post.featuredImage &&
           typeof post.featuredImage === "object" &&
           post.featuredImage.url && (
@@ -150,15 +144,13 @@ export default async function PostPage({ params }: PostPageProps) {
             </div>
           )}
 
-        {/* Content */}
         <div className="prose prose-lg max-w-none prose-headings:text-foreground prose-p:text-foreground prose-a:text-primary prose-strong:text-foreground">
           <RichText data={post.content} />
         </div>
 
-        {/* Related Posts */}
         {post.relatedPosts && post.relatedPosts.length > 0 && (
           <aside className="mt-16 pt-10 border-t border-border">
-            <H2 className="mb-8">Relaterte innlegg</H2>
+            <Heading size="h2">Relaterte innlegg</Heading>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {post.relatedPosts.map((relatedPost) => {
                 if (typeof relatedPost !== "object") return null;
@@ -169,8 +161,6 @@ export default async function PostPage({ params }: PostPageProps) {
                     className="group"
                   >
                     <Card
-                      variant="interactive"
-                      padding="none"
                       className="overflow-hidden"
                     >
                       {relatedPost.featuredImage &&
@@ -189,7 +179,7 @@ export default async function PostPage({ params }: PostPageProps) {
                           </div>
                         )}
                       <CardContent className="p-4">
-                        <Text className="font-semibold group-hover:text-primary transition-colors">
+                        <Text>
                           {relatedPost.title}
                         </Text>
                       </CardContent>

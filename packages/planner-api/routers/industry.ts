@@ -11,10 +11,6 @@ import { z } from "zod";
 import { adminProcedure, protectedProcedure, router } from "../trpc";
 
 export const industryRouter = router({
-  /**
-   * List all industries (public for dropdowns)
-   * Only returns active industries for non-admins
-   */
   list: protectedProcedure
     .input(
       z
@@ -35,9 +31,7 @@ export const industryRouter = router({
       return industries;
     }),
 
-  /**
-   * Get single industry by ID
-   */
+
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input }) => {
@@ -57,13 +51,9 @@ export const industryRouter = router({
       return result;
     }),
 
-  /**
-   * Create new industry (admin only)
-   */
   create: adminProcedure
     .input(createIndustrySchema)
     .mutation(async ({ input }) => {
-      // Check if ID already exists
       const [existing] = await db
         .select({ id: plannerIndustry.id })
         .from(plannerIndustry)
@@ -94,9 +84,6 @@ export const industryRouter = router({
       return created;
     }),
 
-  /**
-   * Update industry (admin only)
-   */
   update: adminProcedure
     .input(
       z.object({
@@ -124,9 +111,6 @@ export const industryRouter = router({
       return updated;
     }),
 
-  /**
-   * Delete industry (admin only)
-   */
   delete: adminProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input }) => {
@@ -145,10 +129,6 @@ export const industryRouter = router({
       return { success: true };
     }),
 
-  /**
-   * Seed default industries (admin only)
-   * Only inserts if no industries exist
-   */
   seed: adminProcedure.mutation(async () => {
     const existing = await db
       .select({ id: plannerIndustry.id })
@@ -179,13 +159,9 @@ export const industryRouter = router({
     return { count: inserted.length };
   }),
 
-  /**
-   * Toggle active status (admin only)
-   */
   toggleActive: adminProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input }) => {
-      // Get current status
       const [current] = await db
         .select({ isActive: plannerIndustry.isActive })
         .from(plannerIndustry)

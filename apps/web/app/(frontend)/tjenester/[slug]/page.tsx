@@ -1,6 +1,6 @@
 import config from "@/payload.config";
 import { RichText } from "@payloadcms/richtext-lexical/react";
-import { Button, Container, H1, Lead } from "@poynt/ui";
+import { Button, Container, Heading, Text } from "@poynt/ui";
 import { ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
@@ -114,11 +114,11 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
 
         {/* Header */}
         <header className="mb-8">
-          <H1 className="mb-2">{service.name}</H1>
+          <Heading size="h1">{service.name}</Heading>
           <p className="text-2xl font-semibold text-primary mb-4">
             {formatPrice(service)}
           </p>
-          <Lead>{service.shortDescription}</Lead>
+          <Text variant={"lead"}>{service.shortDescription}</Text>
         </header>
 
         {/* Image */}

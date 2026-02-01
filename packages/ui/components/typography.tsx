@@ -5,20 +5,20 @@ import type * as React from "react";
 import { cn } from "@poynt/ui";
 
 const sizeVariants = {
-  h1: "text-h1-mobile md:text-h1-desktop",
-  h2: "text-h2-mobile md:text-h2-desktop",
-  h3: "text-h3-mobile md:text-h3-desktop",
-  h4: "text-h4-mobile md:text-h4-desktop",
-  "h4-fixed": "text-h4-desktop md:text-h4-desktop",
-  "h3-special": "text-h3-special-mobile md:text-h3-special-desktop",
+  h1: "text-heading-one-mobile md:text-heading-one-desktop",
+  h2: "text-heading-two-mobile md:text-heading-two-desktop",
+  h3: "text-heading-three-mobile md:text-heading-three-desktop",
+  h4: "text-heading-four-mobile md:text-heading-four-desktop",
+  "h4-fixed": "text-heading-four-desktop md:text-heading-four-desktop",
+  "h3-special":
+    "text-heading-three-special-mobile md:text-heading-three-special-desktop",
   "body-heading": "text-body-heading-mobile md:text-body-heading-desktop",
   body: "text-body-mobile md:text-body-desktop",
   "body-small": "text-body-small-mobile md:text-body-small-desktop",
   "body-detail": "text-body-detail-mobile md:text-body-detail-desktop",
-  // Fixed (alltid desktop-størrelse)
-  "h1-fixed": "text-h1-desktop md:text-h1-desktop",
-  "h2-fixed": "text-h2-desktop md:text-h2-desktop",
-  "h3-fixed": "text-h3-desktop md:text-h3-desktop",
+  "h1-fixed": "text-heading-one-desktop md:text-heading-one-desktop",
+  "h2-fixed": "text-heading-two-desktop md:text-heading-two-desktop",
+  "h3-fixed": "text-heading-three-desktop md:text-heading-three-desktop",
   "body-heading-fixed":
     "text-body-heading-desktop md:text-body-heading-desktop",
   "body-fixed": "text-body-desktop md:text-body-desktop",
@@ -34,17 +34,17 @@ const colorVariants = {
   foreground: "text-foreground",
   muted: "text-muted-foreground",
   white: "text-white",
-  danger: "text-bate-red",
+  danger: "text-destructive",
   success: "text-green-600",
 } as const;
 
 const weightVariants = {
+  light: "font-light",
   normal: "font-normal",
   medium: "font-medium",
   semibold: "font-semibold",
-  bold: "font-clanot-bold",
-  black: "font-clanot-black",
-  ultra: "font-clanot-ultra",
+  bold: "font-bold",
+  extrabold: "font-extrabold",
 } as const;
 
 const clampLines = {
@@ -54,13 +54,13 @@ const clampLines = {
   lg: "overflow-hidden overflow-ellipsis line-clamp-12",
 };
 
-const headingVariants = cva("scroll-m-20 text-balance", {
+const headingVariants = cva("scroll-m-20 text-balance font-heading", {
   variants: {
     variant: {
-      h1: "text-h1-mobile md:text-h1-desktop leading font-clanot-ultra text-primary [body.medlemsfordeler-page_&]:text-white",
-      h2: "text-h2-mobile md:text-h2-desktop font-clanot-ultra text-primary first:mt-0 [body.medlemsfordeler-page_&]:text-white",
-      h3: "text-h3-mobile md:text-h3-desktop font-clanot-black",
-      h4: "text-h3 font-semibold",
+      h1: "text-heading-one-mobile md:text-heading-one-desktop font-bold text-primary",
+      h2: "text-heading-two-mobile md:text-heading-two-desktop font-bold text-primary first:mt-0",
+      h3: "text-heading-three-mobile md:text-heading-three-desktop font-semibold",
+      h4: "text-heading-four-mobile md:text-heading-four-desktop font-sans font-semibold",
     },
     size: sizeVariants,
     color: colorVariants,
@@ -88,7 +88,7 @@ type HeadingProps = Omit<React.ComponentProps<"h1">, "className"> &
 function Heading({
   variant,
   size,
-  color,
+  color = "primary",
   weight,
   asChild = false,
   customStyles,
@@ -123,7 +123,7 @@ const textVariants = cva("", {
     weight: weightVariants,
     clamp: clampLines,
     bold: {
-      true: "font-clanot-bold",
+      true: "font-bold",
     },
   },
   defaultVariants: {
@@ -135,6 +135,7 @@ const textVariants = cva("", {
 
 type TextProps = Omit<React.ComponentProps<"p">, "className"> &
   VariantProps<typeof textVariants> & {
+    type?: "p" | "span" | "div";
     asChild?: boolean;
     /**
      * Bruk `customStyles` kun når du trenger å gå utenfor design-systemet.
@@ -148,9 +149,10 @@ type TextProps = Omit<React.ComponentProps<"p">, "className"> &
   };
 
 function Text({
+  type = "p",
   variant,
   size,
-  color,
+  color = "foreground",
   weight,
   asChild = false,
   bold,
@@ -160,7 +162,7 @@ function Text({
   className: _className,
   ...props
 }: TextProps) {
-  const Comp = asChild ? Slot : "p";
+  const Comp = asChild ? Slot : type;
 
   return (
     <Comp
@@ -169,38 +171,6 @@ function Text({
         textVariants({ variant, size, color, clamp, weight, bold }),
         customStyles
       )}
-      {...props}
-    />
-  );
-}
-
-const labelVariants = cva("", {
-  variants: {
-    size: sizeVariants,
-    color: colorVariants,
-    weight: weightVariants,
-  },
-});
-
-type LabelProps = React.ComponentProps<"label"> &
-  VariantProps<typeof labelVariants> & {
-    asChild?: boolean;
-    customStyles?: string;
-  };
-
-function Label({
-  size,
-  color,
-  weight,
-  asChild = false,
-  customStyles,
-  ...props
-}: LabelProps) {
-  const Comp = asChild ? Slot : "label";
-  return (
-    <Comp
-      data-slot="label"
-      className={cn(labelVariants({ size, color, weight }), customStyles)}
       {...props}
     />
   );
@@ -303,8 +273,6 @@ export {
   headingVariants,
   Text,
   textVariants,
-  Label,
-  labelVariants,
   Blockquote,
   blockquoteVariants,
   Code,

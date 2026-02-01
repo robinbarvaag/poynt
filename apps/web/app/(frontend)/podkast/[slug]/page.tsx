@@ -1,6 +1,6 @@
 import config from "@/payload.config";
 import { RichText } from "@payloadcms/richtext-lexical/react";
-import { Container, H1, Lead } from "@poynt/ui";
+import { Container, Heading, Text } from "@poynt/ui";
 import { ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
@@ -117,10 +117,10 @@ export default async function PodcastDetailPage({ params }: PodcastPageProps) {
             <span>{formatDate(podcast.publishedAt)}</span>
           </div>
 
-          <H1 className="mb-4">{podcast.title}</H1>
+          <Heading size="h1">{podcast.title}</Heading>
 
           {podcast.description && (
-            <Lead className="mb-6">{podcast.description}</Lead>
+            <Text variant="lead">{podcast.description}</Text>
           )}
         </header>
 

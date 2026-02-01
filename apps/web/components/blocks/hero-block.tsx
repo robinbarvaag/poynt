@@ -1,6 +1,6 @@
 import { getMediaUrl } from "@/lib/media-url";
 import { RichText } from "@payloadcms/richtext-lexical/react";
-import { Button, Heading, Lead, cn } from "@poynt/ui";
+import { Button, Heading, cn } from "@poynt/ui";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -97,7 +97,7 @@ export function HeroBlock({
         <div className="absolute bottom-1/4 right-[20%] w-24 h-24 bg-primary/15 rounded-full -z-10 blur-xl animate-float-slow" />
 
         <div className="relative text-center px-4 max-w-5xl mx-auto">
-          <Heading size="display" className="mb-6">
+          <Heading size="h2" variant={"h2"}>
             {title}
           </Heading>
           {subtitle && (
@@ -140,7 +140,7 @@ export function HeroBlock({
         <div className="mx-auto max-w-6xl px-4">
           <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center">
             <div className="order-2 md:order-1">
-              <Heading size="h1" className="mb-6">
+              <Heading size="h2" variant={"h2"}>
                 {title}
               </Heading>
               {subtitle && (
@@ -212,7 +212,7 @@ export function HeroBlock({
               </div>
             )}
             <div>
-              <Heading size="h1" className="mb-6">
+              <Heading size="h2" variant={"h2"}>
                 {title}
               </Heading>
               {subtitle && (
@@ -261,7 +261,7 @@ export function HeroBlock({
         <div className="absolute top-1/3 left-[5%] w-24 h-24 bg-primary/15 rounded-full -z-10 blur-xl animate-float-slow" />
 
         <div className="mx-auto max-w-5xl px-4 text-center">
-          <Heading size="display" className="mb-6">
+          <Heading size="h2" variant={"h2"}>
             {title}
           </Heading>
           {subtitle && (
@@ -328,7 +328,7 @@ export function HeroBlock({
       <div className="absolute bottom-1/4 left-[28%] w-2 h-2 bg-primary/30 rounded-full -z-10 animate-float-medium" />
 
       <div className="mx-auto max-w-4xl text-center">
-        <Heading size="display" className="mb-6 mx-auto">
+        <Heading size="h2" variant={"h2"}>
           {title}
         </Heading>
         {subtitle && (

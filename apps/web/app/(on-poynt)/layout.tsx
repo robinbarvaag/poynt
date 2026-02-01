@@ -1,11 +1,19 @@
 import "../globals.css";
 import { cn } from "@poynt/ui";
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Playfair_Display, Poppins } from "next/font/google";
 
-const inter = Inter({
+const poppins = Poppins({
   subsets: ["latin"],
-  variable: "--font-inter",
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
+  variable: "--font-poppins",
+  display: "swap",
+});
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+  variable: "--font-playfair",
   display: "swap",
 });
 
@@ -27,11 +35,14 @@ export default function PlannerRootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="no" className={inter.variable} suppressHydrationWarning>
+    <html
+      lang="no"
+      className={cn(poppins.variable, playfair.variable)}
+      suppressHydrationWarning
+    >
       <body
         className={cn(
           "min-h-screen bg-background font-sans antialiased",
-          inter.className
         )}
       >
         {children}

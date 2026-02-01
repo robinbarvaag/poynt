@@ -5,13 +5,20 @@ import config from "@payload-config";
 import { cn } from "@poynt/ui";
 import type { Metadata } from "next";
 import { unstable_cache } from "next/cache";
-import { Poppins } from "next/font/google";
+import { Playfair_Display, Poppins } from "next/font/google";
 import { getPayload } from "payload";
 
 const poppins = Poppins({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
   variable: "--font-poppins",
+  display: "swap",
+});
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+  variable: "--font-playfair",
   display: "swap",
 });
 
@@ -70,11 +77,10 @@ export default async function FrontendLayout({
   const { siteSettings, header, footer } = await getCachedGlobals();
 
   return (
-    <html lang="no" className={poppins.variable}>
+    <html lang="no" className={`${poppins.variable} ${playfair.variable}`}>
       <body
         className={cn(
           "min-h-screen bg-background font-sans antialiased",
-          poppins.className
         )}
       >
         <Header

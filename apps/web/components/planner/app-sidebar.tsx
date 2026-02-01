@@ -93,9 +93,9 @@ export function AppSidebar() {
                   <SidebarMenuItem>
                     <SidebarMenuButton
                       asChild
-                      isActive={pathname.startsWith("/planner/admin")}
+                      isActive={pathname.startsWith("/on-poynt/admin")}
                     >
-                      <Link href="/planner/admin" className="text-primary">
+                      <Link href="/on-poynt/admin" className="text-primary">
                         <Icon name="shield" />
                         <span>Admin</span>
                       </Link>

@@ -1,7 +1,7 @@
 import { getMediaUrl } from "@/lib/media-url";
 import type { SerializedEditorState } from "@payloadcms/richtext-lexical/lexical";
 import { RichText } from "@payloadcms/richtext-lexical/react";
-import { H3, Text } from "@poynt/ui";
+import { Heading, Text } from "@poynt/ui";
 import { Facebook, Instagram, Linkedin, Twitter, Youtube } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -66,6 +66,7 @@ const socialIcons = {
   youtube: Youtube,
   tiktok: () => (
     <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+      <title>TikTok Icon</title>
       <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
     </svg>
   ),
@@ -84,37 +85,28 @@ export function Footer({
 
   return (
     <footer className="relative mt-20 overflow-hidden">
-      {/* Gradient transition from page to footer */}
       <div className="absolute -top-20 left-0 right-0 h-20 bg-gradient-to-b from-transparent to-muted/40 pointer-events-none" />
 
-      {/* Main footer background */}
       <div className="absolute inset-0 bg-muted/40" />
 
-      {/* Subtle floating shapes */}
       <FloatingShapes variant="subtle" />
 
-      {/* Content */}
       <div className="relative z-10 mx-auto max-w-6xl px-4 py-12 md:py-16">
-        {/* Newsletter section */}
         {newsletter?.enabled && (
           <div className="mb-12 pb-12 border-b border-border">
             <div className="max-w-xl mx-auto text-center">
-              <H3 className="mb-2">
+              <Heading variant="h3">
                 {newsletter.title || "Meld deg på nyhetsbrevet"}
-              </H3>
+              </Heading>
               {newsletter.description && (
-                <Text variant="muted" className="mb-6">
-                  {newsletter.description}
-                </Text>
+                <Text variant="muted">{newsletter.description}</Text>
               )}
               <NewsletterForm buttonText={newsletter.buttonText} />
             </div>
           </div>
         )}
 
-        {/* Main footer content */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
-          {/* Logo/brand column */}
           <div className="col-span-2 md:col-span-4 lg:col-span-1">
             <Link href="/" className="inline-block mb-4">
               {logo ? (
@@ -133,11 +125,11 @@ export function Footer({
             </Link>
             {showSocialLinks && socialLinks.length > 0 && (
               <div className="flex gap-3 mt-4">
-                {socialLinks.map((social, index) => {
+                {socialLinks.map((social) => {
                   const Icon = socialIcons[social.platform];
                   return (
                     <a
-                      key={index}
+                      key={`${social.platform}-link`}
                       href={social.url}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -151,15 +143,12 @@ export function Footer({
             )}
           </div>
 
-          {/* Footer columns */}
-          {columns.map((column, index) => (
-            <div key={index}>
-              <Text as="p" className="font-semibold mb-4">
-                {column.title}
-              </Text>
+          {columns.map((column) => (
+            <div key={`${column.title}-column`}>
+              <Text>{column.title}</Text>
               <ul className="space-y-2">
                 {column.links?.map((link, linkIndex) => (
-                  <li key={linkIndex}>
+                  <li key={`${column.title}-link-${linkIndex}`}>
                     <Link
                       href={getHref(link)}
                       target={link.openInNewTab ? "_blank" : undefined}
@@ -177,13 +166,12 @@ export function Footer({
           ))}
         </div>
 
-        {/* Bottom bar */}
         <div className="mt-12 pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="text-sm text-muted-foreground">
             {bottomText ? (
               <RichText data={bottomText} />
             ) : (
-              <Text variant="subtle">
+              <Text variant="muted">
                 © {currentYear} {siteName}. Alle rettigheter reservert.
               </Text>
             )}

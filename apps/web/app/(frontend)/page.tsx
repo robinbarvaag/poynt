@@ -56,7 +56,7 @@ export default async function HomePage() {
 
   if (!homepage?.layout?.length) {
     return (
-      <div className="max-w-6xl mx-auto py-12">
+      <div className="max-w-6xl mx-auto py-12 ">
         <p className="text-gray-500">
           Rediger forsiden i admin under "Forside"
         </p>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Container, H2, Text, cn } from "@poynt/ui";
+import { Button, Container, Heading, Label, Text, cn } from "@poynt/ui";
 import { useState } from "react";
 import type { Form as PayloadForm } from "../../payload-types";
 
@@ -29,7 +29,7 @@ export function FormBlockComponent({
   if (typeof form === "string") {
     return (
       <Container size="sm" className="py-12">
-        <Text variant="subtle">Skjema ikke funnet</Text>
+        <Text variant="muted">Skjema ikke funnet</Text>
       </Container>
     );
   }
@@ -116,6 +116,7 @@ export function FormBlockComponent({
                 viewBox="0 0 24 24"
                 stroke="currentColor"
               >
+                <title>Checkmark Icon</title>
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -124,7 +125,7 @@ export function FormBlockComponent({
                 />
               </svg>
             </div>
-            <Text className="text-lg">{confirmationMessage}</Text>
+            <Text>{confirmationMessage}</Text>
           </div>
         </div>
       </Container>
@@ -140,19 +141,14 @@ export function FormBlockComponent({
           variantClasses[currentVariant]
         )}
       >
-        {formTitle && <H2 className="mb-2">{formTitle}</H2>}
-        {description && (
-          <Text variant="subtle" className="mb-6">
-            {description}
-          </Text>
-        )}
+        {formTitle && <Heading variant="h2">{formTitle}</Heading>}
+        {description && <Text variant="muted">{description}</Text>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {formData.fields
               ?.filter((field) => "name" in field && field.name)
-              .map((field, index) => {
-                // Type guard: only process fields with name property
+              .map((field) => {
                 if (!("name" in field) || !field.name) return null;
 
                 const fieldName = field.name;
@@ -165,19 +161,17 @@ export function FormBlockComponent({
 
                 return (
                   <div
-                    key={index}
+                    key={`${fieldName}-${field.id}`}
                     className={cn(
                       fieldWidth === 50 ? "md:col-span-1" : "md:col-span-2"
                     )}
                   >
-                    <label className="block mb-1.5">
-                      <Text as="span" className="font-medium text-sm">
-                        {fieldLabel}
-                        {isRequired && (
-                          <span className="text-destructive ml-1">*</span>
-                        )}
-                      </Text>
-                    </label>
+                    <Label className="block mb-1.5">
+                      {fieldLabel}
+                      {isRequired && (
+                        <span className="text-destructive ml-1">*</span>
+                      )}
+                    </Label>
 
                     {field.blockType === "text" && (
                       <input
@@ -222,8 +216,8 @@ export function FormBlockComponent({
                         className="w-full px-4 py-2.5 rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring"
                       >
                         <option value="">Velg...</option>
-                        {field.options?.map((option, optIndex) => (
-                          <option key={optIndex} value={option.value}>
+                        {field.options?.map((option) => (
+                          <option key={option.value} value={option.value}>
                             {option.label}
                           </option>
                         ))}
@@ -238,7 +232,7 @@ export function FormBlockComponent({
                           required={isRequired}
                           className="w-4 h-4 rounded border-input"
                         />
-                        <Text as="span" variant="subtle">
+                        <Text type="span" variant="muted">
                           {fieldLabel}
                         </Text>
                       </label>
