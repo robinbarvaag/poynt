@@ -106,36 +106,36 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MEMB-01 | — | Pending |
-| MEMB-02 | — | Pending |
-| MEMB-03 | — | Pending |
-| MEMB-04 | — | Pending |
-| MEMB-05 | — | Pending |
-| MEMB-06 | — | Pending |
-| MEMB-07 | — | Pending |
-| MEMB-08 | — | Pending |
-| CONT-01 | — | Pending |
-| CONT-02 | — | Pending |
-| CONT-03 | — | Pending |
-| CONT-04 | — | Pending |
-| CONT-05 | — | Pending |
-| AITL-01 | — | Pending |
-| AITL-02 | — | Pending |
-| AITL-03 | — | Pending |
-| I18N-01 | — | Pending |
-| I18N-02 | — | Pending |
-| I18N-03 | — | Pending |
-| ADMN-01 | — | Pending |
-| ADMN-02 | — | Pending |
-| ADMN-03 | — | Pending |
-| DYNM-01 | — | Pending |
-| DYNM-02 | — | Pending |
+| MEMB-01 | Phase 2 | Pending |
+| MEMB-02 | Phase 1 | Pending |
+| MEMB-03 | Phase 3 | Pending |
+| MEMB-04 | Phase 3 | Pending |
+| MEMB-05 | Phase 2 | Pending |
+| MEMB-06 | Phase 2 | Pending |
+| MEMB-07 | Phase 1 | Pending |
+| MEMB-08 | Phase 1 | Pending |
+| CONT-01 | Phase 3 | Pending |
+| CONT-02 | Phase 3 | Pending |
+| CONT-03 | Phase 3 | Pending |
+| CONT-04 | Phase 3 | Pending |
+| CONT-05 | Phase 3 | Pending |
+| AITL-01 | Phase 5 | Pending |
+| AITL-02 | Phase 5 | Pending |
+| AITL-03 | Phase 6 | Pending |
+| I18N-01 | Phase 4 | Pending |
+| I18N-02 | Phase 4 | Pending |
+| I18N-03 | Phase 4 | Pending |
+| ADMN-01 | Phase 5 | Pending |
+| ADMN-02 | Phase 5 | Pending |
+| ADMN-03 | Phase 5 | Pending |
+| DYNM-01 | Phase 5 | Pending |
+| DYNM-02 | Phase 5 | Pending |
 
 **Coverage:**
 - v1 requirements: 24 total
-- Mapped to phases: 0
-- Unmapped: 24 ⚠️
+- Mapped to phases: 24
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-02-03*
-*Last updated: 2026-02-03 after initial definition*
+*Last updated: 2026-02-03 after roadmap creation*
