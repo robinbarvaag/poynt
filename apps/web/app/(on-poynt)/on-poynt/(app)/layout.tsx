@@ -1,5 +1,5 @@
 import { AppSidebar } from "@/components/planner/app-sidebar";
-import { auth } from "@poynt/planner-auth/server";
+import { getSessionWithMembership } from "@/lib/membership";
 import { SidebarInset, SidebarProvider, Toaster } from "@poynt/ui";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -9,9 +9,11 @@ export default async function PlannerAppLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  // Create Request object from headers for getSessionWithMembership
+  const headersList = await headers();
+  const request = new Request("http://localhost", { headers: headersList });
+
+  const session = await getSessionWithMembership(request);
 
   if (!session) {
     redirect("/on-poynt/innlogging");
