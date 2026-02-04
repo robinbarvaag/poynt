@@ -17,5 +17,18 @@ export const db = drizzle(queryClient, { schema });
 // Re-export schema
 export * from "./schema";
 
+// Re-export commonly used drizzle-orm utilities
+export {
+  eq,
+  and,
+  or,
+  sql,
+  desc,
+  asc,
+  inArray,
+  isNull,
+  isNotNull,
+} from "drizzle-orm";
+
 // Export types
 export type Database = typeof db;
