@@ -72,3 +72,23 @@ export async function subscribeToNewsletter(
     };
   }
 }
+
+/**
+ * Send welcome email to new member with magic link login.
+ */
+export async function sendWelcomeEmail(email: string, magicLinkUrl: string) {
+  if (!process.env.RESEND_API_KEY) return;
+
+  await getResend().emails.send({
+    from: "On Poynt <onboarding@resend.dev>", // TODO: Change to verified domain
+    to: email,
+    subject: "Velkommen til On Poynt!",
+    html: `
+      <h1>Velkommen til On Poynt!</h1>
+      <p>Takk for at du ble medlem. Du har nå tilgang til On Poynt-plattformen.</p>
+      <p>Klikk på lenken under for å komme i gang:</p>
+      <p><a href="${magicLinkUrl}" style="display:inline-block;padding:12px 24px;background:#2563eb;color:#fff;text-decoration:none;border-radius:6px;">Gå til On Poynt</a></p>
+      <p style="color:#666;font-size:12px;">Denne lenken utløper om 10 minutter.</p>
+    `,
+  });
+}
