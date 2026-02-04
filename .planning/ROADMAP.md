@@ -12,7 +12,7 @@ Transform Poynt from a digital product marketplace into a comprehensive membersh
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Auth Unification & Membership Foundation** - Bridge Better Auth and Payload for single membership source of truth
+- [x] **Phase 1: Auth Unification & Membership Foundation** - Bridge Better Auth and Payload for single membership source of truth
 - [ ] **Phase 2: Membership Products & Purchase Flow** - End-to-end purchase-to-access with Stripe subscriptions and onboarding
 - [ ] **Phase 3: Community Content System** - Editorial content management with tier-based access control
 - [ ] **Phase 4: Dual-Language Localization** - Norwegian + English support across CMS and UI
@@ -34,9 +34,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 3 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Schema foundation: Drizzle canonical email, Payload membership fields, email normalization, Better Auth config with Google + magic link
-- [ ] 01-02-PLAN.md — Webhook & membership resolution: Stripe webhook membership purchase handler, idempotency tracking, membership tier resolution utility
-- [ ] 01-03-PLAN.md — Session wiring & login UI: On Poynt layout enriched session, login page with Google + magic link, human verification
+- [x] 01-01-PLAN.md — Schema foundation: Drizzle canonical email, Payload membership fields, email normalization, Better Auth config with Google + magic link
+- [x] 01-02-PLAN.md — Webhook & membership resolution: Stripe webhook membership purchase handler, idempotency tracking, membership tier resolution utility
+- [x] 01-03-PLAN.md — Session wiring & login UI: On Poynt layout enriched session, login page with Google + magic link, human verification
 
 ### Phase 2: Membership Products & Purchase Flow
 **Goal**: Enable end-to-end membership purchase with configurable billing periods and post-purchase onboarding
@@ -133,7 +133,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Auth Unification & Membership Foundation | 0/3 | Planned | - |
+| 1. Auth Unification & Membership Foundation | 3/3 | ✓ Complete | 2026-02-05 |
 | 2. Membership Products & Purchase Flow | 0/3 | Not started | - |
 | 3. Community Content System | 0/3 | Not started | - |
 | 4. Dual-Language Localization | 0/3 | Not started | - |

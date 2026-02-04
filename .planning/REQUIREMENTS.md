@@ -107,13 +107,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | MEMB-01 | Phase 2 | Pending |
-| MEMB-02 | Phase 1 | Pending |
+| MEMB-02 | Phase 1 | Complete |
 | MEMB-03 | Phase 3 | Pending |
 | MEMB-04 | Phase 3 | Pending |
 | MEMB-05 | Phase 2 | Pending |
 | MEMB-06 | Phase 2 | Pending |
-| MEMB-07 | Phase 1 | Pending |
-| MEMB-08 | Phase 1 | Pending |
+| MEMB-07 | Phase 1 | Complete |
+| MEMB-08 | Phase 1 | Complete |
 | CONT-01 | Phase 3 | Pending |
 | CONT-02 | Phase 3 | Pending |
 | CONT-03 | Phase 3 | Pending |
@@ -138,4 +138,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-02-03*
-*Last updated: 2026-02-03 after roadmap creation*
+*Last updated: 2026-02-05 after Phase 1 completion*
