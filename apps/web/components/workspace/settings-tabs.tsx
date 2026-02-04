@@ -1,20 +1,29 @@
 "use client";
 
-import { Icon } from "@poynt/ui/icons";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@poynt/ui";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@poynt/ui";
-import { WorkspaceGeneralForm } from "./general-form";
-import { WorkspaceMemberList } from "./member-list";
-import { WorkspaceInviteForm } from "./invite-form";
-import { WorkspaceProfileForm } from "./profile-form";
 import type { Workspace } from "@/lib/types";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@poynt/ui";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@poynt/ui";
+import { Icon } from "@poynt/ui/icons";
+import { WorkspaceGeneralForm } from "./general-form";
+import { WorkspaceInviteForm } from "./invite-form";
+import { WorkspaceMemberList } from "./member-list";
+import { WorkspaceProfileForm } from "./profile-form";
 
 interface WorkspaceSettingsTabsProps {
   workspace: Workspace;
   userRole: "owner" | "admin" | "member" | "client";
 }
 
-export function WorkspaceSettingsTabs({ workspace, userRole }: WorkspaceSettingsTabsProps) {
+export function WorkspaceSettingsTabs({
+  workspace,
+  userRole,
+}: WorkspaceSettingsTabsProps) {
   const canManageMembers = userRole === "owner" || userRole === "admin";
   const canEditSettings = userRole === "owner" || userRole === "admin";
 
@@ -50,7 +59,10 @@ export function WorkspaceSettingsTabs({ workspace, userRole }: WorkspaceSettings
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <WorkspaceGeneralForm workspace={workspace} disabled={!canEditSettings} />
+            <WorkspaceGeneralForm
+              workspace={workspace}
+              disabled={!canEditSettings}
+            />
           </CardContent>
         </Card>
       </TabsContent>

@@ -1,22 +1,19 @@
 "use client";
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { motion, AnimatePresence } from "framer-motion";
 import {
-  marketingPlanRequestSchema,
-  companySizeTypes,
-  companySizeLabels,
-  timeframeTypes,
-  timeframeLabels,
-  budgetTypes,
-  budgetLabels,
-  marketingGoalTypes,
-  marketingGoalLabels,
-  existingActivityTypes,
-  existingActivityLabels,
   type MarketingPlanRequest,
+  budgetLabels,
+  budgetTypes,
+  companySizeLabels,
+  companySizeTypes,
+  existingActivityLabels,
+  existingActivityTypes,
+  marketingGoalLabels,
+  marketingGoalTypes,
+  marketingPlanRequestSchema,
+  timeframeLabels,
+  timeframeTypes,
 } from "@poynt/planner-validators";
 import { Button } from "@poynt/ui";
 import { Progress } from "@poynt/ui";
@@ -33,7 +30,10 @@ import {
   FormMessage,
 } from "@poynt/ui";
 import { cn } from "@poynt/ui";
-import { Icon, IconName } from "@poynt/ui/icons";
+import { Icon, type IconName } from "@poynt/ui/icons";
+import { AnimatePresence, motion } from "framer-motion";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 
 type CompanySize = "solo" | "small" | "medium" | "large";
 
@@ -47,7 +47,13 @@ interface PlanFormProps {
 
 const TOTAL_STEPS = 5;
 
-const stepIcons: IconName[] = ["building-2", "target", "calendar", "wallet", "layout-list"];
+const stepIcons: IconName[] = [
+  "building-2",
+  "target",
+  "calendar",
+  "wallet",
+  "layout-list",
+];
 
 const stepTitles = [
   "Fortell oss om bedriften",
@@ -179,7 +185,9 @@ export function PlanForm({
         <div
           className={cn(
             "size-5 rounded-full border-2 flex items-center justify-center transition-colors",
-            isSelected ? "border-primary bg-primary" : "border-muted-foreground/30"
+            isSelected
+              ? "border-primary bg-primary"
+              : "border-muted-foreground/30"
           )}
         >
           {isSelected && (
@@ -222,7 +230,7 @@ export function PlanForm({
     none: "circle-off",
     low: "wallet",
     medium: "banknote",
-    high: "landmark"  ,
+    high: "landmark",
   };
 
   const activityIcons: Record<string, IconName> = {
@@ -566,7 +574,11 @@ export function PlanForm({
                 <>
                   <motion.div
                     animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    transition={{
+                      duration: 1,
+                      repeat: Number.POSITIVE_INFINITY,
+                      ease: "linear",
+                    }}
                   >
                     <Icon name="loader" className="size-4 animate-spin" />
                   </motion.div>

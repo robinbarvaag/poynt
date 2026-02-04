@@ -1,5 +1,6 @@
 "use client";
 
+import { mainNavItems, settingsNavItems } from "@/lib/constants";
 import { trpc } from "@/lib/planner/trpc";
 import {
   Icon,
@@ -19,7 +20,6 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { mainNavItems, settingsNavItems } from "@/lib/constants";
 import { NavUser } from "./nav-user";
 import { WorkspaceSwitcher } from "./workspace-switcher";
 

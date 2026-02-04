@@ -1,9 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Progress } from "../progress";
 import { Icon, type IconName } from "../../icons";
 import { cn } from "../../lib/utils";
+import { Progress } from "../progress";
 
 interface StepContainerProps {
   currentStep: number;
@@ -49,7 +49,9 @@ export function StepContainer({
           <span className="font-medium text-muted-foreground">
             Steg {currentStep + 1} av {totalSteps}
           </span>
-          <span className="font-medium text-primary">{Math.round(progressValue)}%</span>
+          <span className="font-medium text-primary">
+            {Math.round(progressValue)}%
+          </span>
         </div>
         <Progress value={progressValue} className="h-2" />
       </div>

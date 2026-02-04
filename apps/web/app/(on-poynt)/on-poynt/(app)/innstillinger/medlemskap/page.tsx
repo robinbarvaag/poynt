@@ -1,5 +1,18 @@
 "use client";
-import { Icon } from "@poynt/ui/icons";
+import {
+  PricingDialog,
+  type PricingTier,
+} from "@/components/pricing/pricing-cards";
+import { UpgradeDialog } from "@/components/subscription/upgrade-dialog";
+import { tierConfig } from "@/lib/constants";
+import { trpc } from "@/lib/planner/trpc";
+import {
+  subscriptionFeatures,
+  subscriptionPricing,
+  subscriptionTierLabels,
+  subscriptionTierLimits,
+  subscriptionTiers,
+} from "@poynt/planner-validators";
 import { Button } from "@poynt/ui";
 import { Progress } from "@poynt/ui";
 import {
@@ -9,20 +22,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@poynt/ui";
-import { trpc } from "@/lib/planner/trpc";
-import {
-  subscriptionTiers,
-  subscriptionTierLabels,
-  subscriptionPricing,
-  subscriptionFeatures,
-  subscriptionTierLimits,
-} from "@poynt/planner-validators";
-import { PricingDialog, type PricingTier } from "@/components/pricing/pricing-cards";
-import { UpgradeDialog } from "@/components/subscription/upgrade-dialog";
 import { cn } from "@poynt/ui";
 import { toast } from "@poynt/ui";
+import { Icon } from "@poynt/ui/icons";
 import { useEffect, useState } from "react";
-import { tierConfig } from "@/lib/constants";
 
 type SubscriptionTierType = "free" | "pro" | "business";
 
@@ -46,7 +49,9 @@ export default function SubscriptionPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [pricingDialogOpen, setPricingDialogOpen] = useState(false);
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
-  const [selectedTier, setSelectedTier] = useState<SubscriptionTierType | undefined>();
+  const [selectedTier, setSelectedTier] = useState<
+    SubscriptionTierType | undefined
+  >();
 
   useEffect(() => {
     trpc.workspace.getSubscriptionStatus
@@ -87,7 +92,10 @@ export default function SubscriptionPage() {
   if (isLoading) {
     return (
       <div className="flex min-h-100 items-center justify-center">
-        <Icon name="loader" className="size-8 animate-spin text-muted-foreground" />
+        <Icon
+          name="loader"
+          className="size-8 animate-spin text-muted-foreground"
+        />
       </div>
     );
   }
@@ -123,22 +131,30 @@ export default function SubscriptionPage() {
         <div className="p-6 border-b">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-4">
-              <div className={cn(
-                "flex items-center justify-center size-14 rounded-xl",
-                config.bgColor
-              )}>
+              <div
+                className={cn(
+                  "flex items-center justify-center size-14 rounded-xl",
+                  config.bgColor
+                )}
+              >
                 <Icon name={config.icon} className="size-7" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="text-2xl font-bold">{subscriptionTierLabels[tier]}</h2>
+                  <h2 className="text-2xl font-bold">
+                    {subscriptionTierLabels[tier]}
+                  </h2>
                   <span
                     className={cn(
                       "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
-                      status === "active" && "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-                      status === "trialing" && "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-                      status === "canceled" && "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-                      status === "past_due" && "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
+                      status === "active" &&
+                        "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+                      status === "trialing" &&
+                        "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
+                      status === "canceled" &&
+                        "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+                      status === "past_due" &&
+                        "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
                     )}
                   >
                     {status === "active" && "Aktiv"}
@@ -165,16 +181,17 @@ export default function SubscriptionPage() {
                 <span>Bedrifter brukt</span>
               </div>
               <span className="font-semibold">
-                {usage.workspaces.current} / {isUnlimited ? "∞" : usage.workspaces.limit}
+                {usage.workspaces.current} /{" "}
+                {isUnlimited ? "∞" : usage.workspaces.limit}
               </span>
             </div>
             {!isUnlimited && (
-              <Progress 
-                value={usagePercent} 
+              <Progress
+                value={usagePercent}
                 className={cn(
                   "h-3",
                   usagePercent >= 100 && "[&>div]:bg-red-500"
-                )} 
+                )}
               />
             )}
             {isUnlimited && (
@@ -240,11 +257,16 @@ export default function SubscriptionPage() {
           <ul className="grid gap-2">
             {subscriptionFeatures[tier].map((feature, i) => (
               <li key={i} className="flex items-center gap-3">
-                <div className={cn(
-                  "flex items-center justify-center size-5 rounded-full shrink-0",
-                  config.bgColor
-                )}>
-                  <Icon name="sparkles" className={cn("size-3", config.color)} />
+                <div
+                  className={cn(
+                    "flex items-center justify-center size-5 rounded-full shrink-0",
+                    config.bgColor
+                  )}
+                >
+                  <Icon
+                    name="sparkles"
+                    className={cn("size-3", config.color)}
+                  />
                 </div>
                 <span className="text-sm text-muted-foreground">{feature}</span>
               </li>

@@ -29,7 +29,9 @@ export const plannerUser = pgTable(
       .$onUpdate(() => new Date())
       .notNull(),
   },
-  (table) => [index("planner_user_canonical_email_idx").on(table.canonicalEmail)]
+  (table) => [
+    index("planner_user_canonical_email_idx").on(table.canonicalEmail),
+  ]
 );
 
 export const plannerSession = pgTable(

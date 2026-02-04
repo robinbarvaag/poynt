@@ -78,11 +78,7 @@ export default async function FrontendLayout({
 
   return (
     <html lang="no" className={`${poppins.variable} ${playfair.variable}`}>
-      <body
-        className={cn(
-          "min-h-screen bg-background font-sans antialiased",
-        )}
-      >
+      <body className={cn("min-h-screen bg-background font-sans antialiased")}>
         <Header
           siteName={siteSettings?.siteName || "Poynt"}
           logo={siteSettings?.logo as { url: string; alt?: string } | null}

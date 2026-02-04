@@ -1,15 +1,15 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { priorityConfig } from "@/lib/constants";
+import { trpc } from "@/lib/planner/trpc";
+import type { MarketingPlan } from "@poynt/planner-validators";
 import { Card, CardContent, CardHeader, CardTitle } from "@poynt/ui";
 import { Button } from "@poynt/ui";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@poynt/ui";
 import { Checkbox } from "@poynt/ui";
 import { cn } from "@poynt/ui";
-import type { MarketingPlan } from "@poynt/planner-validators";
 import { Icon } from "@poynt/ui/icons";
-import { priorityConfig } from "@/lib/constants";
-import { trpc } from "@/lib/planner/trpc";
+import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
 interface PlanResultProps {
@@ -20,8 +20,6 @@ interface PlanResultProps {
   toolResultId?: string;
   initialProgress?: any[];
 }
-
-
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -47,7 +45,14 @@ const itemVariants = {
   },
 };
 
-export function PlanResult({ plan, onReset, mode = "result", onStartForm, toolResultId, initialProgress = [] }: PlanResultProps) {
+export function PlanResult({
+  plan,
+  onReset,
+  mode = "result",
+  onStartForm,
+  toolResultId,
+  initialProgress = [],
+}: PlanResultProps) {
   const [completedTasks, setCompletedTasks] = useState<Set<string>>(new Set());
 
   // Update completed tasks from initialProgress
@@ -56,7 +61,9 @@ export function PlanResult({ plan, onReset, mode = "result", onStartForm, toolRe
       const completed = new Set<string>();
       for (const progress of initialProgress) {
         if (progress.type === "timeline") {
-          completed.add(`timeline-${progress.monthIndex}-${progress.taskIndex}`);
+          completed.add(
+            `timeline-${progress.monthIndex}-${progress.taskIndex}`
+          );
         } else {
           completed.add(`quickwin-${progress.taskIndex}`);
         }
@@ -65,20 +72,23 @@ export function PlanResult({ plan, onReset, mode = "result", onStartForm, toolRe
     }
   }, [initialProgress]);
 
-  const handleTimelineTaskToggle = async (monthIndex: number, taskIndex: number) => {
+  const handleTimelineTaskToggle = async (
+    monthIndex: number,
+    taskIndex: number
+  ) => {
     if (!toolResultId) return;
-    
+
     const key = `timeline-${monthIndex}-${taskIndex}`;
     const newCompleted = new Set(completedTasks);
-    
+
     if (completedTasks.has(key)) {
       newCompleted.delete(key);
     } else {
       newCompleted.add(key);
     }
-    
+
     setCompletedTasks(newCompleted);
-    
+
     try {
       await trpc.marketingPlanProgress.toggleTimelineTask.mutate({
         toolResultId,
@@ -94,18 +104,18 @@ export function PlanResult({ plan, onReset, mode = "result", onStartForm, toolRe
 
   const handleQuickWinToggle = async (taskIndex: number) => {
     if (!toolResultId) return;
-    
+
     const key = `quickwin-${taskIndex}`;
     const newCompleted = new Set(completedTasks);
-    
+
     if (completedTasks.has(key)) {
       newCompleted.delete(key);
     } else {
       newCompleted.add(key);
     }
-    
+
     setCompletedTasks(newCompleted);
-    
+
     try {
       await trpc.marketingPlanProgress.toggleQuickWin.mutate({
         toolResultId,
@@ -133,7 +143,11 @@ export function PlanResult({ plan, onReset, mode = "result", onStartForm, toolRe
         completed++;
       }
     }
-    return { completed, total: totalTasks, percentage: (completed / totalTasks) * 100 };
+    return {
+      completed,
+      total: totalTasks,
+      percentage: (completed / totalTasks) * 100,
+    };
   };
 
   // Intro mode
@@ -158,8 +172,9 @@ export function PlanResult({ plan, onReset, mode = "result", onStartForm, toolRe
             Lag din skreddersydde markedsplan
           </h1>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Slutt å gjette hva du skal gjøre. Få en komplett markedsplan tilpasset din 
-            bransje, mål og ressurser - med konkrete aktiviteter for hver uke.
+            Slutt å gjette hva du skal gjøre. Få en komplett markedsplan
+            tilpasset din bransje, mål og ressurser - med konkrete aktiviteter
+            for hver uke.
           </p>
         </motion.div>
 
@@ -179,15 +194,21 @@ export function PlanResult({ plan, onReset, mode = "result", onStartForm, toolRe
                       <Icon name="target" className="size-5 text-blue-600" />
                     </div>
                     <div>
-                      <h3 className="font-semibold mb-1">Prioriterte kanaler</h3>
+                      <h3 className="font-semibold mb-1">
+                        Prioriterte kanaler
+                      </h3>
                       <p className="text-sm text-muted-foreground">
-                        Hvilke kanaler du bør satse på, hvor ofte, og konkret hva du skal gjøre
+                        Hvilke kanaler du bør satse på, hvor ofte, og konkret
+                        hva du skal gjøre
                       </p>
                     </div>
                   </div>
                   <div className="flex gap-3">
                     <div className="size-10 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0">
-                      <Icon name="calendar" className="size-5 text-purple-600" />
+                      <Icon
+                        name="calendar"
+                        className="size-5 text-purple-600"
+                      />
                     </div>
                     <div>
                       <h3 className="font-semibold mb-1">Månedlig tidslinje</h3>
@@ -227,7 +248,11 @@ export function PlanResult({ plan, onReset, mode = "result", onStartForm, toolRe
         </motion.div>
 
         <motion.div variants={itemVariants} className="text-center pt-4">
-          <Button size="lg" onClick={onStartForm} className="gap-2 px-8 h-12 text-base">
+          <Button
+            size="lg"
+            onClick={onStartForm}
+            className="gap-2 px-8 h-12 text-base"
+          >
             <Icon name="sparkles" className="size-5" />
             Lag min markedsplan
           </Button>
@@ -255,15 +280,18 @@ export function PlanResult({ plan, onReset, mode = "result", onStartForm, toolRe
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.2 }}
+          transition={{
+            type: "spring",
+            stiffness: 200,
+            damping: 15,
+            delay: 0.2,
+          }}
           className="inline-flex items-center justify-center size-16 rounded-full bg-linear-to-br from-primary/20 to-primary/10 text-primary mb-2"
         >
           <Icon name="sparkles" className="size-8" />
         </motion.div>
         <h2 className="text-3xl font-bold tracking-tight">Din markedsplan</h2>
-        <p className="text-muted-foreground text-lg mx-auto">
-          {plan.summary}
-        </p>
+        <p className="text-muted-foreground text-lg mx-auto">{plan.summary}</p>
       </motion.div>
 
       {plan.reasoning && (
@@ -367,7 +395,10 @@ export function PlanResult({ plan, onReset, mode = "result", onStartForm, toolRe
                               key={i}
                               className="flex items-start gap-2 text-sm"
                             >
-                              <Icon name="arrow-right" className="size-4 text-primary mt-0.5 shrink-0" />
+                              <Icon
+                                name="arrow-right"
+                                className="size-4 text-primary mt-0.5 shrink-0"
+                              />
                               <span>{activity}</span>
                             </li>
                           ))}
@@ -379,7 +410,9 @@ export function PlanResult({ plan, onReset, mode = "result", onStartForm, toolRe
                               <Icon name="zap" className="size-3.5" />
                               Forventet effekt
                             </p>
-                            <p className="text-sm text-muted-foreground">{channel.expectedImpact}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {channel.expectedImpact}
+                            </p>
                           </div>
                         )}
 
@@ -389,43 +422,62 @@ export function PlanResult({ plan, onReset, mode = "result", onStartForm, toolRe
                               <Icon name="settings" className="size-3.5" />
                               Du trenger
                             </p>
-                            <p className="text-sm text-muted-foreground">{channel.resourcesNeeded}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {channel.resourcesNeeded}
+                            </p>
                           </div>
                         )}
 
-                        {channel.potentialChallenges && channel.potentialChallenges.length > 0 && (
-                          <div className="mt-3 space-y-1">
-                            <p className="text-xs font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
-                              <Icon name="alert-triangle" className="size-3.5" />
-                              Utfordringer
-                            </p>
-                            <ul className="space-y-1">
-                              {channel.potentialChallenges.map((challenge, idx) => (
-                                <li key={idx} className="text-xs text-muted-foreground flex items-start gap-1.5">
-                                  <span className="text-amber-600 dark:text-amber-400 mt-0.5">•</span>
-                                  <span>{challenge}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
+                        {channel.potentialChallenges &&
+                          channel.potentialChallenges.length > 0 && (
+                            <div className="mt-3 space-y-1">
+                              <p className="text-xs font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
+                                <Icon
+                                  name="alert-triangle"
+                                  className="size-3.5"
+                                />
+                                Utfordringer
+                              </p>
+                              <ul className="space-y-1">
+                                {channel.potentialChallenges.map(
+                                  (challenge, idx) => (
+                                    <li
+                                      key={idx}
+                                      className="text-xs text-muted-foreground flex items-start gap-1.5"
+                                    >
+                                      <span className="text-amber-600 dark:text-amber-400 mt-0.5">
+                                        •
+                                      </span>
+                                      <span>{challenge}</span>
+                                    </li>
+                                  )
+                                )}
+                              </ul>
+                            </div>
+                          )}
 
-                        {channel.successMetrics && channel.successMetrics.length > 0 && (
-                          <div className="mt-3 space-y-1">
-                            <p className="text-xs font-semibold text-green-600 dark:text-green-400 flex items-center gap-1.5">
-                              <Icon name="bar-chart" className="size-3.5" />
-                              Målepunkter
-                            </p>
-                            <ul className="space-y-1">
-                              {channel.successMetrics.map((metric, idx) => (
-                                <li key={idx} className="text-xs text-muted-foreground flex items-start gap-1.5">
-                                  <span className="text-green-600 dark:text-green-400 mt-0.5">•</span>
-                                  <span>{metric}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
+                        {channel.successMetrics &&
+                          channel.successMetrics.length > 0 && (
+                            <div className="mt-3 space-y-1">
+                              <p className="text-xs font-semibold text-green-600 dark:text-green-400 flex items-center gap-1.5">
+                                <Icon name="bar-chart" className="size-3.5" />
+                                Målepunkter
+                              </p>
+                              <ul className="space-y-1">
+                                {channel.successMetrics.map((metric, idx) => (
+                                  <li
+                                    key={idx}
+                                    className="text-xs text-muted-foreground flex items-start gap-1.5"
+                                  >
+                                    <span className="text-green-600 dark:text-green-400 mt-0.5">
+                                      •
+                                    </span>
+                                    <span>{metric}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
                       </CardContent>
                     </Card>
                   </motion.div>
@@ -464,8 +516,12 @@ export function PlanResult({ plan, onReset, mode = "result", onStartForm, toolRe
                             </p>
                           </div>
                           {(() => {
-                            const progress = getMonthProgress(index, month.tasks.length);
-                            return progress.completed === progress.total && progress.total > 0 ? (
+                            const progress = getMonthProgress(
+                              index,
+                              month.tasks.length
+                            );
+                            return progress.completed === progress.total &&
+                              progress.total > 0 ? (
                               <motion.div
                                 initial={{ scale: 0 }}
                                 animate={{ scale: 1 }}
@@ -478,18 +534,26 @@ export function PlanResult({ plan, onReset, mode = "result", onStartForm, toolRe
                           })()}
                         </div>
                         {(() => {
-                          const progress = getMonthProgress(index, month.tasks.length);
+                          const progress = getMonthProgress(
+                            index,
+                            month.tasks.length
+                          );
                           return progress.total > 0 ? (
                             <div className="mt-3">
                               <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
                                 <span>Fremgang</span>
-                                <span>{progress.completed} / {progress.total}</span>
+                                <span>
+                                  {progress.completed} / {progress.total}
+                                </span>
                               </div>
                               <div className="h-2 bg-muted rounded-full overflow-hidden">
                                 <motion.div
                                   initial={{ width: 0 }}
                                   animate={{ width: `${progress.percentage}%` }}
-                                  transition={{ duration: 0.5, ease: "easeOut" }}
+                                  transition={{
+                                    duration: 0.5,
+                                    ease: "easeOut",
+                                  }}
                                   className="h-full bg-primary"
                                 />
                               </div>
@@ -500,19 +564,25 @@ export function PlanResult({ plan, onReset, mode = "result", onStartForm, toolRe
                       <CardContent>
                         <ul className="space-y-2">
                           {month.tasks.map((task, i) => {
-                            const taskCompleted = isTimelineTaskCompleted(index, i);
+                            const taskCompleted = isTimelineTaskCompleted(
+                              index,
+                              i
+                            );
                             return (
                               <li key={i} className="flex items-start gap-3">
                                 <Checkbox
                                   id={`task-${month.month}-${i}`}
                                   checked={taskCompleted}
-                                  onCheckedChange={() => handleTimelineTaskToggle(index, i)}
+                                  onCheckedChange={() =>
+                                    handleTimelineTaskToggle(index, i)
+                                  }
                                 />
                                 <label
                                   htmlFor={`task-${month.month}-${i}`}
                                   className={cn(
                                     "text-sm leading-tight cursor-pointer",
-                                    taskCompleted && "line-through text-muted-foreground"
+                                    taskCompleted &&
+                                      "line-through text-muted-foreground"
                                   )}
                                 >
                                   {task}
@@ -598,7 +668,8 @@ export function PlanResult({ plan, onReset, mode = "result", onStartForm, toolRe
                             htmlFor={`quickwin-${index}`}
                             className={cn(
                               "text-sm cursor-pointer flex-1",
-                              winCompleted && "line-through text-muted-foreground"
+                              winCompleted &&
+                                "line-through text-muted-foreground"
                             )}
                           >
                             <div className="flex items-center gap-2">
@@ -632,7 +703,10 @@ export function PlanResult({ plan, onReset, mode = "result", onStartForm, toolRe
                         transition={{ delay: index * 0.05 }}
                         className="flex items-start gap-3"
                       >
-                        <Icon name="check-circle" className="size-5 text-blue-500 shrink-0 mt-0.5" />
+                        <Icon
+                          name="check-circle"
+                          className="size-5 text-blue-500 shrink-0 mt-0.5"
+                        />
                         <span className="text-sm">{tip}</span>
                       </motion.li>
                     ))}
@@ -653,7 +727,8 @@ export function PlanResult({ plan, onReset, mode = "result", onStartForm, toolRe
               DITT NESTE STEG
             </CardTitle>
             <p className="text-sm text-[oklch(0.35_0.04_175)] dark:text-[oklch(0.85_0.03_175)]">
-              Nå som du har planen, er det på tide å komme i gang. Start med ett av quick wins for å få fart på sakene.
+              Nå som du har planen, er det på tide å komme i gang. Start med ett
+              av quick wins for å få fart på sakene.
             </p>
           </CardHeader>
           <CardContent className="relative">

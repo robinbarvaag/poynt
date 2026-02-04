@@ -1,22 +1,19 @@
 "use client";
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { motion, AnimatePresence } from "framer-motion";
 import {
-  channelGuideRequestSchema,
-  targetAudienceTypes,
-  targetAudienceLabels,
-  mainGoalTypes,
-  mainGoalLabels,
-  weeklyTimeTypes,
-  weeklyTimeLabels,
-  strengthTypes,
-  strengthLabels,
-  previousChannelTypes,
-  previousChannelLabels,
   type ChannelGuideRequest,
+  channelGuideRequestSchema,
+  mainGoalLabels,
+  mainGoalTypes,
+  previousChannelLabels,
+  previousChannelTypes,
+  strengthLabels,
+  strengthTypes,
+  targetAudienceLabels,
+  targetAudienceTypes,
+  weeklyTimeLabels,
+  weeklyTimeTypes,
 } from "@poynt/planner-validators";
 import { Button } from "@poynt/ui";
 import { Card, CardContent } from "@poynt/ui";
@@ -37,8 +34,11 @@ import {
   FormMessage,
 } from "@poynt/ui";
 import { cn } from "@poynt/ui";
-import { StepContainer, OptionCard, PrefilledBadge } from "@poynt/ui";
+import { OptionCard, PrefilledBadge, StepContainer } from "@poynt/ui";
 import { Icon, type IconName } from "@poynt/ui/icons";
+import { AnimatePresence, motion } from "framer-motion";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 
 interface Industry {
   id: string;
@@ -57,7 +57,14 @@ interface GuideQuizProps {
 
 const TOTAL_STEPS = 6;
 
-const stepIcons: IconName[] = ["building-2", "users", "target", "clock", "palette", "message-square"];
+const stepIcons: IconName[] = [
+  "building-2",
+  "users",
+  "target",
+  "clock",
+  "palette",
+  "message-square",
+];
 
 const stepTitles = [
   "Hvilken bransje jobber du i?",
@@ -209,10 +216,7 @@ export function GuideQuiz({
                   )}
                 </div>
                 <FormControl>
-                  <Select
-                    value={field.value}
-                    onValueChange={field.onChange}
-                  >
+                  <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Velg din bransje..." />
                     </SelectTrigger>
@@ -358,7 +362,8 @@ export function GuideQuiz({
                   <FormControl>
                     <div className="grid grid-cols-2 gap-3">
                       {previousChannelTypes.map((channel) => {
-                        const isChecked = field.value?.includes(channel) || false;
+                        const isChecked =
+                          field.value?.includes(channel) || false;
                         return (
                           <Card
                             key={channel}
@@ -393,11 +398,18 @@ export function GuideQuiz({
                               {(() => {
                                 const channelIconName = channelIcons[channel];
                                 return channelIconName ? (
-                                  <div className={cn(
-                                    "size-8 rounded-md flex items-center justify-center",
-                                    isChecked ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
-                                  )}>
-                                    <Icon name={channelIconName} className="size-4" />
+                                  <div
+                                    className={cn(
+                                      "size-8 rounded-md flex items-center justify-center",
+                                      isChecked
+                                        ? "bg-primary/10 text-primary"
+                                        : "bg-muted text-muted-foreground"
+                                    )}
+                                  >
+                                    <Icon
+                                      name={channelIconName}
+                                      className="size-4"
+                                    />
                                   </div>
                                 ) : null;
                               })()}
@@ -480,10 +492,7 @@ export function GuideQuiz({
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={(e) => e.preventDefault()}
-        className="space-y-8"
-      >
+      <form onSubmit={(e) => e.preventDefault()} className="space-y-8">
         <StepContainer
           currentStep={currentStep}
           totalSteps={TOTAL_STEPS}
@@ -542,7 +551,11 @@ export function GuideQuiz({
                 <>
                   <motion.div
                     animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    transition={{
+                      duration: 1,
+                      repeat: Number.POSITIVE_INFINITY,
+                      ease: "linear",
+                    }}
                   >
                     <Icon name="loader" className="size-4 animate-spin mr-2" />
                   </motion.div>

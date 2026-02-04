@@ -1,17 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { trpc } from "@/lib/planner/trpc";
 import { Button } from "@poynt/ui";
 import { toast } from "@poynt/ui";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@poynt/ui";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@poynt/ui";
 import { Icon } from "@poynt/ui/icons";
-import { trpc } from "@/lib/planner/trpc";
 import { motion } from "framer-motion";
+import { useMemo, useState } from "react";
 
 interface DeclineResultProps {
   result?: string;
@@ -51,14 +46,13 @@ const itemVariants = {
   },
 };
 
-export function DeclineResult({ 
-  result, 
-  onReset, 
-  mode = "result", 
-  onStartForm, 
-  toolResultId
+export function DeclineResult({
+  result,
+  onReset,
+  mode = "result",
+  onStartForm,
+  toolResultId,
 }: DeclineResultProps) {
-
   // Intro mode
   if (mode === "intro") {
     return (
@@ -77,11 +71,10 @@ export function DeclineResult({
           >
             <Icon name="message-square-off" className="size-10" />
           </motion.div>
-          <h1 className="text-4xl font-bold tracking-tight">
-            Si nei med stil
-          </h1>
+          <h1 className="text-4xl font-bold tracking-tight">Si nei med stil</h1>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Profesjonelle avslag som bevarer relasjoner. Få 3 varianter tilpasset din situasjon.
+            Profesjonelle avslag som bevarer relasjoner. Få 3 varianter
+            tilpasset din situasjon.
           </p>
         </motion.div>
 
@@ -132,7 +125,11 @@ export function DeclineResult({
         </motion.div>
 
         <motion.div variants={itemVariants} className="text-center pt-4">
-          <Button size="lg" onClick={onStartForm} className="gap-2 px-8 h-12 text-base">
+          <Button
+            size="lg"
+            onClick={onStartForm}
+            className="gap-2 px-8 h-12 text-base"
+          >
             <Icon name="sparkles" className="size-5" />
             Lag mitt avslag
           </Button>
@@ -200,7 +197,7 @@ export function DeclineResult({
     try {
       await navigator.clipboard.writeText(text);
       toast("Kopiert til utklippstavlen");
-      
+
       // Save which variant was copied (low-friction tracking)
       if (toolResultId) {
         trpc.declineFeedback.saveVariantCopy.mutate({
@@ -252,7 +249,12 @@ export function DeclineResult({
           variant="outline"
           size="sm"
           className="gap-2"
-          onClick={() => copyToClipboard(activeVariant?.content || "", activeVariant?.id || "")}
+          onClick={() =>
+            copyToClipboard(
+              activeVariant?.content || "",
+              activeVariant?.id || ""
+            )
+          }
         >
           <Icon name="copy" className="size-4" />
           Kopier tekst

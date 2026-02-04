@@ -1,22 +1,22 @@
 "use client";
 
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import type { MonthContent, YearlyPlan } from "@poynt/planner-validators";
 import { Card, CardContent, CardHeader, CardTitle } from "@poynt/ui";
 import { Button } from "@poynt/ui";
 import { Tabs, TabsList, TabsTrigger } from "@poynt/ui";
 import {
-  RefreshCcw,
+  Calendar,
   CalendarDays,
-  Lightbulb,
   ChevronLeft,
   ChevronRight,
-  Calendar,
-  Sparkles,
+  Lightbulb,
   type LucideIcon,
+  RefreshCcw,
+  Sparkles,
 } from "@poynt/ui/icons";
 import { cn } from "@poynt/ui/lib/utils";
-import type { YearlyPlan, MonthContent } from "@poynt/planner-validators";
+import { AnimatePresence, motion } from "framer-motion";
+import { useState } from "react";
 
 interface PlannerResultProps {
   plan: YearlyPlan;
@@ -99,14 +99,15 @@ export function PlannerResult({ plan, onReset }: PlannerResultProps) {
         <h2 className="text-3xl font-bold tracking-tight">
           Ditt årshjul {plan.year}
         </h2>
-        <p className="text-muted-foreground text-lg mx-auto">
-          {plan.summary}
-        </p>
+        <p className="text-muted-foreground text-lg mx-auto">{plan.summary}</p>
       </div>
 
       {/* View Toggle */}
       <div className="flex justify-center">
-        <Tabs value={view} onValueChange={(v) => setView(v as "wheel" | "list")}>
+        <Tabs
+          value={view}
+          onValueChange={(v) => setView(v as "wheel" | "list")}
+        >
           <TabsList>
             <TabsTrigger value="wheel" className="gap-2">
               <Sparkles className="size-4" />
@@ -246,7 +247,10 @@ export function PlannerResult({ plan, onReset }: PlannerResultProps) {
                       </h4>
                       <ul className="space-y-1">
                         {selectedMonth.tips.map((tip, i) => (
-                          <li key={i} className="text-sm flex items-start gap-2">
+                          <li
+                            key={i}
+                            className="text-sm flex items-start gap-2"
+                          >
                             <span className="text-primary">•</span>
                             {tip}
                           </li>
@@ -279,7 +283,9 @@ export function PlannerResult({ plan, onReset }: PlannerResultProps) {
           {/* Center */}
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 size-32 rounded-full bg-primary/10 flex items-center justify-center z-10">
             <div className="text-center">
-              <span className="text-3xl font-bold text-primary">{plan.year}</span>
+              <span className="text-3xl font-bold text-primary">
+                {plan.year}
+              </span>
               <p className="text-xs text-muted-foreground">Årshjul</p>
             </div>
           </div>

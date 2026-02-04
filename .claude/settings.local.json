@@ -4,7 +4,8 @@
       "Bash(bun run:*)",
       "Bash(find:*)",
       "Bash(node screenshot.mjs:*)",
-      "Bash(bun install)"
+      "Bash(bun install)",
+      "Skill(gsd:map-codebase)"
     ]
   }
 }

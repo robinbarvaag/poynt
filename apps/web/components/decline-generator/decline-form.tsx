@@ -1,17 +1,15 @@
 "use client";
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  declineRequestSchema,
-  situationTypes,
-  situationTypeLabels,
-  relationshipTypes,
-  relationshipTypeLabels,
-  toneTypes,
-  toneTypeLabels,
   type DeclineRequest,
+  declineRequestSchema,
+  relationshipTypeLabels,
+  relationshipTypes,
+  situationTypeLabels,
+  situationTypes,
+  toneTypeLabels,
+  toneTypes,
 } from "@poynt/planner-validators";
 import { Button } from "@poynt/ui";
 import {
@@ -33,18 +31,15 @@ import { RadioGroup, RadioGroupItem } from "@poynt/ui";
 import { Checkbox } from "@poynt/ui";
 import { Textarea } from "@poynt/ui";
 import { Label } from "@poynt/ui";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@poynt/ui";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@poynt/ui";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@poynt/ui";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 
 interface DeclineFormProps {
   onSubmit: (data: DeclineRequest) => Promise<void>;
@@ -69,7 +64,10 @@ export function DeclineForm({ onSubmit, isLoading }: DeclineFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <Tabs value={mode} onValueChange={(v) => setMode(v as "quick" | "custom")}>
+        <Tabs
+          value={mode}
+          onValueChange={(v) => setMode(v as "quick" | "custom")}
+        >
           <TabsList className="w-full">
             <TabsTrigger value="quick" className="flex-1">
               Rask
@@ -132,7 +130,10 @@ export function DeclineForm({ onSubmit, isLoading }: DeclineFormProps) {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Type situasjon</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value ?? ""}>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value ?? ""}
+                        >
                           <FormControl>
                             <SelectTrigger className="w-full">
                               <SelectValue placeholder="La AI analysere automatisk" />
@@ -164,9 +165,15 @@ export function DeclineForm({ onSubmit, isLoading }: DeclineFormProps) {
                             className="flex flex-col gap-2"
                           >
                             {relationshipTypes.map((type) => (
-                              <div key={type} className="flex items-center gap-2">
+                              <div
+                                key={type}
+                                className="flex items-center gap-2"
+                              >
                                 <RadioGroupItem value={type} id={type} />
-                                <Label htmlFor={type} className="font-normal cursor-pointer">
+                                <Label
+                                  htmlFor={type}
+                                  className="font-normal cursor-pointer"
+                                >
                                   {relationshipTypeLabels[type]}
                                 </Label>
                               </div>
@@ -191,9 +198,18 @@ export function DeclineForm({ onSubmit, isLoading }: DeclineFormProps) {
                             className="flex flex-col gap-2"
                           >
                             {toneTypes.map((type) => (
-                              <div key={type} className="flex items-center gap-2">
-                                <RadioGroupItem value={type} id={`tone-${type}`} />
-                                <Label htmlFor={`tone-${type}`} className="font-normal cursor-pointer">
+                              <div
+                                key={type}
+                                className="flex items-center gap-2"
+                              >
+                                <RadioGroupItem
+                                  value={type}
+                                  id={`tone-${type}`}
+                                />
+                                <Label
+                                  htmlFor={`tone-${type}`}
+                                  className="font-normal cursor-pointer"
+                                >
                                   {toneTypeLabels[type]}
                                 </Label>
                               </div>

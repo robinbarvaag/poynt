@@ -1,9 +1,11 @@
 "use client";
 
-import * as React from "react";
-import { useForm } from "react-hook-form";
+import { trpc } from "@/lib/planner/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Icon } from "@poynt/ui/icons";
+import {
+  type UpdateWorkspaceInput,
+  updateWorkspaceSchema,
+} from "@poynt/planner-validators";
 import { Button } from "@poynt/ui";
 import {
   Form,
@@ -17,8 +19,9 @@ import {
 import { Input } from "@poynt/ui";
 import { Textarea } from "@poynt/ui";
 import { toast } from "@poynt/ui";
-import { updateWorkspaceSchema, type UpdateWorkspaceInput } from "@poynt/planner-validators";
-import { trpc } from "@/lib/planner/trpc";
+import { Icon } from "@poynt/ui/icons";
+import * as React from "react";
+import { useForm } from "react-hook-form";
 
 interface Workspace {
   id: string;
@@ -58,7 +61,9 @@ export function WorkspaceGeneralForm({
       }
     } catch (error: unknown) {
       const errorMessage =
-        error instanceof Error ? error.message : "Kunne ikke oppdatere innstillinger";
+        error instanceof Error
+          ? error.message
+          : "Kunne ikke oppdatere innstillinger";
       toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -111,16 +116,16 @@ export function WorkspaceGeneralForm({
         <div className="flex items-center gap-4">
           <div className="flex-1">
             <p className="text-sm font-medium">URL-slug</p>
-            <p className="text-sm text-muted-foreground">
-              {workspace.slug}
-            </p>
+            <p className="text-sm text-muted-foreground">{workspace.slug}</p>
           </div>
         </div>
 
         {!disabled && (
           <div className="flex justify-end">
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting && <Icon name="loader" className="mr-2 size-4 animate-spin" />}
+              {isSubmitting && (
+                <Icon name="loader" className="mr-2 size-4 animate-spin" />
+              )}
               Lagre endringer
             </Button>
           </div>

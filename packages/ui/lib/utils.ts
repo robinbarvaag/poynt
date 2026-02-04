@@ -28,7 +28,7 @@ const twMerge = extendTailwindMerge({
             "body-detail-desktop",
             "body-detail-mobile",
             "font-heading",
-            "font-bold"
+            "font-bold",
           ],
         },
       ],

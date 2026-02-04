@@ -1,8 +1,8 @@
 "use client";
 
+import { cn } from "@poynt/ui";
 import * as AvatarPrimitive from "@radix-ui/react-avatar";
 import * as React from "react";
-import { cn } from "@poynt/ui";
 
 const Avatar = React.forwardRef<
   React.ComponentRef<typeof AvatarPrimitive.Root>,

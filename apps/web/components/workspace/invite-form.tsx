@@ -1,9 +1,13 @@
 "use client";
 
-import * as React from "react";
-import { useForm } from "react-hook-form";
+import { trpc } from "@/lib/planner/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Icon } from "@poynt/ui/icons";
+import {
+  type InviteMemberInput,
+  inviteMemberSchema,
+  workspaceRoleDescriptions,
+  workspaceRoleLabels,
+} from "@poynt/planner-validators";
 import { Button } from "@poynt/ui";
 import {
   Form,
@@ -25,13 +29,9 @@ import {
 import { Separator } from "@poynt/ui";
 import { Skeleton } from "@poynt/ui/components/skeleton";
 import { toast } from "@poynt/ui/components/sonner";
-import {
-  inviteMemberSchema,
-  workspaceRoleLabels,
-  workspaceRoleDescriptions,
-  type InviteMemberInput,
-} from "@poynt/planner-validators";
-import { trpc } from "@/lib/planner/trpc";
+import { Icon } from "@poynt/ui/icons";
+import * as React from "react";
+import { useForm } from "react-hook-form";
 
 interface Invitation {
   id: string;
@@ -51,7 +51,9 @@ interface WorkspaceInviteFormProps {
 
 export function WorkspaceInviteForm({ workspaceId }: WorkspaceInviteFormProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [pendingInvitations, setPendingInvitations] = React.useState<Invitation[]>([]);
+  const [pendingInvitations, setPendingInvitations] = React.useState<
+    Invitation[]
+  >([]);
   const [isLoadingInvitations, setIsLoadingInvitations] = React.useState(true);
 
   const form = useForm<InviteMemberInput>({
@@ -105,7 +107,10 @@ export function WorkspaceInviteForm({ workspaceId }: WorkspaceInviteFormProps) {
     }
   };
 
-  const handleRevokeInvitation = async (invitationId: string, email: string) => {
+  const handleRevokeInvitation = async (
+    invitationId: string,
+    email: string
+  ) => {
     try {
       await trpc.workspace.revokeInvitation.mutate({
         invitationId,

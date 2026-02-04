@@ -1,7 +1,10 @@
 "use client";
 
-import * as React from "react";
-import { Icon } from "@poynt/ui/icons";
+import {
+  subscriptionFeatures,
+  subscriptionPricing,
+  subscriptionTierLabels,
+} from "@poynt/planner-validators";
 import { Button } from "@poynt/ui";
 import {
   Dialog,
@@ -11,11 +14,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@poynt/ui";
-import {
-  subscriptionTierLabels,
-  subscriptionPricing,
-  subscriptionFeatures,
-} from "@poynt/planner-validators";
+import { Icon } from "@poynt/ui/icons";
+import * as React from "react";
 
 type SubscriptionTier = "free" | "pro" | "business";
 
@@ -33,7 +33,8 @@ export function UpgradeDialog({
   selectedTier,
 }: UpgradeDialogProps) {
   const [showSuccess, setShowSuccess] = React.useState(false);
-  const targetTier = selectedTier || (currentTier === "free" ? "pro" : "business");
+  const targetTier =
+    selectedTier || (currentTier === "free" ? "pro" : "business");
 
   const handleContactUs = () => {
     setShowSuccess(true);
@@ -50,9 +51,14 @@ export function UpgradeDialog({
         <DialogContent className="sm:max-w-md">
           <DialogHeader className="text-center">
             <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
-              <Icon name="check" className="size-8 text-green-600 dark:text-green-400" />
+              <Icon
+                name="check"
+                className="size-8 text-green-600 dark:text-green-400"
+              />
             </div>
-            <DialogTitle className="text-center">Takk for din interesse!</DialogTitle>
+            <DialogTitle className="text-center">
+              Takk for din interesse!
+            </DialogTitle>
             <DialogDescription className="text-center">
               Vi har mottatt din forespørsel om å oppgradere til{" "}
               <span className="font-medium text-foreground">
@@ -87,7 +93,9 @@ export function UpgradeDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Oppgrader til {subscriptionTierLabels[targetTier]}</DialogTitle>
+          <DialogTitle>
+            Oppgrader til {subscriptionTierLabels[targetTier]}
+          </DialogTitle>
           <DialogDescription>
             Få tilgang til flere funksjoner og bedrifter med en oppgradert plan.
           </DialogDescription>
@@ -100,7 +108,9 @@ export function UpgradeDialog({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Nåværende plan</p>
-                <p className="font-medium">{subscriptionTierLabels[currentTier]}</p>
+                <p className="font-medium">
+                  {subscriptionTierLabels[currentTier]}
+                </p>
               </div>
               <div className="text-right">
                 <p className="text-2xl font-bold">
@@ -110,18 +120,29 @@ export function UpgradeDialog({
               </div>
             </div>
             <ul className="mt-3 space-y-1">
-              {subscriptionFeatures[currentTier].slice(0, 3).map((feature, i) => (
-                <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Icon name="check" className="size-3.5 text-muted-foreground" />
-                  {feature}
-                </li>
-              ))}
+              {subscriptionFeatures[currentTier]
+                .slice(0, 3)
+                .map((feature, i) => (
+                  <li
+                    key={i}
+                    className="flex items-center gap-2 text-sm text-muted-foreground"
+                  >
+                    <Icon
+                      name="check"
+                      className="size-3.5 text-muted-foreground"
+                    />
+                    {feature}
+                  </li>
+                ))}
             </ul>
           </div>
 
           {/* Arrow */}
           <div className="flex justify-center">
-            <Icon name="arrow-right" className="size-6 text-muted-foreground rotate-90" />
+            <Icon
+              name="arrow-right"
+              className="size-6 text-muted-foreground rotate-90"
+            />
           </div>
 
           {/* Target plan */}
@@ -131,7 +152,9 @@ export function UpgradeDialog({
                 <Icon name="sparkles" className="size-5 text-primary" />
                 <div>
                   <p className="text-sm text-muted-foreground">Oppgrader til</p>
-                  <p className="font-medium">{subscriptionTierLabels[targetTier]}</p>
+                  <p className="font-medium">
+                    {subscriptionTierLabels[targetTier]}
+                  </p>
                 </div>
               </div>
               <div className="text-right">
@@ -155,8 +178,8 @@ export function UpgradeDialog({
         {/* Contact info */}
         <div className="rounded-lg border bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-900 p-4">
           <p className="text-sm text-amber-800 dark:text-amber-200">
-            <strong>Manuell oppgradering:</strong> For å endre abonnementet ditt, 
-            ta kontakt med oss så hjelper vi deg.
+            <strong>Manuell oppgradering:</strong> For å endre abonnementet
+            ditt, ta kontakt med oss så hjelper vi deg.
           </p>
         </div>
 

@@ -61,20 +61,26 @@ export function GuideResult({
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-xl">
-                <Heading size={"h3"} variant={"h2"}>Hvordan fungerer det?</Heading>
+                <Heading size={"h3"} variant={"h2"}>
+                  Hvordan fungerer det?
+                </Heading>
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid md:grid-cols-3 gap-8">
                 <div className="space-y-3">
-                  <Heading size="body-heading" weight={"medium"}>Fortell oss om deg</Heading>
+                  <Heading size="body-heading" weight={"medium"}>
+                    Fortell oss om deg
+                  </Heading>
                   <Text>
                     Vi spør om bransje, målgruppe, tid tilgjengelig, og dine
                     styrker. Jo mer vi vet, desto bedre anbefalinger får du.
                   </Text>
                 </div>
                 <div className="space-y-3">
-                  <Heading size="body-heading" weight={"medium"}>AI analyserer</Heading>
+                  <Heading size="body-heading" weight={"medium"}>
+                    AI analyserer
+                  </Heading>
                   <Text>
                     Basert på 15 års erfaring fra norsk næringsliv og tusenvis
                     av suksesshistorier, vurderer vi hvilke kanaler som passer
@@ -82,7 +88,9 @@ export function GuideResult({
                   </Text>
                 </div>
                 <div className="space-y-3">
-                  <Heading size="body-heading" weight={"medium"}>Få dine topp 3</Heading>
+                  <Heading size="body-heading" weight={"medium"}>
+                    Få dine topp 3
+                  </Heading>
                   <Text>
                     Se hvilke kanaler som passer best, hvorfor de scorer som de
                     gjør, og hva som skal til for å lykkes.

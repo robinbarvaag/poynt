@@ -2,7 +2,13 @@ import { CategoryFilter } from "@/components/category-filter";
 import { PageHero } from "@/components/page-hero";
 import { getMediaUrl } from "@/lib/media-url";
 import config from "@/payload.config";
-import { Avatar, AvatarFallback, AvatarImage, Container, Text } from "@poynt/ui";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  Container,
+  Text,
+} from "@poynt/ui";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -148,7 +154,9 @@ export default async function BlogPage({ searchParams }: PageProps) {
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="w-12 h-12 rounded-full bg-muted-foreground/10 flex items-center justify-center">
-                        <span className="text-muted-foreground/40 text-lg">B</span>
+                        <span className="text-muted-foreground/40 text-lg">
+                          B
+                        </span>
                       </div>
                     </div>
                   )}

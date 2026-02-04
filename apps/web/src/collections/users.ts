@@ -5,7 +5,13 @@ export const Users: CollectionConfig = {
   auth: true,
   admin: {
     useAsTitle: "email",
-    defaultColumns: ["email", "firstName", "lastName", "role", "membershipTier"],
+    defaultColumns: [
+      "email",
+      "firstName",
+      "lastName",
+      "role",
+      "membershipTier",
+    ],
   },
   fields: [
     {

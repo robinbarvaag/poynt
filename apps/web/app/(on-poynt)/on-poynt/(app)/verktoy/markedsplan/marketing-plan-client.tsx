@@ -1,12 +1,15 @@
 "use client";
 
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { PlanForm } from "@/components/marketing-plan/plan-form";
 import { PlanResult } from "@/components/marketing-plan/plan-result";
 import { trpc } from "@/lib/planner/trpc";
-import type { MarketingPlanRequest, MarketingPlan } from "@poynt/planner-validators";
+import type {
+  MarketingPlan,
+  MarketingPlanRequest,
+} from "@poynt/planner-validators";
 import { toast } from "@poynt/ui";
+import { AnimatePresence, motion } from "framer-motion";
+import { useState } from "react";
 interface SavedPlan {
   id: string;
   plan: MarketingPlan;
@@ -32,10 +35,14 @@ export function MarketingPlanClient({
   initialTargetAudience,
   initialProgress,
 }: MarketingPlanClientProps) {
-  const [view, setView] = useState<ViewState>(initialSavedPlan ? "saved" : "intro");
+  const [view, setView] = useState<ViewState>(
+    initialSavedPlan ? "saved" : "intro"
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<MarketingPlan | null>(null);
-  const [savedPlan, setSavedPlan] = useState<SavedPlan | null>(initialSavedPlan);
+  const [savedPlan, setSavedPlan] = useState<SavedPlan | null>(
+    initialSavedPlan
+  );
 
   async function handleSubmit(data: MarketingPlanRequest) {
     setIsLoading(true);
@@ -116,10 +123,10 @@ export function MarketingPlanClient({
             animate="visible"
             exit="exit"
           >
-            <PlanResult 
-              plan={savedPlan.plan} 
-              onReset={handleReset} 
-              mode="result" 
+            <PlanResult
+              plan={savedPlan.plan}
+              onReset={handleReset}
+              mode="result"
               toolResultId={savedPlan.id}
               initialProgress={initialProgress}
             />
@@ -153,9 +160,9 @@ export function MarketingPlanClient({
             animate="visible"
             exit="exit"
           >
-            <PlanResult 
-              plan={result} 
-              onReset={handleReset} 
+            <PlanResult
+              plan={result}
+              onReset={handleReset}
               toolResultId={savedPlan.id}
               initialProgress={[]}
             />

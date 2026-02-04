@@ -1,6 +1,6 @@
 import { createServerCaller } from "@/lib/planner/trpc-server";
-import { YearlyPlannerClient } from "./yearly-planner-client";
 import type { YearlyPlan } from "@poynt/planner-validators";
+import { YearlyPlannerClient } from "./yearly-planner-client";
 
 interface SavedPlan {
   id: string;
@@ -20,7 +20,9 @@ export default async function YearlyPlannerPage() {
 
   // Server-side data fetching in parallel
   const [savedResults, industries, workspaceProfile] = await Promise.all([
-    trpc.toolResult.list({ toolId: "yearly-planner", limit: 1 }).catch(() => []),
+    trpc.toolResult
+      .list({ toolId: "yearly-planner", limit: 1 })
+      .catch(() => []),
     trpc.industry.list().catch(() => []),
     trpc.workspaceProfile.get().catch(() => null),
   ]);
@@ -44,7 +46,9 @@ export default async function YearlyPlannerPage() {
 
   // Find initial industry name from profile
   const initialIndustry = workspaceProfile?.industryId
-    ? activeIndustries.find((i: Industry) => i.id === workspaceProfile.industryId)?.name ?? null
+    ? (activeIndustries.find(
+        (i: Industry) => i.id === workspaceProfile.industryId
+      )?.name ?? null)
     : null;
 
   // Get initial audience type from profile

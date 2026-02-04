@@ -1,15 +1,10 @@
 "use client";
-import { Icon, type IconName } from "@poynt/ui/icons";
-import { cn } from "@poynt/ui/lib/utils";
 import { Button } from "@poynt/ui";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@poynt/ui";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@poynt/ui";
 import { Switch } from "@poynt/ui";
 import { Label } from "@poynt/ui";
+import { Icon, type IconName } from "@poynt/ui/icons";
+import { cn } from "@poynt/ui/lib/utils";
 import { useState } from "react";
 
 export interface PricingTier {
@@ -125,7 +120,7 @@ export function PricingDialog({
             const isCurrentPlan = tier.id === currentTierId;
             const tierConfig = getTierConfig(tier.id);
             const tierIconName = tier.icon ?? tierConfig.icon;
-            
+
             const isHighlighted = tier.highlighted || tier.id === "pro";
 
             return (
@@ -148,16 +143,23 @@ export function PricingDialog({
                   </div>
                 )}
 
-                <div className={cn(
-                  "rounded-2xl p-6 lg:p-8 h-full flex flex-col bg-card",
-                  isHighlighted && "pt-8"
-                )}>
+                <div
+                  className={cn(
+                    "rounded-2xl p-6 lg:p-8 h-full flex flex-col bg-card",
+                    isHighlighted && "pt-8"
+                  )}
+                >
                   <div className="text-center mb-6">
-                    <div className={cn(
-                      "inline-flex items-center justify-center size-14 rounded-2xl mb-4",
-                      tierConfig.bgColor
-                    )}>
-                      <Icon name={tierIconName} className={cn("size-7", tierConfig.color)} />
+                    <div
+                      className={cn(
+                        "inline-flex items-center justify-center size-14 rounded-2xl mb-4",
+                        tierConfig.bgColor
+                      )}
+                    >
+                      <Icon
+                        name={tierIconName}
+                        className={cn("size-7", tierConfig.color)}
+                      />
                     </div>
                     <h3 className="text-xl font-bold">{tier.name}</h3>
                     <p className="text-sm text-muted-foreground mt-1">
@@ -187,8 +189,16 @@ export function PricingDialog({
                   <ul className="space-y-3 flex-1 mb-6">
                     {tier.features.map((feature, i) => (
                       <li key={i} className="flex items-start gap-3">
-                        <Icon name="check" className={cn("size-5 shrink-0 mt-0.5", tierConfig.checkColor)} />
-                        <span className="text-sm text-muted-foreground">{feature}</span>
+                        <Icon
+                          name="check"
+                          className={cn(
+                            "size-5 shrink-0 mt-0.5",
+                            tierConfig.checkColor
+                          )}
+                        />
+                        <span className="text-sm text-muted-foreground">
+                          {feature}
+                        </span>
                       </li>
                     ))}
                   </ul>
@@ -196,7 +206,13 @@ export function PricingDialog({
                   {/* CTA */}
                   <Button
                     className="w-full"
-                    variant={isCurrentPlan ? "secondary" : isHighlighted ? "default" : "outline"}
+                    variant={
+                      isCurrentPlan
+                        ? "secondary"
+                        : isHighlighted
+                          ? "default"
+                          : "outline"
+                    }
                     size="lg"
                     disabled={isCurrentPlan}
                     onClick={() => onSelectTier?.(tier, isYearly)}
@@ -218,7 +234,8 @@ export function PricingDialog({
 
         {/* Footer note */}
         <p className="text-center text-xs text-muted-foreground pt-4">
-          Alle priser er i NOK ekskl. mva. Du kan når som helst endre eller kansellere planen din.
+          Alle priser er i NOK ekskl. mva. Du kan når som helst endre eller
+          kansellere planen din.
         </p>
       </DialogContent>
     </Dialog>
@@ -299,16 +316,23 @@ export function PricingCards({
                 </div>
               )}
 
-              <div className={cn(
-                "rounded-2xl p-6 lg:p-8 h-full flex flex-col bg-card",
-                isHighlighted && "pt-8"
-              )}>
+              <div
+                className={cn(
+                  "rounded-2xl p-6 lg:p-8 h-full flex flex-col bg-card",
+                  isHighlighted && "pt-8"
+                )}
+              >
                 <div className="text-center mb-6">
-                  <div className={cn(
-                    "inline-flex items-center justify-center size-14 rounded-2xl mb-4",
-                    tierConfig.bgColor
-                  )}>
-                    <Icon name={tierIconName} className={cn("size-7", tierConfig.color)} />
+                  <div
+                    className={cn(
+                      "inline-flex items-center justify-center size-14 rounded-2xl mb-4",
+                      tierConfig.bgColor
+                    )}
+                  >
+                    <Icon
+                      name={tierIconName}
+                      className={cn("size-7", tierConfig.color)}
+                    />
                   </div>
                   <h3 className="text-xl font-bold">{tier.name}</h3>
                   <p className="text-sm text-muted-foreground mt-1">
@@ -337,15 +361,29 @@ export function PricingCards({
                 <ul className="space-y-3 flex-1 mb-6">
                   {tier.features.map((feature, i) => (
                     <li key={i} className="flex items-start gap-3">
-                      <Icon name="check" className={cn("size-5 shrink-0 mt-0.5", tierConfig.checkColor)} />
-                      <span className="text-sm text-muted-foreground">{feature}</span>
+                      <Icon
+                        name="check"
+                        className={cn(
+                          "size-5 shrink-0 mt-0.5",
+                          tierConfig.checkColor
+                        )}
+                      />
+                      <span className="text-sm text-muted-foreground">
+                        {feature}
+                      </span>
                     </li>
                   ))}
                 </ul>
 
                 <Button
                   className="w-full"
-                  variant={isCurrentPlan ? "secondary" : isHighlighted ? "default" : "outline"}
+                  variant={
+                    isCurrentPlan
+                      ? "secondary"
+                      : isHighlighted
+                        ? "default"
+                        : "outline"
+                  }
                   size="lg"
                   disabled={isCurrentPlan}
                   onClick={() => onSelectTier?.(tier, isYearly)}

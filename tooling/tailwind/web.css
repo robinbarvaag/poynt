@@ -56,8 +56,6 @@
   --sidebar-ring: oklch(0.463 0.074 165.684);
 }
 
-
-
 .dark {
   --background: oklch(0.328 0.072 161.757);
   --foreground: oklch(0.979 0.008 197.545);
@@ -104,20 +102,17 @@
   --sidebar-ring: oklch(0.878 0.057 196.233);
 }
 
-
 @theme inline {
-
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
   --font-serif: var(--font-serif);
 
-
   --radius: 0.5rem;
 
   --text-tiny: 0.625rem;
-  --text-tiny--line-height: 1.5rem; 
-  --text-tiny--letter-spacing: 0.125rem; 
-  --text-tiny--font-weight: 500; 
+  --text-tiny--line-height: 1.5rem;
+  --text-tiny--letter-spacing: 0.125rem;
+  --text-tiny--font-weight: 500;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -205,7 +200,6 @@
     height: 0;
   }
 }
-
 
 .animate-float-slow {
   animation: float-slow 20s ease-in-out infinite;

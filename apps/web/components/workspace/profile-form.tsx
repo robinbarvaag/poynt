@@ -1,9 +1,15 @@
 "use client";
 
-import * as React from "react";
-import { useForm } from "react-hook-form";
+import { trpc } from "@/lib/planner/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import {
+  type ProfileAudienceType,
+  type ProfileCompanySize,
+  profileAudienceTypeLabels,
+  profileAudienceTypes,
+  profileCompanySizeLabels,
+  profileCompanySizes,
+} from "@poynt/planner-validators";
 import {
   Form,
   FormControl,
@@ -25,16 +31,10 @@ import {
 import { Skeleton } from "@poynt/ui";
 import { toast } from "@poynt/ui";
 import { Icon } from "@poynt/ui/icons";
-import { trpc } from "@/lib/planner/trpc";
-import {
-  profileCompanySizes,
-  profileCompanySizeLabels,
-  profileAudienceTypes,
-  profileAudienceTypeLabels,
-  type ProfileCompanySize,
-  type ProfileAudienceType,
-} from "@poynt/planner-validators";
+import * as React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 const profileFormSchema = z.object({
   industryId: z.string().nullable(),
@@ -59,7 +59,9 @@ interface WorkspaceProfileFormProps {
 
 export function WorkspaceProfileForm({ disabled }: WorkspaceProfileFormProps) {
   const [isLoading, setIsLoading] = useState(true);
-  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">(
+    "idle"
+  );
   const [industries, setIndustries] = useState<Industry[]>([]);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const savedTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -112,7 +114,10 @@ export function WorkspaceProfileForm({ disabled }: WorkspaceProfileFormProps) {
 
     try {
       const goalsArray = values.goals
-        ? values.goals.split(",").map((g) => g.trim()).filter(Boolean)
+        ? values.goals
+            .split(",")
+            .map((g) => g.trim())
+            .filter(Boolean)
         : null;
 
       await trpc.workspaceProfile.upsert.mutate({
@@ -129,7 +134,6 @@ export function WorkspaceProfileForm({ disabled }: WorkspaceProfileFormProps) {
       savedTimeoutRef.current = setTimeout(() => {
         setSaveStatus("idle");
       }, 2000);
-
     } catch (error) {
       console.error("Failed to save profile:", error);
       setSaveStatus("idle");
@@ -316,9 +320,7 @@ export function WorkspaceProfileForm({ disabled }: WorkspaceProfileFormProps) {
                   value={field.value ?? ""}
                 />
               </FormControl>
-              <FormDescription>
-                Skill med komma for flere mål
-              </FormDescription>
+              <FormDescription>Skill med komma for flere mål</FormDescription>
               <FormMessage />
             </FormItem>
           )}

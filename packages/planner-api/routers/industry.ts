@@ -31,7 +31,6 @@ export const industryRouter = router({
       return industries;
     }),
 
-
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input }) => {

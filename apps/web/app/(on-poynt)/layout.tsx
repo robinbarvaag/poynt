@@ -40,11 +40,7 @@ export default function PlannerRootLayout({
       className={cn(poppins.variable, playfair.variable)}
       suppressHydrationWarning
     >
-      <body
-        className={cn(
-          "min-h-screen bg-background font-sans antialiased",
-        )}
-      >
+      <body className={cn("min-h-screen bg-background font-sans antialiased")}>
         {children}
       </body>
     </html>

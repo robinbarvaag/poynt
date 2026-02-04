@@ -1,8 +1,10 @@
 "use client";
 
-import * as React from "react";
-import { Icon, type IconName } from "@poynt/ui/icons";
-import { cn } from "@poynt/ui/lib/utils";
+import {
+  subscriptionPricing,
+  subscriptionTierLabels,
+  subscriptionTierLimits,
+} from "@poynt/planner-validators";
 import { Button } from "@poynt/ui";
 import {
   Card,
@@ -12,11 +14,9 @@ import {
   CardTitle,
 } from "@poynt/ui";
 import { Progress } from "@poynt/ui";
-import {
-  subscriptionTierLabels,
-  subscriptionTierLimits,
-  subscriptionPricing,
-} from "@poynt/planner-validators";
+import { Icon, type IconName } from "@poynt/ui/icons";
+import { cn } from "@poynt/ui/lib/utils";
+import * as React from "react";
 
 interface SubscriptionCardProps {
   subscription: {
@@ -96,10 +96,14 @@ export function SubscriptionCard({
             <span
               className={cn(
                 "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
-                status === "active" && "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-                status === "trialing" && "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-                status === "canceled" && "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-                status === "past_due" && "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
+                status === "active" &&
+                  "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+                status === "trialing" &&
+                  "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
+                status === "canceled" &&
+                  "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+                status === "past_due" &&
+                  "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
               )}
             >
               {status === "active" && "Aktiv"}
@@ -119,12 +123,11 @@ export function SubscriptionCard({
               <span>Bedrifter</span>
             </div>
             <span className="font-medium">
-              {usage.workspaces.current} / {isUnlimited ? "∞" : usage.workspaces.limit}
+              {usage.workspaces.current} /{" "}
+              {isUnlimited ? "∞" : usage.workspaces.limit}
             </span>
           </div>
-          {!isUnlimited && (
-            <Progress value={usagePercent} className="h-2" />
-          )}
+          {!isUnlimited && <Progress value={usagePercent} className="h-2" />}
           {isUnlimited && (
             <div className="rounded-lg bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
               Ubegrenset bedrifter inkludert i din plan

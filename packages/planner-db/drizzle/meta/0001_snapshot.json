@@ -111,12 +111,8 @@
           "name": "planner_account_user_id_planner_user_id_fk",
           "tableFrom": "planner_account",
           "tableTo": "planner_user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -204,12 +200,8 @@
           "name": "planner_session_user_id_planner_user_id_fk",
           "tableFrom": "planner_session",
           "tableTo": "planner_user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -219,9 +211,7 @@
         "planner_session_token_unique": {
           "name": "planner_session_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -314,9 +304,7 @@
         "planner_user_email_unique": {
           "name": "planner_user_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -614,12 +602,8 @@
           "name": "planner_decline_generator_feedback_tool_result_id_planner_tool_result_id_fk",
           "tableFrom": "planner_decline_generator_feedback",
           "tableTo": "planner_tool_result",
-          "columnsFrom": [
-            "tool_result_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["tool_result_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -727,12 +711,8 @@
           "name": "planner_marketing_plan_progress_tool_result_id_planner_tool_result_id_fk",
           "tableFrom": "planner_marketing_plan_progress",
           "tableTo": "planner_tool_result",
-          "columnsFrom": [
-            "tool_result_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["tool_result_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -858,12 +838,8 @@
           "name": "planner_subscription_user_id_planner_user_id_fk",
           "tableFrom": "planner_subscription",
           "tableTo": "planner_user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -873,9 +849,7 @@
         "planner_subscription_user_id_unique": {
           "name": "planner_subscription_user_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_id"
-          ]
+          "columns": ["user_id"]
         }
       },
       "policies": {},
@@ -989,12 +963,8 @@
           "name": "planner_tool_result_workspace_id_planner_workspace_id_fk",
           "tableFrom": "planner_tool_result",
           "tableTo": "planner_workspace",
-          "columnsFrom": [
-            "workspace_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workspace_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1048,12 +1018,8 @@
           "name": "planner_user_preferences_user_id_planner_user_id_fk",
           "tableFrom": "planner_user_preferences",
           "tableTo": "planner_user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1061,12 +1027,8 @@
           "name": "planner_user_preferences_active_workspace_id_planner_workspace_id_fk",
           "tableFrom": "planner_user_preferences",
           "tableTo": "planner_workspace",
-          "columnsFrom": [
-            "active_workspace_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["active_workspace_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -1076,9 +1038,7 @@
         "planner_user_preferences_user_id_unique": {
           "name": "planner_user_preferences_user_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_id"
-          ]
+          "columns": ["user_id"]
         }
       },
       "policies": {},
@@ -1157,9 +1117,7 @@
         "planner_workspace_slug_unique": {
           "name": "planner_workspace_slug_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         }
       },
       "policies": {},
@@ -1259,12 +1217,8 @@
           "name": "planner_workspace_invitation_workspace_id_planner_workspace_id_fk",
           "tableFrom": "planner_workspace_invitation",
           "tableTo": "planner_workspace",
-          "columnsFrom": [
-            "workspace_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workspace_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1272,12 +1226,8 @@
           "name": "planner_workspace_invitation_invited_by_id_planner_user_id_fk",
           "tableFrom": "planner_workspace_invitation",
           "tableTo": "planner_user",
-          "columnsFrom": [
-            "invited_by_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["invited_by_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1287,9 +1237,7 @@
         "planner_workspace_invitation_token_unique": {
           "name": "planner_workspace_invitation_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -1399,12 +1347,8 @@
           "name": "planner_workspace_member_workspace_id_planner_workspace_id_fk",
           "tableFrom": "planner_workspace_member",
           "tableTo": "planner_workspace",
-          "columnsFrom": [
-            "workspace_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workspace_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1412,12 +1356,8 @@
           "name": "planner_workspace_member_user_id_planner_user_id_fk",
           "tableFrom": "planner_workspace_member",
           "tableTo": "planner_user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1534,12 +1474,8 @@
           "name": "planner_workspace_profile_workspace_id_planner_workspace_id_fk",
           "tableFrom": "planner_workspace_profile",
           "tableTo": "planner_workspace",
-          "columnsFrom": [
-            "workspace_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workspace_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1547,12 +1483,8 @@
           "name": "planner_workspace_profile_industry_id_planner_industry_id_fk",
           "tableFrom": "planner_workspace_profile",
           "tableTo": "planner_industry",
-          "columnsFrom": [
-            "industry_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["industry_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -1562,9 +1494,7 @@
         "planner_workspace_profile_workspace_id_unique": {
           "name": "planner_workspace_profile_workspace_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "workspace_id"
-          ]
+          "columns": ["workspace_id"]
         }
       },
       "policies": {},
@@ -1576,50 +1506,27 @@
     "public.planner_audience_type": {
       "name": "planner_audience_type",
       "schema": "public",
-      "values": [
-        "b2b",
-        "b2c",
-        "both"
-      ]
+      "values": ["b2b", "b2c", "both"]
     },
     "public.planner_company_size": {
       "name": "planner_company_size",
       "schema": "public",
-      "values": [
-        "solo",
-        "small",
-        "medium",
-        "large"
-      ]
+      "values": ["solo", "small", "medium", "large"]
     },
     "public.planner_subscription_status": {
       "name": "planner_subscription_status",
       "schema": "public",
-      "values": [
-        "active",
-        "canceled",
-        "past_due",
-        "trialing"
-      ]
+      "values": ["active", "canceled", "past_due", "trialing"]
     },
     "public.planner_subscription_tier": {
       "name": "planner_subscription_tier",
       "schema": "public",
-      "values": [
-        "free",
-        "pro",
-        "business"
-      ]
+      "values": ["free", "pro", "business"]
     },
     "public.planner_workspace_role": {
       "name": "planner_workspace_role",
       "schema": "public",
-      "values": [
-        "owner",
-        "admin",
-        "member",
-        "client"
-      ]
+      "values": ["owner", "admin", "member", "client"]
     }
   },
   "schemas": {},

@@ -1,6 +1,6 @@
 import { createServerCaller } from "@/lib/planner/trpc-server";
-import { MarketingPlanClient } from "./marketing-plan-client";
 import type { MarketingPlan } from "@poynt/planner-validators";
+import { MarketingPlanClient } from "./marketing-plan-client";
 
 interface SavedPlan {
   id: string;
@@ -23,7 +23,9 @@ export default async function MarketingPlanPage() {
 
   // Server-side data fetching in parallel
   const [savedResults, industries, workspaceProfile] = await Promise.all([
-    trpc.toolResult.list({ toolId: "marketing-plan", limit: 1 }).catch(() => []),
+    trpc.toolResult
+      .list({ toolId: "marketing-plan", limit: 1 })
+      .catch(() => []),
     trpc.industry.list().catch(() => []),
     trpc.workspaceProfile.get().catch(() => null),
   ]);
@@ -59,11 +61,14 @@ export default async function MarketingPlanPage() {
 
   // Find initial industry name from profile
   const initialIndustry = workspaceProfile?.industryId
-    ? activeIndustries.find((i: Industry) => i.id === workspaceProfile.industryId)?.name ?? null
+    ? (activeIndustries.find(
+        (i: Industry) => i.id === workspaceProfile.industryId
+      )?.name ?? null)
     : null;
 
   // Get company size directly from profile (same values)
-  const initialCompanySize = (workspaceProfile?.companySize as CompanySize) ?? null;
+  const initialCompanySize =
+    (workspaceProfile?.companySize as CompanySize) ?? null;
 
   // Get target audience description from profile
   const initialTargetAudience = workspaceProfile?.targetAudience ?? null;

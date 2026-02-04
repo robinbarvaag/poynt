@@ -1,20 +1,17 @@
 "use client";
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { motion, AnimatePresence } from "framer-motion";
 import {
-  yearlyPlannerRequestSchema,
-  publishChannelTypes,
-  publishChannelLabels,
-  frequencyTypes,
-  frequencyLabels,
-  audienceTypes,
-  audienceLabels,
-  contentToneTypes,
-  contentToneLabels,
   type YearlyPlannerRequest,
+  audienceLabels,
+  audienceTypes,
+  contentToneLabels,
+  contentToneTypes,
+  frequencyLabels,
+  frequencyTypes,
+  publishChannelLabels,
+  publishChannelTypes,
+  yearlyPlannerRequestSchema,
 } from "@poynt/planner-validators";
 import { Button } from "@poynt/ui";
 import { Progress } from "@poynt/ui";
@@ -39,34 +36,37 @@ import {
 import {
   ArrowLeft,
   ArrowRight,
-  Sparkles,
-  Building2,
-  Share2,
-  Clock,
-  Users,
-  CalendarDays,
-  Linkedin,
-  Instagram,
-  Facebook,
-  Music,
-  Youtube,
-  Mail,
-  PenTool,
-  Headphones,
-  Zap,
-  Flame,
-  Rocket,
-  Timer,
-  CalendarClock,
-  Briefcase,
-  UserCircle,
-  Handshake,
   Award,
-  Heart,
+  Briefcase,
+  Building2,
+  CalendarClock,
+  CalendarDays,
+  Clock,
+  Facebook,
+  Flame,
   GraduationCap,
+  Handshake,
+  Headphones,
+  Heart,
+  Instagram,
+  Linkedin,
   type LucideIcon,
+  Mail,
+  Music,
+  PenTool,
+  Rocket,
+  Share2,
+  Sparkles,
+  Timer,
+  UserCircle,
+  Users,
+  Youtube,
+  Zap,
 } from "@poynt/ui/icons";
 import { cn } from "@poynt/ui/lib/utils";
+import { AnimatePresence, motion } from "framer-motion";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 
 type AudienceType = "b2b" | "b2c" | "both";
 
@@ -215,7 +215,9 @@ export function PlannerForm({
         <div
           className={cn(
             "size-5 rounded-full border-2 flex items-center justify-center transition-colors",
-            isSelected ? "border-primary bg-primary" : "border-muted-foreground/30"
+            isSelected
+              ? "border-primary bg-primary"
+              : "border-muted-foreground/30"
           )}
         >
           {isSelected && (
@@ -275,10 +277,7 @@ export function PlannerForm({
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <Select
-                    value={field.value}
-                    onValueChange={field.onChange}
-                  >
+                  <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Velg din bransje..." />
                     </SelectTrigger>
@@ -602,7 +601,11 @@ export function PlannerForm({
                 <>
                   <motion.div
                     animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    transition={{
+                      duration: 1,
+                      repeat: Number.POSITIVE_INFINITY,
+                      ease: "linear",
+                    }}
                   >
                     <Sparkles className="size-4 mr-2" />
                   </motion.div>

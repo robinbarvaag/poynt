@@ -1,9 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Card, CardContent } from "../card";
 import { Icon, type IconName } from "../../icons";
 import { cn } from "../../lib/utils";
+import { Card, CardContent } from "../card";
 
 interface OptionCardProps {
   value: string;
@@ -52,11 +52,13 @@ export function OptionCard({
             <Icon name={icon} className="size-5" />
           </div>
         )}
-        
+
         <div
           className={cn(
             "size-5 rounded-full border-2 flex items-center justify-center transition-colors shrink-0",
-            isSelected ? "border-primary bg-primary" : "border-muted-foreground/30"
+            isSelected
+              ? "border-primary bg-primary"
+              : "border-muted-foreground/30"
           )}
         >
           {isSelected && (
@@ -69,7 +71,9 @@ export function OptionCard({
         </div>
 
         <div className="flex-1 min-w-0">
-          <span className={cn("font-medium block", isSelected && "text-primary")}>
+          <span
+            className={cn("font-medium block", isSelected && "text-primary")}
+          >
             {label}
           </span>
           {description && (

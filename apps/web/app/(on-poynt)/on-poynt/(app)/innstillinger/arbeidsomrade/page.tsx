@@ -1,13 +1,19 @@
-import { Icon } from "@poynt/ui/icons";
-import { Card, CardDescription, CardHeader, CardTitle, Heading } from "@poynt/ui";
-import { createServerCaller } from "@/lib/planner/trpc-server";
 import { WorkspaceSettingsTabs } from "@/components/workspace/settings-tabs";
+import { createServerCaller } from "@/lib/planner/trpc-server";
+import {
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Heading,
+} from "@poynt/ui";
+import { Icon } from "@poynt/ui/icons";
 import { redirect } from "next/navigation";
 
 export default async function WorkspaceSettingsPage() {
   const trpc = await createServerCaller();
   const currentWorkspace = await trpc.workspace.getCurrentWorkspace();
-  
+
   if (!currentWorkspace) {
     return (
       <div className="container max-w-4xl py-8">
@@ -27,7 +33,7 @@ export default async function WorkspaceSettingsPage() {
   }
 
   const workspace = await trpc.workspace.getById({ id: currentWorkspace.id });
-  
+
   if (!workspace) {
     redirect("/on-poynt");
   }

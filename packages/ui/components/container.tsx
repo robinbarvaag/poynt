@@ -1,6 +1,6 @@
+import { cn } from "@poynt/ui";
 import { type VariantProps, cva } from "class-variance-authority";
 import * as React from "react";
-import { cn } from "@poynt/ui";
 
 const containerVariants = cva("mx-auto w-full px-4", {
   variants: {

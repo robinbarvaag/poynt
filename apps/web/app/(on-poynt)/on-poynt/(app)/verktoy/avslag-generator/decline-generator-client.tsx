@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { DeclineForm } from "@/components/decline-generator/decline-form";
 import { DeclineResult } from "@/components/decline-generator/decline-result";
 import { trpc } from "@/lib/planner/trpc";
 import type { DeclineRequest } from "@poynt/planner-validators";
 import { toast } from "@poynt/ui";
+import { AnimatePresence, motion } from "framer-motion";
+import { useState } from "react";
 
 interface SavedResult {
   id: string;
@@ -21,13 +21,17 @@ interface DeclineGeneratorClientProps {
   initialSavedResult: SavedResult | null;
 }
 
-export function DeclineGeneratorClient({ 
-  initialSavedResult
+export function DeclineGeneratorClient({
+  initialSavedResult,
 }: DeclineGeneratorClientProps) {
-  const [view, setView] = useState<ViewState>(initialSavedResult ? "saved" : "intro");
+  const [view, setView] = useState<ViewState>(
+    initialSavedResult ? "saved" : "intro"
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
-  const [savedResult, setSavedResult] = useState<SavedResult | null>(initialSavedResult);
+  const [savedResult, setSavedResult] = useState<SavedResult | null>(
+    initialSavedResult
+  );
 
   async function handleSubmit(data: DeclineRequest) {
     setIsLoading(true);
@@ -112,10 +116,7 @@ export function DeclineGeneratorClient({
             animate="visible"
             exit="exit"
           >
-            <DeclineResult 
-              mode="intro" 
-              onStartForm={startForm}
-            />
+            <DeclineResult mode="intro" onStartForm={startForm} />
           </motion.div>
         )}
 
@@ -166,11 +167,11 @@ export function DeclineGeneratorClient({
             animate="visible"
             exit="exit"
           >
-            <DeclineResult 
+            <DeclineResult
               mode="result"
-              result={result} 
+              result={result}
               toolResultId={savedResult.id}
-              onReset={handleReset} 
+              onReset={handleReset}
             />
           </motion.div>
         )}

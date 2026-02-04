@@ -1,14 +1,17 @@
 "use client";
 
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { PlannerForm } from "@/components/yearly-planner/planner-form";
 import { PlannerResult } from "@/components/yearly-planner/planner-result";
 import { trpc } from "@/lib/planner/trpc";
-import type { YearlyPlannerRequest, YearlyPlan } from "@poynt/planner-validators";
+import type {
+  YearlyPlan,
+  YearlyPlannerRequest,
+} from "@poynt/planner-validators";
 import { toast } from "@poynt/ui";
 import { Button } from "@poynt/ui";
 import { Icon } from "@poynt/ui/icons";
+import { AnimatePresence, motion } from "framer-motion";
+import { useState } from "react";
 
 interface SavedPlan {
   id: string;
@@ -40,10 +43,14 @@ export function YearlyPlannerClient({
   initialIndustry,
   initialAudience,
 }: YearlyPlannerClientProps) {
-  const [view, setView] = useState<ViewState>(initialSavedPlan ? "saved" : "intro");
+  const [view, setView] = useState<ViewState>(
+    initialSavedPlan ? "saved" : "intro"
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<YearlyPlan | null>(null);
-  const [savedPlan, setSavedPlan] = useState<SavedPlan | null>(initialSavedPlan);
+  const [savedPlan, setSavedPlan] = useState<SavedPlan | null>(
+    initialSavedPlan
+  );
 
   async function handleSubmit(data: YearlyPlannerRequest) {
     setIsLoading(true);
@@ -135,7 +142,8 @@ export function YearlyPlannerClient({
             </h1>
 
             <p className="text-lg text-muted-foreground max-w-md mb-8">
-              Få en komplett innholdsplan for hele året, tilpasset din bransje og sesonger.
+              Få en komplett innholdsplan for hele året, tilpasset din bransje
+              og sesonger.
             </p>
 
             <Button size="lg" onClick={startForm} className="gap-2">
@@ -188,7 +196,12 @@ export function YearlyPlannerClient({
                 <Icon name="arrow-right" className="size-4" />
                 Se årshjulet
               </Button>
-              <Button size="lg" variant="outline" onClick={startForm} className="gap-2">
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={startForm}
+                className="gap-2"
+              >
                 <Icon name="refresh" className="size-4" />
                 Lag nytt årshjul
               </Button>

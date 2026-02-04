@@ -173,6 +173,12 @@ export interface User {
   bio?: string | null;
   role: 'admin' | 'customer';
   stripeCustomerId?: string | null;
+  /**
+   * Brukerens medlemskapsnivå
+   */
+  membershipTier: 'none' | 'community' | 'community_ai';
+  membershipStatus?: ('active' | 'inactive' | 'canceled' | 'past_due') | null;
+  stripeSubscriptionId?: string | null;
   purchases?: (number | Order)[] | null;
   updatedAt: string;
   createdAt: string;
@@ -1222,6 +1228,9 @@ export interface UsersSelect<T extends boolean = true> {
   bio?: T;
   role?: T;
   stripeCustomerId?: T;
+  membershipTier?: T;
+  membershipStatus?: T;
+  stripeSubscriptionId?: T;
   purchases?: T;
   updatedAt?: T;
   createdAt?: T;

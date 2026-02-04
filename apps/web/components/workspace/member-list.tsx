@@ -1,7 +1,7 @@
 "use client";
 
-import * as React from "react";
-import { Icon, type IconName } from "@poynt/ui/icons";
+import { trpc } from "@/lib/planner/trpc";
+import { workspaceRoleLabels } from "@poynt/planner-validators";
 import { Avatar, AvatarFallback, AvatarImage } from "@poynt/ui";
 import { Button } from "@poynt/ui";
 import {
@@ -13,8 +13,8 @@ import {
 } from "@poynt/ui";
 import { Skeleton } from "@poynt/ui";
 import { toast } from "@poynt/ui";
-import { workspaceRoleLabels } from "@poynt/planner-validators";
-import { trpc } from "@/lib/planner/trpc";
+import { Icon, type IconName } from "@poynt/ui/icons";
+import * as React from "react";
 
 interface Member {
   id: string;
@@ -100,9 +100,7 @@ export function WorkspaceMemberList({
         role: newRole,
       });
       setMembers((prev) =>
-        prev.map((m) =>
-          m.user.id === userId ? { ...m, role: newRole } : m
-        )
+        prev.map((m) => (m.user.id === userId ? { ...m, role: newRole } : m))
       );
       toast.success("Rolle oppdatert");
     } catch (error: unknown) {
@@ -130,9 +128,7 @@ export function WorkspaceMemberList({
 
   if (members.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground">
-        Ingen medlemmer funnet.
-      </p>
+      <p className="text-sm text-muted-foreground">Ingen medlemmer funnet.</p>
     );
   }
 
@@ -147,10 +143,7 @@ export function WorkspaceMemberList({
             (currentUserRole === "admin" && member.role !== "admin"));
 
         return (
-          <div
-            key={member.id}
-            className="flex items-center gap-4 py-2"
-          >
+          <div key={member.id} className="flex items-center gap-4 py-2">
             <Avatar>
               <AvatarImage src={member.user.image ?? undefined} />
               <AvatarFallback>
@@ -160,10 +153,11 @@ export function WorkspaceMemberList({
 
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <span className="font-medium truncate">
-                  {member.user.name}
-                </span>
-                <Icon name={roleIcon} className={`size-4 ${roleColors[member.role]}`} />
+                <span className="font-medium truncate">{member.user.name}</span>
+                <Icon
+                  name={roleIcon}
+                  className={`size-4 ${roleColors[member.role]}`}
+                />
               </div>
               <p className="text-sm text-muted-foreground truncate">
                 {member.user.email}

@@ -1,13 +1,6 @@
 import config from "@/payload.config";
 import { RichText } from "@payloadcms/richtext-lexical/react";
-import {
-  Badge,
-  Card,
-  CardContent,
-  Container,
-  Text,
-  Heading
-} from "@poynt/ui";
+import { Badge, Card, CardContent, Container, Heading, Text } from "@poynt/ui";
 import { ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
@@ -160,9 +153,7 @@ export default async function PostPage({ params }: PostPageProps) {
                     href={`/post/${relatedPost.slug}`}
                     className="group"
                   >
-                    <Card
-                      className="overflow-hidden"
-                    >
+                    <Card className="overflow-hidden">
                       {relatedPost.featuredImage &&
                         typeof relatedPost.featuredImage === "object" &&
                         relatedPost.featuredImage.url && (
@@ -179,9 +170,7 @@ export default async function PostPage({ params }: PostPageProps) {
                           </div>
                         )}
                       <CardContent className="p-4">
-                        <Text>
-                          {relatedPost.title}
-                        </Text>
+                        <Text>{relatedPost.title}</Text>
                       </CardContent>
                     </Card>
                   </Link>
