@@ -13,19 +13,24 @@ export type UserRole = (typeof userRoles)[number];
  * All tables prefixed with planner_ to avoid conflicts with Payload CMS
  */
 
-export const plannerUser = pgTable("planner_user", {
-  id: text("id").primaryKey(),
-  name: text("name").notNull(),
-  email: text("email").notNull().unique(),
-  emailVerified: boolean("email_verified").default(false).notNull(),
-  image: text("image"),
-  role: text("role").$type<UserRole>().default("user").notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .$onUpdate(() => new Date())
-    .notNull(),
-});
+export const plannerUser = pgTable(
+  "planner_user",
+  {
+    id: text("id").primaryKey(),
+    name: text("name").notNull(),
+    email: text("email").notNull().unique(),
+    canonicalEmail: text("canonical_email").notNull().default(""),
+    emailVerified: boolean("email_verified").default(false).notNull(),
+    image: text("image"),
+    role: text("role").$type<UserRole>().default("user").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [index("planner_user_canonical_email_idx").on(table.canonicalEmail)]
+);
 
 export const plannerSession = pgTable(
   "planner_session",

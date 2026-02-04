@@ -1,0 +1,1 @@
+ALTER TABLE "planner_user" ALTER COLUMN "canonical_email" SET DEFAULT '';

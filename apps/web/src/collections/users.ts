@@ -5,7 +5,7 @@ export const Users: CollectionConfig = {
   auth: true,
   admin: {
     useAsTitle: "email",
-    defaultColumns: ["email", "firstName", "lastName", "role"],
+    defaultColumns: ["email", "firstName", "lastName", "role", "membershipTier"],
   },
   fields: [
     {
@@ -58,6 +58,46 @@ export const Users: CollectionConfig = {
         readOnly: true,
       },
       label: "Stripe Customer ID",
+    },
+    {
+      name: "membershipTier",
+      type: "select",
+      required: true,
+      defaultValue: "none",
+      options: [
+        { label: "Ingen medlemskap", value: "none" },
+        { label: "Community", value: "community" },
+        { label: "Community + AI", value: "community_ai" },
+      ],
+      label: "Medlemskapsnivå",
+      admin: {
+        position: "sidebar",
+        description: "Brukerens medlemskapsnivå",
+      },
+    },
+    {
+      name: "membershipStatus",
+      type: "select",
+      defaultValue: "inactive",
+      options: [
+        { label: "Aktiv", value: "active" },
+        { label: "Inaktiv", value: "inactive" },
+        { label: "Kansellert", value: "canceled" },
+        { label: "Forfalt", value: "past_due" },
+      ],
+      label: "Medlemskapsstatus",
+      admin: {
+        position: "sidebar",
+      },
+    },
+    {
+      name: "stripeSubscriptionId",
+      type: "text",
+      label: "Stripe Subscription ID",
+      admin: {
+        position: "sidebar",
+        readOnly: true,
+      },
     },
     {
       name: "purchases",
