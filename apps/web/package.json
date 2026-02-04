@@ -57,13 +57,14 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@poynt/eslint-config": "workspace:*",
+    "@poynt/typescript-config": "workspace:*",
+    "@tailwindcss/postcss": "4.0.10",
     "@types/node": "^20.10.6",
     "@types/react": "19.2.3",
     "@types/react-dom": "19.2.3",
-    "@poynt/typescript-config": "workspace:*",
-    "@poynt/eslint-config": "workspace:*",
-    "typescript": "^5.3.3",
+    "postgres": "^3.4.8",
     "tailwindcss": "4.1.18",
-    "@tailwindcss/postcss": "4.0.10"
+    "typescript": "^5.3.3"
   }
 }
