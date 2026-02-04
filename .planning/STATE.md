@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-02-03)
 ## Current Position
 
 Phase: 1 of 6 (Auth Unification & Membership Foundation)
-Plan: 1 of 3 in current phase
+Plan: 2 of 3 in current phase
 Status: In progress
-Last activity: 2026-02-04 — Completed 01-01-PLAN.md (Schema & Auth Foundation)
+Last activity: 2026-02-04 — Completed 01-02-PLAN.md (Stripe Webhook & Membership Resolution)
 
-Progress: [█░░░░░░░░░] 5.6%
+Progress: [██░░░░░░░░] 11.1%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
-- Average duration: 8 min
-- Total execution time: 0.13 hours
+- Total plans completed: 2
+- Average duration: ~12 min
+- Total execution time: ~0.4 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| Phase 1 | 1/3 | 8 min | 8 min |
+| Phase 1 | 2/3 | ~23 min | ~12 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (8 min)
-- Trend: Baseline
+- Last 5 plans: 01-01 (8 min), 01-02 (~15 min)
+- Trend: Consistent
 
 *Updated after each plan completion*
 
@@ -49,6 +49,8 @@ Recent decisions affecting current work:
 - Email normalization: Manual implementation for transparency (zero dependencies) - handles Gmail dots, plus-tags, case differences (01-01)
 - Email+password disabled: Members use Google OAuth or magic link only for Better Auth authentication (01-01)
 - Session persistence: 30-day session expiry with 1-hour cookie cache for performance (01-01)
+- Webhook idempotency: Track processed events in planner_webhook_event table (01-02)
+- Membership resolution: Query Payload per-request, no caching in Phase 1 (01-02)
 
 ### Pending Todos
 
@@ -57,12 +59,12 @@ None yet.
 ### Blockers/Concerns
 
 **Phase 1 critical path:**
-- ✓ Email mismatch between systems — RESOLVED in 01-01: canonical email normalization implemented, ready for account linking in 01-02
-- Password hashing compatibility between Payload and Better Auth needs validation during Phase 1 implementation (email+password now disabled in Better Auth, so compatibility is moot)
+- ✓ Email mismatch between systems — RESOLVED in 01-01: canonical email normalization implemented
+- ✓ Account linking logic — RESOLVED in 01-02: webhook creates linked Better Auth + Payload users
+- ✓ Membership tier resolution — RESOLVED in 01-02: getSessionWithMembership() utility available
 
 **Phase 2 validation needed:**
 - Stripe subscription interval configuration with interval_count for 3/6/12 month billing
-- Race condition: purchase before Better Auth account exists. Solution: just-in-time account creation in webhook
 - Cart handling: membership products cannot mix with digital products in Stripe checkout. Needs separate flows
 
 **Phase 4 locale decision:**
@@ -71,5 +73,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-04 (Phase 1 execution)
-Stopped at: Completed 01-01-PLAN.md — Schema & Auth Foundation (8 min)
-Resume file: None - ready for 01-02 (Account Linking)
+Stopped at: Completed 01-02-PLAN.md — Stripe Webhook & Membership Resolution (~15 min)
+Resume file: None - ready for 01-03 (Middleware Protection)
