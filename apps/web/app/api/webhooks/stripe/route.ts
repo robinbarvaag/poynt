@@ -7,7 +7,11 @@ import {
   syncSubscriptionToPayload,
   type MembershipTier,
 } from "@/src/lib/membership/sync-subscription";
-import { sendOrderConfirmation, sendWelcomeEmail } from "@poynt/email";
+import {
+  sendMemberWelcomeEmail,
+  sendOrderConfirmation,
+  sendWelcomeEmail,
+} from "@poynt/email";
 import { db, eq } from "@poynt/planner-db";
 import { plannerUser, plannerWebhookEvent } from "@poynt/planner-db/schema";
 import { stripe } from "@poynt/stripe";
@@ -192,11 +196,12 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
     });
 
-    // Send welcome email with On Poynt access link
-    // Note: sendMemberWelcomeEmail will be added in Task 2
-    // For now, keep the existing sendWelcomeEmail
-    const loginUrl = `${process.env.NEXT_PUBLIC_URL || "http://localhost:3000"}/on-poynt/innlogging`;
-    await sendWelcomeEmail(email, loginUrl);
+    // Send welcome email with On Poynt onboarding link
+    await sendMemberWelcomeEmail({
+      email,
+      memberName: email.split("@")[0], // Use email prefix as fallback for name
+      tier: tier === "community_ai" ? "Community + AI" : "Community",
+    });
 
     console.log(
       `Subscription created for ${email}: ${tier} (${status}), subscription ${subscription.id}`

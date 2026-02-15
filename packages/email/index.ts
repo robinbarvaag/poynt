@@ -75,6 +75,7 @@ export async function subscribeToNewsletter(
 
 /**
  * Send welcome email to new member with magic link login.
+ * @deprecated Use sendMemberWelcomeEmail for membership subscriptions
  */
 export async function sendWelcomeEmail(email: string, magicLinkUrl: string) {
   if (!process.env.RESEND_API_KEY) return;
@@ -90,5 +91,39 @@ export async function sendWelcomeEmail(email: string, magicLinkUrl: string) {
       <p><a href="${magicLinkUrl}" style="display:inline-block;padding:12px 24px;background:#2563eb;color:#fff;text-decoration:none;border-radius:6px;">Gå til On Poynt</a></p>
       <p style="color:#666;font-size:12px;">Denne lenken utløper om 10 minutter.</p>
     `,
+  });
+}
+
+/**
+ * Send branded welcome email to new member with On Poynt onboarding link.
+ * Uses React Email template for better rendering across email clients.
+ */
+export async function sendMemberWelcomeEmail(params: {
+  email: string;
+  memberName: string;
+  tier: "Community" | "Community + AI";
+}) {
+  if (!process.env.RESEND_API_KEY) return;
+
+  const { render } = await import("@react-email/render");
+  const { default: WelcomeMemberEmail } = await import(
+    "./templates/welcome-member"
+  );
+
+  const onboardingUrl = `${process.env.NEXT_PUBLIC_URL || "http://localhost:3000"}/on-poynt/onboarding`;
+
+  const emailHtml = await render(
+    WelcomeMemberEmail({
+      memberName: params.memberName,
+      tier: params.tier,
+      onboardingUrl,
+    })
+  );
+
+  await getResend().emails.send({
+    from: "On Poynt <velkommen@resend.dev>", // TODO: Change to verified domain
+    to: params.email,
+    subject: "Velkommen til On Poynt!",
+    html: emailHtml,
   });
 }

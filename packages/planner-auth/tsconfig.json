@@ -1,7 +1,9 @@
 {
   "extends": "@poynt/typescript-config/base.json",
   "compilerOptions": {
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "jsx": "react",
+    "module": "esnext"
   },
   "include": ["./**/*"],
   "exclude": ["node_modules", "dist"]
