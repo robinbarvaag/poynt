@@ -179,6 +179,10 @@ export interface User {
   membershipTier: 'none' | 'community' | 'community_ai';
   membershipStatus?: ('active' | 'inactive' | 'canceled' | 'past_due') | null;
   stripeSubscriptionId?: string | null;
+  /**
+   * Markeres automatisk når brukeren fullfører onboarding
+   */
+  onboardingCompleted?: boolean | null;
   purchases?: (number | Order)[] | null;
   updatedAt: string;
   createdAt: string;
@@ -1231,6 +1235,7 @@ export interface UsersSelect<T extends boolean = true> {
   membershipTier?: T;
   membershipStatus?: T;
   stripeSubscriptionId?: T;
+  onboardingCompleted?: T;
   purchases?: T;
   updatedAt?: T;
   createdAt?: T;

@@ -1,8 +1,10 @@
 import { AppSidebar } from "@/components/planner/app-sidebar";
 import { getSessionWithMembership } from "@/lib/membership";
+import config from "@/payload.config";
 import { SidebarInset, SidebarProvider, Toaster } from "@poynt/ui";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { getPayload } from "payload";
 
 export default async function PlannerAppLayout({
   children,
@@ -17,6 +19,27 @@ export default async function PlannerAppLayout({
 
   if (!session) {
     redirect("/on-poynt/innlogging");
+  }
+
+  // Check if user has active membership and hasn't completed onboarding
+  if (
+    session.membership.tier !== "none" &&
+    session.membership.status === "active"
+  ) {
+    const payload = await getPayload({ config });
+
+    const result = await payload.find({
+      collection: "users",
+      where: { email: { equals: session.user.email } },
+      limit: 1,
+    });
+
+    if (result.docs.length > 0) {
+      const user = result.docs[0];
+      if (!user.onboardingCompleted) {
+        redirect("/on-poynt/onboarding");
+      }
+    }
   }
 
   return (

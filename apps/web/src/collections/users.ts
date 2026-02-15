@@ -106,6 +106,16 @@ export const Users: CollectionConfig = {
       },
     },
     {
+      name: "onboardingCompleted",
+      type: "checkbox",
+      defaultValue: false,
+      label: "Onboarding fullført",
+      admin: {
+        position: "sidebar",
+        description: "Markeres automatisk når brukeren fullfører onboarding",
+      },
+    },
+    {
       name: "purchases",
       type: "relationship",
       relationTo: "orders",
