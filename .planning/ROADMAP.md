@@ -48,12 +48,12 @@ Plans:
   3. New member completes onboarding flow showing available features and account setup
   4. User can manage subscription via Stripe Customer Portal (upgrade, downgrade, cancel, update payment)
   5. Webhook handler is idempotent (duplicate events don't create duplicate subscriptions)
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 02-01: TBD during planning
-- [ ] 02-02: TBD during planning
-- [ ] 02-03: TBD during planning
+- [ ] 02-01-PLAN.md — Membership checkout flow: pricing page, Stripe price creation utility, dedicated subscription checkout API
+- [ ] 02-02-PLAN.md — Subscription webhooks & welcome email: lifecycle event handlers, sync utility, React Email welcome template
+- [ ] 02-03-PLAN.md — Post-purchase experience: confirmation page, onboarding wizard, Customer Portal, membership settings
 
 ### Phase 3: Community Content System
 **Goal**: Editorial content managed through Payload CMS with tier-based access control and member discovery
