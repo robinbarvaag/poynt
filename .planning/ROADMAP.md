@@ -51,7 +51,7 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Membership checkout flow: pricing page, Stripe price creation utility, dedicated subscription checkout API
+- [x] 02-01-PLAN.md — Membership checkout flow: pricing page, Stripe price creation utility, dedicated subscription checkout API
 - [ ] 02-02-PLAN.md — Subscription webhooks & welcome email: lifecycle event handlers, sync utility, React Email welcome template
 - [ ] 02-03-PLAN.md — Post-purchase experience: confirmation page, onboarding wizard, Customer Portal, membership settings
 
@@ -134,7 +134,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Auth Unification & Membership Foundation | 3/3 | ✓ Complete | 2026-02-05 |
-| 2. Membership Products & Purchase Flow | 0/3 | Not started | - |
+| 2. Membership Products & Purchase Flow | 1/3 | In progress | - |
 | 3. Community Content System | 0/3 | Not started | - |
 | 4. Dual-Language Localization | 0/3 | Not started | - |
 | 5. Dynamic On Poynt & Admin Tools | 0/4 | Not started | - |
