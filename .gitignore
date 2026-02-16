@@ -110,3 +110,5 @@ media
 screenshots
 
 .mcp.json
+*.tsbuildinfo
+.claude/settings.local.json
