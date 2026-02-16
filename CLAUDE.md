@@ -52,13 +52,16 @@ tooling/
   typescript/             # TypeScript presets
 ```
 
-### Payload CMS Collections
+### Dual Data Systems
 
-- **Users**: Auth with roles (admin/customer), Stripe customer ID
-- **Products**: Digital products synced to Stripe (courses, PDFs, bundles)
-- **Orders**: Purchase records with Stripe payment IDs
-- **Pages**: Dynamic pages with block-based builder
-- **Media**: File uploads
+- **Payload CMS + PostgreSQL**: Content management, admin panel, product sales
+  - Collections: Users (admin only), Products, Orders, Pages, Media, BlogPosts
+  - Users collection is for admin/partner only — no customer data here
+- **Better Auth + Drizzle**: Customer auth, membership, AI tools
+  - Tables: planner_user, planner_subscription, planner_session, planner_workspace, etc.
+  - Auth: Google OAuth + magic link (no email+password)
+  - Drizzle config: `packages/planner-db/drizzle.config.ts` with `tablesFilter: ["planner_*"]`
+  - Migrations: `drizzle-kit generate` → `drizzle-kit migrate` (NEVER use `push` — it tries to drop Payload types)
 
 ### Key Patterns
 
@@ -80,10 +83,6 @@ tooling/
 
 UI and CMS admin labels are in **Norwegian**. Maintain language consistency when adding Payload fields (e.g., "Kurstittel", "Pris (øre)", "Produktnavn").
 
-## Agent Planning System
+## Roadmap
 
-For complex multi-step tasks, plans live in `.plans/YYYY-MM-DD-feature-name/`:
-- `PLAN.md` - Overview, key decisions, file map
-- `task-N.md` - Individual task details
-
-Check `.plans/` before starting implementation work to see if a plan exists.
+See `ROADMAP.md` for current status and future plans.
