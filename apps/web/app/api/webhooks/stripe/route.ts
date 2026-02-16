@@ -4,7 +4,6 @@ import {
   getTierFromSubscription,
   mapSubscriptionStatus,
   syncSubscriptionToDrizzle,
-  syncSubscriptionToPayload,
   type MembershipTier,
 } from "@/src/lib/membership/sync-subscription";
 import {
@@ -21,7 +20,7 @@ import type Stripe from "stripe";
 
 /**
  * Handle membership purchases from Stripe checkout.
- * Creates Better Auth user (if needed) and Payload user with membership tier.
+ * Creates Better Auth user (if needed) and syncs subscription to Drizzle.
  */
 async function handleMembershipPurchase(session: Stripe.Checkout.Session) {
   const email = session.customer_email;
@@ -62,8 +61,8 @@ async function handleMembershipPurchase(session: Stripe.Checkout.Session) {
     });
   }
 
-  // 3. Sync membership to Payload (delegates to reusable utility)
-  await syncSubscriptionToPayload({
+  // 3. Sync membership to Drizzle
+  await syncSubscriptionToDrizzle({
     email,
     tier,
     status: "active",
@@ -163,24 +162,13 @@ async function handleProductPurchase(session: Stripe.Checkout.Session) {
 
 /**
  * Handle subscription creation event.
- * Syncs membership to Payload and Drizzle, sends welcome email.
+ * Syncs membership to Drizzle and sends welcome email.
  */
 async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
   try {
     const email = await getCustomerEmail(subscription.customer);
     const tier = getTierFromSubscription(subscription);
     const status = mapSubscriptionStatus(subscription.status);
-
-    await syncSubscriptionToPayload({
-      email,
-      tier,
-      status,
-      stripeCustomerId:
-        typeof subscription.customer === "string"
-          ? subscription.customer
-          : subscription.customer.id,
-      stripeSubscriptionId: subscription.id,
-    });
 
     await syncSubscriptionToDrizzle({
       email,
@@ -214,24 +202,13 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
 
 /**
  * Handle subscription update event.
- * Syncs updated tier/status to Payload and Drizzle.
+ * Syncs updated tier/status to Drizzle.
  */
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   try {
     const email = await getCustomerEmail(subscription.customer);
     const tier = getTierFromSubscription(subscription);
     const status = mapSubscriptionStatus(subscription.status);
-
-    await syncSubscriptionToPayload({
-      email,
-      tier,
-      status,
-      stripeCustomerId:
-        typeof subscription.customer === "string"
-          ? subscription.customer
-          : subscription.customer.id,
-      stripeSubscriptionId: subscription.id,
-    });
 
     await syncSubscriptionToDrizzle({
       email,
@@ -263,17 +240,6 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   try {
     const email = await getCustomerEmail(subscription.customer);
-
-    await syncSubscriptionToPayload({
-      email,
-      tier: "none",
-      status: "canceled",
-      stripeCustomerId:
-        typeof subscription.customer === "string"
-          ? subscription.customer
-          : subscription.customer.id,
-      stripeSubscriptionId: subscription.id,
-    });
 
     await syncSubscriptionToDrizzle({
       email,
@@ -319,17 +285,6 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
     const tier = getTierFromSubscription(subscription);
 
     // Invoice paid means subscription is active
-    await syncSubscriptionToPayload({
-      email,
-      tier,
-      status: "active",
-      stripeCustomerId:
-        typeof subscription.customer === "string"
-          ? subscription.customer
-          : subscription.customer.id,
-      stripeSubscriptionId: subscription.id,
-    });
-
     await syncSubscriptionToDrizzle({
       email,
       tier,
@@ -374,17 +329,6 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
     const subscription = await stripe.subscriptions.retrieve(subscriptionId);
     const email = await getCustomerEmail(subscription.customer);
     const tier = getTierFromSubscription(subscription);
-
-    await syncSubscriptionToPayload({
-      email,
-      tier,
-      status: "past_due",
-      stripeCustomerId:
-        typeof subscription.customer === "string"
-          ? subscription.customer
-          : subscription.customer.id,
-      stripeSubscriptionId: subscription.id,
-    });
 
     await syncSubscriptionToDrizzle({
       email,

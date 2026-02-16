@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1769943113912,
-      "tag": "0000_lowly_drax",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1770236390634,
-      "tag": "0001_violet_bromley",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1770236438187,
-      "tag": "0002_gray_puppet_master",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1770237141410,
-      "tag": "0003_fixed_sleepwalker",
+      "when": 1771278360930,
+      "tag": "0000_initial-schema",
       "breakpoints": true
     }
   ]

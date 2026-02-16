@@ -1,8 +1,6 @@
 import { canonicalizeEmail } from "@/lib/email-normalize";
-import config from "@/payload.config";
-import { db, eq } from "@poynt/planner-db";
-import { plannerUser } from "@poynt/planner-db/schema";
-import { getPayload } from "payload";
+import { db, eq, sql } from "@poynt/planner-db";
+import { plannerSubscription, plannerUser } from "@poynt/planner-db/schema";
 import type Stripe from "stripe";
 
 export type MembershipTier = "none" | "community" | "community_ai";
@@ -15,13 +13,11 @@ export type MembershipStatus = "active" | "inactive" | "canceled" | "past_due";
 export function getTierFromSubscription(
   subscription: Stripe.Subscription
 ): MembershipTier {
-  // First try subscription metadata
   const tierFromSubMeta = subscription.metadata?.tier;
   if (tierFromSubMeta === "community" || tierFromSubMeta === "community_ai") {
     return tierFromSubMeta;
   }
 
-  // Fallback to price metadata
   const tierFromPriceMeta = subscription.items.data[0]?.price.metadata?.tier;
   if (
     tierFromPriceMeta === "community" ||
@@ -30,7 +26,6 @@ export function getTierFromSubscription(
     return tierFromPriceMeta;
   }
 
-  // Default to community with warning
   console.warn(
     `No tier metadata found on subscription ${subscription.id}, defaulting to 'community'`
   );
@@ -38,7 +33,7 @@ export function getTierFromSubscription(
 }
 
 /**
- * Map Stripe subscription status to Payload MembershipStatus.
+ * Map Stripe subscription status to MembershipStatus.
  */
 export function mapSubscriptionStatus(
   stripeStatus: Stripe.Subscription.Status | string
@@ -67,78 +62,17 @@ interface SyncSubscriptionParams {
   status: MembershipStatus;
   stripeCustomerId: string;
   stripeSubscriptionId: string;
+  currentPeriodStart?: Date;
+  currentPeriodEnd?: Date;
+  cancelAtPeriodEnd?: boolean;
 }
 
 /**
- * Sync subscription data to Payload CMS Users collection.
- * Creates user if not found.
- */
-export async function syncSubscriptionToPayload(
-  params: SyncSubscriptionParams
-) {
-  const { email, tier, status, stripeCustomerId, stripeSubscriptionId } =
-    params;
-
-  const payload = await getPayload({ config });
-
-  // Find existing Payload user
-  const existingUsers = await payload.find({
-    collection: "users",
-    where: { email: { equals: email } },
-    limit: 1,
-  });
-
-  if (existingUsers.docs.length > 0) {
-    // Update existing user
-    await payload.update({
-      collection: "users",
-      id: existingUsers.docs[0].id,
-      data: {
-        membershipTier: tier,
-        membershipStatus: status,
-        stripeCustomerId,
-        stripeSubscriptionId,
-      },
-    });
-    console.log(
-      `Updated Payload user ${email}: tier=${tier}, status=${status}`
-    );
-  } else {
-    // Create new Payload user
-    // Payload auth collections require a password, but user will use magic link/Google
-    await payload.create({
-      collection: "users",
-      data: {
-        email,
-        password: crypto.randomUUID(), // Random password, user won't use it
-        firstName: email.split("@")[0],
-        lastName: "",
-        role: "customer",
-        membershipTier: tier,
-        membershipStatus: status,
-        stripeCustomerId,
-        stripeSubscriptionId,
-      },
-    });
-    console.log(
-      `Created Payload user ${email}: tier=${tier}, status=${status}`
-    );
-  }
-}
-
-interface SyncSubscriptionToDrizzleParams extends SyncSubscriptionParams {
-  currentPeriodStart: Date;
-  currentPeriodEnd: Date;
-  cancelAtPeriodEnd: boolean;
-}
-
-/**
- * Sync subscription data to Drizzle planner_user table.
- * TODO: Phase 6 - sync to planner_subscription table when it exists.
- * For now, this is a placeholder that logs the sync data.
+ * Sync subscription data to Drizzle planner_subscription table.
+ * Finds the Better Auth user by canonical email, then upserts the subscription.
  */
 export async function syncSubscriptionToDrizzle(
-  params: SyncSubscriptionToDrizzleParams
+  params: SyncSubscriptionParams
 ) {
   const {
     email,
@@ -162,21 +96,40 @@ export async function syncSubscriptionToDrizzle(
 
   if (existingUser.length === 0) {
     console.log(
-      `No Better Auth user found for ${email}, skipping Drizzle sync`
+      `No Better Auth user found for ${email}, skipping subscription sync`
     );
     return;
   }
 
-  // TODO: Phase 6 - sync to planner_subscription table
-  // For now, log the sync data for future implementation
-  console.log(`[Drizzle Sync Placeholder] User: ${email}`, {
-    userId: existingUser[0].id,
-    tier,
-    status,
-    stripeCustomerId,
-    stripeSubscriptionId,
-    currentPeriodStart,
-    currentPeriodEnd,
-    cancelAtPeriodEnd,
-  });
+  const userId = existingUser[0].id;
+
+  // Upsert subscription (userId is unique)
+  await db
+    .insert(plannerSubscription)
+    .values({
+      id: crypto.randomUUID(),
+      userId,
+      tier,
+      status,
+      stripeCustomerId,
+      stripeSubscriptionId,
+      currentPeriodStart: currentPeriodStart ?? null,
+      currentPeriodEnd: currentPeriodEnd ?? null,
+      cancelAtPeriodEnd: cancelAtPeriodEnd ?? false,
+    })
+    .onConflictDoUpdate({
+      target: plannerSubscription.userId,
+      set: {
+        tier,
+        status,
+        stripeCustomerId,
+        stripeSubscriptionId,
+        currentPeriodStart: currentPeriodStart ?? null,
+        currentPeriodEnd: currentPeriodEnd ?? null,
+        cancelAtPeriodEnd: cancelAtPeriodEnd ?? false,
+        updatedAt: sql`now()`,
+      },
+    });
+
+  console.log(`Synced subscription for ${email}: tier=${tier}, status=${status}`);
 }

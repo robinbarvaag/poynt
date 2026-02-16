@@ -171,18 +171,8 @@ export interface User {
    * Kort beskrivelse som vises på blogginnlegg
    */
   bio?: string | null;
-  role: 'admin' | 'customer';
+  role: 'admin';
   stripeCustomerId?: string | null;
-  /**
-   * Brukerens medlemskapsnivå
-   */
-  membershipTier: 'none' | 'community' | 'community_ai';
-  membershipStatus?: ('active' | 'inactive' | 'canceled' | 'past_due') | null;
-  stripeSubscriptionId?: string | null;
-  /**
-   * Markeres automatisk når brukeren fullfører onboarding
-   */
-  onboardingCompleted?: boolean | null;
   purchases?: (number | Order)[] | null;
   updatedAt: string;
   createdAt: string;
@@ -1232,10 +1222,6 @@ export interface UsersSelect<T extends boolean = true> {
   bio?: T;
   role?: T;
   stripeCustomerId?: T;
-  membershipTier?: T;
-  membershipStatus?: T;
-  stripeSubscriptionId?: T;
-  onboardingCompleted?: T;
   purchases?: T;
   updatedAt?: T;
   createdAt?: T;

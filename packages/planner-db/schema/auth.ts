@@ -23,6 +23,7 @@ export const plannerUser = pgTable(
     emailVerified: boolean("email_verified").default(false).notNull(),
     image: text("image"),
     role: text("role").$type<UserRole>().default("user").notNull(),
+    onboardingCompleted: boolean("onboarding_completed").default(false).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()

@@ -1,40 +1,21 @@
-import config from "@/payload.config";
 import { auth } from "@poynt/planner-auth/server";
-import { getPayload } from "payload";
+import { db, eq } from "@poynt/planner-db";
+import { plannerUser } from "@poynt/planner-db/schema";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
-    // Get authenticated session
     const session = await auth.api.getSession({ headers: req.headers });
 
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const payload = await getPayload({ config });
-
-    // Find user by email
-    const result = await payload.find({
-      collection: "users",
-      where: { email: { equals: session.user.email } },
-      limit: 1,
-    });
-
-    if (result.docs.length === 0) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
-
-    const user = result.docs[0];
-
-    // Update onboardingCompleted field
-    await payload.update({
-      collection: "users",
-      id: user.id,
-      data: {
-        onboardingCompleted: true,
-      },
-    });
+    // Update onboardingCompleted on Drizzle user
+    await db
+      .update(plannerUser)
+      .set({ onboardingCompleted: true })
+      .where(eq(plannerUser.id, session.user.id));
 
     return NextResponse.json({ success: true });
   } catch (error) {

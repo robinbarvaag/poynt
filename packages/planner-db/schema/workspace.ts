@@ -30,9 +30,9 @@ export const plannerWorkspaceRoleEnum = pgEnum("planner_workspace_role", [
  * Subscription tiers
  */
 export const plannerSubscriptionTierEnum = pgEnum("planner_subscription_tier", [
-  "free",
-  "pro",
-  "business",
+  "none",
+  "community",
+  "community_ai",
 ]);
 
 /**
@@ -40,7 +40,7 @@ export const plannerSubscriptionTierEnum = pgEnum("planner_subscription_tier", [
  */
 export const plannerSubscriptionStatusEnum = pgEnum(
   "planner_subscription_status",
-  ["active", "canceled", "past_due", "trialing"]
+  ["active", "inactive", "canceled", "past_due"]
 );
 
 /**
@@ -148,7 +148,7 @@ export const plannerSubscription = pgTable(
       .notNull()
       .references(() => plannerUser.id, { onDelete: "cascade" })
       .unique(),
-    tier: plannerSubscriptionTierEnum("tier").notNull().default("free"),
+    tier: plannerSubscriptionTierEnum("tier").notNull().default("none"),
     status: plannerSubscriptionStatusEnum("status").notNull().default("active"),
     stripeCustomerId: text("stripe_customer_id"),
     stripeSubscriptionId: text("stripe_subscription_id"),

@@ -1,7 +1,7 @@
 CREATE TYPE "public"."planner_audience_type" AS ENUM('b2b', 'b2c', 'both');--> statement-breakpoint
 CREATE TYPE "public"."planner_company_size" AS ENUM('solo', 'small', 'medium', 'large');--> statement-breakpoint
-CREATE TYPE "public"."planner_subscription_status" AS ENUM('active', 'canceled', 'past_due', 'trialing');--> statement-breakpoint
-CREATE TYPE "public"."planner_subscription_tier" AS ENUM('free', 'pro', 'business');--> statement-breakpoint
+CREATE TYPE "public"."planner_subscription_status" AS ENUM('active', 'inactive', 'canceled', 'past_due');--> statement-breakpoint
+CREATE TYPE "public"."planner_subscription_tier" AS ENUM('none', 'community', 'community_ai');--> statement-breakpoint
 CREATE TYPE "public"."planner_workspace_role" AS ENUM('owner', 'admin', 'member', 'client');--> statement-breakpoint
 CREATE TABLE "planner_account" (
 	"id" text PRIMARY KEY NOT NULL,
@@ -35,9 +35,11 @@ CREATE TABLE "planner_user" (
 	"id" text PRIMARY KEY NOT NULL,
 	"name" text NOT NULL,
 	"email" text NOT NULL,
+	"canonical_email" text DEFAULT '' NOT NULL,
 	"email_verified" boolean DEFAULT false NOT NULL,
 	"image" text,
 	"role" text DEFAULT 'user' NOT NULL,
+	"onboarding_completed" boolean DEFAULT false NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "planner_user_email_unique" UNIQUE("email")
@@ -100,7 +102,7 @@ CREATE TABLE "planner_marketing_plan_progress" (
 CREATE TABLE "planner_subscription" (
 	"id" text PRIMARY KEY NOT NULL,
 	"user_id" text NOT NULL,
-	"tier" "planner_subscription_tier" DEFAULT 'free' NOT NULL,
+	"tier" "planner_subscription_tier" DEFAULT 'none' NOT NULL,
 	"status" "planner_subscription_status" DEFAULT 'active' NOT NULL,
 	"stripe_customer_id" text,
 	"stripe_subscription_id" text,
@@ -178,6 +180,14 @@ CREATE TABLE "planner_workspace_profile" (
 	CONSTRAINT "planner_workspace_profile_workspace_id_unique" UNIQUE("workspace_id")
 );
 --> statement-breakpoint
+CREATE TABLE "planner_webhook_event" (
+	"id" text PRIMARY KEY NOT NULL,
+	"event_id" text NOT NULL,
+	"type" text NOT NULL,
+	"processed_at" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "planner_webhook_event_event_id_unique" UNIQUE("event_id")
+);
+--> statement-breakpoint
 ALTER TABLE "planner_account" ADD CONSTRAINT "planner_account_user_id_planner_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."planner_user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "planner_session" ADD CONSTRAINT "planner_session_user_id_planner_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."planner_user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "planner_decline_generator_feedback" ADD CONSTRAINT "planner_decline_generator_feedback_tool_result_id_planner_tool_result_id_fk" FOREIGN KEY ("tool_result_id") REFERENCES "public"."planner_tool_result"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -194,6 +204,7 @@ ALTER TABLE "planner_workspace_profile" ADD CONSTRAINT "planner_workspace_profil
 ALTER TABLE "planner_workspace_profile" ADD CONSTRAINT "planner_workspace_profile_industry_id_planner_industry_id_fk" FOREIGN KEY ("industry_id") REFERENCES "public"."planner_industry"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "planner_account_userId_idx" ON "planner_account" USING btree ("user_id");--> statement-breakpoint
 CREATE INDEX "planner_session_userId_idx" ON "planner_session" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX "planner_user_canonical_email_idx" ON "planner_user" USING btree ("canonical_email");--> statement-breakpoint
 CREATE INDEX "planner_verification_identifier_idx" ON "planner_verification" USING btree ("identifier");--> statement-breakpoint
 CREATE INDEX "planner_decline_feedback_tool_result_idx" ON "planner_decline_generator_feedback" USING btree ("tool_result_id");--> statement-breakpoint
 CREATE INDEX "planner_marketing_plan_progress_tool_result_idx" ON "planner_marketing_plan_progress" USING btree ("tool_result_id");--> statement-breakpoint
@@ -210,4 +221,5 @@ CREATE UNIQUE INDEX "planner_workspace_member_unique_idx" ON "planner_workspace_
 CREATE INDEX "planner_workspace_member_workspace_idx" ON "planner_workspace_member" USING btree ("workspace_id");--> statement-breakpoint
 CREATE INDEX "planner_workspace_member_user_idx" ON "planner_workspace_member" USING btree ("user_id");--> statement-breakpoint
 CREATE INDEX "planner_workspace_profile_workspace_idx" ON "planner_workspace_profile" USING btree ("workspace_id");--> statement-breakpoint
-CREATE INDEX "planner_workspace_profile_industry_idx" ON "planner_workspace_profile" USING btree ("industry_id");
+CREATE INDEX "planner_workspace_profile_industry_idx" ON "planner_workspace_profile" USING btree ("industry_id");--> statement-breakpoint
+CREATE INDEX "planner_webhook_event_event_id_idx" ON "planner_webhook_event" USING btree ("event_id");
