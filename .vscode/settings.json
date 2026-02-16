@@ -29,5 +29,8 @@
   },
   "[jsonc]": {
     "editor.defaultFormatter": "biomejs.biome"
+  },
+  "search.exclude": {
+    "**/.github/skills": true
   }
 }
