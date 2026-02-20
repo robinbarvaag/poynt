@@ -27,7 +27,10 @@ import { MetaDescriptionComponent as MetaDescriptionComponent_a8a977ebc872c5d5ea
 import { MetaImageComponent as MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { PreviewComponent as PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { LinkToDoc as LinkToDoc_2e9be70cd13299dd4a11a5bd739a5a3c } from '@payloadcms/plugin-stripe/client'
+import { MembersNavLink as MembersNavLink_7ba20e3a77cf9a5f1d91942f7021afa0 } from '../../../admin/components/members/nav-link'
 import { VercelBlobClientUploadHandler as VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e } from '@payloadcms/storage-vercel-blob/client'
+import { MembersListView as MembersListView_1c40f164a24fb9e841d3097dd58f8371 } from '../../../admin/views/members/list'
+import { MemberDetailView as MemberDetailView_dd13572451bb48f4b5e68a05e41ae812 } from '../../../admin/views/members/detail'
 import { CollectionCards as CollectionCards_ab83ff7e88da8d3530831f296ec4756a } from '@payloadcms/ui/rsc'
 
 export const importMap = {
@@ -60,6 +63,9 @@ export const importMap = {
   "@payloadcms/plugin-seo/client#MetaImageComponent": MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@payloadcms/plugin-seo/client#PreviewComponent": PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@payloadcms/plugin-stripe/client#LinkToDoc": LinkToDoc_2e9be70cd13299dd4a11a5bd739a5a3c,
+  "/admin/components/members/nav-link#MembersNavLink": MembersNavLink_7ba20e3a77cf9a5f1d91942f7021afa0,
   "@payloadcms/storage-vercel-blob/client#VercelBlobClientUploadHandler": VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e,
+  "/admin/views/members/list#MembersListView": MembersListView_1c40f164a24fb9e841d3097dd58f8371,
+  "/admin/views/members/detail#MemberDetailView": MemberDetailView_dd13572451bb48f4b5e68a05e41ae812,
   "@payloadcms/ui/rsc#CollectionCards": CollectionCards_ab83ff7e88da8d3530831f296ec4756a
 }

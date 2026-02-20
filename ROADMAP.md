@@ -1,6 +1,6 @@
 # Poynt — Veikart
 
-> Sist oppdatert: 2026-02-16
+> Sist oppdatert: 2026-02-20
 
 ## Ferdig
 
@@ -17,18 +17,7 @@
 - Stripe Customer Portal for sjølvbetjening
 - Membership-innstillingsside i On Poynt
 - On Poynt-portal med sidebar, layout, auth-guards
-
-## Husarbeid
-
-### Flatten `apps/web/src/`
-- Flytt `src/blocks/`, `src/collections/`, `src/globals/` opp til `apps/web/`
-- Slå saman `src/lib/` inn i `apps/web/lib/`
-- Oppdater importar (`@/src/...` → `@/...`)
-- Fjern `src/`-mappa
-
-### Rydd opp planleggingsfiler
-- Slett `.planning/` og `.plans/` (erstatta av denne fila)
-- Oppdater CLAUDE.md (fjern referanse til `.plans/`)
+- Medlemsadministrasjon i Payload admin (custom views med Drizzle-data)
 
 ## Innhaldssystem (Community Content)
 
@@ -54,10 +43,10 @@ Verktøy som tek ein podkast-episode og genererer innhald frå den.
 
 Partnaren treng eitt admin-grensesnitt. Bygg custom views i Payload som les frå Drizzle.
 
-### Medlemsadministrasjon
-- Liste over alle On Poynt-medlemmer (frå Drizzle planner_user + planner_subscription)
-- Vis detaljar: e-post, tier, Stripe-status, siste innlogging
-- Endre tier / deaktiver medlemskap
+### ~~Medlemsadministrasjon~~ ✓
+- ~~Liste over alle On Poynt-medlemmer (frå Drizzle planner_user + planner_subscription)~~
+- ~~Vis detaljar: e-post, tier, Stripe-status, siste innlogging~~
+- ~~Endre tier / deaktiver medlemskap~~
 
 ### Prompt-administrasjon
 - Rediger standard system-prompts for kvart AI-verktøy
@@ -84,7 +73,7 @@ Partnaren treng eitt admin-grensesnitt. Bygg custom views i Payload som les frå
 
 ## Notat
 
-- Drizzle-migrasjonar: `drizzle-kit generate` → `drizzle-kit migrate` (ALDRI `push`)
+- Drizzle-migrasjonar: `drizzle-kit generate` → `bun run db:migrate` frå packages/planner-db (ALDRI `push`)
 - Payload Users = berre admin. Medlemsdata = Drizzle.
 - Stripe handterer både produktkjøp (Payload orders) og membership (Drizzle)
 - Prismodell: 1m=999kr, 3m=899kr, 6m=849kr, 12m=799kr per månad

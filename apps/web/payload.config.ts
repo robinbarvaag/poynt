@@ -1,5 +1,5 @@
-import { fileURLToPath } from "node:url";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { postgresAdapter } from "@payloadcms/db-postgres";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
 import { vercelBlobStorage } from "@payloadcms/storage-vercel-blob";
@@ -48,7 +48,10 @@ export default buildConfig({
       connectionString: process.env.DATABASE_URI || "",
     },
     push: false,
-    migrationDir: path.resolve(path.dirname(fileURLToPath(import.meta.url)), "migrations"),
+    migrationDir: path.resolve(
+      path.dirname(fileURLToPath(import.meta.url)),
+      "migrations"
+    ),
   }),
   sharp,
   collections: [
@@ -76,6 +79,22 @@ export default buildConfig({
   ],
   admin: {
     user: "users",
+    components: {
+      afterNavLinks: ["/admin/components/members/nav-link#MembersNavLink"],
+      views: {
+        members: {
+          Component: "/admin/views/members/list#MembersListView",
+          path: "/medlemmer",
+          exact: true,
+          meta: { title: "Medlemmer" },
+        },
+        memberDetail: {
+          Component: "/admin/views/members/detail#MemberDetailView",
+          path: "/medlemmer/:id",
+          meta: { title: "Medlemsdetaljar" },
+        },
+      },
+    },
   },
   plugins: [
     ...(process.env.BLOB_READ_WRITE_TOKEN
