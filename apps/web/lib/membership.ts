@@ -1,6 +1,6 @@
+import { auth } from "@poynt/planner-auth/server";
 import { db, eq } from "@poynt/planner-db";
 import { plannerSubscription } from "@poynt/planner-db/schema";
-import { auth } from "@poynt/planner-auth/server";
 
 export type MembershipTier = "none" | "community" | "community_ai";
 export type MembershipStatus = "active" | "inactive" | "canceled" | "past_due";

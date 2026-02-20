@@ -1,4 +1,3 @@
-import * as React from "react";
 import {
   Body,
   Button,
@@ -10,6 +9,7 @@ import {
   Section,
   Text,
 } from "@react-email/components";
+import * as React from "react";
 
 interface WelcomeMemberEmailProps {
   memberName: string;
@@ -31,8 +31,8 @@ export default function WelcomeMemberEmail({
           <Heading style={heading}>Velkommen til On Poynt!</Heading>
           <Text style={text}>Hei {memberName},</Text>
           <Text style={text}>
-            Takk for at du ble {tier}-medlem! Du har nå tilgang til
-            On Poynt-plattformen med verktøy for markedsføringsplanlegging.
+            Takk for at du ble {tier}-medlem! Du har nå tilgang til On
+            Poynt-plattformen med verktøy for markedsføringsplanlegging.
           </Text>
           <Section style={buttonContainer}>
             <Button style={button} href={onboardingUrl}>

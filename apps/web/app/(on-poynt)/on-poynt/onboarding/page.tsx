@@ -11,8 +11,7 @@ const features = [
   {
     icon: "file-text" as const,
     title: "Innhold og tips",
-    description:
-      "Artikler og markedsføringsguider for å lære best practice",
+    description: "Artikler og markedsføringsguider for å lære best practice",
   },
   {
     icon: "compass" as const,
@@ -59,9 +58,11 @@ export default function OnboardingPage() {
   const handleComplete = async () => {
     setIsLoading(true);
     try {
-      // Mark onboarding as completed
+      // Create workspace and mark onboarding as completed
       const response = await fetch("/api/onboarding/complete", {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ workspaceName }),
       });
 
       if (!response.ok) {
@@ -93,7 +94,6 @@ export default function OnboardingPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-8">
       <div className="w-full max-w-2xl">
-        {/* Progress Bar */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-slate-700">
@@ -111,9 +111,7 @@ export default function OnboardingPage() {
           </div>
         </div>
 
-        {/* Content Card */}
         <div className="rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
-          {/* Step 1: Workspace Setup */}
           {currentStep === "workspace" && (
             <div className="space-y-6">
               <div className="text-center">
@@ -159,7 +157,10 @@ export default function OnboardingPage() {
                   >
                     {isLoading ? (
                       <>
-                        <Icon name="loader" className="mr-2 size-4 animate-spin" />
+                        <Icon
+                          name="loader"
+                          className="mr-2 size-4 animate-spin"
+                        />
                         Oppretter...
                       </>
                     ) : (
@@ -174,7 +175,6 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {/* Step 2: Feature Tour */}
           {currentStep === "tour" && (
             <div className="space-y-6">
               <div className="text-center">
@@ -276,7 +276,10 @@ export default function OnboardingPage() {
                 >
                   {isLoading ? (
                     <>
-                      <Icon name="loader" className="mr-2 size-4 animate-spin" />
+                      <Icon
+                        name="loader"
+                        className="mr-2 size-4 animate-spin"
+                      />
                       Fullfører...
                     </>
                   ) : (

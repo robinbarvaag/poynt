@@ -131,5 +131,7 @@ export async function syncSubscriptionToDrizzle(
       },
     });
 
-  console.log(`Synced subscription for ${email}: tier=${tier}, status=${status}`);
+  console.log(
+    `Synced subscription for ${email}: tier=${tier}, status=${status}`
+  );
 }

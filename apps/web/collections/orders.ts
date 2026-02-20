@@ -3,29 +3,25 @@ import type { CollectionConfig } from "payload";
 export const Orders: CollectionConfig = {
   slug: "orders",
   admin: {
-    useAsTitle: "id",
+    useAsTitle: "customerEmail",
   },
   access: {
     create: () => false,
     update: () => false,
     delete: () => false,
-    read: ({ req: { user } }) => {
-      if (!user) return false;
-      if (user.role === "admin") return true;
-      return {
-        user: {
-          equals: user.id,
-        },
-      };
-    },
+    read: ({ req: { user } }) => !!user,
   },
   fields: [
     {
-      name: "user",
-      type: "relationship",
-      relationTo: "users",
+      name: "customerEmail",
+      type: "email",
       required: true,
-      label: "Kunde",
+      label: "Kunde e-post",
+    },
+    {
+      name: "customerName",
+      type: "text",
+      label: "Kundenamn",
     },
     {
       name: "items",
@@ -44,7 +40,7 @@ export const Orders: CollectionConfig = {
           name: "priceAtPurchase",
           type: "number",
           required: true,
-          label: "Pris ved kjøp (øre)",
+          label: "Pris ved kjøp (kr)",
         },
       ],
     },
@@ -52,7 +48,7 @@ export const Orders: CollectionConfig = {
       name: "total",
       type: "number",
       required: true,
-      label: "Totalpris (øre)",
+      label: "Totalpris (kr)",
     },
     {
       name: "status",

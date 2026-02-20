@@ -14,11 +14,11 @@ import { ShoppingBag, ShoppingCart, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
-function formatPrice(priceInOre: number): string {
+function formatPrice(price: number): string {
   return new Intl.NumberFormat("nb-NO", {
     style: "currency",
     currency: "NOK",
-  }).format(priceInOre / 100);
+  }).format(price);
 }
 
 export function CartDrawer() {

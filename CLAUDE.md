@@ -61,27 +61,33 @@ tooling/
   - Tables: planner_user, planner_subscription, planner_session, planner_workspace, etc.
   - Auth: Google OAuth + magic link (no email+password)
   - Drizzle config: `packages/planner-db/drizzle.config.ts` with `tablesFilter: ["planner_*"]`
-  - Migrations: `drizzle-kit generate` → `drizzle-kit migrate` (NEVER use `push` — it tries to drop Payload types)
+  - Migrations: `drizzle-kit generate` → `bun run db:migrate` from packages/planner-db (NEVER use `push` — it tries to drop Payload types)
 
 ### Key Patterns
 
-**Block-based pages**: `apps/web/src/blocks/` contains reusable page builder blocks (Hero, Content, Media, Features, etc.). New blocks must be registered in `payload.config.ts`.
+**Block-based pages**: `apps/web/blocks/` contains reusable page builder blocks (Hero, Content, Media, Features, etc.). New blocks must be registered in `payload.config.ts`.
 
 **Cart constraint**: Digital products limited to 1 per item in cart. Cart state persists to localStorage as "poynt-cart".
 
 **Stripe sync**: Products and prices automatically sync to Stripe via Payload plugin. Stripe IDs stored on Product and User documents.
 
+## Code Style (Biome)
+
+- Use `for...of` instead of `.forEach()` — Biome rule `noForEach`
+- Avoid `any` — use proper types or `unknown`
+- All buttons inside forms need explicit `type` attribute
+
 ## Important Files
 
 - `apps/web/payload.config.ts` - CMS configuration, collections, plugins
-- `apps/web/src/collections/` - Payload collection schemas
+- `apps/web/collections/` - Payload collection schemas
 - `packages/cart/src/store.ts` - Zustand cart implementation
 - `turbo.json` - Build task definitions and caching
 - `biome.json` - Formatter/linter rules
 
 ## Localization
 
-UI and CMS admin labels are in **Norwegian**. Maintain language consistency when adding Payload fields (e.g., "Kurstittel", "Pris (øre)", "Produktnavn").
+UI and CMS admin labels are in **Norwegian**. Maintain language consistency when adding Payload fields (e.g., "Kurstittel", "Pris (kr)", "Produktnavn").
 
 ## Roadmap
 

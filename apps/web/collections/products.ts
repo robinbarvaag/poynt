@@ -32,34 +32,6 @@ export const Products: CollectionConfig = {
         return data;
       },
     ],
-    afterChange: [
-      async ({ doc, operation, req }) => {
-        if (doc.stripeID && !doc.stripePriceId) {
-          try {
-            const { getStripe } = await import("@poynt/stripe");
-            const stripe = getStripe();
-            const price = await stripe.prices.create({
-              product: doc.stripeID,
-              unit_amount: doc.price,
-              currency: "nok",
-            });
-
-            await req.payload.update({
-              collection: "products",
-              id: doc.id,
-              data: {
-                stripePriceId: price.id,
-                stripeProductId: doc.stripeID,
-              },
-            });
-          } catch (error) {
-            req.payload.logger.error(
-              `Klarte ikke opprette pris i Stripe: ${error}`
-            );
-          }
-        }
-      },
-    ],
   },
   fields: [
     {
@@ -88,10 +60,34 @@ export const Products: CollectionConfig = {
         { label: "Kurs", value: "course" },
         { label: "PDF", value: "pdf" },
         { label: "Bundle", value: "bundle" },
+        { label: "Medlemskap", value: "membership" },
       ],
       label: "Produkttype",
       admin: {
         position: "sidebar",
+      },
+    },
+    {
+      name: "recurringInterval",
+      type: "number",
+      label: "Faktureringsintervall (månader)",
+      admin: {
+        position: "sidebar",
+        description: "Antal månader mellom kvar fakturering (t.d. 1, 3, 6, 12)",
+        condition: (data) => data?.type === "membership",
+      },
+    },
+    {
+      name: "membershipTier",
+      type: "select",
+      label: "Medlemskapsnivå",
+      options: [
+        { label: "Community", value: "community" },
+        { label: "Community + AI", value: "community_ai" },
+      ],
+      admin: {
+        position: "sidebar",
+        condition: (data) => data?.type === "membership",
       },
     },
     {
@@ -146,16 +142,16 @@ export const Products: CollectionConfig = {
       name: "price",
       type: "number",
       required: true,
-      label: "Pris (øre)",
+      label: "Pris (kr)",
       admin: {
-        description: "Pris i øre (100 = 1 kr)",
+        description: "Pris i heile kroner",
         position: "sidebar",
       },
     },
     {
       name: "compareAtPrice",
       type: "number",
-      label: "Sammenlign med pris (øre)",
+      label: "Samanlikningspris (kr)",
       admin: {
         description: "Valgfri førpris for å vise rabatt",
         position: "sidebar",
@@ -188,24 +184,6 @@ export const Products: CollectionConfig = {
       label: "Kategorier",
       admin: {
         position: "sidebar",
-      },
-    },
-    {
-      name: "stripePriceId",
-      type: "text",
-      label: "Stripe Price ID",
-      admin: {
-        position: "sidebar",
-        readOnly: true,
-      },
-    },
-    {
-      name: "stripeProductId",
-      type: "text",
-      label: "Stripe Product ID",
-      admin: {
-        position: "sidebar",
-        readOnly: true,
       },
     },
   ],

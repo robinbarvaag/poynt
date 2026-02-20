@@ -1,16 +1,12 @@
 import { canonicalizeEmail } from "@/lib/email-normalize";
-import config from "@/payload.config";
 import {
+  type MembershipTier,
   getTierFromSubscription,
   mapSubscriptionStatus,
   syncSubscriptionToDrizzle,
-  type MembershipTier,
-} from "@/src/lib/membership/sync-subscription";
-import {
-  sendMemberWelcomeEmail,
-  sendOrderConfirmation,
-  sendWelcomeEmail,
-} from "@poynt/email";
+} from "@/lib/membership/sync-subscription";
+import config from "@/payload.config";
+import { sendMemberWelcomeEmail, sendOrderConfirmation } from "@poynt/email";
 import { db, eq } from "@poynt/planner-db";
 import { plannerUser, plannerWebhookEvent } from "@poynt/planner-db/schema";
 import { stripe } from "@poynt/stripe";
@@ -23,7 +19,7 @@ import type Stripe from "stripe";
  * Creates Better Auth user (if needed) and syncs subscription to Drizzle.
  */
 async function handleMembershipPurchase(session: Stripe.Checkout.Session) {
-  const email = session.customer_email;
+  const email = session.customer_details?.email || session.customer_email;
   if (!email) throw new Error("No customer email in checkout session");
 
   const canonical = canonicalizeEmail(email);
@@ -41,27 +37,45 @@ async function handleMembershipPurchase(session: Stripe.Checkout.Session) {
       ? session.subscription
       : (session.subscription as Stripe.Subscription | null)?.id || "";
 
-  // 1. Check if Better Auth user exists by canonical email
-  const existingUser = await db
-    .select()
-    .from(plannerUser)
-    .where(eq(plannerUser.canonicalEmail, canonical))
-    .limit(1);
+  // 1. Find user — prefer userId from metadata (logged-in user), fall back to email lookup
+  const userIdFromMeta = session.metadata?.userId;
+  let userId: string | null = null;
 
-  if (existingUser.length === 0) {
-    // 2. Create Better Auth user (just-in-time provisioning)
-    const userId = crypto.randomUUID();
-    await db.insert(plannerUser).values({
-      id: userId,
-      name: session.customer_details?.name || email.split("@")[0],
-      email: email,
-      canonicalEmail: canonical,
-      emailVerified: true, // Stripe verified via payment
-      role: "user",
-    });
+  if (userIdFromMeta) {
+    // User was logged in at checkout — use their Better Auth ID directly
+    const user = await db
+      .select()
+      .from(plannerUser)
+      .where(eq(plannerUser.id, userIdFromMeta))
+      .limit(1);
+    if (user.length > 0) userId = user[0].id;
   }
 
-  // 3. Sync membership to Drizzle
+  if (!userId) {
+    // Fall back to email lookup
+    const existingUser = await db
+      .select()
+      .from(plannerUser)
+      .where(eq(plannerUser.canonicalEmail, canonical))
+      .limit(1);
+
+    if (existingUser.length > 0) {
+      userId = existingUser[0].id;
+    } else {
+      // Create user as last resort (guest purchase)
+      userId = crypto.randomUUID();
+      await db.insert(plannerUser).values({
+        id: userId,
+        name: session.customer_details?.name || email.split("@")[0],
+        email,
+        canonicalEmail: canonical,
+        emailVerified: true,
+        role: "user",
+      });
+    }
+  }
+
+  // 2. Sync membership to Drizzle
   await syncSubscriptionToDrizzle({
     email,
     tier,
@@ -69,6 +83,11 @@ async function handleMembershipPurchase(session: Stripe.Checkout.Session) {
     stripeCustomerId,
     stripeSubscriptionId,
   });
+}
+
+/** Convert a Stripe Unix timestamp to Date, or undefined if invalid. */
+function toDate(ts: number | undefined | null): Date | undefined {
+  return ts ? new Date(ts * 1000) : undefined;
 }
 
 /**
@@ -99,29 +118,42 @@ async function getCustomerEmail(
 async function handleProductPurchase(session: Stripe.Checkout.Session) {
   const payload = await getPayload({ config });
 
+  const customerEmail =
+    session.customer_details?.email || session.customer_email;
+  if (!customerEmail) {
+    throw new Error("Ingen kunde-epost i checkout session");
+  }
+
   // Hent line items frå Stripe
   const lineItems = await stripe.checkout.sessions.listLineItems(session.id, {
     expand: ["data.price.product"],
   });
 
-  // Finn produkt i databasen basert på Stripe Price ID
+  // Finn produkt i databasen basert på Stripe Product ID
   const orderItems = await Promise.all(
     lineItems.data.map(async (item) => {
-      const priceId =
-        typeof item.price === "string" ? item.price : item.price?.id;
+      const stripeProduct = item.price?.product;
+      const stripeProductId =
+        typeof stripeProduct === "string"
+          ? stripeProduct
+          : (stripeProduct as Stripe.Product)?.id;
+
+      if (!stripeProductId) {
+        throw new Error("Manglar Stripe Product ID på line item");
+      }
 
       const products = await payload.find({
         collection: "products",
         where: {
-          stripePriceId: {
-            equals: priceId,
+          stripeID: {
+            equals: stripeProductId,
           },
         },
         limit: 1,
       });
 
       if (products.docs.length === 0) {
-        throw new Error(`Fann ikkje produkt med Price ID: ${priceId}`);
+        throw new Error(`Fann ikkje produkt med Stripe ID: ${stripeProductId}`);
       }
 
       const product = products.docs[0];
@@ -133,19 +165,15 @@ async function handleProductPurchase(session: Stripe.Checkout.Session) {
     })
   );
 
-  // Opprett ordre
-  const userId = session.metadata?.userId;
-  if (!userId) {
-    throw new Error("Mangler userId i session metadata");
-  }
-
+  // Opprett ordre med kundeinfo frå Stripe
   const order = await payload.create({
     collection: "orders",
     draft: false,
     data: {
-      user: Number.parseInt(userId, 10),
+      customerEmail,
+      customerName: session.customer_details?.name || undefined,
       items: orderItems,
-      total: session.amount_total || 0,
+      total: Math.round((session.amount_total || 0) / 100),
       status: "paid",
       stripeSessionId: session.id,
       stripePaymentIntentId: session.payment_intent as string,
@@ -153,9 +181,7 @@ async function handleProductPurchase(session: Stripe.Checkout.Session) {
   });
 
   // Send bekreftelsesmail
-  if (session.customer_email) {
-    await sendOrderConfirmation(session.customer_email, String(order.id));
-  }
+  await sendOrderConfirmation(customerEmail, String(order.id));
 
   console.log("Ordre oppretta:", order.id);
 }
@@ -179,8 +205,8 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
           ? subscription.customer
           : subscription.customer.id,
       stripeSubscriptionId: subscription.id,
-      currentPeriodStart: new Date(subscription.current_period_start * 1000),
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+      currentPeriodStart: toDate(subscription.current_period_start),
+      currentPeriodEnd: toDate(subscription.current_period_end),
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
     });
 
@@ -219,8 +245,8 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
           ? subscription.customer
           : subscription.customer.id,
       stripeSubscriptionId: subscription.id,
-      currentPeriodStart: new Date(subscription.current_period_start * 1000),
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+      currentPeriodStart: toDate(subscription.current_period_start),
+      currentPeriodEnd: toDate(subscription.current_period_end),
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
     });
 
@@ -250,8 +276,8 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
           ? subscription.customer
           : subscription.customer.id,
       stripeSubscriptionId: subscription.id,
-      currentPeriodStart: new Date(subscription.current_period_start * 1000),
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+      currentPeriodStart: toDate(subscription.current_period_start),
+      currentPeriodEnd: toDate(subscription.current_period_end),
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
     });
 
@@ -294,12 +320,14 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
           ? subscription.customer
           : subscription.customer.id,
       stripeSubscriptionId: subscription.id,
-      currentPeriodStart: new Date(subscription.current_period_start * 1000),
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+      currentPeriodStart: toDate(subscription.current_period_start),
+      currentPeriodEnd: toDate(subscription.current_period_end),
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
     });
 
-    console.log(`Invoice paid for ${email}, subscription ${subscriptionId} confirmed active`);
+    console.log(
+      `Invoice paid for ${email}, subscription ${subscriptionId} confirmed active`
+    );
   } catch (error) {
     console.error("Error handling invoice.paid:", error);
     throw error;
@@ -339,8 +367,8 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
           ? subscription.customer
           : subscription.customer.id,
       stripeSubscriptionId: subscription.id,
-      currentPeriodStart: new Date(subscription.current_period_start * 1000),
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+      currentPeriodStart: toDate(subscription.current_period_start),
+      currentPeriodEnd: toDate(subscription.current_period_end),
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
     });
 

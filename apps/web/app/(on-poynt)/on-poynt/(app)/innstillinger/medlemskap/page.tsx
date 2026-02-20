@@ -69,7 +69,7 @@ export default async function MembershipSettingsPage() {
           </CardHeader>
           <CardContent>
             <Button asChild>
-              <Link href="/medlemskap">
+              <Link href="/produkter">
                 <Icon name="sparkles" className="mr-2 size-4" />
                 Se medlemskapspriser
               </Link>
@@ -92,7 +92,7 @@ export default async function MembershipSettingsPage() {
           </CardHeader>
           <CardContent>
             <Button asChild>
-              <Link href="/medlemskap">
+              <Link href="/produkter">
                 <Icon name="refresh" className="mr-2 size-4" />
                 Reaktiver medlemskap
               </Link>
@@ -161,12 +161,11 @@ export default async function MembershipSettingsPage() {
             </div>
 
             {/* Manage Subscription Button */}
-            {membership.stripeCustomerId &&
-              membership.status === "active" && (
-                <div className="pt-4 border-t">
-                  <PortalButton />
-                </div>
-              )}
+            {membership.stripeCustomerId && membership.status === "active" && (
+              <div className="pt-4 border-t">
+                <PortalButton />
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

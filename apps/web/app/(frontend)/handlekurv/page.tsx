@@ -58,7 +58,7 @@ export default function CartPage() {
     );
   }
 
-  const totalInKr = (total() / 100).toFixed(2);
+  const totalInKr = total().toFixed(2);
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -67,7 +67,7 @@ export default function CartPage() {
       </Heading>
       <div className="space-y-4 mb-8">
         {items.map((item) => {
-          const priceInKr = (item.price / 100).toFixed(2);
+          const priceInKr = item.price.toFixed(2);
           return (
             <div
               key={item.id}

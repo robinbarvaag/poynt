@@ -4,87 +4,86 @@
 
 ## 1. Dev-server startar
 
-- [ ] `bun run dev` startar utan feil
-- [ ] `http://localhost:3000` viser framsida
-- [ ] `http://localhost:3000/admin` viser Payload admin login
+- [x] `bun run dev` startar utan feil
+- [x] `http://localhost:3000` viser framsida
+- [x] `http://localhost:3000/admin` viser Payload admin login
 
 ## 2. Payload Admin
 
-- [ ] Logg inn med admin-brukar
-- [ ] Users-collection viser berre admin-brukarar (ingen membership-felt synleg)
-- [ ] Kan opprette/redigere Products, Pages, BlogPosts, Media
-- [ ] Blokk-basert sidebyggar fungerer (legg til Hero, Content, etc.)
+- [x] Logg inn med admin-brukar
+- [x] Users-collection viser berre admin-brukarar (ingen membership-felt synleg)
+- [x] Kan opprette/redigere Products, Pages, BlogPosts, Media
+- [x] Blokk-basert sidebyggar fungerer (legg til Hero, Content, etc.)
 
 ## 3. Offentlege sider
 
-- [ ] `/produkter` — viser produktliste
-- [ ] `/produkter/[slug]` — viser produktdetalj med "Legg i handlekurv"
-- [ ] `/handlekurv` — handlekurv fungerer (legg til, fjern, tal oppdaterer seg)
-- [ ] `/blogg` — viser blogginnlegg
-- [ ] `/post/[slug]` — viser enkeltinnlegg
-- [ ] `/medlemskap` — viser prisingsida med 4 faktureringsperiodar (1, 3, 6, 12 mnd)
-- [ ] Dynamiske sider (`/om-oss` e.l.) rendrar blokker frå Payload
+- [x] `/produkter` — viser produktliste
+- [x] `/produkter/[slug]` — viser produktdetalj med "Legg i handlekurv" (digitale) eller "Bli medlem" (medlemskap)
+- [x] `/handlekurv` — handlekurv fungerer (legg til, fjern, tal oppdaterer seg)
+- [x] `/blogg` — viser blogginnlegg
+- [x] `/post/[slug]` — viser enkeltinnlegg
+- [x] Dynamiske sider (`/om-oss` e.l.) rendrar blokker frå Payload
 
 ## 4. Produktkjøp (Stripe)
 
 > Krev Stripe test-modus + webhook forwarding (`stripe listen --forward-to localhost:3000/api/webhooks/stripe`)
 
-- [ ] Legg produkt i handlekurv → Gå til kassen → Stripe Checkout opnar seg
-- [ ] Bruk testkort `4242 4242 4242 4242` → Betaling godkjent
-- [ ] Omdirigert til `/kvittering` med ordredetaljar
-- [ ] Sjekk Payload admin: ny ordre oppretta med rett produkt og Stripe-referanse
-- [ ] Stadfestingsepost motteke (sjekk Resend dashboard)
+- [x] Legg produkt i handlekurv → Gå til kassen → Stripe Checkout opnar seg
+- [x] Bruk testkort `4242 4242 4242 4242` → Betaling godkjent
+- [x] Omdirigert til `/kvittering` med ordredetaljar
+- [x] Sjekk Payload admin: ny ordre oppretta med rett produkt og Stripe-referanse
+- [x] Stadfestingsepost motteke (sjekk Resend dashboard)
 
 ## 5. Medlemskapskjøp (Stripe)
 
-> Krev at Stripe-produkt for membership er sett opp med rette price IDs i .env
+> Medlemskap er eit produkt i Payload med type=membership. Prisen vert sett i kr.
 
-- [ ] `/medlemskap` → vel "Community" → vel faktureringsperiode → "Bli medlem"
-- [ ] Stripe Checkout opnar seg i subscription-modus
-- [ ] Bruk testkort → Betaling godkjent
-- [ ] Omdirigert til `/medlemskap/bekreftelse`
-- [ ] Webhook logg viser: `checkout.session.completed` + `customer.subscription.created`
-- [ ] Sjekk Drizzle DB: `planner_user` oppretta, `planner_subscription` med tier=community, status=active
-- [ ] Velkomstepost motteke
+- [x] `/produkter` → finn medlemskapsprodukt → klikk "Bli medlem"
+- [x] Stripe Checkout opnar seg i subscription-modus
+- [x] Bruk testkort `4242 4242 4242 4242` → Betaling godkjent
+- [x] Omdirigert til `/kvittering`
+- [x] Webhook logg viser: `checkout.session.completed` + `customer.subscription.created`
+- [x] Sjekk Drizzle DB: `planner_user` oppretta, `planner_subscription` med tier=community, status=active
+- [x] Velkomstepost motteke
 
 ## 6. Innlogging & Auth
 
-- [ ] `/on-poynt/innlogging` — viser Google OAuth-knapp + magic link-skjema
-- [ ] Google OAuth: klikk → Google consent → omdirigert tilbake, innlogga
-- [ ] Magic link: skriv e-post → "Sjekk e-posten din" → klikk lenke i e-post → innlogga
-- [ ] Uautentisert brukar på `/on-poynt/oversikt` → omdirigert til `/on-poynt/innlogging`
+- [x] `/on-poynt/innlogging` — viser Google OAuth-knapp + magic link-skjema
+- [x] Google OAuth: klikk → Google consent → omdirigert tilbake, innlogga
+- [x] Magic link: skriv e-post → "Sjekk e-posten din" → klikk lenke i e-post → innlogga
+- [x] Uautentisert brukar på `/on-poynt/oversikt` → omdirigert til `/on-poynt/innlogging`
 
 ## 7. Onboarding
 
 > Krev innlogga brukar med aktivt membership og `onboardingCompleted=false`
 
-- [ ] Innlogga brukar med membership → omdirigert til `/on-poynt/onboarding`
-- [ ] Steg 1: Workspace-oppsett (namn)
-- [ ] Steg 2: Feature-tour (4 kort)
-- [ ] Steg 3: Ferdig → klikk "Gå til dashboard"
-- [ ] `POST /api/onboarding/complete` køyrt → `onboardingCompleted=true` i DB
-- [ ] Ved neste besøk: rett til dashboard, ikkje onboarding
+- [x] Innlogga brukar med membership → omdirigert til `/on-poynt/onboarding`
+- [x] Steg 1: Workspace-oppsett (namn)
+- [x] Steg 2: Feature-tour (4 kort)
+- [x] Steg 3: Ferdig → klikk "Gå til dashboard"
+- [x] `POST /api/onboarding/complete` køyrt → `onboardingCompleted=true` i DB
+- [x] Ved neste besøk: rett til dashboard, ikkje onboarding
 
 ## 8. On Poynt Dashboard & Verktøy
 
-- [ ] `/on-poynt/oversikt` — dashboard med hurtighandlingar
-- [ ] Sidebar-navigasjon fungerer (verktøy, innstillingar)
-- [ ] `/on-poynt/verktoy/kanalveileder` — kanalveileder lastar
-- [ ] `/on-poynt/verktoy/markedsplan` — markedsplan lastar
-- [ ] `/on-poynt/verktoy/avslag-generator` — avslag-generator lastar
-- [ ] `/on-poynt/verktoy/arsplanlegger` — årsplanleggar lastar
+- [x] `/on-poynt/oversikt` — dashboard med hurtighandlingar
+- [x] Sidebar-navigasjon fungerer (verktøy, innstillingar)
+- [x] `/on-poynt/verktoy/kanalveileder` — kanalveileder lastar
+- [x] `/on-poynt/verktoy/markedsplan` — markedsplan lastar
+- [x] `/on-poynt/verktoy/avslag-generator` — avslag-generator lastar
+- [x] `/on-poynt/verktoy/arsplanlegger` — årsplanleggar lastar
 
 ## 9. Innstillingar
 
 ### Workspace
-- [ ] `/on-poynt/innstillinger/arbeidsomrade` — viser workspace-info
-- [ ] Kan endre workspace-namn
+- [x] `/on-poynt/innstillinger/arbeidsomrade` — viser workspace-info
+- [x] Kan endre workspace-namn
 
 ### Medlemskap
-- [ ] `/on-poynt/innstillinger/medlemskap` — viser rett tier og status frå Drizzle
-- [ ] Viser "Community" eller "Community + AI" med grøn "Aktiv"-badge
-- [ ] "Administrer abonnement"-knapp → opnar Stripe Customer Portal
-- [ ] Brukar utan membership: viser "Du har ikkje eit aktivt medlemskap" + lenke til prissida
+- [x] `/on-poynt/innstillinger/medlemskap` — viser rett tier og status frå Drizzle
+- [x] Viser "Community" eller "Community + AI" med grøn "Aktiv"-badge
+- [x] "Administrer abonnement"-knapp → opnar Stripe Customer Portal
+- [x] Brukar utan membership: viser "Du har ikkje eit aktivt medlemskap" + lenke til produktsida
 
 ## 10. Stripe Customer Portal
 

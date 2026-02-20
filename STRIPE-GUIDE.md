@@ -7,15 +7,17 @@
 Stripe handterer betaling for oss. Vi sender aldri kortnummer — Stripe gjer alt det.
 
 **Flyten:**
-1. Brukaren klikkar "Kjøp" på nettsida vår
+1. Brukaren klikkar "Kjøp" / "Bli medlem" på nettsida vår
 2. Vi lagar ein **Checkout Session** via Stripe API (server-side)
 3. Brukaren vert sendt til Stripe si betalingsside (hosted av Stripe)
 4. Brukaren betalar → Stripe sender ein **webhook** tilbake til oss
 5. Webhook-handleren vår oppdaterer database, sender e-post, etc.
 
 **To typar betaling i Poynt:**
-- **Products** (PDF, kurs): Eingongsbetaling (`mode: "payment"`)
-- **Membership**: Abonnement som fornyar seg (`mode: "subscription"`)
+- **Digitale produkt** (PDF, kurs, bundle): Eingongsbetaling (`mode: "payment"`)
+- **Medlemskap**: Abonnement som fornyar seg (`mode: "subscription"`)
+
+Begge typane er produkt i Payload — ingen separate sider eller API-ruter.
 
 ## 1. Opprett Stripe-konto
 
@@ -26,8 +28,7 @@ Stripe handterer betaling for oss. Vi sender aldri kortnummer — Stripe gjer al
 ## 2. Finn API-nøklane dine
 
 1. I Stripe Dashboard → **Developers** → **API keys**
-2. Du treng to nøklar:
-   - **Publishable key**: `pk_test_...` (vi brukar den ikkje direkte no)
+2. Du treng:
    - **Secret key**: `sk_test_...` (denne treng backend)
 
 Legg secret key i `.env.local`:
@@ -35,60 +36,36 @@ Legg secret key i `.env.local`:
 STRIPE_SECRET_KEY=sk_test_din_nøkkel_her
 ```
 
-## 3. Sett opp produkt for membership
+## 3. Produkt — alt skjer via Payload admin
 
-### Steg 1: Lag produktet i Stripe Dashboard
+Alle produkt (digitale + medlemskap) vert oppretta i Payload admin under **Butikk → Produkter**.
 
-1. **Products** → **Add product**
-2. Namn: "On Poynt Community" (eller kva du vil)
-3. Ikkje legg til pris her — vi gjer det via kode
+### Digitale produkt (kurs, PDF, bundle)
 
-### Steg 2: Køyr prisopprettings-scriptet
+1. Lag eit produkt i Payload admin
+2. Payload sin Stripe-plugin lagar automatisk eit Stripe-produkt (`stripeID`)
+3. Set pris i kr — prisen vert multiplisert med 100 og sendt til Stripe ved checkout (ingen lagra Stripe-pris)
 
-Prosjektet har eit script som lagar 4 prisar (1, 3, 6, 12 mnd) automatisk:
+Du treng ikkje gjere noko manuelt i Stripe Dashboard.
 
-```bash
-# Finn produkt-IDen i Stripe Dashboard (prod_xxxxx)
-# Køyr frå apps/web:
-cd apps/web
-bun run tsx src/lib/stripe/create-membership-prices.ts
-```
+### Medlemskap
 
-> Scriptet ligg i `apps/web/src/lib/stripe/create-membership-prices.ts`.
-> Du må kanskje redigere det og leggje inn produkt-IDen din.
+1. Lag eit produkt i Payload admin med **Produkttype = Medlemskap**
+2. Set **Faktureringsintervall** (t.d. 1 = månadleg, 12 = årleg)
+3. Set **Medlemskapsnivå** (Community eller Community + AI)
+4. Set **Pris** i kr (t.d. 999 for 999 kr/mnd)
 
-Scriptet lagar prisar med desse beløpa (i NOK):
+> For ulike prisperiodar (1 mnd, 3 mnd, 12 mnd) opprettar du eitt produkt per periode i Payload.
 
-| Periode | Per månad | Totalt | Rabatt |
-|---------|-----------|--------|--------|
-| 1 mnd | 999 kr | 999 kr | — |
-| 3 mnd | 899 kr | 2 697 kr | 10% |
-| 6 mnd | 849 kr | 5 094 kr | 15% |
-| 12 mnd | 799 kr | 9 594 kr | 20% |
+### Checkout-flyt
 
-### Steg 3: Legg pris-IDane i .env
+- **Digitale produkt**: Brukar legg i handlekurv → går til kassen → Stripe Checkout (`mode: "payment"`)
+- **Medlemskap**: Brukar klikkar "Bli medlem" direkte → Stripe Checkout (`mode: "subscription"`)
+- Medlemskap kan ikkje blandast med andre produkt i same checkout
 
-Etter scriptet køyrer, får du 4 pris-IDar (`price_xxxxx`). Legg dei i `.env.local`:
+Alt går via éin checkout-rute: `/api/checkout`
 
-```
-NEXT_PUBLIC_MEMBERSHIP_PRICE_1M=price_xxxxx
-NEXT_PUBLIC_MEMBERSHIP_PRICE_3M=price_xxxxx
-NEXT_PUBLIC_MEMBERSHIP_PRICE_6M=price_xxxxx
-NEXT_PUBLIC_MEMBERSHIP_PRICE_12M=price_xxxxx
-```
-
-No veit `/medlemskap`-sida kva prisar som skal brukast.
-
-## 4. Produkt (digitale produkt) — dette skjer automatisk
-
-Når du lagar eit produkt i Payload admin:
-1. Payload sin Stripe-plugin lagar automatisk eit Stripe-produkt
-2. Når du set ein pris (i øre) på produktet, lagar ein afterChange-hook automatisk ein Stripe-pris
-3. Alt vert lagra på produktet (`stripeID`, `stripePriceId`)
-
-Du treng ikkje gjere noko manuelt for digitale produkt.
-
-## 5. Sett opp webhooks (lokal testing)
+## 4. Sett opp webhooks (lokal testing)
 
 Webhooks er korleis Stripe fortel oss at "nokon har betalt". Utan dette skjer ingenting etter betaling.
 
@@ -128,13 +105,9 @@ STRIPE_WEBHOOK_SECRET=whsec_xxxxx
 ```
 STRIPE_SECRET_KEY=sk_test_xxxxx
 STRIPE_WEBHOOK_SECRET=whsec_xxxxx
-NEXT_PUBLIC_MEMBERSHIP_PRICE_1M=price_xxxxx
-NEXT_PUBLIC_MEMBERSHIP_PRICE_3M=price_xxxxx
-NEXT_PUBLIC_MEMBERSHIP_PRICE_6M=price_xxxxx
-NEXT_PUBLIC_MEMBERSHIP_PRICE_12M=price_xxxxx
 ```
 
-## 6. Testing — steg for steg
+## 5. Testing — steg for steg
 
 ### Start alt
 
@@ -175,20 +148,20 @@ For alle testkort:
 
 **Sjekk at det fungerte:**
 - Terminal 2 viser `checkout.session.completed` event
-- Payload admin → Orders → ny ordre synleg
+- Payload admin → Orders → ny ordre med kundens e-post og namn
 - E-post sendt (sjekk Resend dashboard)
 
-### Test B: Kjøp membership
+### Test B: Kjøp medlemskap
 
-1. Gå til `http://localhost:3000/medlemskap`
-2. Vel faktureringsperiode → "Bli medlem"
+1. Gå til `http://localhost:3000/produkter`
+2. Finn eit medlemskapsprodukt → klikk "Bli medlem"
 3. Bruk testkort `4242 4242 4242 4242`
-4. Du kjem tilbake til `/medlemskap/bekreftelse`
+4. Du kjem tilbake til `/kvittering`
 
 **Sjekk at det fungerte:**
 - Terminal 2 viser `checkout.session.completed` + `customer.subscription.created`
 - DB: `planner_user` oppretta (om ny brukar)
-- DB: `planner_subscription` med tier=community, status=active
+- DB: `planner_subscription` med rett tier og status=active
 - Velkomstepost sendt
 
 ### Test C: Logg inn og sjå membership
@@ -197,7 +170,7 @@ For alle testkort:
 2. Logg inn med same e-post som du brukte i Stripe
 3. Om `onboardingCompleted=false` → onboarding-flow
 4. Gå til `/on-poynt/innstillinger/medlemskap`
-5. Skal vise "Community" med grøn "Aktiv"-badge
+5. Skal vise rett tier med grøn "Aktiv"-badge
 
 ### Test D: Kanseller via Customer Portal
 
@@ -224,24 +197,24 @@ stripe trigger invoice.paid
 
 Sjekk at status vert tilbake til `active`.
 
-## 7. Stripe Customer Portal setup
+## 6. Stripe Customer Portal setup
 
 Portalen let brukarar sjølv administrere abonnementet sitt (kansellere, endre betalingsmiddel).
 
 1. Stripe Dashboard → **Settings** → **Billing** → **Customer portal**
 2. Slå på:
-   - "Customers can update their payment methods" ✅
-   - "Customers can cancel subscriptions" ✅
+   - "Customers can update their payment methods"
+   - "Customers can cancel subscriptions"
    - Set cancellation til "Cancel at end of billing period" (ikkje umiddelbart)
 3. Legg til ein lenke tilbake: `http://localhost:3000/on-poynt/innstillinger/medlemskap`
 
-## 8. Frå test til produksjon
+## 7. Frå test til produksjon
 
 Når alt fungerer i test-modus:
 
 1. **Stripe Dashboard** → Slå av "Test mode"
-2. Hent **live** API-nøklar (starter med `sk_live_` og `pk_live_`)
-3. Opprett membership-prisane på nytt (live-produkt)
+2. Hent **live** API-nøklar (starter med `sk_live_`)
+3. Opprett produkt (inkl. medlemskap) på nytt i Payload admin — dei syncar automatisk til live Stripe
 4. Sett opp **live webhook** i Stripe Dashboard:
    - **Settings** → **Webhooks** → **Add endpoint**
    - URL: `https://ditt-domene.no/api/webhooks/stripe`
@@ -269,8 +242,8 @@ Når alt fungerer i test-modus:
 **"Webhook signature verification failed"**
 → `STRIPE_WEBHOOK_SECRET` i `.env.local` stemmer ikkje. Køyr `stripe listen` på nytt og oppdater.
 
-**"No such price: price_xxxxx"**
-→ Pris-IDen i env er feil eller finst ikkje i test-modus. Sjekk Stripe Dashboard → Products.
+**"Produkt manglar Stripe-kopling"**
+→ Produktet har ikkje `stripeID`. Opne produktet i Payload admin og lagre det på nytt — Stripe-pluginen opprettar produktet automatisk.
 
 **Webhook kjem ikkje**
 → Er `stripe listen` køyrande? Sjekk at den viser "Ready!"
@@ -280,3 +253,6 @@ Når alt fungerer i test-modus:
 
 **Betaling godkjent men ingen ordre/subscription i DB**
 → Sjekk Terminal 2 for feilmeldingar. Sjekk Stripe Dashboard → Webhooks → sjå event-historikk og response.
+
+**Medlemskap-produkt viser "Legg i handlekurv" i staden for "Bli medlem"**
+→ Sjekk at produktet har `type: "membership"` i Payload admin.

@@ -1,3 +1,5 @@
+import { fileURLToPath } from "node:url";
+import path from "node:path";
 import { postgresAdapter } from "@payloadcms/db-postgres";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
 import { vercelBlobStorage } from "@payloadcms/storage-vercel-blob";
@@ -10,17 +12,17 @@ import { redirectsPlugin } from "@payloadcms/plugin-redirects";
 import { seoPlugin } from "@payloadcms/plugin-seo";
 import { stripePlugin } from "@payloadcms/plugin-stripe";
 
-import { BlogPosts } from "./src/collections/blog-posts";
-import { Categories } from "./src/collections/categories";
-import { CourseContent } from "./src/collections/course-content";
-import { Media } from "./src/collections/media";
-import { Orders } from "./src/collections/orders";
-import { Pages } from "./src/collections/pages";
-import { Podcasts } from "./src/collections/podcasts";
-import { Products } from "./src/collections/products";
-import { Services } from "./src/collections/services";
+import { BlogPosts } from "./collections/blog-posts";
+import { Categories } from "./collections/categories";
+import { CourseContent } from "./collections/course-content";
+import { Media } from "./collections/media";
+import { Orders } from "./collections/orders";
+import { Pages } from "./collections/pages";
+import { Podcasts } from "./collections/podcasts";
+import { Products } from "./collections/products";
+import { Services } from "./collections/services";
 // Collections
-import { Users } from "./src/collections/users";
+import { Users } from "./collections/users";
 
 // Globals
 import {
@@ -33,7 +35,7 @@ import {
   ProductsPage,
   ServicesPage,
   SiteSettings,
-} from "./src/globals";
+} from "./globals";
 
 const siteUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
 
@@ -45,8 +47,8 @@ export default buildConfig({
     pool: {
       connectionString: process.env.DATABASE_URI || "",
     },
-    // Disable auto-push to prevent conflicts with planner tables (managed by Drizzle)
     push: false,
+    migrationDir: path.resolve(path.dirname(fileURLToPath(import.meta.url)), "migrations"),
   }),
   sharp,
   collections: [
@@ -76,7 +78,6 @@ export default buildConfig({
     user: "users",
   },
   plugins: [
-    // Vercel Blob Storage - CDN for alle media filer
     ...(process.env.BLOB_READ_WRITE_TOKEN
       ? [
           vercelBlobStorage({

@@ -171,9 +171,6 @@ export interface User {
    * Kort beskrivelse som vises på blogginnlegg
    */
   bio?: string | null;
-  role: 'admin';
-  stripeCustomerId?: string | null;
-  purchases?: (number | Order)[] | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -243,25 +240,6 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "orders".
- */
-export interface Order {
-  id: number;
-  user: number | User;
-  items: {
-    product: number | Product;
-    priceAtPurchase: number;
-    id?: string | null;
-  }[];
-  total: number;
-  status: 'pending' | 'paid' | 'cancelled';
-  stripeSessionId?: string | null;
-  stripePaymentIntentId?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "products".
  */
 export interface Product {
@@ -271,7 +249,12 @@ export interface Product {
    * Genereres automatisk fra produktnavn
    */
   slug: string;
-  type: 'course' | 'pdf' | 'bundle';
+  type: 'course' | 'pdf' | 'bundle' | 'membership';
+  /**
+   * Antal månader mellom kvar fakturering (t.d. 1, 3, 6, 12)
+   */
+  recurringInterval?: number | null;
+  membershipTier?: ('community' | 'community_ai') | null;
   /**
    * Vises i produktoversikter og som meta-beskrivelse
    */
@@ -309,7 +292,7 @@ export interface Product {
       }[]
     | null;
   /**
-   * Pris i øre (100 = 1 kr)
+   * Pris i heile kroner
    */
   price: number;
   /**
@@ -333,8 +316,6 @@ export interface Product {
     | boolean
     | null;
   categories?: (number | Category)[] | null;
-  stripePriceId?: string | null;
-  stripeProductId?: string | null;
   meta?: {
     title?: string | null;
     description?: string | null;
@@ -375,6 +356,26 @@ export interface Category {
    * Valgfri beskrivelse av kategorien
    */
   description?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orders".
+ */
+export interface Order {
+  id: number;
+  customerEmail: string;
+  customerName?: string | null;
+  items: {
+    product: number | Product;
+    priceAtPurchase: number;
+    id?: string | null;
+  }[];
+  total: number;
+  status: 'pending' | 'paid' | 'cancelled';
+  stripeSessionId?: string | null;
+  stripePaymentIntentId?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1220,9 +1221,6 @@ export interface UsersSelect<T extends boolean = true> {
   lastName?: T;
   avatar?: T;
   bio?: T;
-  role?: T;
-  stripeCustomerId?: T;
-  purchases?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -1248,6 +1246,8 @@ export interface ProductsSelect<T extends boolean = true> {
   name?: T;
   slug?: T;
   type?: T;
+  recurringInterval?: T;
+  membershipTier?: T;
   shortDescription?: T;
   description?: T;
   featuredImage?: T;
@@ -1263,8 +1263,6 @@ export interface ProductsSelect<T extends boolean = true> {
   active?: T;
   benefits?: T;
   categories?: T;
-  stripePriceId?: T;
-  stripeProductId?: T;
   meta?:
     | T
     | {
@@ -1285,7 +1283,8 @@ export interface ProductsSelect<T extends boolean = true> {
  * via the `definition` "orders_select".
  */
 export interface OrdersSelect<T extends boolean = true> {
-  user?: T;
+  customerEmail?: T;
+  customerName?: T;
   items?:
     | T
     | {

@@ -1,8 +1,8 @@
 "use client";
 
 import { Button } from "@poynt/ui";
-import { Icon } from "@poynt/ui/icons";
 import { toast } from "@poynt/ui";
+import { Icon } from "@poynt/ui/icons";
 import { useState } from "react";
 
 export function PortalButton() {

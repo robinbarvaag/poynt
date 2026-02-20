@@ -31,9 +31,9 @@ const typeLabels: Record<string, string> = {
 };
 
 export function ProductCard({ product }: ProductCardProps) {
-  const priceInKr = (product.price / 100).toLocaleString("nb-NO");
+  const priceInKr = product.price.toLocaleString("nb-NO");
   const compareAtPriceInKr = product.compareAtPrice
-    ? (product.compareAtPrice / 100).toLocaleString("nb-NO")
+    ? product.compareAtPrice.toLocaleString("nb-NO")
     : null;
 
   const hasDiscount =
