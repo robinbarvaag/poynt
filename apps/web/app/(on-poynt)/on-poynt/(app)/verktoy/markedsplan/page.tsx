@@ -1,3 +1,4 @@
+import { TierGate } from "@/components/planner/tier-gate";
 import { createServerCaller } from "@/lib/planner/trpc-server";
 import type { MarketingPlan } from "@poynt/planner-validators";
 import { MarketingPlanClient } from "./marketing-plan-client";
@@ -74,12 +75,14 @@ export default async function MarketingPlanPage() {
   const initialTargetAudience = workspaceProfile?.targetAudience ?? null;
 
   return (
-    <MarketingPlanClient
-      initialSavedPlan={initialSavedPlan}
-      initialIndustry={initialIndustry}
-      initialCompanySize={initialCompanySize}
-      initialTargetAudience={initialTargetAudience}
-      initialProgress={initialProgress}
-    />
+    <TierGate>
+      <MarketingPlanClient
+        initialSavedPlan={initialSavedPlan}
+        initialIndustry={initialIndustry}
+        initialCompanySize={initialCompanySize}
+        initialTargetAudience={initialTargetAudience}
+        initialProgress={initialProgress}
+      />
+    </TierGate>
   );
 }

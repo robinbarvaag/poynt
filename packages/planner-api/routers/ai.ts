@@ -5,6 +5,7 @@ import {
   type ChannelGuideResponse,
   type DeclineResponse,
   type MarketingPlanResponse,
+  type PodcastToContentResponse,
   type YearlyPlannerResponse,
   audienceLabels,
   budgetLabels,
@@ -17,6 +18,7 @@ import {
   mainGoalLabels,
   marketingGoalLabels,
   marketingPlanRequestSchema,
+  podcastToContentRequestSchema,
   previousChannelLabels,
   publishChannelLabels,
   relationshipTypeLabels,
@@ -30,7 +32,7 @@ import {
 } from "@poynt/planner-validators";
 import { generateText } from "ai";
 import { eq } from "drizzle-orm";
-import { publicProcedure, router } from "../trpc";
+import { aiProtectedProcedure, router } from "../trpc";
 
 const systemPrompt = `Du er en erfaren kommunikasjonsrådgiver som hjelper gründere og småbedriftseiere med å si nei på en profesjonell og hyggelig måte.
 
@@ -83,7 +85,7 @@ UNNGÅ:
 - Å unnskylde seg for mye`;
 
 export const aiRouter = router({
-  decline: publicProcedure
+  decline: aiProtectedProcedure
     .input(declineRequestSchema)
     .mutation(async ({ input }): Promise<DeclineResponse> => {
       const {
@@ -198,7 +200,7 @@ Skriv 3 varianter av et avslag:
       }
     }),
 
-  channelGuide: publicProcedure
+  channelGuide: aiProtectedProcedure
     .input(channelGuideRequestSchema)
     .mutation(async ({ input }): Promise<ChannelGuideResponse> => {
       const {
@@ -324,7 +326,7 @@ Anbefal de 3 beste markedskanalene for denne brukeren.`;
       }
     }),
 
-  marketingPlan: publicProcedure
+  marketingPlan: aiProtectedProcedure
     .input(marketingPlanRequestSchema)
     .mutation(async ({ input }): Promise<MarketingPlanResponse> => {
       const {
@@ -483,7 +485,7 @@ Lag en praktisk og gjennomførbar plan med fokus på ${marketingGoalLabels[mainG
       }
     }),
 
-  yearlyPlanner: publicProcedure
+  yearlyPlanner: aiProtectedProcedure
     .input(yearlyPlannerRequestSchema)
     .mutation(async ({ input }): Promise<YearlyPlannerResponse> => {
       const {
@@ -589,6 +591,109 @@ Lag en praktisk årsplan med konkrete innholdsideer for hver måned, tilpasset b
           success: false,
           error:
             "Kunne ikke generere årsplan. Sjekk at API-nøkkelen er satt opp.",
+        };
+      }
+    }),
+
+  podcastToContent: aiProtectedProcedure
+    .input(podcastToContentRequestSchema)
+    .mutation(async ({ input }): Promise<PodcastToContentResponse> => {
+      const {
+        transcript,
+        generateBlogPost,
+        generateSocialPosts,
+        generateChapters,
+      } = input;
+
+      const sections: string[] = [];
+      if (generateBlogPost) sections.push("blogPost");
+      if (generateSocialPosts) sections.push("socialPosts");
+      if (generateChapters) sections.push("chapters");
+
+      if (sections.length === 0) {
+        return {
+          success: false,
+          error: "Vel minst ein type innhald å generera.",
+        };
+      }
+
+      const podcastSystemPrompt = `Du er ein erfaren innhaldsstrategist som hjelper podkastarar med å gjenbruka podkastinnhald på tvers av plattformer.
+
+RETURNER ALLTID GYLDIG JSON utan markdown-formatering eller kodeblokker.
+
+Format:
+{
+  ${
+    generateBlogPost
+      ? `"blogPost": {
+    "title": "Tittel på blogginnlegget",
+    "content": "Fullstendig blogginnlegg i markdown-format (med overskrifter, avsnitt, ev. punktlister). Minst 400 ord."
+  },`
+      : ""
+  }
+  ${
+    generateSocialPosts
+      ? `"socialPosts": {
+    "linkedin": "LinkedIn-post (200-300 ord, profesjonell tone, med 3-5 relevante emneknaggar)",
+    "instagram": "Instagram-tekst (100-150 ord, engasjerande, med 5-8 emneknaggar)",
+    "twitter": "X/Twitter-post (maks 280 teikn, konsis og fengjande)"
+  },`
+      : ""
+  }
+  ${
+    generateChapters
+      ? `"chapters": [
+    {"timestamp": "00:00", "title": "Innleiing"},
+    {"timestamp": "05:30", "title": "Hovudpoeng 1"}
+  ]`
+      : ""
+  }
+}
+
+REGLER:
+- Skriv på norsk (bokmål)
+- Tilpass tonen og innhaldet til den faktiske transkripsjonens innhald
+- Blogginnlegg skal ha naturleg flyt og vera lesbart som ein selvstendig artikkel
+- Sosiale medier-postar skal fanga interesse utan å vera spammande
+- Kapittelmerke skal reflektera dei faktiske emna/overgangane i transkripsjonens rekkefølge
+- Bruk estimerte tidsstempel basert på innhaldsrekkefølga`;
+
+      const prompt = `Podkast-transkripsjon:
+"""
+${transcript}
+"""
+
+Generer${generateBlogPost ? " eit blogginnlegg" : ""}${generateSocialPosts ? " sosiale medier-postar" : ""}${generateChapters ? " og kapittelmerke" : ""} basert på denne transkripsjonens.`;
+
+      try {
+        const { text } = await generateText({
+          model: openai("gpt-4o-mini"),
+          system: podcastSystemPrompt,
+          prompt,
+        });
+
+        const parsed = JSON.parse(text);
+
+        return {
+          success: true,
+          blogPost: parsed.blogPost,
+          socialPosts: parsed.socialPosts,
+          chapters: parsed.chapters,
+        };
+      } catch (error) {
+        console.error("Podcast content generation failed:", error);
+
+        if (error instanceof SyntaxError) {
+          return {
+            success: false,
+            error: "Kunne ikkje tolka AI-respons. Prøv igjen.",
+          };
+        }
+
+        return {
+          success: false,
+          error:
+            "Kunne ikkje generera innhald. Sjekk at API-nøkkelen er satt opp.",
         };
       }
     }),

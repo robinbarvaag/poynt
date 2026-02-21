@@ -1,3 +1,4 @@
+import { TierGate } from "@/components/planner/tier-gate";
 import { createServerCaller } from "@/lib/planner/trpc-server";
 import type { YearlyPlan } from "@poynt/planner-validators";
 import { YearlyPlannerClient } from "./yearly-planner-client";
@@ -55,11 +56,13 @@ export default async function YearlyPlannerPage() {
   const initialAudience = workspaceProfile?.audienceType ?? null;
 
   return (
-    <YearlyPlannerClient
-      initialSavedPlan={initialSavedPlan}
-      industries={activeIndustries}
-      initialIndustry={initialIndustry}
-      initialAudience={initialAudience}
-    />
+    <TierGate>
+      <YearlyPlannerClient
+        initialSavedPlan={initialSavedPlan}
+        industries={activeIndustries}
+        initialIndustry={initialIndustry}
+        initialAudience={initialAudience}
+      />
+    </TierGate>
   );
 }

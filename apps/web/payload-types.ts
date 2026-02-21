@@ -13,53 +13,53 @@
  * via the `definition` "supportedTimezones".
  */
 export type SupportedTimezones =
-  | 'Pacific/Midway'
-  | 'Pacific/Niue'
-  | 'Pacific/Honolulu'
-  | 'Pacific/Rarotonga'
-  | 'America/Anchorage'
-  | 'Pacific/Gambier'
-  | 'America/Los_Angeles'
-  | 'America/Tijuana'
-  | 'America/Denver'
-  | 'America/Phoenix'
-  | 'America/Chicago'
-  | 'America/Guatemala'
-  | 'America/New_York'
-  | 'America/Bogota'
-  | 'America/Caracas'
-  | 'America/Santiago'
-  | 'America/Buenos_Aires'
-  | 'America/Sao_Paulo'
-  | 'Atlantic/South_Georgia'
-  | 'Atlantic/Azores'
-  | 'Atlantic/Cape_Verde'
-  | 'Europe/London'
-  | 'Europe/Berlin'
-  | 'Africa/Lagos'
-  | 'Europe/Athens'
-  | 'Africa/Cairo'
-  | 'Europe/Moscow'
-  | 'Asia/Riyadh'
-  | 'Asia/Dubai'
-  | 'Asia/Baku'
-  | 'Asia/Karachi'
-  | 'Asia/Tashkent'
-  | 'Asia/Calcutta'
-  | 'Asia/Dhaka'
-  | 'Asia/Almaty'
-  | 'Asia/Jakarta'
-  | 'Asia/Bangkok'
-  | 'Asia/Shanghai'
-  | 'Asia/Singapore'
-  | 'Asia/Tokyo'
-  | 'Asia/Seoul'
-  | 'Australia/Brisbane'
-  | 'Australia/Sydney'
-  | 'Pacific/Guam'
-  | 'Pacific/Noumea'
-  | 'Pacific/Auckland'
-  | 'Pacific/Fiji';
+  | "Pacific/Midway"
+  | "Pacific/Niue"
+  | "Pacific/Honolulu"
+  | "Pacific/Rarotonga"
+  | "America/Anchorage"
+  | "Pacific/Gambier"
+  | "America/Los_Angeles"
+  | "America/Tijuana"
+  | "America/Denver"
+  | "America/Phoenix"
+  | "America/Chicago"
+  | "America/Guatemala"
+  | "America/New_York"
+  | "America/Bogota"
+  | "America/Caracas"
+  | "America/Santiago"
+  | "America/Buenos_Aires"
+  | "America/Sao_Paulo"
+  | "Atlantic/South_Georgia"
+  | "Atlantic/Azores"
+  | "Atlantic/Cape_Verde"
+  | "Europe/London"
+  | "Europe/Berlin"
+  | "Africa/Lagos"
+  | "Europe/Athens"
+  | "Africa/Cairo"
+  | "Europe/Moscow"
+  | "Asia/Riyadh"
+  | "Asia/Dubai"
+  | "Asia/Baku"
+  | "Asia/Karachi"
+  | "Asia/Tashkent"
+  | "Asia/Calcutta"
+  | "Asia/Dhaka"
+  | "Asia/Almaty"
+  | "Asia/Jakarta"
+  | "Asia/Bangkok"
+  | "Asia/Shanghai"
+  | "Asia/Singapore"
+  | "Asia/Tokyo"
+  | "Asia/Seoul"
+  | "Australia/Brisbane"
+  | "Australia/Sydney"
+  | "Pacific/Guam"
+  | "Pacific/Noumea"
+  | "Pacific/Auckland"
+  | "Pacific/Fiji";
 
 export interface Config {
   auth: {
@@ -70,47 +70,57 @@ export interface Config {
     users: User;
     products: Product;
     orders: Order;
-    'course-content': CourseContent;
+    "course-content": CourseContent;
     pages: Page;
-    'blog-posts': BlogPost;
+    "blog-posts": BlogPost;
+    articles: Article;
     podcasts: Podcast;
     services: Service;
     categories: Category;
     media: Media;
     redirects: Redirect;
     forms: Form;
-    'form-submissions': FormSubmission;
-    'payload-kv': PayloadKv;
-    'payload-locked-documents': PayloadLockedDocument;
-    'payload-preferences': PayloadPreference;
-    'payload-migrations': PayloadMigration;
+    "form-submissions": FormSubmission;
+    "payload-kv": PayloadKv;
+    "payload-locked-documents": PayloadLockedDocument;
+    "payload-preferences": PayloadPreference;
+    "payload-migrations": PayloadMigration;
   };
   collectionsJoins: {};
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
     orders: OrdersSelect<false> | OrdersSelect<true>;
-    'course-content': CourseContentSelect<false> | CourseContentSelect<true>;
+    "course-content": CourseContentSelect<false> | CourseContentSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
-    'blog-posts': BlogPostsSelect<false> | BlogPostsSelect<true>;
+    "blog-posts": BlogPostsSelect<false> | BlogPostsSelect<true>;
+    articles: ArticlesSelect<false> | ArticlesSelect<true>;
     podcasts: PodcastsSelect<false> | PodcastsSelect<true>;
     services: ServicesSelect<false> | ServicesSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
-    'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
-    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
-    'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
-    'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
-    'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
+    "form-submissions":
+      | FormSubmissionsSelect<false>
+      | FormSubmissionsSelect<true>;
+    "payload-kv": PayloadKvSelect<false> | PayloadKvSelect<true>;
+    "payload-locked-documents":
+      | PayloadLockedDocumentsSelect<false>
+      | PayloadLockedDocumentsSelect<true>;
+    "payload-preferences":
+      | PayloadPreferencesSelect<false>
+      | PayloadPreferencesSelect<true>;
+    "payload-migrations":
+      | PayloadMigrationsSelect<false>
+      | PayloadMigrationsSelect<true>;
   };
   db: {
     defaultIDType: number;
   };
   fallbackLocale: null;
   globals: {
-    'site-settings': SiteSetting;
+    "site-settings": SiteSetting;
     header: Header;
     footer: Footer;
     homepage: Homepage;
@@ -121,7 +131,7 @@ export interface Config {
     productSettings: ProductSetting;
   };
   globalsSelect: {
-    'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+    "site-settings": SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
     homepage: HomepageSelect<false> | HomepageSelect<true>;
@@ -133,7 +143,7 @@ export interface Config {
   };
   locale: null;
   user: User & {
-    collection: 'users';
+    collection: "users";
   };
   jobs: {
     tasks: unknown;
@@ -249,12 +259,12 @@ export interface Product {
    * Genereres automatisk fra produktnavn
    */
   slug: string;
-  type: 'course' | 'pdf' | 'bundle' | 'membership';
+  type: "course" | "pdf" | "bundle" | "membership";
   /**
    * Antal månader mellom kvar fakturering (t.d. 1, 3, 6, 12)
    */
   recurringInterval?: number | null;
-  membershipTier?: ('community' | 'community_ai') | null;
+  membershipTier?: ("community" | "community_ai") | null;
   /**
    * Vises i produktoversikter og som meta-beskrivelse
    */
@@ -270,8 +280,8 @@ export interface Product {
         version: number;
         [k: string]: unknown;
       }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      direction: ("ltr" | "rtl") | null;
+      format: "left" | "start" | "center" | "right" | "end" | "justify" | "";
       indent: number;
       version: number;
     };
@@ -334,7 +344,7 @@ export interface Product {
     /**
      * Brukes av sosiale medier ved deling
      */
-    ogType?: ('website' | 'article' | 'product') | null;
+    ogType?: ("website" | "article" | "product") | null;
   };
   stripeID?: string | null;
   skipSync?: boolean | null;
@@ -373,7 +383,7 @@ export interface Order {
     id?: string | null;
   }[];
   total: number;
-  status: 'pending' | 'paid' | 'cancelled';
+  status: "pending" | "paid" | "cancelled";
   stripeSessionId?: string | null;
   stripePaymentIntentId?: string | null;
   updatedAt: string;
@@ -461,11 +471,11 @@ export interface Page {
     /**
      * Brukes av sosiale medier ved deling
      */
-    ogType?: ('website' | 'article' | 'product') | null;
+    ogType?: ("website" | "article" | "product") | null;
   };
   updatedAt: string;
   createdAt: string;
-  _status?: ('draft' | 'published') | null;
+  _status?: ("draft" | "published") | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -475,7 +485,7 @@ export interface HeroBlock {
   /**
    * Velg utseende på hero-seksjonen
    */
-  variant?: ('centered' | 'left' | 'split' | 'fullscreen' | 'gradient') | null;
+  variant?: ("centered" | "left" | "split" | "fullscreen" | "gradient") | null;
   title: string;
   subtitle?: {
     root: {
@@ -485,8 +495,8 @@ export interface HeroBlock {
         version: number;
         [k: string]: unknown;
       }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      direction: ("ltr" | "rtl") | null;
+      format: "left" | "start" | "center" | "right" | "end" | "justify" | "";
       indent: number;
       version: number;
     };
@@ -516,7 +526,7 @@ export interface HeroBlock {
   };
   id?: string | null;
   blockName?: string | null;
-  blockType: 'hero';
+  blockType: "hero";
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -531,8 +541,8 @@ export interface ContentBlock {
         version: number;
         [k: string]: unknown;
       }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      direction: ("ltr" | "rtl") | null;
+      format: "left" | "start" | "center" | "right" | "end" | "justify" | "";
       indent: number;
       version: number;
     };
@@ -540,7 +550,7 @@ export interface ContentBlock {
   };
   id?: string | null;
   blockName?: string | null;
-  blockType: 'content';
+  blockType: "content";
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -551,7 +561,7 @@ export interface MediaBlock {
   caption?: string | null;
   id?: string | null;
   blockName?: string | null;
-  blockType: 'media';
+  blockType: "media";
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -570,12 +580,12 @@ export interface FormBlock {
    * Tekst som vises over skjemaet
    */
   description?: string | null;
-  variant?: ('default' | 'card' | 'bordered') | null;
-  alignment?: ('left' | 'center') | null;
-  maxWidth?: ('sm' | 'md' | 'lg' | 'full') | null;
+  variant?: ("default" | "card" | "bordered") | null;
+  alignment?: ("left" | "center") | null;
+  maxWidth?: ("sm" | "md" | "lg" | "full") | null;
   id?: string | null;
   blockName?: string | null;
-  blockType: 'formBlock';
+  blockType: "formBlock";
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -594,7 +604,7 @@ export interface Form {
             defaultValue?: boolean | null;
             id?: string | null;
             blockName?: string | null;
-            blockType: 'checkbox';
+            blockType: "checkbox";
           }
         | {
             name: string;
@@ -603,7 +613,7 @@ export interface Form {
             required?: boolean | null;
             id?: string | null;
             blockName?: string | null;
-            blockType: 'country';
+            blockType: "country";
           }
         | {
             name: string;
@@ -612,7 +622,7 @@ export interface Form {
             required?: boolean | null;
             id?: string | null;
             blockName?: string | null;
-            blockType: 'email';
+            blockType: "email";
           }
         | {
             message?: {
@@ -623,8 +633,15 @@ export interface Form {
                   version: number;
                   [k: string]: unknown;
                 }[];
-                direction: ('ltr' | 'rtl') | null;
-                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                direction: ("ltr" | "rtl") | null;
+                format:
+                  | "left"
+                  | "start"
+                  | "center"
+                  | "right"
+                  | "end"
+                  | "justify"
+                  | "";
                 indent: number;
                 version: number;
               };
@@ -632,7 +649,7 @@ export interface Form {
             } | null;
             id?: string | null;
             blockName?: string | null;
-            blockType: 'message';
+            blockType: "message";
           }
         | {
             name: string;
@@ -642,7 +659,7 @@ export interface Form {
             required?: boolean | null;
             id?: string | null;
             blockName?: string | null;
-            blockType: 'number';
+            blockType: "number";
           }
         | {
             name: string;
@@ -660,7 +677,7 @@ export interface Form {
             required?: boolean | null;
             id?: string | null;
             blockName?: string | null;
-            blockType: 'select';
+            blockType: "select";
           }
         | {
             name: string;
@@ -669,17 +686,7 @@ export interface Form {
             required?: boolean | null;
             id?: string | null;
             blockName?: string | null;
-            blockType: 'state';
-          }
-        | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            defaultValue?: string | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'text';
+            blockType: "state";
           }
         | {
             name: string;
@@ -689,7 +696,17 @@ export interface Form {
             required?: boolean | null;
             id?: string | null;
             blockName?: string | null;
-            blockType: 'textarea';
+            blockType: "text";
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            defaultValue?: string | null;
+            required?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: "textarea";
           }
       )[]
     | null;
@@ -697,7 +714,7 @@ export interface Form {
   /**
    * Choose whether to display an on-page message or redirect to a different page after they submit the form.
    */
-  confirmationType?: ('message' | 'redirect') | null;
+  confirmationType?: ("message" | "redirect") | null;
   confirmationMessage?: {
     root: {
       type: string;
@@ -706,8 +723,8 @@ export interface Form {
         version: number;
         [k: string]: unknown;
       }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      direction: ("ltr" | "rtl") | null;
+      format: "left" | "start" | "center" | "right" | "end" | "justify" | "";
       indent: number;
       version: number;
     };
@@ -738,8 +755,15 @@ export interface Form {
               version: number;
               [k: string]: unknown;
             }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            direction: ("ltr" | "rtl") | null;
+            format:
+              | "left"
+              | "start"
+              | "center"
+              | "right"
+              | "end"
+              | "justify"
+              | "";
             indent: number;
             version: number;
           };
@@ -758,21 +782,21 @@ export interface Form {
 export interface ProductArchiveBlock {
   title?: string | null;
   description?: string | null;
-  selectionMode?: ('auto' | 'manual') | null;
+  selectionMode?: ("auto" | "manual") | null;
   /**
    * Velg hvilke produkter som skal vises
    */
   selectedProducts?: (number | Product)[] | null;
-  filterByType?: ('all' | 'course' | 'pdf' | 'bundle') | null;
+  filterByType?: ("all" | "course" | "pdf" | "bundle") | null;
   /**
    * La stå tom for å vise alle
    */
   limit?: number | null;
-  layout?: ('grid' | 'grid-4' | 'carousel') | null;
+  layout?: ("grid" | "grid-4" | "carousel") | null;
   showMoreLink?: boolean | null;
   id?: string | null;
   blockName?: string | null;
-  blockType: 'productArchive';
+  blockType: "productArchive";
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -788,7 +812,7 @@ export interface PodcastArchiveBlock {
   showMoreLink?: boolean | null;
   id?: string | null;
   blockName?: string | null;
-  blockType: 'podcastArchive';
+  blockType: "podcastArchive";
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -797,11 +821,11 @@ export interface PodcastArchiveBlock {
 export interface ServicesArchiveBlock {
   title?: string | null;
   description?: string | null;
-  layout?: ('grid' | 'list') | null;
+  layout?: ("grid" | "list") | null;
   showMoreLink?: boolean | null;
   id?: string | null;
   blockName?: string | null;
-  blockType: 'servicesArchive';
+  blockType: "servicesArchive";
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -809,7 +833,7 @@ export interface ServicesArchiveBlock {
  */
 export interface TestimonialsBlock {
   title?: string | null;
-  layout?: ('cards' | 'slider' | 'quote') | null;
+  layout?: ("cards" | "slider" | "quote") | null;
   testimonials?:
     | {
         quote: string;
@@ -827,14 +851,14 @@ export interface TestimonialsBlock {
     | null;
   id?: string | null;
   blockName?: string | null;
-  blockType: 'testimonials';
+  blockType: "testimonials";
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "CtaSectionBlock".
  */
 export interface CtaSectionBlock {
-  variant?: ('simple' | 'colored' | 'image') | null;
+  variant?: ("simple" | "colored" | "image") | null;
   title: string;
   description?: string | null;
   backgroundImage?: (number | null) | Media;
@@ -848,14 +872,14 @@ export interface CtaSectionBlock {
   };
   id?: string | null;
   blockName?: string | null;
-  blockType: 'ctaSection';
+  blockType: "ctaSection";
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "SpotifyEmbedBlock".
  */
 export interface SpotifyEmbedBlock {
-  embedType: 'episode' | 'show' | 'playlist';
+  embedType: "episode" | "show" | "playlist";
   /**
    * Lim inn lenke fra Spotify (f.eks. https://open.spotify.com/episode/...)
    */
@@ -864,11 +888,11 @@ export interface SpotifyEmbedBlock {
    * Overskrift som vises over spilleren
    */
   title?: string | null;
-  height?: ('compact' | 'standard' | 'large') | null;
-  theme?: ('auto' | 'light' | 'dark') | null;
+  height?: ("compact" | "standard" | "large") | null;
+  theme?: ("auto" | "light" | "dark") | null;
   id?: string | null;
   blockName?: string | null;
-  blockType: 'spotify-embed';
+  blockType: "spotify-embed";
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -894,8 +918,8 @@ export interface BlogPost {
         version: number;
         [k: string]: unknown;
       }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      direction: ("ltr" | "rtl") | null;
+      format: "left" | "start" | "center" | "right" | "end" | "justify" | "";
       indent: number;
       version: number;
     };
@@ -923,11 +947,50 @@ export interface BlogPost {
     /**
      * Brukes av sosiale medier ved deling
      */
-    ogType?: ('website' | 'article' | 'product') | null;
+    ogType?: ("website" | "article" | "product") | null;
   };
   updatedAt: string;
   createdAt: string;
-  _status?: ('draft' | 'published') | null;
+  _status?: ("draft" | "published") | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "articles".
+ */
+export interface Article {
+  id: number;
+  title: string;
+  /**
+   * Genereres automatisk fra tittel
+   */
+  slug: string;
+  /**
+   * Kort beskrivelse som vises i listeoversikter
+   */
+  excerpt?: string | null;
+  featuredImage?: (number | null) | Media;
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ("ltr" | "rtl") | null;
+      format: "left" | "start" | "center" | "right" | "end" | "justify" | "";
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  author?: (number | null) | User;
+  categories?: (number | Category)[] | null;
+  publishedAt: string;
+  relatedArticles?: (number | Article)[] | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ("draft" | "published") | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -955,8 +1018,8 @@ export interface Podcast {
         version: number;
         [k: string]: unknown;
       }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      direction: ("ltr" | "rtl") | null;
+      format: "left" | "start" | "center" | "right" | "end" | "justify" | "";
       indent: number;
       version: number;
     };
@@ -1020,14 +1083,14 @@ export interface Service {
         version: number;
         [k: string]: unknown;
       }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      direction: ("ltr" | "rtl") | null;
+      format: "left" | "start" | "center" | "right" | "end" | "justify" | "";
       indent: number;
       version: number;
     };
     [k: string]: unknown;
   } | null;
-  priceType: 'fixed' | 'from' | 'monthly' | 'contact';
+  priceType: "fixed" | "from" | "monthly" | "contact";
   /**
    * Pris i hele kroner (eks. mva)
    */
@@ -1058,18 +1121,18 @@ export interface Redirect {
   id: number;
   from: string;
   to?: {
-    type?: ('reference' | 'custom') | null;
+    type?: ("reference" | "custom") | null;
     reference?:
       | ({
-          relationTo: 'pages';
+          relationTo: "pages";
           value: number | Page;
         } | null)
       | ({
-          relationTo: 'products';
+          relationTo: "products";
           value: number | Product;
         } | null)
       | ({
-          relationTo: 'blog-posts';
+          relationTo: "blog-posts";
           value: number | BlogPost;
         } | null);
     url?: string | null;
@@ -1119,60 +1182,64 @@ export interface PayloadLockedDocument {
   id: number;
   document?:
     | ({
-        relationTo: 'users';
+        relationTo: "users";
         value: number | User;
       } | null)
     | ({
-        relationTo: 'products';
+        relationTo: "products";
         value: number | Product;
       } | null)
     | ({
-        relationTo: 'orders';
+        relationTo: "orders";
         value: number | Order;
       } | null)
     | ({
-        relationTo: 'course-content';
+        relationTo: "course-content";
         value: number | CourseContent;
       } | null)
     | ({
-        relationTo: 'pages';
+        relationTo: "pages";
         value: number | Page;
       } | null)
     | ({
-        relationTo: 'blog-posts';
+        relationTo: "blog-posts";
         value: number | BlogPost;
       } | null)
     | ({
-        relationTo: 'podcasts';
+        relationTo: "articles";
+        value: number | Article;
+      } | null)
+    | ({
+        relationTo: "podcasts";
         value: number | Podcast;
       } | null)
     | ({
-        relationTo: 'services';
+        relationTo: "services";
         value: number | Service;
       } | null)
     | ({
-        relationTo: 'categories';
+        relationTo: "categories";
         value: number | Category;
       } | null)
     | ({
-        relationTo: 'media';
+        relationTo: "media";
         value: number | Media;
       } | null)
     | ({
-        relationTo: 'redirects';
+        relationTo: "redirects";
         value: number | Redirect;
       } | null)
     | ({
-        relationTo: 'forms';
+        relationTo: "forms";
         value: number | Form;
       } | null)
     | ({
-        relationTo: 'form-submissions';
+        relationTo: "form-submissions";
         value: number | FormSubmission;
       } | null);
   globalSlug?: string | null;
   user: {
-    relationTo: 'users';
+    relationTo: "users";
     value: number | User;
   };
   updatedAt: string;
@@ -1185,7 +1252,7 @@ export interface PayloadLockedDocument {
 export interface PayloadPreference {
   id: number;
   user: {
-    relationTo: 'users';
+    relationTo: "users";
     value: number | User;
   };
   key?: string | null;
@@ -1343,7 +1410,7 @@ export interface PagesSelect<T extends boolean = true> {
         servicesArchive?: T | ServicesArchiveBlockSelect<T>;
         testimonials?: T | TestimonialsBlockSelect<T>;
         ctaSection?: T | CtaSectionBlockSelect<T>;
-        'spotify-embed'?: T | SpotifyEmbedBlockSelect<T>;
+        "spotify-embed"?: T | SpotifyEmbedBlockSelect<T>;
       };
   publishedAt?: T;
   meta?:
@@ -1547,6 +1614,24 @@ export interface BlogPostsSelect<T extends boolean = true> {
         canonicalUrl?: T;
         ogType?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "articles_select".
+ */
+export interface ArticlesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  excerpt?: T;
+  featuredImage?: T;
+  content?: T;
+  author?: T;
+  categories?: T;
+  publishedAt?: T;
+  relatedArticles?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1888,7 +1973,13 @@ export interface SiteSetting {
   address?: string | null;
   socialLinks?:
     | {
-        platform: 'facebook' | 'instagram' | 'linkedin' | 'twitter' | 'youtube' | 'tiktok';
+        platform:
+          | "facebook"
+          | "instagram"
+          | "linkedin"
+          | "twitter"
+          | "youtube"
+          | "tiktok";
         url: string;
         id?: string | null;
       }[]
@@ -1915,7 +2006,7 @@ export interface Header {
         /**
          * Velg type lenke. Bruk 'Egendefinert URL' for /blogg, /produkter eller eksterne lenker.
          */
-        linkType?: ('custom' | 'page' | 'blog' | 'product') | null;
+        linkType?: ("custom" | "page" | "blog" | "product") | null;
         /**
          * F.eks. /blogg, /produkter, eller https://ekstern-side.no
          */
@@ -1928,7 +2019,7 @@ export interface Header {
           | {
               label: string;
               description?: string | null;
-              linkType?: ('custom' | 'page' | 'blog' | 'product') | null;
+              linkType?: ("custom" | "page" | "blog" | "product") | null;
               url?: string | null;
               page?: (number | null) | Page;
               blogPost?: (number | null) | BlogPost;
@@ -1955,7 +2046,7 @@ export interface Footer {
         links?:
           | {
               label: string;
-              linkType?: ('internal' | 'external') | null;
+              linkType?: ("internal" | "external") | null;
               page?: (number | null) | Page;
               url?: string | null;
               id?: string | null;
@@ -1975,8 +2066,8 @@ export interface Footer {
         version: number;
         [k: string]: unknown;
       }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      direction: ("ltr" | "rtl") | null;
+      format: "left" | "start" | "center" | "right" | "end" | "justify" | "";
       indent: number;
       version: number;
     };
@@ -2333,7 +2424,7 @@ export interface HomepageSelect<T extends boolean = true> {
         servicesArchive?: T | ServicesArchiveBlockSelect<T>;
         testimonials?: T | TestimonialsBlockSelect<T>;
         ctaSection?: T | CtaSectionBlockSelect<T>;
-        'spotify-embed'?: T | SpotifyEmbedBlockSelect<T>;
+        "spotify-embed"?: T | SpotifyEmbedBlockSelect<T>;
       };
   meta?:
     | T
@@ -2469,7 +2560,6 @@ export interface Auth {
   [k: string]: unknown;
 }
 
-
-declare module 'payload' {
+declare module "payload" {
   export interface GeneratedTypes extends Config {}
 }

@@ -1,31 +1,51 @@
 import type { IconName } from "@poynt/ui/icons";
 import type { MedalConfigItem } from "./types";
 
-export const mainNavItems: { title: string; url: string; icon: IconName }[] = [
+export const mainNavItems: {
+  title: string;
+  url: string;
+  icon: IconName;
+  requiresAi?: boolean;
+}[] = [
   {
     title: "Hjem",
     url: "/on-poynt/oversikt",
     icon: "home",
   },
   {
+    title: "Artiklar",
+    url: "/on-poynt/artiklar",
+    icon: "newspaper",
+  },
+  {
     title: "Kanalveileder",
     url: "/on-poynt/verktoy/kanalveileder",
     icon: "compass",
+    requiresAi: true,
   },
   {
     title: "Markedsplan",
     url: "/on-poynt/verktoy/markedsplan",
     icon: "bar-chart",
+    requiresAi: true,
   },
   {
     title: "Si nei-generator",
     url: "/on-poynt/verktoy/avslag-generator",
     icon: "hand-metal",
+    requiresAi: true,
   },
   {
     title: "Årshjul",
     url: "/on-poynt/verktoy/arsplanlegger",
     icon: "calendar-days",
+    requiresAi: true,
+  },
+  {
+    title: "Podcast til innhald",
+    url: "/on-poynt/verktoy/podcast-til-innhald",
+    icon: "mic",
+    requiresAi: true,
   },
 ];
 
@@ -106,6 +126,15 @@ export const tools: {
     href: "/on-poynt/verktoy/arsplanlegger",
     gradient: "from-emerald-400/80 to-teal-400/80",
     benefits: ["12 måneder", "Sesongbasert"],
+  },
+  {
+    icon: "mic",
+    title: "Podcast til innhald",
+    description:
+      "Last opp ein podkast-episode og få blogginnlegg, sosiale postar og kapittelmerke automatisk.",
+    href: "/on-poynt/verktoy/podcast-til-innhald",
+    gradient: "from-pink-400/80 to-rose-400/80",
+    benefits: ["Whisper AI", "3 format på ein gong"],
   },
 ];
 

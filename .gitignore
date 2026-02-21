@@ -112,3 +112,4 @@ screenshots
 .mcp.json
 *.tsbuildinfo
 .claude/settings.local.json
+on-poynt-screenshots/

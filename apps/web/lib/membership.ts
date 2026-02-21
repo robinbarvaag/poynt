@@ -10,6 +10,8 @@ export interface MembershipInfo {
   status: MembershipStatus;
   stripeCustomerId: string | null;
   stripeSubscriptionId: string | null;
+  currentPeriodEnd: Date | null;
+  cancelAtPeriodEnd: boolean;
 }
 
 export interface EnrichedSession {
@@ -67,12 +69,16 @@ export async function getSessionWithMembership(
           status: sub.status as MembershipStatus,
           stripeCustomerId: sub.stripeCustomerId,
           stripeSubscriptionId: sub.stripeSubscriptionId,
+          currentPeriodEnd: sub.currentPeriodEnd ?? null,
+          cancelAtPeriodEnd: sub.cancelAtPeriodEnd ?? false,
         }
       : {
           tier: "none",
           status: "inactive",
           stripeCustomerId: null,
           stripeSubscriptionId: null,
+          currentPeriodEnd: null,
+          cancelAtPeriodEnd: false,
         },
   };
 }

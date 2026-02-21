@@ -1,16 +1,5 @@
 import type { CollectionConfig } from "payload";
-
-function generateSlug(text: string): string {
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/[æ]/g, "ae")
-    .replace(/[ø]/g, "o")
-    .replace(/[å]/g, "a")
-    .replace(/[^\w\s-]/g, "")
-    .replace(/[\s_-]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
+import { generateSlug } from "../lib/generate-slug";
 
 export const Podcasts: CollectionConfig = {
   slug: "podcasts",

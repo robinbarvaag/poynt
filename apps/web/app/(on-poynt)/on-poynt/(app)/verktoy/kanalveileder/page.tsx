@@ -1,3 +1,4 @@
+import { TierGate } from "@/components/planner/tier-gate";
 import { createServerCaller } from "@/lib/planner/trpc-server";
 import type { ChannelRecommendation, SavedResult } from "@/lib/types";
 import { ChannelGuideClient } from "./channel-guide-client";
@@ -32,11 +33,13 @@ export default async function ChannelGuidePage() {
   const initialTargetAudience = workspaceProfile?.audienceType ?? null;
 
   return (
-    <ChannelGuideClient
-      initialSavedResult={initialSavedResult}
-      industries={activeIndustries}
-      initialIndustryId={initialIndustryId}
-      initialTargetAudience={initialTargetAudience}
-    />
+    <TierGate>
+      <ChannelGuideClient
+        initialSavedResult={initialSavedResult}
+        industries={activeIndustries}
+        initialIndustryId={initialIndustryId}
+        initialTargetAudience={initialTargetAudience}
+      />
+    </TierGate>
   );
 }

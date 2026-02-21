@@ -1,6 +1,6 @@
 # Poynt — Veikart
 
-> Sist oppdatert: 2026-02-20
+> Sist oppdatert: 2026-02-21
 
 ## Ferdig
 
@@ -18,51 +18,18 @@
 - Membership-innstillingsside i On Poynt
 - On Poynt-portal med sidebar, layout, auth-guards
 - Medlemsadministrasjon i Payload admin (custom views med Drizzle-data)
+- Innhaldssystem: Articles-collection, oversiktsside med kategorifilter + søk, artikkelside med TOC
+- Vis detaljar: e-post, tier, Stripe-status, siste innlogging
+- Liste over alle On Poynt-medlemmer (frå Drizzle planner_user + planner_subscription)
+- Endre tier / deaktiver medlemskap
+- **Tilgangskontroll**: `community_ai`-sjekk på alle AI-verktøy (tRPC + TierGate UI), kansellert-innen-periode-fix, past_due grace period
+- **Podcast-to-Content**: lydfil-opplasting → Whisper-transkripsjon → blogginnlegg + sosiale postar + kapittelmerke (`/verktoy/podcast-til-innhald`)
+- **Admin-verktøy**: Bransje-konfigurasjon og Prompt-malar i Payload admin (`/admin/bransjar`, `/admin/prompts`)
 
-## Innhaldssystem (Community Content)
+## Tilgangskontroll (gjenstår)
 
-Artiklar og guider for medlemmer, administrert i Payload.
-
-- Payload-collection: `Articles` med kategoriar (LinkedIn, TikTok, E-post, etc.)
-- Rik tekst-editor, bilete, utkast, planlagd publisering
-- Artikkelside med TOC for lange innlegg
-- Oversiktsside med kategorifilter og søk
-- Tilgangskontroll: synleg for alle medlemmer (community + community_ai)
-
-## Podcast-to-Content (AI-verktøy)
-
-Verktøy som tek ein podkast-episode og genererer innhald frå den.
-
-- Last opp lydfil / lim inn URL
-- Transkripsjon (Whisper eller tilsvarande)
-- Generer blogginnlegg, sosiale medier-postar, kapittelmerke
-- Redigerbart resultat før publisering
-- Krev `community_ai`-tier
-
-## Admin-verktøy i Payload
-
-Partnaren treng eitt admin-grensesnitt. Bygg custom views i Payload som les frå Drizzle.
-
-### ~~Medlemsadministrasjon~~ ✓
-- ~~Liste over alle On Poynt-medlemmer (frå Drizzle planner_user + planner_subscription)~~
-- ~~Vis detaljar: e-post, tier, Stripe-status, siste innlogging~~
-- ~~Endre tier / deaktiver medlemskap~~
-
-### Prompt-administrasjon
-- Rediger standard system-prompts for kvart AI-verktøy
-- Per-kunde prompt-overrides for spesifikke medlemmer
-- Kan vere Payload-collection (`SystemPrompts`) eller Drizzle-tabell — avheng av kva som gir best UX
-
-### Bransje-konfigurasjon
-- Administrer bransjar som AI-verktøya brukar som kontekst
-- Legg til / rediger / fjern bransjar
-
-## Tilgangskontroll
-
-- AI-verktøy sjekkar tier før køyring (`community_ai` only)
-- `community`-brukarar ser oppgraderingsmelding med pris
-- Kansellert abonnement: tilgang til periodens slutt (`cancel_at_period_end`)
-- Forfalt betaling: grace period + e-postvarsel
+- Forfalt betaling: e-postvarsel til brukar ved `past_due` (grace period er implementert, men ingen e-post enno)
+- Per-kunde prompt-overrides for spesifikke medlemmer (ikkje prioritert)
 
 ## Lokalisering (lågare prioritet)
 

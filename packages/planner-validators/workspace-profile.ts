@@ -69,6 +69,7 @@ export const toolIds = [
   "decline-generator",
   "marketing-plan",
   "yearly-planner",
+  "podcast-to-content",
 ] as const;
 export type ToolId = (typeof toolIds)[number];
 
@@ -77,6 +78,7 @@ export const toolIdLabels: Record<ToolId, string> = {
   "decline-generator": "Avslå-generator",
   "marketing-plan": "Markedsplan",
   "yearly-planner": "Årshjul",
+  "podcast-to-content": "Podcast til innhald",
 };
 
 export const toolResultSchema = z.object({

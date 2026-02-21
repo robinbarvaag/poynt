@@ -1,3 +1,4 @@
+import { TierGate } from "@/components/planner/tier-gate";
 import { createServerCaller } from "@/lib/planner/trpc-server";
 import { DeclineGeneratorClient } from "./decline-generator-client";
 
@@ -36,5 +37,9 @@ export default async function DeclineGeneratorPage() {
     console.error("Could not fetch saved results:", error);
   }
 
-  return <DeclineGeneratorClient initialSavedResult={initialSavedResult} />;
+  return (
+    <TierGate>
+      <DeclineGeneratorClient initialSavedResult={initialSavedResult} />
+    </TierGate>
+  );
 }

@@ -1,5 +1,5 @@
 import { db } from "@poynt/planner-db";
-import { plannerUser } from "@poynt/planner-db/schema";
+import { plannerSubscription, plannerUser } from "@poynt/planner-db/schema";
 import { TRPCError, initTRPC } from "@trpc/server";
 import { eq } from "drizzle-orm";
 
@@ -31,6 +31,61 @@ export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
     throw new TRPCError({
       code: "UNAUTHORIZED",
       message: "Du må være logget inn for å gjøre dette",
+    });
+  }
+
+  return next({
+    ctx: {
+      ...ctx,
+      userId: ctx.userId,
+    },
+  });
+});
+
+/**
+ * AI protected procedure - requires community_ai tier with active access.
+ * Allows: active status, canceled-but-within-period, past_due (grace period).
+ */
+export const aiProtectedProcedure = t.procedure.use(async ({ ctx, next }) => {
+  if (!ctx.userId) {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "Du må være logget inn for å gjøre dette",
+    });
+  }
+
+  const [sub] = await db
+    .select()
+    .from(plannerSubscription)
+    .where(eq(plannerSubscription.userId, ctx.userId))
+    .limit(1);
+
+  if (!sub || sub.tier !== "community_ai") {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "community_ai",
+    });
+  }
+
+  const allowedStatuses = ["active", "canceled", "past_due"] as const;
+  const isAllowedStatus = (allowedStatuses as readonly string[]).includes(
+    sub.status
+  );
+
+  // For canceled: only allow if still within the paid period
+  if (sub.status === "canceled") {
+    const withinPeriod =
+      sub.currentPeriodEnd && sub.currentPeriodEnd > new Date();
+    if (!withinPeriod) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "Abonnementet ditt er avsluttet",
+      });
+    }
+  } else if (!isAllowedStatus) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Du har ikke tilgang til AI-verktøy",
     });
   }
 

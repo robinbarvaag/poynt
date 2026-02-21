@@ -1,5 +1,6 @@
 import { AppSidebar } from "@/components/planner/app-sidebar";
 import { getSessionWithMembership } from "@/lib/membership";
+import { hasActiveAccess } from "@/lib/membership/has-active-access";
 import { db, eq } from "@poynt/planner-db";
 import { plannerUser } from "@poynt/planner-db/schema";
 import { SidebarInset, SidebarProvider, Toaster } from "@poynt/ui";
@@ -20,11 +21,8 @@ export default async function PlannerAppLayout({
     redirect("/on-poynt/innlogging");
   }
 
-  // Check if user has active membership and hasn't completed onboarding
-  if (
-    session.membership.tier !== "none" &&
-    session.membership.status === "active"
-  ) {
+  // Check if user has active access (handles canceled-but-within-period and past_due grace period)
+  if (hasActiveAccess(session.membership)) {
     const users = await db
       .select({ onboardingCompleted: plannerUser.onboardingCompleted })
       .from(plannerUser)

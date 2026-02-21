@@ -132,6 +132,13 @@ export {
   type UpdatePromptTemplateInput,
 } from "./admin";
 
+// Podcast to content
+export {
+  podcastToContentRequestSchema,
+  type PodcastToContentRequest,
+  type PodcastToContentResponse,
+} from "./podcast-to-content";
+
 // Workspace profile & tool results
 export {
   profileCompanySizes,

@@ -26,12 +26,18 @@ import { WorkspaceSwitcher } from "./workspace-switcher";
 export function AppSidebar() {
   const pathname = usePathname();
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isAiTier, setIsAiTier] = useState<boolean | null>(null);
 
   useEffect(() => {
     trpc.admin.checkAccess
       .query()
       .then((result) => setIsAdmin(result.isAdmin))
       .catch(() => setIsAdmin(false));
+
+    trpc.membership.getTier
+      .query()
+      .then((result) => setIsAiTier(result.tier === "community_ai"))
+      .catch(() => setIsAiTier(false));
   }, []);
 
   return (
@@ -45,16 +51,31 @@ export function AppSidebar() {
           <SidebarGroupLabel>Verktøy</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {mainNavItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={pathname === item.url}>
-                    <Link href={item.url}>
-                      <Icon name={item.icon} />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {mainNavItems.map((item) => {
+                const isLocked = item.requiresAi && isAiTier === false;
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={
+                        pathname === item.url ||
+                        pathname.startsWith(`${item.url}/`)
+                      }
+                    >
+                      <Link href={item.url}>
+                        <Icon name={item.icon} />
+                        <span>{item.title}</span>
+                        {isLocked && (
+                          <Icon
+                            name="sparkles"
+                            className="ml-auto h-3 w-3 text-muted-foreground/60"
+                          />
+                        )}
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -71,7 +92,7 @@ export function AppSidebar() {
                     asChild
                     isActive={
                       pathname === item.url ||
-                      pathname.startsWith(item.url + "/")
+                      pathname.startsWith(`${item.url}/`)
                     }
                   >
                     <Link href={item.url}>

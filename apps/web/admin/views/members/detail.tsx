@@ -1,4 +1,3 @@
-import type React from "react";
 import { DefaultTemplate } from "@payloadcms/next/templates";
 import { Gutter, SetStepNav } from "@payloadcms/ui";
 import { getVisibleEntities } from "@payloadcms/ui/shared";
@@ -9,6 +8,7 @@ import {
   plannerUser,
 } from "@poynt/planner-db/schema";
 import type { AdminViewServerProps } from "payload";
+import type React from "react";
 import { MemberActions } from "../../components/members/member-actions";
 import { MemberDetailCard } from "../../components/members/member-detail-card";
 
@@ -110,7 +110,7 @@ export const MemberDetailView = async (props: AdminViewServerProps) => {
           ]}
         />
         <p style={{ marginTop: "2rem" }}>Ugyldig medlem-ID</p>
-      </Gutter>,
+      </Gutter>
     );
   }
 
@@ -126,7 +126,7 @@ export const MemberDetailView = async (props: AdminViewServerProps) => {
           ]}
         />
         <p style={{ marginTop: "2rem" }}>Fann ikkje medlemmet</p>
-      </Gutter>,
+      </Gutter>
     );
   }
 
@@ -153,6 +153,6 @@ export const MemberDetailView = async (props: AdminViewServerProps) => {
           />
         </div>
       </Gutter>
-    </>,
+    </>
   );
 };

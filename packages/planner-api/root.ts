@@ -3,6 +3,7 @@ import { aiRouter } from "./routers/ai";
 import { declineFeedbackRouter } from "./routers/decline-feedback";
 import { industryRouter } from "./routers/industry";
 import { marketingPlanProgressRouter } from "./routers/marketing-plan-progress";
+import { membershipRouter } from "./routers/membership";
 import { toolResultRouter } from "./routers/tool-result";
 import { workspaceRouter } from "./routers/workspace";
 import { workspaceProfileRouter } from "./routers/workspace-profile";
@@ -21,6 +22,7 @@ export const appRouter = router({
   workspaceProfile: workspaceProfileRouter,
   toolResult: toolResultRouter,
   marketingPlanProgress: marketingPlanProgressRouter,
+  membership: membershipRouter,
   declineFeedback: declineFeedbackRouter,
 });
 

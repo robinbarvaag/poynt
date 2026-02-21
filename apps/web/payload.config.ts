@@ -12,6 +12,7 @@ import { redirectsPlugin } from "@payloadcms/plugin-redirects";
 import { seoPlugin } from "@payloadcms/plugin-seo";
 import { stripePlugin } from "@payloadcms/plugin-stripe";
 
+import { Articles } from "./collections/articles";
 import { BlogPosts } from "./collections/blog-posts";
 import { Categories } from "./collections/categories";
 import { CourseContent } from "./collections/course-content";
@@ -61,6 +62,7 @@ export default buildConfig({
     CourseContent,
     Pages,
     BlogPosts,
+    Articles,
     Podcasts,
     Services,
     Categories,
@@ -80,7 +82,11 @@ export default buildConfig({
   admin: {
     user: "users",
     components: {
-      afterNavLinks: ["/admin/components/members/nav-link#MembersNavLink"],
+      afterNavLinks: [
+        "/admin/components/members/nav-link#MembersNavLink",
+        "/admin/components/industries/nav-link#IndustriesNavLink",
+        "/admin/components/prompts/nav-link#PromptsNavLink",
+      ],
       views: {
         members: {
           Component: "/admin/views/members/list#MembersListView",
@@ -92,6 +98,18 @@ export default buildConfig({
           Component: "/admin/views/members/detail#MemberDetailView",
           path: "/medlemmer/:id",
           meta: { title: "Medlemsdetaljar" },
+        },
+        industries: {
+          Component: "/admin/views/industries/list#IndustriesListView",
+          path: "/bransjar",
+          exact: true,
+          meta: { title: "Bransjar" },
+        },
+        prompts: {
+          Component: "/admin/views/prompts/list#PromptsListView",
+          path: "/prompts",
+          exact: true,
+          meta: { title: "Prompt-malar" },
         },
       },
     },

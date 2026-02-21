@@ -91,7 +91,12 @@ export const MemberTable = ({ members }: { members: MemberListItem[] }) => {
                     {member.email}
                   </span>
                 ) : (
-                  <span style={{ color: "var(--theme-elevation-400)", fontStyle: "italic" }}>
+                  <span
+                    style={{
+                      color: "var(--theme-elevation-400)",
+                      fontStyle: "italic",
+                    }}
+                  >
                     (vist som namn)
                   </span>
                 )}

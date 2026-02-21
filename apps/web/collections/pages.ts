@@ -9,19 +9,7 @@ import { ProductArchive } from "../blocks/product-archive";
 import { ServicesArchive } from "../blocks/services-archive";
 import { SpotifyEmbed } from "../blocks/spotify-embed";
 import { Testimonials } from "../blocks/testimonials";
-
-// Utility for å generere slug
-function generateSlug(text: string): string {
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/[æ]/g, "ae")
-    .replace(/[ø]/g, "o")
-    .replace(/[å]/g, "a")
-    .replace(/[^\w\s-]/g, "")
-    .replace(/[\s_-]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
+import { generateSlug } from "../lib/generate-slug";
 
 export const Pages: CollectionConfig = {
   slug: "pages",
