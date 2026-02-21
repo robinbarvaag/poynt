@@ -42,7 +42,7 @@ export const MemberDetailCard = ({
     <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
       {/* User info */}
       <section>
-        <h2 style={sectionHeader}>Brukarinfo</h2>
+        <h2 style={sectionHeader}>Brukerinfo</h2>
         <div style={cardStyle}>
           <div
             style={{
@@ -77,7 +77,7 @@ export const MemberDetailCard = ({
             <Field label="Rolle" value={user.role} />
             <Field
               label="Onboarding"
-              value={user.onboardingCompleted ? "Fullført" : "Ikkje fullført"}
+              value={user.onboardingCompleted ? "Fullført" : "Ikke fullført"}
             />
             <Field label="Registrert" value={formatDate(user.createdAt)} />
           </div>

@@ -48,7 +48,7 @@ export const IndustriesTable = ({
   }
 
   async function handleDelete(id: string, name: string) {
-    if (!window.confirm(`Slett bransjen "${name}"? Dette kan ikkje angrast.`))
+    if (!window.confirm(`Slett bransjen "${name}"? Dette kan ikke angres.`))
       return;
     setLoading(id);
     try {
@@ -97,7 +97,7 @@ export const IndustriesTable = ({
   async function handleSeed() {
     if (
       !window.confirm(
-        "Seed standard bransjar? Dette vil feila om det allereie finst bransjar."
+        "Seed standard bransjer? Dette vil feile hvis det allerede finnes bransjer."
       )
     )
       return;
@@ -107,7 +107,7 @@ export const IndustriesTable = ({
       if (result.success) {
         refresh();
       } else {
-        window.alert(result.error ?? "Seeding feila");
+        window.alert(result.error ?? "Seeding feilet");
       }
     } finally {
       setLoading(null);
@@ -180,7 +180,7 @@ export const IndustriesTable = ({
             onClick={handleSeed}
             disabled={loading === "seed"}
           >
-            {loading === "seed" ? "Seeder..." : "Seed standard bransjar"}
+            {loading === "seed" ? "Seeder..." : "Seed standard bransjer"}
           </button>
         )}
       </div>
@@ -196,11 +196,11 @@ export const IndustriesTable = ({
           <thead>
             <tr>
               <th style={thStyle}>ID</th>
-              <th style={thStyle}>Namn</th>
+              <th style={thStyle}>Navn</th>
               <th style={thStyle}>Ikon</th>
-              <th style={thStyle}>Rekkjefølge</th>
+              <th style={thStyle}>Rekkefølge</th>
               <th style={thStyle}>Status</th>
-              <th style={thStyle}>Handling</th>
+              <th style={thStyle}>Handlinger</th>
             </tr>
           </thead>
           <tbody>
@@ -219,7 +219,7 @@ export const IndustriesTable = ({
                 <td style={tdStyle}>
                   <input
                     style={inputStyle}
-                    placeholder="Namn"
+                    placeholder="Navn"
                     value={newIndustry.name}
                     onChange={(e) =>
                       setNewIndustry((p) => ({ ...p, name: e.target.value }))
@@ -414,7 +414,7 @@ export const IndustriesTable = ({
                     padding: "2rem",
                   }}
                 >
-                  Ingen bransjar. Klikk "Seed standard bransjar" for å starta.
+                  Ingen bransjer enda. Klikk «Seed standard bransjer» for å komme i gang.
                 </td>
               </tr>
             )}

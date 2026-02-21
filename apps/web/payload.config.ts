@@ -12,17 +12,16 @@ import { redirectsPlugin } from "@payloadcms/plugin-redirects";
 import { seoPlugin } from "@payloadcms/plugin-seo";
 import { stripePlugin } from "@payloadcms/plugin-stripe";
 
+// Collections
 import { Articles } from "./collections/articles";
 import { BlogPosts } from "./collections/blog-posts";
 import { Categories } from "./collections/categories";
-import { CourseContent } from "./collections/course-content";
 import { Media } from "./collections/media";
 import { Orders } from "./collections/orders";
 import { Pages } from "./collections/pages";
 import { Podcasts } from "./collections/podcasts";
 import { Products } from "./collections/products";
 import { Services } from "./collections/services";
-// Collections
 import { Users } from "./collections/users";
 
 // Globals
@@ -56,10 +55,7 @@ export default buildConfig({
   }),
   sharp,
   collections: [
-    Users,
-    Products,
-    Orders,
-    CourseContent,
+    // Innhold
     Pages,
     BlogPosts,
     Articles,
@@ -67,25 +63,30 @@ export default buildConfig({
     Services,
     Categories,
     Media,
+    // Nettbutikk
+    Products,
+    Orders,
+    // Hidden
+    Users,
   ],
   globals: [
-    SiteSettings,
-    Header,
-    Footer,
+    // Sideoppsett
     Homepage,
     BlogPage,
     PodcastPage,
     ProductsPage,
     ServicesPage,
+    // Innstillinger
+    Header,
+    Footer,
+    SiteSettings,
     ProductSettings,
   ],
   admin: {
     user: "users",
     components: {
       afterNavLinks: [
-        "/admin/components/members/nav-link#MembersNavLink",
-        "/admin/components/industries/nav-link#IndustriesNavLink",
-        "/admin/components/prompts/nav-link#PromptsNavLink",
+        "/admin/components/on-poynt-nav-group#OnPoyntNavGroup",
       ],
       views: {
         members: {
@@ -97,19 +98,19 @@ export default buildConfig({
         memberDetail: {
           Component: "/admin/views/members/detail#MemberDetailView",
           path: "/medlemmer/:id",
-          meta: { title: "Medlemsdetaljar" },
+          meta: { title: "Medlemsdetaljer" },
         },
         industries: {
           Component: "/admin/views/industries/list#IndustriesListView",
           path: "/bransjar",
           exact: true,
-          meta: { title: "Bransjar" },
+          meta: { title: "Bransjer" },
         },
         prompts: {
           Component: "/admin/views/prompts/list#PromptsListView",
           path: "/prompts",
           exact: true,
-          meta: { title: "Prompt-malar" },
+          meta: { title: "Prompt-maler" },
         },
       },
     },

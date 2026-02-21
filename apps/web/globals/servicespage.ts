@@ -2,9 +2,9 @@ import type { GlobalConfig } from "payload";
 
 export const ServicesPage: GlobalConfig = {
   slug: "servicespage",
-  label: "Tjenesteside",
+  label: "Tjenesteoversikt",
   admin: {
-    group: "Innhold",
+    group: "Sideoppsett",
   },
   fields: [
     {

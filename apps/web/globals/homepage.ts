@@ -14,7 +14,7 @@ export const Homepage: GlobalConfig = {
   slug: "homepage",
   label: "Forside",
   admin: {
-    group: "Innhold",
+    group: "Sideoppsett",
   },
   fields: [
     {

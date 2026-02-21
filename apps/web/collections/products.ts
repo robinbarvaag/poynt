@@ -10,7 +10,7 @@ export const Products: CollectionConfig = {
   admin: {
     useAsTitle: "name",
     defaultColumns: ["name", "type", "price", "active", "updatedAt"],
-    group: "Butikk",
+    group: "Nettbutikk",
   },
   hooks: {
     beforeChange: [

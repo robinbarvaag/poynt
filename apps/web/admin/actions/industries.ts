@@ -75,7 +75,7 @@ export async function seedIndustries() {
     .limit(1);
 
   if (existing.length > 0) {
-    return { success: false, error: "Bransjar finst allereie" };
+    return { success: false, error: "Bransjer finnes allerede" };
   }
 
   const inserted = await db

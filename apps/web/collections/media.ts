@@ -2,6 +2,9 @@ import type { CollectionConfig } from "payload";
 
 export const Media: CollectionConfig = {
   slug: "media",
+  admin: {
+    group: "Innhold",
+  },
   access: {
     read: ({ req: { user } }) => {
       // Innloggede brukere kan se alt

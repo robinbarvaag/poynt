@@ -4,6 +4,7 @@ export const CourseContent: CollectionConfig = {
   slug: "course-content",
   admin: {
     useAsTitle: "title",
+    group: "Butikk",
   },
   fields: [
     {

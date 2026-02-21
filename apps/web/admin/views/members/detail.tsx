@@ -102,15 +102,17 @@ export const MemberDetailView = async (props: AdminViewServerProps) => {
 
   if (!userId) {
     return template(
-      <Gutter>
+      <div style={{ width: "100%" }}>
         <SetStepNav
           nav={[
             { label: "Medlemmer", url: "/admin/medlemmer" },
             { label: "Feil" },
           ]}
         />
-        <p style={{ marginTop: "2rem" }}>Ugyldig medlem-ID</p>
-      </Gutter>
+        <Gutter>
+          <p style={{ marginTop: "2rem" }}>Ugyldig medlem-ID</p>
+        </Gutter>
+      </div>
     );
   }
 
@@ -118,20 +120,22 @@ export const MemberDetailView = async (props: AdminViewServerProps) => {
 
   if (!member) {
     return template(
-      <Gutter>
+      <div style={{ width: "100%" }}>
         <SetStepNav
           nav={[
             { label: "Medlemmer", url: "/admin/medlemmer" },
-            { label: "Ikkje funne" },
+            { label: "Ikke funnet" },
           ]}
         />
-        <p style={{ marginTop: "2rem" }}>Fann ikkje medlemmet</p>
-      </Gutter>
+        <Gutter>
+          <p style={{ marginTop: "2rem" }}>Fant ikke medlemmet</p>
+        </Gutter>
+      </div>
     );
   }
 
   return template(
-    <>
+    <div style={{ width: "100%" }}>
       <SetStepNav
         nav={[
           { label: "Medlemmer", url: "/admin/medlemmer" },
@@ -153,6 +157,6 @@ export const MemberDetailView = async (props: AdminViewServerProps) => {
           />
         </div>
       </Gutter>
-    </>
+    </div>
   );
 };

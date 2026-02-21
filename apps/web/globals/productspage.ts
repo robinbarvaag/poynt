@@ -2,9 +2,9 @@ import type { GlobalConfig } from "payload";
 
 export const ProductsPage: GlobalConfig = {
   slug: "productspage",
-  label: "Produktside",
+  label: "Produktoversikt",
   admin: {
-    group: "Innhold",
+    group: "Sideoppsett",
   },
   fields: [
     {

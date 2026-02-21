@@ -9,12 +9,19 @@ import {
 } from "../../actions/prompts";
 import type { PromptTemplateListItem } from "../../views/prompts/list";
 
+function generateId(toolId: string, name: string): string {
+  return `${toolId}-${name}`
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
 const toolIdLabels: Record<string, string> = {
   "channel-guide": "Kanalveileder",
   "decline-generator": "Si nei-generator",
   "marketing-plan": "Markedsplan",
   "yearly-planner": "Årshjul",
-  "podcast-to-content": "Podcast til innhald",
+  "podcast-to-content": "Podcast til innhold",
 };
 
 type EditingState = {
@@ -35,7 +42,6 @@ export const PromptsTable = ({
   const [editing, setEditing] = useState<EditingState | null>(null);
   const [showAdd, setShowAdd] = useState(false);
   const [newTemplate, setNewTemplate] = useState({
-    id: "",
     toolId: "",
     name: "",
     description: "",
@@ -64,17 +70,13 @@ export const PromptsTable = ({
   }
 
   async function handleAdd() {
-    if (
-      !newTemplate.id ||
-      !newTemplate.name ||
-      !newTemplate.template ||
-      !newTemplate.toolId
-    )
+    if (!newTemplate.name || !newTemplate.template || !newTemplate.toolId)
       return;
+    const id = generateId(newTemplate.toolId, newTemplate.name);
     setLoading("new");
     try {
       await upsertPromptTemplate({
-        id: newTemplate.id,
+        id,
         toolId: newTemplate.toolId,
         name: newTemplate.name,
         description: newTemplate.description || undefined,
@@ -82,7 +84,6 @@ export const PromptsTable = ({
       });
       setShowAdd(false);
       setNewTemplate({
-        id: "",
         toolId: "",
         name: "",
         description: "",
@@ -176,7 +177,7 @@ export const PromptsTable = ({
           onClick={() => setShowAdd(true)}
           disabled={showAdd}
         >
-          + Ny prompt-mal
+          + Ny mal
         </button>
       </div>
 
@@ -207,25 +208,6 @@ export const PromptsTable = ({
                   fontWeight: 500,
                 }}
               >
-                ID
-              </label>
-              <input
-                style={inputStyle}
-                placeholder="t.d. channel-guide-system"
-                value={newTemplate.id}
-                onChange={(e) =>
-                  setNewTemplate((p) => ({ ...p, id: e.target.value }))
-                }
-              />
-            </div>
-            <div>
-              <label
-                style={{
-                  display: "block",
-                  marginBottom: "0.25rem",
-                  fontWeight: 500,
-                }}
-              >
                 Verktøy
               </label>
               <select
@@ -235,7 +217,7 @@ export const PromptsTable = ({
                   setNewTemplate((p) => ({ ...p, toolId: e.target.value }))
                 }
               >
-                <option value="">Vel verktøy</option>
+                <option value="">Velg verktøy</option>
                 {Object.entries(toolIdLabels).map(([id, label]) => (
                   <option key={id} value={id}>
                     {label}
@@ -251,11 +233,11 @@ export const PromptsTable = ({
                   fontWeight: 500,
                 }}
               >
-                Namn
+                Navn
               </label>
               <input
                 style={inputStyle}
-                placeholder="Namn"
+                placeholder="Navn"
                 value={newTemplate.name}
                 onChange={(e) =>
                   setNewTemplate((p) => ({ ...p, name: e.target.value }))
@@ -270,11 +252,11 @@ export const PromptsTable = ({
                   fontWeight: 500,
                 }}
               >
-                Beskriving (valfritt)
+                Beskrivelse (valgfritt)
               </label>
               <input
                 style={inputStyle}
-                placeholder="Beskriving"
+                placeholder="Beskrivelse"
                 value={newTemplate.description}
                 onChange={(e) =>
                   setNewTemplate((p) => ({ ...p, description: e.target.value }))
@@ -308,7 +290,7 @@ export const PromptsTable = ({
               onClick={handleAdd}
               disabled={loading === "new"}
             >
-              {loading === "new" ? "Lagrar..." : "Lagre"}
+              {loading === "new" ? "Lagrer..." : "Lagre"}
             </button>
             <button
               type="button"
@@ -332,9 +314,9 @@ export const PromptsTable = ({
           <thead>
             <tr>
               <th style={thStyle}>Verktøy</th>
-              <th style={thStyle}>Namn</th>
+              <th style={thStyle}>Navn</th>
               <th style={thStyle}>Status</th>
-              <th style={thStyle}>Handling</th>
+              <th style={thStyle}>Handlinger</th>
             </tr>
           </thead>
           <tbody>
@@ -490,7 +472,7 @@ export const PromptsTable = ({
                               fontWeight: 500,
                             }}
                           >
-                            Namn
+                            Navn
                           </label>
                           <input
                             style={inputStyle}
@@ -510,7 +492,7 @@ export const PromptsTable = ({
                               fontWeight: 500,
                             }}
                           >
-                            Beskriving
+                            Beskrivelse
                           </label>
                           <input
                             style={inputStyle}
@@ -551,7 +533,7 @@ export const PromptsTable = ({
                           onClick={handleSaveEdit}
                           disabled={loading === editing.id}
                         >
-                          {loading === editing.id ? "Lagrar..." : "Lagre"}
+                          {loading === editing.id ? "Lagrer..." : "Lagre"}
                         </button>
                         <button
                           type="button"
@@ -577,7 +559,7 @@ export const PromptsTable = ({
                     padding: "2rem",
                   }}
                 >
-                  Ingen prompt-malar enno. Klikk "Ny prompt-mal" for å starta.
+                  Ingen prompt-maler enda. Klikk «+ Ny mal» for å komme i gang.
                 </td>
               </tr>
             )}

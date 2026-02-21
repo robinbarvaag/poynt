@@ -98,6 +98,25 @@ export const Articles: CollectionConfig = {
       },
     },
     {
+      name: "isFeatured",
+      type: "checkbox",
+      label: "Framheva artikkel",
+      defaultValue: false,
+      admin: {
+        position: "sidebar",
+        description: "Vis som stor hero-artikkel øvst på listesida",
+      },
+    },
+    {
+      name: "readingTime",
+      type: "number",
+      label: "Lesetid (minutt)",
+      admin: {
+        position: "sidebar",
+        description: "Estimert lesetid i minutt",
+      },
+    },
+    {
       name: "relatedArticles",
       type: "relationship",
       relationTo: "articles",

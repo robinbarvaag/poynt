@@ -13,9 +13,14 @@ import { generateSlug } from "../lib/generate-slug";
 
 export const Pages: CollectionConfig = {
   slug: "pages",
+  labels: {
+    singular: "Side",
+    plural: "Sider",
+  },
   admin: {
     useAsTitle: "title",
     defaultColumns: ["title", "slug", "updatedAt"],
+    group: "Innhold",
     livePreview: {
       url: ({ data }) => {
         const slug = data?.slug;

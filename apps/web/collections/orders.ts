@@ -2,8 +2,13 @@ import type { CollectionConfig } from "payload";
 
 export const Orders: CollectionConfig = {
   slug: "orders",
+  labels: {
+    singular: "Bestilling",
+    plural: "Bestillinger",
+  },
   admin: {
     useAsTitle: "customerEmail",
+    group: "Nettbutikk",
   },
   access: {
     create: () => false,
@@ -21,7 +26,7 @@ export const Orders: CollectionConfig = {
     {
       name: "customerName",
       type: "text",
-      label: "Kundenamn",
+      label: "Kundenavn",
     },
     {
       name: "items",

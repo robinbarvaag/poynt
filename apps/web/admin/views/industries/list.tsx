@@ -33,38 +33,40 @@ export const IndustriesListView = async (props: AdminViewServerProps) => {
       permissions={props.initPageResult.permissions}
       visibleEntities={visibleEntities}
     >
-      <SetStepNav nav={[{ label: "Bransjar" }]} />
-      <Gutter>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: "1rem",
-            marginTop: "1.5rem",
-          }}
-        >
-          <h1 style={{ margin: 0 }}>Bransjar</h1>
-          <span
+      <SetStepNav nav={[{ label: "Bransjer" }]} />
+      <div style={{ width: "100%" }}>
+        <Gutter>
+          <div
             style={{
-              fontSize: "var(--font-body-size)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: "1rem",
+              marginTop: "1.5rem",
+            }}
+          >
+            <h1 style={{ margin: 0 }}>Bransjer</h1>
+            <span
+              style={{
+                fontSize: "var(--font-body-size)",
+                color: "var(--theme-elevation-500)",
+              }}
+            >
+              {industries.length} bransjer totalt
+            </span>
+          </div>
+          <p
+            style={{
+              marginBottom: "2rem",
               color: "var(--theme-elevation-500)",
             }}
           >
-            {industries.length} bransjar totalt
-          </span>
-        </div>
-        <p
-          style={{
-            marginBottom: "2rem",
-            color: "var(--theme-elevation-500)",
-          }}
-        >
-          Bransjar som brukast i alle AI-verktøy. Aktive bransjar er synlege for
-          brukarane.
-        </p>
-        <IndustriesTable industries={industries} />
-      </Gutter>
+            Bransjer som brukes i alle AI-verktøy. Aktive bransjer er synlige
+            for brukerne.
+          </p>
+          <IndustriesTable industries={industries} />
+        </Gutter>
+      </div>
     </DefaultTemplate>
   );
 };

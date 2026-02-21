@@ -10,7 +10,7 @@ export const Categories: CollectionConfig = {
   admin: {
     useAsTitle: "name",
     defaultColumns: ["name", "slug", "updatedAt"],
-    group: "Innstillinger",
+    group: "Innhold",
   },
   hooks: {
     beforeChange: [
@@ -47,6 +47,24 @@ export const Categories: CollectionConfig = {
       label: "Beskrivelse",
       admin: {
         description: "Valgfri beskrivelse av kategorien",
+      },
+    },
+    {
+      name: "color",
+      type: "text",
+      label: "Farge (hex)",
+      admin: {
+        position: "sidebar",
+        description: "Hex-farge, t.d. #E1306C",
+      },
+    },
+    {
+      name: "icon",
+      type: "text",
+      label: "Ikon / emoji",
+      admin: {
+        position: "sidebar",
+        description: "Emoji eller tekst som visast saman med kategorien",
       },
     },
   ],

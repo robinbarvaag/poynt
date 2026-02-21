@@ -2,9 +2,9 @@ import type { GlobalConfig } from "payload";
 
 export const PodcastPage: GlobalConfig = {
   slug: "podcastpage",
-  label: "Podkastside",
+  label: "Podkastoversikt",
   admin: {
-    group: "Innhold",
+    group: "Sideoppsett",
   },
   fields: [
     {

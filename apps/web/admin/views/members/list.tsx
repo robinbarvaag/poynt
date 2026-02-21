@@ -69,18 +69,30 @@ export const MembersListView = async (props: AdminViewServerProps) => {
       visibleEntities={visibleEntities}
     >
       <SetStepNav nav={[{ label: "Medlemmer" }]} />
-      <Gutter>
-        <h1 style={{ marginBottom: "1rem", marginTop: "1.5rem" }}>Medlemmer</h1>
-        <p
-          style={{
-            marginBottom: "2rem",
-            color: "var(--theme-elevation-500)",
-          }}
-        >
-          {members.length} registrerte medlemmer
-        </p>
-        <MemberTable members={members} />
-      </Gutter>
+      <div style={{ width: "100%" }}>
+        <Gutter>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: "1rem",
+              marginTop: "1.5rem",
+            }}
+          >
+            <h1 style={{ margin: 0 }}>Medlemmer</h1>
+            <span
+              style={{
+                fontSize: "var(--font-body-size)",
+                color: "var(--theme-elevation-500)",
+              }}
+            >
+              {members.length} registrerte medlemmer
+            </span>
+          </div>
+          <MemberTable members={members} />
+        </Gutter>
+      </div>
     </DefaultTemplate>
   );
 };
