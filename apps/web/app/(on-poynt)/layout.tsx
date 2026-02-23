@@ -1,7 +1,7 @@
 import "../globals.css";
 import { cn } from "@poynt/ui";
 import type { Metadata } from "next";
-import { Playfair_Display, Poppins } from "next/font/google";
+import { Bricolage_Grotesque, Poppins } from "next/font/google";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -10,10 +10,10 @@ const poppins = Poppins({
   display: "swap",
 });
 
-const playfair = Playfair_Display({
+const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
-  variable: "--font-playfair",
+  weight: ["200", "300", "400", "500", "600", "700", "800"],
+  variable: "--font-bricolage",
   display: "swap",
 });
 
@@ -37,7 +37,7 @@ export default function PlannerRootLayout({
   return (
     <html
       lang="no"
-      className={cn(poppins.variable, playfair.variable)}
+      className={cn(poppins.variable, bricolage.variable)}
       suppressHydrationWarning
     >
       <body className={cn("min-h-screen bg-background font-sans antialiased")}>

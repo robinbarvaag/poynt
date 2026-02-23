@@ -5,7 +5,7 @@ import { Button, Text, cn } from "@poynt/ui";
 import { ChevronDown, Menu, Search, User, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CartDrawer } from "./cart-drawer";
 
 interface NavItem {
@@ -81,11 +81,28 @@ export function Header({
 }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<number | null>(null);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    function handleScroll() {
+      setScrolled(window.scrollY > 20);
+    }
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
-      <div className="mx-auto max-w-6xl px-4">
-        <div className="flex h-16 items-center justify-between">
+    <header className="fixed top-0 z-50 w-full px-4 sm:px-6 lg:px-8 pt-4 pointer-events-none">
+      <nav
+        className={cn(
+          "mx-auto max-w-6xl rounded-2xl transition-all duration-300 pointer-events-auto",
+          scrolled
+            ? "bg-background/80 backdrop-blur-xl shadow-lg shadow-foreground/5 ring-1 ring-foreground/5"
+            : "bg-background/50 backdrop-blur-md ring-1 ring-foreground/3"
+        )}
+      >
+        <div className="flex h-14 items-center justify-between px-4 sm:px-6">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
             {logo ? (
@@ -94,17 +111,17 @@ export function Header({
                 alt={logo.alt || siteName}
                 width={120}
                 height={40}
-                className="h-8 w-auto"
+                className="h-7 w-auto"
               />
             ) : (
-              <span className="text-xl font-bold text-foreground">
+              <span className="text-lg font-bold font-heading text-foreground">
                 {siteName}
               </span>
             )}
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-1">
+          <div className="hidden md:flex items-center gap-0.5">
             {navItems.map((item, index) => (
               <div
                 key={index}
@@ -119,14 +136,14 @@ export function Header({
                   target={item.openInNewTab ? "_blank" : undefined}
                   rel={item.openInNewTab ? "noopener noreferrer" : undefined}
                   className={cn(
-                    "flex items-center gap-1 px-4 py-2 text-sm font-medium rounded-md transition-colors",
-                    "text-foreground hover:bg-accent hover:text-accent-foreground",
-                    openDropdown === index && "bg-accent text-accent-foreground"
+                    "flex items-center gap-1 px-3.5 py-1.5 text-sm font-medium rounded-full transition-colors",
+                    "text-foreground/70 hover:text-foreground hover:bg-foreground/5",
+                    openDropdown === index && "bg-foreground/5 text-foreground"
                   )}
                 >
                   {item.label}
                   {item.subItems && item.subItems.length > 0 && (
-                    <ChevronDown className="h-4 w-4" />
+                    <ChevronDown className="h-3.5 w-3.5" />
                   )}
                 </Link>
 
@@ -135,7 +152,7 @@ export function Header({
                   item.subItems.length > 0 &&
                   openDropdown === index && (
                     <div className="absolute top-full left-0 pt-2 w-72">
-                      <div className="rounded-lg border border-border bg-card p-2 shadow-lg">
+                      <div className="rounded-2xl border border-border/50 bg-background/95 backdrop-blur-xl p-2 shadow-lg">
                         {item.subItems.map((subItem, subIndex) => (
                           <Link
                             key={subIndex}
@@ -146,16 +163,22 @@ export function Header({
                                 ? "noopener noreferrer"
                                 : undefined
                             }
-                            className="block rounded-md px-3 py-2 hover:bg-accent transition-colors"
+                            className="block rounded-xl px-3 py-2.5 hover:bg-foreground/5 transition-colors"
                           >
-                            <Text as="span" className="font-medium block">
+                            <Text
+                              type="span"
+                              weight="medium"
+                              size="body-small"
+                              customStyles="block"
+                            >
                               {subItem.label}
                             </Text>
                             {subItem.description && (
                               <Text
-                                as="span"
-                                variant="subtle"
-                                className="block mt-0.5"
+                                type="span"
+                                size="body-detail"
+                                color="muted"
+                                customStyles="block mt-0.5"
                               >
                                 {subItem.description}
                               </Text>
@@ -167,26 +190,28 @@ export function Header({
                   )}
               </div>
             ))}
-          </nav>
+          </div>
 
           {/* Right side actions */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             {showSearch && (
               <Button
                 variant="ghost"
-                size="sm"
-                className="hidden sm:flex gap-2"
+                size="icon"
+                className="hidden sm:flex h-8 w-8 rounded-full"
               >
                 <Search className="h-4 w-4" />
-                <span className="hidden lg:inline">Søk</span>
               </Button>
             )}
 
             {showLogin && (
               <Link href="/min-side">
-                <Button variant="ghost" size="sm" className="hidden sm:flex">
-                  <User className="h-4 w-4 mr-2" />
-                  Logg inn
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="hidden sm:flex h-8 w-8 rounded-full"
+                >
+                  <User className="h-4 w-4" />
                 </Button>
               </Link>
             )}
@@ -195,7 +220,7 @@ export function Header({
 
             {ctaButton?.show && ctaButton.text && ctaButton.url && (
               <Link href={ctaButton.url}>
-                <Button size="sm" className="hidden sm:flex">
+                <Button size="sm" className="hidden sm:flex rounded-full px-5 h-8 text-xs">
                   {ctaButton.text}
                 </Button>
               </Link>
@@ -205,13 +230,13 @@ export function Header({
             <Button
               variant="ghost"
               size="icon"
-              className="md:hidden"
+              className="md:hidden h-8 w-8 rounded-full"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               {mobileMenuOpen ? (
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4" />
               ) : (
-                <Menu className="h-5 w-5" />
+                <Menu className="h-4 w-4" />
               )}
             </Button>
           </div>
@@ -219,7 +244,7 @@ export function Header({
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-border">
+          <div className="md:hidden border-t border-foreground/5 px-4 pb-4 pt-2">
             <nav className="flex flex-col gap-1">
               {navItems.map((item, index) => (
                 <div key={index}>
@@ -227,13 +252,13 @@ export function Header({
                     href={getHref(item)}
                     target={item.openInNewTab ? "_blank" : undefined}
                     rel={item.openInNewTab ? "noopener noreferrer" : undefined}
-                    className="block py-2 px-3 rounded-md font-medium hover:bg-accent transition-colors"
+                    className="block py-2.5 px-3 rounded-xl font-medium text-sm hover:bg-foreground/5 transition-colors"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     {item.label}
                   </Link>
                   {item.subItems && item.subItems.length > 0 && (
-                    <div className="ml-4 pl-3 border-l border-border">
+                    <div className="ml-4 pl-3 border-l-2 border-primary/20">
                       {item.subItems.map((subItem, subIndex) => (
                         <Link
                           key={subIndex}
@@ -254,10 +279,10 @@ export function Header({
                   )}
                 </div>
               ))}
-              <div className="flex gap-2 pt-4 mt-4 border-t border-border">
+              <div className="flex gap-2 pt-3 mt-3 border-t border-foreground/5">
                 {showLogin && (
                   <Link href="/min-side" className="flex-1">
-                    <Button variant="outline" className="w-full">
+                    <Button variant="outline" size="sm" className="w-full rounded-full">
                       <User className="h-4 w-4 mr-2" />
                       Logg inn
                     </Button>
@@ -265,14 +290,16 @@ export function Header({
                 )}
                 {ctaButton?.show && ctaButton.text && ctaButton.url && (
                   <Link href={ctaButton.url} className="flex-1">
-                    <Button className="w-full">{ctaButton.text}</Button>
+                    <Button size="sm" className="w-full rounded-full">
+                      {ctaButton.text}
+                    </Button>
                   </Link>
                 )}
               </div>
             </nav>
           </div>
         )}
-      </div>
+      </nav>
     </header>
   );
 }

@@ -12,17 +12,15 @@ export const Hero: Block = {
     {
       name: "variant",
       type: "select",
-      defaultValue: "centered",
+      defaultValue: "standard",
       options: [
-        { label: "Sentrert", value: "centered" },
-        { label: "Venstre-justert", value: "left" },
-        { label: "Med bilde til høyre", value: "split" },
+        { label: "Standard", value: "standard" },
         { label: "Fullskjerm med bakgrunnsbilde", value: "fullscreen" },
-        { label: "Gradient bakgrunn", value: "gradient" },
       ],
       label: "Variant",
       admin: {
-        description: "Velg utseende på hero-seksjonen",
+        description:
+          "Standard: Sentrert uten bilde, eller tekst + bilde side om side. Fullskjerm: Bilde som bakgrunn med overlay.",
       },
     },
     {
@@ -66,6 +64,10 @@ export const Hero: Block = {
       type: "upload",
       relationTo: "media",
       label: "Bilde",
+      admin: {
+        description:
+          "Standard: Vises ved siden av teksten. Fullskjerm: Brukes som bakgrunnsbilde.",
+      },
     },
     {
       name: "primaryCta",

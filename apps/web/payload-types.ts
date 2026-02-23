@@ -221,9 +221,9 @@ export interface Page {
  */
 export interface HeroBlock {
   /**
-   * Velg utseende på hero-seksjonen
+   * Standard: Sentrert uten bilde, eller tekst + bilde side om side. Fullskjerm: Bilde som bakgrunn med overlay.
    */
-  variant?: ('centered' | 'left' | 'split' | 'fullscreen' | 'gradient') | null;
+  variant?: ('standard' | 'fullscreen') | null;
   title: string;
   subtitle?: {
     root: {
@@ -253,6 +253,9 @@ export interface HeroBlock {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Standard: Vises ved siden av teksten. Fullskjerm: Brukes som bakgrunnsbilde.
+   */
   image?: (number | null) | Media;
   primaryCta?: {
     text?: string | null;

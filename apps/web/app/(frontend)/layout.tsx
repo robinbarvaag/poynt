@@ -5,7 +5,7 @@ import config from "@payload-config";
 import { cn } from "@poynt/ui";
 import type { Metadata } from "next";
 import { unstable_cache } from "next/cache";
-import { Playfair_Display, Poppins } from "next/font/google";
+import { Bricolage_Grotesque, Poppins } from "next/font/google";
 import { getPayload } from "payload";
 
 const poppins = Poppins({
@@ -15,10 +15,10 @@ const poppins = Poppins({
   display: "swap",
 });
 
-const playfair = Playfair_Display({
+const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
-  variable: "--font-playfair",
+  weight: ["200", "300", "400", "500", "600", "700", "800"],
+  variable: "--font-bricolage",
   display: "swap",
 });
 
@@ -77,7 +77,7 @@ export default async function FrontendLayout({
   const { siteSettings, header, footer } = await getCachedGlobals();
 
   return (
-    <html lang="no" className={`${poppins.variable} ${playfair.variable}`}>
+    <html lang="no" className={`${poppins.variable} ${bricolage.variable}`}>
       <body className={cn("min-h-screen bg-background font-sans antialiased")}>
         <Header
           siteName={siteSettings?.siteName || "Poynt"}
@@ -87,7 +87,7 @@ export default async function FrontendLayout({
           ctaButton={header?.ctaButton as HeaderProps["ctaButton"]}
           navItems={header?.navItems as unknown as HeaderProps["navItems"]}
         />
-        <main className="min-h-screen">{children}</main>
+        <main className="min-h-screen pt-22">{children}</main>
         <Footer
           siteName={siteSettings?.siteName || "Poynt"}
           logo={siteSettings?.logo as { url: string; alt?: string } | null}

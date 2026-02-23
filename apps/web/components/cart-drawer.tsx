@@ -10,7 +10,7 @@ import {
   SheetTitle,
   Text,
 } from "@poynt/ui";
-import { ShoppingBag, ShoppingCart, Trash2 } from "lucide-react";
+import { ShoppingBag, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -31,14 +31,14 @@ export function CartDrawer() {
     <Sheet open={open} onOpenChange={setOpen}>
       {/* Cart trigger button */}
       <Button
-        variant="outline"
+        variant="ghost"
         size="icon"
-        className="relative"
+        className="relative rounded-full"
         onClick={() => setOpen(true)}
       >
-        <ShoppingCart className="h-4 w-4" />
+        <ShoppingBag className="h-4 w-4" />
         {itemCount > 0 && (
-          <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs font-medium">
+          <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs font-medium">
             {itemCount}
           </span>
         )}

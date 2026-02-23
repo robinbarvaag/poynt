@@ -5,8 +5,8 @@
 
 :root {
   --font-sans: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
-  --font-serif: var(--font-poppins), ui-serif, Georgia, serif;
-  --font-heading: var(--font-poppins), ui-serif, Georgia, serif;
+  --font-serif: var(--font-bricolage), ui-serif, Georgia, serif;
+  --font-heading: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
 
   --radius: 0.625rem;
 
@@ -106,6 +106,7 @@
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
   --font-serif: var(--font-serif);
+  --font-heading: var(--font-heading);
 
   --radius: 0.5rem;
 
