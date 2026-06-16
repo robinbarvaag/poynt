@@ -181,6 +181,13 @@ export interface Page {
         | HeroBlock
         | ContentBlock
         | FeatureGridBlock
+        | StepsBlock
+        | ContentMediaBlock
+        | StatsBandBlock
+        | PricingBlock
+        | FaqBlock
+        | LogoCloudBlock
+        | NewsletterBlock
         | MediaBlock
         | FormBlock
         | ProductArchiveBlock
@@ -366,6 +373,151 @@ export interface FeatureGridBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'featureGrid';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "StepsBlock".
+ */
+export interface StepsBlock {
+  eyebrow?: string | null;
+  title?: string | null;
+  intro?: string | null;
+  steps?:
+    | {
+        title: string;
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'steps';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ContentMediaBlock".
+ */
+export interface ContentMediaBlock {
+  eyebrow?: string | null;
+  title: string;
+  body?: string | null;
+  bullets?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  ctaText?: string | null;
+  ctaUrl?: string | null;
+  image?: (number | null) | Media;
+  mediaSide?: ('right' | 'left') | null;
+  accent?: ('saffron' | 'salmon' | 'primary' | 'mint') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'contentMedia';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "StatsBandBlock".
+ */
+export interface StatsBandBlock {
+  eyebrow?: string | null;
+  title?: string | null;
+  variant?: ('primary' | 'salmon' | 'saffron') | null;
+  stats?:
+    | {
+        value: number;
+        prefix?: string | null;
+        suffix?: string | null;
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'statsBand';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PricingBlock".
+ */
+export interface PricingBlock {
+  eyebrow?: string | null;
+  title?: string | null;
+  intro?: string | null;
+  tiers?:
+    | {
+        name: string;
+        price: string;
+        period?: string | null;
+        description?: string | null;
+        features?:
+          | {
+              text: string;
+              id?: string | null;
+            }[]
+          | null;
+        ctaText: string;
+        ctaUrl: string;
+        featured?: boolean | null;
+        badge?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'pricing';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FaqBlock".
+ */
+export interface FaqBlock {
+  eyebrow?: string | null;
+  title?: string | null;
+  intro?: string | null;
+  items?:
+    | {
+        question: string;
+        answer: string;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'faq';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LogoCloudBlock".
+ */
+export interface LogoCloudBlock {
+  label?: string | null;
+  logos?:
+    | {
+        name: string;
+        image?: (number | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'logoCloud';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "NewsletterBlock".
+ */
+export interface NewsletterBlock {
+  eyebrow?: string | null;
+  title: string;
+  description?: string | null;
+  buttonText?: string | null;
+  placeholder?: string | null;
+  variant?: ('primary' | 'saffron' | 'salmon') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'newsletter';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1278,6 +1430,13 @@ export interface PagesSelect<T extends boolean = true> {
         hero?: T | HeroBlockSelect<T>;
         content?: T | ContentBlockSelect<T>;
         featureGrid?: T | FeatureGridBlockSelect<T>;
+        steps?: T | StepsBlockSelect<T>;
+        contentMedia?: T | ContentMediaBlockSelect<T>;
+        statsBand?: T | StatsBandBlockSelect<T>;
+        pricing?: T | PricingBlockSelect<T>;
+        faq?: T | FaqBlockSelect<T>;
+        logoCloud?: T | LogoCloudBlockSelect<T>;
+        newsletter?: T | NewsletterBlockSelect<T>;
         media?: T | MediaBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
         productArchive?: T | ProductArchiveBlockSelect<T>;
@@ -1362,6 +1521,144 @@ export interface FeatureGridBlockSelect<T extends boolean = true> {
         statLabel?: T;
         id?: T;
       };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "StepsBlock_select".
+ */
+export interface StepsBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  title?: T;
+  intro?: T;
+  steps?:
+    | T
+    | {
+        title?: T;
+        text?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ContentMediaBlock_select".
+ */
+export interface ContentMediaBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  title?: T;
+  body?: T;
+  bullets?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  ctaText?: T;
+  ctaUrl?: T;
+  image?: T;
+  mediaSide?: T;
+  accent?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "StatsBandBlock_select".
+ */
+export interface StatsBandBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  title?: T;
+  variant?: T;
+  stats?:
+    | T
+    | {
+        value?: T;
+        prefix?: T;
+        suffix?: T;
+        label?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PricingBlock_select".
+ */
+export interface PricingBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  title?: T;
+  intro?: T;
+  tiers?:
+    | T
+    | {
+        name?: T;
+        price?: T;
+        period?: T;
+        description?: T;
+        features?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        ctaText?: T;
+        ctaUrl?: T;
+        featured?: T;
+        badge?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FaqBlock_select".
+ */
+export interface FaqBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  title?: T;
+  intro?: T;
+  items?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LogoCloudBlock_select".
+ */
+export interface LogoCloudBlockSelect<T extends boolean = true> {
+  label?: T;
+  logos?:
+    | T
+    | {
+        name?: T;
+        image?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "NewsletterBlock_select".
+ */
+export interface NewsletterBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  title?: T;
+  description?: T;
+  buttonText?: T;
+  placeholder?: T;
+  variant?: T;
   id?: T;
   blockName?: T;
 }

@@ -1,14 +1,21 @@
 import type { CollectionConfig } from "payload";
 import { Content } from "../blocks/content";
+import { ContentMedia } from "../blocks/content-media";
 import { CtaSection } from "../blocks/cta-section";
+import { Faq } from "../blocks/faq";
 import { FeatureGrid } from "../blocks/feature-grid";
 import { FormBlock } from "../blocks/form";
 import { Hero } from "../blocks/hero";
+import { LogoCloud } from "../blocks/logo-cloud";
 import { MediaBlock } from "../blocks/media";
+import { Newsletter } from "../blocks/newsletter";
 import { PodcastArchive } from "../blocks/podcast-archive";
+import { Pricing } from "../blocks/pricing";
 import { ProductArchive } from "../blocks/product-archive";
 import { ServicesArchive } from "../blocks/services-archive";
 import { SpotifyEmbed } from "../blocks/spotify-embed";
+import { StatsBand } from "../blocks/stats-band";
+import { Steps } from "../blocks/steps";
 import { Testimonials } from "../blocks/testimonials";
 import { generateSlug } from "../lib/generate-slug";
 
@@ -91,6 +98,13 @@ export const Pages: CollectionConfig = {
         Hero,
         Content,
         FeatureGrid,
+        Steps,
+        ContentMedia,
+        StatsBand,
+        Pricing,
+        Faq,
+        LogoCloud,
+        Newsletter,
         MediaBlock,
         FormBlock,
         ProductArchive,
