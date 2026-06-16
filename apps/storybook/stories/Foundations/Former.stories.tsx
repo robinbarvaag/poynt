@@ -41,17 +41,22 @@ export const Korn: Story = {
         redaksjonell følelse. Brukes globalt én gang i layouten (&lt;Grain fixed
         /&gt;), eller lokalt på en flate.
       </Text>
+      <Text variant="muted" customStyles="text-xs">
+        Vist på lys flate — kornet kommer fra <code>multiply</code> og er derfor
+        nesten usynlig på mørke farger. Sammenlign rutene: «ingen» mot de tre
+        styrkene.
+      </Text>
       <div className="flex flex-wrap gap-6">
+        <div className="flex flex-col gap-2">
+          <div className="h-40 w-56 overflow-hidden rounded-2xl border border-border bg-card" />
+          <code className="text-muted-foreground text-xs">ingen</code>
+        </div>
         {(["subtle", "medium", "strong"] as const).map((intensity) => (
           <div key={intensity} className="flex flex-col gap-2">
-            <div className="relative h-40 w-56 overflow-hidden rounded-2xl bg-primary">
+            <div className="relative h-40 w-56 overflow-hidden rounded-2xl border border-border bg-card">
               <Grain intensity={intensity} />
-              <div className="relative z-10 flex h-full items-center justify-center">
-                <code className="text-primary-foreground/80 text-xs">
-                  {intensity}
-                </code>
-              </div>
             </div>
+            <code className="text-muted-foreground text-xs">{intensity}</code>
           </div>
         ))}
       </div>

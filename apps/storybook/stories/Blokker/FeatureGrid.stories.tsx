@@ -9,9 +9,10 @@ const meta: Meta<typeof FeatureGrid> = {
     docs: {
       description: {
         component:
-          "Verdi-/feature-rutenett («hvorfor Poynt»). Innholds-only blokk som " +
-          "pakkes i seksjonsrytmen i appen. Roterende tint på ikon-chipene gir " +
-          "liv, kortene løftes på hover og staggrer inn ved scroll.",
+          "Verdi-/feature-rutenett i modig fargeblokk-stil (INSPO/PayPal). Hvert " +
+          "kort er en hel mettet flate med stor line-art-ikon, fet tittel med " +
+          "aksent-stjerne, tynn skillelinje og enten en lenke eller et nøkkeltall. " +
+          "Kortene er bevisst varierte — ikke tre identiske bokser.",
       },
     },
   },
@@ -34,27 +35,30 @@ export const Standard: Story = {
     features: [
       {
         icon: "graduation-cap",
-        title: "Kurs i ditt tempo",
+        title: "Lær i ditt tempo*",
         text: "Strukturerte kurs som tar deg fra nybegynner til trygg — når det passer deg.",
+        link: { label: "Se kursene", href: "#" },
       },
       {
         icon: "sparkles",
-        title: "AI-verktøy som jobber",
-        text: "La verktøyene gjøre grovjobben, fra idé til ferdig resultat.",
+        title: "AI-verktøy som jobber*",
+        text: "La verktøyene gjøre grovjobben, fra idé til ferdig resultat på minutter.",
+        stat: { value: "12+", label: "verktøy klare" },
       },
       {
         icon: "users",
-        title: "Et fellesskap i ryggen",
+        title: "Et fellesskap i ryggen*",
         text: "Del, få tilbakemelding og voks sammen med andre på samme reise.",
+        link: { label: "Bli medlem", href: "#" },
       },
     ],
   },
 };
 
 export const FireKolonner: Story = {
-  name: "Fire kolonner (dempet flate)",
+  name: "Fire kolonner",
   render: (args) => (
-    <Section variant="muted" spacing="lg">
+    <Section spacing="lg">
       <FeatureGrid {...args} />
     </Section>
   ),
@@ -64,22 +68,22 @@ export const FireKolonner: Story = {
     features: [
       {
         icon: "graduation-cap",
-        title: "Kurs",
+        title: "Kurs*",
         text: "Lær i ditt eget tempo, steg for steg.",
       },
       {
         icon: "sparkles",
-        title: "AI-verktøy",
+        title: "AI-verktøy*",
         text: "Fra plan til konkret resultat.",
       },
       {
         icon: "users",
-        title: "Fellesskap",
+        title: "Fellesskap*",
         text: "Del og voks sammen med andre.",
       },
       {
         icon: "rocket",
-        title: "Maler",
+        title: "Maler*",
         text: "Kom i gang med fart fra dag én.",
       },
     ],

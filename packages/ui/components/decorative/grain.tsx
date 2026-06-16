@@ -12,9 +12,9 @@ interface GrainProps {
 }
 
 const intensityMap = {
-  subtle: "opacity-[0.035]",
-  medium: "opacity-[0.06]",
-  strong: "opacity-[0.10]",
+  subtle: "opacity-[0.05]",
+  medium: "opacity-[0.09]",
+  strong: "opacity-[0.14]",
 } as const;
 
 /**
@@ -36,7 +36,7 @@ export function Grain({
       aria-hidden="true"
       className={cn(
         "pointer-events-none mix-blend-multiply",
-        fixed ? "fixed inset-0 z-[100]" : "absolute inset-0",
+        fixed ? "fixed inset-0 z-100" : "absolute inset-0",
         intensityMap[intensity],
         className
       )}

@@ -6,12 +6,16 @@ import { Heading, Text } from "../typography";
 
 export interface Feature {
   icon: IconName;
+  /** Tittel. Bruk `*` for en aksent-stjerne, f.eks. "Lær raskere*". */
   title: string;
   text: string;
+  /** Valgfri lenke nederst (PayPal-stil "Se mer →"). */
+  link?: { label: string; href: string };
+  /** Valgfritt nøkkeltall nederst i stedet for lenke. */
+  stat?: { value: string; label: string };
 }
 
 export interface FeatureGridProps {
-  /** Liten etikett over tittelen. */
   eyebrow?: string;
   title?: string;
   intro?: string;
@@ -20,12 +24,27 @@ export interface FeatureGridProps {
   columns?: 2 | 3 | 4;
 }
 
-// Roterende tint på ikon-chipene — gir liv uten å bli rotete.
-const chipTints = [
-  "bg-primary/10 text-primary",
-  "bg-saffron/40 text-foreground",
-  "bg-mint/60 text-foreground",
-  "bg-salmon/30 text-foreground",
+// Modige fargeblokker — hvert kort er en hel mettet flate (jf. INSPO/PayPal).
+// `accent` er en kontrastfarge brukt på stjerne/lenke for å gi kortet snert.
+const themes = [
+  {
+    surface: "bg-saffron text-foreground",
+    rule: "border-foreground/15",
+    muted: "text-foreground/70",
+    accent: "text-salmon",
+  },
+  {
+    surface: "bg-salmon text-foreground",
+    rule: "border-foreground/15",
+    muted: "text-foreground/75",
+    accent: "text-primary",
+  },
+  {
+    surface: "bg-primary text-primary-foreground",
+    rule: "border-primary-foreground/25",
+    muted: "text-primary-foreground/75",
+    accent: "text-saffron",
+  },
 ] as const;
 
 const columnClass = {
@@ -34,9 +53,16 @@ const columnClass = {
   4: "sm:grid-cols-2 lg:grid-cols-4",
 } as const;
 
+/** Deler tittel på siste `*` slik at stjernen kan farges som aksent. */
+function splitTitle(title: string) {
+  const star = title.includes("*");
+  return { base: title.replace(/\*/g, ""), star };
+}
+
 /**
- * Verdi-/feature-rutenett («hvorfor Poynt»). Innholds-only — pakkes i
- * `BlockSection` i appen. Header er valgfri; kortene staggrer inn.
+ * Verdi-/feature-rutenett i modig fargeblokk-stil (INSPO/PayPal): hver flate er
+ * en mettet farge med stor line-art-ikon, fet editorial-tittel med aksent-
+ * stjerne, tynn skillelinje og en lenke eller et nøkkeltall. Innholds-only.
  */
 export function FeatureGrid({
   eyebrow,
@@ -49,15 +75,11 @@ export function FeatureGrid({
     <Container padding="none">
       {(eyebrow || title || intro) && (
         <Reveal>
-          <div className="mx-auto mb-12 max-w-2xl text-center">
+          <div className="mb-12 max-w-2xl">
             {eyebrow && (
-              <Text
-                variant="small"
-                color="primary"
-                customStyles="uppercase tracking-[0.18em]"
-              >
+              <span className="font-heading font-semibold text-primary text-sm uppercase tracking-[0.2em]">
                 {eyebrow}
-              </Text>
+              </span>
             )}
             {title && (
               <Heading variant="h2" color="foreground" customStyles="mt-3">
@@ -74,26 +96,69 @@ export function FeatureGrid({
       )}
 
       <Stagger className={cn("grid grid-cols-1 gap-5", columnClass[columns])}>
-        {features.map((feature, index) => (
-          <StaggerItem key={feature.title}>
-            <div className="group h-full rounded-3xl border border-border bg-card p-7 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
-              <span
+        {features.map((feature, index) => {
+          const theme = themes[index % themes.length];
+          const { base, star } = splitTitle(feature.title);
+          return (
+            <StaggerItem key={feature.title}>
+              <div
                 className={cn(
-                  "inline-flex size-12 items-center justify-center rounded-2xl transition-transform duration-300 group-hover:scale-110",
-                  chipTints[index % chipTints.length]
+                  "group flex h-full min-h-80 flex-col rounded-[1.75rem] p-8 transition-transform duration-300 hover:-translate-y-1.5",
+                  theme.surface
                 )}
               >
-                <Icon name={feature.icon} className="size-6" />
-              </span>
-              <Heading variant="h4" color="foreground" customStyles="mt-5">
-                {feature.title}
-              </Heading>
-              <Text customStyles="mt-2 text-muted-foreground">
-                {feature.text}
-              </Text>
-            </div>
-          </StaggerItem>
-        ))}
+                <div className="flex items-start justify-between">
+                  <Icon
+                    name={feature.icon}
+                    className="size-14"
+                    strokeWidth={1.5}
+                  />
+                  <span className="font-heading font-bold text-sm tracking-[0.2em] opacity-40">
+                    0{index + 1}
+                  </span>
+                </div>
+
+                <div className="mt-auto pt-12">
+                  <h3 className="font-heading font-bold text-3xl leading-[1.1]">
+                    {base}
+                    {star && <span className={theme.accent}>*</span>}
+                  </h3>
+                  <hr className={cn("my-5 border-t", theme.rule)} />
+                  <p className={cn("text-sm leading-relaxed", theme.muted)}>
+                    {feature.text}
+                  </p>
+
+                  {feature.link && (
+                    <a
+                      href={feature.link.href}
+                      className={cn(
+                        "mt-6 inline-flex items-center gap-1.5 font-semibold text-sm",
+                        theme.accent
+                      )}
+                    >
+                      {feature.link.label}
+                      <Icon
+                        name="arrow-right"
+                        className="size-4 transition-transform group-hover:translate-x-1"
+                      />
+                    </a>
+                  )}
+
+                  {feature.stat && (
+                    <div className="mt-6">
+                      <div className="font-heading font-bold text-4xl leading-none">
+                        {feature.stat.value}
+                      </div>
+                      <div className={cn("mt-1 text-sm", theme.muted)}>
+                        {feature.stat.label}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </StaggerItem>
+          );
+        })}
       </Stagger>
     </Container>
   );
