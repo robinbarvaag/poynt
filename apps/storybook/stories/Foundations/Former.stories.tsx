@@ -1,23 +1,19 @@
-import {
-  BlobShape,
-  FloatingShapes,
-  SectionDivider,
-  WaveDivider,
-} from "@poynt/ui";
+import { FloatingShapes, Grain, Heading, Text } from "@poynt/ui";
 import { DriftingBlob } from "@poynt/ui/motion";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
 const meta: Meta = {
-  title: "Foundations/Former",
+  title: "Foundations/Tekstur og former",
   tags: ["autodocs"],
   parameters: {
     layout: "padded",
     docs: {
       description: {
         component:
-          "Det organiske formspråket: blob-former, flytende fargeflekker og " +
-          "formede seksjons-overganger. Sammen med den utvidede paletten " +
-          "(salmon/saffron/mint) gir dette den lekne, levende følelsen — alltid " +
+          "Signaturen vår er redaksjonell: en fin korn-/papirtekstur over alt, " +
+          "litt asymmetriske layouts, og myke drivende fargeflekker som bakgrunn. " +
+          "Ingen seksjons-dividers — teksturen og asymmetrien gir det unike, " +
+          "uten et grep som er lett å kjenne igjen fra andre prosjekter. Alt er " +
           "subtilt og dekorativt (aria-hidden).",
       },
     },
@@ -36,6 +32,60 @@ function Swatch({ bg, name }: { bg: string; name: string }) {
   );
 }
 
+export const Korn: Story = {
+  name: "Grain (signatur)",
+  render: () => (
+    <div className="flex flex-col gap-6">
+      <Text variant="muted">
+        Print-/papirkorn lagt over med <code>multiply</code>. Gir en taktil,
+        redaksjonell følelse. Brukes globalt én gang i layouten (&lt;Grain fixed
+        /&gt;), eller lokalt på en flate.
+      </Text>
+      <div className="flex flex-wrap gap-6">
+        {(["subtle", "medium", "strong"] as const).map((intensity) => (
+          <div key={intensity} className="flex flex-col gap-2">
+            <div className="relative h-40 w-56 overflow-hidden rounded-2xl bg-primary">
+              <Grain intensity={intensity} />
+              <div className="relative z-10 flex h-full items-center justify-center">
+                <code className="text-primary-foreground/80 text-xs">
+                  {intensity}
+                </code>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  ),
+};
+
+export const AsymmetriskLayout: Story = {
+  name: "Asymmetrisk layout",
+  render: () => (
+    <div className="rounded-2xl border border-border bg-background p-6 md:p-10">
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-12">
+        {/* Smal venstre-rail som «hanger» — magasinfølelse */}
+        <div className="md:col-span-4 md:pt-2">
+          <Text variant="muted" customStyles="uppercase tracking-wide text-xs">
+            Redaksjonelt
+          </Text>
+          <Heading variant="h3" customStyles="mt-2">
+            Innhold som bryter griddet
+          </Heading>
+        </div>
+        {/* Bred høyre-kolonne, forskjøvet fra midten */}
+        <div className="md:col-span-7 md:col-start-6">
+          <Text customStyles="text-muted-foreground">
+            I stedet for alltid å midtstille, lar vi tekst og bilder sitte litt
+            av-senter, med ujevne kolonneforhold (4 / 7) og luft på én side. Det
+            gir en rolig, redaksjonell rytme — distinkt uten dekorative former.
+          </Text>
+        </div>
+      </div>
+    </div>
+  ),
+};
+
 export const PlayfulPalett: Story = {
   name: "Utvidet palett",
   render: () => (
@@ -43,21 +93,6 @@ export const PlayfulPalett: Story = {
       <Swatch bg="bg-salmon" name="salmon" />
       <Swatch bg="bg-saffron" name="saffron" />
       <Swatch bg="bg-mint" name="mint" />
-    </div>
-  ),
-};
-
-export const Blob: Story = {
-  render: () => (
-    <div className="flex flex-wrap items-end gap-8">
-      {(["salmon", "saffron", "mint", "accent", "primary"] as const).map(
-        (c) => (
-          <div key={c} className="flex flex-col items-center gap-2">
-            <BlobShape color={c} size="sm" />
-            <code className="text-muted-foreground text-xs">{c}</code>
-          </div>
-        )
-      )}
     </div>
   ),
 };
@@ -87,32 +122,6 @@ export const DrivendeBlob: Story = {
       />
       <div className="relative z-10 flex h-full items-center justify-center">
         <code className="text-muted-foreground text-sm">DriftingBlob</code>
-      </div>
-    </div>
-  ),
-};
-
-export const Overganger: Story = {
-  name: "Seksjons-overganger",
-  render: () => (
-    <div className="flex flex-col gap-8">
-      {(["wave", "curve", "slant", "peak"] as const).map((shape) => (
-        <div key={shape} className="overflow-hidden rounded-xl">
-          <div className="h-12 bg-background" />
-          <SectionDivider shape={shape} color="primary" />
-          <div className="h-12 bg-primary" />
-          <code className="block bg-card p-2 text-muted-foreground text-xs">
-            {`<SectionDivider shape="${shape}" />`}
-          </code>
-        </div>
-      ))}
-      <div className="overflow-hidden rounded-xl">
-        <div className="h-12 bg-background" />
-        <WaveDivider color="accent" />
-        <div className="h-12 bg-accent" />
-        <code className="block bg-card p-2 text-muted-foreground text-xs">
-          {'<WaveDivider color="accent" />'}
-        </code>
       </div>
     </div>
   ),

@@ -200,10 +200,8 @@ export {
 } from "./icons";
 
 export {
-  BlobShape,
   FloatingShapes,
-  SectionDivider,
-  WaveDivider,
+  Grain,
 } from "./components/decorative";
 
 export {

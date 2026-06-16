@@ -220,5 +220,5 @@ Denne seksjonen er referansen slik at vi alltid vet **hvilke filer** som pavirke
 - [ ] CTA-blokker (former, fargede bakgrunner)
 - [ ] Footer (redesign, animasjon, former)
 - [ ] Knapper og interaktive elementer (pill-form, hover)
-- [ ] Seksjon-overganger (fargede bakgrunner, dekorative former)
+- [ ] Seksjonsrytme (fargede bakgrunner + global korn-tekstur)
 - [ ] Scroll-animasjoner (reveal, parallax pa dekor)

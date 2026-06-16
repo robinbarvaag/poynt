@@ -51,19 +51,25 @@ blokk-index + type → bakgrunn), så hele appen følger samme rytme.
 Senere kan partneren overstyre per blokk i Payload (et `background`-felt:
 auto / lys / dempet / farget), med «auto» som default.
 
-## 3. Dekor (former, dividers, blobs) — sjeldent og regelstyrt
+## 3. Signatur og dekor — redaksjonelt, ikke former
 
-Dette er flørten, ikke grunnmuren. Disiplin:
-- **Organiske former / blobs** (`FloatingShapes`, `DriftingBlob`): kun på
-  utvalgte flater — hero og den ene farge-/CTA-seksjonen. Aldri på vanlige
+Det unike grepet vårt er **redaksjonelt**: en fin korn-/papirtekstur over alt,
+og litt asymmetriske layouts. Vi bruker **ikke** formede seksjons-overganger
+(wave/curve-dividers) — de er bevisst fjernet, både fordi de blir overkill og
+fordi grepet er for lett å kjenne igjen fra andre prosjekter.
+
+- **Korn-tekstur** (`Grain`): den alltid-på signaturen. Legges globalt **én
+  gang** i layouten (`<Grain fixed />`), svært lav opacity. Gir en taktil,
+  trykt følelse uten å konkurrere med innholdet.
+- **Asymmetri:** der en blokk har et naturlig motvektselement (bilde, tall,
+  marginalia), la innholdet sitte litt av-senter med ujevne kolonneforhold
+  (f.eks. 4/7) i stedet for alltid å midtstille. Ren prosa uten motvekt
+  midtstilles fortsatt — asymmetri uten motvekt ser bare ut som en feil.
+- **Organiske blobs** (`FloatingShapes`, `DriftingBlob`): kun på utvalgte
+  flater — hero og den ene farge-/CTA-seksjonen. Aldri på vanlige
   innholdsblokker. Alltid lav opacity, bak innholdet.
-- **Seksjons-overganger** (`WaveDivider`/`SectionDivider`): brukes **svært
-  sparsomt** — som regel ikke i det hele tatt. Kun mellom to *solide*
-  fargeflater der overgangen ellers blir hard. Aldri stablet nedover siden.
-  (De skal plasseres som et eget element *mellom* to seksjoner, ikke inni en
-  seksjon med padding — ellers havner de feil.)
-- Tommelfingerregel: ser du mer enn ett dekor-grep i viewporten samtidig, er
-  det for mye.
+- Tommelfingerregel: korn-teksturen er overalt og umerkelig; alt annet dekor
+  ser du maks ett av i viewporten samtidig.
 
 ## 4. Bevegelse — på blokk-nivå, konsistent
 
@@ -86,17 +92,19 @@ Dette er flørten, ikke grunnmuren. Disiplin:
   Flytt bakgrunn/spacing/reveal dit. (Liten, sentral endring.)
 - **Fase B — rydd blokkene:** fjern hardkodet `<section>`/`py-*` fra hver
   `*-block.tsx`; de blir innholds-only. Én blokk om gangen.
-- **Fase C — dekor-aksenter:** legg former/blobs på hero + CTA etter §3. Vurder
-  ev. ett signatur-divider-sted.
-- **Fase D — Payload-styring (valgfritt):** `background`-felt per blokk så
+- **Fase C — dekor-aksenter:** legg blobs på hero + CTA etter §3.
+- **Fase D — signatur:** global korn-tekstur (`<Grain fixed />`) + asymmetri på
+  blokker med naturlig motvekt.
+- **Fase E — Payload-styring (valgfritt):** `background`-felt per blokk så
   partneren kan overstyre rytmen.
 
 ## 7. Hva vi IKKE gjør
 
-- Ikke divider mellom hver seksjon.
+- Ikke formede seksjons-overganger (wave/curve-dividers).
 - Ikke ny bakgrunnsfarge på hver blokk.
-- Ikke dekor på vanlige innholdsblokker.
+- Ikke organiske blobs på vanlige innholdsblokker.
+- Ikke asymmetri på ren prosa uten motvekt.
 - Ikke bevegelse som forsinker lesing eller hindrer scroll.
 
-> Kort sagt: **systemet (farge-rytme + spacing + reveal) er overalt og
-> automatisk; flørten (former, dividers) er sjelden og bevisst.**
+> Kort sagt: **systemet (farge-rytme + spacing + reveal + korn-tekstur) er
+> overalt og automatisk; flørten (blobs, asymmetri) er sjelden og bevisst.**

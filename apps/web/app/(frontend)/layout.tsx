@@ -2,7 +2,7 @@ import "../globals.css";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import config from "@payload-config";
-import { cn } from "@poynt/ui";
+import { Grain, cn } from "@poynt/ui";
 import type { Metadata } from "next";
 import { unstable_cache } from "next/cache";
 import { Bricolage_Grotesque, Poppins } from "next/font/google";
@@ -105,6 +105,8 @@ export default async function FrontendLayout({
               : undefined
           }
         />
+        {/* Redaksjonell signatur: ett fint korn-lag over hele siden */}
+        <Grain fixed />
       </body>
     </html>
   );

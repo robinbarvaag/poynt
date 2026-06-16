@@ -15,9 +15,11 @@ små ting som gjør at det lever.
 
 Én sammenbindende idé som gjør On Poynt gjenkjennelig. Tre lag som alltid spiller sammen:
 
-1. **Organisk formsystem** — blob/pill-former som bøyer reglene, men følger ett system
-   (jf. INSPO `inspo-shapes` + Basel). Former er aldri tilfeldige: de kommer fra et lite
-   sett tokens (se §4) og gjenbrukes som dekor, bilde-utklipp og seksjons-overganger.
+1. **Redaksjonell tekstur + asymmetri** — en fin korn-/papirtekstur (`Grain`) over
+   hele siden, og litt asymmetriske layouts (av-senter, ujevne kolonneforhold). Dette
+   er signaturen, ikke formede seksjons-overganger (dem bruker vi ikke — se
+   docs/COMPOSITION.md §3). Myke drivende blobs er fortsatt med, men kun som bakgrunn
+   på hero/CTA.
 2. **Én delt bevegelsesgrammatikk** — *alt* som animerer bruker samme varighet, easing og
    avstand. Det er dette som skiller «designet subtilitet» fra «tilfeldige animasjoner».
    Definert som motion-tokens (§3), brukt overalt.
@@ -125,7 +127,7 @@ Bygg nedenfra: tokens → primitives → seksjoner. Da blir alt konsistent fra s
   - [ ] Pricing/medlemskap-kort med tekstur
 - **Fase 4 — Footer + polish**
   - [ ] Footer-redesign med form + CTA + myk animasjon
-  - [ ] Seksjons-overganger (fargerytme + den drivende formen ende-til-ende)
+  - [ ] Fargerytme + korn-tekstur ende-til-ende
   - [ ] Reduced-motion-gjennomgang på hele forsiden
 
 ---
