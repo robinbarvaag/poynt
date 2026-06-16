@@ -1,15 +1,13 @@
-import { Icon, type IconName } from "../../icons";
 import { cn } from "../../lib/utils";
 import { Container } from "../container";
 import { Reveal, Stagger, StaggerItem } from "../motion";
 import { Heading, Text } from "../typography";
 
 export interface Feature {
-  icon: IconName;
   /** Tittel. Bruk `*` for en aksent-stjerne, f.eks. "Lær raskere*". */
   title: string;
   text: string;
-  /** Valgfri lenke nederst (PayPal-stil "Se mer →"). */
+  /** Valgfri lenke nederst (typografisk "Se mer →"). */
   link?: { label: string; href: string };
   /** Valgfritt nøkkeltall nederst i stedet for lenke. */
   stat?: { value: string; label: string };
@@ -25,7 +23,8 @@ export interface FeatureGridProps {
 }
 
 // Modige fargeblokker — hvert kort er en hel mettet flate (jf. INSPO/PayPal).
-// `accent` er en kontrastfarge brukt på stjerne/lenke for å gi kortet snert.
+// Ingen ikoner: det store tallet er det grafiske ankeret. `accent` er en
+// kontrastfarge som gir kortet snert (tall, stjerne, lenke).
 const themes = [
   {
     surface: "bg-saffron text-foreground",
@@ -61,8 +60,9 @@ function splitTitle(title: string) {
 
 /**
  * Verdi-/feature-rutenett i modig fargeblokk-stil (INSPO/PayPal): hver flate er
- * en mettet farge med stor line-art-ikon, fet editorial-tittel med aksent-
- * stjerne, tynn skillelinje og en lenke eller et nøkkeltall. Innholds-only.
+ * en mettet farge med et stort tall som grafisk anker (ingen ikoner), fet
+ * editorial-tittel med aksent-stjerne, tynn skillelinje og en lenke eller et
+ * nøkkeltall. Innholds-only.
  */
 export function FeatureGrid({
   eyebrow,
@@ -107,16 +107,14 @@ export function FeatureGrid({
                   theme.surface
                 )}
               >
-                <div className="flex items-start justify-between">
-                  <Icon
-                    name={feature.icon}
-                    className="size-14"
-                    strokeWidth={1.5}
-                  />
-                  <span className="font-heading font-bold text-sm tracking-[0.2em] opacity-40">
-                    0{index + 1}
-                  </span>
-                </div>
+                <span
+                  className={cn(
+                    "font-heading font-bold text-7xl leading-none tracking-tight",
+                    theme.accent
+                  )}
+                >
+                  0{index + 1}
+                </span>
 
                 <div className="mt-auto pt-12">
                   <h3 className="font-heading font-bold text-3xl leading-[1.1]">
@@ -132,15 +130,14 @@ export function FeatureGrid({
                     <a
                       href={feature.link.href}
                       className={cn(
-                        "mt-6 inline-flex items-center gap-1.5 font-semibold text-sm",
+                        "mt-6 inline-flex items-center gap-2 font-semibold text-sm",
                         theme.accent
                       )}
                     >
                       {feature.link.label}
-                      <Icon
-                        name="arrow-right"
-                        className="size-4 transition-transform group-hover:translate-x-1"
-                      />
+                      <span className="transition-transform group-hover:translate-x-1">
+                        →
+                      </span>
                     </a>
                   )}
 

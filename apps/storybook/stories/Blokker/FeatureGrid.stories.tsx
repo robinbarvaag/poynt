@@ -34,19 +34,16 @@ export const Standard: Story = {
     columns: 3,
     features: [
       {
-        icon: "graduation-cap",
         title: "Lær i ditt tempo*",
         text: "Strukturerte kurs som tar deg fra nybegynner til trygg — når det passer deg.",
         link: { label: "Se kursene", href: "#" },
       },
       {
-        icon: "sparkles",
         title: "AI-verktøy som jobber*",
         text: "La verktøyene gjøre grovjobben, fra idé til ferdig resultat på minutter.",
         stat: { value: "12+", label: "verktøy klare" },
       },
       {
-        icon: "users",
         title: "Et fellesskap i ryggen*",
         text: "Del, få tilbakemelding og voks sammen med andre på samme reise.",
         link: { label: "Bli medlem", href: "#" },
@@ -67,22 +64,18 @@ export const FireKolonner: Story = {
     columns: 4,
     features: [
       {
-        icon: "graduation-cap",
         title: "Kurs*",
         text: "Lær i ditt eget tempo, steg for steg.",
       },
       {
-        icon: "sparkles",
         title: "AI-verktøy*",
         text: "Fra plan til konkret resultat.",
       },
       {
-        icon: "users",
         title: "Fellesskap*",
         text: "Del og voks sammen med andre.",
       },
       {
-        icon: "rocket",
         title: "Maler*",
         text: "Kom i gang med fart fra dag én.",
       },

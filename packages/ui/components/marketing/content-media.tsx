@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import { Icon } from "../../icons";
 import { cn } from "../../lib/utils";
 import { Button } from "../button";
 import { Container } from "../container";
@@ -63,10 +62,10 @@ export function ContentMedia({
           {bullets && bullets.length > 0 && (
             <ul className="mt-6 flex flex-col gap-3">
               {bullets.map((bullet) => (
-                <li key={bullet} className="flex items-start gap-3">
-                  <Icon
-                    name="check-circle"
-                    className="mt-0.5 size-5 shrink-0 text-primary"
+                <li key={bullet} className="flex items-start gap-4">
+                  <span
+                    aria-hidden="true"
+                    className="mt-2.5 h-px w-6 shrink-0 bg-primary"
                   />
                   <Text customStyles="text-muted-foreground">{bullet}</Text>
                 </li>
@@ -87,7 +86,7 @@ export function ContentMedia({
             mediaLeft ? "md:col-start-1 md:row-start-1" : "md:col-start-7"
           )}
         >
-          <div className="relative aspect-4/3 overflow-hidden rounded-[2rem] bg-muted shadow-sm ring-1 ring-foreground/5">
+          <div className="relative aspect-4/3 overflow-hidden rounded-4xl bg-muted shadow-sm ring-1 ring-foreground/5">
             {media}
           </div>
         </Reveal>
