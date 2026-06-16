@@ -1,42 +1,49 @@
-import { cn } from "@poynt/ui";
+import { cn } from "../../lib/utils";
 
-type WaveColor = "primary" | "accent" | "salmon" | "saffron" | "mint" | "muted";
-type WaveVariant = "top" | "bottom";
+type DecorColor =
+  | "primary"
+  | "accent"
+  | "salmon"
+  | "saffron"
+  | "mint"
+  | "muted"
+  | "secondary";
 
 interface WaveDividerProps {
-  variant?: WaveVariant;
-  color?: WaveColor;
+  variant?: "top" | "bottom";
+  color?: DecorColor;
   className?: string;
 }
 
-const colorMap: Record<WaveColor, string> = {
+const fillMap: Record<DecorColor, string> = {
   primary: "fill-primary",
   accent: "fill-accent",
-  salmon: "fill-[oklch(0.793_0.124_7.590)]", // Salmon Pink
-  saffron: "fill-[oklch(0.830_0.155_93.127)]", // Saffron
-  mint: "fill-[oklch(0.959_0.049_201.168)]", // Mint Green
+  salmon: "fill-salmon",
+  saffron: "fill-saffron",
+  mint: "fill-mint",
   muted: "fill-muted",
+  secondary: "fill-secondary",
 };
 
+/** Bølge-formet overgang mellom to fargeseksjoner. */
 export function WaveDivider({
   variant = "top",
   color = "muted",
   className,
 }: WaveDividerProps) {
   const isTop = variant === "top";
-
   return (
     <div
       className={cn(
         "w-full overflow-hidden leading-[0]",
-        isTop ? "-mb-[1px]" : "-mt-[1px] rotate-180",
+        isTop ? "-mb-px" : "-mt-px rotate-180",
         className
       )}
     >
       <svg
         viewBox="0 0 1200 120"
         preserveAspectRatio="none"
-        className={cn("w-full h-[60px] md:h-[80px]", colorMap[color])}
+        className={cn("h-[60px] w-full md:h-[80px]", fillMap[color])}
         aria-hidden="true"
         focusable={false}
       >

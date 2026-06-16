@@ -1,11 +1,10 @@
 import { getMediaUrl } from "@/lib/media-url";
 import type { SerializedEditorState } from "@payloadcms/richtext-lexical/lexical";
 import { RichText } from "@payloadcms/richtext-lexical/react";
-import { Heading, Text } from "@poynt/ui";
+import { FloatingShapes, Heading, Text } from "@poynt/ui";
 import { Facebook, Instagram, Linkedin, Twitter, Youtube } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { FloatingShapes } from "./decorative/floating-shapes";
 import { NewsletterForm } from "./newsletter-form";
 
 interface FooterLink {

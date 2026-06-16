@@ -143,6 +143,12 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
+  /* Leken utvidet palett — for dekorative former, shades og fargeflekker.
+     Gir utilities som bg-salmon, fill-mint, text-saffron. */
+  --color-salmon: oklch(0.793 0.124 7.59);
+  --color-saffron: oklch(0.83 0.155 93.127);
+  --color-mint: oklch(0.959 0.049 201.168);
+
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
 

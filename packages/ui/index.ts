@@ -40,6 +40,11 @@ export {
   Container,
   containerVariants,
   Section,
+  sectionVariants,
+  type SectionProps,
+  Stack,
+  stackVariants,
+  type StackProps,
   type ContainerProps,
 } from "./components/container";
 
@@ -191,6 +196,13 @@ export {
   type IconName,
   type IconProps,
 } from "./icons";
+
+export {
+  BlobShape,
+  FloatingShapes,
+  SectionDivider,
+  WaveDivider,
+} from "./components/decorative";
 
 export {
   StepContainer,
