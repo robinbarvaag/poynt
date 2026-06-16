@@ -61,15 +61,13 @@ export function SpotifyEmbedBlock({
 
   if (!extracted) {
     return (
-      <section className="py-12 md:py-16">
-        <div className="mx-auto max-w-4xl px-4">
-          <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-8 text-center">
-            <p className="text-destructive">
-              Ugyldig Spotify URL. Sjekk at lenken er korrekt.
-            </p>
-          </div>
+      <div className="mx-auto max-w-4xl px-4">
+        <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-8 text-center">
+          <p className="text-destructive">
+            Ugyldig Spotify URL. Sjekk at lenken er korrekt.
+          </p>
         </div>
-      </section>
+      </div>
     );
   }
 
@@ -82,7 +80,7 @@ export function SpotifyEmbedBlock({
   const isLarge = height === "large";
 
   return (
-    <section className="relative py-12 md:py-20 overflow-hidden">
+    <div className="relative overflow-hidden">
       {/* Background decorations */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute top-0 left-1/4 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
@@ -148,6 +146,6 @@ export function SpotifyEmbedBlock({
           </p>
         )}
       </div>
-    </section>
+    </div>
   );
 }

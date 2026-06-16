@@ -28,7 +28,7 @@ export function FormBlockComponent({
   // If form is just an ID string, we can't render it
   if (typeof form === "string") {
     return (
-      <Container size="sm" className="py-12">
+      <Container size="sm">
         <Text variant="muted">Skjema ikke funnet</Text>
       </Container>
     );
@@ -100,7 +100,7 @@ export function FormBlockComponent({
 
   if (isSubmitted) {
     return (
-      <Container size="sm" className="py-12">
+      <Container size="sm">
         <div
           className={cn(
             maxWidthClasses[currentMaxWidth],
@@ -133,7 +133,7 @@ export function FormBlockComponent({
   }
 
   return (
-    <Container size="sm" className="py-12">
+    <Container size="sm">
       <div
         className={cn(
           maxWidthClasses[currentMaxWidth],

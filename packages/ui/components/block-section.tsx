@@ -12,8 +12,11 @@ interface BlockSectionProps {
   background?: SectionProps["variant"];
   /** Vertikal rytme. Default "lg". */
   spacing?: SectionProps["spacing"];
-  /** Innholdsbredde. Default "default". */
-  containerSize?: ContainerProps["size"];
+  /**
+   * Innholdsbredde. Sett til `false` når blokken har sin egen `Container`
+   * (da legger ikke BlockSection på en ekstra). Default "default".
+   */
+  containerSize?: ContainerProps["size"] | false;
   /** Subtil scroll-reveal av innholdet. Default true. */
   reveal?: boolean;
   className?: string;
@@ -34,7 +37,12 @@ export function BlockSection({
   className,
   children,
 }: BlockSectionProps) {
-  const inner = <Container size={containerSize}>{children}</Container>;
+  const inner =
+    containerSize === false ? (
+      children
+    ) : (
+      <Container size={containerSize}>{children}</Container>
+    );
   return (
     <Section variant={background} spacing={spacing} className={className}>
       {reveal ? <Reveal>{inner}</Reveal> : inner}

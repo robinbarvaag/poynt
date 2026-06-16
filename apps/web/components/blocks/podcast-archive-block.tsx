@@ -32,48 +32,46 @@ export async function PodcastArchiveBlock({
   }
 
   return (
-    <section className="py-12 md:py-16">
-      <div className="container mx-auto px-4">
-        {(title || description) && (
-          <div className="mb-8 md:mb-12">
-            {title && (
-              <Heading size="h2" customStyles="mb-3">
-                {title}
-              </Heading>
-            )}
-            {description && (
-              <p className="text-lg text-muted-foreground max-w-2xl">
-                {description}
-              </p>
-            )}
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {podcasts.docs.map((podcast) => (
-            <PodcastCard
-              key={podcast.id}
-              podcast={
-                podcast as unknown as ComponentProps<
-                  typeof PodcastCard
-                >["podcast"]
-              }
-            />
-          ))}
+    <div className="container mx-auto px-4">
+      {(title || description) && (
+        <div className="mb-8 md:mb-12">
+          {title && (
+            <Heading size="h2" customStyles="mb-3">
+              {title}
+            </Heading>
+          )}
+          {description && (
+            <p className="text-lg text-muted-foreground max-w-2xl">
+              {description}
+            </p>
+          )}
         </div>
+      )}
 
-        {showMoreLink && podcasts.totalDocs > (limit || 0) && (
-          <div className="mt-8 text-center">
-            <Link
-              href="/podcast"
-              className="inline-flex items-center gap-2 text-primary hover:underline font-medium"
-            >
-              Se alle episoder
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-        )}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {podcasts.docs.map((podcast) => (
+          <PodcastCard
+            key={podcast.id}
+            podcast={
+              podcast as unknown as ComponentProps<
+                typeof PodcastCard
+              >["podcast"]
+            }
+          />
+        ))}
       </div>
-    </section>
+
+      {showMoreLink && podcasts.totalDocs > (limit || 0) && (
+        <div className="mt-8 text-center">
+          <Link
+            href="/podcast"
+            className="inline-flex items-center gap-2 text-primary hover:underline font-medium"
+          >
+            Se alle episoder
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+      )}
+    </div>
   );
 }

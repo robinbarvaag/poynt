@@ -79,55 +79,53 @@ export async function ProductArchiveBlock({
   }
 
   return (
-    <section className="py-12 md:py-16">
-      <div className="container mx-auto px-4">
-        {(title || description) && (
-          <div className="mb-8 md:mb-12">
-            {title && (
-              <Heading size="h2" customStyles="mb-3">
-                {title}
-              </Heading>
-            )}
-            {description && (
-              <p className="text-lg text-muted-foreground max-w-2xl">
-                {description}
-              </p>
-            )}
-          </div>
-        )}
-
-        <div
-          className={cn(
-            "grid gap-6",
-            layout === "grid" && "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
-            layout === "grid-4" && "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4",
-            layout === "carousel" && "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
+    <div className="container mx-auto px-4">
+      {(title || description) && (
+        <div className="mb-8 md:mb-12">
+          {title && (
+            <Heading size="h2" customStyles="mb-3">
+              {title}
+            </Heading>
           )}
-        >
-          {products.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={
-                product as unknown as ComponentProps<
-                  typeof ProductCard
-                >["product"]
-              }
-            />
-          ))}
+          {description && (
+            <p className="text-lg text-muted-foreground max-w-2xl">
+              {description}
+            </p>
+          )}
         </div>
+      )}
 
-        {showMoreLink && (
-          <div className="mt-8 text-center">
-            <Link
-              href="/produkter"
-              className="inline-flex items-center gap-2 text-primary hover:underline font-medium"
-            >
-              Se alle produkter
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
+      <div
+        className={cn(
+          "grid gap-6",
+          layout === "grid" && "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
+          layout === "grid-4" && "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4",
+          layout === "carousel" && "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
         )}
+      >
+        {products.map((product) => (
+          <ProductCard
+            key={product.id}
+            product={
+              product as unknown as ComponentProps<
+                typeof ProductCard
+              >["product"]
+            }
+          />
+        ))}
       </div>
-    </section>
+
+      {showMoreLink && (
+        <div className="mt-8 text-center">
+          <Link
+            href="/produkter"
+            className="inline-flex items-center gap-2 text-primary hover:underline font-medium"
+          >
+            Se alle produkter
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+      )}
+    </div>
   );
 }
