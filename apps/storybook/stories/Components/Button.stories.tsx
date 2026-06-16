@@ -10,11 +10,11 @@ const meta = {
     docs: {
       description: {
         component:
-          "Merkevareknappene (default/saffron/salmon/ink) har et lekent sveip: " +
-          "en aksent-flate ligger forskjøvet bak som en hard skygge og sklir inn " +
-          "og dekker hele knappen ved hover, mens tekstfargen bytter. HOLD MUSA " +
-          "OVER for å se det. Nøytrale verktøy-varianter (outline/ghost/…) er " +
-          "uendret. Bygget med pseudo-elementer, så `asChild` fortsatt funker.",
+          "Raffinert, ikke leken. Merkevareknappene (default/saffron/salmon/ink) " +
+          "har squircle-form (Apple-aktige «continuous corners» via corner-shape " +
+          "— progressive enhancement, faller tilbake til vanlig avrunding i " +
+          "Safari/Firefox) og et dempet løft + myk skygge på hover. Nøytrale " +
+          "verktøy-varianter (outline/ghost/…) er uendret.",
       },
     },
   },
@@ -53,7 +53,7 @@ export const Default: Story = {
 };
 
 export const Merkevare: Story = {
-  name: "Merkevare (sveip — hold musa over)",
+  name: "Merkevare (squircle)",
   render: () => (
     <div className="flex flex-wrap items-center gap-6">
       <Button variant="default" size="lg">
