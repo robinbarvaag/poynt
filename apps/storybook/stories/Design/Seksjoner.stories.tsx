@@ -1,18 +1,27 @@
+import { Container, Heading, Section, Stack, Text } from "@poynt/ui";
 import {
-  Container,
-  FloatingShapes,
-  Heading,
-  Section,
-  SectionDivider,
-  Stack,
-  Text,
-} from "@poynt/ui";
-import { CountUp, Reveal, Stagger, StaggerItem } from "@poynt/ui/motion";
+  CountUp,
+  DriftingBlob,
+  Reveal,
+  Stagger,
+  StaggerItem,
+} from "@poynt/ui/motion";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
 const meta: Meta = {
   title: "Design/Seksjoner",
-  parameters: { layout: "fullscreen" },
+  parameters: {
+    layout: "fullscreen",
+    docs: {
+      description: {
+        component:
+          "Disiplinert komposisjon (se docs/COMPOSITION.md): mest lyst, lett " +
+          "veksling i rytme via spacing, ÉN sterk farget seksjon, og subtil " +
+          "scroll-reveal. Ingen stablede dividers — systemet er overalt, " +
+          "flørten er sjelden.",
+      },
+    },
+  },
 };
 export default meta;
 
@@ -33,34 +42,32 @@ const STEG = [
   },
 ];
 
-/** En «reise» nedover siden: fargerytme, formede overganger og scroll-reveal. */
 export const Reise: Story = {
   render: () => (
     <div>
-      {/* 1 — intro */}
-      <Section variant="default" spacing="xl">
+      {/* Intro — lyst */}
+      <Section spacing="xl">
         <Container>
           <Reveal>
             <Stack gap="md" align="center">
               <Heading variant="h1" color="foreground" align="center">
-                En reise nedover siden
+                En rolig reise nedover siden
               </Heading>
               <Text
                 variant="lead"
                 align="center"
-                customStyles="max-w-lg text-foreground/70"
+                customStyles="max-w-xl text-foreground/70"
               >
-                Fargeseksjoner med fast rytme, organiske overganger og subtile
-                bevegelser — aldri overkill.
+                Mest lyst, lett veksling i rytmen, subtil bevegelse. Systemet er
+                overalt — flørten er sjelden.
               </Text>
             </Stack>
           </Reveal>
         </Container>
       </Section>
 
-      {/* 2 — slik funker det (muted) */}
+      {/* Slik funker det — dempet flate (rytme), ikke ny sterk farge */}
       <Section variant="muted" spacing="lg">
-        <SectionDivider shape="wave" color="background" />
         <Container>
           <Stack gap="lg">
             <Reveal>
@@ -89,14 +96,17 @@ export const Reise: Story = {
         </Container>
       </Section>
 
-      {/* 3 — tall (primary, mørk, med shades) */}
+      {/* DEN ENE sterke seksjonen — primary med faint, drivende dekor */}
       <Section
         variant="primary"
         spacing="lg"
         className="relative overflow-hidden"
       >
-        <SectionDivider shape="curve" color="muted" />
-        <FloatingShapes variant="subtle" />
+        <DriftingBlob className="-left-16 -top-10 size-80 bg-mint/15" />
+        <DriftingBlob
+          className="-bottom-20 -right-10 size-96 bg-saffron/10"
+          duration={24}
+        />
         <Container>
           <div className="relative z-10 flex flex-wrap justify-center gap-12">
             <div className="flex flex-col items-center">
@@ -115,9 +125,8 @@ export const Reise: Story = {
         </Container>
       </Section>
 
-      {/* 4 — CTA (mint) */}
-      <Section variant="mint" spacing="lg">
-        <SectionDivider shape="slant" color="primary" />
+      {/* CTA — tilbake til lyst */}
+      <Section spacing="xl">
         <Container>
           <Reveal>
             <Stack gap="md" align="center">

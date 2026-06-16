@@ -24,9 +24,9 @@ interface SectionDividerProps {
 // Paths fyller den øvre fargede delen og former den nedre kanten.
 const paths: Record<DividerShape, string> = {
   wave: "M0,0V42c47.8,22.2,103.6,32.2,158,28C386,64,420,18,600,18s214,46,442,52c54.4,4.2,110.2-5.8,158-28V0Z",
-  curve: "M0,0V30C400,92,800,92,1200,30V0Z",
-  slant: "M0,0V70L1200,0Z",
-  peak: "M0,0H1200V36L600,80L0,36Z",
+  curve: "M0,0V28C400,76,800,76,1200,28V0Z",
+  slant: "M0,0V62L1200,0Z",
+  peak: "M0,0H1200V34L600,78L0,34Z",
 };
 
 const fillMap: Record<DividerColor, string> = {

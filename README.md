@@ -58,6 +58,7 @@ docs/                     # Prosjektdokumentasjon (se under)
 
 - [docs/DESIGN.md](docs/DESIGN.md) — designprinsipper og visuell retning («Leken Profesjonalitet»)
 - [docs/DESIGN-PLAN.md](docs/DESIGN-PLAN.md) — signatur, scroll-«reise» og bevegelses-/animasjonsplan
+- [docs/COMPOSITION.md](docs/COMPOSITION.md) — hvordan det visuelle systemet går igjen i hele appen (via blokkene)
 - [docs/STRIPE-GUIDE.md](docs/STRIPE-GUIDE.md) — Stripe-integrasjon, webhooks og medlemskap
 - [docs/DRIZZLE-GUIDE.md](docs/DRIZZLE-GUIDE.md) — Drizzle ORM og medlemssystem
 - [docs/TESTING.md](docs/TESTING.md) — manuell testsjekkliste
