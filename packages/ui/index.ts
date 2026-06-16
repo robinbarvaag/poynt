@@ -205,6 +205,17 @@ export {
 } from "./components/decorative";
 
 export {
+  ContentMedia,
+  type ContentMediaProps,
+  type Feature,
+  FeatureGrid,
+  type FeatureGridProps,
+  type Step,
+  Steps,
+  type StepsProps,
+} from "./components/marketing";
+
+export {
   StepContainer,
   OptionCard,
   PrefilledBadge,
