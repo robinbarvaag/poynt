@@ -3,8 +3,8 @@ import { AddToCartButton } from "@/components/add-to-cart-button";
 import { getMediaUrl } from "@/lib/media-url";
 import type { Product } from "@/payload-types";
 import { RichText } from "@payloadcms/richtext-lexical/react";
-import { Badge, Button, Container, Heading } from "@poynt/ui";
-import { ArrowLeft, Check } from "lucide-react";
+import { Badge, Button, Container, Heading, Text } from "@poynt/ui";
+import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -65,7 +65,11 @@ function MembershipCheckoutButton({ product }: { product: Product }) {
       >
         {isLoading ? "Laster..." : "Bli medlem"}
       </Button>
-      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+      {error && (
+        <Text color="danger" customStyles="mt-2 text-sm">
+          {error}
+        </Text>
+      )}
     </div>
   );
 }
@@ -138,11 +142,9 @@ function ProductDetailClient({
             )}
 
             {hasDiscount && (
-              <div className="absolute top-4 right-4">
-                <Badge variant="destructive" className="text-sm px-3 py-1">
-                  Tilbud
-                </Badge>
-              </div>
+              <span className="absolute top-4 right-4 rounded-full bg-saffron px-4 py-1.5 font-semibold text-foreground text-sm">
+                Tilbud
+              </span>
             )}
           </div>
 
@@ -154,7 +156,7 @@ function ProductDetailClient({
                   // biome-ignore lint/suspicious/noArrayIndexKey: Using index as key is acceptable here because the list is static and does not change order
                   key={index}
                   onClick={() => setSelectedImage(index)}
-                  className={`relative w-20 h-20 rounded-lg overflow-hidden shrink-0 border-2 transition-colors ${
+                  className={`relative size-20 shrink-0 overflow-hidden rounded-2xl border-2 transition-colors ${
                     selectedImage === index
                       ? "border-primary"
                       : "border-transparent hover:border-border"
@@ -179,52 +181,68 @@ function ProductDetailClient({
             </Badge>
           </div>
 
-          <Heading size="h1" customStyles="mb-4">
+          <Heading
+            size="h1"
+            color="foreground"
+            weight="bold"
+            customStyles="mb-4"
+          >
             {product.name}
           </Heading>
 
           {product.shortDescription && (
-            <p className="text-lg text-muted-foreground mb-6">
+            <Text variant="lead" customStyles="mb-6">
               {product.shortDescription}
-            </p>
+            </Text>
           )}
 
           <div className="mb-8">
             <div className="flex items-baseline gap-3">
-              <span className="text-4xl font-bold text-primary">
+              <Text
+                type="span"
+                size="display-md"
+                weight="bold"
+                color="primary"
+                customStyles="leading-none"
+              >
                 {priceInKr} kr
-              </span>
+              </Text>
               {hasDiscount && (
-                <span className="text-xl text-muted-foreground line-through">
+                <Text
+                  type="span"
+                  variant="muted"
+                  customStyles="text-xl line-through"
+                >
                   {compareAtPriceInKr} kr
-                </span>
+                </Text>
               )}
             </div>
-            {product.type === "membership" && product.recurringInterval ? (
-              <p className="text-sm text-muted-foreground mt-1">
-                {product.recurringInterval === 1
+            <Text variant="muted" customStyles="mt-1">
+              {product.type === "membership" && product.recurringInterval
+                ? product.recurringInterval === 1
                   ? "per månad"
-                  : `kvar ${product.recurringInterval}. månad`}
-              </p>
-            ) : (
-              <p className="text-sm text-muted-foreground mt-1">Inkl. mva</p>
-            )}
+                  : `kvar ${product.recurringInterval}. månad`
+                : "Inkl. mva"}
+            </Text>
           </div>
 
           {/* Benefits list */}
           {benefits.length > 0 && (
-            <div className="mb-8 p-5 bg-muted/50 rounded-xl border border-border/50">
-              <h3 className="font-semibold mb-4 text-lg">Dette får du:</h3>
+            <div className="mb-8 rounded-2xl border border-border/50 bg-muted/50 p-6">
+              <Heading variant="h4" color="foreground" customStyles="mb-4">
+                Dette får du:
+              </Heading>
               <ul className="space-y-3">
                 {benefits.map((benefit) => (
                   <li
                     key={`benefit-${benefit}`}
                     className="flex items-start gap-3"
                   >
-                    <div className="mt-0.5 shrink-0 w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Check className="h-3 w-3 text-primary" />
-                    </div>
-                    <span className="text-sm">{benefit}</span>
+                    <span
+                      aria-hidden="true"
+                      className="mt-2.5 h-px w-4 shrink-0 rounded-full bg-primary"
+                    />
+                    <Text customStyles="text-sm">{benefit}</Text>
                   </li>
                 ))}
               </ul>
@@ -250,7 +268,7 @@ function ProductDetailClient({
 
       {product.description && (
         <div className="mt-16 pt-16 border-t border-border">
-          <Heading size="h2" customStyles="mb-6">
+          <Heading size="h2" color="foreground" customStyles="mb-6">
             Om produktet
           </Heading>
           <div className="prose prose-lg max-w-none prose-headings:text-foreground prose-p:text-foreground prose-a:text-primary prose-strong:text-foreground rich-text">

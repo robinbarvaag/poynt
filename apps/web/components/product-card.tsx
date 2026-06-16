@@ -1,4 +1,5 @@
 import { getMediaUrl } from "@/lib/media-url";
+import { Heading, Text } from "@poynt/ui";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -43,18 +44,18 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Link href={`/produkter/${product.slug}`} className="group block">
-      <div className="relative aspect-[4/3] rounded-lg overflow-hidden bg-muted mb-3">
+      <div className="relative mb-4 aspect-4/3 overflow-hidden rounded-2xl bg-muted">
         {productImage ? (
           <Image
             src={getMediaUrl(productImage.url)}
             alt={productImage.alt || product.name}
             fill
-            className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+            className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-12 h-12 rounded-full bg-muted-foreground/10 flex items-center justify-center">
-              <span className="text-muted-foreground/40 text-lg">
+            <div className="flex size-12 items-center justify-center rounded-full bg-muted-foreground/10">
+              <span className="text-lg text-muted-foreground/40">
                 {typeLabels[product.type]?.[0] || "P"}
               </span>
             </div>
@@ -62,37 +63,43 @@ export function ProductCard({ product }: ProductCardProps) {
         )}
 
         {hasDiscount && (
-          <div className="absolute top-2 right-2">
-            <span className="px-2 py-0.5 text-xs font-medium bg-foreground text-background rounded">
-              Tilbud
-            </span>
-          </div>
+          <span className="absolute top-3 right-3 rounded-full bg-saffron px-3 py-1 font-semibold text-foreground text-xs">
+            Tilbud
+          </span>
         )}
       </div>
 
-      <div className="space-y-1">
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground uppercase tracking-wide">
-            {typeLabels[product.type] || product.type}
-          </span>
-        </div>
+      <div className="space-y-1.5">
+        <Text
+          type="span"
+          customStyles="font-heading font-semibold text-primary text-xs uppercase tracking-[0.18em]"
+        >
+          {typeLabels[product.type] || product.type}
+        </Text>
 
-        <h3 className="font-medium leading-snug group-hover:text-primary transition-colors line-clamp-2">
+        <Heading
+          variant="h4"
+          color="foreground"
+          weight="bold"
+          customStyles="line-clamp-2 leading-snug transition-colors group-hover:text-primary"
+        >
           {product.name}
-        </h3>
+        </Heading>
 
         {product.shortDescription && (
-          <p className="text-sm text-muted-foreground line-clamp-1">
+          <Text variant="muted" customStyles="line-clamp-1">
             {product.shortDescription}
-          </p>
+          </Text>
         )}
 
         <div className="flex items-baseline gap-2 pt-1">
-          <span className="font-semibold">{priceInKr} kr</span>
+          <Text type="span" customStyles="font-semibold text-foreground">
+            {priceInKr} kr
+          </Text>
           {hasDiscount && (
-            <span className="text-sm text-muted-foreground line-through">
+            <Text type="span" variant="muted" customStyles="line-through">
               {compareAtPriceInKr} kr
-            </span>
+            </Text>
           )}
         </div>
       </div>
