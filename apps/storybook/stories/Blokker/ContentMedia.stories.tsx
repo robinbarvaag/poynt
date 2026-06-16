@@ -20,9 +20,14 @@ export default meta;
 
 type Story = StoryObj<typeof ContentMedia>;
 
-// Plassholder-media (i appen sendes et ekte bilde inn via slot).
-const placeholder = (
-  <div className="size-full bg-linear-to-br from-primary/25 via-mint/40 to-saffron/40" />
+// Ekte foto via Lorem Picsum (stabilt per seed). I appen sendes et next/Image
+// inn i samme slot.
+const photo = (seed: string) => (
+  <img
+    src={`https://picsum.photos/seed/${seed}/900/680`}
+    alt=""
+    className="h-full w-full object-cover"
+  />
 );
 
 export const MediaHoyre: Story = {
@@ -42,7 +47,7 @@ export const MediaHoyre: Story = {
       "Last ned maler og verktøy underveis",
     ],
     cta: { text: "Utforsk kursene", href: "#" },
-    media: placeholder,
+    media: photo("poynt-laering"),
     mediaSide: "right",
     accent: "saffron",
   },
@@ -64,7 +69,7 @@ export const MediaVenstre: Story = {
       "Tilpasset ditt fagfelt og din stemme",
     ],
     cta: { text: "Se verktøyene", href: "#" },
-    media: placeholder,
+    media: photo("poynt-verktoy"),
     mediaSide: "left",
     accent: "salmon",
   },

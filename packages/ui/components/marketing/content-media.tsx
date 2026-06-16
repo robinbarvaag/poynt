@@ -101,16 +101,16 @@ export function ContentMedia({
             mediaLeft ? "md:col-start-1 md:row-start-1" : "md:col-start-7"
           )}
         >
-          <div className="relative">
+          <div className="relative isolate">
             <div
               aria-hidden="true"
               className={cn(
-                "-z-10 absolute h-full w-full rounded-4xl",
+                "absolute inset-0 translate-y-5 rounded-4xl",
                 a.block,
-                mediaLeft ? "-bottom-5 -left-5" : "-right-5 -bottom-5"
+                mediaLeft ? "-translate-x-5" : "translate-x-5"
               )}
             />
-            <div className="relative aspect-4/3 overflow-hidden rounded-4xl bg-muted ring-1 ring-foreground/5">
+            <div className="relative z-10 aspect-4/3 overflow-hidden rounded-4xl bg-muted ring-1 ring-foreground/5">
               {media}
             </div>
           </div>
