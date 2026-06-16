@@ -125,44 +125,42 @@ export function FeatureGrid({
 
                 <hr className={cn("my-5 border-t", theme.rule)} />
 
-                {/* Beskrivelse — alltid 4 rader avsatt */}
+                {/* Beskrivelse — line-clamp 4, men følger teksten i høyde */}
                 <p
                   className={cn(
-                    "line-clamp-4 min-h-[5.7rem] text-sm leading-relaxed",
+                    "line-clamp-4 text-sm leading-relaxed",
                     theme.muted
                   )}
                 >
                   {feature.text}
                 </p>
 
-                {/* Footer — lenke eller nøkkeltall, fast min-høyde */}
-                <div className="mt-6 flex min-h-14 items-end">
-                  {feature.link && (
-                    <a
-                      href={feature.link.href}
-                      className={cn(
-                        "group/link inline-flex w-fit flex-col gap-2 font-bold text-sm",
-                        theme.accent
-                      )}
-                    >
-                      {feature.link.label}
-                      <span
-                        aria-hidden="true"
-                        className="h-0.75 w-9 rounded-full bg-current transition-all duration-300 ease-out group-hover/link:w-full"
-                      />
-                    </a>
-                  )}
-                  {!feature.link && feature.stat && (
-                    <div>
-                      <div className="font-heading font-bold text-4xl leading-none">
-                        {feature.stat.value}
-                      </div>
-                      <div className={cn("mt-1 text-sm", theme.muted)}>
-                        {feature.stat.label}
-                      </div>
+                {/* Footer — kun når det er en lenke eller et tall; pinnet til bunn */}
+                {feature.link && (
+                  <a
+                    href={feature.link.href}
+                    className={cn(
+                      "group/link mt-auto inline-flex w-fit flex-col gap-2 pt-8 font-bold text-sm",
+                      theme.accent
+                    )}
+                  >
+                    {feature.link.label}
+                    <span
+                      aria-hidden="true"
+                      className="h-0.75 w-9 rounded-full bg-current transition-all duration-300 ease-out group-hover/link:w-full"
+                    />
+                  </a>
+                )}
+                {!feature.link && feature.stat && (
+                  <div className="mt-auto pt-8">
+                    <div className="font-heading font-bold text-4xl leading-none">
+                      {feature.stat.value}
                     </div>
-                  )}
-                </div>
+                    <div className={cn("mt-1 text-sm", theme.muted)}>
+                      {feature.stat.label}
+                    </div>
+                  </div>
+                )}
               </div>
             </StaggerItem>
           );
