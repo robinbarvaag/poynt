@@ -3,6 +3,7 @@ import { BlockSection } from "@poynt/ui";
 import { type ComponentProps, Fragment, type ReactNode } from "react";
 import { ContentBlock } from "./blocks/content-block";
 import { CtaSectionBlock } from "./blocks/cta-section-block";
+import { FeatureGridBlock } from "./blocks/feature-grid-block";
 import { FormBlockComponent } from "./blocks/form-block";
 import { HeroBlock } from "./blocks/hero-block";
 import { MediaBlockComponent } from "./blocks/media-block";
@@ -33,6 +34,12 @@ function renderBlock(block: Block): ReactNode {
       return (
         <ContentBlock
           {...(block as unknown as ComponentProps<typeof ContentBlock>)}
+        />
+      );
+    case "featureGrid":
+      return (
+        <FeatureGridBlock
+          {...(block as unknown as ComponentProps<typeof FeatureGridBlock>)}
         />
       );
     case "media":

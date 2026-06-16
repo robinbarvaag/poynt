@@ -1,6 +1,7 @@
 import type { CollectionConfig } from "payload";
 import { Content } from "../blocks/content";
 import { CtaSection } from "../blocks/cta-section";
+import { FeatureGrid } from "../blocks/feature-grid";
 import { FormBlock } from "../blocks/form";
 import { Hero } from "../blocks/hero";
 import { MediaBlock } from "../blocks/media";
@@ -89,6 +90,7 @@ export const Pages: CollectionConfig = {
       blocks: [
         Hero,
         Content,
+        FeatureGrid,
         MediaBlock,
         FormBlock,
         ProductArchive,

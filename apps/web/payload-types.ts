@@ -180,6 +180,7 @@ export interface Page {
     | (
         | HeroBlock
         | ContentBlock
+        | FeatureGridBlock
         | MediaBlock
         | FormBlock
         | ProductArchiveBlock
@@ -341,6 +342,30 @@ export interface ContentBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'content';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FeatureGridBlock".
+ */
+export interface FeatureGridBlock {
+  eyebrow?: string | null;
+  title?: string | null;
+  intro?: string | null;
+  columns?: ('2' | '3' | '4') | null;
+  features?:
+    | {
+        title: string;
+        text: string;
+        linkLabel?: string | null;
+        linkUrl?: string | null;
+        statValue?: string | null;
+        statLabel?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'featureGrid';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1252,6 +1277,7 @@ export interface PagesSelect<T extends boolean = true> {
     | {
         hero?: T | HeroBlockSelect<T>;
         content?: T | ContentBlockSelect<T>;
+        featureGrid?: T | FeatureGridBlockSelect<T>;
         media?: T | MediaBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
         productArchive?: T | ProductArchiveBlockSelect<T>;
@@ -1313,6 +1339,29 @@ export interface HeroBlockSelect<T extends boolean = true> {
  */
 export interface ContentBlockSelect<T extends boolean = true> {
   richText?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FeatureGridBlock_select".
+ */
+export interface FeatureGridBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  title?: T;
+  intro?: T;
+  columns?: T;
+  features?:
+    | T
+    | {
+        title?: T;
+        text?: T;
+        linkLabel?: T;
+        linkUrl?: T;
+        statValue?: T;
+        statLabel?: T;
+        id?: T;
+      };
   id?: T;
   blockName?: T;
 }
