@@ -48,6 +48,8 @@ export {
   type ContainerProps,
 } from "./components/container";
 
+export { BlockSection } from "./components/block-section";
+
 export {
   Badge,
   badgeVariants,
