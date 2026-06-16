@@ -1,5 +1,6 @@
 import { getMediaUrl } from "@/lib/media-url";
 import { Button, Heading, cn } from "@poynt/ui";
+import { DriftingBlob } from "@poynt/ui/motion";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -85,8 +86,14 @@ export function CtaSectionBlock({
 
   if (variant === "colored") {
     return (
-      <section className="py-20 md:py-28 bg-primary text-primary-foreground">
-        <div className="container mx-auto px-4">{content}</div>
+      <section className="relative overflow-hidden bg-primary py-20 text-primary-foreground md:py-28">
+        {/* Signaturflørt: organiske former bak innholdet — kun her, jf. docs/COMPOSITION.md §3 */}
+        <DriftingBlob className="-left-16 -top-12 size-80 bg-mint/15" />
+        <DriftingBlob
+          className="-bottom-20 -right-12 size-96 bg-saffron/10"
+          duration={24}
+        />
+        <div className="container relative z-10 mx-auto px-4">{content}</div>
       </section>
     );
   }

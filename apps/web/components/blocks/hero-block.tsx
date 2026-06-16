@@ -2,6 +2,7 @@ import { getMediaUrl } from "@/lib/media-url";
 import type { SerializedEditorState } from "@payloadcms/richtext-lexical/lexical";
 import { RichText } from "@payloadcms/richtext-lexical/react";
 import { Button, Heading, cn } from "@poynt/ui";
+import { DriftingBlob } from "@poynt/ui/motion";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -159,10 +160,16 @@ export function HeroBlock({
           }}
         />
 
-        {/* Decorative floating shapes */}
-        <div className="absolute top-20 right-[5%] w-48 h-48 bg-accent/15 rounded-full blur-3xl animate-float-slow" />
-        <div className="absolute top-1/3 left-[3%] w-64 h-64 bg-primary-foreground/8 rounded-full blur-3xl animate-float-medium" />
-        <div className="absolute bottom-[30%] right-[15%] w-24 h-24 bg-accent/10 rounded-full blur-2xl animate-float-fast" />
+        {/* Decorative drifting shapes — respekterer prefers-reduced-motion */}
+        <DriftingBlob className="top-20 right-[5%] size-48 bg-accent/15 blur-3xl" />
+        <DriftingBlob
+          className="top-1/3 left-[3%] size-64 bg-primary-foreground/8 blur-3xl"
+          duration={22}
+        />
+        <DriftingBlob
+          className="bottom-[30%] right-[15%] size-24 bg-accent/10"
+          duration={14}
+        />
 
         {/* Text content on solid background */}
         <div className="relative text-center px-6 sm:px-10 lg:px-16 pt-36 md:pt-48 pb-12 md:pb-16 max-w-5xl mx-auto">
@@ -227,9 +234,12 @@ export function HeroBlock({
           }}
         />
 
-        {/* Decorative shapes */}
-        <div className="absolute top-16 right-[3%] w-64 h-64 bg-accent/15 rounded-full blur-3xl animate-float-slow" />
-        <div className="absolute bottom-12 left-[2%] w-48 h-48 bg-primary/10 rounded-full blur-3xl animate-float-medium" />
+        {/* Decorative drifting shapes — respekterer prefers-reduced-motion */}
+        <DriftingBlob className="top-16 right-[3%] size-64 bg-accent/15 blur-3xl" />
+        <DriftingBlob
+          className="bottom-12 left-[2%] size-48 bg-primary/10 blur-3xl"
+          duration={22}
+        />
 
         <div className="mx-auto max-w-360 px-6 sm:px-10 lg:px-16 pt-36 md:pt-44 pb-20 md:pb-28">
           <div className="grid md:grid-cols-[1fr_1.1fr] gap-10 lg:gap-16 items-center">
@@ -272,12 +282,19 @@ export function HeroBlock({
   // Standard without image - centered layout
   return (
     <section className="relative -mt-22 overflow-hidden bg-linear-to-b from-primary/5 via-accent/5 to-background">
-      {/* Decorative floating shapes */}
-      <div className="absolute top-24 right-[10%] w-40 h-40 bg-accent/20 rounded-full blur-3xl animate-float-slow" />
-      <div className="absolute top-40 left-[5%] w-48 h-48 bg-primary/10 rounded-full blur-3xl animate-float-medium" />
-      <div className="absolute bottom-32 right-[15%] w-24 h-24 bg-accent/15 rounded-full blur-xl animate-float-fast" />
-      <div className="absolute top-1/3 right-[30%] w-3 h-3 bg-accent/40 rounded-full animate-float-fast" />
-      <div className="absolute bottom-1/4 left-[28%] w-2 h-2 bg-primary/30 rounded-full animate-float-medium" />
+      {/* Decorative drifting shapes — respekterer prefers-reduced-motion */}
+      <DriftingBlob className="top-24 right-[10%] size-40 bg-accent/20 blur-3xl" />
+      <DriftingBlob
+        className="top-40 left-[5%] size-48 bg-primary/10 blur-3xl"
+        duration={22}
+      />
+      <DriftingBlob
+        className="bottom-32 right-[15%] size-24 bg-accent/15 blur-xl"
+        duration={14}
+      />
+      {/* Skarpe aksentprikker — statiske, ligger over de myke blobsene */}
+      <div className="absolute top-1/3 right-[30%] size-3 rounded-full bg-accent/40" />
+      <div className="absolute bottom-1/4 left-[28%] size-2 rounded-full bg-primary/30" />
 
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 pt-40 md:pt-48 pb-20 md:pb-28 text-center">
         {tags && tags.length > 0 && (
