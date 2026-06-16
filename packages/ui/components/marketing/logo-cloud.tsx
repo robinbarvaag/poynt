@@ -1,5 +1,6 @@
 import { cn } from "../../lib/utils";
 import { Container } from "../container";
+import { Eyebrow } from "../eyebrow";
 import { Reveal } from "../motion";
 
 export interface Logo {
@@ -23,9 +24,9 @@ export function LogoCloud({ label, logos }: LogoCloudProps) {
     <Container padding="none">
       <Reveal>
         {label && (
-          <p className="mb-10 text-center font-heading font-semibold text-muted-foreground text-sm uppercase tracking-[0.2em]">
-            {label}
-          </p>
+          <div className="mb-10 text-center">
+            <Eyebrow>{label}</Eyebrow>
+          </div>
         )}
         <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-8 md:gap-x-16">
           {logos.map((logo) =>

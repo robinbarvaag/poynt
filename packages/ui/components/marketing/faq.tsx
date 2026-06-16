@@ -5,6 +5,7 @@ import {
   AccordionTrigger,
 } from "../accordion";
 import { Container } from "../container";
+import { Eyebrow } from "../eyebrow";
 import { Reveal } from "../motion";
 import { Heading, Text } from "../typography";
 
@@ -32,11 +33,7 @@ export function Faq({ eyebrow, title, intro, items, defaultOpen }: FaqProps) {
       {(eyebrow || title || intro) && (
         <Reveal>
           <div className="mb-12 max-w-2xl">
-            {eyebrow && (
-              <span className="font-heading font-semibold text-primary text-sm uppercase tracking-[0.2em]">
-                {eyebrow}
-              </span>
-            )}
+            {eyebrow && <Eyebrow className="text-primary">{eyebrow}</Eyebrow>}
             {title && (
               <Heading variant="h2" color="foreground" customStyles="mt-3">
                 {title}

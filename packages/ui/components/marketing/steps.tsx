@@ -1,5 +1,6 @@
 import { cn } from "../../lib/utils";
 import { Container } from "../container";
+import { Eyebrow } from "../eyebrow";
 import { Reveal } from "../motion";
 import { Heading, Text } from "../typography";
 
@@ -48,11 +49,7 @@ export function Steps({ eyebrow, title, intro, steps }: StepsProps) {
       {(eyebrow || title || intro) && (
         <Reveal>
           <div className="mb-16 max-w-2xl">
-            {eyebrow && (
-              <span className="font-heading font-semibold text-primary text-sm uppercase tracking-[0.2em]">
-                {eyebrow}
-              </span>
-            )}
+            {eyebrow && <Eyebrow className="text-primary">{eyebrow}</Eyebrow>}
             {title && (
               <Heading variant="h2" color="foreground" customStyles="mt-3">
                 {title}
@@ -104,21 +101,21 @@ export function Steps({ eyebrow, title, intro, steps }: StepsProps) {
                     flip ? "md:col-start-1" : "md:col-start-5"
                   )}
                 >
-                  <div className="flex items-center gap-3">
-                    <span
-                      className={cn("h-1 w-10 rounded-full", accent.bar)}
-                      aria-hidden="true"
-                    />
-                    <span className="font-heading font-semibold text-muted-foreground text-sm uppercase tracking-[0.2em]">
-                      Steg 0{index + 1}
-                    </span>
-                  </div>
-                  <h3 className="mt-4 font-heading font-bold text-3xl text-foreground leading-tight md:text-4xl">
+                  <Eyebrow marker markerClassName={accent.bar}>
+                    Steg 0{index + 1}
+                  </Eyebrow>
+                  <Heading
+                    variant="h3"
+                    size="display-md"
+                    color="foreground"
+                    weight="bold"
+                    customStyles="mt-4 leading-tight"
+                  >
                     {step.title}
-                  </h3>
-                  <p className="mt-3 max-w-md text-muted-foreground leading-relaxed">
+                  </Heading>
+                  <Text customStyles="mt-3 max-w-md text-muted-foreground leading-relaxed">
                     {step.text}
-                  </p>
+                  </Text>
                 </div>
               </div>
             </Reveal>

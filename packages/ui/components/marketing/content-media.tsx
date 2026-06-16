@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { cn } from "../../lib/utils";
 import { Button } from "../button";
 import { Container } from "../container";
+import { Eyebrow } from "../eyebrow";
 import { Reveal } from "../motion";
 import { Heading, Text } from "../typography";
 
@@ -56,15 +57,9 @@ export function ContentMedia({
           )}
         >
           {eyebrow && (
-            <div className="flex items-center gap-3">
-              <span
-                aria-hidden="true"
-                className={cn("h-1 w-10 rounded-full", a.marker)}
-              />
-              <span className="font-heading font-semibold text-muted-foreground text-sm uppercase tracking-[0.2em]">
-                {eyebrow}
-              </span>
-            </div>
+            <Eyebrow marker markerClassName={a.marker}>
+              {eyebrow}
+            </Eyebrow>
           )}
           <Heading variant="h2" color="foreground" customStyles="mt-4">
             {title}

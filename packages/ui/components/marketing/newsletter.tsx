@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { cn } from "../../lib/utils";
 import { Button } from "../button";
 import { Container, Section } from "../container";
+import { Eyebrow } from "../eyebrow";
 import { Reveal } from "../motion";
 import { Heading, Text } from "../typography";
 
@@ -61,16 +62,7 @@ export function Newsletter({
       <Container size="sm">
         <Reveal>
           <div className="text-center">
-            {eyebrow && (
-              <span
-                className={cn(
-                  "font-heading font-semibold text-sm uppercase tracking-[0.2em]",
-                  theme.eyebrow
-                )}
-              >
-                {eyebrow}
-              </span>
-            )}
+            {eyebrow && <Eyebrow className={theme.eyebrow}>{eyebrow}</Eyebrow>}
             <Heading
               variant="h2"
               color={theme.heading}

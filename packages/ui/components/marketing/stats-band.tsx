@@ -1,5 +1,6 @@
 import { cn } from "../../lib/utils";
 import { Container, Section } from "../container";
+import { Eyebrow } from "../eyebrow";
 import { CountUp, Reveal } from "../motion";
 import { Heading, Text } from "../typography";
 
@@ -60,14 +61,7 @@ export function StatsBand({
           {(eyebrow || title) && (
             <div className="mb-12 text-center">
               {eyebrow && (
-                <span
-                  className={cn(
-                    "font-heading font-semibold text-sm uppercase tracking-[0.2em]",
-                    theme.eyebrow
-                  )}
-                >
-                  {eyebrow}
-                </span>
+                <Eyebrow className={theme.eyebrow}>{eyebrow}</Eyebrow>
               )}
               {title && (
                 <Heading

@@ -1,5 +1,6 @@
 import { cn } from "../../lib/utils";
 import { Container } from "../container";
+import { Eyebrow } from "../eyebrow";
 import { Reveal, Stagger, StaggerItem } from "../motion";
 import { Heading, Text } from "../typography";
 
@@ -76,11 +77,7 @@ export function FeatureGrid({
       {(eyebrow || title || intro) && (
         <Reveal>
           <div className="mb-12 max-w-2xl">
-            {eyebrow && (
-              <span className="font-heading font-semibold text-primary text-sm uppercase tracking-[0.2em]">
-                {eyebrow}
-              </span>
-            )}
+            {eyebrow && <Eyebrow className="text-primary">{eyebrow}</Eyebrow>}
             {title && (
               <Heading variant="h2" color="foreground" customStyles="mt-3">
                 {title}
@@ -108,32 +105,40 @@ export function FeatureGrid({
                 )}
               >
                 {/* Tall — fast sone */}
-                <span
-                  className={cn(
-                    "font-heading font-bold text-7xl leading-none tracking-tight",
+                <Text
+                  type="span"
+                  size="display-xl"
+                  weight="bold"
+                  color="inherit"
+                  customStyles={cn(
+                    "font-heading leading-none tracking-tight",
                     theme.accent
                   )}
                 >
                   0{index + 1}
-                </span>
+                </Text>
 
                 {/* Tittel — alltid 2 rader avsatt */}
-                <h3 className="mt-8 line-clamp-2 min-h-[4.2rem] font-heading font-bold text-3xl leading-[1.1]">
+                <Heading
+                  variant="h3"
+                  size="display-sm"
+                  color="inherit"
+                  weight="bold"
+                  customStyles="mt-8 line-clamp-2 min-h-[4.2rem] leading-[1.1]"
+                >
                   {base}
                   {star && <span className={theme.accent}>*</span>}
-                </h3>
+                </Heading>
 
                 <hr className={cn("my-5 border-t", theme.rule)} />
 
                 {/* Beskrivelse — line-clamp 4, men følger teksten i høyde */}
-                <p
-                  className={cn(
-                    "line-clamp-4 text-sm leading-relaxed",
-                    theme.muted
-                  )}
+                <Text
+                  color="inherit"
+                  customStyles={cn("line-clamp-4 leading-relaxed", theme.muted)}
                 >
                   {feature.text}
-                </p>
+                </Text>
 
                 {/* Footer — kun når det er en lenke eller et tall; pinnet til bunn */}
                 {feature.link && (
@@ -153,12 +158,21 @@ export function FeatureGrid({
                 )}
                 {!feature.link && feature.stat && (
                   <div className="mt-auto pt-8">
-                    <div className="font-heading font-bold text-4xl leading-none">
+                    <Text
+                      type="div"
+                      size="display-md"
+                      weight="bold"
+                      color="inherit"
+                      customStyles="font-heading leading-none"
+                    >
                       {feature.stat.value}
-                    </div>
-                    <div className={cn("mt-1 text-sm", theme.muted)}>
+                    </Text>
+                    <Text
+                      color="inherit"
+                      customStyles={cn("mt-1", theme.muted)}
+                    >
                       {feature.stat.label}
-                    </div>
+                    </Text>
                   </div>
                 )}
               </div>

@@ -26,6 +26,12 @@ const sizeVariants = {
   "body-detail-fixed": "text-body-detail-desktop md:text-body-detail-desktop",
   input: "text-body-small-mobile md:text-body-small-desktop",
   "input-fixed": "text-body-small-desktop md:text-body-small-desktop",
+  // Display-størrelser for marketing-blokkene (modige, store titler). Holdes
+  // her så de er ett sted — endrer du dem her, endres de i alle blokker.
+  "display-sm": "text-2xl md:text-3xl",
+  "display-md": "text-3xl md:text-4xl",
+  "display-lg": "text-4xl md:text-5xl",
+  "display-xl": "text-6xl md:text-7xl",
 } as const;
 
 const colorVariants = {

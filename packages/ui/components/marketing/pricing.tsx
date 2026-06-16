@@ -1,6 +1,7 @@
 import { cn } from "../../lib/utils";
 import { Button } from "../button";
 import { Container } from "../container";
+import { Eyebrow } from "../eyebrow";
 import { Reveal } from "../motion";
 import { Heading, Text } from "../typography";
 
@@ -36,11 +37,7 @@ export function Pricing({ eyebrow, title, intro, tiers }: PricingProps) {
       {(eyebrow || title || intro) && (
         <Reveal>
           <div className="mx-auto mb-14 max-w-2xl text-center">
-            {eyebrow && (
-              <span className="font-heading font-semibold text-primary text-sm uppercase tracking-[0.2em]">
-                {eyebrow}
-              </span>
-            )}
+            {eyebrow && <Eyebrow className="text-primary">{eyebrow}</Eyebrow>}
             {title && (
               <Heading
                 variant="h2"
@@ -78,9 +75,9 @@ export function Pricing({ eyebrow, title, intro, tiers }: PricingProps) {
                 )}
               >
                 <div className="flex items-center justify-between gap-3">
-                  <h3 className="font-heading font-bold text-xl">
+                  <Heading variant="h3" color="inherit" weight="bold">
                     {tier.name}
-                  </h3>
+                  </Heading>
                   {tier.badge && (
                     <span
                       className={cn(
@@ -105,9 +102,12 @@ export function Pricing({ eyebrow, title, intro, tiers }: PricingProps) {
                 </div>
 
                 {tier.description && (
-                  <p className={cn("mt-4 text-sm leading-relaxed", muted)}>
+                  <Text
+                    color="inherit"
+                    customStyles={cn("mt-4 leading-relaxed", muted)}
+                  >
                     {tier.description}
-                  </p>
+                  </Text>
                 )}
 
                 <ul className="mt-8 flex flex-col gap-3">
@@ -120,9 +120,12 @@ export function Pricing({ eyebrow, title, intro, tiers }: PricingProps) {
                           marker
                         )}
                       />
-                      <span className={cn("text-sm leading-relaxed", muted)}>
+                      <Text
+                        color="inherit"
+                        customStyles={cn("leading-relaxed", muted)}
+                      >
                         {feature}
-                      </span>
+                      </Text>
                     </li>
                   ))}
                 </ul>

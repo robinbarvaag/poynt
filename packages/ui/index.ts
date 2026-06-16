@@ -50,6 +50,8 @@ export {
 
 export { BlockSection } from "./components/block-section";
 
+export { Eyebrow } from "./components/eyebrow";
+
 export {
   Badge,
   badgeVariants,
