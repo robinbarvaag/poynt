@@ -179,7 +179,6 @@ export interface Page {
   layout?:
     | (
         | HeroBlock
-        | ContentBlock
         | FeatureGridBlock
         | StepsBlock
         | ContentMediaBlock
@@ -188,13 +187,14 @@ export interface Page {
         | FaqBlock
         | LogoCloudBlock
         | NewsletterBlock
+        | ContentBlock
         | MediaBlock
-        | FormBlock
+        | TestimonialsBlock
+        | CtaSectionBlock
         | ProductArchiveBlock
         | PodcastArchiveBlock
         | ServicesArchiveBlock
-        | TestimonialsBlock
-        | CtaSectionBlock
+        | FormBlock
         | SpotifyEmbedBlock
       )[]
     | null;
@@ -325,30 +325,6 @@ export interface Media {
       filename?: string | null;
     };
   };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ContentBlock".
- */
-export interface ContentBlock {
-  richText: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'content';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -521,6 +497,30 @@ export interface NewsletterBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ContentBlock".
+ */
+export interface ContentBlock {
+  richText: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'content';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "MediaBlock".
  */
 export interface MediaBlock {
@@ -529,6 +529,234 @@ export interface MediaBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'media';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TestimonialsBlock".
+ */
+export interface TestimonialsBlock {
+  title?: string | null;
+  layout?: ('cards' | 'slider' | 'quote') | null;
+  testimonials?:
+    | {
+        quote: string;
+        author: string;
+        role?: string | null;
+        company?: string | null;
+        /**
+         * Firmalogo som vises over sitatet
+         */
+        logo?: (number | null) | Media;
+        avatar?: (number | null) | Media;
+        rating?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'testimonials';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CtaSectionBlock".
+ */
+export interface CtaSectionBlock {
+  variant?: ('simple' | 'colored' | 'image') | null;
+  title: string;
+  description?: string | null;
+  backgroundImage?: (number | null) | Media;
+  primaryCta: {
+    text: string;
+    url: string;
+  };
+  secondaryCta?: {
+    text?: string | null;
+    url?: string | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'ctaSection';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProductArchiveBlock".
+ */
+export interface ProductArchiveBlock {
+  title?: string | null;
+  description?: string | null;
+  selectionMode?: ('auto' | 'manual') | null;
+  /**
+   * Velg hvilke produkter som skal vises
+   */
+  selectedProducts?: (number | Product)[] | null;
+  filterByType?: ('all' | 'course' | 'pdf' | 'bundle') | null;
+  /**
+   * La stå tom for å vise alle
+   */
+  limit?: number | null;
+  layout?: ('grid' | 'grid-4' | 'carousel') | null;
+  showMoreLink?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'productArchive';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products".
+ */
+export interface Product {
+  id: number;
+  name: string;
+  /**
+   * Genereres automatisk fra produktnavn
+   */
+  slug: string;
+  type: 'course' | 'pdf' | 'bundle' | 'membership';
+  /**
+   * Antal månader mellom kvar fakturering (t.d. 1, 3, 6, 12)
+   */
+  recurringInterval?: number | null;
+  membershipTier?: ('community' | 'community_ai') | null;
+  /**
+   * Vises i produktoversikter og som meta-beskrivelse
+   */
+  shortDescription?: string | null;
+  /**
+   * Full produktbeskrivelse som vises på produktsiden
+   */
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Hovedbilde som vises i oversikter og øverst på produktsiden
+   */
+  featuredImage?: (number | null) | Media;
+  /**
+   * Ekstra bilder som vises på produktsiden
+   */
+  gallery?:
+    | {
+        image: number | Media;
+        caption?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Pris i heile kroner
+   */
+  price: number;
+  /**
+   * Valgfri førpris for å vise rabatt
+   */
+  compareAtPrice?: number | null;
+  /**
+   * Deaktiver for å skjule produktet
+   */
+  active?: boolean | null;
+  /**
+   * Velg fordeler som gjelder for dette produktet (hentes fra Produktinnstillinger)
+   */
+  benefits?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  categories?: (number | Category)[] | null;
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+    /**
+     * Aktivér for å hindre Google fra å indeksere denne siden
+     */
+    noIndex?: boolean | null;
+    /**
+     * Overstyr automatisk canonical URL hvis innholdet finnes på en annen URL
+     */
+    canonicalUrl?: string | null;
+    /**
+     * Brukes av sosiale medier ved deling
+     */
+    ogType?: ('website' | 'article' | 'product') | null;
+  };
+  stripeID?: string | null;
+  skipSync?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories".
+ */
+export interface Category {
+  id: number;
+  name: string;
+  /**
+   * Genereres automatisk fra navn
+   */
+  slug: string;
+  /**
+   * Valgfri beskrivelse av kategorien
+   */
+  description?: string | null;
+  /**
+   * Hex-farge, t.d. #E1306C
+   */
+  color?: string | null;
+  /**
+   * Emoji eller tekst som visast saman med kategorien
+   */
+  icon?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PodcastArchiveBlock".
+ */
+export interface PodcastArchiveBlock {
+  title?: string | null;
+  description?: string | null;
+  /**
+   * Maks antall episoder som vises (0 = vis alle)
+   */
+  limit?: number | null;
+  showMoreLink?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'podcastArchive';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ServicesArchiveBlock".
+ */
+export interface ServicesArchiveBlock {
+  title?: string | null;
+  description?: string | null;
+  layout?: ('grid' | 'list') | null;
+  showMoreLink?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'servicesArchive';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -727,234 +955,6 @@ export interface Form {
     | null;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ProductArchiveBlock".
- */
-export interface ProductArchiveBlock {
-  title?: string | null;
-  description?: string | null;
-  selectionMode?: ('auto' | 'manual') | null;
-  /**
-   * Velg hvilke produkter som skal vises
-   */
-  selectedProducts?: (number | Product)[] | null;
-  filterByType?: ('all' | 'course' | 'pdf' | 'bundle') | null;
-  /**
-   * La stå tom for å vise alle
-   */
-  limit?: number | null;
-  layout?: ('grid' | 'grid-4' | 'carousel') | null;
-  showMoreLink?: boolean | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'productArchive';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "products".
- */
-export interface Product {
-  id: number;
-  name: string;
-  /**
-   * Genereres automatisk fra produktnavn
-   */
-  slug: string;
-  type: 'course' | 'pdf' | 'bundle' | 'membership';
-  /**
-   * Antal månader mellom kvar fakturering (t.d. 1, 3, 6, 12)
-   */
-  recurringInterval?: number | null;
-  membershipTier?: ('community' | 'community_ai') | null;
-  /**
-   * Vises i produktoversikter og som meta-beskrivelse
-   */
-  shortDescription?: string | null;
-  /**
-   * Full produktbeskrivelse som vises på produktsiden
-   */
-  description?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  /**
-   * Hovedbilde som vises i oversikter og øverst på produktsiden
-   */
-  featuredImage?: (number | null) | Media;
-  /**
-   * Ekstra bilder som vises på produktsiden
-   */
-  gallery?:
-    | {
-        image: number | Media;
-        caption?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Pris i heile kroner
-   */
-  price: number;
-  /**
-   * Valgfri førpris for å vise rabatt
-   */
-  compareAtPrice?: number | null;
-  /**
-   * Deaktiver for å skjule produktet
-   */
-  active?: boolean | null;
-  /**
-   * Velg fordeler som gjelder for dette produktet (hentes fra Produktinnstillinger)
-   */
-  benefits?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  categories?: (number | Category)[] | null;
-  meta?: {
-    title?: string | null;
-    description?: string | null;
-    /**
-     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
-     */
-    image?: (number | null) | Media;
-    /**
-     * Aktivér for å hindre Google fra å indeksere denne siden
-     */
-    noIndex?: boolean | null;
-    /**
-     * Overstyr automatisk canonical URL hvis innholdet finnes på en annen URL
-     */
-    canonicalUrl?: string | null;
-    /**
-     * Brukes av sosiale medier ved deling
-     */
-    ogType?: ('website' | 'article' | 'product') | null;
-  };
-  stripeID?: string | null;
-  skipSync?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories".
- */
-export interface Category {
-  id: number;
-  name: string;
-  /**
-   * Genereres automatisk fra navn
-   */
-  slug: string;
-  /**
-   * Valgfri beskrivelse av kategorien
-   */
-  description?: string | null;
-  /**
-   * Hex-farge, t.d. #E1306C
-   */
-  color?: string | null;
-  /**
-   * Emoji eller tekst som visast saman med kategorien
-   */
-  icon?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "PodcastArchiveBlock".
- */
-export interface PodcastArchiveBlock {
-  title?: string | null;
-  description?: string | null;
-  /**
-   * Maks antall episoder som vises (0 = vis alle)
-   */
-  limit?: number | null;
-  showMoreLink?: boolean | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'podcastArchive';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ServicesArchiveBlock".
- */
-export interface ServicesArchiveBlock {
-  title?: string | null;
-  description?: string | null;
-  layout?: ('grid' | 'list') | null;
-  showMoreLink?: boolean | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'servicesArchive';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TestimonialsBlock".
- */
-export interface TestimonialsBlock {
-  title?: string | null;
-  layout?: ('cards' | 'slider' | 'quote') | null;
-  testimonials?:
-    | {
-        quote: string;
-        author: string;
-        role?: string | null;
-        company?: string | null;
-        /**
-         * Firmalogo som vises over sitatet
-         */
-        logo?: (number | null) | Media;
-        avatar?: (number | null) | Media;
-        rating?: number | null;
-        id?: string | null;
-      }[]
-    | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'testimonials';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "CtaSectionBlock".
- */
-export interface CtaSectionBlock {
-  variant?: ('simple' | 'colored' | 'image') | null;
-  title: string;
-  description?: string | null;
-  backgroundImage?: (number | null) | Media;
-  primaryCta: {
-    text: string;
-    url: string;
-  };
-  secondaryCta?: {
-    text?: string | null;
-    url?: string | null;
-  };
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'ctaSection';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1428,7 +1428,6 @@ export interface PagesSelect<T extends boolean = true> {
     | T
     | {
         hero?: T | HeroBlockSelect<T>;
-        content?: T | ContentBlockSelect<T>;
         featureGrid?: T | FeatureGridBlockSelect<T>;
         steps?: T | StepsBlockSelect<T>;
         contentMedia?: T | ContentMediaBlockSelect<T>;
@@ -1437,13 +1436,14 @@ export interface PagesSelect<T extends boolean = true> {
         faq?: T | FaqBlockSelect<T>;
         logoCloud?: T | LogoCloudBlockSelect<T>;
         newsletter?: T | NewsletterBlockSelect<T>;
+        content?: T | ContentBlockSelect<T>;
         media?: T | MediaBlockSelect<T>;
-        formBlock?: T | FormBlockSelect<T>;
+        testimonials?: T | TestimonialsBlockSelect<T>;
+        ctaSection?: T | CtaSectionBlockSelect<T>;
         productArchive?: T | ProductArchiveBlockSelect<T>;
         podcastArchive?: T | PodcastArchiveBlockSelect<T>;
         servicesArchive?: T | ServicesArchiveBlockSelect<T>;
-        testimonials?: T | TestimonialsBlockSelect<T>;
-        ctaSection?: T | CtaSectionBlockSelect<T>;
+        formBlock?: T | FormBlockSelect<T>;
         'spotify-embed'?: T | SpotifyEmbedBlockSelect<T>;
       };
   publishedAt?: T;
@@ -1489,15 +1489,6 @@ export interface HeroBlockSelect<T extends boolean = true> {
         text?: T;
         url?: T;
       };
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ContentBlock_select".
- */
-export interface ContentBlockSelect<T extends boolean = true> {
-  richText?: T;
   id?: T;
   blockName?: T;
 }
@@ -1664,65 +1655,20 @@ export interface NewsletterBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ContentBlock_select".
+ */
+export interface ContentBlockSelect<T extends boolean = true> {
+  richText?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "MediaBlock_select".
  */
 export interface MediaBlockSelect<T extends boolean = true> {
   media?: T;
   caption?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "FormBlock_select".
- */
-export interface FormBlockSelect<T extends boolean = true> {
-  form?: T;
-  title?: T;
-  description?: T;
-  variant?: T;
-  alignment?: T;
-  maxWidth?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ProductArchiveBlock_select".
- */
-export interface ProductArchiveBlockSelect<T extends boolean = true> {
-  title?: T;
-  description?: T;
-  selectionMode?: T;
-  selectedProducts?: T;
-  filterByType?: T;
-  limit?: T;
-  layout?: T;
-  showMoreLink?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "PodcastArchiveBlock_select".
- */
-export interface PodcastArchiveBlockSelect<T extends boolean = true> {
-  title?: T;
-  description?: T;
-  limit?: T;
-  showMoreLink?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ServicesArchiveBlock_select".
- */
-export interface ServicesArchiveBlockSelect<T extends boolean = true> {
-  title?: T;
-  description?: T;
-  layout?: T;
-  showMoreLink?: T;
   id?: T;
   blockName?: T;
 }
@@ -1769,6 +1715,60 @@ export interface CtaSectionBlockSelect<T extends boolean = true> {
         text?: T;
         url?: T;
       };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProductArchiveBlock_select".
+ */
+export interface ProductArchiveBlockSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  selectionMode?: T;
+  selectedProducts?: T;
+  filterByType?: T;
+  limit?: T;
+  layout?: T;
+  showMoreLink?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PodcastArchiveBlock_select".
+ */
+export interface PodcastArchiveBlockSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  limit?: T;
+  showMoreLink?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ServicesArchiveBlock_select".
+ */
+export interface ServicesArchiveBlockSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  layout?: T;
+  showMoreLink?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FormBlock_select".
+ */
+export interface FormBlockSelect<T extends boolean = true> {
+  form?: T;
+  title?: T;
+  description?: T;
+  variant?: T;
+  alignment?: T;
+  maxWidth?: T;
   id?: T;
   blockName?: T;
 }
@@ -2249,14 +2249,22 @@ export interface Homepage {
   layout?:
     | (
         | HeroBlock
+        | FeatureGridBlock
+        | StepsBlock
+        | ContentMediaBlock
+        | StatsBandBlock
+        | PricingBlock
+        | FaqBlock
+        | LogoCloudBlock
+        | NewsletterBlock
         | ContentBlock
         | MediaBlock
-        | FormBlock
-        | PodcastArchiveBlock
-        | ProductArchiveBlock
-        | ServicesArchiveBlock
         | TestimonialsBlock
         | CtaSectionBlock
+        | ProductArchiveBlock
+        | PodcastArchiveBlock
+        | ServicesArchiveBlock
+        | FormBlock
         | SpotifyEmbedBlock
       )[]
     | null;
@@ -2600,14 +2608,22 @@ export interface HomepageSelect<T extends boolean = true> {
     | T
     | {
         hero?: T | HeroBlockSelect<T>;
+        featureGrid?: T | FeatureGridBlockSelect<T>;
+        steps?: T | StepsBlockSelect<T>;
+        contentMedia?: T | ContentMediaBlockSelect<T>;
+        statsBand?: T | StatsBandBlockSelect<T>;
+        pricing?: T | PricingBlockSelect<T>;
+        faq?: T | FaqBlockSelect<T>;
+        logoCloud?: T | LogoCloudBlockSelect<T>;
+        newsletter?: T | NewsletterBlockSelect<T>;
         content?: T | ContentBlockSelect<T>;
         media?: T | MediaBlockSelect<T>;
-        formBlock?: T | FormBlockSelect<T>;
-        podcastArchive?: T | PodcastArchiveBlockSelect<T>;
-        productArchive?: T | ProductArchiveBlockSelect<T>;
-        servicesArchive?: T | ServicesArchiveBlockSelect<T>;
         testimonials?: T | TestimonialsBlockSelect<T>;
         ctaSection?: T | CtaSectionBlockSelect<T>;
+        productArchive?: T | ProductArchiveBlockSelect<T>;
+        podcastArchive?: T | PodcastArchiveBlockSelect<T>;
+        servicesArchive?: T | ServicesArchiveBlockSelect<T>;
+        formBlock?: T | FormBlockSelect<T>;
         'spotify-embed'?: T | SpotifyEmbedBlockSelect<T>;
       };
   meta?:

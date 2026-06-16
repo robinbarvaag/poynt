@@ -1,14 +1,5 @@
 import type { GlobalConfig } from "payload";
-import { Content } from "../blocks/content";
-import { CtaSection } from "../blocks/cta-section";
-import { FormBlock } from "../blocks/form";
-import { Hero } from "../blocks/hero";
-import { MediaBlock } from "../blocks/media";
-import { PodcastArchive } from "../blocks/podcast-archive";
-import { ProductArchive } from "../blocks/product-archive";
-import { ServicesArchive } from "../blocks/services-archive";
-import { SpotifyEmbed } from "../blocks/spotify-embed";
-import { Testimonials } from "../blocks/testimonials";
+import { layoutBlocks } from "../blocks/layout-blocks";
 
 export const Homepage: GlobalConfig = {
   slug: "homepage",
@@ -31,18 +22,7 @@ export const Homepage: GlobalConfig = {
                 description:
                   "Bygg forsiden med blokker. Hero = stor intro, Innhold = tekst, Media = bilde/video, Skjema = kontaktskjema, Produkter/Tjenester/Podcast = automatiske lister, Anmeldelser = kundeomtaler, CTA = handlingsoppfordring.",
               },
-              blocks: [
-                Hero,
-                Content,
-                MediaBlock,
-                FormBlock,
-                PodcastArchive,
-                ProductArchive,
-                ServicesArchive,
-                Testimonials,
-                CtaSection,
-                SpotifyEmbed,
-              ],
+              blocks: layoutBlocks,
             },
           ],
         },

@@ -1,22 +1,5 @@
 import type { CollectionConfig } from "payload";
-import { Content } from "../blocks/content";
-import { ContentMedia } from "../blocks/content-media";
-import { CtaSection } from "../blocks/cta-section";
-import { Faq } from "../blocks/faq";
-import { FeatureGrid } from "../blocks/feature-grid";
-import { FormBlock } from "../blocks/form";
-import { Hero } from "../blocks/hero";
-import { LogoCloud } from "../blocks/logo-cloud";
-import { MediaBlock } from "../blocks/media";
-import { Newsletter } from "../blocks/newsletter";
-import { PodcastArchive } from "../blocks/podcast-archive";
-import { Pricing } from "../blocks/pricing";
-import { ProductArchive } from "../blocks/product-archive";
-import { ServicesArchive } from "../blocks/services-archive";
-import { SpotifyEmbed } from "../blocks/spotify-embed";
-import { StatsBand } from "../blocks/stats-band";
-import { Steps } from "../blocks/steps";
-import { Testimonials } from "../blocks/testimonials";
+import { layoutBlocks } from "../blocks/layout-blocks";
 import { generateSlug } from "../lib/generate-slug";
 
 export const Pages: CollectionConfig = {
@@ -94,26 +77,7 @@ export const Pages: CollectionConfig = {
         description:
           "Bygg siden med blokker. Hero = stor intro-seksjon, Innholdsblokk = rik tekst, Mediablokk = bilde/video, Skjema = kontaktskjema, Produkter/Tjenester/Podcast = lister fra databasen, Anmeldelser = kundeomtaler, CTA = handlingsoppfordring, Spotify = podcast-spiller.",
       },
-      blocks: [
-        Hero,
-        Content,
-        FeatureGrid,
-        Steps,
-        ContentMedia,
-        StatsBand,
-        Pricing,
-        Faq,
-        LogoCloud,
-        Newsletter,
-        MediaBlock,
-        FormBlock,
-        ProductArchive,
-        PodcastArchive,
-        ServicesArchive,
-        Testimonials,
-        CtaSection,
-        SpotifyEmbed,
-      ],
+      blocks: layoutBlocks,
     },
     // SEO-felt kommer automatisk fra seoPlugin
     {
