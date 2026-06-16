@@ -22,6 +22,10 @@ interface RenderBlocksProps {
 // Full-bleed / self-styled blocks render as-is, never wrapped in BlockSection.
 const SPECIAL_BLOCK_TYPES = new Set(["hero", "ctaSection", "media"]);
 
+// Blocks that manage their own scroll-reveal (Reveal/Stagger internally), so
+// BlockSection should NOT add its blanket reveal on top — avoids double motion.
+const SELF_REVEAL_BLOCK_TYPES = new Set(["featureGrid"]);
+
 function renderBlock(block: Block): ReactNode {
   switch (block.blockType) {
     case "hero":
@@ -119,7 +123,12 @@ export function RenderBlocks({ blocks }: RenderBlocksProps) {
         const background = standardIndex % 2 === 1 ? "muted" : "default";
 
         return (
-          <BlockSection key={key} background={background} containerSize={false}>
+          <BlockSection
+            key={key}
+            background={background}
+            containerSize={false}
+            reveal={!SELF_REVEAL_BLOCK_TYPES.has(block.blockType)}
+          >
             {element}
           </BlockSection>
         );
