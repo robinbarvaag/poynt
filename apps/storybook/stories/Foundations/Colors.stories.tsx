@@ -2,7 +2,8 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 
 const meta: Meta = {
   title: "Foundations/Farger",
-  parameters: { layout: "fullscreen" },
+  tags: ["autodocs"],
+  parameters: { layout: "padded" },
 };
 export default meta;
 

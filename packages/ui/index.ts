@@ -24,6 +24,7 @@ export {
   sizeVariants,
   colorVariants,
   weightVariants,
+  alignVariants,
 } from "./components/typography";
 
 export {

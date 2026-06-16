@@ -1,29 +1,23 @@
 import type { Decorator, Preview } from "@storybook/react-vite";
+import { useEffect } from "react";
 import "./styles.css";
 
+// Tema settes som klasse på <html> (ikke en wrapper-div). En wrapper med fast
+// høyde/padding kolliderer med per-story `layout`-parameteren (gjorde at
+// `layout: centered`-stories krympet til en smal stripe). Bakgrunn/farge kommer
+// fra body i styles.css og følger .dark-klassen.
 const withTheme: Decorator = (Story, context) => {
   const theme = (context.globals.theme as string) ?? "light";
-  return (
-    <div
-      className={theme === "dark" ? "dark" : ""}
-      style={{
-        background: "var(--background)",
-        color: "var(--foreground)",
-        fontFamily: "var(--font-sans)",
-        padding: "2.5rem",
-        minHeight: "100vh",
-      }}
-    >
-      <Story />
-    </div>
-  );
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", theme === "dark");
+  }, [theme]);
+  return <Story />;
 };
 
 const preview: Preview = {
   globalTypes: {
     theme: {
       description: "Lyst eller mørkt tema",
-      defaultValue: "light",
       toolbar: {
         title: "Tema",
         icon: "paintbrush",
@@ -35,9 +29,9 @@ const preview: Preview = {
       },
     },
   },
+  initialGlobals: { theme: "light" },
   decorators: [withTheme],
   parameters: {
-    layout: "fullscreen",
     controls: {
       matchers: { color: /(background|color)$/i, date: /Date$/i },
     },

@@ -11,7 +11,8 @@ import type { ReactNode } from "react";
 
 const meta: Meta = {
   title: "Foundations/Bevegelse",
-  parameters: { layout: "fullscreen" },
+  tags: ["autodocs"],
+  parameters: { layout: "padded" },
 };
 export default meta;
 

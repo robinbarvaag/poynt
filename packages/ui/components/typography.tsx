@@ -47,6 +47,12 @@ const weightVariants = {
   extrabold: "font-extrabold",
 } as const;
 
+const alignVariants = {
+  left: "text-left",
+  center: "text-center",
+  right: "text-right",
+} as const;
+
 const clampLines = {
   none: "",
   sm: "overflow-hidden overflow-ellipsis line-clamp-3",
@@ -65,6 +71,7 @@ const headingVariants = cva("scroll-m-20 text-balance font-heading", {
     size: sizeVariants,
     color: colorVariants,
     weight: weightVariants,
+    align: alignVariants,
   },
   defaultVariants: {
     variant: "h1",
@@ -90,6 +97,7 @@ function Heading({
   size,
   color = "primary",
   weight,
+  align,
   asChild = false,
   customStyles,
   ...props
@@ -100,7 +108,7 @@ function Heading({
     <Comp
       data-slot="heading"
       className={cn(
-        headingVariants({ variant, size, color, weight }),
+        headingVariants({ variant, size, color, weight, align }),
         customStyles
       )}
       {...props}
@@ -121,6 +129,7 @@ const textVariants = cva("", {
     size: sizeVariants,
     color: colorVariants,
     weight: weightVariants,
+    align: alignVariants,
     clamp: clampLines,
     bold: {
       true: "font-bold",
@@ -154,6 +163,7 @@ function Text({
   size,
   color = "foreground",
   weight,
+  align,
   asChild = false,
   bold,
   customStyles,
@@ -167,7 +177,7 @@ function Text({
     <Comp
       data-slot="text"
       className={cn(
-        textVariants({ variant, size, color, clamp, weight, bold }),
+        textVariants({ variant, size, color, clamp, weight, bold, align }),
         customStyles
       )}
       {...props}
@@ -281,4 +291,5 @@ export {
   sizeVariants,
   colorVariants,
   weightVariants,
+  alignVariants,
 };
