@@ -9,8 +9,9 @@ const meta: Meta<typeof Steps> = {
     docs: {
       description: {
         component:
-          "«Slik funker det» — den lille reisen nedover siden. Nummererte steg " +
-          "bundet sammen av én loddrett linje. Innholds-only; staggrer inn.",
+          "«Slik funker det» — reisen nedover siden som en redaksjonell zig-zag. " +
+          "Gigantiske tall som anker (ingen ikoner), vekslende side for bevegelse " +
+          "og en marker-strek som aksent. Hvert steg glir inn ved scroll.",
       },
     },
   },

@@ -1,6 +1,6 @@
 import { cn } from "../../lib/utils";
 import { Container } from "../container";
-import { Reveal, Stagger, StaggerItem } from "../motion";
+import { Reveal } from "../motion";
 import { Heading, Text } from "../typography";
 
 export interface Step {
@@ -15,24 +15,29 @@ export interface StepsProps {
   steps: Step[];
 }
 
+// Tall + marker-strek i høy-kontrast farger (lesbare på lys flate).
+const accents = [
+  { text: "text-primary", bar: "bg-primary" },
+  { text: "text-salmon", bar: "bg-salmon" },
+  { text: "text-foreground", bar: "bg-foreground" },
+] as const;
+
 /**
- * «Slik funker det» — den lille reisen nedover siden. Nummererte steg med en
- * sammenhengende loddrett linje. Innholds-only; staggrer inn.
+ * «Slik funker det» — reisen nedover siden, som en redaksjonell zig-zag.
+ * Gigantiske tall som grafisk anker (ingen ikoner), vekslende side for
+ * bevegelse, og en marker-strek som aksent. Hvert steg glir inn ved scroll.
+ * Innholds-only.
  */
 export function Steps({ eyebrow, title, intro, steps }: StepsProps) {
   return (
-    <Container size="sm" padding="none">
+    <Container padding="none">
       {(eyebrow || title || intro) && (
         <Reveal>
-          <div className="mx-auto mb-12 max-w-2xl text-center">
+          <div className="mb-16 max-w-2xl">
             {eyebrow && (
-              <Text
-                variant="small"
-                color="primary"
-                customStyles="uppercase tracking-[0.18em]"
-              >
+              <span className="font-heading font-semibold text-primary text-sm uppercase tracking-[0.2em]">
                 {eyebrow}
-              </Text>
+              </span>
             )}
             {title && (
               <Heading variant="h2" color="foreground" customStyles="mt-3">
@@ -48,36 +53,62 @@ export function Steps({ eyebrow, title, intro, steps }: StepsProps) {
         </Reveal>
       )}
 
-      <Stagger className="flex flex-col">
+      <div className="flex flex-col gap-16 md:gap-24">
         {steps.map((step, index) => {
-          const isLast = index === steps.length - 1;
+          const accent = accents[index % accents.length];
+          const flip = index % 2 === 1;
           return (
-            <StaggerItem key={step.title}>
-              <div className="flex gap-6">
-                <div className="relative flex flex-col items-center">
-                  <span className="z-10 inline-flex size-12 items-center justify-center rounded-full bg-primary font-heading font-bold text-lg text-primary-foreground">
-                    {index + 1}
-                  </span>
-                  {!isLast && (
-                    <span
-                      aria-hidden="true"
-                      className="absolute top-12 h-full w-px bg-border"
-                    />
+            <Reveal key={step.title}>
+              <div className="grid items-center gap-6 md:grid-cols-12 md:gap-10">
+                {/* Gigantisk tall */}
+                <div
+                  className={cn(
+                    "md:row-start-1",
+                    flip
+                      ? "md:col-start-9 md:col-span-4 md:text-right"
+                      : "md:col-start-1 md:col-span-4"
                   )}
+                >
+                  <span
+                    className={cn(
+                      "font-heading font-bold text-7xl leading-none tracking-tighter md:text-[9rem]",
+                      accent.text
+                    )}
+                  >
+                    0{index + 1}
+                  </span>
                 </div>
-                <div className={cn("pt-1.5", isLast ? "pb-0" : "pb-12")}>
-                  <Heading variant="h4" color="foreground">
+
+                {/* Innhold */}
+                <div
+                  className={cn(
+                    "md:row-start-1",
+                    flip
+                      ? "md:col-start-1 md:col-span-7"
+                      : "md:col-start-6 md:col-span-7"
+                  )}
+                >
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={cn("h-1 w-10 rounded-full", accent.bar)}
+                      aria-hidden="true"
+                    />
+                    <span className="font-heading font-semibold text-muted-foreground text-sm uppercase tracking-[0.2em]">
+                      Steg 0{index + 1}
+                    </span>
+                  </div>
+                  <h3 className="mt-4 font-heading font-bold text-3xl text-foreground leading-tight md:text-4xl">
                     {step.title}
-                  </Heading>
-                  <Text customStyles="mt-2 text-muted-foreground">
+                  </h3>
+                  <p className="mt-3 max-w-md text-muted-foreground leading-relaxed">
                     {step.text}
-                  </Text>
+                  </p>
                 </div>
               </div>
-            </StaggerItem>
+            </Reveal>
           );
         })}
-      </Stagger>
+      </div>
     </Container>
   );
 }
