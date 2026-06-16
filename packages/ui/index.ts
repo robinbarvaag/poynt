@@ -10,6 +10,8 @@ export {
   type ButtonProps,
 } from "./components/button";
 
+export { ActionButton } from "./components/action-button";
+
 export {
   Heading,
   headingVariants,
