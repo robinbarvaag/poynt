@@ -112,11 +112,17 @@ export default async function PostPage({ params }: PostPageProps) {
             </div>
           )}
 
-          <Heading size="h1">{post.title}</Heading>
+          <Heading size="h1" color="foreground" weight="bold">
+            {post.title}
+          </Heading>
 
-          {post.excerpt && <Text variant="lead">{post.excerpt}</Text>}
+          {post.excerpt && (
+            <Text variant="lead" customStyles="mt-4">
+              {post.excerpt}
+            </Text>
+          )}
 
-          <div className="flex items-center gap-4">
+          <div className="mt-6 flex items-center gap-4">
             {post.author && typeof post.author === "object" && (
               <Text variant="muted">Av {post.author.email}</Text>
             )}
@@ -127,7 +133,7 @@ export default async function PostPage({ params }: PostPageProps) {
         {post.featuredImage &&
           typeof post.featuredImage === "object" &&
           post.featuredImage.url && (
-            <div className="relative aspect-video w-full rounded-lg overflow-hidden mb-10 bg-muted">
+            <div className="relative mb-10 aspect-video w-full overflow-hidden rounded-3xl bg-muted">
               <Image
                 src={post.featuredImage.url}
                 alt={post.featuredImage.alt || post.title}
@@ -144,8 +150,10 @@ export default async function PostPage({ params }: PostPageProps) {
 
         {post.relatedPosts && post.relatedPosts.length > 0 && (
           <aside className="mt-16 pt-10 border-t border-border">
-            <Heading size="h2">Relaterte innlegg</Heading>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Heading size="h2" color="foreground" customStyles="mb-8">
+              Relaterte innlegg
+            </Heading>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               {post.relatedPosts.map((relatedPost) => {
                 if (typeof relatedPost !== "object") return null;
                 return (

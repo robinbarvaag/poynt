@@ -1,17 +1,22 @@
-import { Container, cn } from "@poynt/ui";
+import { Container, Eyebrow, Heading, Text, cn } from "@poynt/ui";
+import type { ReactNode } from "react";
 
 interface PageHeroProps {
+  eyebrow?: string;
   title: string;
   description?: string;
-  image?: {
-    url: string;
-    alt?: string;
-  } | null;
-  children?: React.ReactNode;
+  /** Akseptert for bakoverkompatibilitet (vises ikke i dette hodet). */
+  image?: { url: string; alt?: string } | null;
+  children?: ReactNode;
   size?: "default" | "large";
 }
 
+/**
+ * Felles sidehode for liste-/oversiktssider (blogg, produkter, podkast …).
+ * Bruker design-systemets primitiver, så det matcher blokk-språket.
+ */
 export function PageHero({
+  eyebrow,
   title,
   description,
   children,
@@ -20,19 +25,26 @@ export function PageHero({
   return (
     <section
       className={cn(
-        "border-b border-border/50",
-        size === "large" ? "py-8 md:py-12" : "py-6 md:py-8"
+        "border-border/60 border-b",
+        size === "large" ? "py-14 md:py-20" : "py-10 md:py-14"
       )}
     >
       <Container>
-        <div className="max-w-2xl">
-          <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">
+        <div className="max-w-3xl">
+          {eyebrow && <Eyebrow className="text-primary">{eyebrow}</Eyebrow>}
+          <Heading
+            variant={size === "large" ? "h1" : "h2"}
+            color="foreground"
+            customStyles={eyebrow ? "mt-3" : undefined}
+          >
             {title}
-          </h1>
+          </Heading>
           {description && (
-            <p className="mt-2 text-muted-foreground">{description}</p>
+            <Text variant="lead" customStyles="mt-4 max-w-2xl">
+              {description}
+            </Text>
           )}
-          {children && <div className="mt-6">{children}</div>}
+          {children && <div className="mt-8">{children}</div>}
         </div>
       </Container>
     </section>

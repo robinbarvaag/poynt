@@ -7,6 +7,7 @@ import {
   AvatarFallback,
   AvatarImage,
   Container,
+  Heading,
   Text,
 } from "@poynt/ui";
 import type { Metadata } from "next";
@@ -140,7 +141,7 @@ export default async function BlogPage({ searchParams }: PageProps) {
               >
                 {/* Featured Image */}
                 <div
-                  className={`relative bg-muted rounded-lg overflow-hidden mb-4 ${index === 0 && !kategori ? "aspect-[2/1]" : "aspect-video"}`}
+                  className={`relative mb-4 overflow-hidden rounded-2xl bg-muted ${index === 0 && !kategori ? "aspect-2/1" : "aspect-video"}`}
                 >
                   {post.featuredImage &&
                   typeof post.featuredImage === "object" &&
@@ -165,7 +166,7 @@ export default async function BlogPage({ searchParams }: PageProps) {
                 <div className="space-y-2">
                   {/* Categories */}
                   {post.categories && post.categories.length > 0 && (
-                    <div className="flex gap-2">
+                    <div className="flex gap-3">
                       {post.categories.slice(0, 2).map((cat) => {
                         const categoryName =
                           typeof cat === "object" ? cat.name : null;
@@ -173,29 +174,34 @@ export default async function BlogPage({ searchParams }: PageProps) {
                         const categoryKey =
                           typeof cat === "object" ? cat.id : cat;
                         return (
-                          <span
+                          <Text
                             key={categoryKey}
-                            className="text-xs text-muted-foreground uppercase tracking-wide"
+                            type="span"
+                            customStyles="font-heading font-semibold text-primary text-xs uppercase tracking-[0.18em]"
                           >
                             {categoryName}
-                          </span>
+                          </Text>
                         );
                       })}
                     </div>
                   )}
 
                   {/* Title */}
-                  <h2
-                    className={`font-medium leading-snug group-hover:text-primary transition-colors ${index === 0 && !kategori ? "text-xl" : ""}`}
+                  <Heading
+                    variant="h3"
+                    size={index === 0 && !kategori ? "display-sm" : undefined}
+                    color="foreground"
+                    weight="bold"
+                    customStyles="leading-snug transition-colors group-hover:text-primary"
                   >
                     {post.title}
-                  </h2>
+                  </Heading>
 
                   {/* Excerpt */}
                   {post.excerpt && (
-                    <p className="text-sm text-muted-foreground line-clamp-2">
+                    <Text variant="muted" customStyles="line-clamp-2">
                       {post.excerpt}
-                    </p>
+                    </Text>
                   )}
 
                   {/* Author and Date */}
@@ -217,15 +223,15 @@ export default async function BlogPage({ searchParams }: PageProps) {
                               "?"}
                           </AvatarFallback>
                         </Avatar>
-                        <span className="text-sm text-muted-foreground">
+                        <Text type="span" variant="muted">
                           {post.author.firstName || post.author.email}
-                        </span>
+                        </Text>
                         <span className="text-muted-foreground/50">·</span>
                       </>
                     )}
-                    <span className="text-sm text-muted-foreground">
+                    <Text type="span" variant="muted">
                       {formatDate(post.publishedAt)}
-                    </span>
+                    </Text>
                   </div>
                 </div>
               </Link>
