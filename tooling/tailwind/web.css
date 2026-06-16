@@ -286,3 +286,19 @@
     transform: translate(10px, 5px) scale(1.02);
   }
 }
+
+/* Squircle-form (Apple-aktige «continuous corners») på alt med avrunding.
+   Progressive enhancement: corner-shape ignoreres i nettlesere uten støtte
+   (Safari/Firefox per nå) og faller tilbake til vanlig avrunding.
+   rounded-full (sirkler, pills, avatarer) holdes ekte runde. */
+*,
+::before,
+::after {
+  /* biome-ignore lint/correctness/noUnknownProperty: corner-shape (CSS Corners L4) er nyere enn Biome sin liste */
+  corner-shape: squircle;
+}
+
+.rounded-full {
+  /* biome-ignore lint/correctness/noUnknownProperty: corner-shape (CSS Corners L4) er nyere enn Biome sin liste */
+  corner-shape: round;
+}
