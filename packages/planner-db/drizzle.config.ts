@@ -5,12 +5,17 @@ import { defineConfig } from "drizzle-kit";
 dotenv.config({ path: "../../.env" });
 dotenv.config();
 
+const databaseUri = process.env.DATABASE_URI;
+if (!databaseUri) {
+  throw new Error("DATABASE_URI is not set");
+}
+
 export default defineConfig({
   schema: "./schema/index.ts",
   out: "./drizzle",
   dialect: "postgresql",
   dbCredentials: {
-    url: process.env.DATABASE_URI!,
+    url: databaseUri,
   },
   tablesFilter: ["planner_*"],
   verbose: true,

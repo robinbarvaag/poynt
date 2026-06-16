@@ -5,6 +5,9 @@ import config from "@/payload.config";
 import { Container, Text } from "@poynt/ui";
 import type { Metadata } from "next";
 import { getPayload } from "payload";
+import type { ComponentProps } from "react";
+
+type ProductCardData = ComponentProps<typeof ProductCard>["product"];
 
 const productTypes = [
   { value: "course", label: "Kurs" },
@@ -96,7 +99,10 @@ export default async function ProductsPage({ searchParams }: PageProps) {
         {products.docs.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8">
             {products.docs.map((product) => (
-              <ProductCard key={product.id} product={product as any} />
+              <ProductCard
+                key={product.id}
+                product={product as unknown as ProductCardData}
+              />
             ))}
           </div>
         ) : (

@@ -3,6 +3,7 @@
 import { PlanForm } from "@/components/marketing-plan/plan-form";
 import { PlanResult } from "@/components/marketing-plan/plan-result";
 import { trpc } from "@/lib/planner/trpc";
+import type { PlannerMarketingPlanProgress } from "@poynt/planner-db";
 import type {
   MarketingPlan,
   MarketingPlanRequest,
@@ -25,7 +26,7 @@ interface MarketingPlanClientProps {
   initialIndustry: string | null;
   initialCompanySize: CompanySize | null;
   initialTargetAudience: string | null;
-  initialProgress: any[];
+  initialProgress: PlannerMarketingPlanProgress[];
 }
 
 export function MarketingPlanClient({

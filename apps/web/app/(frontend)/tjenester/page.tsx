@@ -4,6 +4,9 @@ import config from "@/payload.config";
 import { Container, Text } from "@poynt/ui";
 import type { Metadata } from "next";
 import { getPayload } from "payload";
+import type { ComponentProps } from "react";
+
+type ServiceCardData = ComponentProps<typeof ServiceCard>["service"];
 
 export async function generateMetadata(): Promise<Metadata> {
   const payload = await getPayload({ config });
@@ -83,7 +86,10 @@ export default async function ServicesPage() {
         {services.docs.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {services.docs.map((service) => (
-              <ServiceCard key={service.id} service={service as any} />
+              <ServiceCard
+                key={service.id}
+                service={service as unknown as ServiceCardData}
+              />
             ))}
           </div>
         ) : (

@@ -1,5 +1,6 @@
 import { TierGate } from "@/components/planner/tier-gate";
 import { createServerCaller } from "@/lib/planner/trpc-server";
+import type { PlannerMarketingPlanProgress } from "@poynt/planner-db";
 import type { MarketingPlan } from "@poynt/planner-validators";
 import { MarketingPlanClient } from "./marketing-plan-client";
 
@@ -46,7 +47,7 @@ export default async function MarketingPlanPage() {
   }
 
   // Fetch progress if we have a saved plan
-  let initialProgress: any[] = [];
+  let initialProgress: PlannerMarketingPlanProgress[] = [];
   if (initialSavedPlan) {
     try {
       initialProgress = await trpc.marketingPlanProgress.getProgress({

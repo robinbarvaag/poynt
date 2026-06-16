@@ -16,7 +16,7 @@ import {
   weeklyTimeTypes,
 } from "@poynt/planner-validators";
 import { Button } from "@poynt/ui";
-import { Card, CardContent } from "@poynt/ui";
+import { CardContent } from "@poynt/ui";
 import { Textarea } from "@poynt/ui";
 import {
   Select,
@@ -365,11 +365,12 @@ export function GuideQuiz({
                         const isChecked =
                           field.value?.includes(channel) || false;
                         return (
-                          <Card
+                          <button
                             key={channel}
-                            tabIndex={0}
-                            role="button"
+                            type="button"
+                            aria-pressed={isChecked}
                             className={cn(
+                              "ring-foreground/10 bg-card text-card-foreground w-full rounded-xl py-4 text-left text-sm ring-1",
                               "cursor-pointer transition-all duration-200 hover:scale-[1.02]",
                               isChecked
                                 ? "ring-2 ring-primary bg-primary/5 border-primary"
@@ -428,6 +429,8 @@ export function GuideQuiz({
                                     viewBox="0 0 24 24"
                                     stroke="currentColor"
                                     strokeWidth={3}
+                                    aria-hidden="true"
+                                    focusable={false}
                                   >
                                     <path
                                       strokeLinecap="round"
@@ -446,7 +449,7 @@ export function GuideQuiz({
                                 {previousChannelLabels[channel]}
                               </span>
                             </CardContent>
-                          </Card>
+                          </button>
                         );
                       })}
                     </div>

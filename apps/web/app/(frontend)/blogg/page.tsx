@@ -166,13 +166,15 @@ export default async function BlogPage({ searchParams }: PageProps) {
                   {/* Categories */}
                   {post.categories && post.categories.length > 0 && (
                     <div className="flex gap-2">
-                      {post.categories.slice(0, 2).map((cat, catIndex) => {
+                      {post.categories.slice(0, 2).map((cat) => {
                         const categoryName =
                           typeof cat === "object" ? cat.name : null;
                         if (!categoryName) return null;
+                        const categoryKey =
+                          typeof cat === "object" ? cat.id : cat;
                         return (
                           <span
-                            key={catIndex}
+                            key={categoryKey}
                             className="text-xs text-muted-foreground uppercase tracking-wide"
                           >
                             {categoryName}

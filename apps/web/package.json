@@ -7,7 +7,6 @@
     "dev": "next dev",
     "build": "payload generate:importmap && next build",
     "start": "next start",
-    "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "generate:types": "payload generate:types",
     "migrate:create": "bun run payload migrate:create",
@@ -58,7 +57,6 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@poynt/eslint-config": "workspace:*",
     "@poynt/typescript-config": "workspace:*",
     "@tailwindcss/postcss": "4.0.10",
     "@types/node": "^20.10.6",

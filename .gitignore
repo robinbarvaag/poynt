@@ -113,3 +113,5 @@ screenshots
 *.tsbuildinfo
 .claude/settings.local.json
 on-poynt-screenshots/
+# Storybook
+storybook-static

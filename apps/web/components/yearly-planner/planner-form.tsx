@@ -311,6 +311,7 @@ export function PlannerForm({
                       return (
                         <label
                           key={type}
+                          htmlFor={`channel-${type}`}
                           className={cn(
                             "flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-all",
                             isChecked
@@ -319,6 +320,7 @@ export function PlannerForm({
                           )}
                         >
                           <Checkbox
+                            id={`channel-${type}`}
                             checked={isChecked}
                             onCheckedChange={(checked) => {
                               const current = field.value || [];
@@ -429,10 +431,12 @@ export function PlannerForm({
                         const Icon = toneIcons[type];
                         const isSelected = field.value === type;
                         return (
-                          <label
+                          <button
                             key={type}
+                            type="button"
+                            aria-pressed={isSelected}
                             className={cn(
-                              "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all",
+                              "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all text-left",
                               isSelected
                                 ? "border-primary bg-primary/5"
                                 : "border-border hover:border-primary/50"
@@ -457,7 +461,7 @@ export function PlannerForm({
                             >
                               {contentToneLabels[type]}
                             </span>
-                          </label>
+                          </button>
                         );
                       })}
                     </div>

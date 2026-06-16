@@ -6,6 +6,7 @@ import { Quote, Star } from "lucide-react";
 import Image from "next/image";
 
 interface Testimonial {
+  id?: string;
   quote: string;
   author: string;
   role?: string;
@@ -139,8 +140,11 @@ export function TestimonialsBlock({
           </Heading>
         )}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {testimonials?.map((testimonial, index) => (
-            <TestimonialCard key={index} testimonial={testimonial} />
+          {testimonials?.map((testimonial) => (
+            <TestimonialCard
+              key={testimonial.id ?? testimonial.author}
+              testimonial={testimonial}
+            />
           ))}
         </div>
       </div>

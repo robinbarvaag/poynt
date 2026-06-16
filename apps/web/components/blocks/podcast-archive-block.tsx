@@ -3,6 +3,7 @@ import { Heading } from "@poynt/ui";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { getPayload } from "payload";
+import type { ComponentProps } from "react";
 import { PodcastCard } from "../podcast-card";
 
 interface PodcastArchiveBlockProps {
@@ -50,7 +51,14 @@ export async function PodcastArchiveBlock({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {podcasts.docs.map((podcast) => (
-            <PodcastCard key={podcast.id} podcast={podcast as any} />
+            <PodcastCard
+              key={podcast.id}
+              podcast={
+                podcast as unknown as ComponentProps<
+                  typeof PodcastCard
+                >["podcast"]
+              }
+            />
           ))}
         </div>
 

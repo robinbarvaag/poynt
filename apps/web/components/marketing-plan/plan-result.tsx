@@ -12,13 +12,21 @@ import { Icon } from "@poynt/ui/icons";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
+interface PlanProgressItem {
+  type?: string;
+  // Lagres som tekst i databasen (PlannerMarketingPlanProgress); leses kun i
+  // template-literals, så vi godtar både streng, tall og null.
+  monthIndex?: string | number | null;
+  taskIndex?: string | number | null;
+}
+
 interface PlanResultProps {
   plan?: MarketingPlan;
   onReset?: () => void;
   mode?: "intro" | "result";
   onStartForm?: () => void;
   toolResultId?: string;
-  initialProgress?: any[];
+  initialProgress?: PlanProgressItem[];
 }
 
 const containerVariants = {
@@ -390,9 +398,9 @@ export function PlanResult({
                       </CardHeader>
                       <CardContent>
                         <ul className="space-y-2">
-                          {channel.activities.map((activity, i) => (
+                          {channel.activities.map((activity) => (
                             <li
-                              key={i}
+                              key={activity}
                               className="flex items-start gap-2 text-sm"
                             >
                               <Icon
@@ -440,9 +448,9 @@ export function PlanResult({
                               </p>
                               <ul className="space-y-1">
                                 {channel.potentialChallenges.map(
-                                  (challenge, idx) => (
+                                  (challenge) => (
                                     <li
-                                      key={idx}
+                                      key={challenge}
                                       className="text-xs text-muted-foreground flex items-start gap-1.5"
                                     >
                                       <span className="text-amber-600 dark:text-amber-400 mt-0.5">
@@ -464,9 +472,9 @@ export function PlanResult({
                                 Målepunkter
                               </p>
                               <ul className="space-y-1">
-                                {channel.successMetrics.map((metric, idx) => (
+                                {channel.successMetrics.map((metric) => (
                                   <li
-                                    key={idx}
+                                    key={metric}
                                     className="text-xs text-muted-foreground flex items-start gap-1.5"
                                   >
                                     <span className="text-green-600 dark:text-green-400 mt-0.5">
@@ -569,7 +577,10 @@ export function PlanResult({
                               i
                             );
                             return (
-                              <li key={i} className="flex items-start gap-3">
+                              <li
+                                key={`${month.month}-${task}`}
+                                className="flex items-start gap-3"
+                              >
                                 <Checkbox
                                   id={`task-${month.month}-${i}`}
                                   checked={taskCompleted}
@@ -611,7 +622,7 @@ export function PlanResult({
                 <div className="space-y-3">
                   {plan.weeklyRoutine.map((task, index) => (
                     <motion.div
-                      key={index}
+                      key={`${task.day}-${task.task}`}
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.05 }}
@@ -652,7 +663,7 @@ export function PlanResult({
                       const winCompleted = isQuickWinCompleted(index);
                       return (
                         <motion.li
-                          key={index}
+                          key={win}
                           initial={{ opacity: 0, x: -10 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: index * 0.05 }}
@@ -697,7 +708,7 @@ export function PlanResult({
                   <ul className="space-y-3">
                     {plan.tips.map((tip, index) => (
                       <motion.li
-                        key={index}
+                        key={tip}
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.05 }}
@@ -735,7 +746,7 @@ export function PlanResult({
             <div className="grid sm:grid-cols-2 gap-4">
               {plan.quickWins.slice(0, 4).map((win, idx) => (
                 <div
-                  key={idx}
+                  key={win}
                   className="flex gap-3 p-4 rounded-lg bg-white/60 dark:bg-[oklch(0.25_0.05_175)]/40 backdrop-blur-sm border border-[oklch(0.75_0.05_175)]/30 dark:border-[oklch(0.45_0.08_175)]/30"
                 >
                   <div className="flex items-center justify-center size-8 rounded-lg bg-[oklch(0.75_0.07_175)] dark:bg-[oklch(0.45_0.10_175)] text-[oklch(0.25_0.05_175)] dark:text-[oklch(0.95_0.02_175)] font-bold text-sm shrink-0">

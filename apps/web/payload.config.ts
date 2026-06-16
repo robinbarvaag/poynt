@@ -85,9 +85,7 @@ export default buildConfig({
   admin: {
     user: "users",
     components: {
-      afterNavLinks: [
-        "/admin/components/on-poynt-nav-group#OnPoyntNavGroup",
-      ],
+      afterNavLinks: ["/admin/components/on-poynt-nav-group#OnPoyntNavGroup"],
       views: {
         members: {
           Component: "/admin/views/members/list#MembersListView",

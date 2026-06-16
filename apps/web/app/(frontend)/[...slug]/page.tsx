@@ -81,10 +81,12 @@ export async function generateMetadata({
   const pageUrl = page.slug === "forside" ? baseUrl : `${baseUrl}/${page.slug}`;
 
   // Bruk SEO-feltene fra pluginet (legges til som 'meta' group)
-  const seo = (page as any).meta || {};
+  const seo = page.meta || {};
   const title = seo.title || page.title;
   const description = seo.description || "";
   const image = seo.image;
+  const rawImageUrl = image && typeof image === "object" ? image.url : image;
+  const ogImageUrl = typeof rawImageUrl === "string" ? rawImageUrl : undefined;
 
   return {
     title,
@@ -97,10 +99,10 @@ export async function generateMetadata({
       description,
       url: pageUrl,
       type: "website",
-      ...(image && {
+      ...(ogImageUrl && {
         images: [
           {
-            url: typeof image === "object" ? image.url : image,
+            url: ogImageUrl,
             width: 1200,
             height: 630,
           },

@@ -184,9 +184,9 @@ export function PlannerResult({ plan, onReset }: PlannerResultProps) {
                       Innholdsforslag
                     </h4>
                     <div className="space-y-2">
-                      {selectedMonth.posts.map((post, i) => (
+                      {selectedMonth.posts.map((post) => (
                         <div
-                          key={i}
+                          key={`${post.week}-${post.idea}`}
                           className="flex items-start gap-3 p-3 rounded-lg bg-background/50"
                         >
                           <div className="flex items-center justify-center size-8 rounded-full bg-primary/10 text-primary text-xs font-bold shrink-0">
@@ -216,9 +216,9 @@ export function PlannerResult({ plan, onReset }: PlannerResultProps) {
                         Viktige datoer
                       </h4>
                       <div className="space-y-2">
-                        {selectedMonth.keyDates.map((date, i) => (
+                        {selectedMonth.keyDates.map((date) => (
                           <div
-                            key={i}
+                            key={`${date.date}-${date.event}`}
                             className="p-3 rounded-lg bg-background/50"
                           >
                             <div className="flex items-center gap-2 mb-1">
@@ -246,9 +246,9 @@ export function PlannerResult({ plan, onReset }: PlannerResultProps) {
                         Tips for måneden
                       </h4>
                       <ul className="space-y-1">
-                        {selectedMonth.tips.map((tip, i) => (
+                        {selectedMonth.tips.map((tip) => (
                           <li
-                            key={i}
+                            key={tip}
                             className="text-sm flex items-start gap-2"
                           >
                             <span className="text-primary">•</span>
@@ -398,7 +398,7 @@ export function PlannerResult({ plan, onReset }: PlannerResultProps) {
           <CardContent>
             <ul className="grid gap-2 sm:grid-cols-2">
               {plan.overallTips.map((tip, index) => (
-                <li key={index} className="flex items-start gap-2 text-sm">
+                <li key={tip} className="flex items-start gap-2 text-sm">
                   <span className="text-primary font-bold">{index + 1}.</span>
                   {tip}
                 </li>

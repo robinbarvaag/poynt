@@ -267,7 +267,11 @@ export function GuideResult({
 
       <div className="grid gap-4">
         {channels.map((channel, index) => {
-          const config = medalConfig[index] ?? medalConfig[2]!;
+          const config =
+            medalConfig[index] ?? medalConfig[medalConfig.length - 1];
+          if (!config) {
+            return null;
+          }
           const medalIconName = config.icon;
           const channelLink = channelLinks[channel.name];
 

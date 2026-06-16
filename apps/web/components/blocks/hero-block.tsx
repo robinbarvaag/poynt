@@ -1,4 +1,5 @@
 import { getMediaUrl } from "@/lib/media-url";
+import type { SerializedEditorState } from "@payloadcms/richtext-lexical/lexical";
 import { RichText } from "@payloadcms/richtext-lexical/react";
 import { Button, Heading, cn } from "@poynt/ui";
 import { ArrowRight } from "lucide-react";
@@ -6,9 +7,15 @@ import Image from "next/image";
 import Link from "next/link";
 
 interface HeroBlockProps {
-  variant?: "standard" | "fullscreen" | "centered" | "left" | "split" | "gradient";
+  variant?:
+    | "standard"
+    | "fullscreen"
+    | "centered"
+    | "left"
+    | "split"
+    | "gradient";
   title: string;
-  subtitle?: any;
+  subtitle?: SerializedEditorState;
   tagsLabel?: string;
   tags?: { label: string; id?: string }[];
   image?: {
@@ -136,32 +143,29 @@ export function HeroBlock({
   const hasImage = Boolean(image?.url);
 
   // Map old variant names to new ones for backwards compatibility
-  const resolvedVariant =
-    variant === "fullscreen" ? "fullscreen" : "standard";
+  const resolvedVariant = variant === "fullscreen" ? "fullscreen" : "standard";
 
-  // Fullscreen variant - background image with overlay
+  // Fullscreen / Showcase variant - text on solid background, image below
   if (resolvedVariant === "fullscreen") {
     return (
-      <section className="relative -mt-22 min-h-[85vh] flex items-center justify-center overflow-hidden">
-        {image && (
-          <div className="absolute inset-0 -z-10">
-            <Image
-              src={getMediaUrl(image.url)}
-              alt={image.alt || ""}
-              fill
-              className="object-cover"
-              priority
-              unoptimized={process.env.NODE_ENV === "development"}
-            />
-            <div className="absolute inset-0 bg-linear-to-t from-foreground/80 via-foreground/40 to-foreground/20" />
-          </div>
-        )}
+      <section className="relative -mt-22 overflow-hidden bg-primary">
+        {/* Subtle dot texture */}
+        <div
+          className="absolute inset-0 opacity-[0.06]"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle, oklch(0.979 0.008 197) 1px, transparent 1px)",
+            backgroundSize: "20px 20px",
+          }}
+        />
 
         {/* Decorative floating shapes */}
-        <div className="absolute top-1/4 left-[8%] w-28 h-28 bg-accent/20 rounded-full -z-10 blur-xl animate-float-slow" />
-        <div className="absolute bottom-1/3 right-[12%] w-36 h-36 bg-primary/15 rounded-full -z-10 blur-2xl animate-float-medium" />
+        <div className="absolute top-20 right-[5%] w-48 h-48 bg-accent/15 rounded-full blur-3xl animate-float-slow" />
+        <div className="absolute top-1/3 left-[3%] w-64 h-64 bg-primary-foreground/8 rounded-full blur-3xl animate-float-medium" />
+        <div className="absolute bottom-[30%] right-[15%] w-24 h-24 bg-accent/10 rounded-full blur-2xl animate-float-fast" />
 
-        <div className="relative text-center px-4 max-w-5xl mx-auto pt-22">
+        {/* Text content on solid background */}
+        <div className="relative text-center px-6 sm:px-10 lg:px-16 pt-36 md:pt-48 pb-12 md:pb-16 max-w-5xl mx-auto">
           {tags && tags.length > 0 && (
             <HeroTags label={tagsLabel} tags={tags} centered light />
           )}
@@ -169,7 +173,7 @@ export function HeroBlock({
             {title}
           </Heading>
           {subtitle && (
-            <div className="text-lg md:text-xl text-white/80 mb-10 max-w-3xl mx-auto rich-text">
+            <div className="text-base md:text-xl text-primary-foreground/75 mb-10 max-w-3xl mx-auto rich-text">
               <RichText data={subtitle} />
             </div>
           )}
@@ -181,8 +185,28 @@ export function HeroBlock({
           />
         </div>
 
-        {/* Bottom fade */}
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-linear-to-t from-background to-transparent" />
+        {/* Image showcase below text */}
+        {image && (
+          <div className="relative px-6 sm:px-10 lg:px-16 pb-16 md:pb-24 max-w-6xl mx-auto">
+            {/* Organic blob behind image */}
+            <div className="absolute -inset-x-4 inset-y-4 bg-accent/10 rounded-[2.5rem] -rotate-1 blur-sm" />
+            <div className="relative rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/10">
+              <div className="relative aspect-video md:aspect-2/1">
+                <Image
+                  src={getMediaUrl(image.url)}
+                  alt={image.alt || ""}
+                  fill
+                  className="object-cover"
+                  priority
+                  unoptimized={process.env.NODE_ENV === "development"}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Bottom gradient fade to background */}
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-linear-to-t from-background to-transparent" />
       </section>
     );
   }
@@ -221,10 +245,7 @@ export function HeroBlock({
                   <RichText data={subtitle} />
                 </div>
               )}
-              <HeroCtaButtons
-                mainCta={mainCta}
-                secondaryCta={secondaryCta}
-              />
+              <HeroCtaButtons mainCta={mainCta} secondaryCta={secondaryCta} />
             </div>
             {image && (
               <div className="relative">

@@ -4,6 +4,9 @@ import config from "@/payload.config";
 import { Container } from "@poynt/ui";
 import type { Metadata } from "next";
 import { getPayload } from "payload";
+import type { ComponentProps } from "react";
+
+type PodcastCardData = ComponentProps<typeof PodcastCard>["podcast"];
 
 export async function generateMetadata(): Promise<Metadata> {
   const payload = await getPayload({ config });
@@ -76,7 +79,10 @@ export default async function PodcastPage() {
         {podcasts.docs.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8">
             {podcasts.docs.map((podcast) => (
-              <PodcastCard key={podcast.id} podcast={podcast as any} />
+              <PodcastCard
+                key={podcast.id}
+                podcast={podcast as unknown as PodcastCardData}
+              />
             ))}
           </div>
         ) : (

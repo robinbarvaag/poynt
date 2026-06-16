@@ -396,6 +396,7 @@ export function PlanForm({
                         return (
                           <label
                             key={type}
+                            htmlFor={`existing-activity-${type}`}
                             className={cn(
                               "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all",
                               isChecked
@@ -404,6 +405,7 @@ export function PlanForm({
                             )}
                           >
                             <Checkbox
+                              id={`existing-activity-${type}`}
                               checked={isChecked}
                               onCheckedChange={(checked) => {
                                 const current = field.value || [];

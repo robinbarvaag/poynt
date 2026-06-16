@@ -105,8 +105,8 @@ export const PromptsListView = async (props: AdminViewServerProps) => {
                 for dynamiske verdier (f.eks. bransjnavn, brukerinput).
               </li>
               <li>
-                <strong>Status</strong> — Kun aktive maler brukes av
-                verktøyene. Deaktiver for å teste uten å slette.
+                <strong>Status</strong> — Kun aktive maler brukes av verktøyene.
+                Deaktiver for å teste uten å slette.
               </li>
             </ul>
           </div>

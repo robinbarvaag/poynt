@@ -25,7 +25,7 @@ bun run nuke             # Full reset (rm node_modules, reinstall)
 # Code Quality
 bun run check            # Biome lint + format (with fixes)
 bun run check:ci         # CI-friendly Biome check (no fixes)
-bun run lint             # ESLint
+bun run lint             # Biome lint (whole repo, single pass)
 bun run typecheck        # TypeScript validation
 bun run format           # Format with Biome
 
@@ -47,10 +47,12 @@ packages/
   types/                  # Shared TypeScript types
   ui/                     # Radix UI components + Tailwind
 tooling/
-  eslint/                 # ESLint config
   tailwind/               # Tailwind config
   typescript/             # TypeScript presets
+docs/                     # Project documentation (DESIGN, STRIPE, DRIZZLE, TESTING)
 ```
+
+Linting and formatting are handled entirely by **Biome** (`biome.json` at root) — there is no ESLint in this repo.
 
 ### Dual Data Systems
 

@@ -37,7 +37,7 @@ export function ProductCard({ product }: ProductCardProps) {
     : null;
 
   const hasDiscount =
-    compareAtPriceInKr && product.compareAtPrice! > product.price;
+    product.compareAtPrice != null && product.compareAtPrice > product.price;
 
   const productImage = product.featuredImage || product.image;
 

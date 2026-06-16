@@ -202,6 +202,7 @@ export const PromptsTable = ({
           >
             <div>
               <label
+                htmlFor="new-template-tool"
                 style={{
                   display: "block",
                   marginBottom: "0.25rem",
@@ -211,6 +212,7 @@ export const PromptsTable = ({
                 Verktøy
               </label>
               <select
+                id="new-template-tool"
                 style={inputStyle}
                 value={newTemplate.toolId}
                 onChange={(e) =>
@@ -227,6 +229,7 @@ export const PromptsTable = ({
             </div>
             <div>
               <label
+                htmlFor="new-template-name"
                 style={{
                   display: "block",
                   marginBottom: "0.25rem",
@@ -236,6 +239,7 @@ export const PromptsTable = ({
                 Navn
               </label>
               <input
+                id="new-template-name"
                 style={inputStyle}
                 placeholder="Navn"
                 value={newTemplate.name}
@@ -246,6 +250,7 @@ export const PromptsTable = ({
             </div>
             <div>
               <label
+                htmlFor="new-template-description"
                 style={{
                   display: "block",
                   marginBottom: "0.25rem",
@@ -255,6 +260,7 @@ export const PromptsTable = ({
                 Beskrivelse (valgfritt)
               </label>
               <input
+                id="new-template-description"
                 style={inputStyle}
                 placeholder="Beskrivelse"
                 value={newTemplate.description}
@@ -266,6 +272,7 @@ export const PromptsTable = ({
           </div>
           <div style={{ marginBottom: "0.75rem" }}>
             <label
+              htmlFor="new-template-text"
               style={{
                 display: "block",
                 marginBottom: "0.25rem",
@@ -275,6 +282,7 @@ export const PromptsTable = ({
               Prompt-tekst
             </label>
             <textarea
+              id="new-template-text"
               style={textareaStyle}
               placeholder="Skriv prompt-teksten her..."
               value={newTemplate.template}
@@ -466,6 +474,7 @@ export const PromptsTable = ({
                       >
                         <div>
                           <label
+                            htmlFor="edit-template-name"
                             style={{
                               display: "block",
                               marginBottom: "0.25rem",
@@ -475,6 +484,7 @@ export const PromptsTable = ({
                             Navn
                           </label>
                           <input
+                            id="edit-template-name"
                             style={inputStyle}
                             value={editing.name}
                             onChange={(e) =>
@@ -486,6 +496,7 @@ export const PromptsTable = ({
                         </div>
                         <div>
                           <label
+                            htmlFor="edit-template-description"
                             style={{
                               display: "block",
                               marginBottom: "0.25rem",
@@ -495,6 +506,7 @@ export const PromptsTable = ({
                             Beskrivelse
                           </label>
                           <input
+                            id="edit-template-description"
                             style={inputStyle}
                             value={editing.description}
                             onChange={(e) =>
@@ -508,6 +520,7 @@ export const PromptsTable = ({
                       </div>
                       <div style={{ marginBottom: "0.75rem" }}>
                         <label
+                          htmlFor="edit-template-text"
                           style={{
                             display: "block",
                             marginBottom: "0.25rem",
@@ -517,6 +530,7 @@ export const PromptsTable = ({
                           Prompt-tekst
                         </label>
                         <textarea
+                          id="edit-template-text"
                           style={textareaStyle}
                           value={editing.template}
                           onChange={(e) =>

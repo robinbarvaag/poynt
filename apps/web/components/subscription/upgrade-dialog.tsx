@@ -120,20 +120,18 @@ export function UpgradeDialog({
               </div>
             </div>
             <ul className="mt-3 space-y-1">
-              {subscriptionFeatures[currentTier]
-                .slice(0, 3)
-                .map((feature, i) => (
-                  <li
-                    key={i}
-                    className="flex items-center gap-2 text-sm text-muted-foreground"
-                  >
-                    <Icon
-                      name="check"
-                      className="size-3.5 text-muted-foreground"
-                    />
-                    {feature}
-                  </li>
-                ))}
+              {subscriptionFeatures[currentTier].slice(0, 3).map((feature) => (
+                <li
+                  key={feature}
+                  className="flex items-center gap-2 text-sm text-muted-foreground"
+                >
+                  <Icon
+                    name="check"
+                    className="size-3.5 text-muted-foreground"
+                  />
+                  {feature}
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -165,8 +163,8 @@ export function UpgradeDialog({
               </div>
             </div>
             <ul className="mt-3 space-y-1">
-              {subscriptionFeatures[targetTier].map((feature, i) => (
-                <li key={i} className="flex items-center gap-2 text-sm">
+              {subscriptionFeatures[targetTier].map((feature) => (
+                <li key={feature} className="flex items-center gap-2 text-sm">
                   <Icon name="check" className="size-3.5 text-primary" />
                   {feature}
                 </li>

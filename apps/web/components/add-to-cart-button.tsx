@@ -26,7 +26,7 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
     addItem({
       ...product,
       slug: product.slug || product.id,
-    } as any);
+    });
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   };

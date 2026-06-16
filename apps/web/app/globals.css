@@ -1,6 +1,6 @@
 @import "tailwindcss";
-@plugin "tailwindcss-animate";
 @import "@poynt/tailwind-config/web.css";
+@plugin "tailwindcss-animate";
 @source "../../../packages/ui/";
 
 /* Rich text styling for Lexical content */

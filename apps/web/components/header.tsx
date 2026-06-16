@@ -64,7 +64,6 @@ function getHref(item: {
         return `/produkter/${item.product.slug}`;
       }
       break;
-    case "custom":
     default:
       return item.url || "#";
   }
@@ -124,7 +123,7 @@ export function Header({
           <div className="hidden md:flex items-center gap-0.5">
             {navItems.map((item, index) => (
               <div
-                key={index}
+                key={item.label}
                 className="relative"
                 onMouseEnter={() =>
                   item.subItems?.length && setOpenDropdown(index)
@@ -153,9 +152,9 @@ export function Header({
                   openDropdown === index && (
                     <div className="absolute top-full left-0 pt-2 w-72">
                       <div className="rounded-2xl border border-border/50 bg-background/95 backdrop-blur-xl p-2 shadow-lg">
-                        {item.subItems.map((subItem, subIndex) => (
+                        {item.subItems.map((subItem) => (
                           <Link
-                            key={subIndex}
+                            key={subItem.label}
                             href={getHref(subItem)}
                             target={subItem.openInNewTab ? "_blank" : undefined}
                             rel={
@@ -220,7 +219,10 @@ export function Header({
 
             {ctaButton?.show && ctaButton.text && ctaButton.url && (
               <Link href={ctaButton.url}>
-                <Button size="sm" className="hidden sm:flex rounded-full px-5 h-8 text-xs">
+                <Button
+                  size="sm"
+                  className="hidden sm:flex rounded-full px-5 h-8 text-xs"
+                >
                   {ctaButton.text}
                 </Button>
               </Link>
@@ -246,8 +248,8 @@ export function Header({
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-foreground/5 px-4 pb-4 pt-2">
             <nav className="flex flex-col gap-1">
-              {navItems.map((item, index) => (
-                <div key={index}>
+              {navItems.map((item) => (
+                <div key={item.label}>
                   <Link
                     href={getHref(item)}
                     target={item.openInNewTab ? "_blank" : undefined}
@@ -259,9 +261,9 @@ export function Header({
                   </Link>
                   {item.subItems && item.subItems.length > 0 && (
                     <div className="ml-4 pl-3 border-l-2 border-primary/20">
-                      {item.subItems.map((subItem, subIndex) => (
+                      {item.subItems.map((subItem) => (
                         <Link
-                          key={subIndex}
+                          key={subItem.label}
                           href={getHref(subItem)}
                           target={subItem.openInNewTab ? "_blank" : undefined}
                           rel={
@@ -282,7 +284,11 @@ export function Header({
               <div className="flex gap-2 pt-3 mt-3 border-t border-foreground/5">
                 {showLogin && (
                   <Link href="/min-side" className="flex-1">
-                    <Button variant="outline" size="sm" className="w-full rounded-full">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full rounded-full"
+                    >
                       <User className="h-4 w-4 mr-2" />
                       Logg inn
                     </Button>

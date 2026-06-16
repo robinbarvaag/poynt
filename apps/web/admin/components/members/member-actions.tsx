@@ -83,7 +83,7 @@ export const MemberActions = ({
       >
         {/* Tier change */}
         <div>
-          <label
+          <span
             style={{
               display: "block",
               fontSize: "0.75rem",
@@ -95,7 +95,7 @@ export const MemberActions = ({
             }}
           >
             Endre tier
-          </label>
+          </span>
           <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
             {tiers.map((tier) => (
               <button

@@ -1,0 +1,21 @@
+/* Design-tokens + Tailwind for Storybook.
+   web.css inneholder @import "tailwindcss" og @theme inline med token-mappingen. */
+@import "@poynt/tailwind-config/web.css";
+
+/* Tailwind v4 må vite hvor klassene brukes (relativt til denne fila).
+   Komponentene bor i @poynt/ui; stories ligger lokalt i denne workspacen. */
+@source "../../../packages/ui/components";
+@source "../../../packages/ui/icons";
+@source "../stories";
+
+/* Fontene injiseres normalt av next/font. I Storybook laster vi dem
+   fra Google Fonts (se preview-head.html) og peker token-variablene dit. */
+:root {
+  --font-poppins: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  --font-bricolage: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+body {
+  font-family: var(--font-sans);
+}

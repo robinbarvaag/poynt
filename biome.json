@@ -15,7 +15,11 @@
       ".turbo",
       "*.min.js",
       "*.min.css",
-      "public"
+      "public",
+      "apps/web/payload-types.ts",
+      "apps/web/app/(payload)/**",
+      "apps/web/migrations/**",
+      "packages/planner-db/drizzle/**"
     ]
   },
   "formatter": {

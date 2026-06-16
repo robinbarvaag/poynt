@@ -187,8 +187,8 @@ export function PricingDialog({
 
                   {/* Features */}
                   <ul className="space-y-3 flex-1 mb-6">
-                    {tier.features.map((feature, i) => (
-                      <li key={i} className="flex items-start gap-3">
+                    {tier.features.map((feature) => (
+                      <li key={feature} className="flex items-start gap-3">
                         <Icon
                           name="check"
                           className={cn(
@@ -359,8 +359,8 @@ export function PricingCards({
                 </div>
 
                 <ul className="space-y-3 flex-1 mb-6">
-                  {tier.features.map((feature, i) => (
-                    <li key={i} className="flex items-start gap-3">
+                  {tier.features.map((feature) => (
+                    <li key={feature} className="flex items-start gap-3">
                       <Icon
                         name="check"
                         className={cn(

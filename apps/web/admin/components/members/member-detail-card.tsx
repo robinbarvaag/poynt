@@ -164,7 +164,7 @@ export const MemberDetailCard = ({
             >
               {recentSessions.map((session, i) => (
                 <div
-                  key={i}
+                  key={session.createdAt}
                   style={{
                     display: "flex",
                     justifyContent: "space-between",

@@ -27,7 +27,7 @@ export async function sendOrderConfirmation(email: string, orderId: string) {
     from: "Poynt <onboarding@resend.dev>", // Change to verified domain later
     to: email,
     subject: `Ordrebekreftelse #${orderId}`,
-    html: `<p>Takk for din bestilling!</p>`,
+    html: "<p>Takk for din bestilling!</p>",
   });
 }
 

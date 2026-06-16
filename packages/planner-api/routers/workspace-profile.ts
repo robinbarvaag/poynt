@@ -85,19 +85,19 @@ export const workspaceProfileRouter = router({
           .returning();
 
         return updated;
-      } else {
-        // Create new
-        const id = crypto.randomUUID();
-        const [created] = await db
-          .insert(plannerWorkspaceProfile)
-          .values({
-            id,
-            workspaceId,
-            ...input,
-          })
-          .returning();
-
-        return created;
       }
+
+      // Create new
+      const id = crypto.randomUUID();
+      const [created] = await db
+        .insert(plannerWorkspaceProfile)
+        .values({
+          id,
+          workspaceId,
+          ...input,
+        })
+        .returning();
+
+      return created;
     }),
 });

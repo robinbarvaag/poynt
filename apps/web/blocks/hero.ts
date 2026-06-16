@@ -15,7 +15,10 @@ export const Hero: Block = {
       defaultValue: "standard",
       options: [
         { label: "Standard", value: "standard" },
-        { label: "Fullskjerm med bakgrunnsbilde", value: "fullscreen" },
+        {
+          label: "Showcase (fargebakgrunn + bilde under)",
+          value: "fullscreen",
+        },
       ],
       label: "Variant",
       admin: {

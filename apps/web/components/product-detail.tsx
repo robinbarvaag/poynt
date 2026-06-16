@@ -81,21 +81,25 @@ function ProductDetailClient({
     ? product.compareAtPrice.toLocaleString("nb-NO")
     : null;
   const hasDiscount =
-    compareAtPriceInKr && product.compareAtPrice! > product.price;
+    product.compareAtPrice != null && product.compareAtPrice > product.price;
 
   // Build image array from featuredImage and gallery
   const images: { url: string; alt?: string; caption?: string }[] = [];
-  if (product.featuredImage && typeof product.featuredImage !== "number") {
+  if (
+    product.featuredImage &&
+    typeof product.featuredImage !== "number" &&
+    product.featuredImage.url
+  ) {
     images.push({
-      url: product.featuredImage.url!,
+      url: product.featuredImage.url,
       alt: product.featuredImage.alt ?? undefined,
     });
   }
   if (product.gallery) {
     for (const item of product.gallery) {
-      if (item.image && typeof item.image !== "number") {
+      if (item.image && typeof item.image !== "number" && item.image.url) {
         images.push({
-          url: item.image.url!,
+          url: item.image.url,
           alt: item.image.alt ?? undefined,
           caption: item.caption ?? undefined,
         });
@@ -231,7 +235,14 @@ function ProductDetailClient({
             {product.type === "membership" ? (
               <MembershipCheckoutButton product={product} />
             ) : (
-              <AddToCartButton product={product as any} />
+              <AddToCartButton
+                product={{
+                  id: String(product.id),
+                  name: product.name,
+                  price: product.price,
+                  slug: product.slug ?? undefined,
+                }}
+              />
             )}
           </div>
         </div>

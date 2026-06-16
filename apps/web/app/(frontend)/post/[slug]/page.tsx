@@ -99,11 +99,12 @@ export default async function PostPage({ params }: PostPageProps) {
         <header className="mb-8">
           {post.categories && post.categories.length > 0 && (
             <div className="flex gap-2 mb-4">
-              {post.categories.map((cat, index) => {
+              {post.categories.map((cat) => {
                 const categoryName = typeof cat === "object" ? cat.name : null;
                 if (!categoryName) return null;
+                const categoryKey = typeof cat === "object" ? cat.id : cat;
                 return (
-                  <Badge key={index} variant="accent">
+                  <Badge key={categoryKey} variant="accent">
                     {categoryName}
                   </Badge>
                 );

@@ -414,7 +414,8 @@ export const IndustriesTable = ({
                     padding: "2rem",
                   }}
                 >
-                  Ingen bransjer enda. Klikk «Seed standard bransjer» for å komme i gang.
+                  Ingen bransjer enda. Klikk «Seed standard bransjer» for å
+                  komme i gang.
                 </td>
               </tr>
             )}

@@ -2,8 +2,8 @@ import { ArticleSearch } from "@/components/article-search";
 import { CategoryFilter } from "@/components/category-filter";
 import { hexToRgba } from "@/lib/color-utils";
 import { getMediaUrl } from "@/lib/media-url";
-import config from "@/payload.config";
 import type { Article, Category, Media } from "@/payload-types";
+import config from "@/payload.config";
 import { Heading, Text } from "@poynt/ui";
 import { Clock } from "lucide-react";
 import Image from "next/image";
@@ -225,7 +225,9 @@ function ArticleCard({ article }: { article: Article }) {
         ) : (
           <div
             className="absolute inset-0"
-            style={catColor ? { backgroundColor: hexToRgba(catColor, 0.06) } : {}}
+            style={
+              catColor ? { backgroundColor: hexToRgba(catColor, 0.06) } : {}
+            }
           />
         )}
       </div>
@@ -236,8 +238,14 @@ function ArticleCard({ article }: { article: Article }) {
             className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full w-fit mb-3"
             style={
               catColor
-                ? { backgroundColor: hexToRgba(catColor, 0.12), color: catColor }
-                : { backgroundColor: "var(--muted)", color: "var(--muted-foreground)" }
+                ? {
+                    backgroundColor: hexToRgba(catColor, 0.12),
+                    color: catColor,
+                  }
+                : {
+                    backgroundColor: "var(--muted)",
+                    color: "var(--muted-foreground)",
+                  }
             }
           >
             {cat.icon && <span aria-hidden="true">{cat.icon}</span>}

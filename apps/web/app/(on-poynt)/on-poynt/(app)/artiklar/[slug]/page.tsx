@@ -3,8 +3,8 @@ import { TableOfContents } from "@/components/table-of-contents";
 import { hexToRgba } from "@/lib/color-utils";
 import { extractToc } from "@/lib/extract-toc";
 import { getMediaUrl } from "@/lib/media-url";
-import config from "@/payload.config";
 import type { Article, Category, Media, User } from "@/payload-types";
+import config from "@/payload.config";
 import { Card, CardContent, Heading, Text } from "@poynt/ui";
 import { ArrowLeft, Clock } from "lucide-react";
 import Image from "next/image";
@@ -45,7 +45,12 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       : null;
   const catColor = firstCat?.color ?? null;
 
-  type TocNode = { type: string; tag?: string; text?: string; children?: TocNode[] };
+  type TocNode = {
+    type: string;
+    tag?: string;
+    text?: string;
+    children?: TocNode[];
+  };
   const tocItems = extractToc(
     article.content as { root: { children: TocNode[] } }
   );
@@ -134,17 +139,18 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             </div>
           </header>
 
-          {article.featuredImage && typeof article.featuredImage !== "number" && (
-            <div className="relative aspect-video w-full rounded-xl overflow-hidden mb-10 bg-muted">
-              <Image
-                src={getMediaUrl((article.featuredImage as Media).url ?? "")}
-                alt={(article.featuredImage as Media).alt || article.title}
-                fill
-                className="object-cover"
-                priority
-              />
-            </div>
-          )}
+          {article.featuredImage &&
+            typeof article.featuredImage !== "number" && (
+              <div className="relative aspect-video w-full rounded-xl overflow-hidden mb-10 bg-muted">
+                <Image
+                  src={getMediaUrl((article.featuredImage as Media).url ?? "")}
+                  alt={(article.featuredImage as Media).alt || article.title}
+                  fill
+                  className="object-cover"
+                  priority
+                />
+              </div>
+            )}
 
           <div className="prose prose-lg max-w-none prose-headings:text-foreground prose-p:text-foreground prose-a:text-primary prose-strong:text-foreground">
             <ArticleRichText data={article.content} />

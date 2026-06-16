@@ -4,6 +4,7 @@ import { Heading, cn } from "@poynt/ui";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { type Where, getPayload } from "payload";
+import type { ComponentProps } from "react";
 import { ProductCard } from "../product-card";
 
 interface ProductArchiveBlockProps {
@@ -104,7 +105,14 @@ export async function ProductArchiveBlock({
           )}
         >
           {products.map((product) => (
-            <ProductCard key={product.id} product={product as any} />
+            <ProductCard
+              key={product.id}
+              product={
+                product as unknown as ComponentProps<
+                  typeof ProductCard
+                >["product"]
+              }
+            />
           ))}
         </div>
 

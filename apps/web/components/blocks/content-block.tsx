@@ -1,7 +1,8 @@
+import type { SerializedEditorState } from "@payloadcms/richtext-lexical/lexical";
 import { RichText } from "@payloadcms/richtext-lexical/react";
 
 interface ContentBlockProps {
-  richText: any; // Lexical JSON
+  richText: SerializedEditorState; // Lexical JSON
 }
 
 export function ContentBlock({ richText }: ContentBlockProps) {

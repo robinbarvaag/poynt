@@ -1,0 +1,17 @@
+# Normaliser linjeslutt til LF overalt — matcher Biome-formatteren og unngår
+# CRLF/LF-støy på Windows (der core.autocrlf ellers konverterer til CRLF).
+* text=auto eol=lf
+
+# Binærfiler skal ikke røres
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.avif binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.pdf binary

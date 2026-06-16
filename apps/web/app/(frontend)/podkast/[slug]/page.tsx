@@ -143,6 +143,7 @@ export default async function PodcastDetailPage({ params }: PodcastPageProps) {
         {embedUrl && (
           <div className="mb-10">
             <iframe
+              title="Spotify-spiller"
               src={embedUrl}
               width="100%"
               height="352"
@@ -159,8 +160,11 @@ export default async function PodcastDetailPage({ params }: PodcastPageProps) {
           <div className="mb-8 p-4 bg-muted/50 rounded-lg">
             <h2 className="font-semibold mb-2">Gjester i denne episoden</h2>
             <ul className="space-y-1">
-              {podcast.guests.map((guest, index) => (
-                <li key={index} className="text-muted-foreground">
+              {podcast.guests.map((guest) => (
+                <li
+                  key={guest.id ?? guest.name}
+                  className="text-muted-foreground"
+                >
                   <span className="text-foreground">{guest.name}</span>
                   {guest.title && <span> – {guest.title}</span>}
                 </li>

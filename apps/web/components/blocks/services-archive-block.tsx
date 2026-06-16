@@ -3,6 +3,7 @@ import { Heading, cn } from "@poynt/ui";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { getPayload } from "payload";
+import type { ComponentProps } from "react";
 import { ServiceCard } from "../service-card";
 
 interface ServicesArchiveBlockProps {
@@ -61,7 +62,14 @@ export async function ServicesArchiveBlock({
           )}
         >
           {services.docs.map((service) => (
-            <ServiceCard key={service.id} service={service as any} />
+            <ServiceCard
+              key={service.id}
+              service={
+                service as unknown as ComponentProps<
+                  typeof ServiceCard
+                >["service"]
+              }
+            />
           ))}
         </div>
 
