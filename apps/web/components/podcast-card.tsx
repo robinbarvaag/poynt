@@ -1,4 +1,5 @@
 import { getMediaUrl } from "@/lib/media-url";
+import { Heading, Text } from "@poynt/ui";
 import { Play } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -32,7 +33,7 @@ export function PodcastCard({ podcast }: PodcastCardProps) {
 
   return (
     <Link href={`/podkast/${podcast.slug}`} className="group block">
-      <div className="relative aspect-square rounded-lg overflow-hidden bg-muted mb-3">
+      <div className="relative mb-3 aspect-square overflow-hidden rounded-2xl bg-muted">
         {podcast.coverImage ? (
           <Image
             src={getMediaUrl(podcast.coverImage.url)}
@@ -42,35 +43,44 @@ export function PodcastCard({ podcast }: PodcastCardProps) {
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-12 h-12 rounded-full bg-muted-foreground/10 flex items-center justify-center">
-              <Play className="w-5 h-5 text-muted-foreground/40 ml-0.5" />
+            <div className="flex size-12 items-center justify-center rounded-full bg-muted-foreground/10">
+              <Play className="ml-0.5 size-5 text-muted-foreground/40" />
             </div>
           </div>
         )}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-          <div className="w-12 h-12 rounded-full bg-foreground flex items-center justify-center">
-            <Play className="w-5 h-5 text-background ml-0.5" />
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
+          <div className="flex size-12 items-center justify-center rounded-full bg-foreground">
+            <Play className="ml-0.5 size-5 text-background" />
           </div>
         </div>
       </div>
 
       <div className="space-y-1">
-        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <Text
+          type="div"
+          variant="muted"
+          customStyles="flex items-center gap-1.5 text-xs"
+        >
           {podcast.episodeNumber && <span>Ep. {podcast.episodeNumber}</span>}
           {podcast.episodeNumber && podcast.duration && <span>·</span>}
           {podcast.duration && <span>{podcast.duration}</span>}
           {(podcast.episodeNumber || podcast.duration) && <span>·</span>}
           <span>{formattedDate}</span>
-        </div>
+        </Text>
 
-        <h3 className="font-medium leading-snug line-clamp-2 group-hover:text-primary transition-colors">
+        <Heading
+          variant="h4"
+          color="foreground"
+          weight="medium"
+          customStyles="line-clamp-2 leading-snug transition-colors group-hover:text-primary"
+        >
           {podcast.title}
-        </h3>
+        </Heading>
 
         {podcast.description && (
-          <p className="text-sm text-muted-foreground line-clamp-1">
+          <Text variant="muted" customStyles="line-clamp-1">
             {podcast.description}
-          </p>
+          </Text>
         )}
       </div>
     </Link>

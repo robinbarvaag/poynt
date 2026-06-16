@@ -99,15 +99,19 @@ export default async function PodcastDetailPage({ params }: PodcastPageProps) {
         {/* Back link */}
         <Link
           href="/podkast"
-          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8"
+          className="mb-8 inline-flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="size-4" />
           <span>Alle episoder</span>
         </Link>
 
         {/* Header */}
         <header className="mb-8">
-          <div className="flex items-center gap-3 text-sm text-muted-foreground mb-4">
+          <Text
+            type="div"
+            variant="muted"
+            customStyles="mb-4 flex items-center gap-3 text-sm"
+          >
             {podcast.episodeNumber && (
               <span>Episode {podcast.episodeNumber}</span>
             )}
@@ -115,9 +119,11 @@ export default async function PodcastDetailPage({ params }: PodcastPageProps) {
             {podcast.duration && <span>{podcast.duration}</span>}
             <span>·</span>
             <span>{formatDate(podcast.publishedAt)}</span>
-          </div>
+          </Text>
 
-          <Heading size="h1">{podcast.title}</Heading>
+          <Heading variant="h1" color="foreground" weight="bold">
+            {podcast.title}
+          </Heading>
 
           {podcast.description && (
             <Text variant="lead">{podcast.description}</Text>
@@ -128,7 +134,7 @@ export default async function PodcastDetailPage({ params }: PodcastPageProps) {
         {podcast.coverImage &&
           typeof podcast.coverImage === "object" &&
           podcast.coverImage.url && (
-            <div className="relative aspect-square max-w-md mx-auto rounded-lg overflow-hidden mb-8 bg-muted">
+            <div className="relative mx-auto mb-8 aspect-square max-w-md overflow-hidden rounded-3xl bg-muted">
               <Image
                 src={podcast.coverImage.url}
                 alt={podcast.coverImage.alt || podcast.title}
@@ -150,23 +156,34 @@ export default async function PodcastDetailPage({ params }: PodcastPageProps) {
               frameBorder="0"
               allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
               loading="lazy"
-              className="rounded-xl"
+              className="rounded-2xl"
             />
           </div>
         )}
 
         {/* Guests */}
         {podcast.guests && podcast.guests.length > 0 && (
-          <div className="mb-8 p-4 bg-muted/50 rounded-lg">
-            <h2 className="font-semibold mb-2">Gjester i denne episoden</h2>
+          <div className="mb-8 rounded-2xl bg-muted/50 p-4">
+            <Heading
+              variant="h3"
+              color="foreground"
+              weight="semibold"
+              customStyles="mb-2 text-base"
+            >
+              Gjester i denne episoden
+            </Heading>
             <ul className="space-y-1">
               {podcast.guests.map((guest) => (
-                <li
-                  key={guest.id ?? guest.name}
-                  className="text-muted-foreground"
-                >
-                  <span className="text-foreground">{guest.name}</span>
-                  {guest.title && <span> – {guest.title}</span>}
+                <li key={guest.id ?? guest.name}>
+                  <Text type="span" color="foreground">
+                    {guest.name}
+                  </Text>
+                  {guest.title && (
+                    <Text type="span" variant="muted">
+                      {" "}
+                      – {guest.title}
+                    </Text>
+                  )}
                 </li>
               ))}
             </ul>

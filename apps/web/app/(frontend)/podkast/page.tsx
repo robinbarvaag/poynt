@@ -1,7 +1,7 @@
 import { PageHero } from "@/components/page-hero";
 import { PodcastCard } from "@/components/podcast-card";
 import config from "@/payload.config";
-import { Container } from "@poynt/ui";
+import { Container, Text } from "@poynt/ui";
 import type { Metadata } from "next";
 import { getPayload } from "payload";
 import type { ComponentProps } from "react";
@@ -77,7 +77,7 @@ export default async function PodcastPage() {
 
       <Container padding="default" className="py-8">
         {podcasts.docs.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 lg:grid-cols-4">
             {podcasts.docs.map((podcast) => (
               <PodcastCard
                 key={podcast.id}
@@ -86,9 +86,9 @@ export default async function PodcastPage() {
             ))}
           </div>
         ) : (
-          <p className="text-muted-foreground text-center py-12">
+          <Text variant="muted" align="center" customStyles="py-12">
             {emptyStateText}
-          </p>
+          </Text>
         )}
       </Container>
     </>

@@ -106,18 +106,25 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
         {/* Back link */}
         <Link
           href="/tjenester"
-          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8"
+          className="mb-8 inline-flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="size-4" />
           <span>Alle tjenester</span>
         </Link>
 
         {/* Header */}
         <header className="mb-8">
-          <Heading size="h1">{service.name}</Heading>
-          <p className="text-2xl font-semibold text-primary mb-4">
+          <Heading variant="h1" color="foreground" weight="bold">
+            {service.name}
+          </Heading>
+          <Text
+            type="p"
+            color="primary"
+            weight="semibold"
+            customStyles="mb-4 text-2xl"
+          >
             {formatPrice(service)}
-          </p>
+          </Text>
           <Text variant={"lead"}>{service.shortDescription}</Text>
         </header>
 
@@ -125,7 +132,7 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
         {service.image &&
           typeof service.image === "object" &&
           service.image.url && (
-            <div className="relative aspect-video w-full rounded-lg overflow-hidden mb-10 bg-muted">
+            <div className="relative mb-10 aspect-video w-full overflow-hidden rounded-3xl bg-muted">
               <Image
                 src={service.image.url}
                 alt={service.image.alt || service.name}
@@ -144,11 +151,18 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
         )}
 
         {/* CTA */}
-        <div className="bg-muted/50 rounded-2xl p-8 text-center">
-          <h2 className="text-xl font-semibold mb-2">Interessert?</h2>
-          <p className="text-muted-foreground mb-6">
+        <div className="rounded-2xl bg-muted/50 p-8 text-center">
+          <Heading
+            variant="h2"
+            color="foreground"
+            weight="semibold"
+            customStyles="mb-2 text-xl"
+          >
+            Interessert?
+          </Heading>
+          <Text variant="muted" customStyles="mb-6">
             Ta kontakt for en uforpliktende prat om hvordan vi kan hjelpe deg.
-          </p>
+          </Text>
           <Button asChild size="lg">
             <Link href="/kontakt">Ta kontakt</Link>
           </Button>

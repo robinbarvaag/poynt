@@ -1,7 +1,7 @@
 "use client";
 
 import { useCart } from "@poynt/cart";
-import { Button, Heading } from "@poynt/ui";
+import { Button, Heading, Text } from "@poynt/ui";
 import { Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -44,13 +44,18 @@ export default function CartPage() {
 
   if (items.length === 0) {
     return (
-      <div className="max-w-2xl mx-auto text-center py-16">
-        <Heading size="h1" customStyles="mb-4">
+      <div className="mx-auto max-w-2xl py-16 text-center">
+        <Heading
+          variant="h1"
+          color="foreground"
+          weight="bold"
+          customStyles="mb-4"
+        >
           Handlekurven din er tom
         </Heading>
-        <p className="text-muted-foreground mb-8">
+        <Text variant="muted" customStyles="mb-8">
           Legg til produkt for å starte handelen.
-        </p>
+        </Text>
         <Link href="/kurs">
           <Button>Sjå alle kurs</Button>
         </Link>
@@ -61,38 +66,55 @@ export default function CartPage() {
   const totalInKr = total().toFixed(2);
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <Heading size="h1" customStyles="mb-8">
+    <div className="mx-auto max-w-2xl">
+      <Heading
+        variant="h1"
+        color="foreground"
+        weight="bold"
+        customStyles="mb-8"
+      >
         Handlekurv
       </Heading>
-      <div className="space-y-4 mb-8">
+      <div className="mb-8 space-y-4">
         {items.map((item) => {
           const priceInKr = item.price.toFixed(2);
           return (
             <div
               key={item.id}
-              className="flex items-center justify-between border rounded-lg p-4"
+              className="flex items-center justify-between rounded-2xl border p-4"
             >
               <div>
-                <h3 className="font-semibold">{item.name}</h3>
-                <p className="text-muted-foreground">{priceInKr} kr</p>
+                <Heading
+                  variant="h4"
+                  color="foreground"
+                  weight="semibold"
+                  customStyles="text-base"
+                >
+                  {item.name}
+                </Heading>
+                <Text variant="muted">{priceInKr} kr</Text>
               </div>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => removeItem(item.id)}
               >
-                <Trash2 className="h-5 w-5 text-destructive" />
+                <Trash2 className="size-5 text-destructive" />
               </Button>
             </div>
           );
         })}
       </div>
       <div className="border-t pt-4">
-        <div className="flex items-center justify-between text-xl font-bold mb-6">
+        <Text
+          type="div"
+          color="foreground"
+          weight="bold"
+          customStyles="mb-6 flex items-center justify-between text-xl"
+        >
           <span>Totalt:</span>
           <span>{totalInKr} kr</span>
-        </div>
+        </Text>
         <Button
           size="lg"
           className="w-full"

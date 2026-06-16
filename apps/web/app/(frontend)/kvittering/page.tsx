@@ -1,6 +1,5 @@
 import { ClearCart } from "@/components/clear-cart";
-import { Button, Heading } from "@poynt/ui";
-import { CheckCircle } from "lucide-react";
+import { Button, Eyebrow, Heading, Text } from "@poynt/ui";
 import Link from "next/link";
 
 interface Props {
@@ -11,22 +10,22 @@ export default async function ReceiptPage({ searchParams }: Props) {
   const { session_id: sessionId } = await searchParams;
 
   return (
-    <div className="max-w-2xl mx-auto text-center py-16">
+    <div className="mx-auto max-w-2xl py-16 text-center">
       <ClearCart />
-      <div className="mb-8 flex justify-center">
-        <CheckCircle className="h-24 w-24 text-green-500" />
-      </div>
-      <Heading size="h1">Takk for kjøpet!</Heading>
-      <p className="text-xl text-muted-foreground mb-8">
+      <Eyebrow className="mb-4 justify-center text-primary">Bekrefta</Eyebrow>
+      <Heading variant="h1" color="foreground" weight="bold">
+        Takk for kjøpet!
+      </Heading>
+      <Text variant="lead" customStyles="mb-8 text-xl">
         Orderen din er bekrefta. Du vil motta ein e-post med detaljar og tilgang
         til kurset ditt.
-      </p>
+      </Text>
       {sessionId && (
-        <p className="text-sm text-muted-foreground mb-8">
+        <Text variant="muted" customStyles="mb-8">
           Referanse: {sessionId}
-        </p>
+        </Text>
       )}
-      <div className="flex gap-4 justify-center">
+      <div className="flex justify-center gap-4">
         <Link href="/min-side">
           <Button size="lg">Gå til Min side</Button>
         </Link>
