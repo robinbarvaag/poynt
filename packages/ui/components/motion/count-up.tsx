@@ -2,13 +2,14 @@
 
 import { animate, useInView, useReducedMotion } from "framer-motion";
 import { useEffect, useRef } from "react";
+import { easeSoft } from "./motion-tokens";
 
 interface CountUpProps {
   /** Sluttverdi. */
   to: number;
   /** Startverdi. Default 0. */
   from?: number;
-  /** Varighet i sekunder. Default 1.5. */
+  /** Varighet i sekunder. Default 2. */
   duration?: number;
   prefix?: string;
   suffix?: string;
@@ -22,7 +23,7 @@ interface CountUpProps {
 export function CountUp({
   to,
   from = 0,
-  duration = 1.5,
+  duration = 2,
   prefix = "",
   suffix = "",
   className,
@@ -42,7 +43,7 @@ export function CountUp({
     }
     const controls = animate(from, to, {
       duration,
-      ease: "easeOut",
+      ease: easeSoft,
       onUpdate(value) {
         el.textContent = `${prefix}${Math.round(value)}${suffix}`;
       },

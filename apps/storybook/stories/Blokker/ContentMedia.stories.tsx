@@ -44,6 +44,7 @@ export const MediaHoyre: Story = {
     cta: { text: "Utforsk kursene", href: "#" },
     media: placeholder,
     mediaSide: "right",
+    accent: "saffron",
   },
 };
 
@@ -65,5 +66,6 @@ export const MediaVenstre: Story = {
     cta: { text: "Se verktøyene", href: "#" },
     media: placeholder,
     mediaSide: "left",
+    accent: "salmon",
   },
 };

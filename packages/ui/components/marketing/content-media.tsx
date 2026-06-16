@@ -15,11 +15,22 @@ export interface ContentMediaProps {
   media?: ReactNode;
   /** Hvilken side mediet ligger på. Default "right". */
   mediaSide?: "left" | "right";
+  /** Aksentfarge for marker-strek og fargeblokken bak mediet. Default "saffron". */
+  accent?: "saffron" | "salmon" | "primary" | "mint";
 }
+
+const accents = {
+  saffron: { bar: "bg-saffron", block: "bg-saffron", marker: "bg-saffron" },
+  salmon: { bar: "bg-salmon", block: "bg-salmon", marker: "bg-salmon" },
+  primary: { bar: "bg-primary", block: "bg-primary/15", marker: "bg-primary" },
+  mint: { bar: "bg-mint", block: "bg-mint", marker: "bg-primary" },
+} as const;
 
 /**
  * Redaksjonell tekst + media-split med bevisst asymmetri (5/6-kolonner,
- * forskjøvet fra midten — jf. docs/COMPOSITION.md §3). Innholds-only.
+ * forskjøvet fra midten). Mediet har en forskjøvet fargeblokk bak seg
+ * (editorial collage), og teksten har samme marker-aksent som Steps.
+ * Innholds-only.
  */
 export function ContentMedia({
   eyebrow,
@@ -29,12 +40,14 @@ export function ContentMedia({
   cta,
   media,
   mediaSide = "right",
+  accent = "saffron",
 }: ContentMediaProps) {
   const mediaLeft = mediaSide === "left";
+  const a = accents[accent];
 
   return (
     <Container padding="none">
-      <div className="grid grid-cols-1 items-center gap-10 md:grid-cols-12 md:gap-16">
+      <div className="grid grid-cols-1 items-center gap-12 md:grid-cols-12 md:gap-16">
         {/* Tekst */}
         <Reveal
           className={cn(
@@ -43,15 +56,17 @@ export function ContentMedia({
           )}
         >
           {eyebrow && (
-            <Text
-              variant="small"
-              color="primary"
-              customStyles="uppercase tracking-[0.18em]"
-            >
-              {eyebrow}
-            </Text>
+            <div className="flex items-center gap-3">
+              <span
+                aria-hidden="true"
+                className={cn("h-1 w-10 rounded-full", a.marker)}
+              />
+              <span className="font-heading font-semibold text-muted-foreground text-sm uppercase tracking-[0.2em]">
+                {eyebrow}
+              </span>
+            </div>
           )}
-          <Heading variant="h2" color="foreground" customStyles="mt-3">
+          <Heading variant="h2" color="foreground" customStyles="mt-4">
             {title}
           </Heading>
           {body && (
@@ -65,7 +80,7 @@ export function ContentMedia({
                 <li key={bullet} className="flex items-start gap-4">
                   <span
                     aria-hidden="true"
-                    className="mt-2.5 h-px w-6 shrink-0 bg-primary"
+                    className={cn("mt-2.5 h-px w-6 shrink-0", a.marker)}
                   />
                   <Text customStyles="text-muted-foreground">{bullet}</Text>
                 </li>
@@ -79,15 +94,25 @@ export function ContentMedia({
           )}
         </Reveal>
 
-        {/* Media */}
+        {/* Media med forskjøvet fargeblokk bak */}
         <Reveal
           className={cn(
             "md:col-span-6",
             mediaLeft ? "md:col-start-1 md:row-start-1" : "md:col-start-7"
           )}
         >
-          <div className="relative aspect-4/3 overflow-hidden rounded-4xl bg-muted shadow-sm ring-1 ring-foreground/5">
-            {media}
+          <div className="relative">
+            <div
+              aria-hidden="true"
+              className={cn(
+                "-z-10 absolute h-full w-full rounded-4xl",
+                a.block,
+                mediaLeft ? "-bottom-5 -left-5" : "-right-5 -bottom-5"
+              )}
+            />
+            <div className="relative aspect-4/3 overflow-hidden rounded-4xl bg-muted ring-1 ring-foreground/5">
+              {media}
+            </div>
           </div>
         </Reveal>
       </div>
