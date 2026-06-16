@@ -36,7 +36,7 @@ export async function ArchiveBlock({
   return (
     <section className="py-8">
       {title && (
-        <Heading size="h2" className="mb-6">
+        <Heading size="h2" customStyles="mb-6">
           {title}
         </Heading>
       )}

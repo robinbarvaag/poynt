@@ -1,6 +1,5 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import {
   type DeclineRequest,
   declineRequestSchema,
@@ -38,8 +37,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@poynt/ui";
+import { useForm, zodResolver } from "@poynt/ui/form";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
 
 interface DeclineFormProps {
   onSubmit: (data: DeclineRequest) => Promise<void>;

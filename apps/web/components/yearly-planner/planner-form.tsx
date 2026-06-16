@@ -1,6 +1,5 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import {
   type YearlyPlannerRequest,
   audienceLabels,
@@ -33,6 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@poynt/ui";
+import { useForm, zodResolver } from "@poynt/ui/form";
 import {
   ArrowLeft,
   ArrowRight,
@@ -66,7 +66,6 @@ import {
 import { cn } from "@poynt/ui/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
 
 type AudienceType = "b2b" | "b2c" | "both";
 

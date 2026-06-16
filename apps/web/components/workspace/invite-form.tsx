@@ -1,7 +1,6 @@
 "use client";
 
 import { trpc } from "@/lib/planner/trpc";
-import { zodResolver } from "@hookform/resolvers/zod";
 import {
   type InviteMemberInput,
   inviteMemberSchema,
@@ -29,9 +28,9 @@ import {
 import { Separator } from "@poynt/ui";
 import { Skeleton } from "@poynt/ui/components/skeleton";
 import { toast } from "@poynt/ui/components/sonner";
+import { useForm, zodResolver } from "@poynt/ui/form";
 import { Icon } from "@poynt/ui/icons";
 import * as React from "react";
-import { useForm } from "react-hook-form";
 
 interface Invitation {
   id: string;

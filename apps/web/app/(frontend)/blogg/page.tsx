@@ -127,7 +127,7 @@ export default async function BlogPage({ searchParams }: PageProps) {
 
       <Container padding="default" className="py-8">
         {posts.docs.length === 0 ? (
-          <Text variant="muted" className="text-center py-12">
+          <Text variant="muted" customStyles="text-center py-12">
             {emptyStateText}
           </Text>
         ) : (

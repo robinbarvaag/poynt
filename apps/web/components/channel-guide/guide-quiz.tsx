@@ -1,6 +1,5 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import {
   type ChannelGuideRequest,
   channelGuideRequestSchema,
@@ -35,10 +34,10 @@ import {
 } from "@poynt/ui";
 import { cn } from "@poynt/ui";
 import { OptionCard, PrefilledBadge, StepContainer } from "@poynt/ui";
+import { useForm, zodResolver } from "@poynt/ui/form";
 import { Icon, type IconName } from "@poynt/ui/icons";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
 
 interface Industry {
   id: string;

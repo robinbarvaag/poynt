@@ -6,6 +6,7 @@
   "types": "./index.ts",
   "exports": {
     ".": "./index.ts",
+    "./form": "./form.ts",
     "./lib/*": "./lib/*.ts",
     "./components/*": "./components/*.tsx",
     "./hooks/*": "./hooks/*.ts",

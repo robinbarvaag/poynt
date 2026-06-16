@@ -1,7 +1,6 @@
 "use client";
 
 import { trpc } from "@/lib/planner/trpc";
-import { zodResolver } from "@hookform/resolvers/zod";
 import {
   type UpdateWorkspaceInput,
   updateWorkspaceSchema,
@@ -19,9 +18,9 @@ import {
 import { Input } from "@poynt/ui";
 import { Textarea } from "@poynt/ui";
 import { toast } from "@poynt/ui";
+import { useForm, zodResolver } from "@poynt/ui/form";
 import { Icon } from "@poynt/ui/icons";
 import * as React from "react";
-import { useForm } from "react-hook-form";
 
 interface Workspace {
   id: string;

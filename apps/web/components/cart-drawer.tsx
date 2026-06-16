@@ -65,8 +65,8 @@ export function CartDrawer() {
                 <ShoppingBag className="h-10 w-10 text-muted-foreground" />
               </div>
               <div>
-                <Text className="font-medium">Ingen produkter ennå</Text>
-                <Text variant="subtle" className="mt-1">
+                <Text customStyles="font-medium">Ingen produkter ennå</Text>
+                <Text variant="muted" customStyles="mt-1">
                   Utforsk våre produkter og legg noe i kurven
                 </Text>
               </div>
@@ -88,8 +88,8 @@ export function CartDrawer() {
 
                   {/* Product info */}
                   <div className="flex-1 min-w-0">
-                    <Text className="font-medium truncate">{item.name}</Text>
-                    <Text variant="subtle" className="text-sm">
+                    <Text customStyles="font-medium truncate">{item.name}</Text>
+                    <Text variant="muted" customStyles="text-sm">
                       {formatPrice(item.price)}
                     </Text>
                   </div>
@@ -115,8 +115,8 @@ export function CartDrawer() {
           <div className="border-t border-border px-6 py-4 space-y-4">
             {/* Subtotal */}
             <div className="flex items-center justify-between">
-              <Text className="font-medium">Totalt</Text>
-              <Text className="text-lg font-semibold">
+              <Text customStyles="font-medium">Totalt</Text>
+              <Text customStyles="text-lg font-semibold">
                 {formatPrice(cartTotal)}
               </Text>
             </div>

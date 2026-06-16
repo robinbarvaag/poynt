@@ -135,7 +135,7 @@ export function TestimonialsBlock({
     <section className="py-16 md:py-24">
       <div className="container mx-auto px-4">
         {title && (
-          <Heading size="h2" className="text-center mb-12">
+          <Heading size="h2" customStyles="text-center mb-12">
             {title}
           </Heading>
         )}

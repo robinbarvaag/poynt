@@ -1,6 +1,5 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import {
   type MarketingPlanRequest,
   budgetLabels,
@@ -30,10 +29,10 @@ import {
   FormMessage,
 } from "@poynt/ui";
 import { cn } from "@poynt/ui";
+import { useForm, zodResolver } from "@poynt/ui/form";
 import { Icon, type IconName } from "@poynt/ui/icons";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
 
 type CompanySize = "solo" | "small" | "medium" | "large";
 

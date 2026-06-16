@@ -108,7 +108,7 @@ export function SpotifyEmbedBlock({
                     ? "Podkast"
                     : "Spilleliste"}
               </p>
-              <Heading size="h3" className="text-foreground">
+              <Heading size="h3" customStyles="text-foreground">
                 {title}
               </Heading>
             </div>

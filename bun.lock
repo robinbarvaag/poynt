@@ -35,7 +35,6 @@
       "name": "web",
       "version": "0.0.0",
       "dependencies": {
-        "@hookform/resolvers": "^5.2.2",
         "@payloadcms/db-postgres": "3.70.0",
         "@payloadcms/next": "3.70.0",
         "@payloadcms/plugin-form-builder": "3.70.0",
@@ -70,7 +69,6 @@
         "payload": "3.70.0",
         "react": "19.2.3",
         "react-dom": "19.2.3",
-        "react-hook-form": "^7.69.0",
         "sharp": "^0.34.5",
         "tailwindcss-animate": "^1.0.7",
         "zod": "^4.3.6",

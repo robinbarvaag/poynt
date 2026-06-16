@@ -1,7 +1,6 @@
 "use client";
 
 import { trpc } from "@/lib/planner/trpc";
-import { zodResolver } from "@hookform/resolvers/zod";
 import {
   type ProfileAudienceType,
   type ProfileCompanySize,
@@ -30,10 +29,10 @@ import {
 } from "@poynt/ui";
 import { Skeleton } from "@poynt/ui";
 import { toast } from "@poynt/ui";
+import { useForm, zodResolver } from "@poynt/ui/form";
 import { Icon } from "@poynt/ui/icons";
 import * as React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 const profileFormSchema = z.object({

@@ -84,7 +84,7 @@ export async function ProductArchiveBlock({
         {(title || description) && (
           <div className="mb-8 md:mb-12">
             {title && (
-              <Heading size="h2" className="mb-3">
+              <Heading size="h2" customStyles="mb-3">
                 {title}
               </Heading>
             )}

@@ -93,7 +93,7 @@ export default async function ServicesPage() {
             ))}
           </div>
         ) : (
-          <Text variant="muted" className="text-center py-12">
+          <Text variant="muted" customStyles="text-center py-12">
             {emptyStateText}
           </Text>
         )}

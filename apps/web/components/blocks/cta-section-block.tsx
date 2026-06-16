@@ -31,7 +31,7 @@ export function CtaSectionBlock({
 }: CtaSectionBlockProps) {
   const content = (
     <div className="text-center max-w-2xl mx-auto">
-      <Heading size="h2" className="mb-4">
+      <Heading size="h2" customStyles="mb-4">
         {title}
       </Heading>
       {description && (

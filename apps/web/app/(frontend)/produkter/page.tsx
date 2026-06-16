@@ -106,7 +106,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
             ))}
           </div>
         ) : (
-          <Text variant="muted" className="text-center py-12">
+          <Text variant="muted" customStyles="text-center py-12">
             {emptyStateText}
           </Text>
         )}
