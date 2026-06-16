@@ -110,6 +110,14 @@
 
   --radius: 0.5rem;
 
+  /* Bevegelses-grammatikk (se docs/DESIGN-PLAN.md §3).
+     Én delt easing + varigheter slik at all bevegelse føles designet, ikke
+     tilfeldig. Gir Tailwind-utilities: ease-soft, duration-fast/base/slow. */
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-fast: 200ms;
+  --duration-base: 500ms;
+  --duration-slow: 800ms;
+
   --text-tiny: 0.625rem;
   --text-tiny--line-height: 1.5rem;
   --text-tiny--letter-spacing: 0.125rem;
