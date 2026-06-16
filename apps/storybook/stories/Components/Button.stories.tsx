@@ -5,7 +5,19 @@ const meta = {
   title: "Komponenter/Button",
   component: Button,
   tags: ["autodocs"],
-  parameters: { layout: "centered" },
+  parameters: {
+    layout: "centered",
+    docs: {
+      description: {
+        component:
+          "Merkevareknappene (default/saffron/salmon/ink) har et lekent sveip: " +
+          "en aksent-flate ligger forskjøvet bak som en hard skygge og sklir inn " +
+          "og dekker hele knappen ved hover, mens tekstfargen bytter. HOLD MUSA " +
+          "OVER for å se det. Nøytrale verktøy-varianter (outline/ghost/…) er " +
+          "uendret. Bygget med pseudo-elementer, så `asChild` fortsatt funker.",
+      },
+    },
+  },
 } satisfies Meta<typeof Button>;
 
 export default meta;
@@ -23,6 +35,9 @@ export const Default: Story = {
       control: { type: "select" },
       options: [
         "default",
+        "saffron",
+        "salmon",
+        "ink",
         "destructive",
         "outline",
         "secondary",
@@ -37,15 +52,35 @@ export const Default: Story = {
   },
 };
 
-export const Varianter: Story = {
+export const Merkevare: Story = {
+  name: "Merkevare (sveip — hold musa over)",
+  render: () => (
+    <div className="flex flex-wrap items-center gap-6">
+      <Button variant="default" size="lg">
+        Bli medlem
+      </Button>
+      <Button variant="saffron" size="lg">
+        Se kursene
+      </Button>
+      <Button variant="salmon" size="lg">
+        Prøv gratis
+      </Button>
+      <Button variant="ink" size="lg">
+        Logg inn
+      </Button>
+    </div>
+  ),
+};
+
+export const Verktoy: Story = {
+  name: "Verktøy-varianter",
   render: () => (
     <div className="flex flex-wrap items-center gap-2">
-      <Button variant="default">Default</Button>
-      <Button variant="destructive">Destructive</Button>
       <Button variant="outline">Outline</Button>
       <Button variant="secondary">Secondary</Button>
       <Button variant="ghost">Ghost</Button>
       <Button variant="link">Link</Button>
+      <Button variant="destructive">Destructive</Button>
     </div>
   ),
 };
