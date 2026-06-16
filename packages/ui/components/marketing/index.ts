@@ -6,9 +6,11 @@ export {
   type FeatureGridProps,
 } from "./feature-grid";
 export {
-  Pricing,
-  type PricingProps,
-  type PricingTier,
-} from "./pricing";
+  type Logo,
+  LogoCloud,
+  type LogoCloudProps,
+} from "./logo-cloud";
+export { Newsletter, type NewsletterProps } from "./newsletter";
+export { Pricing, type PricingProps, type PricingTier } from "./pricing";
 export { type Stat, StatsBand, type StatsBandProps } from "./stats-band";
 export { type Step, Steps, type StepsProps } from "./steps";
