@@ -32,7 +32,19 @@ bun run format           # Format with Biome
 # Payload CMS (run from apps/web)
 bun run generate:types   # Regenerate Payload TypeScript types
 bun run payload          # Payload CLI
+
+# Database migrations (run from repo root) — see docs/MIGRATIONS.md
+bun run payload:status         # Show applied Payload migrations
+bun run payload:migrate:create # Generate a Payload migration from schema changes
+bun run payload:migrate        # Apply pending Payload migrations
+bun run planner:generate       # Generate a Drizzle (planner_*) migration
+bun run planner:migrate        # Apply Drizzle (planner_*) migrations
 ```
+
+**Migrations**: Payload runs with `push: false` — schema changes go through committed migration
+files (`payload:migrate:create` → review the generated `up()` → `payload:migrate`). Never run
+`drizzle-kit push` or boot dev with Payload `push: true` (both can corrupt the `planner_*`
+schema). Full workflow and rationale in `docs/MIGRATIONS.md`.
 
 ## Architecture
 

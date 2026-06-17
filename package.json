@@ -11,7 +11,15 @@
     "check": "biome check --write .",
     "check:ci": "biome ci .",
     "clean": "turbo clean",
-    "nuke": "find . -name 'node_modules' -type d -prune -exec rm -rf {} + && find . -name '.next' -type d -prune -exec rm -rf {} + && rm -rf .turbo && bun install"
+    "nuke": "find . -name 'node_modules' -type d -prune -exec rm -rf {} + && find . -name '.next' -type d -prune -exec rm -rf {} + && rm -rf .turbo && bun install",
+    "payload:status": "bun run --cwd apps/web migrate:status",
+    "payload:migrate": "bun run --cwd apps/web migrate",
+    "payload:migrate:create": "bun run --cwd apps/web migrate:create",
+    "payload:migrate:down": "bun run --cwd apps/web migrate:down",
+    "payload:types": "bun run --cwd apps/web generate:types",
+    "planner:generate": "bun run --cwd packages/planner-db db:generate",
+    "planner:migrate": "bun run --cwd packages/planner-db db:migrate",
+    "planner:studio": "bun run --cwd packages/planner-db db:studio"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
