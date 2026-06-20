@@ -9,9 +9,19 @@ export const Testimonials: Block = {
   },
   fields: [
     {
+      name: "eyebrow",
+      type: "text",
+      label: "Etikett (liten tekst over tittel)",
+    },
+    {
       name: "title",
       type: "text",
       label: "Tittel",
+    },
+    {
+      name: "intro",
+      type: "textarea",
+      label: "Ingress",
     },
     {
       name: "layout",
@@ -19,10 +29,22 @@ export const Testimonials: Block = {
       defaultValue: "cards",
       options: [
         { label: "Kort", value: "cards" },
-        { label: "Slider", value: "slider" },
         { label: "Stor sitat", value: "quote" },
       ],
       label: "Layout",
+    },
+    {
+      name: "columns",
+      type: "select",
+      label: "Antall kolonner",
+      defaultValue: "3",
+      admin: {
+        condition: (_, siblingData) => siblingData?.layout !== "quote",
+      },
+      options: [
+        { label: "2", value: "2" },
+        { label: "3", value: "3" },
+      ],
     },
     {
       name: "testimonials",

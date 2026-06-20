@@ -1,11 +1,7 @@
-import { getMediaUrl } from "@/lib/media-url";
+import { type MediaResource, PayloadImage } from "@/components/payload-image";
 import { type TestimonialItem, Testimonials } from "@poynt/ui";
-import Image from "next/image";
 
-interface Media {
-  url?: string | null;
-  alt?: string | null;
-}
+type Media = MediaResource;
 
 interface TestimonialInput {
   id?: string | null;
@@ -22,7 +18,7 @@ interface TestimonialsBlockProps {
   title?: string | null;
   eyebrow?: string | null;
   intro?: string | null;
-  layout?: "cards" | "quote" | "slider" | null;
+  layout?: "cards" | "quote" | null;
   columns?: "2" | "3" | null;
   testimonials?: TestimonialInput[] | null;
 }
@@ -55,16 +51,16 @@ export function TestimonialsBlock({
       company: t.company ?? undefined,
       rating: t.rating ?? undefined,
       logo: logo?.url ? (
-        <Image
-          src={getMediaUrl(logo.url)}
+        <PayloadImage
+          media={logo}
           alt={logo.alt || t.company || "Logo"}
           fill
           className="object-contain object-left"
         />
       ) : undefined,
       avatar: avatar?.url ? (
-        <Image
-          src={getMediaUrl(avatar.url)}
+        <PayloadImage
+          media={avatar}
           alt={avatar.alt || t.author}
           fill
           className="object-cover"
@@ -78,7 +74,6 @@ export function TestimonialsBlock({
       eyebrow={eyebrow ?? undefined}
       title={title ?? undefined}
       intro={intro ?? undefined}
-      // "slider" finnes som gammelt valg i CMS — vis det som kort inntil videre.
       layout={layout === "quote" ? "quote" : "cards"}
       columns={columns ? (Number(columns) as 2 | 3) : undefined}
       testimonials={items}

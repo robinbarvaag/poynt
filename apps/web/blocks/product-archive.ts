@@ -45,6 +45,7 @@ export const ProductArchive: Block = {
       label: "Filtrer på produkttype",
       options: [
         { label: "Alle produkter", value: "all" },
+        { label: "Kun produkter", value: "product" },
         { label: "Kun kurs", value: "course" },
         { label: "Kun PDF-er", value: "pdf" },
         { label: "Kun bundles", value: "bundle" },

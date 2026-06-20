@@ -1,0 +1,58 @@
+import { Meta, Canvas, Controls } from "@storybook/addon-docs/blocks";
+import * as ServiceShowcaseStories from "./ServiceShowcase.stories";
+
+<Meta of={ServiceShowcaseStories} />
+
+# ServiceShowcase
+
+Tjeneste-oversikt der et kort **«zoomer» åpent** til et panel via delt
+layout-animasjon (framer-motion `layoutId`). Laget for tilfellet der hver
+tjeneste er en kort beskrivelse + pris + «ta kontakt» — da unngår man tynne egne
+sider, men får likevel en rik, fokusert visning per tjeneste.
+
+## Når brukes den
+
+- `/tjenester` når innholdet per tjeneste er moderat (et avsnitt + pris).
+- Andre steder der man vil vise et lite sett valg som ekspanderer på stedet.
+
+## Når IKKE
+
+- Når hver tjeneste har mye innhold som fortjener en ekte, delbar side (SEO) —
+  bruk da dedikerte sider (`ServiceGrid` + `/tjenester/[slug]`).
+- Til produkter man legger i handlekurv — bruk **ProductGrid**.
+
+## Slik virker den
+
+- Kortet og panelet deler `layoutId={`service-${id}`}`, så framer-motion morfer
+  kortet til panelet (zoom) og tilbake igjen ved lukking.
+- **Kontrollert:** appen eier `activeId` + `onSelect`/`onClose`. Escape og klikk
+  på bakgrunnen lukker; body-scroll låses mens panelet er åpent. Respekterer
+  `prefers-reduced-motion`.
+
+## Presentasjon, ikke data
+
+Appen formaterer pris og kobler `next/image` inn via `image`-slotten; `details`
+kan ta rik tekst for ekstra innhold i panelet:
+
+```tsx
+const [activeId, setActiveId] = useState<string | number | null>(null);
+
+<ServiceShowcase
+  services={docs.map((s) => ({
+    id: s.id,
+    name: s.name,
+    price: formatServicePrice(s),
+    description: s.shortDescription,
+    image: <Image src={url(s)} alt={s.name} fill className="object-cover" />,
+    ctaLabel: "Ta kontakt",
+    ctaHref: "/om",
+  }))}
+  activeId={activeId}
+  onSelect={setActiveId}
+  onClose={() => setActiveId(null)}
+/>
+```
+
+## Demo
+
+<Canvas of={ServiceShowcaseStories.Standard} />

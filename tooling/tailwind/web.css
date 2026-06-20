@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @plugin "tailwindcss-animate";
+@plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -10,98 +11,65 @@
 
   --radius: 0.625rem;
 
-  --background: oklch(0.979 0.008 197.545);
-  --foreground: oklch(0.2 0.072 161.757);
+  /* Semantiske tokens snappet til den offisielle paletten
+     (poynt-assets/«Poynt - Utvidet fargepalett.pdf»). Eksakte hex, ingen
+     friheter. Lyst tema: Azure-bakgrunn, Forrest-tekst, Castelton som primær. */
+  --background: #f2fafa; /* Azure */
+  --foreground: #004029; /* Forrest Green */
 
-  --card: oklch(0.979 0.008 197.545);
-  --card-foreground: oklch(0.328 0.072 161.757);
+  --card: #ffffff; /* Hvit — løfter kort/flater over Azure-bakgrunnen */
+  --card-foreground: #004029; /* Forrest Green */
 
-  --popover: oklch(0.979 0.008 197.545);
-  --popover-foreground: oklch(0.328 0.072 161.757);
+  --popover: #ffffff; /* Hvit — crisp meny/dropdown over Azure-bakgrunnen */
+  --popover-foreground: #004029; /* Forrest Green */
 
-  --primary: oklch(0.468 0.092 165.684);
-  --primary-foreground: oklch(0.979 0.008 197.545);
+  --primary: #29664f; /* Castelton Green */
+  --primary-foreground: #f2fafa; /* Azure */
 
-  --secondary: oklch(0.901 0.011 176.676);
-  --secondary-foreground: oklch(0.328 0.072 161.757);
+  --secondary: #d7e1de; /* Platinum */
+  --secondary-foreground: #004029; /* Forrest Green */
 
-  --muted: oklch(0.901 0.011 176.676);
-  --muted-foreground: oklch(0.463 0.074 165.684);
+  --muted: #d7e1de; /* Platinum */
+  --muted-foreground: #29664f; /* Castelton Green */
 
-  --accent: oklch(0.885 0.078 6.5);
-  --accent-foreground: oklch(0.328 0.072 161.757);
+  --accent: #ffd6de; /* Mimi Pink */
+  --accent-foreground: #004029; /* Forrest Green */
 
-  /* Tydelig fare-rød — bevisst adskilt fra merkevarens salmon/accent (hue ~8)
-     slik at destructive faktisk leser som «rød», ikke rosa. */
+  /* Tydelig fare-rød — ingen palettfarge dekker dette; beholdt som oklch slik
+     at destructive faktisk leser som «rød», ikke en av merkevarens rosa. */
   --destructive: oklch(0.55 0.218 27);
-  --destructive-foreground: oklch(0.979 0.008 197.545);
+  --destructive-foreground: #f2fafa; /* Azure */
 
-  --border: oklch(0.878 0.057 196.233);
+  --border: #d7e1de; /* Platinum */
+  --input: #d7e1de; /* Platinum */
+  --ring: #29664f; /* Castelton Green */
 
-  --input: oklch(0.878 0.057 196.233);
+  /* Aksent-flater fra sekundærpaletten — hver med en lesbar tekstfarge.
+     Gir par-tokens bg-accent-1 / text-accent-1-foreground osv. (de bare
+     bg-saffron/-salmon-utilitiene mangler en definert tekstfarge). */
+  --accent-1: #eac435; /* Saffron */
+  --accent-1-foreground: #004029; /* Forrest Green */
+  --accent-2: #ff99ad; /* Salmon Pink */
+  --accent-2-foreground: #004029; /* Forrest Green */
+  --accent-3: #abe3e3; /* Celeste */
+  --accent-3-foreground: #004029; /* Forrest Green */
+  --accent-4: #dee5b3; /* Cream */
+  --accent-4-foreground: #004029; /* Forrest Green */
 
-  --ring: oklch(0.463 0.074 165.684);
+  --chart-1: #29664f; /* Castelton */
+  --chart-2: #eac435; /* Saffron */
+  --chart-3: #ff99ad; /* Salmon Pink */
+  --chart-4: #b6c454; /* Yellow Green */
+  --chart-5: #ff6e8a; /* Bright Pink */
 
-  --chart-1: oklch(0.463 0.074 165.684);
-  --chart-2: oklch(0.83 0.155 93.127);
-  --chart-3: oklch(0.722 0.178 10.748);
-  --chart-4: oklch(0.787 0.137 115.615);
-  --chart-5: oklch(0.793 0.124 7.59);
-
-  --sidebar: oklch(0.959 0.049 201.168);
-  --sidebar-foreground: oklch(0.328 0.072 161.757);
-  --sidebar-primary: oklch(0.463 0.074 165.684);
-  --sidebar-primary-foreground: oklch(0.979 0.008 197.545);
-  --sidebar-accent: oklch(0.878 0.057 196.233);
-  --sidebar-accent-foreground: oklch(0.328 0.072 161.757);
-  --sidebar-border: oklch(0.878 0.057 196.233);
-  --sidebar-ring: oklch(0.463 0.074 165.684);
-}
-
-.dark {
-  --background: oklch(0.328 0.072 161.757);
-  --foreground: oklch(0.979 0.008 197.545);
-
-  --card: oklch(0.463 0.074 165.684);
-  --card-foreground: oklch(0.979 0.008 197.545);
-
-  --popover: oklch(0.463 0.074 165.684);
-  --popover-foreground: oklch(0.979 0.008 197.545);
-
-  --primary: oklch(0.959 0.049 201.168);
-  --primary-foreground: oklch(0.328 0.072 161.757);
-
-  --secondary: oklch(0.463 0.074 165.684);
-  --secondary-foreground: oklch(0.979 0.008 197.545);
-
-  --muted: oklch(0.463 0.074 165.684);
-  --muted-foreground: oklch(0.878 0.057 196.233);
-
-  --accent: oklch(0.793 0.124 7.59);
-  --accent-foreground: oklch(0.979 0.008 197.545);
-
-  --destructive: oklch(0.62 0.21 27);
-  --destructive-foreground: oklch(0.979 0.008 197.545);
-
-  --border: oklch(0.878 0.057 196.233 / 20%);
-  --input: oklch(0.878 0.057 196.233 / 25%);
-
-  --ring: oklch(0.878 0.057 196.233);
-
-  --chart-1: oklch(0.959 0.049 201.168);
-  --chart-2: oklch(0.83 0.155 93.127);
-  --chart-3: oklch(0.793 0.124 7.59);
-  --chart-4: oklch(0.787 0.137 115.615);
-  --chart-5: oklch(0.913 0.047 4.774);
-
-  --sidebar: oklch(0.328 0.072 161.757);
-  --sidebar-foreground: oklch(0.979 0.008 197.545);
-  --sidebar-primary: oklch(0.959 0.049 201.168);
-  --sidebar-primary-foreground: oklch(0.328 0.072 161.757);
-  --sidebar-accent: oklch(0.463 0.074 165.684);
-  --sidebar-accent-foreground: oklch(0.979 0.008 197.545);
-  --sidebar-border: oklch(0.878 0.057 196.233 / 20%);
-  --sidebar-ring: oklch(0.878 0.057 196.233);
+  --sidebar: #ccfcff; /* Mint Green */
+  --sidebar-foreground: #004029; /* Forrest Green */
+  --sidebar-primary: #29664f; /* Castelton */
+  --sidebar-primary-foreground: #f2fafa; /* Azure */
+  --sidebar-accent: #abe3e3; /* Celeste */
+  --sidebar-accent-foreground: #004029; /* Forrest Green */
+  --sidebar-border: #d7e1de; /* Platinum */
+  --sidebar-ring: #29664f; /* Castelton */
 }
 
 @theme inline {
@@ -139,17 +107,30 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-accent-1: var(--accent-1);
+  --color-accent-1-foreground: var(--accent-1-foreground);
+  --color-accent-2: var(--accent-2);
+  --color-accent-2-foreground: var(--accent-2-foreground);
+  --color-accent-3: var(--accent-3);
+  --color-accent-3-foreground: var(--accent-3-foreground);
+  --color-accent-4: var(--accent-4);
+  --color-accent-4-foreground: var(--accent-4-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  /* Leken utvidet palett — for dekorative former, shades og fargeflekker.
-     Gir utilities som bg-salmon, fill-mint, text-saffron. */
-  --color-salmon: oklch(0.77 0.148 8);
-  --color-saffron: oklch(0.845 0.168 90);
-  --color-mint: oklch(0.9 0.088 196);
+  /* Offisiell utvidet palett — eksakte merkefarger fra
+     poynt-assets/«Poynt - Utvidet fargepalett.pdf». Gir utilities som
+     bg-salmon, fill-mint, text-saffron, bg-cream osv. Ikke ta friheter her;
+     bruk disse hex-verdiene direkte. */
+  --color-salmon: #ff99ad; /* Salmon Pink */
+  --color-saffron: #eac435; /* Saffron */
+  --color-mint: #abe3e3; /* Celeste — den lyse teal-flaten for fargeblokker */
+  --color-cream: #dee5b3; /* Cream */
+  --color-bright-pink: #ff6e8a; /* Bright Pink */
+  --color-yellow-green: #b6c454; /* Yellow Green */
 
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;

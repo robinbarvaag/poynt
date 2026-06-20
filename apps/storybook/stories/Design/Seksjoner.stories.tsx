@@ -4,7 +4,6 @@ import {
   FeatureGrid,
   Heading,
   Section,
-  Sprinkles,
   Stack,
   StatsBand,
   Steps,
@@ -98,9 +97,8 @@ export const Reise: Story = {
         ]}
       />
 
-      {/* 4 — CTA: tilbake til lyst, med litt krydder bak */}
+      {/* 4 — CTA: tilbake til lyst */}
       <Section spacing="xl" className="relative overflow-hidden">
-        <Sprinkles />
         <Container className="relative z-10">
           <Reveal>
             <Stack gap="md" align="center">

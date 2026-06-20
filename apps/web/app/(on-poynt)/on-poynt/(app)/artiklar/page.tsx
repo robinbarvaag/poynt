@@ -1,12 +1,11 @@
 import { ArticleSearch } from "@/components/article-search";
 import { CategoryFilter } from "@/components/category-filter";
+import { PayloadImage } from "@/components/payload-image";
 import { hexToRgba } from "@/lib/color-utils";
-import { getMediaUrl } from "@/lib/media-url";
 import type { Article, Category, Media } from "@/payload-types";
 import config from "@/payload.config";
 import { Heading, Text } from "@poynt/ui";
 import { Clock } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { getPayload } from "payload";
 
@@ -125,8 +124,8 @@ function FeaturedCard({ article }: { article: Article }) {
     >
       <div className="relative aspect-21/9 overflow-hidden">
         {featuredImage?.url ? (
-          <Image
-            src={getMediaUrl(featuredImage.url)}
+          <PayloadImage
+            media={featuredImage}
             alt={featuredImage.alt || article.title}
             fill
             className="object-cover transition-transform duration-700 group-hover:scale-[1.02]"
@@ -216,8 +215,8 @@ function ArticleCard({ article }: { article: Article }) {
 
       <div className="relative aspect-video bg-muted overflow-hidden shrink-0">
         {featuredImage?.url ? (
-          <Image
-            src={getMediaUrl(featuredImage.url)}
+          <PayloadImage
+            media={featuredImage}
             alt={featuredImage.alt || article.title}
             fill
             className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"

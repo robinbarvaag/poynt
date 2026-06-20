@@ -1,20 +1,12 @@
-import { getMediaUrl } from "@/lib/media-url";
-import type { SerializedEditorState } from "@payloadcms/richtext-lexical/lexical";
-import { RichText } from "@payloadcms/richtext-lexical/react";
+import { type MediaResource, PayloadImage } from "@/components/payload-image";
 import { Hero } from "@poynt/ui";
-import Image from "next/image";
 
 interface HeroBlockProps {
   title: string;
-  subtitle?: SerializedEditorState;
+  subtitle?: string;
   tagsLabel?: string;
   tags?: { label: string; id?: string }[];
-  image?: {
-    url: string;
-    alt?: string;
-    width?: number;
-    height?: number;
-  };
+  image?: MediaResource;
   imageDuotone?: boolean;
   primaryCta?: {
     text?: string;
@@ -53,7 +45,7 @@ export function HeroBlock({
       className="-mt-22"
       eyebrow={tagsLabel ?? undefined}
       title={title}
-      subtitle={subtitle ? <RichText data={subtitle} /> : undefined}
+      subtitle={subtitle ?? undefined}
       primaryCta={
         mainCta?.text && mainCta?.url
           ? { text: mainCta.text, href: mainCta.url }
@@ -69,14 +61,7 @@ export function HeroBlock({
       duotone={imageDuotone ?? false}
       media={
         image?.url ? (
-          <Image
-            src={getMediaUrl(image.url)}
-            alt={image.alt || ""}
-            fill
-            className="object-cover"
-            priority
-            unoptimized={process.env.NODE_ENV === "development"}
-          />
+          <PayloadImage media={image} fill className="object-cover" priority />
         ) : undefined
       }
     />

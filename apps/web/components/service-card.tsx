@@ -1,6 +1,5 @@
-import { getMediaUrl } from "@/lib/media-url";
+import { type MediaResource, PayloadImage } from "@/components/payload-image";
 import { Heading, Text } from "@poynt/ui";
-import Image from "next/image";
 import Link from "next/link";
 
 interface Service {
@@ -8,10 +7,7 @@ interface Service {
   name: string;
   slug: string;
   shortDescription: string;
-  image?: {
-    url: string;
-    alt?: string;
-  };
+  image?: MediaResource;
   priceType: "fixed" | "from" | "monthly" | "contact";
   price?: number;
   includesVat?: boolean;
@@ -53,8 +49,8 @@ export function ServiceCard({ service }: ServiceCardProps) {
     >
       {service.image && (
         <div className="relative aspect-4/3 w-full bg-muted">
-          <Image
-            src={getMediaUrl(service.image.url)}
+          <PayloadImage
+            media={service.image}
             alt={service.image.alt || service.name}
             fill
             className="object-cover transition-transform group-hover:scale-105"

@@ -40,7 +40,7 @@ export const Header: GlobalConfig = {
           name: "url",
           type: "text",
           label: "Lenke",
-          defaultValue: "/om",
+          defaultValue: "/kontakt",
         },
       ],
     },

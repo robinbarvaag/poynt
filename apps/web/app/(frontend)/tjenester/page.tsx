@@ -1,16 +1,12 @@
 import { PageHero } from "@/components/page-hero";
-import { getMediaUrl } from "@/lib/media-url";
+import {
+  ServiceExplorer,
+  type ServiceExplorerItem,
+} from "@/components/service-explorer";
 import type { Service } from "@/payload-types";
 import config from "@/payload.config";
-import {
-  Container,
-  Section,
-  ServiceGrid,
-  type ServiceGridItem,
-  Text,
-} from "@poynt/ui";
+import { Container, Section, Text } from "@poynt/ui";
 import type { Metadata } from "next";
-import Image from "next/image";
 import { getPayload } from "payload";
 
 function formatServicePrice(service: Service): string | undefined {
@@ -32,26 +28,19 @@ function formatServicePrice(service: Service): string | undefined {
   }
 }
 
-function toServiceItem(service: Service): ServiceGridItem {
+function toExplorerItem(service: Service): ServiceExplorerItem {
   const media =
     service.image && typeof service.image !== "number" ? service.image : null;
 
   return {
     id: service.id,
-    href: service.ctaLink || `/tjenester/${service.slug}`,
     name: service.name,
     price: formatServicePrice(service),
-    shortDescription: service.shortDescription,
+    description: service.shortDescription,
     eyebrow: "Tjeneste",
-    ctaLabel: service.ctaText || "Les mer",
-    image: media?.url ? (
-      <Image
-        src={getMediaUrl(media.url)}
-        alt={media.alt || service.name}
-        fill
-        className="object-cover"
-      />
-    ) : undefined,
+    ctaLabel: service.ctaText || "Ta kontakt",
+    ctaHref: service.ctaLink || "/kontakt",
+    image: media ?? undefined,
   };
 }
 
@@ -132,7 +121,7 @@ export default async function ServicesPage() {
       <Section variant="muted" spacing="md">
         <Container padding="none">
           {services.docs.length > 0 ? (
-            <ServiceGrid services={services.docs.map(toServiceItem)} />
+            <ServiceExplorer services={services.docs.map(toExplorerItem)} />
           ) : (
             <Text variant="muted" customStyles="text-center py-12">
               {emptyStateText}

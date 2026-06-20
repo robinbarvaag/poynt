@@ -81,11 +81,16 @@ export interface Config {
     forms: Form;
     'form-submissions': FormSubmission;
     'payload-kv': PayloadKv;
+    'payload-folders': FolderInterface;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    'payload-folders': {
+      documentsAndFolders: 'payload-folders' | 'media';
+    };
+  };
   collectionsSelect: {
     pages: PagesSelect<false> | PagesSelect<true>;
     'blog-posts': BlogPostsSelect<false> | BlogPostsSelect<true>;
@@ -101,6 +106,7 @@ export interface Config {
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
+    'payload-folders': PayloadFoldersSelect<false> | PayloadFoldersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -230,21 +236,7 @@ export interface Page {
  */
 export interface HeroBlock {
   title: string;
-  subtitle?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  subtitle?: string | null;
   /**
    * F.eks. 'Jeg tilbyr:' eller 'Tjenester:'
    */
@@ -289,6 +281,7 @@ export interface Media {
    * Kun synlig for innloggede brukere
    */
   isPrivate?: boolean | null;
+  folder?: (number | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -326,6 +319,32 @@ export interface Media {
       filename?: string | null;
     };
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-folders".
+ */
+export interface FolderInterface {
+  id: number;
+  name: string;
+  folder?: (number | null) | FolderInterface;
+  documentsAndFolders?: {
+    docs?: (
+      | {
+          relationTo?: 'payload-folders';
+          value: number | FolderInterface;
+        }
+      | {
+          relationTo?: 'media';
+          value: number | Media;
+        }
+    )[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  folderType?: 'media'[] | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -569,8 +588,11 @@ export interface PathCardsBlock {
  * via the `definition` "TestimonialsBlock".
  */
 export interface TestimonialsBlock {
+  eyebrow?: string | null;
   title?: string | null;
-  layout?: ('cards' | 'slider' | 'quote') | null;
+  intro?: string | null;
+  layout?: ('cards' | 'quote') | null;
+  columns?: ('2' | '3') | null;
   testimonials?:
     | {
         quote: string;
@@ -623,7 +645,7 @@ export interface ProductArchiveBlock {
    * Velg hvilke produkter som skal vises
    */
   selectedProducts?: (number | Product)[] | null;
-  filterByType?: ('all' | 'course' | 'pdf' | 'bundle') | null;
+  filterByType?: ('all' | 'product' | 'course' | 'pdf' | 'bundle') | null;
   /**
    * La stå tom for å vise alle
    */
@@ -645,7 +667,7 @@ export interface Product {
    * Genereres automatisk fra produktnavn
    */
   slug: string;
-  type: 'course' | 'pdf' | 'bundle' | 'membership';
+  type: 'product' | 'course' | 'pdf' | 'bundle' | 'membership';
   /**
    * Antal månader mellom kvar fakturering (t.d. 1, 3, 6, 12)
    */
@@ -1407,6 +1429,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'form-submissions';
         value: number | FormSubmission;
+      } | null)
+    | ({
+        relationTo: 'payload-folders';
+        value: number | FolderInterface;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1741,8 +1767,11 @@ export interface PathCardsBlockSelect<T extends boolean = true> {
  * via the `definition` "TestimonialsBlock_select".
  */
 export interface TestimonialsBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
   title?: T;
+  intro?: T;
   layout?: T;
+  columns?: T;
   testimonials?:
     | T
     | {
@@ -1963,6 +1992,7 @@ export interface CategoriesSelect<T extends boolean = true> {
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   isPrivate?: T;
+  folder?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -2268,6 +2298,18 @@ export interface FormSubmissionsSelect<T extends boolean = true> {
 export interface PayloadKvSelect<T extends boolean = true> {
   key?: T;
   data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-folders_select".
+ */
+export interface PayloadFoldersSelect<T extends boolean = true> {
+  name?: T;
+  folder?: T;
+  documentsAndFolders?: T;
+  folderType?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

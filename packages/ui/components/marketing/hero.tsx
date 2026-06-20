@@ -3,7 +3,6 @@ import { Icon, type IconName } from "../../icons";
 import { cn } from "../../lib/utils";
 import { Badge } from "../badge";
 import { Button } from "../button";
-import { Sprinkles } from "../decorative";
 import {
   CountUp,
   DriftingBlob,
@@ -111,8 +110,6 @@ export function Hero({
       <Parallax amount={40} className="-right-16 absolute top-24 z-0">
         <div className="size-72 rounded-[60%_40%_55%_45%/50%_60%_40%_50%] bg-accent/40 blur-2xl" />
       </Parallax>
-      {/* Sentrert (uten bilde) får litt redaksjonelt krydder bak teksten */}
-      {!split && <Sprinkles />}
 
       <div
         className={cn(

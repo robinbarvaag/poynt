@@ -1,13 +1,12 @@
 import { ArticleRichText } from "@/components/article-rich-text";
+import { PayloadImage } from "@/components/payload-image";
 import { TableOfContents } from "@/components/table-of-contents";
 import { hexToRgba } from "@/lib/color-utils";
 import { extractToc } from "@/lib/extract-toc";
-import { getMediaUrl } from "@/lib/media-url";
 import type { Article, Category, Media, User } from "@/payload-types";
 import config from "@/payload.config";
 import { Card, CardContent, Heading, Text } from "@poynt/ui";
 import { ArrowLeft, Clock } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPayload } from "payload";
@@ -142,8 +141,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           {article.featuredImage &&
             typeof article.featuredImage !== "number" && (
               <div className="relative aspect-video w-full rounded-xl overflow-hidden mb-10 bg-muted">
-                <Image
-                  src={getMediaUrl((article.featuredImage as Media).url ?? "")}
+                <PayloadImage
+                  media={article.featuredImage as Media}
                   alt={(article.featuredImage as Media).alt || article.title}
                   fill
                   className="object-cover"
@@ -175,10 +174,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                           {r.featuredImage &&
                             typeof r.featuredImage !== "number" && (
                               <div className="relative aspect-video bg-muted">
-                                <Image
-                                  src={getMediaUrl(
-                                    (r.featuredImage as Media).url ?? ""
-                                  )}
+                                <PayloadImage
+                                  media={r.featuredImage as Media}
                                   alt={
                                     (r.featuredImage as Media).alt || r.title
                                   }

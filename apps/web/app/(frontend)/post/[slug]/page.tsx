@@ -1,9 +1,9 @@
+import { PayloadImage } from "@/components/payload-image";
 import config from "@/payload.config";
 import { RichText } from "@payloadcms/richtext-lexical/react";
 import { Badge, Card, CardContent, Container, Heading, Text } from "@poynt/ui";
 import { ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPayload } from "payload";
@@ -134,8 +134,8 @@ export default async function PostPage({ params }: PostPageProps) {
           typeof post.featuredImage === "object" &&
           post.featuredImage.url && (
             <div className="relative mb-10 aspect-video w-full overflow-hidden rounded-3xl bg-muted">
-              <Image
-                src={post.featuredImage.url}
+              <PayloadImage
+                media={post.featuredImage}
                 alt={post.featuredImage.alt || post.title}
                 fill
                 className="object-cover"
@@ -167,8 +167,8 @@ export default async function PostPage({ params }: PostPageProps) {
                         typeof relatedPost.featuredImage === "object" &&
                         relatedPost.featuredImage.url && (
                           <div className="relative aspect-video bg-muted">
-                            <Image
-                              src={relatedPost.featuredImage.url}
+                            <PayloadImage
+                              media={relatedPost.featuredImage}
                               alt={
                                 relatedPost.featuredImage.alt ||
                                 relatedPost.title

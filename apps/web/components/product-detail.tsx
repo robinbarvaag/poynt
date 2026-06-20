@@ -1,11 +1,10 @@
 "use client";
 import { AddToCartButton } from "@/components/add-to-cart-button";
-import { getMediaUrl } from "@/lib/media-url";
+import { type MediaResource, PayloadImage } from "@/components/payload-image";
 import type { Product } from "@/payload-types";
 import { RichText } from "@payloadcms/richtext-lexical/react";
 import { Badge, Button, Container, Heading, Text } from "@poynt/ui";
 import { ArrowLeft } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -15,6 +14,7 @@ interface ProductDetailClientProps {
 }
 
 const typeLabels: Record<string, string> = {
+  product: "Produkt",
   course: "Kurs",
   pdf: "PDF",
   bundle: "Bundle",
@@ -87,24 +87,21 @@ function ProductDetailClient({
   const hasDiscount =
     product.compareAtPrice != null && product.compareAtPrice > product.price;
 
-  // Build image array from featuredImage and gallery
-  const images: { url: string; alt?: string; caption?: string }[] = [];
+  // Build image array from featuredImage and gallery. Vi beholder hele media-
+  // objektet (ikke bare url/alt) så fokuspunkt o.l. flyter til PayloadImage.
+  const images: { media: MediaResource; caption?: string }[] = [];
   if (
     product.featuredImage &&
     typeof product.featuredImage !== "number" &&
     product.featuredImage.url
   ) {
-    images.push({
-      url: product.featuredImage.url,
-      alt: product.featuredImage.alt ?? undefined,
-    });
+    images.push({ media: product.featuredImage });
   }
   if (product.gallery) {
     for (const item of product.gallery) {
       if (item.image && typeof item.image !== "number" && item.image.url) {
         images.push({
-          url: item.image.url,
-          alt: item.image.alt ?? undefined,
+          media: item.image,
           caption: item.caption ?? undefined,
         });
       }
@@ -134,9 +131,9 @@ function ProductDetailClient({
             />
             <div className="relative z-10 aspect-square w-full overflow-hidden rounded-3xl bg-muted shadow-sm">
               {currentImage ? (
-                <Image
-                  src={getMediaUrl(currentImage.url)}
-                  alt={currentImage.alt || product.name}
+                <PayloadImage
+                  media={currentImage.media}
+                  alt={currentImage.media.alt || product.name}
                   fill
                   className="object-cover"
                   priority
@@ -169,9 +166,9 @@ function ProductDetailClient({
                       : "border-transparent hover:border-border"
                   }`}
                 >
-                  <Image
-                    src={getMediaUrl(img.url)}
-                    alt={img.alt || `Bilde ${index + 1}`}
+                  <PayloadImage
+                    media={img.media}
+                    alt={img.media.alt || `Bilde ${index + 1}`}
                     fill
                     className="object-cover"
                   />

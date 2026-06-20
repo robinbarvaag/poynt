@@ -1,6 +1,6 @@
 "use client";
 
-import { getMediaUrl } from "@/lib/media-url";
+import { type MediaResource, PayloadImage } from "@/components/payload-image";
 import {
   Button,
   SiteHeader,
@@ -8,7 +8,6 @@ import {
   type SiteHeaderNavItem,
 } from "@poynt/ui";
 import { Search, User } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { CartDrawer } from "./cart-drawer";
@@ -37,7 +36,7 @@ interface NavItem {
 
 interface HeaderProps {
   siteName?: string;
-  logo?: { url: string; alt?: string } | null;
+  logo?: MediaResource | null;
   showSearch?: boolean;
   showLogin?: boolean;
   ctaButton?: {
@@ -108,9 +107,9 @@ export function Header({
     })),
   }));
 
-  const logoNode = logo ? (
-    <Image
-      src={getMediaUrl(logo.url)}
+  const logoNode = logo?.url ? (
+    <PayloadImage
+      media={logo}
       alt={logo.alt || siteName}
       width={120}
       height={40}

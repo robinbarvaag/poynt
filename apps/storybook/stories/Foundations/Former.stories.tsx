@@ -6,7 +6,6 @@ import {
   Grain,
   GridPattern,
   Heading,
-  Sprinkles,
   Text,
 } from "@poynt/ui";
 import { DriftingBlob } from "@poynt/ui/motion";
@@ -232,26 +231,6 @@ export const GridIBruk: Story = {
             På en mettet flate løfter en svak grid frem dybden — fin som CTA-
             eller hero-bånd.
           </Text>
-        </div>
-      </div>
-    </div>
-  ),
-};
-
-export const Krydder: Story = {
-  name: "Sprinkles (krydder)",
-  render: () => (
-    <div className="flex flex-col gap-6">
-      <Text variant="muted">
-        Spredte redaksjonelle «stickers» — ring, prikk, pluss, squiggle, blob —
-        i merkefargene. Krydrer en seksjon uten å ta fokus. Driver sakte.
-      </Text>
-      <div className="relative h-80 overflow-hidden rounded-3xl border border-border bg-background">
-        <Sprinkles />
-        <div className="relative z-10 flex h-full items-center justify-center">
-          <Heading variant="h3" color="foreground">
-            En seksjon med litt krydder
-          </Heading>
         </div>
       </div>
     </div>

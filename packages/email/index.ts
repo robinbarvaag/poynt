@@ -74,6 +74,56 @@ export async function subscribeToNewsletter(
 }
 
 /**
+ * Send branded contact emails when the contact form is submitted: a notification
+ * to Poynt (set CONTACT_EMAIL) and a confirmation to the sender. No-ops if
+ * RESEND_API_KEY is missing. Uses React Email templates for proper design.
+ */
+export async function sendContactEmails(params: {
+  name: string;
+  email: string;
+  phone?: string;
+  subject?: string;
+  message: string;
+}): Promise<void> {
+  if (!process.env.RESEND_API_KEY) return;
+
+  const { render } = await import("@react-email/render");
+  const { default: ContactNotificationEmail } = await import(
+    "./templates/contact-notification"
+  );
+  const { default: ContactConfirmationEmail } = await import(
+    "./templates/contact-confirmation"
+  );
+
+  const resendClient = getResend();
+  // TODO: bytt til verifisert avsender-domene (onboarding@resend.dev kan i
+  // test-modus kun levere til Resend-kontoens egen adresse).
+  const from = "Poynt <onboarding@resend.dev>";
+
+  const notifyTo = process.env.CONTACT_EMAIL;
+  if (notifyTo) {
+    const html = await render(ContactNotificationEmail(params));
+    await resendClient.emails.send({
+      from,
+      to: notifyTo,
+      replyTo: params.email,
+      subject: `Ny henvendelse fra ${params.name}`,
+      html,
+    });
+  }
+
+  const confirmationHtml = await render(
+    ContactConfirmationEmail({ name: params.name, message: params.message })
+  );
+  await resendClient.emails.send({
+    from,
+    to: params.email,
+    subject: "Takk for din henvendelse – Poynt",
+    html: confirmationHtml,
+  });
+}
+
+/**
  * Send welcome email to new member with magic link login.
  * @deprecated Use sendMemberWelcomeEmail for membership subscriptions
  */

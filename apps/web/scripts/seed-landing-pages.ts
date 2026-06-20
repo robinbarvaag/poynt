@@ -8,40 +8,6 @@
 import config from "@payload-config";
 import { getPayload } from "payload";
 
-// Minimal Lexical-dokument for hero-undertekst (richText-felt).
-function richText(text: string) {
-  return {
-    root: {
-      type: "root",
-      format: "" as const,
-      indent: 0,
-      version: 1,
-      direction: "ltr" as const,
-      children: [
-        {
-          type: "paragraph",
-          format: "" as const,
-          indent: 0,
-          version: 1,
-          direction: "ltr" as const,
-          textFormat: 0,
-          children: [
-            {
-              type: "text",
-              mode: "normal" as const,
-              text,
-              detail: 0,
-              format: 0,
-              style: "",
-              version: 1,
-            },
-          ],
-        },
-      ],
-    },
-  };
-}
-
 const pages = [
   {
     title: "For gründere",
@@ -52,9 +18,8 @@ const pages = [
       {
         blockType: "hero",
         title: "Bygg det du drømmer om — med litt drahjelp",
-        subtitle: richText(
-          "On Poynt gir deg verktøyene, kunnskapen og fellesskapet du trenger for å komme videre som selvstendig."
-        ),
+        subtitle:
+          "On Poynt gir deg verktøyene, kunnskapen og fellesskapet du trenger for å komme videre som selvstendig.",
         tagsLabel: "For deg som er:",
         tags: [
           { label: "Gründer" },
@@ -106,7 +71,7 @@ const pages = [
         description:
           "Bli medlem i On Poynt i dag og få tilgang til verktøy, kurs og fellesskap.",
         primaryCta: { text: "Bli medlem", url: "/on-poynt" },
-        secondaryCta: { text: "Ta kontakt", url: "/om" },
+        secondaryCta: { text: "Ta kontakt", url: "/kontakt" },
       },
     ],
   },
@@ -119,16 +84,15 @@ const pages = [
       {
         blockType: "hero",
         title: "Kompetanse til styret og ledelsen",
-        subtitle: richText(
-          "Erfaring med både forretning og mennesker — som styremedlem, rådgiver eller foredragsholder."
-        ),
+        subtitle:
+          "Erfaring med både forretning og mennesker — som styremedlem, rådgiver eller foredragsholder.",
         tagsLabel: "Jeg tilbyr:",
         tags: [
           { label: "Styreverv" },
           { label: "Rådgivning" },
           { label: "Foredrag" },
         ],
-        primaryCta: { text: "Ta kontakt", url: "/om" },
+        primaryCta: { text: "Ta kontakt", url: "/kontakt" },
         secondaryCta: { text: "Se tjenester", url: "/tjenester" },
       },
       {
@@ -164,7 +128,7 @@ const pages = [
         title: "La oss ta en prat",
         description:
           "Ta kontakt for en uforpliktende samtale om hvordan jeg kan bidra hos dere.",
-        primaryCta: { text: "Ta kontakt", url: "/om" },
+        primaryCta: { text: "Ta kontakt", url: "/kontakt" },
       },
     ],
   },

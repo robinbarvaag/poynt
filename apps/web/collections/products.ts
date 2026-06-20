@@ -46,6 +46,7 @@ export const Products: CollectionConfig = {
       type: "select",
       required: true,
       options: [
+        { label: "Produkt", value: "product" },
         { label: "Kurs", value: "course" },
         { label: "PDF", value: "pdf" },
         { label: "Bundle", value: "bundle" },

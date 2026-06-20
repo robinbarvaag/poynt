@@ -1,11 +1,7 @@
-import { getMediaUrl } from "@/lib/media-url";
+import { type MediaResource, PayloadImage } from "@/components/payload-image";
 import { ContentMedia } from "@poynt/ui";
-import Image from "next/image";
 
-interface MediaRef {
-  url?: string | null;
-  alt?: string | null;
-}
+type MediaRef = MediaResource;
 
 interface ContentMediaBlockProps {
   eyebrow?: string | null;
@@ -33,13 +29,7 @@ export function ContentMediaBlock({
 }: ContentMediaBlockProps) {
   const img = typeof image === "object" && image !== null ? image : null;
   const media = img?.url ? (
-    <Image
-      src={getMediaUrl(img.url)}
-      alt={img.alt ?? ""}
-      fill
-      className="object-cover"
-      unoptimized={process.env.NODE_ENV === "development"}
-    />
+    <PayloadImage media={img} fill className="object-cover" />
   ) : undefined;
 
   return (

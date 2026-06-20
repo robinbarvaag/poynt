@@ -230,7 +230,6 @@ export {
   FloatingShapes,
   Grain,
   GridPattern,
-  Sprinkles,
 } from "./components/decorative";
 
 export {
@@ -285,6 +284,9 @@ export {
   ServiceGrid,
   type ServiceGridItem,
   type ServiceGridProps,
+  ServiceShowcase,
+  type ServiceShowcaseItem,
+  type ServiceShowcaseProps,
   type Stat,
   StatsBand,
   type StatsBandProps,

@@ -1,11 +1,15 @@
+import { PayloadImage } from "@/components/payload-image";
 import type { Product } from "@/payload-types";
 import config from "@/payload.config";
-import { Heading, cn } from "@poynt/ui";
+import {
+  BlockSection,
+  Heading,
+  ProductGrid,
+  type ProductGridItem,
+} from "@poynt/ui";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { type Where, getPayload } from "payload";
-import type { ComponentProps } from "react";
-import { ProductCard } from "../product-card";
 
 interface ProductArchiveBlockProps {
   title?: string;
@@ -18,6 +22,39 @@ interface ProductArchiveBlockProps {
   showMoreLink?: boolean;
 }
 
+const typeLabels: Record<string, string> = {
+  product: "Produkt",
+  course: "Kurs",
+  pdf: "PDF",
+  bundle: "Pakke",
+  membership: "Medlemskap",
+};
+
+function toGridItem(product: Product): ProductGridItem {
+  const media =
+    product.featuredImage && typeof product.featuredImage !== "number"
+      ? product.featuredImage
+      : null;
+
+  return {
+    id: product.id,
+    href: `/produkter/${product.slug}`,
+    name: product.name,
+    eyebrow: typeLabels[product.type] ?? product.type,
+    shortDescription: product.shortDescription ?? undefined,
+    price: product.price,
+    compareAtPrice: product.compareAtPrice ?? undefined,
+    image: media?.url ? (
+      <PayloadImage
+        media={media}
+        alt={media.alt || product.name}
+        fill
+        className="object-cover"
+      />
+    ) : undefined,
+  };
+}
+
 export async function ProductArchiveBlock({
   title,
   description,
@@ -25,7 +62,6 @@ export async function ProductArchiveBlock({
   selectedProducts,
   filterByType = "all",
   limit = 8,
-  layout = "grid",
   showMoreLink = false,
 }: ProductArchiveBlockProps) {
   const payload = await getPayload({ config });
@@ -79,53 +115,37 @@ export async function ProductArchiveBlock({
   }
 
   return (
-    <div className="container mx-auto px-4">
-      {(title || description) && (
-        <div className="mb-8 md:mb-12">
-          {title && (
-            <Heading size="h2" customStyles="mb-3">
-              {title}
-            </Heading>
-          )}
-          {description && (
-            <p className="text-lg text-muted-foreground max-w-2xl">
-              {description}
-            </p>
-          )}
-        </div>
-      )}
-
-      <div
-        className={cn(
-          "grid gap-6",
-          layout === "grid" && "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
-          layout === "grid-4" && "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4",
-          layout === "carousel" && "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
+    <BlockSection background="default" containerSize={false}>
+      <div className="container mx-auto px-4">
+        {(title || description) && (
+          <div className="mb-8 md:mb-12">
+            {title && (
+              <Heading size="h2" customStyles="mb-3">
+                {title}
+              </Heading>
+            )}
+            {description && (
+              <p className="max-w-2xl text-lg text-muted-foreground">
+                {description}
+              </p>
+            )}
+          </div>
         )}
-      >
-        {products.map((product) => (
-          <ProductCard
-            key={product.id}
-            product={
-              product as unknown as ComponentProps<
-                typeof ProductCard
-              >["product"]
-            }
-          />
-        ))}
-      </div>
 
-      {showMoreLink && (
-        <div className="mt-8 text-center">
-          <Link
-            href="/produkter"
-            className="inline-flex items-center gap-2 text-primary hover:underline font-medium"
-          >
-            Se alle produkter
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
-      )}
-    </div>
+        <ProductGrid products={products.map(toGridItem)} featureFirst={false} />
+
+        {showMoreLink && (
+          <div className="mt-8 text-center">
+            <Link
+              href="/produkter"
+              className="inline-flex items-center gap-2 font-medium text-primary hover:underline"
+            >
+              Se alle produkter
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        )}
+      </div>
+    </BlockSection>
   );
 }

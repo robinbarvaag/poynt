@@ -1,9 +1,8 @@
-import { getMediaUrl } from "@/lib/media-url";
+import { type MediaResource, PayloadImage } from "@/components/payload-image";
 import type { SerializedEditorState } from "@payloadcms/richtext-lexical/lexical";
 import { RichText } from "@payloadcms/richtext-lexical/react";
 import { FloatingShapes, Heading, Text } from "@poynt/ui";
 import { Facebook, Instagram, Linkedin, Twitter, Youtube } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { NewsletterForm } from "./newsletter-form";
 
@@ -33,7 +32,7 @@ interface SocialLink {
 
 interface FooterProps {
   siteName?: string;
-  logo?: { url: string; alt?: string } | null;
+  logo?: MediaResource | null;
   columns?: FooterColumn[];
   bottomText?: SerializedEditorState;
   showSocialLinks?: boolean;
@@ -108,9 +107,9 @@ export function Footer({
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
           <div className="col-span-2 md:col-span-4 lg:col-span-1">
             <Link href="/" className="inline-block mb-4">
-              {logo ? (
-                <Image
-                  src={getMediaUrl(logo.url)}
+              {logo?.url ? (
+                <PayloadImage
+                  media={logo}
                   alt={logo.alt || siteName}
                   width={120}
                   height={40}

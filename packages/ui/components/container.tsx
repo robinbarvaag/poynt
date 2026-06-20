@@ -51,6 +51,9 @@ const sectionVariants = cva("w-full", {
   variants: {
     variant: {
       default: "",
+      // Mild veksel-flate for seksjonsrytmen — en hårfin Platinum-vask over
+      // bakgrunnen, ikke den harde grå `muted`. Gir rolige overganger.
+      soft: "bg-secondary/40",
       muted: "bg-muted",
       primary: "bg-primary text-primary-foreground",
       accent: "bg-accent text-accent-foreground",

@@ -23,18 +23,21 @@ export interface NewsletterProps {
 
 const themes = {
   primary: {
+    panel: "bg-primary text-primary-foreground",
     eyebrow: "text-primary-foreground/70",
     heading: "white",
     description: "text-primary-foreground/80",
     button: "saffron",
   },
   saffron: {
+    panel: "bg-saffron text-foreground",
     eyebrow: "text-foreground/60",
     heading: "foreground",
     description: "text-foreground/75",
     button: "ink",
   },
   salmon: {
+    panel: "bg-salmon text-foreground",
     eyebrow: "text-foreground/60",
     heading: "foreground",
     description: "text-foreground/75",
@@ -58,41 +61,50 @@ export function Newsletter({
   const theme = themes[variant];
 
   return (
-    <Section variant={variant} spacing="lg">
-      <Container size="sm">
+    <Section spacing="lg">
+      <Container>
         <Reveal>
-          <div className="text-center">
-            {eyebrow && <Eyebrow className={theme.eyebrow}>{eyebrow}</Eyebrow>}
-            <Heading
-              variant="h2"
-              color={theme.heading}
-              align="center"
-              customStyles="mt-3"
-            >
-              {title}
-            </Heading>
-            {description && (
-              <Text
-                variant="lead"
+          <div
+            className={cn(
+              "rounded-3xl px-6 py-16 shadow-lg md:px-12 md:py-20",
+              theme.panel
+            )}
+          >
+            <div className="mx-auto max-w-xl text-center">
+              {eyebrow && (
+                <Eyebrow className={theme.eyebrow}>{eyebrow}</Eyebrow>
+              )}
+              <Heading
+                variant="h2"
+                color={theme.heading}
                 align="center"
-                customStyles={cn("mx-auto mt-4 max-w-xl", theme.description)}
+                customStyles="mt-3"
               >
-                {description}
-              </Text>
-            )}
+                {title}
+              </Heading>
+              {description && (
+                <Text
+                  variant="lead"
+                  align="center"
+                  customStyles={cn("mx-auto mt-4 max-w-xl", theme.description)}
+                >
+                  {description}
+                </Text>
+              )}
 
-            {form ?? (
-              <div className="mx-auto mt-8 flex max-w-md flex-col gap-3 sm:flex-row">
-                <input
-                  type="email"
-                  placeholder={placeholder}
-                  className="flex-1 rounded-2xl border-0 bg-background px-5 py-3 text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                />
-                <Button type="button" size="lg" variant={theme.button}>
-                  {buttonText}
-                </Button>
-              </div>
-            )}
+              {form ?? (
+                <div className="mx-auto mt-8 flex max-w-md flex-col gap-3 sm:flex-row">
+                  <input
+                    type="email"
+                    placeholder={placeholder}
+                    className="flex-1 rounded-2xl border-0 bg-background px-5 py-3 text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  />
+                  <Button type="button" size="lg" variant={theme.button}>
+                    {buttonText}
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
         </Reveal>
       </Container>

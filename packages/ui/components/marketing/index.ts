@@ -57,6 +57,11 @@ export {
 export { Pricing, type PricingProps, type PricingTier } from "./pricing";
 export { ServiceCard, type ServiceCardProps } from "./service-card";
 export {
+  ServiceShowcase,
+  type ServiceShowcaseItem,
+  type ServiceShowcaseProps,
+} from "./service-showcase";
+export {
   ServiceGrid,
   type ServiceGridItem,
   type ServiceGridProps,

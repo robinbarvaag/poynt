@@ -28,12 +28,19 @@ interface RenderBlocksProps {
 }
 
 // Full-bleed / self-styled blocks render as-is, never wrapped in BlockSection.
+// The data-driven archives wrap THEMSELVES in a BlockSection so that when they
+// have no content (return null) nothing renders at all — otherwise the central
+// wrapper would leave an empty, padded "ghost" section (e.g. an empty podcast
+// band when no episodes exist). They also don't advance the rhythm counter.
 const SPECIAL_BLOCK_TYPES = new Set([
   "hero",
   "ctaSection",
   "media",
   "statsBand",
   "newsletter",
+  "productArchive",
+  "podcastArchive",
+  "servicesArchive",
 ]);
 
 // Blocks that manage their own scroll-reveal (Reveal/Stagger internally), so
@@ -168,11 +175,10 @@ function renderBlock(block: Block): ReactNode {
 }
 
 export function RenderBlocks({ blocks }: RenderBlocksProps) {
-  // Rhythm: alternate background across STANDARD (wrapped) blocks only.
-  // 1st standard "default", 2nd "muted", 3rd "default", … — special blocks
-  // (hero/ctaSection/media) are skipped and don't advance the counter.
-  let standardIndex = -1;
-
+  // Én jevn bakgrunn (Azure) hele veien — INGEN veksel-tint mellom seksjoner.
+  // Farge/rytme kommer fra innholdet: fargede kort (path/produkt/testimonials)
+  // og flytende avrundede paneler (statsBand/ctaSection colored/newsletter).
+  // Det fjerner alle harde fullbredde-overganger. Spacing gir luft mellom blokk.
   return (
     <div>
       {blocks.map((block, index) => {
@@ -187,13 +193,10 @@ export function RenderBlocks({ blocks }: RenderBlocksProps) {
           return <Fragment key={key}>{element}</Fragment>;
         }
 
-        standardIndex += 1;
-        const background = standardIndex % 2 === 1 ? "muted" : "default";
-
         return (
           <BlockSection
             key={key}
-            background={background}
+            background="default"
             containerSize={false}
             reveal={!SELF_REVEAL_BLOCK_TYPES.has(block.blockType)}
           >

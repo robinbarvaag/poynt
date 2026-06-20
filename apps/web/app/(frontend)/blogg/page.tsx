@@ -3,12 +3,11 @@ import {
   type BlogExplorerPost,
 } from "@/components/blog-explorer";
 import { PageHero } from "@/components/page-hero";
-import { getMediaUrl } from "@/lib/media-url";
+import { PayloadImage } from "@/components/payload-image";
 import type { Category } from "@/payload-types";
 import config from "@/payload.config";
 import { Avatar, AvatarFallback, AvatarImage, Container } from "@poynt/ui";
 import type { Metadata } from "next";
-import Image from "next/image";
 import { getPayload } from "payload";
 
 interface BlogPageData {
@@ -131,10 +130,7 @@ export default async function BlogPage() {
       authorAvatar: author ? (
         <Avatar className="size-6 ring-1 ring-current/10">
           {authorAvatarUrl ? (
-            <AvatarImage
-              src={getMediaUrl(authorAvatarUrl)}
-              alt={authorName || ""}
-            />
+            <AvatarImage src={authorAvatarUrl} alt={authorName || ""} />
           ) : null}
           <AvatarFallback className="text-xs">
             {(authorName?.[0] || "?").toUpperCase()}
@@ -142,8 +138,8 @@ export default async function BlogPage() {
         </Avatar>
       ) : undefined,
       image: media?.url ? (
-        <Image
-          src={getMediaUrl(media.url)}
+        <PayloadImage
+          media={media}
           alt={media.alt || post.title}
           fill
           className="object-cover transition-transform duration-500 group-hover/post:scale-[1.03]"

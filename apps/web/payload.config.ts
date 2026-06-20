@@ -214,6 +214,41 @@ export default buildConfig({
           singular: "Innsending",
           plural: "Innsendinger",
         },
+        hooks: {
+          afterChange: [
+            async ({ doc, operation, req }) => {
+              if (operation !== "create") return doc;
+              try {
+                const entries = (doc.submissionData ?? []) as {
+                  field: string;
+                  value: string;
+                }[];
+                const get = (names: string[]) =>
+                  entries.find((e) =>
+                    names.includes((e.field ?? "").toLowerCase())
+                  )?.value;
+
+                const email = get(["epost", "email", "e-post"]);
+                const message = get(["melding", "message", "beskjed"]);
+                if (!email || !message) return doc;
+
+                const { sendContactEmails } = await import("@poynt/email");
+                await sendContactEmails({
+                  name: get(["navn", "name"]) || "Ukjent",
+                  email,
+                  phone: get(["telefon", "phone", "tlf"]),
+                  subject: get(["emne", "subject", "tema"]),
+                  message,
+                });
+              } catch (err) {
+                req.payload.logger.error(
+                  `Kontakt-e-post feilet: ${err instanceof Error ? err.message : err}`
+                );
+              }
+              return doc;
+            },
+          ],
+        },
       },
     }),
     stripePlugin({

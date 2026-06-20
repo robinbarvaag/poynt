@@ -1,14 +1,13 @@
 import { PageHero } from "@/components/page-hero";
+import { PayloadImage } from "@/components/payload-image";
 import {
   PodcastExplorer,
   type PodcastExplorerEpisode,
 } from "@/components/podcast-explorer";
-import { getMediaUrl } from "@/lib/media-url";
 import { fetchPodcastEpisodes } from "@/lib/podcast-rss";
 import config from "@/payload.config";
 import { Container } from "@poynt/ui";
 import type { Metadata } from "next";
-import Image from "next/image";
 import { getPayload } from "payload";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -109,8 +108,8 @@ export default async function PodcastPage() {
         duration: podcast.duration ?? undefined,
         date: formatDate(podcast.publishedAt),
         cover: media?.url ? (
-          <Image
-            src={getMediaUrl(media.url)}
+          <PayloadImage
+            media={media}
             alt={media.alt || podcast.title}
             fill
             className="object-cover"

@@ -1,11 +1,10 @@
 import { CategoryFilter } from "@/components/category-filter";
 import { PageHero } from "@/components/page-hero";
-import { getMediaUrl } from "@/lib/media-url";
+import { PayloadImage } from "@/components/payload-image";
 import type { Product } from "@/payload-types";
 import config from "@/payload.config";
 import { Container, ProductGrid, type ProductGridItem, Text } from "@poynt/ui";
 import type { Metadata } from "next";
-import Image from "next/image";
 import { getPayload } from "payload";
 
 function toGridItem(product: Product): ProductGridItem {
@@ -23,8 +22,8 @@ function toGridItem(product: Product): ProductGridItem {
     price: product.price,
     compareAtPrice: product.compareAtPrice ?? undefined,
     image: media?.url ? (
-      <Image
-        src={getMediaUrl(media.url)}
+      <PayloadImage
+        media={media}
         alt={media.alt || product.name}
         fill
         className="object-cover"
@@ -34,12 +33,14 @@ function toGridItem(product: Product): ProductGridItem {
 }
 
 const productTypes = [
+  { value: "product", label: "Produkter" },
   { value: "course", label: "Kurs" },
   { value: "pdf", label: "PDF" },
   { value: "bundle", label: "Pakker" },
 ];
 
 const typeLabels: Record<string, string> = {
+  product: "Produkt",
   course: "Kurs",
   pdf: "PDF",
   bundle: "Pakke",
@@ -117,7 +118,12 @@ export default async function ProductsPage({ searchParams }: PageProps) {
   return (
     <>
       {heroEnabled && (
-        <PageHero title={heroTitle} description={heroDescription} size="large">
+        <PageHero
+          eyebrow="Nettbutikk"
+          title={heroTitle}
+          description={heroDescription}
+          size="large"
+        >
           <CategoryFilter
             categories={productTypes}
             paramName="type"
