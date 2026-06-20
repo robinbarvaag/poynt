@@ -1,5 +1,6 @@
 import { cn } from "../../lib/utils";
-import { Container } from "../container";
+import { Card } from "../card";
+import { Container, gridVariants } from "../container";
 import { Eyebrow } from "../eyebrow";
 import { Reveal, Stagger, StaggerItem } from "../motion";
 import { Heading, Text } from "../typography";
@@ -23,35 +24,30 @@ export interface FeatureGridProps {
   columns?: 2 | 3 | 4;
 }
 
-// Modige fargeblokker — hvert kort er en hel mettet flate (jf. INSPO/PayPal).
-// Ingen ikoner: det store tallet er det grafiske ankeret. `accent` er en
-// HØY-KONTRAST kontrastfarge (tall, stjerne, lenke) — aldri rosa-på-gult o.l.
+// Modige fargeblokker — hvert kort er et `Card` med en mettet `surface`
+// (jf. INSPO/PayPal). Ingen ikoner: det store tallet er det grafiske ankeret.
+// `accent` er en HØY-KONTRAST kontrastfarge (tall, stjerne, lenke) — aldri
+// rosa-på-gult o.l. — og `rule`/`muted` er surface-tilpassede innholdsfarger.
 const themes = [
   {
-    surface: "bg-saffron text-foreground",
+    surface: "saffron",
     rule: "border-foreground/15",
     muted: "text-foreground/70",
     accent: "text-primary",
   },
   {
-    surface: "bg-salmon text-foreground",
+    surface: "salmon",
     rule: "border-foreground/15",
     muted: "text-foreground/75",
     accent: "text-primary",
   },
   {
-    surface: "bg-primary text-primary-foreground",
+    surface: "primary",
     rule: "border-primary-foreground/25",
     muted: "text-primary-foreground/75",
     accent: "text-saffron",
   },
 ] as const;
-
-const columnClass = {
-  2: "sm:grid-cols-2",
-  3: "sm:grid-cols-2 lg:grid-cols-3",
-  4: "sm:grid-cols-2 lg:grid-cols-4",
-} as const;
 
 /** Deler tittel på siste `*` slik at stjernen kan farges som aksent. */
 function splitTitle(title: string) {
@@ -92,17 +88,15 @@ export function FeatureGrid({
         </Reveal>
       )}
 
-      <Stagger className={cn("grid grid-cols-1 gap-5", columnClass[columns])}>
+      <Stagger className={cn(gridVariants({ cols: columns, gap: "md" }))}>
         {features.map((feature, index) => {
           const theme = themes[index % themes.length];
           const { base, star } = splitTitle(feature.title);
           return (
-            <StaggerItem key={feature.title}>
-              <div
-                className={cn(
-                  "flex h-full flex-col rounded-[1.75rem] p-8 transition-transform duration-300 hover:-translate-y-1.5",
-                  theme.surface
-                )}
+            <StaggerItem key={feature.title} className="h-full">
+              <Card
+                surface={theme.surface}
+                className="h-full gap-0 rounded-[1.75rem] p-8 transition-transform duration-300 hover:-translate-y-1.5"
               >
                 {/* Tall — fast sone */}
                 <Text
@@ -175,7 +169,7 @@ export function FeatureGrid({
                     </Text>
                   </div>
                 )}
-              </div>
+              </Card>
             </StaggerItem>
           );
         })}

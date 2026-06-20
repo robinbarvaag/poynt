@@ -1,0 +1,50 @@
+import { Meta, Canvas, Controls } from "@storybook/addon-docs/blocks";
+import * as ButtonStories from "./Button.stories";
+
+<Meta of={ButtonStories} />
+
+# Button
+
+Den primære handlingsknappen. Merkevareknappene har squircle-form (Apple-aktige
+«continuous corners» via global `corner-shape` — progressive enhancement, faller
+tilbake til vanlig avrunding i Safari/Firefox) og et dempet løft + myk skygge på
+hover.
+
+## Når brukes den
+
+- **Én primær handling** per skjerm/seksjon: bruk `default` (eller en merkevare-tone).
+- Sekundære handlinger: `outline` (medium) eller `ghost` (lav emfase).
+- Farlige, irreversible handlinger: `destructive` (tydelig rød).
+- Inline tekst-handling i en setning: `link`.
+
+## Når IKKE
+
+- Til navigasjon som *ser ut* som en lenke og oppfører seg som en lenke — bruk en
+  `<a>`/`<Link>` (gjerne `asChild`), ikke en knapp med onClick.
+- Som statusmerkelapp — bruk **Badge**.
+- Flere likestilte primærknapper ved siden av hverandre — velg ett tydelig hierarki.
+
+## Varianter
+
+Hierarkiet er bevisst: **merkevare/CTA** (default · saffron · salmon · ink) for de
+viktige handlingene, en **nøytral emfase-stige** (outline → ghost), og to
+**ortogonale roller** (destructive, link). `secondary` er fjernet — bruk `outline`.
+
+<Canvas of={ButtonStories.Merkevare} />
+<Canvas of={ButtonStories.Noytrale} />
+<Canvas of={ButtonStories.Destruktiv} />
+
+## Størrelser
+
+<Canvas of={ButtonStories.Størrelser} />
+
+## Med ikon
+
+`asChild` lar deg rendre knappestilen på et annet element (f.eks. en `<Link>`).
+
+<Canvas of={ButtonStories.MedIkon} />
+<Canvas of={ButtonStories.IkonKnapp} />
+
+## Props
+
+<Controls of={ButtonStories.Default} />

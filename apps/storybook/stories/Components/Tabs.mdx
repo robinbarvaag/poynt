@@ -1,0 +1,52 @@
+import { Meta, Canvas, Controls } from "@storybook/addon-docs/blocks";
+import * as TabsStories from "./Tabs.stories";
+
+<Meta of={TabsStories} />
+
+# Tabs
+
+Faner for å veksle mellom likestilte visninger i samme kontekst, uten å navigere
+bort fra siden.
+
+## Når brukes den
+
+- Bytte mellom seksjoner av samme side (Konto / Varsler / Fakturering).
+- Når innholdsmengden per fane er moderat og brukeren hopper fram og tilbake.
+
+## Når IKKE
+
+- Til steg-for-steg-flyt — bruk en stegindikator (jf. **StepContainer**).
+- Til primær sidenavigasjon — bruk vanlige lenker.
+- Når kun ett valg skal velges i et skjema — bruk **RadioGroup**.
+
+## Anatomi
+
+Samme komposisjonsmønster som resten av biblioteket:
+
+```tsx
+<Tabs defaultValue="konto">
+  <TabsList variant="default" size="md">
+    <TabsTrigger value="konto">Konto</TabsTrigger>
+    <TabsTrigger value="varsler">Varsler</TabsTrigger>
+  </TabsList>
+  <TabsContent value="konto">…</TabsContent>
+  <TabsContent value="varsler">…</TabsContent>
+</Tabs>
+```
+
+`TabsList` har `variant` (`default` | `line`) og `size` (`sm` | `md` | `lg`);
+triggerne tilpasser seg via `group-data`-attributter på listen.
+
+## Varianter
+
+<Canvas of={TabsStories.Default} />
+<Canvas of={TabsStories.Line} />
+
+## Størrelser
+
+<Canvas of={TabsStories.Størrelser} />
+
+## Test
+
+`Test: bytt fane` kjører en `play`-funksjon som klikker en fane og verifiserer at
+riktig panel vises.

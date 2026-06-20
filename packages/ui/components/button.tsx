@@ -12,7 +12,8 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        // Merkevareknapper — solide flater, dempet løft på hover
+        // Merkevare/CTA — solide flater, dempet løft på hover. `default` er den
+        // primære handlingen; saffron/salmon/ink er merkevare-toner for variasjon.
         default:
           "bg-primary text-primary-foreground shadow-sm hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-md",
         saffron:
@@ -20,14 +21,13 @@ const buttonVariants = cva(
         salmon:
           "bg-salmon text-foreground shadow-sm hover:-translate-y-0.5 hover:shadow-md hover:brightness-[0.97]",
         ink: "bg-foreground text-background shadow-sm hover:-translate-y-0.5 hover:bg-foreground/90 hover:shadow-md",
-        // Nøytrale verktøy-varianter
-        destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+        // Nøytral emfase-stige: outline (medium) og ghost (lav).
         outline:
           "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-        secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
+        // Ortogonale roller: destructive (tydelig rød, farlig handling) og link.
+        destructive:
+          "bg-destructive text-destructive-foreground shadow-sm hover:-translate-y-0.5 hover:bg-destructive/90 hover:shadow-md",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {

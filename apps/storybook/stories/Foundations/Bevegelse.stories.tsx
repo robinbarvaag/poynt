@@ -89,19 +89,40 @@ export const Blob: Story = {
 };
 
 export const ParallaxDekor: Story = {
+  name: "Parallax — flerlags dybde",
   render: () => (
-    <div className="mx-auto max-w-md">
+    <div className="mx-auto max-w-2xl">
       <p className="text-sm text-muted-foreground">
-        Scroll i forhåndsvisningen — den fargede formen driver forsiktig.
+        Scroll i forhåndsvisningen. Flere lag driver i ulik fart (ulik{" "}
+        <code>amount</code>) → følelse av dybde. Innholdet står helt stille. Kun
+        dekor parallax-er, aldri tekst.
       </p>
-      <div className="h-[60vh]" />
-      <div className="relative flex h-64 items-center justify-center rounded-2xl border border-border">
-        <Parallax amount={50} className="absolute left-6 top-0">
-          <div className="size-24 rounded-full bg-accent/50 blur-xl" />
+      <div className="h-[70vh]" />
+
+      <div className="relative flex h-96 items-center justify-center overflow-hidden rounded-3xl border border-border bg-secondary">
+        {/* Bakerst — driver mest, mest blur (lengst unna) */}
+        <Parallax amount={90} className="absolute -left-10 -top-10">
+          <div className="size-56 rounded-full bg-saffron/40 blur-3xl" />
         </Parallax>
-        <p className="relative z-10 text-foreground">Innhold står stille</p>
+        {/* Midtlag */}
+        <Parallax amount={50} className="absolute right-4 top-8">
+          <div className="size-40 rounded-[60%_40%_55%_45%/50%_60%_40%_50%] bg-accent/50 blur-2xl" />
+        </Parallax>
+        {/* Fremst — driver minst, skarpest (nærmest) */}
+        <Parallax amount={24} className="absolute bottom-6 left-10">
+          <div className="size-20 rounded-full bg-salmon/70 blur-md" />
+        </Parallax>
+
+        <p className="relative z-10 font-bold font-heading text-2xl text-foreground">
+          Innhold står stille
+        </p>
       </div>
-      <div className="h-[60vh]" />
+
+      <p className="mt-6 text-muted-foreground text-sm">
+        Tommelfingerregel: jo lenger «bak», jo høyere <code>amount</code> og mer
+        blur. Maks ~8–12 % forskyvning av seksjonshøyden (jf. DESIGN-PLAN §3).
+      </p>
+      <div className="h-[70vh]" />
     </div>
   ),
 };

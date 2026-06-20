@@ -1,4 +1,14 @@
-import { FloatingShapes, Grain, Heading, Text } from "@poynt/ui";
+import {
+  Card,
+  CardContent,
+  Eyebrow,
+  FloatingShapes,
+  Grain,
+  GridPattern,
+  Heading,
+  Sprinkles,
+  Text,
+} from "@poynt/ui";
 import { DriftingBlob } from "@poynt/ui/motion";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
@@ -105,12 +115,144 @@ export const PlayfulPalett: Story = {
 export const FlytendeFormer: Story = {
   name: "FloatingShapes",
   render: () => (
-    <div className="relative h-80 overflow-hidden rounded-2xl border border-border bg-background">
-      <FloatingShapes variant="vibrant" />
-      <div className="relative z-10 flex h-full items-center justify-center">
-        <code className="text-muted-foreground text-sm">
-          {'<FloatingShapes variant="vibrant" />'}
-        </code>
+    <div className="flex flex-col gap-6">
+      <Text variant="muted">
+        Myke, drivende fargeflekker bak innholdet — «alt puster». Tre styrker:
+        <code>subtle</code>, <code>default</code>, <code>vibrant</code>. Husk{" "}
+        <code>relative z-10</code> på innholdet over.
+      </Text>
+      <div className="grid gap-6 md:grid-cols-3">
+        {(["subtle", "default", "vibrant"] as const).map((variant) => (
+          <div
+            key={variant}
+            className="relative h-64 overflow-hidden rounded-3xl border border-border bg-background"
+          >
+            <FloatingShapes variant={variant} />
+            <div className="relative z-10 flex h-full items-center justify-center">
+              <code className="text-muted-foreground text-sm">{variant}</code>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  ),
+};
+
+export const GridTekstur: Story = {
+  name: "GridPattern (dot/grid)",
+  render: () => (
+    <div className="flex flex-col gap-6">
+      <Text variant="muted">
+        Subtil dot-/grid-tekstur (jf. Caide). Tar farge fra{" "}
+        <code>currentColor</code>, så styr farge + synlighet med en text-klasse
+        — fin oppå fargede kort.
+      </Text>
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {/* Dots på lyst kort */}
+        <div className="relative h-48 overflow-hidden rounded-3xl bg-card ring-1 ring-foreground/10">
+          <GridPattern variant="dots" className="text-foreground/10" />
+          <div className="relative z-10 flex h-full items-end p-5">
+            <code className="text-muted-foreground text-xs">dots · lyst</code>
+          </div>
+        </div>
+        {/* Grid på saffron */}
+        <div className="relative h-48 overflow-hidden rounded-3xl bg-saffron">
+          <GridPattern variant="grid" className="text-foreground/12" />
+          <div className="relative z-10 flex h-full items-end p-5">
+            <code className="text-foreground/70 text-xs">grid · saffron</code>
+          </div>
+        </div>
+        {/* Dots på primary */}
+        <div className="relative h-48 overflow-hidden rounded-3xl bg-primary">
+          <GridPattern variant="dots" className="text-primary-foreground/25" />
+          <div className="relative z-10 flex h-full items-end p-5">
+            <code className="text-primary-foreground/80 text-xs">
+              dots · primary
+            </code>
+          </div>
+        </div>
+      </div>
+    </div>
+  ),
+};
+
+export const GridIBruk: Story = {
+  name: "GridPattern — i bruk",
+  render: () => (
+    <div className="flex flex-col gap-8">
+      <Text variant="muted">
+        Tre måter å bruke teksturen på: bak et farget kort, som «fancy» aksent
+        som toner ut (<code>fade</code>), og full-bredde i en seksjon.
+      </Text>
+
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* 1 — bak et farget kort */}
+        <Card surface="saffron" className="relative">
+          <GridPattern variant="grid" className="text-foreground/10" />
+          <CardContent className="relative z-10">
+            <Eyebrow className="text-primary">Kort</Eyebrow>
+            <Heading variant="h3" color="inherit" customStyles="mt-2">
+              Grid bak innhold
+            </Heading>
+            <Text color="inherit" customStyles="mt-2 text-foreground/70">
+              Teksturen gir kortet en taktil flate uten å ta fokus.
+            </Text>
+          </CardContent>
+        </Card>
+
+        {/* 2 — fade som krydder */}
+        <Card surface="default" className="relative">
+          <GridPattern variant="dots" fade className="text-primary/35" />
+          <CardContent className="relative z-10">
+            <Eyebrow className="text-primary">Aksent (fade)</Eyebrow>
+            <Heading variant="h3" customStyles="mt-2">
+              Toner ut mot kantene
+            </Heading>
+            <Text customStyles="mt-2 text-muted-foreground">
+              <code>fade</code> legger en radial maske, så teksturen forsvinner
+              mykt — fint som lite krydder.
+            </Text>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* 3 — full seksjon på mettet flate */}
+      <div className="relative overflow-hidden rounded-4xl bg-primary p-10 text-primary-foreground md:p-16">
+        <GridPattern
+          variant="dots"
+          fade
+          className="text-primary-foreground/25"
+        />
+        <div className="relative z-10 max-w-lg">
+          <Eyebrow className="text-primary-foreground/70">Seksjon</Eyebrow>
+          <Heading variant="h2" color="white" customStyles="mt-3">
+            Full-bredde med tekstur
+          </Heading>
+          <Text color="white" customStyles="mt-3 text-primary-foreground/80">
+            På en mettet flate løfter en svak grid frem dybden — fin som CTA-
+            eller hero-bånd.
+          </Text>
+        </div>
+      </div>
+    </div>
+  ),
+};
+
+export const Krydder: Story = {
+  name: "Sprinkles (krydder)",
+  render: () => (
+    <div className="flex flex-col gap-6">
+      <Text variant="muted">
+        Spredte redaksjonelle «stickers» — ring, prikk, pluss, squiggle, blob —
+        i merkefargene. Krydrer en seksjon uten å ta fokus. Driver sakte.
+      </Text>
+      <div className="relative h-80 overflow-hidden rounded-3xl border border-border bg-background">
+        <Sprinkles />
+        <div className="relative z-10 flex h-full items-center justify-center">
+          <Heading variant="h3" color="foreground">
+            En seksjon med litt krydder
+          </Heading>
+        </div>
       </div>
     </div>
   ),

@@ -34,13 +34,13 @@ export const Header: GlobalConfig = {
           name: "text",
           type: "text",
           label: "Knappetekst",
-          defaultValue: "Kom i gang",
+          defaultValue: "Ta kontakt",
         },
         {
           name: "url",
           type: "text",
           label: "Lenke",
-          defaultValue: "/kurs",
+          defaultValue: "/om",
         },
       ],
     },
@@ -49,6 +49,10 @@ export const Header: GlobalConfig = {
       type: "array",
       label: "Hovedmeny",
       maxRows: 8,
+      admin: {
+        description:
+          "Anbefalt struktur (målgruppe-først): «For gründere» (undermeny: On Poynt, Verktøy, Produkter & kurs), «For bedrifter» (undermeny: Styre & verv, Rådgivning, Foredrag), «Ressurser» (undermeny: Blogg, Podkast, Artikler) og «Om». Bruk undermenypunkter for å samle relaterte sider under hvert hovedpunkt.",
+      },
       fields: [
         {
           name: "label",

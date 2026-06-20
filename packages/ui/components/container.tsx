@@ -129,6 +129,46 @@ const Stack = React.forwardRef<HTMLDivElement, StackProps>(
 );
 Stack.displayName = "Stack";
 
+// Responsivt rutenett med fast kolonnetall på desktop og fornuftig nedtrapping
+// på mindre skjermer. Brukes som komposisjons-primitiv (jf. FeatureGrid = Grid
+// + Card). Hold deg til de tillatte kolonne-/gap-verdiene for konsistent rytme.
+const gridVariants = cva("grid grid-cols-1", {
+  variants: {
+    cols: {
+      1: "",
+      2: "sm:grid-cols-2",
+      3: "sm:grid-cols-2 lg:grid-cols-3",
+      4: "sm:grid-cols-2 lg:grid-cols-4",
+    },
+    gap: {
+      xs: "gap-2",
+      sm: "gap-4",
+      md: "gap-6",
+      lg: "gap-10",
+      xl: "gap-16",
+    },
+  },
+  defaultVariants: {
+    cols: 3,
+    gap: "md",
+  },
+});
+
+export interface GridProps
+  extends React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof gridVariants> {}
+
+const Grid = React.forwardRef<HTMLDivElement, GridProps>(
+  ({ className, cols, gap, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn(gridVariants({ cols, gap, className }))}
+      {...props}
+    />
+  )
+);
+Grid.displayName = "Grid";
+
 export {
   Container,
   containerVariants,
@@ -136,4 +176,6 @@ export {
   sectionVariants,
   Stack,
   stackVariants,
+  Grid,
+  gridVariants,
 };

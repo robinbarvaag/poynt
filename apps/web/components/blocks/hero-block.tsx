@@ -1,20 +1,10 @@
 import { getMediaUrl } from "@/lib/media-url";
 import type { SerializedEditorState } from "@payloadcms/richtext-lexical/lexical";
 import { RichText } from "@payloadcms/richtext-lexical/react";
-import { Button, Heading, cn } from "@poynt/ui";
-import { DriftingBlob } from "@poynt/ui/motion";
-import { ArrowRight } from "lucide-react";
+import { Hero } from "@poynt/ui";
 import Image from "next/image";
-import Link from "next/link";
 
 interface HeroBlockProps {
-  variant?:
-    | "standard"
-    | "fullscreen"
-    | "centered"
-    | "left"
-    | "split"
-    | "gradient";
   title: string;
   subtitle?: SerializedEditorState;
   tagsLabel?: string;
@@ -25,6 +15,7 @@ interface HeroBlockProps {
     width?: number;
     height?: number;
   };
+  imageDuotone?: boolean;
   primaryCta?: {
     text?: string;
     url?: string;
@@ -39,281 +30,55 @@ interface HeroBlockProps {
   };
 }
 
-function HeroTags({
-  label,
-  tags,
-  centered = false,
-  light = false,
-}: {
-  label?: string;
-  tags: { label: string; id?: string }[];
-  centered?: boolean;
-  light?: boolean;
-}) {
-  if (!tags || tags.length === 0) return null;
-
-  return (
-    <div className={cn("mb-8", centered && "text-center")}>
-      {label && (
-        <p
-          className={cn(
-            "text-sm mb-3",
-            light ? "text-primary-foreground/70" : "text-muted-foreground"
-          )}
-        >
-          {label}
-        </p>
-      )}
-      <div className={cn("flex flex-wrap gap-2", centered && "justify-center")}>
-        {tags.map((tag, index) => (
-          <span
-            key={tag.id || index}
-            className={cn(
-              "inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium transition-colors",
-              light
-                ? "bg-white/15 text-primary-foreground border border-white/20 hover:bg-white/25"
-                : "bg-accent/50 text-foreground border border-accent hover:bg-accent/70"
-            )}
-          >
-            {tag.label}
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function HeroCtaButtons({
-  mainCta,
-  secondaryCta,
-  centered = false,
-  light = false,
-}: {
-  mainCta?: { text?: string; url?: string };
-  secondaryCta?: { text?: string; url?: string };
-  centered?: boolean;
-  light?: boolean;
-}) {
-  return (
-    <div className={cn("flex gap-4 flex-wrap", centered && "justify-center")}>
-      {mainCta?.text && mainCta?.url && (
-        <Link href={mainCta.url}>
-          <Button
-            size="lg"
-            className={cn(
-              "group rounded-full px-8",
-              light && "bg-white text-primary hover:bg-white/90"
-            )}
-          >
-            {mainCta.text}
-            <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </Button>
-        </Link>
-      )}
-      {secondaryCta?.text && secondaryCta?.url && (
-        <Link href={secondaryCta.url}>
-          <Button
-            size="lg"
-            variant="outline"
-            className={cn(
-              "rounded-full px-8",
-              light &&
-                "border-white/30 text-primary-foreground hover:bg-white/10"
-            )}
-          >
-            {secondaryCta.text}
-          </Button>
-        </Link>
-      )}
-    </div>
-  );
-}
-
+/**
+ * Mapper Payload-blokken `hero` til Hero i @poynt/ui. `Hero` velger selv layout:
+ * med bilde → split med foto klippet i organisk form; uten bilde → sentrert.
+ * `-mt-22` trekker heroen opp bak den flytende headeren.
+ */
 export function HeroBlock({
-  variant = "standard",
   title,
   subtitle,
   tagsLabel,
   tags,
   image,
+  imageDuotone,
   primaryCta,
   secondaryCta,
   cta,
 }: HeroBlockProps) {
   const mainCta = primaryCta?.text ? primaryCta : cta;
-  const hasImage = Boolean(image?.url);
 
-  // Map old variant names to new ones for backwards compatibility
-  const resolvedVariant = variant === "fullscreen" ? "fullscreen" : "standard";
-
-  // Fullscreen / Showcase variant - text on solid background, image below
-  if (resolvedVariant === "fullscreen") {
-    return (
-      <section className="relative -mt-22 overflow-hidden bg-primary">
-        {/* Subtle dot texture */}
-        <div
-          className="absolute inset-0 opacity-[0.06]"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle, oklch(0.979 0.008 197) 1px, transparent 1px)",
-            backgroundSize: "20px 20px",
-          }}
-        />
-
-        {/* Decorative drifting shapes — respekterer prefers-reduced-motion */}
-        <DriftingBlob className="top-20 right-[5%] size-48 bg-accent/15 blur-3xl" />
-        <DriftingBlob
-          className="top-1/3 left-[3%] size-64 bg-primary-foreground/8 blur-3xl"
-          duration={22}
-        />
-        <DriftingBlob
-          className="bottom-[30%] right-[15%] size-24 bg-accent/10"
-          duration={14}
-        />
-
-        {/* Text content on solid background */}
-        <div className="relative text-center px-6 sm:px-10 lg:px-16 pt-36 md:pt-48 pb-12 md:pb-16 max-w-5xl mx-auto">
-          {tags && tags.length > 0 && (
-            <HeroTags label={tagsLabel} tags={tags} centered light />
-          )}
-          <Heading variant="h1" color="white" customStyles="mb-6">
-            {title}
-          </Heading>
-          {subtitle && (
-            <div className="text-base md:text-xl text-primary-foreground/75 mb-10 max-w-3xl mx-auto rich-text">
-              <RichText data={subtitle} />
-            </div>
-          )}
-          <HeroCtaButtons
-            mainCta={mainCta}
-            secondaryCta={secondaryCta}
-            centered
-            light
-          />
-        </div>
-
-        {/* Image showcase below text */}
-        {image && (
-          <div className="relative px-6 sm:px-10 lg:px-16 pb-16 md:pb-24 max-w-6xl mx-auto">
-            {/* Organic blob behind image */}
-            <div className="absolute -inset-x-4 inset-y-4 bg-accent/10 rounded-[2.5rem] -rotate-1 blur-sm" />
-            <div className="relative rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/10">
-              <div className="relative aspect-video md:aspect-2/1">
-                <Image
-                  src={getMediaUrl(image.url)}
-                  alt={image.alt || ""}
-                  fill
-                  className="object-cover"
-                  priority
-                  unoptimized={process.env.NODE_ENV === "development"}
-                />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Bottom gradient fade to background */}
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-linear-to-t from-background to-transparent" />
-      </section>
-    );
-  }
-
-  // Standard variant - adapts based on whether image exists
-  // With image: text left + image right (split layout)
-  // Without image: centered text
-  if (hasImage) {
-    return (
-      <section className="relative -mt-22 overflow-hidden bg-secondary">
-        {/* Subtle grid texture overlay */}
-        <div
-          className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle, currentColor 1px, transparent 1px)",
-            backgroundSize: "24px 24px",
-          }}
-        />
-
-        {/* Decorative drifting shapes — respekterer prefers-reduced-motion */}
-        <DriftingBlob className="top-16 right-[3%] size-64 bg-accent/15 blur-3xl" />
-        <DriftingBlob
-          className="bottom-12 left-[2%] size-48 bg-primary/10 blur-3xl"
-          duration={22}
-        />
-
-        <div className="mx-auto max-w-360 px-6 sm:px-10 lg:px-16 pt-36 md:pt-44 pb-20 md:pb-28">
-          <div className="grid md:grid-cols-[1fr_1.1fr] gap-10 lg:gap-16 items-center">
-            <div className="max-w-2xl">
-              {tags && tags.length > 0 && (
-                <HeroTags label={tagsLabel} tags={tags} />
-              )}
-              <Heading variant="h1" customStyles="mb-6">
-                {title}
-              </Heading>
-              {subtitle && (
-                <div className="text-base md:text-lg text-muted-foreground mb-8 rich-text">
-                  <RichText data={subtitle} />
-                </div>
-              )}
-              <HeroCtaButtons mainCta={mainCta} secondaryCta={secondaryCta} />
-            </div>
-            {image && (
-              <div className="relative">
-                {/* Organic background shapes */}
-                <div className="absolute -inset-4 bg-accent/20 rounded-4xl -rotate-2 -z-10 animate-blob" />
-                <div className="relative aspect-4/3 rounded-3xl overflow-hidden shadow-2xl ring-1 ring-foreground/5">
-                  <Image
-                    src={getMediaUrl(image.url)}
-                    alt={image.alt || ""}
-                    fill
-                    className="object-cover"
-                    priority
-                    unoptimized={process.env.NODE_ENV === "development"}
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  // Standard without image - centered layout
   return (
-    <section className="relative -mt-22 overflow-hidden bg-linear-to-b from-primary/5 via-accent/5 to-background">
-      {/* Decorative drifting shapes — respekterer prefers-reduced-motion */}
-      <DriftingBlob className="top-24 right-[10%] size-40 bg-accent/20 blur-3xl" />
-      <DriftingBlob
-        className="top-40 left-[5%] size-48 bg-primary/10 blur-3xl"
-        duration={22}
-      />
-      <DriftingBlob
-        className="bottom-32 right-[15%] size-24 bg-accent/15 blur-xl"
-        duration={14}
-      />
-      {/* Skarpe aksentprikker — statiske, ligger over de myke blobsene */}
-      <div className="absolute top-1/3 right-[30%] size-3 rounded-full bg-accent/40" />
-      <div className="absolute bottom-1/4 left-[28%] size-2 rounded-full bg-primary/30" />
-
-      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 pt-40 md:pt-48 pb-20 md:pb-28 text-center">
-        {tags && tags.length > 0 && (
-          <HeroTags label={tagsLabel} tags={tags} centered />
-        )}
-        <Heading variant="h1" customStyles="mb-6">
-          {title}
-        </Heading>
-        {subtitle && (
-          <div className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto rich-text">
-            <RichText data={subtitle} />
-          </div>
-        )}
-        <HeroCtaButtons
-          mainCta={mainCta}
-          secondaryCta={secondaryCta}
-          centered
-        />
-      </div>
-    </section>
+    <Hero
+      className="-mt-22"
+      eyebrow={tagsLabel ?? undefined}
+      title={title}
+      subtitle={subtitle ? <RichText data={subtitle} /> : undefined}
+      primaryCta={
+        mainCta?.text && mainCta?.url
+          ? { text: mainCta.text, href: mainCta.url }
+          : undefined
+      }
+      secondaryCta={
+        secondaryCta?.text && secondaryCta?.url
+          ? { text: secondaryCta.text, href: secondaryCta.url }
+          : undefined
+      }
+      pills={tags?.map((tag) => ({ label: tag.label }))}
+      // Styres per hero i admin; av som standard (ekte foto vises rent).
+      duotone={imageDuotone ?? false}
+      media={
+        image?.url ? (
+          <Image
+            src={getMediaUrl(image.url)}
+            alt={image.alt || ""}
+            fill
+            className="object-cover"
+            priority
+            unoptimized={process.env.NODE_ENV === "development"}
+          />
+        ) : undefined
+      }
+    />
   );
 }

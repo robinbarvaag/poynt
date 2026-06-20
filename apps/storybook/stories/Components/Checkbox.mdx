@@ -1,0 +1,46 @@
+import { Meta, Canvas, Controls } from "@storybook/addon-docs/blocks";
+import * as CheckboxStories from "./Checkbox.stories";
+
+<Meta of={CheckboxStories} />
+
+# Checkbox
+
+Avkrysningsboks for å slå et valg av eller på. Større og litt lekent — tydelig
+boks, myk fokusring og en liten «pop» når den hukes av.
+
+## Når brukes den
+
+- Samtykker og vilkår.
+- Filtre der flere alternativer kan være på samtidig.
+- Lister der hver rad kan velges uavhengig.
+
+## Når IKKE
+
+- Når nøyaktig ett av flere alternativer skal velges — bruk **RadioGroup**.
+- For en av/på-innstilling som trer i kraft umiddelbart — bruk **Switch**.
+
+## Størrelser
+
+Tre størrelser (`sm`/`md`/`lg`). Standard er `md`.
+
+<Canvas of={CheckboxStories.Størrelser} />
+
+## Med ledetekst
+
+Koble boksen til en **Label** via `htmlFor`/`id` slik at hele teksten er klikkbar.
+
+<Canvas of={CheckboxStories.MedLabel} />
+
+## Tilstander
+
+<Canvas of={CheckboxStories.Avkrysset} />
+<Canvas of={CheckboxStories.Deaktivert} />
+
+## Test
+
+`ToggleTest`-storyen kjører en `play`-funksjon (se Interactions-panelet) som
+klikker boksen og verifiserer at avkrysset-tilstanden veksler.
+
+## Props
+
+<Controls of={CheckboxStories.Default} />

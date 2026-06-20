@@ -1,0 +1,59 @@
+import { Meta, Canvas, Controls } from "@storybook/addon-docs/blocks";
+import * as ProductGridStories from "./ProductGrid.stories";
+import * as ProductCardStories from "./ProductCard.stories";
+
+<Meta of={ProductGridStories} />
+
+# ProductGrid & ProductCard
+
+Produkt-visning i fargeblokk-stil. Bevisst **uniformt grid — ikke masonry**: med
+en liten katalog ser masonry tilfeldig ut og bryter sammenligning. Lekenheten kommer
+fra kortene (roterende surface-tinter, blob bak bildet, hover-løft) og fra **ett
+fremhevet kort** som spenner 2 kolonner for magasin-rytme.
+
+## Når brukes den
+
+- Produktkatalog/utstilling (`/produkter`) og «relaterte produkter».
+- `ProductGrid` for hele rutenettet; `ProductCard` alene i andre komposisjoner.
+
+## Når IKKE
+
+- Til en lang, tett liste der bilde ikke betyr noe — bruk en enkel liste.
+- Til prisplaner/abonnement — bruk **Pricing**.
+
+## Presentasjon, ikke data
+
+Komponentene er rene presentasjons-komponenter (ingen Payload/next-avhengighet).
+Appen mapper data og sender `next/image` inn via `image`-slotten:
+
+```tsx
+<ProductGrid
+  products={docs.map((p) => ({
+    id: p.id,
+    href: `/produkter/${p.slug}`,
+    name: p.name,
+    eyebrow: typeLabel(p.type),
+    price: p.price,
+    compareAtPrice: p.compareAtPrice,
+    image: <Image src={url(p)} alt={p.name} fill className="object-cover" />,
+  }))}
+/>
+```
+
+`ProductGrid` gir hvert kort en roterende tint (saffron/salmon/mint) med mindre
+produktet selv setter `surface`, og gjør det første kortet fremhevet (skru av med
+`featureFirst={false}`).
+
+## Rutenett
+
+<Canvas of={ProductGridStories.Standard} />
+<Canvas of={ProductGridStories.UtenFremhevet} />
+
+## Enkeltkort
+
+<Canvas of={ProductCardStories.Tinter} />
+<Canvas of={ProductCardStories.Fremhevet} />
+
+## Props
+
+<Controls of={ProductCardStories.Default} />

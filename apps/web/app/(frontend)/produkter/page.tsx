@@ -1,19 +1,50 @@
 import { CategoryFilter } from "@/components/category-filter";
 import { PageHero } from "@/components/page-hero";
-import { ProductCard } from "@/components/product-card";
+import { getMediaUrl } from "@/lib/media-url";
+import type { Product } from "@/payload-types";
 import config from "@/payload.config";
-import { Container, Text } from "@poynt/ui";
+import { Container, ProductGrid, type ProductGridItem, Text } from "@poynt/ui";
 import type { Metadata } from "next";
+import Image from "next/image";
 import { getPayload } from "payload";
-import type { ComponentProps } from "react";
 
-type ProductCardData = ComponentProps<typeof ProductCard>["product"];
+function toGridItem(product: Product): ProductGridItem {
+  const media =
+    product.featuredImage && typeof product.featuredImage !== "number"
+      ? product.featuredImage
+      : null;
+
+  return {
+    id: product.id,
+    href: `/produkter/${product.slug}`,
+    name: product.name,
+    eyebrow: typeLabels[product.type] ?? product.type,
+    shortDescription: product.shortDescription ?? undefined,
+    price: product.price,
+    compareAtPrice: product.compareAtPrice ?? undefined,
+    image: media?.url ? (
+      <Image
+        src={getMediaUrl(media.url)}
+        alt={media.alt || product.name}
+        fill
+        className="object-cover"
+      />
+    ) : undefined,
+  };
+}
 
 const productTypes = [
   { value: "course", label: "Kurs" },
   { value: "pdf", label: "PDF" },
   { value: "bundle", label: "Pakker" },
 ];
+
+const typeLabels: Record<string, string> = {
+  course: "Kurs",
+  pdf: "PDF",
+  bundle: "Pakke",
+  membership: "Medlemskap",
+};
 
 export async function generateMetadata(): Promise<Metadata> {
   const payload = await getPayload({ config });
@@ -97,14 +128,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
 
       <Container padding="default" className="py-8">
         {products.docs.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8">
-            {products.docs.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product as unknown as ProductCardData}
-              />
-            ))}
-          </div>
+          <ProductGrid products={products.docs.map(toGridItem)} />
         ) : (
           <Text variant="muted" customStyles="text-center py-12">
             {emptyStateText}

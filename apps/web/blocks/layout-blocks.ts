@@ -9,6 +9,7 @@ import { Hero } from "./hero";
 import { LogoCloud } from "./logo-cloud";
 import { MediaBlock } from "./media";
 import { Newsletter } from "./newsletter";
+import { PathCards } from "./path-cards";
 import { PodcastArchive } from "./podcast-archive";
 import { Pricing } from "./pricing";
 import { ProductArchive } from "./product-archive";
@@ -34,6 +35,7 @@ export const layoutBlocks: Block[] = [
   Newsletter,
   Content,
   MediaBlock,
+  PathCards,
   Testimonials,
   CtaSection,
   ProductArchive,

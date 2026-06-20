@@ -1,0 +1,33 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Foundations/Squircle" />
+
+# Squircle (continuous corners)
+
+Hjørnene våre er **squircle** — Apple-aktige «continuous corners» — ikke vanlige
+sirkulære hjørner. Dette er en signatur som gjør UI-et mykere og mer raffinert.
+
+## Hvordan det virker
+
+Det settes **globalt én gang** i `web.css`:
+
+```css
+*, ::before, ::after {
+  corner-shape: squircle;
+}
+.rounded-full {
+  corner-shape: round; /* sirkler, pills og avatarer holdes ekte runde */
+}
+```
+
+`corner-shape` (CSS Corners L4) er **progressive enhancement**: nettlesere uten
+støtte (per nå Safari/Firefox) ignorerer regelen og faller pent tilbake til vanlig
+avrunding. Ingen JavaScript, ingen ekstra klasser.
+
+## Konsekvenser for komponenter
+
+- **Len deg på det globale oppsettet.** Bruk vanlige `rounded-*`-klasser — squircle
+  kommer automatisk. Ikke hardkode egne `corner-shape`-verdier i komponenter.
+- **`rounded-full` = ekte rund.** Pills (Badge), avatarer og prikker skal forbli
+  sirkulære, så de bruker `rounded-full` (som er unntatt fra squircle).
+- Alt fra knapper og kort til input-felter får squircle uten ekstra arbeid.

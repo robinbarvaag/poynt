@@ -1,0 +1,46 @@
+import { Meta, Canvas, Controls } from "@storybook/addon-docs/blocks";
+import * as SiteHeaderStories from "./SiteHeader.stories";
+
+<Meta of={SiteHeaderStories} />
+
+# SiteHeader
+
+Nettstedets header som en **presentasjonell shell**: en flytende «pill» med subtil
+glass-morphisme (tettere på scroll), desktop-navigasjon med dropdowns, og en mobil-
+drawer (`Sheet`). Den eier kun struktur og oppførsel — data, logo, handlekurv og
+lenke-implementasjon sendes inn via slots/props, så den er fri for app-avhengigheter
+og kan dokumenteres her.
+
+## Når brukes den
+
+- Topp-header på alle sider. Appen (`apps/web/components/header.tsx`) er en tynn
+  wrapper som mater inn Payload-navigasjon, logo, `CartDrawer` og `next/link`.
+
+## Slots & props
+
+- **`logo`** — ReactNode (tekst eller `next/image`).
+- **`navItems`** — `{ label, href, external?, subItems? }[]`. Dropdowns vises når et
+  element har `subItems`.
+- **`actions`** — høyre handlingsklynge i baren (søk/login/handlekurv/CTA). Alltid
+  synlig, både desktop og mobil.
+- **`mobileFooter`** — innhold nederst i mobil-draweren (typisk login + CTA i full
+  bredde).
+- **`linkComponent`** — send inn `next/link` for klient-navigasjon (default `<a>`).
+- **`pathname`** — fra `usePathname()`. Markerer aktiv lenke og lukker mobil-
+  draweren automatisk ved navigasjon.
+
+## Hvorfor en shell?
+
+Headeren er datadrevet (Payload-nav) og har klient-state (handlekurv). I stedet for
+å duplisere layout/glass/mobil-logikk i appen, bor alt det i `SiteHeader`, mens
+appen kun kobler på data. Glass-nivået er bevisst dempet — ikke «for fancy».
+
+## Demo
+
+Scroll for å se glass-effekten skifte; krymp vinduet for mobil-draweren.
+
+<Canvas of={SiteHeaderStories.Standard} />
+
+## Props
+
+<Controls of={SiteHeaderStories.Standard} />

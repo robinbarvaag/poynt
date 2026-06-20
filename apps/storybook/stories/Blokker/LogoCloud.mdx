@@ -1,0 +1,38 @@
+import { Meta, Canvas, Controls } from "@storybook/addon-docs/blocks";
+import * as LogoCloudStories from "./LogoCloud.stories";
+
+<Meta of={LogoCloudStories} />
+
+# LogoCloud
+
+Logo-/bevis-stripe («brukt av», «som omtalt i»). Hver logo legges i en fast-høyde
+tile med `object-contain`, slik at logoer med ulik intrinsisk størrelse blir
+optisk balansert — lik høyde, naturlig bredde. Tåler mange logoer i ryddige rader.
+
+## Når brukes den
+
+- Sosialt bevis: kunder, partnere, presse.
+- Plasseres typisk rett under hero eller mellom seksjoner.
+- Uten `src` vises navnet som en dempet typografisk wordmark (ingen ikoner).
+
+## Når IKKE
+
+- Som klikkbar logo-meny/navigasjon — dette er ren visning (innholds-only).
+- Til ett enkelt fremhevet partnerskap — bruk heller en **Card** eller sitat.
+
+## Varianter
+
+`variant="default"` står på en lys flate (logoene er gråtonet og lyser opp på
+hover). `variant="contrast"` er ment for plassering oppå en farget/mørk `Section` —
+da antas lyse/monokrome logoer og teksten blir lys.
+
+<Canvas of={LogoCloudStories.Logoer} />
+<Canvas of={LogoCloudStories.PaaFargetBand} />
+
+Uten `src` faller hver logo tilbake til navnet som en dempet typografisk wordmark:
+
+<Canvas of={LogoCloudStories.Wordmarks} />
+
+## Props
+
+<Controls of={LogoCloudStories.Logoer} />

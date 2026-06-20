@@ -1,4 +1,4 @@
-import { Container, Heading, Section, Text } from "@poynt/ui";
+import { Container, Grid, Heading, Section, Text } from "@poynt/ui";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
 const meta: Meta = {
@@ -55,6 +55,31 @@ export const SeksjonsVarianter: Story = {
             </code>
           </Container>
         </Section>
+      ))}
+    </div>
+  ),
+};
+
+export const Rutenett: Story = {
+  name: "Grid — responsivt rutenett",
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`Grid` er komposisjons-primitivet for rutenett (cols 1–4, gap xs–xl) " +
+          "med fornuftig nedtrapping på mindre skjermer. FeatureGrid bygger på " +
+          "samme `gridVariants`.",
+      },
+    },
+  },
+  render: () => (
+    <div className="flex flex-col gap-8 py-8">
+      {([2, 3, 4] as const).map((cols) => (
+        <Grid key={cols} cols={cols}>
+          {["a", "b", "c", "d"].slice(0, cols).map((id) => (
+            <Box key={`${cols}-${id}`} label={`<Grid cols={${cols}}>`} />
+          ))}
+        </Grid>
       ))}
     </div>
   ),

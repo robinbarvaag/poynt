@@ -1,0 +1,67 @@
+import { Meta, Canvas, Controls } from "@storybook/addon-docs/blocks";
+import * as PathCardsStories from "./PathCards.stories";
+
+<Meta of={PathCardsStories} />
+
+# PathCards & PathCard
+
+«To dører»-seksjonen: store, fullt klikkbare kort der den besøkende velger sin
+vei. Kjernen i den målgruppe-først-strukturen vi bruker — typisk
+**«Jeg er gründer»** vs. **«Vi er en bedrift»** — og speiler `For gründere` /
+`For bedrifter` i hovedmenyen.
+
+## Når brukes den
+
+- Rett under hero på forsiden, for å sende folk inn i riktig løp.
+- Som inngang øverst på en seksjon der to (eller tre) målgrupper skal skilles.
+
+## Når IKKE
+
+- Til en liste av likestilte fordeler/funksjoner — bruk **FeatureGrid**.
+- Til produkt- eller tjenestekatalog — bruk **ProductGrid** / **ServiceGrid**.
+
+## Varianter
+
+- **2 kolonner** (default) — de klassiske «to dørene».
+- **3 kolonner** — når en tredje, lettere vei (f.eks. «bare nysgjerrig») er med.
+- Hvert kort kan sette egen `surface`; uten den roterer seksjonen automatisk
+  mellom saffron / mint / salmon så dørene blir tydelig forskjellige.
+
+## Anatomi
+
+`PathCard` (én dør: eyebrow + tittel + beskrivelse + punktliste + CTA, hele
+kortet er én lenke) → `PathCards` (seksjon med valgfri eyebrow/tittel/intro og
+2–3 kort i rutenett).
+
+## Presentasjon, ikke data
+
+Komponenten er presentasjons-only og tar et valgfritt `icon`-slot:
+
+```tsx
+<PathCards
+  paths={[
+    {
+      id: "grunder",
+      href: "/for-grundere",
+      eyebrow: "For deg som",
+      title: "Jeg er gründer",
+      description: "…",
+      items: ["On Poynt-medlemskap", "Kurs og maler"],
+      ctaLabel: "Se hva som er inkludert",
+    },
+    // …
+  ]}
+/>
+```
+
+## To dører
+
+<Canvas of={PathCardsStories.ToDorer} />
+
+## Med overskrift
+
+<Canvas of={PathCardsStories.MedOverskrift} />
+
+## Tre veier
+
+<Canvas of={PathCardsStories.TreVeier} />

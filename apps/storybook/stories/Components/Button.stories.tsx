@@ -4,20 +4,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 const meta = {
   title: "Komponenter/Button",
   component: Button,
-  tags: ["autodocs"],
-  parameters: {
-    layout: "centered",
-    docs: {
-      description: {
-        component:
-          "Raffinert, ikke leken. Merkevareknappene (default/saffron/salmon/ink) " +
-          "har squircle-form (Apple-aktige «continuous corners» via corner-shape " +
-          "— progressive enhancement, faller tilbake til vanlig avrunding i " +
-          "Safari/Firefox) og et dempet løft + myk skygge på hover. Nøytrale " +
-          "verktøy-varianter (outline/ghost/…) er uendret.",
-      },
-    },
-  },
+  parameters: { layout: "centered" },
 } satisfies Meta<typeof Button>;
 
 export default meta;
@@ -38,10 +25,9 @@ export const Default: Story = {
         "saffron",
         "salmon",
         "ink",
-        "destructive",
         "outline",
-        "secondary",
         "ghost",
+        "destructive",
         "link",
       ],
     },
@@ -53,7 +39,7 @@ export const Default: Story = {
 };
 
 export const Merkevare: Story = {
-  name: "Merkevare (squircle)",
+  name: "Merkevare/CTA",
   render: () => (
     <div className="flex flex-wrap items-center gap-6">
       <Button variant="default" size="lg">
@@ -72,17 +58,19 @@ export const Merkevare: Story = {
   ),
 };
 
-export const Verktoy: Story = {
-  name: "Verktøy-varianter",
+export const Noytrale: Story = {
+  name: "Nøytral emfase",
   render: () => (
     <div className="flex flex-wrap items-center gap-2">
       <Button variant="outline">Outline</Button>
-      <Button variant="secondary">Secondary</Button>
       <Button variant="ghost">Ghost</Button>
       <Button variant="link">Link</Button>
-      <Button variant="destructive">Destructive</Button>
     </div>
   ),
+};
+
+export const Destruktiv: Story = {
+  render: () => <Button variant="destructive">Slett konto</Button>,
 };
 
 export const Størrelser: Story = {

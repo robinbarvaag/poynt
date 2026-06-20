@@ -1,0 +1,45 @@
+import { Meta, Canvas, Controls } from "@storybook/addon-docs/blocks";
+import * as BadgeStories from "./Badge.stories";
+
+<Meta of={BadgeStories} />
+
+# Badge
+
+Liten pill-merkelapp som gir et innholdselement en status, kategori eller etikett.
+Holdes alltid ekte rund (`rounded-full` → `corner-shape: round`, ikke squircle).
+
+## Når brukes den
+
+- Statuser («Aktiv», «Utløpt», «Ny»), tellere og korte etiketter.
+- Kategori-/type-tagger på kort, produkter og lister.
+- Bruk `dot` for en liten statusprikk. Bevisst ren tekst — ingen ikoner.
+
+## Når IKKE
+
+- Som klikkbar handling — bruk **Button** (`variant="link"`/`ghost`) eller en lenke.
+- For lengre, brødtekstnær informasjon — bruk vanlig tekst.
+- Som filter-/valgknapp — bruk **Tabs**, **Checkbox** eller **RadioGroup**.
+
+## Varianter
+
+Solide flater for tydelige statuser, merkevare-toner (saffron/salmon/mint) for
+lekenhet, og myke/tonale varianter når badgen skal være dempet.
+
+<Canvas of={BadgeStories.Solide} />
+<Canvas of={BadgeStories.MerkevareToner} />
+<Canvas of={BadgeStories.MykeToner} />
+
+## Størrelser
+
+Fire størrelser (`sm`–`xl`). Standard er `md` — tør å gå opp i `lg`/`xl` når badgen
+er et blikkfang.
+
+<Canvas of={BadgeStories.Størrelser} />
+
+## Statusprikk
+
+<Canvas of={BadgeStories.MedDot} />
+
+## Props
+
+<Controls of={BadgeStories.Default} />

@@ -1,6 +1,7 @@
 import { cn } from "../../lib/utils";
 import { Button } from "../button";
 import { Container } from "../container";
+import { GridPattern } from "../decorative";
 import { Eyebrow } from "../eyebrow";
 import { Reveal } from "../motion";
 import { Heading, Text } from "../typography";
@@ -68,76 +69,87 @@ export function Pricing({ eyebrow, title, intro, tiers }: PricingProps) {
             <Reveal key={tier.name} className="h-full">
               <div
                 className={cn(
-                  "flex h-full flex-col rounded-3xl p-8",
+                  "relative flex h-full flex-col overflow-hidden rounded-3xl p-8",
                   featured
                     ? "bg-primary text-primary-foreground shadow-xl ring-1 ring-primary/20 lg:-translate-y-2"
                     : "border border-border bg-card text-card-foreground"
                 )}
               >
-                <div className="flex items-center justify-between gap-3">
-                  <Heading variant="h3" color="inherit" weight="bold">
-                    {tier.name}
-                  </Heading>
-                  {tier.badge && (
-                    <span
-                      className={cn(
-                        "rounded-full px-3 py-1 font-semibold text-xs",
-                        featured
-                          ? "bg-saffron text-foreground"
-                          : "bg-accent text-accent-foreground"
-                      )}
-                    >
-                      {tier.badge}
-                    </span>
-                  )}
-                </div>
-
-                <div className="mt-5 flex items-baseline gap-2">
-                  <span className="font-bold font-heading text-5xl leading-none tracking-tight">
-                    {tier.price}
-                  </span>
-                  {tier.period && (
-                    <span className={cn("text-sm", muted)}>{tier.period}</span>
-                  )}
-                </div>
-
-                {tier.description && (
-                  <Text
-                    color="inherit"
-                    customStyles={cn("mt-4 leading-relaxed", muted)}
-                  >
-                    {tier.description}
-                  </Text>
+                {featured && (
+                  <GridPattern
+                    variant="dots"
+                    fade
+                    className="text-primary-foreground/15"
+                  />
                 )}
-
-                <ul className="mt-8 flex flex-col gap-3">
-                  {tier.features.map((feature) => (
-                    <li key={feature} className="flex items-start gap-3">
+                <div className="relative z-10 flex h-full flex-col">
+                  <div className="flex items-center justify-between gap-3">
+                    <Heading variant="h3" color="inherit" weight="bold">
+                      {tier.name}
+                    </Heading>
+                    {tier.badge && (
                       <span
-                        aria-hidden="true"
                         className={cn(
-                          "mt-2.5 h-px w-4 shrink-0 rounded-full",
-                          marker
+                          "rounded-full px-3 py-1 font-semibold text-xs",
+                          featured
+                            ? "bg-saffron text-foreground"
+                            : "bg-accent text-accent-foreground"
                         )}
-                      />
-                      <Text
-                        color="inherit"
-                        customStyles={cn("leading-relaxed", muted)}
                       >
-                        {feature}
-                      </Text>
-                    </li>
-                  ))}
-                </ul>
+                        {tier.badge}
+                      </span>
+                    )}
+                  </div>
 
-                <Button
-                  asChild
-                  size="lg"
-                  variant={featured ? "saffron" : "default"}
-                  className="mt-10 w-full"
-                >
-                  <a href={tier.cta.href}>{tier.cta.text}</a>
-                </Button>
+                  <div className="mt-5 flex items-baseline gap-2">
+                    <span className="font-bold font-heading text-5xl leading-none tracking-tight">
+                      {tier.price}
+                    </span>
+                    {tier.period && (
+                      <span className={cn("text-sm", muted)}>
+                        {tier.period}
+                      </span>
+                    )}
+                  </div>
+
+                  {tier.description && (
+                    <Text
+                      color="inherit"
+                      customStyles={cn("mt-4 leading-relaxed", muted)}
+                    >
+                      {tier.description}
+                    </Text>
+                  )}
+
+                  <ul className="mt-8 flex flex-col gap-3">
+                    {tier.features.map((feature) => (
+                      <li key={feature} className="flex items-start gap-3">
+                        <span
+                          aria-hidden="true"
+                          className={cn(
+                            "mt-2.5 h-px w-4 shrink-0 rounded-full",
+                            marker
+                          )}
+                        />
+                        <Text
+                          color="inherit"
+                          customStyles={cn("leading-relaxed", muted)}
+                        >
+                          {feature}
+                        </Text>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Button
+                    asChild
+                    size="lg"
+                    variant={featured ? "saffron" : "default"}
+                    className="mt-10 w-full"
+                  >
+                    <a href={tier.cta.href}>{tier.cta.text}</a>
+                  </Button>
+                </div>
               </div>
             </Reveal>
           );

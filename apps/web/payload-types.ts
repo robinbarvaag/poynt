@@ -189,6 +189,7 @@ export interface Page {
         | NewsletterBlock
         | ContentBlock
         | MediaBlock
+        | PathCardsBlock
         | TestimonialsBlock
         | CtaSectionBlock
         | ProductArchiveBlock
@@ -228,10 +229,6 @@ export interface Page {
  * via the `definition` "HeroBlock".
  */
 export interface HeroBlock {
-  /**
-   * Standard: Sentrert uten bilde, eller tekst + bilde side om side. Fullskjerm: Bilde som bakgrunn med overlay.
-   */
-  variant?: ('standard' | 'fullscreen') | null;
   title: string;
   subtitle?: {
     root: {
@@ -262,9 +259,13 @@ export interface HeroBlock {
       }[]
     | null;
   /**
-   * Standard: Vises ved siden av teksten. Fullskjerm: Brukes som bakgrunnsbilde.
+   * Vises ved siden av teksten (klippet i organisk form). Uten bilde blir heroen sentrert.
    */
   image?: (number | null) | Media;
+  /**
+   * Legg et mykt merkefarge-filter (duotone) over bildet. Egner seg for illustrasjoner/grafikk — skru av for ekte foto av personer.
+   */
+  imageDuotone?: boolean | null;
   primaryCta?: {
     text?: string | null;
     url?: string | null;
@@ -529,6 +530,39 @@ export interface MediaBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'media';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PathCardsBlock".
+ */
+export interface PathCardsBlock {
+  eyebrow?: string | null;
+  title?: string | null;
+  intro?: string | null;
+  columns?: ('2' | '3') | null;
+  paths?:
+    | {
+        eyebrow?: string | null;
+        title: string;
+        description?: string | null;
+        href: string;
+        ctaLabel?: string | null;
+        items?:
+          | {
+              text: string;
+              id?: string | null;
+            }[]
+          | null;
+        /**
+         * La stå tom for automatisk fargerotasjon (saffron/mint/salmon).
+         */
+        surface?: ('default' | 'saffron' | 'salmon' | 'mint' | 'primary') | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'pathCards';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1438,6 +1472,7 @@ export interface PagesSelect<T extends boolean = true> {
         newsletter?: T | NewsletterBlockSelect<T>;
         content?: T | ContentBlockSelect<T>;
         media?: T | MediaBlockSelect<T>;
+        pathCards?: T | PathCardsBlockSelect<T>;
         testimonials?: T | TestimonialsBlockSelect<T>;
         ctaSection?: T | CtaSectionBlockSelect<T>;
         productArchive?: T | ProductArchiveBlockSelect<T>;
@@ -1466,7 +1501,6 @@ export interface PagesSelect<T extends boolean = true> {
  * via the `definition` "HeroBlock_select".
  */
 export interface HeroBlockSelect<T extends boolean = true> {
-  variant?: T;
   title?: T;
   subtitle?: T;
   tagsLabel?: T;
@@ -1477,6 +1511,7 @@ export interface HeroBlockSelect<T extends boolean = true> {
         id?: T;
       };
   image?: T;
+  imageDuotone?: T;
   primaryCta?:
     | T
     | {
@@ -1669,6 +1704,35 @@ export interface ContentBlockSelect<T extends boolean = true> {
 export interface MediaBlockSelect<T extends boolean = true> {
   media?: T;
   caption?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PathCardsBlock_select".
+ */
+export interface PathCardsBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  title?: T;
+  intro?: T;
+  columns?: T;
+  paths?:
+    | T
+    | {
+        eyebrow?: T;
+        title?: T;
+        description?: T;
+        href?: T;
+        ctaLabel?: T;
+        items?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        surface?: T;
+        id?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -2259,6 +2323,7 @@ export interface Homepage {
         | NewsletterBlock
         | ContentBlock
         | MediaBlock
+        | PathCardsBlock
         | TestimonialsBlock
         | CtaSectionBlock
         | ProductArchiveBlock
@@ -2461,6 +2526,9 @@ export interface Header {
     text?: string | null;
     url?: string | null;
   };
+  /**
+   * Anbefalt struktur (målgruppe-først): «For gründere» (undermeny: On Poynt, Verktøy, Produkter & kurs), «For bedrifter» (undermeny: Styre & verv, Rådgivning, Foredrag), «Ressurser» (undermeny: Blogg, Podkast, Artikler) og «Om». Bruk undermenypunkter for å samle relaterte sider under hvert hovedpunkt.
+   */
   navItems?:
     | {
         label: string;
@@ -2618,6 +2686,7 @@ export interface HomepageSelect<T extends boolean = true> {
         newsletter?: T | NewsletterBlockSelect<T>;
         content?: T | ContentBlockSelect<T>;
         media?: T | MediaBlockSelect<T>;
+        pathCards?: T | PathCardsBlockSelect<T>;
         testimonials?: T | TestimonialsBlockSelect<T>;
         ctaSection?: T | CtaSectionBlockSelect<T>;
         productArchive?: T | ProductArchiveBlockSelect<T>;

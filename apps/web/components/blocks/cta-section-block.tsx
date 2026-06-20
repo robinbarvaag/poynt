@@ -1,5 +1,5 @@
 import { getMediaUrl } from "@/lib/media-url";
-import { Button, Heading, cn } from "@poynt/ui";
+import { Button, GridPattern, Heading, cn } from "@poynt/ui";
 import { DriftingBlob } from "@poynt/ui/motion";
 import Image from "next/image";
 import Link from "next/link";
@@ -88,6 +88,11 @@ export function CtaSectionBlock({
     return (
       <section className="relative overflow-hidden bg-primary py-20 text-primary-foreground md:py-28">
         {/* Signaturflørt: organiske former bak innholdet — kun her, jf. docs/COMPOSITION.md §3 */}
+        <GridPattern
+          variant="dots"
+          fade
+          className="text-primary-foreground/15"
+        />
         <DriftingBlob className="-left-16 -top-12 size-80 bg-mint/15" />
         <DriftingBlob
           className="-bottom-20 -right-12 size-96 bg-saffron/10"

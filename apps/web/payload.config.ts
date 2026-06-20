@@ -1,6 +1,7 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { postgresAdapter } from "@payloadcms/db-postgres";
+import { resendAdapter } from "@payloadcms/email-resend";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
 import { vercelBlobStorage } from "@payloadcms/storage-vercel-blob";
 import { buildConfig } from "payload";
@@ -43,6 +44,13 @@ export default buildConfig({
   editor: lexicalEditor({}),
   secret: process.env.PAYLOAD_SECRET || "development-secret",
   serverURL: siteUrl,
+  email: resendAdapter({
+    // TODO: bytt til verifisert domene (t.d. noreply@dittdomene.no) når domenet er
+    // verifisert i Resend. onboarding@resend.dev kan berre sende til eiga konto-adresse.
+    defaultFromName: "On Poynt",
+    defaultFromAddress: "onboarding@resend.dev",
+    apiKey: process.env.RESEND_API_KEY || "",
+  }),
   db: postgresAdapter({
     pool: {
       connectionString: process.env.DATABASE_URI || "",

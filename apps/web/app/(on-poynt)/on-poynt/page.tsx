@@ -14,7 +14,7 @@ export default function PlannerLandingPage() {
           <Link href="/on-poynt/registrer">Kom i gang gratis</Link>
         </Button>
 
-        <Button variant={"secondary"} asChild>
+        <Button variant="outline" asChild>
           <Link href="/on-poynt/innlogging">Logg inn</Link>
         </Button>
       </div>

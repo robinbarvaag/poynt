@@ -1,5 +1,6 @@
 "use client";
 
+import { useCartReady } from "@/lib/use-cart-ready";
 import { useCart } from "@poynt/cart";
 import { Button } from "@poynt/ui";
 import { Check } from "lucide-react";
@@ -18,9 +19,12 @@ interface AddToCartButtonProps {
 
 export function AddToCartButton({ product }: AddToCartButtonProps) {
   const { addItem, items } = useCart();
+  const ready = useCartReady();
   const [added, setAdded] = useState(false);
 
-  const isInCart = items.some((item) => item.id === product.id);
+  // Behandle som «ikke i kurv» til klienten har montert (unngår hydration-
+  // mismatch på knapptilstanden — se useCartReady).
+  const isInCart = ready && items.some((item) => item.id === product.id);
 
   const handleAddToCart = () => {
     addItem({
