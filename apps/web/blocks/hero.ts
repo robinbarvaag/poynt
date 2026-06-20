@@ -10,23 +10,6 @@ export const Hero: Block = {
   },
   fields: [
     {
-      name: "variant",
-      type: "select",
-      defaultValue: "standard",
-      options: [
-        { label: "Standard", value: "standard" },
-        {
-          label: "Showcase (fargebakgrunn + bilde under)",
-          value: "fullscreen",
-        },
-      ],
-      label: "Variant",
-      admin: {
-        description:
-          "Standard: Sentrert uten bilde, eller tekst + bilde side om side. Fullskjerm: Bilde som bakgrunn med overlay.",
-      },
-    },
-    {
       name: "title",
       type: "text",
       required: true,
@@ -69,7 +52,18 @@ export const Hero: Block = {
       label: "Bilde",
       admin: {
         description:
-          "Standard: Vises ved siden av teksten. Fullskjerm: Brukes som bakgrunnsbilde.",
+          "Vises ved siden av teksten (klippet i organisk form). Uten bilde blir heroen sentrert.",
+      },
+    },
+    {
+      name: "imageDuotone",
+      type: "checkbox",
+      defaultValue: false,
+      label: "Fargefilter på bildet",
+      admin: {
+        description:
+          "Legg et mykt merkefarge-filter (duotone) over bildet. Egner seg for illustrasjoner/grafikk — skru av for ekte foto av personer.",
+        condition: (_, siblingData) => Boolean(siblingData?.image),
       },
     },
     {

@@ -1,0 +1,41 @@
+import { Meta, Canvas } from "@storybook/addon-docs/blocks";
+import * as CardStories from "./Card.stories";
+
+<Meta of={CardStories} />
+
+# Card
+
+Fleksibel innholdsbeholder med en fast anatomi: `CardHeader`, `CardTitle`,
+`CardDescription`, `CardContent`, `CardFooter` (og `CardAction`).
+
+## Når brukes den
+
+- Gruppere relatert innhold i en avgrenset flate: produkter, planer, innstillinger.
+- Som **byggekloss i grids** — f.eks. `FeatureGrid = Grid + Card surface`.
+
+## Når IKKE
+
+- Som hel seksjonsbakgrunn — bruk **Section**.
+- Som klikkbart valg i et skjema — bruk **OptionCard** (Card med valg-semantikk).
+
+## Anatomi
+
+`Card` → `CardHeader` (`CardTitle` + `CardDescription` + ev. `CardAction`) →
+`CardContent` → `CardFooter`. `CardSeparator` gir den tynne PayPal-streken mellom
+seksjoner (tar farge fra kortet via `border-current`). Send `size="sm"` for et
+tettere kort.
+
+Kortet er bygget i samme språk som FeatureGrid/INSPO (PayPal-kortene): store runde
+hjørner, romslig luft, bold tittel og et lite løft på hover. Med en farget
+`surface` + et tall/aksent-stjerne + `CardSeparator` + footer-lenke/stat blir et
+hvilket som helst `<Card>` et fullverdig fargeblokk-kort.
+
+<Canvas of={CardStories.Default} />
+
+## Flater (surface)
+
+`surface` styrer flate + tekstfarge: `default` (nøytralt kort) og de mettede
+merkevareflatene `saffron`/`salmon`/`primary`/`ink`. På fargede flater bør du selv
+sette kontrastfarger på beskrivelse/aksenter (`text-muted-foreground` passer ikke).
+
+<Canvas of={CardStories.Surfaces} />

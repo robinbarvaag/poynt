@@ -1,0 +1,60 @@
+import { Meta, Canvas, Controls } from "@storybook/addon-docs/blocks";
+import * as CartDrawerStories from "./CartDrawer.stories";
+import * as CartLineItemStories from "./CartLineItem.stories";
+
+<Meta of={CartDrawerStories} />
+
+# CartDrawer & CartLineItem
+
+Handlekurven som en **presentasjonell** `Sheet`-drawer. Triggeren «popper» — saffron-
+fylt med teller — når kurven har varer, og er et rolig ghost-ikon når den er tom.
+
+## Når brukes den
+
+- Handlekurv-knappen i headeren (`actions`-slotten i **SiteHeader**).
+- `CartLineItem` for hver rad; `CartDrawer` for hele panelet (header, liste, tom-
+  tilstand og footer med totalsum + checkout).
+
+## Presentasjon, ikke state
+
+Komponentene eier ingen cart-state. Appen
+(`apps/web/components/cart-drawer.tsx`) kobler på `@poynt/cart`-storen, formaterer
+pris, og sender checkout/«se produkter» som lenke-knapper inn via slots. Åpen-
+tilstanden kontrolleres av appen (`open`/`onOpenChange`) så den lukkes ved
+navigasjon; i storybook brukes `defaultOpen` (ukontrollert).
+
+```tsx
+<CartDrawer
+  open={open}
+  onOpenChange={setOpen}
+  count={items.length}
+  total={formatPrice(total())}
+  onClear={clearCart}
+  checkout={<Button asChild><Link href="/handlekurv">Gå til kassen</Link></Button>}
+  emptyAction={<Button variant="outline" asChild><Link href="/produkter">Se produkter</Link></Button>}
+>
+  {items.map((i) => (
+    <CartLineItem key={i.id} name={i.name} priceLabel={formatPrice(i.price)} onRemove={() => removeItem(i.id)} />
+  ))}
+</CartDrawer>
+```
+
+## Triggeren
+
+<Canvas of={CartDrawerStories.Trigger} />
+
+## Med produkter
+
+<Canvas of={CartDrawerStories.MedProdukter} />
+
+## Tom
+
+<Canvas of={CartDrawerStories.Tom} />
+
+## CartLineItem
+
+<Canvas of={CartLineItemStories.Default} />
+
+## Props
+
+<Controls of={CartDrawerStories.Tom} />

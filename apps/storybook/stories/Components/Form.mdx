@@ -1,0 +1,59 @@
+import { Meta, Canvas } from "@storybook/addon-docs/blocks";
+import * as FormStories from "./Form.stories";
+
+<Meta of={FormStories} />
+
+# Form
+
+Skjemabyggeklossene er bygget på **react-hook-form** + **zod**. Alt importeres fra
+`@poynt/ui/form` slik at det finnes én fysisk react-hook-form-instans (ellers får
+man inkompatible `Control<T>`-typer på tvers av apper).
+
+## Når brukes den
+
+- Alle skjemaer med validering: kontakt, registrering, innstillinger, verktøy-steg.
+- Bruk **`Field`** som standard — den samler ledetekst + kontroll + hjelpetekst +
+  feilmelding i én komponent.
+- Fall ned til byggeklossene (`FormField`, `FormItem`, `FormControl`, `FormMessage`)
+  når en kontroll trenger spesiell kobling (f.eks. **Checkbox** med
+  `checked`/`onCheckedChange`).
+
+## Når IKKE
+
+- For et enkelt, ukontrollert input uten validering — bruk **Input** alene.
+
+## Anatomi
+
+```tsx
+import {
+  Field, Form, Input, useForm, zodResolver,
+} from "@poynt/ui/form";
+
+const form = useForm({ resolver: zodResolver(schema), defaultValues });
+
+<Form {...form}>
+  <form onSubmit={form.handleSubmit(onValid)}>
+    <Field control={form.control} name="navn" label="Navn">
+      <Input placeholder="…" />
+    </Field>
+  </form>
+</Form>
+```
+
+`Field` injiserer automatisk `value`, `onChange`, `onBlur`, `name` og `ref` i
+barnet — du slipper å koble dem manuelt.
+
+## Eksempel
+
+Et komplett zod-validert skjema med tekstfelt, e-post, tekstområde og en
+checkbox-kobling.
+
+<Canvas of={FormStories.Default} />
+
+## Tester
+
+Skjemaene har `play`-funksjoner (se **Interactions**-panelet) som mønster for
+hvordan vi tester forms: `Test: validering` sender inn tomt og verifiserer at
+feilmeldingene vises; `Test: vellykket innsending` fyller ut gyldig og verifiserer
+kvitteringen. Bruk samme mønster (`within` + `userEvent` + `expect` fra
+`storybook/test`) for andre interaktive komponenter.

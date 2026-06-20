@@ -1,0 +1,33 @@
+import { Meta, Canvas } from "@storybook/addon-docs/blocks";
+import * as ToolFormStories from "./ToolForm.stories";
+
+<Meta of={ToolFormStories} />
+
+# Tool Form
+
+Byggeklosser for de stegvise AI-verktøyskjemaene.
+
+- **StepContainer** rammer inn et steg med framdrift (steg-teller, ikon, tittel).
+- **OptionCard** er et valgbart kort (Card med valg-semantikk) — tastatur-tilgjengelig
+  (`role="button"`, `aria-pressed`, Enter/Mellomrom) og bygget på **Card**.
+- **PrefilledBadge** markerer felter som er fylt ut automatisk.
+
+## Når brukes den
+
+- Stegvise verktøy/wizards der hvert steg har noen få store valg.
+- `OptionCard` der et radiovalg trenger mer kontekst enn en ren **RadioGroup**
+  (ikon + beskrivelse + større treffflate).
+
+## Når IKKE
+
+- Til vanlige skjemaer med tekstfelt — bruk **Form** + **Field**.
+- Til mange kompakte valg på én linje — bruk **RadioGroup** eller **Select**.
+
+## Eksempel
+
+<Canvas of={ToolFormStories.Default} />
+
+## Test
+
+`Test: velg alternativ` kjører en `play`-funksjon som klikker et `OptionCard` og
+verifiserer at `aria-pressed` veksler til `true`.

@@ -1,0 +1,37 @@
+import { Meta, Canvas, Controls } from "@storybook/addon-docs/blocks";
+import * as FeatureGridStories from "./FeatureGrid.stories";
+
+<Meta of={FeatureGridStories} />
+
+# FeatureGrid
+
+Verdi-/feature-rutenett i modig fargeblokk-stil (INSPO/PayPal). Hvert kort er en
+mettet flate med et stort tall som grafisk anker, fet tittel med aksent-stjerne,
+tynn skillelinje og enten en lenke eller et nøkkeltall.
+
+## Komposisjon
+
+FeatureGrid er ikke lenger en blindvei: den er en **komposisjon av `Grid` +
+`Card surface`**. Layouten kommer fra `Grid`-primitivet (samme `gridVariants` som
+`<Grid>`), og hvert kort er et `<Card surface="saffron|salmon|primary">`. Vil du
+bygge et annet fargeblokk-rutenett, gjenbruk de samme primitivene direkte.
+
+## Når brukes den
+
+- Trekke fram 2–4 kjerneverdier/funksjoner med visuell tyngde.
+- Marker en aksent i tittelen med `*` (farges som aksent).
+- Bruk `link` *eller* `stat` nederst på et kort — ikke begge.
+
+## Når IKKE
+
+- Til en nøytral kort-liste uten fargeblokk-uttrykk — bruk `Grid` + `Card` (default).
+- Til lange tekstavsnitt — beskrivelsen klippes til fire linjer.
+
+## Eksempel
+
+<Canvas of={FeatureGridStories.Standard} />
+<Canvas of={FeatureGridStories.FireKolonner} />
+
+## Props
+
+<Controls of={FeatureGridStories.Standard} />

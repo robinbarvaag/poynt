@@ -1,12 +1,59 @@
 import { PageHero } from "@/components/page-hero";
-import { ServiceCard } from "@/components/service-card";
+import { getMediaUrl } from "@/lib/media-url";
+import type { Service } from "@/payload-types";
 import config from "@/payload.config";
-import { Container, Text } from "@poynt/ui";
+import {
+  Container,
+  Section,
+  ServiceGrid,
+  type ServiceGridItem,
+  Text,
+} from "@poynt/ui";
 import type { Metadata } from "next";
+import Image from "next/image";
 import { getPayload } from "payload";
-import type { ComponentProps } from "react";
 
-type ServiceCardData = ComponentProps<typeof ServiceCard>["service"];
+function formatServicePrice(service: Service): string | undefined {
+  if (service.priceType === "contact") {
+    return "Ta kontakt for pris";
+  }
+  if (!service.price) {
+    return undefined;
+  }
+  const price = service.price.toLocaleString("nb-NO");
+  const vat = service.includesVat ? " + mva" : "";
+  switch (service.priceType) {
+    case "from":
+      return `Fra ${price} kr${vat}`;
+    case "monthly":
+      return `${price} kr${vat} / mnd`;
+    default:
+      return `${price} kr${vat}`;
+  }
+}
+
+function toServiceItem(service: Service): ServiceGridItem {
+  const media =
+    service.image && typeof service.image !== "number" ? service.image : null;
+
+  return {
+    id: service.id,
+    href: service.ctaLink || `/tjenester/${service.slug}`,
+    name: service.name,
+    price: formatServicePrice(service),
+    shortDescription: service.shortDescription,
+    eyebrow: "Tjeneste",
+    ctaLabel: service.ctaText || "Les mer",
+    image: media?.url ? (
+      <Image
+        src={getMediaUrl(media.url)}
+        alt={media.alt || service.name}
+        fill
+        className="object-cover"
+      />
+    ) : undefined,
+  };
+}
 
 export async function generateMetadata(): Promise<Metadata> {
   const payload = await getPayload({ config });
@@ -82,22 +129,17 @@ export default async function ServicesPage() {
         />
       )}
 
-      <Container padding="default" className={heroEnabled ? "pt-0" : ""}>
-        {services.docs.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {services.docs.map((service) => (
-              <ServiceCard
-                key={service.id}
-                service={service as unknown as ServiceCardData}
-              />
-            ))}
-          </div>
-        ) : (
-          <Text variant="muted" customStyles="text-center py-12">
-            {emptyStateText}
-          </Text>
-        )}
-      </Container>
+      <Section variant="muted" spacing="md">
+        <Container padding="none">
+          {services.docs.length > 0 ? (
+            <ServiceGrid services={services.docs.map(toServiceItem)} />
+          ) : (
+            <Text variant="muted" customStyles="text-center py-12">
+              {emptyStateText}
+            </Text>
+          )}
+        </Container>
+      </Section>
     </>
   );
 }

@@ -126,26 +126,33 @@ function ProductDetailClient({
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
         <div className="space-y-4">
-          <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-muted">
-            {currentImage ? (
-              <Image
-                src={getMediaUrl(currentImage.url)}
-                alt={currentImage.alt || product.name}
-                fill
-                className="object-cover"
-                priority
-              />
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center bg-primary/5">
-                <span className="text-6xl">📦</span>
-              </div>
-            )}
+          <div className="relative">
+            {/* Lekent blob-pek bak bildet (INSPO/Steady-signaturen) */}
+            <span
+              aria-hidden="true"
+              className="-top-5 -left-5 absolute size-32 rounded-[58%_42%_55%_45%/55%_48%_52%_45%] bg-saffron opacity-70 blur-[2px]"
+            />
+            <div className="relative z-10 aspect-square w-full overflow-hidden rounded-3xl bg-muted shadow-sm">
+              {currentImage ? (
+                <Image
+                  src={getMediaUrl(currentImage.url)}
+                  alt={currentImage.alt || product.name}
+                  fill
+                  className="object-cover"
+                  priority
+                />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center bg-primary/5">
+                  <span className="text-6xl">📦</span>
+                </div>
+              )}
 
-            {hasDiscount && (
-              <span className="absolute top-4 right-4 rounded-full bg-saffron px-4 py-1.5 font-semibold text-foreground text-sm">
-                Tilbud
-              </span>
-            )}
+              {hasDiscount && (
+                <span className="absolute top-4 right-4 rounded-full bg-saffron px-4 py-1.5 font-semibold text-foreground text-sm shadow-sm">
+                  Tilbud
+                </span>
+              )}
+            </div>
           </div>
 
           {images.length > 1 && (
@@ -176,7 +183,7 @@ function ProductDetailClient({
 
         <div className="flex flex-col">
           <div className="mb-4">
-            <Badge variant="secondary">
+            <Badge variant="soft-saffron" size="lg">
               {typeLabels[product.type] || product.type}
             </Badge>
           </div>
@@ -228,7 +235,7 @@ function ProductDetailClient({
 
           {/* Benefits list */}
           {benefits.length > 0 && (
-            <div className="mb-8 rounded-2xl border border-border/50 bg-muted/50 p-6">
+            <div className="mb-8 rounded-3xl bg-mint p-6 md:p-8">
               <Heading variant="h4" color="foreground" customStyles="mb-4">
                 Dette får du:
               </Heading>

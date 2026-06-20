@@ -1,0 +1,60 @@
+import { Meta, Canvas, Controls } from "@storybook/addon-docs/blocks";
+import * as ServiceGridStories from "./ServiceGrid.stories";
+
+<Meta of={ServiceGridStories} />
+
+# ServiceGrid & ServiceCard
+
+Oversikt over tjenester du tilbyr. Bevisst en **annen sjanger enn produktene**:
+der produktkortene er modige fargeblokker, er tjenestekortene rolige og
+redaksjonelle — et bilde med et hvitt infokort som løftes opp og legger seg delvis
+oppå bildet.
+
+## Hvorfor det leser som «tjeneste», ikke «butikk»
+
+- **Lagdelt, redaksjonelt kort** i stedet for fargeblokk.
+- **Pris som «… + mva» / «Fra …» / «… / mnd» / «Ta kontakt for pris»** — B2B-språk,
+  ikke en kjøp-pill.
+- **«Les mer →»** (informasjon) i stedet for «Kjøp» / handlekurv.
+- Legges typisk på en dempet `Section` (muted) så de hvite kortene løftes fram.
+
+## Når brukes den
+
+- Tjeneste-/konsultasjonsoversikt (`/tjenester`).
+- `ServiceCard` alene i andre komposisjoner (f.eks. «utvalgte tjenester» på forsiden).
+
+## Når IKKE
+
+- Til produkter man legger i handlekurv — bruk **ProductGrid**.
+- Til prisplaner/abonnementsnivåer — bruk **Pricing**.
+
+## Presentasjon, ikke data
+
+Appen formaterer pris (ut fra `priceType`/`includesVat`) og kobler `next/image`
+inn via `image`-slotten:
+
+```tsx
+<ServiceGrid
+  services={docs.map((s) => ({
+    id: s.id,
+    href: s.ctaLink || `/tjenester/${s.slug}`,
+    name: s.name,
+    price: formatServicePrice(s),     // "5000 kr + mva" | "Ta kontakt for pris"
+    shortDescription: s.shortDescription,
+    ctaLabel: s.ctaText || "Les mer",
+    image: <Image src={url(s)} alt={s.name} fill className="object-cover" />,
+  }))}
+/>
+```
+
+## Oversikt
+
+<Canvas of={ServiceGridStories.Standard} />
+
+## Enkeltkort
+
+<Canvas of={ServiceGridStories.Enkeltkort} />
+
+## Props
+
+<Controls of={ServiceGridStories.Enkeltkort} />

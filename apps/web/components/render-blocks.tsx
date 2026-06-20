@@ -11,6 +11,7 @@ import { HeroBlock } from "./blocks/hero-block";
 import { LogoCloudBlock } from "./blocks/logo-cloud-block";
 import { MediaBlockComponent } from "./blocks/media-block";
 import { NewsletterBlock } from "./blocks/newsletter-block";
+import { PathCardsBlock } from "./blocks/path-cards-block";
 import { PodcastArchiveBlock } from "./blocks/podcast-archive-block";
 import { PricingBlock } from "./blocks/pricing-block";
 import { ProductArchiveBlock } from "./blocks/product-archive-block";
@@ -44,6 +45,7 @@ const SELF_REVEAL_BLOCK_TYPES = new Set([
   "pricing",
   "faq",
   "logoCloud",
+  "pathCards",
 ]);
 
 function renderBlock(block: Block): ReactNode {
@@ -128,6 +130,12 @@ function renderBlock(block: Block): ReactNode {
       return (
         <ServicesArchiveBlock
           {...(block as unknown as ComponentProps<typeof ServicesArchiveBlock>)}
+        />
+      );
+    case "pathCards":
+      return (
+        <PathCardsBlock
+          {...(block as unknown as ComponentProps<typeof PathCardsBlock>)}
         />
       );
     case "testimonials":

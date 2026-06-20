@@ -1,12 +1,15 @@
 import { PageHero } from "@/components/page-hero";
-import { PodcastCard } from "@/components/podcast-card";
+import {
+  PodcastExplorer,
+  type PodcastExplorerEpisode,
+} from "@/components/podcast-explorer";
+import { getMediaUrl } from "@/lib/media-url";
+import { fetchPodcastEpisodes } from "@/lib/podcast-rss";
 import config from "@/payload.config";
-import { Container, Text } from "@poynt/ui";
+import { Container } from "@poynt/ui";
 import type { Metadata } from "next";
+import Image from "next/image";
 import { getPayload } from "payload";
-import type { ComponentProps } from "react";
-
-type PodcastCardData = ComponentProps<typeof PodcastCard>["podcast"];
 
 export async function generateMetadata(): Promise<Metadata> {
   const payload = await getPayload({ config });
@@ -43,31 +46,81 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function PodcastPage() {
   const payload = await getPayload({ config });
-
-  const [pageConfig, podcasts] = await Promise.all([
-    payload.findGlobal({ slug: "podcastpage" }),
-    payload.find({
-      collection: "podcasts",
-      sort: "-publishedAt",
-      limit: 100,
-    }),
-  ]);
+  const pageConfig = await payload.findGlobal({ slug: "podcastpage" });
 
   const heroEnabled = pageConfig?.hero?.enabled ?? true;
   const heroTitle = pageConfig?.hero?.title || "Podkast";
   const heroDescription =
     pageConfig?.hero?.description || "Lytt til alle episoder";
-  const heroImage =
-    pageConfig?.hero?.image &&
-    typeof pageConfig.hero.image === "object" &&
-    pageConfig.hero.image.url
-      ? {
-          url: pageConfig.hero.image.url,
-          alt: pageConfig.hero.image.alt ?? undefined,
-        }
-      : null;
   const emptyStateText =
     pageConfig?.emptyStateText || "Ingen episoder publisert ennå.";
+
+  const formatDate = (value: string) =>
+    new Date(value).toLocaleDateString("nb-NO", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+
+  // Automatisk fra RSS når PODCAST_RSS_URL er satt — ellers fall tilbake til de
+  // manuelle Payload-episodene (så siden virker i dag og bytter til RSS av seg
+  // selv når feed-URL-en er på plass).
+  const feedUrl = process.env.PODCAST_RSS_URL;
+  let episodes: PodcastExplorerEpisode[];
+
+  if (feedUrl) {
+    const rss = await fetchPodcastEpisodes(feedUrl, { limit: 200 });
+    episodes = rss.map((episode, index) => ({
+      id: episode.id,
+      href: episode.link ?? "#",
+      title: episode.title,
+      description: episode.description,
+      episodeNumber: episode.episodeNumber,
+      duration: episode.durationLabel,
+      date: episode.publishedAt ? formatDate(episode.publishedAt) : undefined,
+      cover: episode.coverUrl ? (
+        // RSS-cover kommer fra ukjente domener → vanlig <img> (ikke next/image)
+        <img
+          src={episode.coverUrl}
+          alt={episode.title}
+          className="size-full object-cover"
+        />
+      ) : undefined,
+      badge: index === 0 ? "Siste episode" : undefined,
+      search: `${episode.title} ${episode.description ?? ""}`.toLowerCase(),
+    }));
+  } else {
+    const podcasts = await payload.find({
+      collection: "podcasts",
+      sort: "-publishedAt",
+      limit: 200,
+    });
+    episodes = podcasts.docs.map((podcast, index) => {
+      const media =
+        podcast.coverImage && typeof podcast.coverImage === "object"
+          ? podcast.coverImage
+          : null;
+      return {
+        id: podcast.id,
+        href: `/podkast/${podcast.slug}`,
+        title: podcast.title,
+        description: podcast.description ?? undefined,
+        episodeNumber: podcast.episodeNumber ?? undefined,
+        duration: podcast.duration ?? undefined,
+        date: formatDate(podcast.publishedAt),
+        cover: media?.url ? (
+          <Image
+            src={getMediaUrl(media.url)}
+            alt={media.alt || podcast.title}
+            fill
+            className="object-cover"
+          />
+        ) : undefined,
+        badge: index === 0 ? "Siste episode" : undefined,
+        search: `${podcast.title} ${podcast.description ?? ""}`.toLowerCase(),
+      };
+    });
+  }
 
   return (
     <>
@@ -76,20 +129,7 @@ export default async function PodcastPage() {
       )}
 
       <Container padding="default" className="py-8">
-        {podcasts.docs.length > 0 ? (
-          <div className="grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 lg:grid-cols-4">
-            {podcasts.docs.map((podcast) => (
-              <PodcastCard
-                key={podcast.id}
-                podcast={podcast as unknown as PodcastCardData}
-              />
-            ))}
-          </div>
-        ) : (
-          <Text variant="muted" align="center" customStyles="py-12">
-            {emptyStateText}
-          </Text>
-        )}
+        <PodcastExplorer episodes={episodes} emptyStateText={emptyStateText} />
       </Container>
     </>
   );

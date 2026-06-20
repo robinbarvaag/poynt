@@ -1,10 +1,11 @@
-import { index, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { index, text, timestamp } from "drizzle-orm/pg-core";
+import { plannerSchema } from "./_schema";
 
 /**
  * Track processed Stripe webhook events to prevent duplicate processing.
  * Each event ID is stored after successful processing.
  */
-export const plannerWebhookEvent = pgTable(
+export const plannerWebhookEvent = plannerSchema.table(
   "planner_webhook_event",
   {
     id: text("id").primaryKey(),

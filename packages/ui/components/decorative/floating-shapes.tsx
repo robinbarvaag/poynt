@@ -5,50 +5,59 @@ interface FloatingShapesProps {
   className?: string;
 }
 
-const opacityMap = {
-  default: "opacity-20",
-  subtle: "opacity-10",
-  vibrant: "opacity-30",
+// Synlighet per variant. `vibrant` bruker mindre blur i tillegg til høyere
+// opacity, slik at formene faktisk leser som former (jf. INSPO/shapes) og ikke
+// bare en svak fargeskygge.
+const variantMap = {
+  subtle: { opacity: "opacity-15", blur: "blur-3xl" },
+  default: { opacity: "opacity-25", blur: "blur-3xl" },
+  vibrant: { opacity: "opacity-45", blur: "blur-2xl" },
 } as const;
 
 /**
  * Lag av myke, flytende fargeflekker som driver sakte i bakgrunnen — «alt
- * puster». Legg i en `relative`-container; ligger bak innholdet (-z-10).
+ * puster». Legg i en `relative`-container og gi innholdet `relative z-10`
+ * over: flekkene ligger på `z-0` (over containerens egen bakgrunn, under
+ * innholdet). Rent dekorativ (aria-hidden, pointer-events-none).
  */
 export function FloatingShapes({
   variant = "default",
   className,
 }: FloatingShapesProps) {
-  const opacity = opacityMap[variant];
+  const { opacity, blur } = variantMap[variant];
   return (
     <div
       className={cn(
-        "-z-10 pointer-events-none absolute inset-0 overflow-hidden",
+        "pointer-events-none absolute inset-0 z-0 overflow-hidden",
         className
       )}
       aria-hidden="true"
     >
       <div
         className={cn(
-          "-top-20 -right-20 absolute size-72 animate-float-slow rounded-full bg-salmon blur-3xl",
+          "-top-10 -right-8 absolute size-72 animate-float-slow rounded-full bg-salmon",
+          blur,
           opacity
         )}
       />
       <div
         className={cn(
-          "-bottom-32 -left-32 absolute size-96 animate-float-medium rounded-full bg-saffron blur-3xl",
+          "-bottom-16 -left-16 absolute size-96 animate-float-medium rounded-[60%_40%_55%_45%/50%_60%_40%_50%] bg-saffron",
+          blur,
           opacity
         )}
       />
       <div
         className={cn(
-          "-right-16 absolute top-1/2 size-64 animate-float-fast rounded-full bg-mint blur-3xl",
+          "-right-8 absolute top-1/2 size-64 animate-float-fast rounded-full bg-mint",
+          blur,
           opacity
         )}
       />
       <div
         className={cn(
-          "absolute top-20 left-1/4 size-48 animate-float-medium rounded-full bg-accent blur-3xl",
+          "absolute top-12 left-1/4 size-48 animate-float-medium rounded-[50%_50%_45%_55%/55%_45%_55%_45%] bg-accent",
+          blur,
           opacity
         )}
       />

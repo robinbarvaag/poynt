@@ -1,149 +1,87 @@
-"use client";
-
 import { getMediaUrl } from "@/lib/media-url";
-import { Heading, cn } from "@poynt/ui";
-import { Quote, Star } from "lucide-react";
+import { type TestimonialItem, Testimonials } from "@poynt/ui";
 import Image from "next/image";
 
-interface Testimonial {
-  id?: string;
+interface Media {
+  url?: string | null;
+  alt?: string | null;
+}
+
+interface TestimonialInput {
+  id?: string | null;
   quote: string;
   author: string;
-  role?: string;
-  company?: string;
-  logo?: {
-    url: string;
-    alt?: string;
-  };
-  avatar?: {
-    url: string;
-    alt?: string;
-  };
-  rating?: number;
+  role?: string | null;
+  company?: string | null;
+  logo?: Media | string | null;
+  avatar?: Media | string | null;
+  rating?: number | null;
 }
 
 interface TestimonialsBlockProps {
-  title?: string;
-  layout?: "cards" | "slider" | "quote";
-  testimonials: Testimonial[];
+  title?: string | null;
+  eyebrow?: string | null;
+  intro?: string | null;
+  layout?: "cards" | "quote" | "slider" | null;
+  columns?: "2" | "3" | null;
+  testimonials?: TestimonialInput[] | null;
 }
 
-function StarRating({ rating }: { rating: number }) {
-  return (
-    <div className="flex gap-1">
-      {[1, 2, 3, 4, 5].map((star) => (
-        <Star
-          key={star}
-          className={cn(
-            "w-4 h-4",
-            star <= rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
-          )}
-        />
-      ))}
-    </div>
-  );
+function media(value: Media | string | null | undefined): Media | null {
+  return value && typeof value === "object" ? value : null;
 }
 
-function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
-  return (
-    <div className="bg-muted/50 rounded-2xl p-6 md:p-8 flex flex-col">
-      {testimonial.logo && (
-        <div className="relative h-12 w-32 mb-6">
-          <Image
-            src={getMediaUrl(testimonial.logo.url)}
-            alt={testimonial.logo.alt || testimonial.company || "Logo"}
-            fill
-            className="object-contain object-left"
-          />
-        </div>
-      )}
-      {testimonial.rating && (
-        <div className="mb-4">
-          <StarRating rating={testimonial.rating} />
-        </div>
-      )}
-      <div className="mb-6">
-        <div className="font-semibold text-primary">{testimonial.author}</div>
-        {(testimonial.role || testimonial.company) && (
-          <div className="text-sm text-muted-foreground">
-            {testimonial.role}
-            {testimonial.role && testimonial.company && ", "}
-            {testimonial.company}
-          </div>
-        )}
-      </div>
-      <blockquote className="text-base text-muted-foreground flex-1">
-        "{testimonial.quote}"
-      </blockquote>
-    </div>
-  );
-}
-
+/**
+ * Wrapper som mapper Payload-blokken `testimonials` til presentasjons-
+ * komponenten `Testimonials` i @poynt/ui. Kobler `next/image` inn i
+ * `avatar`/`logo`-slottene; selve oppsettet bor i designsystemet.
+ */
 export function TestimonialsBlock({
   title,
+  eyebrow,
+  intro,
   layout = "cards",
+  columns,
   testimonials,
 }: TestimonialsBlockProps) {
-  if (layout === "quote" && testimonials?.length > 0) {
-    const testimonial = testimonials[0];
-    return (
-      <div className="container mx-auto px-4 max-w-4xl text-center">
-        {testimonial.logo && (
-          <div className="relative h-16 w-40 mx-auto mb-8">
-            <Image
-              src={getMediaUrl(testimonial.logo.url)}
-              alt={testimonial.logo.alt || testimonial.company || "Logo"}
-              fill
-              className="object-contain"
-            />
-          </div>
-        )}
-        <Quote className="w-12 h-12 mx-auto mb-6 text-primary/50" />
-        <blockquote className="text-2xl md:text-3xl font-medium mb-8 leading-relaxed">
-          "{testimonial.quote}"
-        </blockquote>
-        <div className="flex flex-col items-center gap-3">
-          {testimonial.avatar && (
-            <div className="relative w-16 h-16 rounded-full overflow-hidden">
-              <Image
-                src={getMediaUrl(testimonial.avatar.url)}
-                alt={testimonial.avatar.alt || testimonial.author}
-                fill
-                className="object-cover"
-              />
-            </div>
-          )}
-          <div>
-            <div className="font-semibold text-lg">{testimonial.author}</div>
-            {(testimonial.role || testimonial.company) && (
-              <div className="text-muted-foreground">
-                {testimonial.role}
-                {testimonial.role && testimonial.company && ", "}
-                {testimonial.company}
-              </div>
-            )}
-          </div>
-          {testimonial.rating && <StarRating rating={testimonial.rating} />}
-        </div>
-      </div>
-    );
-  }
+  const items: TestimonialItem[] = (testimonials ?? []).map((t, index) => {
+    const logo = media(t.logo);
+    const avatar = media(t.avatar);
+    return {
+      id: t.id ?? index,
+      quote: t.quote,
+      author: t.author,
+      role: t.role ?? undefined,
+      company: t.company ?? undefined,
+      rating: t.rating ?? undefined,
+      logo: logo?.url ? (
+        <Image
+          src={getMediaUrl(logo.url)}
+          alt={logo.alt || t.company || "Logo"}
+          fill
+          className="object-contain object-left"
+        />
+      ) : undefined,
+      avatar: avatar?.url ? (
+        <Image
+          src={getMediaUrl(avatar.url)}
+          alt={avatar.alt || t.author}
+          fill
+          className="object-cover"
+        />
+      ) : undefined,
+    };
+  });
 
   return (
-    <div className="container mx-auto px-4">
-      {title && (
-        <Heading size="h2" customStyles="text-center mb-12">
-          {title}
-        </Heading>
-      )}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {testimonials?.map((testimonial) => (
-          <TestimonialCard
-            key={testimonial.id ?? testimonial.author}
-            testimonial={testimonial}
-          />
-        ))}
-      </div>
-    </div>
+    <Testimonials
+      eyebrow={eyebrow ?? undefined}
+      title={title ?? undefined}
+      intro={intro ?? undefined}
+      // "slider" finnes som gammelt valg i CMS — vis det som kort inntil videre.
+      layout={layout === "quote" ? "quote" : "cards"}
+      columns={columns ? (Number(columns) as 2 | 3) : undefined}
+      testimonials={items}
+    />
   );
 }

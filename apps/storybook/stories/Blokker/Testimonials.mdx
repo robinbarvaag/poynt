@@ -1,0 +1,67 @@
+import { Meta, Canvas, Controls } from "@storybook/addon-docs/blocks";
+import * as TestimonialsStories from "./Testimonials.stories";
+
+<Meta of={TestimonialsStories} />
+
+# Testimonials & TestimonialCard
+
+Anmeldelser og kundehistorier i en rolig, **sitat-drevet** stil. En egen
+kort-sjanger ved siden av produkt-, tjeneste-, blogg- og podkast-kortene: de
+deler `Card`-flatene, men skiller seg på «footeren» — her er det et sitatmerke
+(eller en firmalogo) øverst og personen nederst (bilde + navn + rolle/selskap).
+
+## Når brukes den
+
+- Sosialt bevis på forsiden, landingssider (`/for-grundere`, `/for-bedrifter`)
+  og tjenestesider.
+- `quote`-layouten når ett sterkt sitat skal bære en hel seksjon.
+
+## Når IKKE
+
+- Til fordeler/funksjoner uten avsender — bruk **FeatureGrid**.
+- Til logo-vegg av kunder uten sitat — bruk **LogoCloud**.
+
+## Varianter
+
+- **`cards`** (default) — rutenett av `TestimonialCard`. 2 eller 3 kolonner.
+- **`quote`** — ett stort, sentrert sitat (bruker den første anmeldelsen).
+- **Rating** og **personbilde** er valgfrie. Uten bilde vises initialene; uten
+  rating droppes stjernene.
+
+## Anatomi
+
+`TestimonialCard` (én anmeldelse) → `Testimonials` (seksjon med eyebrow + tittel
++ intro og enten rutenett eller stort sitat). `TestimonialCard` kan også brukes
+alene i andre komposisjoner.
+
+## Presentasjon, ikke data
+
+Komponenten er presentasjons-only. Appen kobler `next/image` inn via
+`avatar`- og `logo`-slottene (begge forventer et element med `fill`):
+
+```tsx
+<Testimonials
+  title="Hva andre sier"
+  testimonials={docs.map((t) => ({
+    id: t.id,
+    quote: t.quote,
+    author: t.author,
+    role: t.role,
+    company: t.company,
+    rating: t.rating,
+    avatar: <Image src={url(t.avatar)} alt={t.author} fill className="object-cover" />,
+  }))}
+/>
+```
+
+## Oversikt
+
+<Canvas of={TestimonialsStories.Standard} />
+
+## Stort sitat
+
+<Canvas of={TestimonialsStories.StortSitat} />
+
+## Uten rating
+
+<Canvas of={TestimonialsStories.UtenRating} />

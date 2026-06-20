@@ -3,12 +3,11 @@ import {
   boolean,
   index,
   jsonb,
-  pgEnum,
-  pgTable,
   text,
   timestamp,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
+import { plannerSchema } from "./_schema";
 import { plannerIndustry } from "./admin";
 import { plannerUser } from "./auth";
 
@@ -19,26 +18,23 @@ import { plannerUser } from "./auth";
  * - member: Can use tools, see data
  * - client: Limited view access (for freelancer's clients)
  */
-export const plannerWorkspaceRoleEnum = pgEnum("planner_workspace_role", [
-  "owner",
-  "admin",
-  "member",
-  "client",
-]);
+export const plannerWorkspaceRoleEnum = plannerSchema.enum(
+  "planner_workspace_role",
+  ["owner", "admin", "member", "client"]
+);
 
 /**
  * Subscription tiers
  */
-export const plannerSubscriptionTierEnum = pgEnum("planner_subscription_tier", [
-  "none",
-  "community",
-  "community_ai",
-]);
+export const plannerSubscriptionTierEnum = plannerSchema.enum(
+  "planner_subscription_tier",
+  ["none", "community", "community_ai"]
+);
 
 /**
  * Subscription status
  */
-export const plannerSubscriptionStatusEnum = pgEnum(
+export const plannerSubscriptionStatusEnum = plannerSchema.enum(
   "planner_subscription_status",
   ["active", "inactive", "canceled", "past_due"]
 );
@@ -46,26 +42,32 @@ export const plannerSubscriptionStatusEnum = pgEnum(
 /**
  * Company size options for workspace profile
  */
-export const plannerCompanySizeEnum = pgEnum("planner_company_size", [
-  "solo", // Enmannsbedrift
-  "small", // 2-10 ansatte
-  "medium", // 11-50 ansatte
-  "large", // 50+ ansatte
-]);
+export const plannerCompanySizeEnum = plannerSchema.enum(
+  "planner_company_size",
+  [
+    "solo", // Enmannsbedrift
+    "small", // 2-10 ansatte
+    "medium", // 11-50 ansatte
+    "large", // 50+ ansatte
+  ]
+);
 
 /**
  * Audience type - B2B, B2C or both
  */
-export const plannerAudienceTypeEnum = pgEnum("planner_audience_type", [
-  "b2b", // Bedrifter
-  "b2c", // Forbrukere
-  "both", // Begge deler
-]);
+export const plannerAudienceTypeEnum = plannerSchema.enum(
+  "planner_audience_type",
+  [
+    "b2b", // Bedrifter
+    "b2c", // Forbrukere
+    "both", // Begge deler
+  ]
+);
 
 /**
  * Workspace - represents a "bedrift" or client account
  */
-export const plannerWorkspace = pgTable(
+export const plannerWorkspace = plannerSchema.table(
   "planner_workspace",
   {
     id: text("id").primaryKey(),
@@ -85,7 +87,7 @@ export const plannerWorkspace = pgTable(
 /**
  * Workspace member - links users to workspaces with roles
  */
-export const plannerWorkspaceMember = pgTable(
+export const plannerWorkspaceMember = plannerSchema.table(
   "planner_workspace_member",
   {
     id: text("id").primaryKey(),
@@ -115,7 +117,7 @@ export const plannerWorkspaceMember = pgTable(
 /**
  * Workspace invitation - pending invites
  */
-export const plannerWorkspaceInvitation = pgTable(
+export const plannerWorkspaceInvitation = plannerSchema.table(
   "planner_workspace_invitation",
   {
     id: text("id").primaryKey(),
@@ -140,7 +142,7 @@ export const plannerWorkspaceInvitation = pgTable(
 /**
  * User subscription - tracks user's subscription tier
  */
-export const plannerSubscription = pgTable(
+export const plannerSubscription = plannerSchema.table(
   "planner_subscription",
   {
     id: text("id").primaryKey(),
@@ -172,30 +174,33 @@ export const plannerSubscription = pgTable(
 /**
  * User preferences - stores active workspace and other settings
  */
-export const plannerUserPreferences = pgTable("planner_user_preferences", {
-  id: text("id").primaryKey(),
-  userId: text("user_id")
-    .notNull()
-    .references(() => plannerUser.id, { onDelete: "cascade" })
-    .unique(),
-  activeWorkspaceId: text("active_workspace_id").references(
-    () => plannerWorkspace.id,
-    {
-      onDelete: "set null",
-    }
-  ),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .$onUpdate(() => new Date())
-    .notNull(),
-});
+export const plannerUserPreferences = plannerSchema.table(
+  "planner_user_preferences",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => plannerUser.id, { onDelete: "cascade" })
+      .unique(),
+    activeWorkspaceId: text("active_workspace_id").references(
+      () => plannerWorkspace.id,
+      {
+        onDelete: "set null",
+      }
+    ),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  }
+);
 
 /**
  * Workspace Profile - Extended info about the workspace/business
  * Used across all tools for consistent context
  */
-export const plannerWorkspaceProfile = pgTable(
+export const plannerWorkspaceProfile = plannerSchema.table(
   "planner_workspace_profile",
   {
     id: text("id").primaryKey(),
@@ -226,7 +231,7 @@ export const plannerWorkspaceProfile = pgTable(
 /**
  * Tool Result - Stores results from AI tools for history and reuse
  */
-export const plannerToolResult = pgTable(
+export const plannerToolResult = plannerSchema.table(
   "planner_tool_result",
   {
     id: text("id").primaryKey(),
@@ -253,7 +258,7 @@ export const plannerToolResult = pgTable(
 /**
  * Marketing Plan Progress - Track completion of timeline tasks and quick wins
  */
-export const plannerMarketingPlanProgress = pgTable(
+export const plannerMarketingPlanProgress = plannerSchema.table(
   "planner_marketing_plan_progress",
   {
     id: text("id").primaryKey(),
@@ -281,7 +286,7 @@ export const plannerMarketingPlanProgress = pgTable(
 /**
  * Decline Generator Feedback - Track user feedback and variant usage
  */
-export const plannerDeclineGeneratorFeedback = pgTable(
+export const plannerDeclineGeneratorFeedback = plannerSchema.table(
   "planner_decline_generator_feedback",
   {
     id: text("id").primaryKey(),

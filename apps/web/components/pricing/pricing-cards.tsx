@@ -208,7 +208,7 @@ export function PricingDialog({
                     className="w-full"
                     variant={
                       isCurrentPlan
-                        ? "secondary"
+                        ? "outline"
                         : isHighlighted
                           ? "default"
                           : "outline"
@@ -379,7 +379,7 @@ export function PricingCards({
                   className="w-full"
                   variant={
                     isCurrentPlan
-                      ? "secondary"
+                      ? "outline"
                       : isHighlighted
                         ? "default"
                         : "outline"

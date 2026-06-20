@@ -12,9 +12,9 @@ interface GrainProps {
 }
 
 const intensityMap = {
-  subtle: "opacity-[0.05]",
-  medium: "opacity-[0.09]",
-  strong: "opacity-[0.14]",
+  subtle: "opacity-[0.1]",
+  medium: "opacity-[0.16]",
+  strong: "opacity-[0.24]",
 } as const;
 
 /**
@@ -46,8 +46,8 @@ export function Grain({
         <filter id="poynt-grain">
           <feTurbulence
             type="fractalNoise"
-            baseFrequency="0.82"
-            numOctaves="2"
+            baseFrequency="0.7"
+            numOctaves="3"
             stitchTiles="stitch"
           />
           <feColorMatrix type="saturate" values="0" />

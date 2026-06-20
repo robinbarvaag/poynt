@@ -40,4 +40,9 @@ export {
   FormLabel,
   FormMessage,
   useFormField,
+  Field,
+  type FieldProps,
+  Input,
+  Textarea,
+  Label,
 } from "./components/form";

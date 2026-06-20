@@ -17,7 +17,7 @@ export default defineConfig({
   dbCredentials: {
     url: databaseUri,
   },
-  tablesFilter: ["planner_*"],
+  schemaFilter: ["planner"],
   verbose: true,
   strict: true,
 });

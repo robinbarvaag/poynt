@@ -1,0 +1,52 @@
+import { Meta, Canvas, Controls } from "@storybook/addon-docs/blocks";
+import * as PodcastGridStories from "./PodcastGrid.stories";
+
+<Meta of={PodcastGridStories} />
+
+# PodcastGrid & PodcastCard
+
+Episodeoversikt for podkasten. Den fjerde kort-sjangeren — og bevisst forskjellig
+fra de tre andre: her er **cover-art-et helten** (det fargede elementet), med en
+tydelig **play-knapp** som signatur. Derfor ingen fargeblokk-rotasjon; kortene
+holdes rolige så cover-fargene får råde.
+
+## Fire kort-sjangre, hver sin signatur
+
+- **Produkt** — fargeblokk + pris-pill.
+- **Tjeneste** — overlappende infokort + «Les mer →».
+- **Blogg** — fargeblokk + forfatter/dato.
+- **Podkast** — cover-art + play-knapp + episodemeta (Ep. · varighet · dato).
+
+## Når brukes den
+
+- Podkast-/episodeoversikt med en fremhevet «siste episode» (2 kolonner, `badge`).
+- `PodcastCard` alene, f.eks. «siste episode» på forsiden.
+
+## Rutenett
+
+<Canvas of={PodcastGridStories.Standard} />
+
+## Data-kobling
+
+Presentasjons-only. Appen sender cover via `next/image` inn i `cover`-slotten og
+formaterer dato/varighet. Datakilden kan være manuelle Payload-episoder **eller**
+en automatisk RSS-feed — komponenten bryr seg ikke.
+
+```tsx
+<PodcastGrid
+  episodes={docs.map((ep) => ({
+    id: ep.id,
+    href: `/podkast/${ep.slug}`,
+    episodeNumber: ep.episodeNumber,
+    duration: ep.duration,
+    date: formatDate(ep.publishedAt),
+    title: ep.title,
+    description: ep.description,
+    cover: <Image src={url(ep)} alt={ep.title} fill className="object-cover" />,
+  }))}
+/>
+```
+
+## Props
+
+<Controls of={PodcastGridStories.Standard} />

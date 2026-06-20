@@ -8,7 +8,7 @@ import * as React from "react";
 import { useIsMobile } from "@poynt/ui";
 import { cn } from "@poynt/ui";
 import { Button } from "./button";
-import { Input } from "./input";
+import { Input } from "./form/input";
 import { Separator } from "./separator";
 import {
   Sheet,

@@ -1,5 +1,6 @@
 "use client";
 
+import { useCartReady } from "@/lib/use-cart-ready";
 import { useCart } from "@poynt/cart";
 import { Button, Heading, Text } from "@poynt/ui";
 import { Trash2 } from "lucide-react";
@@ -8,7 +9,11 @@ import { useState } from "react";
 
 export default function CartPage() {
   const { items, removeItem, total } = useCart();
+  const ready = useCartReady();
   const [isLoading, setIsLoading] = useState(false);
+
+  // Tom til klienten har montert — server og første render må være like.
+  const cartItems = ready ? items : [];
 
   const handleCheckout = async () => {
     setIsLoading(true);
@@ -42,7 +47,7 @@ export default function CartPage() {
     }
   };
 
-  if (items.length === 0) {
+  if (cartItems.length === 0) {
     return (
       <div className="mx-auto max-w-2xl py-16 text-center">
         <Heading
@@ -64,6 +69,7 @@ export default function CartPage() {
   }
 
   const totalInKr = total().toFixed(2);
+  // cartItems er garantert = items her (vi har returnert tidlig hvis tom)
 
   return (
     <div className="mx-auto max-w-2xl">

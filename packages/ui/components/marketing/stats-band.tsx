@@ -1,5 +1,6 @@
 import { cn } from "../../lib/utils";
 import { Container, Section } from "../container";
+import { GridPattern } from "../decorative";
 import { Eyebrow } from "../eyebrow";
 import { CountUp, Reveal } from "../motion";
 import { Heading, Text } from "../typography";
@@ -19,25 +20,29 @@ export interface StatsBandProps {
   variant?: "primary" | "salmon" | "saffron";
 }
 
-// Tall-farge + etikett-farge som har god kontrast på hvert bånd.
+// Tall-farge + etikett-farge som har god kontrast på hvert bånd. `grid` er
+// fargen på den svake dot-teksturen som ligger over flaten (Caide-INSPO).
 const themes = {
   primary: {
     number: "text-saffron",
     label: "text-primary-foreground/80",
     eyebrow: "text-primary-foreground/70",
     heading: "white",
+    grid: "text-primary-foreground/20",
   },
   salmon: {
     number: "text-primary",
     label: "text-foreground/70",
     eyebrow: "text-foreground/60",
     heading: "foreground",
+    grid: "text-foreground/10",
   },
   saffron: {
     number: "text-primary",
     label: "text-foreground/70",
     eyebrow: "text-foreground/60",
     heading: "foreground",
+    grid: "text-foreground/10",
   },
 } as const;
 
@@ -55,8 +60,13 @@ export function StatsBand({
   const theme = themes[variant];
 
   return (
-    <Section variant={variant} spacing="lg">
-      <Container>
+    <Section
+      variant={variant}
+      spacing="lg"
+      className="relative overflow-hidden"
+    >
+      <GridPattern variant="dots" fade className={theme.grid} />
+      <Container className="relative z-10">
         <Reveal>
           {(eyebrow || title) && (
             <div className="mb-12 text-center">
