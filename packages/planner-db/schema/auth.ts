@@ -1,5 +1,6 @@
 import { relations } from "drizzle-orm";
-import { boolean, index, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { boolean, index, text, timestamp } from "drizzle-orm/pg-core";
+import { plannerSchema } from "./_schema";
 
 /**
  * User roles for admin access
@@ -13,7 +14,7 @@ export type UserRole = (typeof userRoles)[number];
  * All tables prefixed with planner_ to avoid conflicts with Payload CMS
  */
 
-export const plannerUser = pgTable(
+export const plannerUser = plannerSchema.table(
   "planner_user",
   {
     id: text("id").primaryKey(),
@@ -37,7 +38,7 @@ export const plannerUser = pgTable(
   ]
 );
 
-export const plannerSession = pgTable(
+export const plannerSession = plannerSchema.table(
   "planner_session",
   {
     id: text("id").primaryKey(),
@@ -57,7 +58,7 @@ export const plannerSession = pgTable(
   (table) => [index("planner_session_userId_idx").on(table.userId)]
 );
 
-export const plannerAccount = pgTable(
+export const plannerAccount = plannerSchema.table(
   "planner_account",
   {
     id: text("id").primaryKey(),
@@ -82,7 +83,7 @@ export const plannerAccount = pgTable(
   (table) => [index("planner_account_userId_idx").on(table.userId)]
 );
 
-export const plannerVerification = pgTable(
+export const plannerVerification = plannerSchema.table(
   "planner_verification",
   {
     id: text("id").primaryKey(),

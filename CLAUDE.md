@@ -41,10 +41,12 @@ bun run planner:generate       # Generate a Drizzle (planner_*) migration
 bun run planner:migrate        # Apply Drizzle (planner_*) migrations
 ```
 
-**Migrations**: Payload runs with `push: false` — schema changes go through committed migration
-files (`payload:migrate:create` → review the generated `up()` → `payload:migrate`). Never run
-`drizzle-kit push` or boot dev with Payload `push: true` (both can corrupt the `planner_*`
-schema). Full workflow and rationale in `docs/MIGRATIONS.md`.
+**Migrations**: Payload (`public` schema) and Better-Auth/Drizzle (`planner` schema) are
+isolated into separate Postgres schemas, so each migration tool only sees its own objects.
+Payload runs with `push: false` — schema changes go through committed migration files
+(`payload:migrate:create` → review the generated `up()` → `payload:migrate`). Migrations remain
+the source of truth for both sides; only use `drizzle-kit push` for throwaway local experiments.
+Full workflow and rationale in `docs/MIGRATIONS.md`.
 
 ## Architecture
 
@@ -72,10 +74,11 @@ Linting and formatting are handled entirely by **Biome** (`biome.json` at root) 
   - Collections: Users (admin only), Products, Orders, Pages, Media, BlogPosts
   - Users collection is for admin/partner only — no customer data here
 - **Better Auth + Drizzle**: Customer auth, membership, AI tools
+  - Lives in its own `planner` **Postgres schema** (`pgSchema("planner")` in `packages/planner-db/schema/_schema.ts`), physically isolated from Payload's `public` schema
   - Tables: planner_user, planner_subscription, planner_session, planner_workspace, etc.
   - Auth: Google OAuth + magic link (no email+password)
-  - Drizzle config: `packages/planner-db/drizzle.config.ts` with `tablesFilter: ["planner_*"]`
-  - Migrations: `drizzle-kit generate` → `bun run db:migrate` from packages/planner-db (NEVER use `push` — it tries to drop Payload types)
+  - Drizzle config: `packages/planner-db/drizzle.config.ts` with `schemaFilter: ["planner"]` — drizzle-kit can't see Payload's `public` objects, so cross-schema collisions are impossible
+  - Migrations: `drizzle-kit generate` → `bun run db:migrate` from packages/planner-db (prefer over `push`; the generated `0000_*.sql` needs `CREATE SCHEMA IF NOT EXISTS "planner";` prepended — see `docs/MIGRATIONS.md`)
 
 ### Key Patterns
 

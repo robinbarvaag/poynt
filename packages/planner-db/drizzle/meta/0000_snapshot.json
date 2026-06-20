@@ -1,12 +1,12 @@
 {
-  "id": "aeccc53a-c0c0-4673-bfc5-722b013bea6e",
+  "id": "89ad3836-35b2-446e-8ad5-dce757461aa7",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.planner_account": {
+    "planner.planner_account": {
       "name": "planner_account",
-      "schema": "",
+      "schema": "planner",
       "columns": {
         "id": {
           "name": "id",
@@ -111,8 +111,13 @@
           "name": "planner_account_user_id_planner_user_id_fk",
           "tableFrom": "planner_account",
           "tableTo": "planner_user",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "schemaTo": "planner",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -123,9 +128,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.planner_session": {
+    "planner.planner_session": {
       "name": "planner_session",
-      "schema": "",
+      "schema": "planner",
       "columns": {
         "id": {
           "name": "id",
@@ -200,8 +205,13 @@
           "name": "planner_session_user_id_planner_user_id_fk",
           "tableFrom": "planner_session",
           "tableTo": "planner_user",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "schemaTo": "planner",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -211,16 +221,18 @@
         "planner_session_token_unique": {
           "name": "planner_session_token_unique",
           "nullsNotDistinct": false,
-          "columns": ["token"]
+          "columns": [
+            "token"
+          ]
         }
       },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.planner_user": {
+    "planner.planner_user": {
       "name": "planner_user",
-      "schema": "",
+      "schema": "planner",
       "columns": {
         "id": {
           "name": "id",
@@ -312,16 +324,18 @@
         "planner_user_email_unique": {
           "name": "planner_user_email_unique",
           "nullsNotDistinct": false,
-          "columns": ["email"]
+          "columns": [
+            "email"
+          ]
         }
       },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.planner_verification": {
+    "planner.planner_verification": {
       "name": "planner_verification",
-      "schema": "",
+      "schema": "planner",
       "columns": {
         "id": {
           "name": "id",
@@ -386,9 +400,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.planner_industry": {
+    "planner.planner_industry": {
       "name": "planner_industry",
-      "schema": "",
+      "schema": "planner",
       "columns": {
         "id": {
           "name": "id",
@@ -463,9 +477,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.planner_prompt_template": {
+    "planner.planner_prompt_template": {
       "name": "planner_prompt_template",
-      "schema": "",
+      "schema": "planner",
       "columns": {
         "id": {
           "name": "id",
@@ -540,9 +554,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.planner_decline_generator_feedback": {
+    "planner.planner_decline_generator_feedback": {
       "name": "planner_decline_generator_feedback",
-      "schema": "",
+      "schema": "planner",
       "columns": {
         "id": {
           "name": "id",
@@ -610,8 +624,13 @@
           "name": "planner_decline_generator_feedback_tool_result_id_planner_tool_result_id_fk",
           "tableFrom": "planner_decline_generator_feedback",
           "tableTo": "planner_tool_result",
-          "columnsFrom": ["tool_result_id"],
-          "columnsTo": ["id"],
+          "schemaTo": "planner",
+          "columnsFrom": [
+            "tool_result_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -622,9 +641,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.planner_marketing_plan_progress": {
+    "planner.planner_marketing_plan_progress": {
       "name": "planner_marketing_plan_progress",
-      "schema": "",
+      "schema": "planner",
       "columns": {
         "id": {
           "name": "id",
@@ -719,8 +738,13 @@
           "name": "planner_marketing_plan_progress_tool_result_id_planner_tool_result_id_fk",
           "tableFrom": "planner_marketing_plan_progress",
           "tableTo": "planner_tool_result",
-          "columnsFrom": ["tool_result_id"],
-          "columnsTo": ["id"],
+          "schemaTo": "planner",
+          "columnsFrom": [
+            "tool_result_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -731,9 +755,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.planner_subscription": {
+    "planner.planner_subscription": {
       "name": "planner_subscription",
-      "schema": "",
+      "schema": "planner",
       "columns": {
         "id": {
           "name": "id",
@@ -750,7 +774,7 @@
         "tier": {
           "name": "tier",
           "type": "planner_subscription_tier",
-          "typeSchema": "public",
+          "typeSchema": "planner",
           "primaryKey": false,
           "notNull": true,
           "default": "'none'"
@@ -758,7 +782,7 @@
         "status": {
           "name": "status",
           "type": "planner_subscription_status",
-          "typeSchema": "public",
+          "typeSchema": "planner",
           "primaryKey": false,
           "notNull": true,
           "default": "'active'"
@@ -846,8 +870,13 @@
           "name": "planner_subscription_user_id_planner_user_id_fk",
           "tableFrom": "planner_subscription",
           "tableTo": "planner_user",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "schemaTo": "planner",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -857,16 +886,18 @@
         "planner_subscription_user_id_unique": {
           "name": "planner_subscription_user_id_unique",
           "nullsNotDistinct": false,
-          "columns": ["user_id"]
+          "columns": [
+            "user_id"
+          ]
         }
       },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.planner_tool_result": {
+    "planner.planner_tool_result": {
       "name": "planner_tool_result",
-      "schema": "",
+      "schema": "planner",
       "columns": {
         "id": {
           "name": "id",
@@ -971,8 +1002,13 @@
           "name": "planner_tool_result_workspace_id_planner_workspace_id_fk",
           "tableFrom": "planner_tool_result",
           "tableTo": "planner_workspace",
-          "columnsFrom": ["workspace_id"],
-          "columnsTo": ["id"],
+          "schemaTo": "planner",
+          "columnsFrom": [
+            "workspace_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -983,9 +1019,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.planner_user_preferences": {
+    "planner.planner_user_preferences": {
       "name": "planner_user_preferences",
-      "schema": "",
+      "schema": "planner",
       "columns": {
         "id": {
           "name": "id",
@@ -1026,8 +1062,13 @@
           "name": "planner_user_preferences_user_id_planner_user_id_fk",
           "tableFrom": "planner_user_preferences",
           "tableTo": "planner_user",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "schemaTo": "planner",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1035,8 +1076,13 @@
           "name": "planner_user_preferences_active_workspace_id_planner_workspace_id_fk",
           "tableFrom": "planner_user_preferences",
           "tableTo": "planner_workspace",
-          "columnsFrom": ["active_workspace_id"],
-          "columnsTo": ["id"],
+          "schemaTo": "planner",
+          "columnsFrom": [
+            "active_workspace_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -1046,16 +1092,18 @@
         "planner_user_preferences_user_id_unique": {
           "name": "planner_user_preferences_user_id_unique",
           "nullsNotDistinct": false,
-          "columns": ["user_id"]
+          "columns": [
+            "user_id"
+          ]
         }
       },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.planner_workspace": {
+    "planner.planner_workspace": {
       "name": "planner_workspace",
-      "schema": "",
+      "schema": "planner",
       "columns": {
         "id": {
           "name": "id",
@@ -1125,16 +1173,18 @@
         "planner_workspace_slug_unique": {
           "name": "planner_workspace_slug_unique",
           "nullsNotDistinct": false,
-          "columns": ["slug"]
+          "columns": [
+            "slug"
+          ]
         }
       },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.planner_workspace_invitation": {
+    "planner.planner_workspace_invitation": {
       "name": "planner_workspace_invitation",
-      "schema": "",
+      "schema": "planner",
       "columns": {
         "id": {
           "name": "id",
@@ -1157,7 +1207,7 @@
         "role": {
           "name": "role",
           "type": "planner_workspace_role",
-          "typeSchema": "public",
+          "typeSchema": "planner",
           "primaryKey": false,
           "notNull": true,
           "default": "'member'"
@@ -1225,8 +1275,13 @@
           "name": "planner_workspace_invitation_workspace_id_planner_workspace_id_fk",
           "tableFrom": "planner_workspace_invitation",
           "tableTo": "planner_workspace",
-          "columnsFrom": ["workspace_id"],
-          "columnsTo": ["id"],
+          "schemaTo": "planner",
+          "columnsFrom": [
+            "workspace_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1234,8 +1289,13 @@
           "name": "planner_workspace_invitation_invited_by_id_planner_user_id_fk",
           "tableFrom": "planner_workspace_invitation",
           "tableTo": "planner_user",
-          "columnsFrom": ["invited_by_id"],
-          "columnsTo": ["id"],
+          "schemaTo": "planner",
+          "columnsFrom": [
+            "invited_by_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1245,16 +1305,18 @@
         "planner_workspace_invitation_token_unique": {
           "name": "planner_workspace_invitation_token_unique",
           "nullsNotDistinct": false,
-          "columns": ["token"]
+          "columns": [
+            "token"
+          ]
         }
       },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.planner_workspace_member": {
+    "planner.planner_workspace_member": {
       "name": "planner_workspace_member",
-      "schema": "",
+      "schema": "planner",
       "columns": {
         "id": {
           "name": "id",
@@ -1277,7 +1339,7 @@
         "role": {
           "name": "role",
           "type": "planner_workspace_role",
-          "typeSchema": "public",
+          "typeSchema": "planner",
           "primaryKey": false,
           "notNull": true,
           "default": "'member'"
@@ -1355,8 +1417,13 @@
           "name": "planner_workspace_member_workspace_id_planner_workspace_id_fk",
           "tableFrom": "planner_workspace_member",
           "tableTo": "planner_workspace",
-          "columnsFrom": ["workspace_id"],
-          "columnsTo": ["id"],
+          "schemaTo": "planner",
+          "columnsFrom": [
+            "workspace_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1364,8 +1431,13 @@
           "name": "planner_workspace_member_user_id_planner_user_id_fk",
           "tableFrom": "planner_workspace_member",
           "tableTo": "planner_user",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "schemaTo": "planner",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1376,9 +1448,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.planner_workspace_profile": {
+    "planner.planner_workspace_profile": {
       "name": "planner_workspace_profile",
-      "schema": "",
+      "schema": "planner",
       "columns": {
         "id": {
           "name": "id",
@@ -1407,14 +1479,14 @@
         "audience_type": {
           "name": "audience_type",
           "type": "planner_audience_type",
-          "typeSchema": "public",
+          "typeSchema": "planner",
           "primaryKey": false,
           "notNull": false
         },
         "company_size": {
           "name": "company_size",
           "type": "planner_company_size",
-          "typeSchema": "public",
+          "typeSchema": "planner",
           "primaryKey": false,
           "notNull": false
         },
@@ -1482,8 +1554,13 @@
           "name": "planner_workspace_profile_workspace_id_planner_workspace_id_fk",
           "tableFrom": "planner_workspace_profile",
           "tableTo": "planner_workspace",
-          "columnsFrom": ["workspace_id"],
-          "columnsTo": ["id"],
+          "schemaTo": "planner",
+          "columnsFrom": [
+            "workspace_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1491,8 +1568,13 @@
           "name": "planner_workspace_profile_industry_id_planner_industry_id_fk",
           "tableFrom": "planner_workspace_profile",
           "tableTo": "planner_industry",
-          "columnsFrom": ["industry_id"],
-          "columnsTo": ["id"],
+          "schemaTo": "planner",
+          "columnsFrom": [
+            "industry_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -1502,16 +1584,18 @@
         "planner_workspace_profile_workspace_id_unique": {
           "name": "planner_workspace_profile_workspace_id_unique",
           "nullsNotDistinct": false,
-          "columns": ["workspace_id"]
+          "columns": [
+            "workspace_id"
+          ]
         }
       },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.planner_webhook_event": {
+    "planner.planner_webhook_event": {
       "name": "planner_webhook_event",
-      "schema": "",
+      "schema": "planner",
       "columns": {
         "id": {
           "name": "id",
@@ -1562,7 +1646,9 @@
         "planner_webhook_event_event_id_unique": {
           "name": "planner_webhook_event_event_id_unique",
           "nullsNotDistinct": false,
-          "columns": ["event_id"]
+          "columns": [
+            "event_id"
+          ]
         }
       },
       "policies": {},
@@ -1571,30 +1657,53 @@
     }
   },
   "enums": {
-    "public.planner_audience_type": {
+    "planner.planner_audience_type": {
       "name": "planner_audience_type",
-      "schema": "public",
-      "values": ["b2b", "b2c", "both"]
+      "schema": "planner",
+      "values": [
+        "b2b",
+        "b2c",
+        "both"
+      ]
     },
-    "public.planner_company_size": {
+    "planner.planner_company_size": {
       "name": "planner_company_size",
-      "schema": "public",
-      "values": ["solo", "small", "medium", "large"]
+      "schema": "planner",
+      "values": [
+        "solo",
+        "small",
+        "medium",
+        "large"
+      ]
     },
-    "public.planner_subscription_status": {
+    "planner.planner_subscription_status": {
       "name": "planner_subscription_status",
-      "schema": "public",
-      "values": ["active", "inactive", "canceled", "past_due"]
+      "schema": "planner",
+      "values": [
+        "active",
+        "inactive",
+        "canceled",
+        "past_due"
+      ]
     },
-    "public.planner_subscription_tier": {
+    "planner.planner_subscription_tier": {
       "name": "planner_subscription_tier",
-      "schema": "public",
-      "values": ["none", "community", "community_ai"]
+      "schema": "planner",
+      "values": [
+        "none",
+        "community",
+        "community_ai"
+      ]
     },
-    "public.planner_workspace_role": {
+    "planner.planner_workspace_role": {
       "name": "planner_workspace_role",
-      "schema": "public",
-      "values": ["owner", "admin", "member", "client"]
+      "schema": "planner",
+      "values": [
+        "owner",
+        "admin",
+        "member",
+        "client"
+      ]
     }
   },
   "schemas": {},

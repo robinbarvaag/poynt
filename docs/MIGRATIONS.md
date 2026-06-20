@@ -1,15 +1,21 @@
 # Database Migrations
 
-This repo has **two independent schemas in the same Postgres database**, managed by two
-different tools. Knowing which one owns a table tells you which workflow to use.
+This repo has **two systems sharing one Postgres database, isolated into separate Postgres
+schemas**, each managed by a different tool. Knowing which schema owns a table tells you which
+workflow to use.
 
-| Schema | Owned by | Tables | Migration tool |
+| Postgres schema | Owned by | Tables | Migration tool |
 | --- | --- | --- | --- |
-| Content / shop | **Payload CMS** | `pages`, `homepage`, `products`, `orders`, `media`, `*_blocks_*`, `payload_*`, … | `payload migrate` |
-| Auth / members | **Better Auth + Drizzle** | `planner_*` only | `drizzle-kit` + custom `migrate.ts` |
+| `public` | **Payload CMS** | `pages`, `homepage`, `products`, `orders`, `media`, `*_blocks_*`, `payload_*`, … | `payload migrate` |
+| `planner` | **Better Auth + Drizzle** | `planner_*` only | `drizzle-kit` + custom `migrate.ts` |
 
-They never touch each other's tables. `payload migrate` only manages Payload tables;
-Drizzle is filtered to `planner_*` (`tablesFilter` in `packages/planner-db/drizzle.config.ts`).
+They are **physically isolated**: all Better-Auth/planner objects live in a dedicated `planner`
+Postgres schema (`pgSchema("planner")` in `packages/planner-db/schema/_schema.ts`), and
+drizzle-kit is scoped to it via `schemaFilter: ["planner"]` in `drizzle.config.ts`. Drizzle-kit
+**cannot see** Payload's tables/enums (they live in `public`), and Payload never touches
+`planner`. This makes the old "push fights our own schema" enum-rename collision *structurally
+impossible* rather than merely unlikely. The `planner_` table-name prefix is now redundant but
+kept to avoid reserved words (e.g. `user`) and to keep all app/query code unchanged.
 
 `push` is **`false`** in `apps/web/payload.config.ts`. Schema changes go through committed
 migration files, not dev-time auto-push.
@@ -64,11 +70,17 @@ bun run planner:studio           # open Drizzle Studio
 
 ## Hard rules / gotchas
 
-- **NEVER run `drizzle-kit push`** (`bun run --cwd packages/planner-db db:push`). It sees
-  Payload's types/sequences as foreign and tries to drop them. Always use `generate` + `migrate`.
-- **NEVER boot dev with Payload `push: true` while `planner_*` enums exist.** Drizzle-kit's
-  push resolver can mistake a new Payload enum for a *rename* of a `planner_*` enum and offer to
-  rename/destroy it. (This is why `push` is `false`.) Use migrations instead.
+- **Still prefer `generate` + `migrate` over `drizzle-kit push`.** With `schemaFilter: ["planner"]`
+  push is now scoped to the `planner` schema and can no longer see Payload's objects, so the old
+  cross-schema drop/rename hazard is gone. But migrations remain the source of truth for
+  reproducible deploys — only reach for push for throwaway local experiments, never against a DB
+  you care about.
+- **Drizzle migrations include `CREATE SCHEMA IF NOT EXISTS "planner";`** as their first
+  statement. drizzle-kit (0.30) does **not** emit this automatically when using `pgSchema`, so it
+  is prepended to the generated `0000_*.sql` by hand. If you regenerate the baseline from scratch,
+  re-add that line at the top or the `CREATE TABLE "planner".*` statements fail on a fresh DB.
+- Payload `push` stays **`false`**. Even though the schema split removes the enum-collision
+  hazard, committed migration files are still how production schema changes are tracked.
 - `payload migrate` runs the migration file's raw SQL — it does **not** run drizzle-kit's
   diff/push, so it never triggers the enum-rename prompt. It's the safe path.
 - `drizzle-kit migrate` silently no-ops here (wrong driver). `planner:migrate` runs the custom

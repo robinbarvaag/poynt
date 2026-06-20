@@ -1,45 +1,9 @@
-import * as migration_20260110_113243_initial from './20260110_113243_initial';
-import * as migration_20260117_230853 from './20260117_230853';
-import * as migration_20260217_213443 from './20260217_213443';
-import * as migration_20260221_114858 from './20260221_114858';
-import * as migration_20260221_225757 from './20260221_225757';
-import * as migration_20260222_225338 from './20260222_225338';
-import * as migration_20260617_193355_surgical_blocks from './20260617_193355_surgical_blocks';
+import * as migration_20260620_104354_initial_baseline from './20260620_104354_initial_baseline';
 
 export const migrations = [
   {
-    up: migration_20260110_113243_initial.up,
-    down: migration_20260110_113243_initial.down,
-    name: '20260110_113243_initial',
-  },
-  {
-    up: migration_20260117_230853.up,
-    down: migration_20260117_230853.down,
-    name: '20260117_230853',
-  },
-  {
-    up: migration_20260217_213443.up,
-    down: migration_20260217_213443.down,
-    name: '20260217_213443',
-  },
-  {
-    up: migration_20260221_114858.up,
-    down: migration_20260221_114858.down,
-    name: '20260221_114858',
-  },
-  {
-    up: migration_20260221_225757.up,
-    down: migration_20260221_225757.down,
-    name: '20260221_225757',
-  },
-  {
-    up: migration_20260222_225338.up,
-    down: migration_20260222_225338.down,
-    name: '20260222_225338',
-  },
-  {
-    up: migration_20260617_193355_surgical_blocks.up,
-    down: migration_20260617_193355_surgical_blocks.down,
-    name: '20260617_193355_surgical_blocks'
+    up: migration_20260620_104354_initial_baseline.up,
+    down: migration_20260620_104354_initial_baseline.down,
+    name: '20260620_104354_initial_baseline'
   },
 ];
