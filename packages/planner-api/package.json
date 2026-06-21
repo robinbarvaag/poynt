@@ -20,6 +20,7 @@
     "@trpc/server": "^11.0.0",
     "@poynt/planner-validators": "workspace:*",
     "@poynt/planner-db": "workspace:*",
+    "@poynt/utils": "workspace:*",
     "ai": "^6.0.5",
     "@ai-sdk/openai": "^3.0.2",
     "drizzle-orm": "^0.38.3",

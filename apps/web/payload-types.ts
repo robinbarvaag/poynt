@@ -70,6 +70,7 @@ export interface Config {
     pages: Page;
     'blog-posts': BlogPost;
     articles: Article;
+    courses: Course;
     podcasts: Podcast;
     services: Service;
     categories: Category;
@@ -95,6 +96,7 @@ export interface Config {
     pages: PagesSelect<false> | PagesSelect<true>;
     'blog-posts': BlogPostsSelect<false> | BlogPostsSelect<true>;
     articles: ArticlesSelect<false> | ArticlesSelect<true>;
+    courses: CoursesSelect<false> | CoursesSelect<true>;
     podcasts: PodcastsSelect<false> | PodcastsSelect<true>;
     services: ServicesSelect<false> | ServicesSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
@@ -1329,6 +1331,70 @@ export interface Article {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "courses".
+ */
+export interface Course {
+  id: number;
+  title: string;
+  /**
+   * Genererast automatisk frå tittel
+   */
+  slug: string;
+  /**
+   * Kort beskriving som visast i listeoversikter
+   */
+  excerpt?: string | null;
+  featuredImage?: (number | null) | Media;
+  categories?: (number | Category)[] | null;
+  publishedAt: string;
+  /**
+   * Vis som stort hero-kurs øvst på listesida
+   */
+  isFeatured?: boolean | null;
+  modules?:
+    | {
+        title: string;
+        lessons?:
+          | {
+              title: string;
+              /**
+               * YouTube, Vimeo eller direkte lenke
+               */
+              videoUrl?: string | null;
+              content?: {
+                root: {
+                  type: string;
+                  children: {
+                    type: any;
+                    version: number;
+                    [k: string]: unknown;
+                  }[];
+                  direction: ('ltr' | 'rtl') | null;
+                  format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                  indent: number;
+                  version: number;
+                };
+                [k: string]: unknown;
+              } | null;
+              resources?:
+                | {
+                    title: string;
+                    file?: (number | null) | Media;
+                    id?: string | null;
+                  }[]
+                | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "podcasts".
  */
 export interface Podcast {
@@ -1492,6 +1558,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'articles';
         value: number | Article;
+      } | null)
+    | ({
+        relationTo: 'courses';
+        value: number | Course;
       } | null)
     | ({
         relationTo: 'podcasts';
@@ -2035,6 +2105,43 @@ export interface ArticlesSelect<T extends boolean = true> {
   isFeatured?: T;
   readingTime?: T;
   relatedArticles?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "courses_select".
+ */
+export interface CoursesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  excerpt?: T;
+  featuredImage?: T;
+  categories?: T;
+  publishedAt?: T;
+  isFeatured?: T;
+  modules?:
+    | T
+    | {
+        title?: T;
+        lessons?:
+          | T
+          | {
+              title?: T;
+              videoUrl?: T;
+              content?: T;
+              resources?:
+                | T
+                | {
+                    title?: T;
+                    file?: T;
+                    id?: T;
+                  };
+              id?: T;
+            };
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

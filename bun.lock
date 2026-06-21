@@ -57,6 +57,7 @@
         "@poynt/tailwind-config": "workspace:*",
         "@poynt/types": "workspace:*",
         "@poynt/ui": "workspace:*",
+        "@poynt/utils": "workspace:*",
         "@tailwindcss/typography": "^0.5.20",
         "@tanstack/react-query": "^5.60.0",
         "@trpc/client": "^11.0.0",
@@ -122,6 +123,7 @@
         "@ai-sdk/openai": "^3.0.2",
         "@poynt/planner-db": "workspace:*",
         "@poynt/planner-validators": "workspace:*",
+        "@poynt/utils": "workspace:*",
         "@trpc/server": "^11.0.0",
         "ai": "^6.0.5",
         "drizzle-orm": "^0.38.3",
@@ -230,6 +232,17 @@
       "peerDependencies": {
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
+      },
+    },
+    "packages/utils": {
+      "name": "@poynt/utils",
+      "version": "0.0.0",
+      "dependencies": {
+        "zod": "^4.3.6",
+      },
+      "devDependencies": {
+        "@poynt/typescript-config": "workspace:*",
+        "typescript": "^5.7.2",
       },
     },
     "tooling/tailwind": {
@@ -724,6 +737,8 @@
     "@poynt/typescript-config": ["@poynt/typescript-config@workspace:tooling/typescript"],
 
     "@poynt/ui": ["@poynt/ui@workspace:packages/ui"],
+
+    "@poynt/utils": ["@poynt/utils@workspace:packages/utils"],
 
     "@puppeteer/browsers": ["@puppeteer/browsers@2.11.1", "", { "dependencies": { "debug": "^4.4.3", "extract-zip": "^2.0.1", "progress": "^2.0.3", "proxy-agent": "^6.5.0", "semver": "^7.7.3", "tar-fs": "^3.1.1", "yargs": "^17.7.2" }, "bin": { "browsers": "lib/cjs/main-cli.js" } }, "sha512-YmhAxs7XPuxN0j7LJloHpfD1ylhDuFmmwMvfy/+6nBSrETT2ycL53LrhgPtR+f+GcPSybQVuQ5inWWu5MrWCpA=="],
 

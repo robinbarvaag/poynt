@@ -17,6 +17,7 @@ import { stripePlugin } from "@payloadcms/plugin-stripe";
 import { Articles } from "./collections/articles";
 import { BlogPosts } from "./collections/blog-posts";
 import { Categories } from "./collections/categories";
+import { Courses } from "./collections/courses";
 import { Media } from "./collections/media";
 import { Orders } from "./collections/orders";
 import { Pages } from "./collections/pages";
@@ -67,6 +68,7 @@ export default buildConfig({
     Pages,
     BlogPosts,
     Articles,
+    Courses,
     Podcasts,
     Services,
     Categories,

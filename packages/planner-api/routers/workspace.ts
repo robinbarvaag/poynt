@@ -16,6 +16,7 @@ import {
   updateMemberRoleSchema,
   updateWorkspaceSchema,
 } from "@poynt/planner-validators";
+import { generateSlug as generateSlugBase } from "@poynt/utils/generate-slug";
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
@@ -26,17 +27,10 @@ import { protectedProcedure, router } from "../trpc";
 type TierKey = "free" | "pro" | "business";
 
 /**
- * Helper to generate a URL-friendly slug from name
+ * Helper to generate a URL-friendly slug from a workspace name (max 50 chars).
  */
 function generateSlug(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/[æ]/g, "ae")
-    .replace(/[ø]/g, "o")
-    .replace(/[å]/g, "a")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "")
-    .slice(0, 50);
+  return generateSlugBase(name, { maxLength: 50 });
 }
 
 /**

@@ -1,0 +1,25 @@
+{
+  "name": "@poynt/utils",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./generate-slug": "./generate-slug.ts",
+    "./email-normalize": "./email-normalize.ts",
+    "./color-utils": "./color-utils.ts",
+    "./format": "./format.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@poynt/typescript-config": "workspace:*",
+    "typescript": "^5.7.2"
+  }
+}

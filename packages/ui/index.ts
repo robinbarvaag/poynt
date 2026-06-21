@@ -206,6 +206,22 @@ export {
 } from "./components/tabs";
 
 export {
+  ListDetail,
+  type ListDetailProps,
+  ListDetailList,
+  ListDetailListHeader,
+  ListDetailListContent,
+  ListDetailRow,
+  type ListDetailRowProps,
+  ListDetailDetail,
+  type ListDetailDetailProps,
+  ListDetailDetailHeader,
+  ListDetailDetailContent,
+  ListDetailEmpty,
+  useListDetail,
+} from "./components/list-detail";
+
+export {
   Select,
   SelectContent,
   SelectGroup,

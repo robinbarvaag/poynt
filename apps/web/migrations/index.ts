@@ -9,6 +9,7 @@ import * as migration_20260621_170543_add_variants_and_quantity from './20260621
 import * as migration_20260621_193347_services_archive_selection from './20260621_193347_services_archive_selection';
 import * as migration_20260621_195315_services_featured from './20260621_195315_services_featured';
 import * as migration_20260621_211840_add_seo_faq_fields from './20260621_211840_add_seo_faq_fields';
+import * as migration_20260621_221017_add_courses from './20260621_221017_add_courses';
 
 export const migrations = [
   {
@@ -64,6 +65,11 @@ export const migrations = [
   {
     up: migration_20260621_211840_add_seo_faq_fields.up,
     down: migration_20260621_211840_add_seo_faq_fields.down,
-    name: '20260621_211840_add_seo_faq_fields'
+    name: '20260621_211840_add_seo_faq_fields',
+  },
+  {
+    up: migration_20260621_221017_add_courses.up,
+    down: migration_20260621_221017_add_courses.down,
+    name: '20260621_221017_add_courses'
   },
 ];

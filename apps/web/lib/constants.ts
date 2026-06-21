@@ -13,9 +13,19 @@ export const mainNavItems: {
     icon: "home",
   },
   {
+    title: "Bedrifter",
+    url: "/on-poynt/bedrifter",
+    icon: "building-2",
+  },
+  {
     title: "Artiklar",
     url: "/on-poynt/artiklar",
     icon: "newspaper",
+  },
+  {
+    title: "Kurs",
+    url: "/on-poynt/kurs",
+    icon: "graduation-cap",
   },
   {
     title: "Kanalveileder",

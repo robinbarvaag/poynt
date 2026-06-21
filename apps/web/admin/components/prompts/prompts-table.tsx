@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   deletePromptTemplate,
+  seedPromptTemplates,
   togglePromptActive,
   upsertPromptTemplate,
 } from "../../actions/prompts";
@@ -105,6 +106,19 @@ export const PromptsTable = ({
     }
   }
 
+  async function handleSeed() {
+    setLoading("seed");
+    try {
+      const result = await seedPromptTemplates();
+      if (result.count === 0) {
+        window.alert("Alle standard-prompts er allerede lagt inn.");
+      }
+      refresh();
+    } finally {
+      setLoading(null);
+    }
+  }
+
   async function handleDelete(id: string, name: string) {
     if (!window.confirm(`Slett malen "${name}"?`)) return;
     setLoading(id);
@@ -170,7 +184,7 @@ export const PromptsTable = ({
 
   return (
     <div>
-      <div style={{ marginBottom: "1rem" }}>
+      <div style={{ marginBottom: "1rem", display: "flex", gap: "0.5rem" }}>
         <button
           type="button"
           style={btnStyle("primary")}
@@ -178,6 +192,14 @@ export const PromptsTable = ({
           disabled={showAdd}
         >
           + Ny mal
+        </button>
+        <button
+          type="button"
+          style={btnStyle("ghost")}
+          onClick={handleSeed}
+          disabled={loading === "seed"}
+        >
+          {loading === "seed" ? "Seeder..." : "Seed standard-prompts"}
         </button>
       </div>
 
