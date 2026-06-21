@@ -17,7 +17,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   const meta = pageConfig?.meta;
   return buildMetadata({
-    title: meta?.title || "Podkast | Poynt",
+    title: meta?.title || "Podkast",
     description:
       meta?.description || "Lytt til alle episoder av Poynt-podkasten",
     path: "/podkast",

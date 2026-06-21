@@ -1,6 +1,8 @@
+import { JsonLd } from "@/components/json-ld";
 import { PageHero } from "@/components/page-hero";
 import { RenderBlocks } from "@/components/render-blocks";
 import { buildMetadata, notFoundMetadata } from "@/lib/seo";
+import { faqSchema } from "@/lib/structured-data";
 import config from "@/payload.config";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
@@ -109,8 +111,11 @@ export default async function Page({ params }: PageProps) {
   const firstBlock = page.layout?.[0];
   const hasHeroBlock = firstBlock?.blockType === "hero";
 
+  const faqLd = faqSchema(page.faq);
+
   return (
     <>
+      {faqLd && <JsonLd data={faqLd} />}
       {!hasHeroBlock && <PageHero title={page.title} size="large" />}
       {page.layout && <RenderBlocks blocks={page.layout} />}
     </>

@@ -1,6 +1,8 @@
 import "../globals.css";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
+import { JsonLd } from "@/components/json-ld";
+import { organizationSchema, websiteSchema } from "@/lib/structured-data";
 import config from "@payload-config";
 import { Grain, cn } from "@poynt/ui";
 import type { Metadata } from "next";
@@ -78,9 +80,24 @@ export default async function FrontendLayout({
 }) {
   const { siteSettings, header, footer } = await getCachedGlobals();
 
+  // Nettstedsdekkende strukturert data (GEO/SEO): organisasjon + nettsted.
+  const siteJsonLd = [
+    organizationSchema({
+      name: siteSettings?.siteName,
+      description: siteSettings?.siteDescription,
+      logo: siteSettings?.logo,
+      email: siteSettings?.email,
+      phone: siteSettings?.phone,
+      address: siteSettings?.address,
+      socialLinks: siteSettings?.socialLinks,
+    }),
+    websiteSchema({ name: siteSettings?.siteName }),
+  ];
+
   return (
     <html lang="no" className={`${poppins.variable} ${bricolage.variable}`}>
       <body className={cn("min-h-screen bg-background font-sans antialiased")}>
+        <JsonLd data={siteJsonLd} />
         <Header
           siteName={siteSettings?.siteName || "Poynt"}
           logo={siteSettings?.logo as { url: string; alt?: string } | null}

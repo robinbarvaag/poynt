@@ -3,6 +3,7 @@ import { cn } from "../../lib/utils";
 import { Button } from "../button";
 import { Container, Section } from "../container";
 import { Eyebrow } from "../eyebrow";
+import { Input } from "../form/input";
 import { Reveal } from "../motion";
 import { Heading, Text } from "../typography";
 
@@ -95,10 +96,11 @@ export function Newsletter({
               <div className="mx-auto mt-8 max-w-md">
                 {form ?? (
                   <div className="flex flex-col gap-3 sm:flex-row">
-                    <input
+                    <Input
                       type="email"
+                      sizeVariant="lg"
                       placeholder={placeholder}
-                      className="flex-1 rounded-2xl border-0 bg-background px-5 py-3 text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      className="flex-1 rounded-2xl border-0 bg-background text-foreground shadow-none"
                     />
                     <Button type="button" size="lg" variant={theme.button}>
                       {buttonText}

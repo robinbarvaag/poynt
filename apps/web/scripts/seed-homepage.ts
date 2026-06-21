@@ -67,19 +67,20 @@ const layout = [
     ],
   },
 
-  // 3 — Kunde-stripe (tekst, uten logoer ennå)
+  // 3 — Kunde-stripe. Navn her som tekst-fallback; bildene kobles på av
+  // scripts/seed-client-logos.ts (kjør det ETTER denne) – samme mønster som
+  // migrate-images-from-wix.ts for produkter/tjenester.
   {
     blockType: "logoCloud",
     label: "Noen jeg har jobbet med",
     logos: [
-      { name: "Bouvet" },
       { name: "Vår Energi" },
-      { name: "Janove" },
-      { name: "Kitch'n" },
+      { name: "Bouvet" },
       { name: "NOFO" },
+      { name: "Kitch'n" },
       { name: "Tilbords" },
-      { name: "King Oscar" },
-      { name: "Norsk Dyremat" },
+      { name: "Sopra Steria" },
+      { name: "Stavanger Symfoniorkester" },
     ],
   },
 

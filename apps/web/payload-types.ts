@@ -205,6 +205,16 @@ export interface Page {
         | SpotifyEmbedBlock
       )[]
     | null;
+  /**
+   * Spørsmål og svar som publiseres som strukturert data for søkemotorer og AI-svar. La stå tom for å hoppe over.
+   */
+  faq?:
+    | {
+        question: string;
+        answer: string;
+        id?: string | null;
+      }[]
+    | null;
   publishedAt?: string | null;
   meta?: {
     title?: string | null;
@@ -931,6 +941,34 @@ export interface Service {
    */
   active?: boolean | null;
   categories?: (number | Category)[] | null;
+  meta?: {
+    /**
+     * Vises i nettleser-fanen og i søkeresultater. «| Poynt» legges på automatisk – skriv uten.
+     */
+    title?: string | null;
+    /**
+     * Kort beskrivelse som vises i søkeresultater (maks 160 tegn)
+     */
+    description?: string | null;
+    /**
+     * Bilde som vises ved deling på sosiale medier (1200x630px anbefalt)
+     */
+    image?: (number | null) | Media;
+    /**
+     * Aktivér for å hindre Google fra å indeksere denne tjenestesiden
+     */
+    noIndex?: boolean | null;
+  };
+  /**
+   * Spørsmål og svar som publiseres som strukturert data for søkemotorer og AI-svar. La stå tom for å hoppe over.
+   */
+  faq?:
+    | {
+        question: string;
+        answer: string;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1572,6 +1610,13 @@ export interface PagesSelect<T extends boolean = true> {
         formBlock?: T | FormBlockSelect<T>;
         'spotify-embed'?: T | SpotifyEmbedBlockSelect<T>;
       };
+  faq?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
   publishedAt?: T;
   meta?:
     | T
@@ -2038,6 +2083,21 @@ export interface ServicesSelect<T extends boolean = true> {
   featured?: T;
   active?: T;
   categories?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+        noIndex?: T;
+      };
+  faq?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2468,7 +2528,7 @@ export interface Homepage {
     | null;
   meta?: {
     /**
-     * Vises i nettleser-fanen og i søkeresultater
+     * Vises i nettleser-fanen og i søkeresultater. «| Poynt» legges på automatisk – skriv uten.
      */
     title?: string | null;
     /**
@@ -2507,7 +2567,7 @@ export interface Blogpage {
   emptyStateText?: string | null;
   meta?: {
     /**
-     * Vises i nettleser-fanen og i søkeresultater
+     * Vises i nettleser-fanen og i søkeresultater. «| Poynt» legges på automatisk – skriv uten.
      */
     title?: string | null;
     /**
@@ -2547,7 +2607,7 @@ export interface Podcastpage {
   emptyStateText?: string | null;
   meta?: {
     /**
-     * Vises i nettleser-fanen og i søkeresultater
+     * Vises i nettleser-fanen og i søkeresultater. «| Poynt» legges på automatisk – skriv uten.
      */
     title?: string | null;
     /**
@@ -2587,7 +2647,7 @@ export interface Productspage {
   emptyStateText?: string | null;
   meta?: {
     /**
-     * Vises i nettleser-fanen og i søkeresultater
+     * Vises i nettleser-fanen og i søkeresultater. «| Poynt» legges på automatisk – skriv uten.
      */
     title?: string | null;
     /**
@@ -2639,7 +2699,7 @@ export interface Servicespage {
   };
   meta?: {
     /**
-     * Vises i nettleser-fanen og i søkeresultater
+     * Vises i nettleser-fanen og i søkeresultater. «| Poynt» legges på automatisk – skriv uten.
      */
     title?: string | null;
     /**

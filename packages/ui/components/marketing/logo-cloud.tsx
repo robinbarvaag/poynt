@@ -43,11 +43,11 @@ export function LogoCloud({
             </Eyebrow>
           </div>
         )}
-        <div className="grid grid-cols-2 items-center justify-items-center gap-x-8 gap-y-10 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+        <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-10 md:gap-x-16">
           {logos.map((logo) => (
             <div
               key={logo.name}
-              className="flex h-10 w-full items-center justify-center md:h-12"
+              className="flex h-10 items-center justify-center md:h-12"
             >
               {logo.src ? (
                 <img

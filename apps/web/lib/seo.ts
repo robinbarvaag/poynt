@@ -7,8 +7,27 @@ export const SITE_URL = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
 
 type MediaInput = MediaResource | number | null | undefined;
 
+/** Nettstedsnavn brukes som tittel-suffiks (samme som template i layouten). */
+export const SITE_NAME = "Poynt";
+
+/**
+ * Fjerner et utilsiktet «| Poynt»-suffiks fra en tittel. Layouten legger på
+ * suffikset automatisk via `title.template`, så om en redaktør (eller en
+ * gammel fallback) skriver «Tjenester | Poynt» unngår vi «… | Poynt | Poynt».
+ */
+export function stripSiteSuffix(title: string): string {
+  return title
+    .replace(new RegExp(`\\s*[|–-]\\s*${SITE_NAME}\\s*$`, "i"), "")
+    .trim();
+}
+
 export type BuildMetadataOpts = {
   title: string;
+  /**
+   * Sett `true` for sider som ikke skal ha «| Poynt»-suffikset (f.eks.
+   * forsiden, der tittelen allerede er merkenavnet).
+   */
+  absoluteTitle?: boolean;
   description?: string;
   /** Sti relativt til `SITE_URL`, f.eks. "/blogg" eller "" for rot. */
   path?: string;
@@ -28,6 +47,7 @@ export type BuildMetadataOpts = {
  */
 export function buildMetadata({
   title,
+  absoluteTitle = false,
   description = "",
   path = "",
   image,
@@ -42,12 +62,18 @@ export function buildMetadata({
     ? [{ url: imageUrl, width: 1200, height: 630 }]
     : undefined;
 
+  // Forhindre dobbelt suffiks: template («%s | Poynt») i layouten legger på
+  // merkenavnet, så vi rydder bort et evt. eksisterende «| Poynt» her.
+  const cleanTitle = stripSiteSuffix(title);
+  // OG/Twitter bruker den fullstendige tittelen (ingen template der).
+  const fullTitle = absoluteTitle ? cleanTitle : `${cleanTitle} | ${SITE_NAME}`;
+
   return {
-    title,
+    title: absoluteTitle ? { absolute: cleanTitle } : cleanTitle,
     description,
     alternates: { canonical: url },
     openGraph: {
-      title,
+      title: fullTitle,
       description,
       url,
       type,
@@ -55,7 +81,7 @@ export function buildMetadata({
       ...(images ? { images } : {}),
     },
     ...(twitter && {
-      twitter: { card: "summary_large_image", title, description },
+      twitter: { card: "summary_large_image", title: fullTitle, description },
     }),
     ...(noIndex && { robots: { index: false, follow: false } }),
   };

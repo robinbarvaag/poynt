@@ -8,6 +8,7 @@ import * as migration_20260621_164517_add_services_detail_cta from './20260621_1
 import * as migration_20260621_170543_add_variants_and_quantity from './20260621_170543_add_variants_and_quantity';
 import * as migration_20260621_193347_services_archive_selection from './20260621_193347_services_archive_selection';
 import * as migration_20260621_195315_services_featured from './20260621_195315_services_featured';
+import * as migration_20260621_211840_add_seo_faq_fields from './20260621_211840_add_seo_faq_fields';
 
 export const migrations = [
   {
@@ -58,6 +59,11 @@ export const migrations = [
   {
     up: migration_20260621_195315_services_featured.up,
     down: migration_20260621_195315_services_featured.down,
-    name: '20260621_195315_services_featured'
+    name: '20260621_195315_services_featured',
+  },
+  {
+    up: migration_20260621_211840_add_seo_faq_fields.up,
+    down: migration_20260621_211840_add_seo_faq_fields.down,
+    name: '20260621_211840_add_seo_faq_fields'
   },
 ];

@@ -92,13 +92,14 @@ export function FeatureGrid({
         {features.map((feature, index) => {
           const theme = themes[index % themes.length];
           const { base, star } = splitTitle(feature.title);
-          return (
-            <StaggerItem key={feature.title} className="h-full">
-              <Card
-                surface={theme.surface}
-                className="h-full gap-0 rounded-[1.75rem] p-8 transition-transform duration-300 hover:-translate-y-1.5"
-              >
-                {/* Tall — fast sone */}
+          const cardClassName = cn(
+            "h-full gap-0 rounded-[1.75rem] p-8 transition-transform duration-300 hover:-translate-y-1.5",
+            feature.link &&
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current focus-visible:ring-offset-2"
+          );
+          const cardBody = (
+            <>
+              {/* Tall — fast sone */}
                 <Text
                   type="span"
                   size="display-xl"
@@ -134,21 +135,22 @@ export function FeatureGrid({
                   {feature.text}
                 </Text>
 
-                {/* Footer — kun når det er en lenke eller et tall; pinnet til bunn */}
+                {/* Footer — kun når det er en lenke eller et tall; pinnet til bunn.
+                    Hele kortet er lenken (Card asChild + <a>), så dette er kun
+                    et visuelt anker som animerer på hover over hele kortet. */}
                 {feature.link && (
-                  <a
-                    href={feature.link.href}
+                  <span
                     className={cn(
-                      "group/link mt-auto inline-flex w-fit flex-col gap-2 pt-8 font-bold text-sm",
+                      "mt-auto inline-flex w-fit flex-col gap-2 pt-8 font-bold text-sm",
                       theme.accent
                     )}
                   >
                     {feature.link.label}
                     <span
                       aria-hidden="true"
-                      className="h-0.75 w-9 rounded-full bg-current transition-all duration-300 ease-out group-hover/link:w-full"
+                      className="h-0.75 w-9 rounded-full bg-current transition-all duration-300 ease-out group-hover/card:w-full"
                     />
-                  </a>
+                  </span>
                 )}
                 {!feature.link && feature.stat && (
                   <div className="mt-auto pt-8">
@@ -169,7 +171,19 @@ export function FeatureGrid({
                     </Text>
                   </div>
                 )}
-              </Card>
+            </>
+          );
+          return (
+            <StaggerItem key={feature.title} className="h-full">
+              {feature.link ? (
+                <Card asChild surface={theme.surface} className={cardClassName}>
+                  <a href={feature.link.href}>{cardBody}</a>
+                </Card>
+              ) : (
+                <Card surface={theme.surface} className={cardClassName}>
+                  {cardBody}
+                </Card>
+              )}
             </StaggerItem>
           );
         })}

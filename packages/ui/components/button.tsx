@@ -3,6 +3,7 @@ import { type VariantProps, cva } from "class-variance-authority";
 import * as React from "react";
 
 import { cn } from "@poynt/ui";
+import { CONTROL_HEIGHTS } from "./form/control-size";
 
 // Raffinert, ikke leken: squircle-form (Apple-aktige «continuous corners»)
 // kommer globalt fra web.css, så her holder vi oss til avrunding + et dempet
@@ -30,11 +31,14 @@ const buttonVariants = cva(
           "bg-destructive text-destructive-foreground shadow-sm hover:-translate-y-0.5 hover:bg-destructive/90 hover:shadow-md",
         link: "text-primary underline-offset-4 hover:underline",
       },
+      // Høydene deles med Input/Select via CONTROL_HEIGHTS, så en knapp og et
+      // felt med samme størrelses-nøkkel alltid blir like høye. Padding er
+      // knapp-spesifikk (romsligere horisontalt).
       size: {
-        default: "h-10 px-5 py-2",
-        sm: "h-9 px-3",
-        lg: "h-11 px-8",
-        icon: "h-10 w-10",
+        default: `${CONTROL_HEIGHTS.default} px-5 py-2`,
+        sm: `${CONTROL_HEIGHTS.sm} px-3`,
+        lg: `${CONTROL_HEIGHTS.lg} px-8`,
+        icon: `${CONTROL_HEIGHTS.default} w-10`,
       },
     },
     defaultVariants: {

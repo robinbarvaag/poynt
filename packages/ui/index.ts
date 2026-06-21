@@ -107,7 +107,12 @@ export {
 
 export { Skeleton } from "./components/skeleton";
 export { Separator } from "./components/separator";
-export { Input } from "./components/form/input";
+export { Input, type InputProps } from "./components/form/input";
+export {
+  controlSizeVariants,
+  CONTROL_HEIGHTS,
+  type ControlSize,
+} from "./components/form/control-size";
 export { Textarea } from "./components/form/textarea";
 export { Label } from "./components/form/label";
 export { Progress } from "./components/progress";

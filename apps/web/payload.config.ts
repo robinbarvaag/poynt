@@ -135,7 +135,9 @@ export default buildConfig({
     seoPlugin({
       collections: ["pages", "products", "blog-posts"],
       uploadsCollection: "media",
-      generateTitle: ({ doc }) => `${doc.title} | Poynt`,
+      // «| Poynt»-suffikset legges på automatisk i frontend (title.template),
+      // så meta-tittelen lagres uten suffiks for å unngå dobbel «| Poynt».
+      generateTitle: ({ doc }) => doc.title,
       generateDescription: ({ doc }) => doc.excerpt || "",
       generateURL: ({ doc, collectionSlug }) => {
         if (collectionSlug === "pages") {

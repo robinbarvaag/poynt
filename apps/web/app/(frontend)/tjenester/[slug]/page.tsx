@@ -1,8 +1,14 @@
 import { CtaSectionBlock } from "@/components/blocks/cta-section-block";
+import { JsonLd } from "@/components/json-ld";
 import { PayloadImage } from "@/components/payload-image";
 import { resolveMedia } from "@/lib/payload";
-import { buildMetadata, notFoundMetadata } from "@/lib/seo";
+import { SITE_URL, buildMetadata, notFoundMetadata } from "@/lib/seo";
 import { formatServicePrice } from "@/lib/service";
+import {
+  breadcrumbSchema,
+  faqSchema,
+  serviceSchema,
+} from "@/lib/structured-data";
 import { detailBreadcrumbs } from "@/lib/ui-text";
 import config from "@/payload.config";
 import { RichText } from "@payloadcms/richtext-lexical/react";
@@ -38,10 +44,11 @@ export async function generateMetadata({
   }
 
   return buildMetadata({
-    title: `${service.name} | Tjenester | Poynt`,
-    description: service.shortDescription ?? undefined,
+    title: service.meta?.title || `${service.name} | Tjenester`,
+    description: service.meta?.description || service.shortDescription || "",
     path: `/tjenester/${slug}`,
-    image: service.image,
+    image: service.meta?.image || service.image,
+    noIndex: service.meta?.noIndex ?? undefined,
   });
 }
 
@@ -70,8 +77,26 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
   const image = resolveMedia(service.image);
   const cta = servicesPage?.detailCta;
 
+  const serviceUrl = `${SITE_URL}/tjenester/${slug}`;
+  const jsonLd = [
+    serviceSchema({
+      name: service.name,
+      description: service.shortDescription,
+      image: service.image,
+      url: serviceUrl,
+      price: service.price,
+    }),
+    breadcrumbSchema([
+      { name: "Hjem", url: SITE_URL },
+      { name: "Tjenester", url: `${SITE_URL}/tjenester` },
+      { name: service.name, url: serviceUrl },
+    ]),
+    faqSchema(service.faq),
+  ].filter((schema): schema is NonNullable<typeof schema> => schema !== null);
+
   return (
     <>
+      <JsonLd data={jsonLd} />
       <Container size="sm" padding="default">
         <article>
           <Breadcrumbs

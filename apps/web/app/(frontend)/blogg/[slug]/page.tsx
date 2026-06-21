@@ -1,8 +1,10 @@
+import { JsonLd } from "@/components/json-ld";
 import { PayloadImage } from "@/components/payload-image";
 import { RelatedPosts } from "@/components/related-posts";
 import { formatLongDate } from "@/lib/format";
 import { resolveMedia, resolveRelations } from "@/lib/payload";
-import { buildMetadata, notFoundMetadata } from "@/lib/seo";
+import { SITE_URL, buildMetadata, notFoundMetadata } from "@/lib/seo";
+import { articleSchema, breadcrumbSchema } from "@/lib/structured-data";
 import { detailBreadcrumbs } from "@/lib/ui-text";
 import type { BlogPost } from "@/payload-types";
 import config from "@/payload.config";
@@ -70,8 +72,26 @@ export default async function PostPage({ params }: PostPageProps) {
   const featuredImage = resolveMedia(post.featuredImage);
   const relatedPosts = resolveRelations<BlogPost>(post.relatedPosts);
 
+  const postUrl = `${SITE_URL}/blogg/${slug}`;
+  const jsonLd = [
+    articleSchema({
+      title: post.title,
+      description: post.meta?.description || post.excerpt,
+      image: featuredImage,
+      url: postUrl,
+      datePublished: post.publishedAt,
+      dateModified: post.updatedAt,
+    }),
+    breadcrumbSchema([
+      { name: "Hjem", url: SITE_URL },
+      { name: "Blogg", url: `${SITE_URL}/blogg` },
+      { name: post.title, url: postUrl },
+    ]),
+  ];
+
   return (
     <Container size="sm" padding="default">
+      <JsonLd data={jsonLd} />
       <article>
         <Breadcrumbs
           items={detailBreadcrumbs("blogg", post.title)}

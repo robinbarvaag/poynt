@@ -10,7 +10,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
   const meta = homepage?.meta || {};
   return buildMetadata({
-    title: meta.title || "Poynt",
+    title: meta.title || "Poynt – Din læringsplattform for kurs og opplæring",
+    absoluteTitle: true,
     description: meta.description ?? undefined,
     image: meta.image,
     noIndex: meta.noIndex ?? undefined,

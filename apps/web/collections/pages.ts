@@ -1,5 +1,6 @@
 import type { CollectionConfig } from "payload";
 import { layoutBlocks } from "../blocks/layout-blocks";
+import { seoFaqField } from "../fields/seo-meta";
 import { generateSlug } from "../lib/generate-slug";
 
 export const Pages: CollectionConfig = {
@@ -80,6 +81,7 @@ export const Pages: CollectionConfig = {
       blocks: layoutBlocks,
     },
     // SEO-felt kommer automatisk fra seoPlugin
+    seoFaqField(),
     {
       name: "publishedAt",
       type: "date",

@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { seoFaqField, seoMetaField } from "../fields/seo-meta";
 import { generateSlug } from "../lib/generate-slug";
 
 export const Services: CollectionConfig = {
@@ -157,5 +158,10 @@ export const Services: CollectionConfig = {
         position: "sidebar",
       },
     },
+    seoMetaField({
+      noIndexDescription:
+        "Aktivér for å hindre Google fra å indeksere denne tjenestesiden",
+    }),
+    seoFaqField(),
   ],
 };

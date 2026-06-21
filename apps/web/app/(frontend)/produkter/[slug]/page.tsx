@@ -1,6 +1,8 @@
+import { JsonLd } from "@/components/json-ld";
 import { ProductDetailClient } from "@/components/product-detail";
 import { toProductGridItem } from "@/lib/product";
-import { buildMetadata, notFoundMetadata } from "@/lib/seo";
+import { SITE_URL, buildMetadata, notFoundMetadata } from "@/lib/seo";
+import { breadcrumbSchema, productSchema } from "@/lib/structured-data";
 import config from "@/payload.config";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -33,10 +35,10 @@ export async function generateMetadata({
   }
 
   return buildMetadata({
-    title: `${product.name} | Produkter | Poynt`,
-    description: product.shortDescription ?? undefined,
+    title: product.meta?.title || `${product.name} | Produkter`,
+    description: product.meta?.description || product.shortDescription || "",
     path: `/produkter/${slug}`,
-    image: product.featuredImage,
+    image: product.meta?.image || product.featuredImage,
   });
 }
 
@@ -105,12 +107,31 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   const relatedProducts = related.docs.map(toProductGridItem);
 
+  const productUrl = `${SITE_URL}/produkter/${slug}`;
+  const jsonLd = [
+    productSchema({
+      name: product.name,
+      description: product.shortDescription,
+      image: product.featuredImage,
+      url: productUrl,
+      price: product.price,
+    }),
+    breadcrumbSchema([
+      { name: "Hjem", url: SITE_URL },
+      { name: "Produkter", url: `${SITE_URL}/produkter` },
+      { name: product.name, url: productUrl },
+    ]),
+  ];
+
   return (
-    <ProductDetailClient
-      product={product}
-      benefits={productBenefits}
-      relatedProducts={relatedProducts}
-    />
+    <>
+      <JsonLd data={jsonLd} />
+      <ProductDetailClient
+        product={product}
+        benefits={productBenefits}
+        relatedProducts={relatedProducts}
+      />
+    </>
   );
 }
 

@@ -13,6 +13,11 @@ export {
   FormField,
 } from "./form";
 export { Field, type FieldProps } from "./field";
-export { Input } from "./input";
+export {
+  controlSizeVariants,
+  CONTROL_HEIGHTS,
+  type ControlSize,
+} from "./control-size";
+export { Input, type InputProps } from "./input";
 export { Textarea } from "./textarea";
 export { Label } from "./label";

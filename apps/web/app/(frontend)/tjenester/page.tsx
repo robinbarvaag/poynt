@@ -13,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   const meta = pageConfig?.meta;
   return buildMetadata({
-    title: meta?.title || "Tjenester | Poynt",
+    title: meta?.title || "Tjenester",
     description: meta?.description || "Se alle tjenester vi tilbyr",
     path: "/tjenester",
     image: meta?.image,
