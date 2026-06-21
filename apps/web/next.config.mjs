@@ -14,6 +14,22 @@ const nextConfig = {
         protocol: "https",
         hostname: "*.public.blob.vercel-storage.com",
       },
+      {
+        // Egen app-host: Payload serverer media som absolutt URL
+        // (https://<host>/api/media/file/...), så Next sin image-optimizer må
+        // godta hosten. *.vercel.app dekker både prod-aliaset og preview-deploys.
+        protocol: "https",
+        hostname: "*.vercel.app",
+      },
+      {
+        // Egendomene (tas i bruk ved lansering)
+        protocol: "https",
+        hostname: "poynt.no",
+      },
+      {
+        protocol: "https",
+        hostname: "www.poynt.no",
+      },
     ],
   },
 };
