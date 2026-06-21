@@ -8,6 +8,22 @@
 import config from "@payload-config";
 import { getPayload } from "payload";
 
+const payload = await getPayload({ config });
+
+// Slå opp tjeneste-ID-er på slug, så vi kan kuratere manuelt utvalg per side.
+const allServices = await payload.find({
+  collection: "services",
+  limit: 100,
+  depth: 0,
+});
+const serviceIdBySlug = new Map(
+  allServices.docs.map((s) => [s.slug, s.id])
+);
+const pickServices = (slugs: string[]) =>
+  slugs
+    .map((slug) => serviceIdBySlug.get(slug))
+    .filter((id): id is NonNullable<typeof id> => id != null);
+
 const pages = [
   {
     title: "For gründere",
@@ -85,33 +101,72 @@ const pages = [
         blockType: "hero",
         title: "Kompetanse til styret og ledelsen",
         subtitle:
-          "Erfaring med både forretning og mennesker — som styremedlem, rådgiver eller foredragsholder.",
+          "Susanne Todnem har ti år som selvstendig, bakgrunn fra bank, IT og fintech – blant annet PayPal – og flere styreverv i stiftelser og kommersielle AS. Hun bidrar som styremedlem, rådgiver og foredragsholder.",
         tagsLabel: "Jeg tilbyr:",
         tags: [
           { label: "Styreverv" },
-          { label: "Rådgivning" },
+          { label: "Strategisk rådgivning" },
           { label: "Foredrag" },
         ],
         primaryCta: { text: "Ta kontakt", url: "/kontakt" },
         secondaryCta: { text: "Se tjenester", url: "/tjenester" },
       },
       {
-        blockType: "featureGrid",
-        eyebrow: "Slik kan jeg bidra",
+        blockType: "statsBand",
+        eyebrow: "Bakgrunn",
         title: "Erfaring dere kan lene dere på",
+        variant: "primary",
+        stats: [
+          { value: 10, suffix: " år", label: "som selvstendig" },
+          { value: 5, label: "egne bedrifter startet" },
+          { value: 9, suffix: "+", label: "merkevarer jobbet med" },
+        ],
+      },
+      {
+        // blockName → #styre: menyens «Styre & rådgivning» lenker hit.
+        blockName: "styre",
+        blockType: "featureGrid",
+        eyebrow: "Styre & rådgivning",
+        title: "Et styremedlem som ser både tall og mennesker",
         columns: "3",
         features: [
           {
-            title: "Styrearbeid",
-            text: "Aktiv styredeltakelse med blikk for både forretning, vekst og mennesker.",
+            title: "Aktivt styrearbeid",
+            text: "Flere styreverv i stiftelser og kommersielle AS. Aktiv deltakelse med blikk for forretning, vekst og menneskene bak.",
           },
           {
             title: "Strategisk rådgivning",
-            text: "Sparring og rådgivning for posisjonering, vekst og gjennomføring.",
+            text: "Sparring på posisjonering, vekst og gjennomføring – fra strategi til konkrete tiltak. Kunder fra børsnoterte selskap til to ansatte.",
           },
           {
-            title: "Foredrag",
-            text: "Inspirerende foredrag og workshops for team, ledergrupper og samlinger.",
+            title: "Gründer- og investorblikk",
+            text: "Har startet fem bedrifter selv og investert i lokale oppstartsselskap. Vet hvordan det er å stå i det.",
+            linkLabel: "Ta en prat",
+            linkUrl: "/kontakt",
+          },
+        ],
+      },
+      {
+        // blockName → #foredrag: menyens «Foredrag» lenker hit.
+        blockName: "foredrag",
+        blockType: "featureGrid",
+        eyebrow: "Foredrag & workshop",
+        title: "Foredrag som gir energi – og noe å gå hjem med",
+        columns: "3",
+        features: [
+          {
+            title: "AI for bedrifter",
+            text: "Det mest etterspurte temaet – praktisk og jordnært om hvordan AI gir reell vekst i arbeidshverdagen.",
+          },
+          {
+            title: "LinkedIn i praksis",
+            text: "Holdt på Social Media Days og i næringsforeninger over hele landet. Konkret om synlighet og posisjonering.",
+          },
+          {
+            title: "Workshop for team og styre",
+            text: "Skreddersydde samlinger for ledergrupper, team og styrer.",
+            linkLabel: "Book et foredrag",
+            linkUrl: "/kontakt",
           },
         ],
       },
@@ -119,6 +174,12 @@ const pages = [
         blockType: "servicesArchive",
         title: "Tjenester",
         description: "Et utvalg av hva jeg kan bidra med.",
+        selectionMode: "manual",
+        selectedServices: pickServices([
+          "workshop-for-styret",
+          "kurs-og-foredrag",
+          "radgiving",
+        ]),
         layout: "grid",
         showMoreLink: true,
       },
@@ -133,8 +194,6 @@ const pages = [
     ],
   },
 ];
-
-const payload = await getPayload({ config });
 
 for (const page of pages) {
   const existing = await payload.find({

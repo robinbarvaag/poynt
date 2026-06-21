@@ -1,81 +1,24 @@
 import { CategoryFilter } from "@/components/category-filter";
 import { PageHero } from "@/components/page-hero";
-import { PayloadImage } from "@/components/payload-image";
-import type { Product } from "@/payload-types";
+import { PRODUCT_TYPE_FILTERS, toProductGridItem } from "@/lib/product";
+import { buildMetadata } from "@/lib/seo";
 import config from "@/payload.config";
-import { Container, ProductGrid, type ProductGridItem, Text } from "@poynt/ui";
+import { Container, ProductGrid, Text } from "@poynt/ui";
 import type { Metadata } from "next";
 import { getPayload } from "payload";
-
-function toGridItem(product: Product): ProductGridItem {
-  const media =
-    product.featuredImage && typeof product.featuredImage !== "number"
-      ? product.featuredImage
-      : null;
-
-  return {
-    id: product.id,
-    href: `/produkter/${product.slug}`,
-    name: product.name,
-    eyebrow: typeLabels[product.type] ?? product.type,
-    shortDescription: product.shortDescription ?? undefined,
-    price: product.price,
-    compareAtPrice: product.compareAtPrice ?? undefined,
-    image: media?.url ? (
-      <PayloadImage
-        media={media}
-        alt={media.alt || product.name}
-        fill
-        className="object-cover"
-      />
-    ) : undefined,
-  };
-}
-
-const productTypes = [
-  { value: "product", label: "Produkter" },
-  { value: "course", label: "Kurs" },
-  { value: "pdf", label: "PDF" },
-  { value: "bundle", label: "Pakker" },
-];
-
-const typeLabels: Record<string, string> = {
-  product: "Produkt",
-  course: "Kurs",
-  pdf: "PDF",
-  bundle: "Pakke",
-  membership: "Medlemskap",
-};
 
 export async function generateMetadata(): Promise<Metadata> {
   const payload = await getPayload({ config });
   const pageConfig = await payload.findGlobal({ slug: "productspage" });
 
-  const baseUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
-
-  return {
-    title: pageConfig?.meta?.title || "Produkter | Poynt",
-    description:
-      pageConfig?.meta?.description || "Utforsk våre digitale produkter",
-    alternates: {
-      canonical: `${baseUrl}/produkter`,
-    },
-    openGraph: {
-      title: pageConfig?.meta?.title || "Produkter | Poynt",
-      description:
-        pageConfig?.meta?.description || "Utforsk våre digitale produkter",
-      url: `${baseUrl}/produkter`,
-      type: "website",
-      ...(pageConfig?.meta?.image &&
-        typeof pageConfig.meta.image === "object" &&
-        pageConfig.meta.image.url && {
-          images: [{ url: pageConfig.meta.image.url }],
-        }),
-    },
-    ...(pageConfig?.meta?.noIndex && {
-      robots: { index: false, follow: false },
-    }),
-  };
+  const meta = pageConfig?.meta;
+  return buildMetadata({
+    title: meta?.title || "Produkter | Poynt",
+    description: meta?.description || "Utforsk våre digitale produkter",
+    path: "/produkter",
+    image: meta?.image,
+    noIndex: meta?.noIndex ?? undefined,
+  });
 }
 
 interface PageProps {
@@ -125,7 +68,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
           size="large"
         >
           <CategoryFilter
-            categories={productTypes}
+            categories={PRODUCT_TYPE_FILTERS}
             paramName="type"
             allLabel="Alle"
           />
@@ -134,7 +77,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
 
       <Container padding="default" className="py-8">
         {products.docs.length > 0 ? (
-          <ProductGrid products={products.docs.map(toGridItem)} />
+          <ProductGrid products={products.docs.map(toProductGridItem)} />
         ) : (
           <Text variant="muted" customStyles="text-center py-12">
             {emptyStateText}

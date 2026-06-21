@@ -1,3 +1,4 @@
+import type { Service } from "@/payload-types";
 import config from "@/payload.config";
 import { BlockSection, Heading, cn } from "@poynt/ui";
 import { ArrowRight } from "lucide-react";
@@ -9,6 +10,9 @@ import { ServiceCard } from "../service-card";
 interface ServicesArchiveBlockProps {
   title?: string;
   description?: string;
+  selectionMode?: "auto" | "manual";
+  selectedServices?: (string | number | Service)[];
+  limit?: number;
   layout?: "grid" | "list";
   showMoreLink?: boolean;
 }
@@ -16,23 +20,51 @@ interface ServicesArchiveBlockProps {
 export async function ServicesArchiveBlock({
   title,
   description,
+  selectionMode = "auto",
+  selectedServices,
+  limit,
   layout = "grid",
   showMoreLink = false,
 }: ServicesArchiveBlockProps) {
   const payload = await getPayload({ config });
 
-  const services = await payload.find({
-    collection: "services",
-    where: {
-      active: {
-        equals: true,
-      },
-    },
-    sort: "sortOrder",
-    limit: 100,
-  });
+  let docs: Service[] = [];
 
-  if (!services.docs.length) {
+  if (selectionMode === "manual" && selectedServices?.length) {
+    const serviceIds = selectedServices.map((s) =>
+      typeof s === "object" ? s.id : s
+    );
+
+    const result = await payload.find({
+      collection: "services",
+      where: {
+        id: { in: serviceIds },
+        active: { equals: true },
+      },
+      depth: 1,
+      limit: 100,
+    });
+
+    // Behold rekkefølgen partneren valgte.
+    docs = serviceIds
+      .map((id) => result.docs.find((doc) => doc.id === id))
+      .filter((doc): doc is Service => !!doc);
+  } else {
+    const result = await payload.find({
+      collection: "services",
+      where: {
+        active: {
+          equals: true,
+        },
+      },
+      sort: "sortOrder",
+      limit: limit || 100,
+    });
+
+    docs = result.docs;
+  }
+
+  if (!docs.length) {
     return null;
   }
 
@@ -57,11 +89,11 @@ export async function ServicesArchiveBlock({
         <div
           className={cn(
             layout === "grid"
-              ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+              ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
               : "flex flex-col gap-4 max-w-2xl"
           )}
         >
-          {services.docs.map((service) => (
+          {docs.map((service) => (
             <ServiceCard
               key={service.id}
               service={

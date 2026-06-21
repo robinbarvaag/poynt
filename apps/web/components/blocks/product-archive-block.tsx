@@ -1,12 +1,7 @@
-import { PayloadImage } from "@/components/payload-image";
+import { toProductGridItem } from "@/lib/product";
 import type { Product } from "@/payload-types";
 import config from "@/payload.config";
-import {
-  BlockSection,
-  Heading,
-  ProductGrid,
-  type ProductGridItem,
-} from "@poynt/ui";
+import { BlockSection, Heading, ProductGrid } from "@poynt/ui";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { type Where, getPayload } from "payload";
@@ -20,39 +15,6 @@ interface ProductArchiveBlockProps {
   limit?: number;
   layout?: "grid" | "grid-4" | "carousel";
   showMoreLink?: boolean;
-}
-
-const typeLabels: Record<string, string> = {
-  product: "Produkt",
-  course: "Kurs",
-  pdf: "PDF",
-  bundle: "Pakke",
-  membership: "Medlemskap",
-};
-
-function toGridItem(product: Product): ProductGridItem {
-  const media =
-    product.featuredImage && typeof product.featuredImage !== "number"
-      ? product.featuredImage
-      : null;
-
-  return {
-    id: product.id,
-    href: `/produkter/${product.slug}`,
-    name: product.name,
-    eyebrow: typeLabels[product.type] ?? product.type,
-    shortDescription: product.shortDescription ?? undefined,
-    price: product.price,
-    compareAtPrice: product.compareAtPrice ?? undefined,
-    image: media?.url ? (
-      <PayloadImage
-        media={media}
-        alt={media.alt || product.name}
-        fill
-        className="object-cover"
-      />
-    ) : undefined,
-  };
 }
 
 export async function ProductArchiveBlock({
@@ -132,7 +94,10 @@ export async function ProductArchiveBlock({
           </div>
         )}
 
-        <ProductGrid products={products.map(toGridItem)} featureFirst={false} />
+        <ProductGrid
+          products={products.map(toProductGridItem)}
+          featureFirst={false}
+        />
 
         {showMoreLink && (
           <div className="mt-8 text-center">

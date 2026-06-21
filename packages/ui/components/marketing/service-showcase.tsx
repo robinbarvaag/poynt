@@ -16,11 +16,19 @@ export interface ServiceShowcaseItem {
   eyebrow?: string;
   /** Media-slot (f.eks. next/image med fill). */
   image?: React.ReactNode;
+  /** Fremhev som et bredt kort over 2 kolonner (horisontalt oppsett). */
+  featured?: boolean;
   /** Valgfritt rikt innhold som vises under beskrivelsen i panelet. */
   details?: React.ReactNode;
   /** Handlingslenke i panelet. */
   ctaLabel?: string;
   ctaHref?: string;
+}
+
+export interface ServiceShowcaseLinkProps {
+  href: string;
+  className?: string;
+  children: React.ReactNode;
 }
 
 export interface ServiceShowcaseProps {
@@ -30,6 +38,12 @@ export interface ServiceShowcaseProps {
   onSelect: (id: string | number) => void;
   onClose: () => void;
   className?: string;
+  /**
+   * Lenkekomponent for handlingsknappen (f.eks. next/link, eller en ContactLink
+   * som åpner kontaktmodalet via klient-navigasjon). Default er en vanlig <a>,
+   * som gir full sidelast.
+   */
+  ctaLinkComponent?: React.ComponentType<ServiceShowcaseLinkProps>;
 }
 
 function CloseIcon() {
@@ -99,6 +113,7 @@ export function ServiceShowcase({
   onSelect,
   onClose,
   className,
+  ctaLinkComponent: CtaLink,
 }: ServiceShowcaseProps) {
   const reduce = useReducedMotion();
   const active = services.find((s) => s.id === activeId) ?? null;
@@ -126,43 +141,73 @@ export function ServiceShowcase({
     <>
       <ul
         className={cn(
-          "grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3",
+          "grid grid-flow-row-dense grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3",
           className
         )}
       >
-        {services.map((service) => (
-          <li key={service.id} className="h-full">
-            <motion.button
-              type="button"
-              layoutId={`service-${service.id}`}
-              onClick={() => onSelect(service.id)}
-              aria-label={`Vis mer om ${service.name}`}
-              className="group flex h-full w-full cursor-pointer flex-col overflow-hidden rounded-3xl bg-card text-left shadow-sm ring-1 ring-foreground/10 transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        {services.map((service) => {
+          const isFeatured = service.featured ?? false;
+          return (
+            <li
+              key={service.id}
+              className={cn("h-full", isFeatured && "sm:col-span-2")}
             >
-              <ImageFrame image={service.image} className="aspect-4/3" />
-              <div className="flex flex-1 flex-col p-6">
-                <span className="font-heading font-semibold text-primary text-xs uppercase tracking-[0.18em]">
-                  {service.eyebrow ?? "Tjeneste"}
-                </span>
-                <h3 className="mt-1.5 font-bold font-heading text-lg leading-snug tracking-tight">
-                  {service.name}
-                </h3>
-                {service.price && (
-                  <p className="mt-1 font-semibold text-primary">
-                    {service.price}
-                  </p>
+              <motion.button
+                type="button"
+                layoutId={`service-${service.id}`}
+                onClick={() => onSelect(service.id)}
+                aria-label={`Vis mer om ${service.name}`}
+                className={cn(
+                  "group flex h-full w-full cursor-pointer flex-col overflow-hidden rounded-3xl bg-card text-left shadow-sm ring-1 ring-foreground/10 transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                  isFeatured && "sm:flex-row"
                 )}
-                <p className="mt-3 line-clamp-2 text-muted-foreground text-sm leading-relaxed">
-                  {service.description}
-                </p>
-                <span className="mt-4 inline-flex items-center gap-1.5 font-semibold text-foreground text-sm transition-all group-hover:gap-2.5">
-                  Les mer
-                  <ArrowRight />
-                </span>
-              </div>
-            </motion.button>
-          </li>
-        ))}
+              >
+                <ImageFrame
+                  image={service.image}
+                  className={cn(
+                    "aspect-4/3",
+                    isFeatured && "sm:aspect-auto sm:h-full sm:w-1/2 sm:shrink-0"
+                  )}
+                />
+                <div
+                  className={cn(
+                    "flex flex-1 flex-col p-6",
+                    isFeatured && "sm:justify-center sm:p-8"
+                  )}
+                >
+                  <span className="font-heading font-semibold text-primary text-xs uppercase tracking-[0.18em]">
+                    {service.eyebrow ?? "Tjeneste"}
+                  </span>
+                  <h3
+                    className={cn(
+                      "mt-1.5 font-bold font-heading text-lg leading-snug tracking-tight",
+                      isFeatured && "sm:text-2xl"
+                    )}
+                  >
+                    {service.name}
+                  </h3>
+                  {service.price && (
+                    <p className="mt-1 font-semibold text-primary">
+                      {service.price}
+                    </p>
+                  )}
+                  <p
+                    className={cn(
+                      "mt-3 text-muted-foreground text-sm leading-relaxed",
+                      isFeatured ? "line-clamp-3" : "line-clamp-2"
+                    )}
+                  >
+                    {service.description}
+                  </p>
+                  <span className="mt-4 inline-flex items-center gap-1.5 font-semibold text-foreground text-sm transition-all group-hover:gap-2.5">
+                    Les mer
+                    <ArrowRight />
+                  </span>
+                </div>
+              </motion.button>
+            </li>
+          );
+        })}
       </ul>
 
       <AnimatePresence>
@@ -221,15 +266,24 @@ export function ServiceShowcase({
                     {active.details}
                   </div>
                 )}
-                {active.ctaHref && (
-                  <a
-                    href={active.ctaHref}
-                    className="mt-8 inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3 font-semibold text-primary-foreground text-sm transition-all hover:gap-3"
-                  >
-                    {active.ctaLabel ?? "Ta kontakt"}
-                    <ArrowRight />
-                  </a>
-                )}
+                {active.ctaHref &&
+                  (CtaLink ? (
+                    <CtaLink
+                      href={active.ctaHref}
+                      className="mt-8 inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3 font-semibold text-primary-foreground text-sm transition-all hover:gap-3"
+                    >
+                      {active.ctaLabel ?? "Ta kontakt"}
+                      <ArrowRight />
+                    </CtaLink>
+                  ) : (
+                    <a
+                      href={active.ctaHref}
+                      className="mt-8 inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3 font-semibold text-primary-foreground text-sm transition-all hover:gap-3"
+                    >
+                      {active.ctaLabel ?? "Ta kontakt"}
+                      <ArrowRight />
+                    </a>
+                  ))}
               </motion.div>
             </motion.dialog>
           </div>

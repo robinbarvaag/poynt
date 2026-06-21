@@ -4,6 +4,15 @@ import { Card } from "../card";
 
 export type ProductSurface = "default" | "saffron" | "salmon" | "mint";
 
+export type ProductBadgeTone = "new" | "presale" | "soldout" | "neutral";
+
+export interface ProductBadge {
+  /** Teksten på merkelappen, f.eks. "Forhåndssalg". */
+  label: string;
+  /** Fargetone — styrer pill-fargen. Default "neutral". */
+  tone?: ProductBadgeTone;
+}
+
 export interface ProductCardProps {
   /** Lenke til produktsiden. Hele kortet er klikkbart. */
   href: string;
@@ -26,8 +35,18 @@ export interface ProductCardProps {
   surface?: ProductSurface;
   /** Stort, fremhevet kort: bilde og innhold side-om-side (spenn 2 kolonner). */
   featured?: boolean;
+  /** Status-merkelapp (Nyhet/Forhåndssalg/Utsolgt) – vises øverst til venstre. */
+  badge?: ProductBadge;
   className?: string;
 }
+
+// Fargetone → pill-stil for status-merkelappen.
+const badgeToneClass: Record<ProductBadgeTone, string> = {
+  new: "bg-saffron text-foreground",
+  presale: "bg-salmon text-foreground",
+  soldout: "bg-foreground/80 text-background",
+  neutral: "bg-background/90 text-foreground",
+};
 
 // Pris-pill: grønn primær-flate gir god kontrast på alle surfaces vi bruker.
 const pricePill = "bg-primary text-primary-foreground";
@@ -51,11 +70,13 @@ function ImageFrame({
   surface,
   featured,
   discount,
+  badge,
 }: {
   image?: React.ReactNode;
   surface: ProductSurface;
   featured?: boolean;
   discount?: boolean;
+  badge?: ProductBadge;
 }) {
   return (
     <div className={cn("relative p-3", featured && "md:h-full")}>
@@ -88,6 +109,16 @@ function ImageFrame({
             />
           </div>
         )}
+        {badge && (
+          <span
+            className={cn(
+              "absolute top-3 left-3 z-20 rounded-full px-3 py-1 font-semibold text-xs shadow-sm backdrop-blur-sm",
+              badgeToneClass[badge.tone ?? "neutral"]
+            )}
+          >
+            {badge.label}
+          </span>
+        )}
         {discount && (
           <span className="absolute top-3 right-3 z-20 rounded-full bg-saffron px-3 py-1 font-semibold text-foreground text-xs shadow-sm">
             Tilbud
@@ -109,6 +140,7 @@ export function ProductCard({
   image,
   surface = "default",
   featured = false,
+  badge,
   className,
 }: ProductCardProps) {
   const discount =
@@ -138,6 +170,7 @@ export function ProductCard({
             surface={surface}
             featured={featured}
             discount={discount}
+            badge={badge}
           />
 
           <div

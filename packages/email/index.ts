@@ -1,4 +1,7 @@
 import { Resend } from "resend";
+import type { OrderConfirmationItem } from "./templates/order-confirmation";
+
+export type { OrderConfirmationItem };
 
 let _resend: Resend | null = null;
 
@@ -20,15 +23,81 @@ export const resend = new Proxy({} as Resend, {
   },
 });
 
-export async function sendOrderConfirmation(email: string, orderId: string) {
+export async function sendOrderConfirmation(params: {
+  email: string;
+  orderNumber: string;
+  customerName?: string;
+  items: OrderConfirmationItem[];
+  /** Totalsum i kr. */
+  total: number;
+}) {
   if (!process.env.RESEND_API_KEY) return;
 
+  const { render } = await import("@react-email/render");
+  const { default: OrderConfirmationEmail } = await import(
+    "./templates/order-confirmation"
+  );
+
+  const html = await render(
+    OrderConfirmationEmail({
+      orderNumber: params.orderNumber,
+      customerName: params.customerName,
+      items: params.items,
+      total: params.total,
+    })
+  );
+
   await getResend().emails.send({
-    from: "Poynt <onboarding@resend.dev>", // Change to verified domain later
-    to: email,
-    subject: `Ordrebekreftelse #${orderId}`,
-    html: "<p>Takk for din bestilling!</p>",
+    from: "Poynt <onboarding@resend.dev>", // TODO: bytt til verifisert domene
+    to: params.email,
+    subject: `Ordrebekreftelse #${params.orderNumber}`,
+    html,
   });
+}
+
+/**
+ * Send en branded magisk innloggingslenke til et On Poynt-medlem.
+ * No-op hvis RESEND_API_KEY mangler.
+ */
+export async function sendMagicLinkEmail(params: {
+  email: string;
+  url: string;
+  expiresInMinutes?: number;
+}) {
+  if (!process.env.RESEND_API_KEY) return;
+
+  const { render } = await import("@react-email/render");
+  const { default: MagicLinkEmail } = await import("./templates/magic-link");
+
+  const html = await render(
+    MagicLinkEmail({
+      url: params.url,
+      expiresInMinutes: params.expiresInMinutes,
+    })
+  );
+
+  await getResend().emails.send({
+    from: "On Poynt <onboarding@resend.dev>", // TODO: bytt til verifisert domene
+    to: params.email,
+    subject: "Logg inn på On Poynt",
+    html,
+  });
+}
+
+/**
+ * Render den branda «tilbakestill passord»-e-posten til HTML.
+ * Brukes av Payload-admin (Users-collection) sin forgotPassword-hook.
+ */
+export async function renderPasswordResetEmail(params: {
+  url: string;
+  name?: string;
+}): Promise<string> {
+  const { render } = await import("@react-email/render");
+  const { default: PasswordResetEmail } = await import(
+    "./templates/password-reset"
+  );
+
+  return render(PasswordResetEmail({ url: params.url, name: params.name }));
 }
 
 /**
@@ -84,6 +153,10 @@ export async function sendContactEmails(params: {
   phone?: string;
   subject?: string;
   message: string;
+  /** Intern sporing: lesbar kilde-etikett (f.eks. "tjeneste:radgivning"). */
+  source?: string;
+  /** Intern sporing: stien brukeren sto på da skjemaet ble åpnet. */
+  sourcePath?: string;
 }): Promise<void> {
   if (!process.env.RESEND_API_KEY) return;
 

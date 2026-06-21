@@ -1,10 +1,13 @@
+import { CtaSectionBlock } from "@/components/blocks/cta-section-block";
+import { PayloadImage } from "@/components/payload-image";
+import { resolveMedia } from "@/lib/payload";
+import { buildMetadata, notFoundMetadata } from "@/lib/seo";
+import { formatServicePrice } from "@/lib/service";
+import { detailBreadcrumbs } from "@/lib/ui-text";
 import config from "@/payload.config";
 import { RichText } from "@payloadcms/richtext-lexical/react";
-import { Button, Container, Heading, Text } from "@poynt/ui";
-import { ArrowLeft } from "lucide-react";
+import { Breadcrumbs, Container, Heading, Text } from "@poynt/ui";
 import type { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPayload } from "payload";
 
@@ -12,30 +15,6 @@ interface ServicePageProps {
   params: Promise<{
     slug: string;
   }>;
-}
-
-function formatPrice(service: {
-  priceType: string;
-  price?: number | null;
-  includesVat?: boolean | null;
-}): string {
-  if (service.priceType === "contact") {
-    return "Ta kontakt for pris";
-  }
-
-  if (!service.price) return "";
-
-  const priceStr = service.price.toLocaleString("nb-NO");
-  const vatSuffix = service.includesVat ? " + mva" : "";
-
-  switch (service.priceType) {
-    case "from":
-      return `Fra ${priceStr} kr${vatSuffix}`;
-    case "monthly":
-      return `${priceStr} kr${vatSuffix} / mnd`;
-    default:
-      return `${priceStr} kr${vatSuffix}`;
-  }
 }
 
 export async function generateMetadata({
@@ -53,89 +32,75 @@ export async function generateMetadata({
     limit: 1,
   });
 
-  if (services.docs.length === 0) {
-    return { title: "Tjeneste ikke funnet" };
+  const service = services.docs[0];
+  if (!service) {
+    return notFoundMetadata("Tjeneste ikke funnet");
   }
 
-  const service = services.docs[0];
-  const baseUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
-
-  return {
+  return buildMetadata({
     title: `${service.name} | Tjenester | Poynt`,
-    description: service.shortDescription || "",
-    alternates: {
-      canonical: `${baseUrl}/tjenester/${slug}`,
-    },
-    openGraph: {
-      title: service.name,
-      description: service.shortDescription || "",
-      url: `${baseUrl}/tjenester/${slug}`,
-      type: "website",
-      ...(service.image &&
-        typeof service.image === "object" &&
-        service.image.url && {
-          images: [{ url: service.image.url }],
-        }),
-    },
-  };
+    description: service.shortDescription ?? undefined,
+    path: `/tjenester/${slug}`,
+    image: service.image,
+  });
 }
 
 export default async function ServiceDetailPage({ params }: ServicePageProps) {
   const { slug } = await params;
   const payload = await getPayload({ config });
 
-  const services = await payload.find({
-    collection: "services",
-    where: {
-      slug: { equals: slug },
-      active: { equals: true },
-    },
-    depth: 2,
-    limit: 1,
-  });
+  const [services, servicesPage] = await Promise.all([
+    payload.find({
+      collection: "services",
+      where: {
+        slug: { equals: slug },
+        active: { equals: true },
+      },
+      depth: 2,
+      limit: 1,
+    }),
+    payload.findGlobal({ slug: "servicespage" }),
+  ]);
 
-  if (services.docs.length === 0) {
+  const service = services.docs[0];
+  if (!service) {
     notFound();
   }
 
-  const service = services.docs[0];
+  const image = resolveMedia(service.image);
+  const cta = servicesPage?.detailCta;
 
   return (
-    <Container size="sm" padding="default">
-      <article>
-        {/* Back link */}
-        <Link
-          href="/tjenester"
-          className="mb-8 inline-flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <ArrowLeft className="size-4" />
-          <span>Alle tjenester</span>
-        </Link>
+    <>
+      <Container size="sm" padding="default">
+        <article>
+          <Breadcrumbs
+            items={detailBreadcrumbs("tjenester", service.name)}
+            className="mb-8"
+          />
 
-        {/* Header */}
-        <header className="mb-8">
-          <Heading variant="h1" color="foreground" weight="bold">
-            {service.name}
-          </Heading>
-          <Text
-            type="p"
-            color="primary"
-            weight="semibold"
-            customStyles="mb-4 text-2xl"
-          >
-            {formatPrice(service)}
-          </Text>
-          <Text variant={"lead"}>{service.shortDescription}</Text>
-        </header>
+          {/* Header */}
+          <header className="mb-8">
+            <Heading variant="h1" color="foreground" weight="bold">
+              {service.name}
+            </Heading>
+            <Text
+              type="p"
+              color="primary"
+              weight="semibold"
+              customStyles="mb-4 text-2xl"
+            >
+              {formatServicePrice(service)}
+            </Text>
+            <Text variant={"lead"}>{service.shortDescription}</Text>
+          </header>
 
-        {/* Image */}
-        {service.image &&
-          typeof service.image === "object" &&
-          service.image.url && (
+          {/* Image */}
+          {image?.url && (
             <div className="relative mb-10 aspect-video w-full overflow-hidden rounded-3xl bg-muted">
-              <Image
-                src={service.image.url}
-                alt={service.image.alt || service.name}
+              <PayloadImage
+                media={image}
+                alt={image.alt || service.name}
                 fill
                 className="object-cover"
                 priority
@@ -143,32 +108,28 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
             </div>
           )}
 
-        {/* Extended Content */}
-        {service.content && (
-          <div className="prose prose-lg max-w-none prose-headings:text-foreground prose-p:text-foreground prose-a:text-primary prose-strong:text-foreground mb-10">
-            <RichText data={service.content} />
-          </div>
-        )}
+          {/* Extended Content */}
+          {service.content && (
+            <div className="prose prose-lg max-w-none prose-headings:text-foreground prose-p:text-foreground prose-a:text-primary prose-strong:text-foreground mb-10">
+              <RichText data={service.content} />
+            </div>
+          )}
+        </article>
+      </Container>
 
-        {/* CTA */}
-        <div className="rounded-2xl bg-muted/50 p-8 text-center">
-          <Heading
-            variant="h2"
-            color="foreground"
-            weight="semibold"
-            customStyles="mb-2 text-xl"
-          >
-            Interessert?
-          </Heading>
-          <Text variant="muted" customStyles="mb-6">
-            Ta kontakt for en uforpliktende prat om hvordan vi kan hjelpe deg.
-          </Text>
-          <Button asChild size="lg">
-            <Link href="/kontakt">Ta kontakt</Link>
-          </Button>
-        </div>
-      </article>
-    </Container>
+      {/* Felles CTA, styrt fra Tjenesteoversikt-globalen */}
+      {cta && (
+        <CtaSectionBlock
+          variant={cta.variant ?? "colored"}
+          title={cta.title || "Interessert?"}
+          description={cta.description ?? undefined}
+          primaryCta={{
+            text: cta.primaryCta?.text || "Ta kontakt",
+            url: cta.primaryCta?.url || "/kontakt",
+          }}
+        />
+      )}
+    </>
   );
 }
 

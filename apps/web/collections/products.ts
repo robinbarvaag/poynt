@@ -148,6 +148,123 @@ export const Products: CollectionConfig = {
       },
     },
     {
+      name: "statusBadge",
+      type: "select",
+      label: "Merkelapp",
+      defaultValue: "none",
+      options: [
+        { label: "Ingen", value: "none" },
+        { label: "Nyhet", value: "new" },
+        { label: "Forhåndssalg", value: "presale" },
+        { label: "Utsolgt", value: "soldout" },
+        { label: "Egendefinert", value: "custom" },
+      ],
+      admin: {
+        description:
+          "Liten merkelapp som vises på produktkort og produktsiden (t.d. «Forhåndssalg»)",
+      },
+    },
+    {
+      name: "statusBadgeLabel",
+      type: "text",
+      label: "Egendefinert merkelapp-tekst",
+      admin: {
+        condition: (data) => data?.statusBadge === "custom",
+      },
+    },
+    {
+      name: "notice",
+      type: "textarea",
+      label: "Merknad / forhåndssalg-tekst",
+      admin: {
+        description:
+          "Valgfri melding som vises tydeleg på produktsiden (t.d. «NB! Boka kjem i oktober 2026 – dette er forhåndssal»)",
+      },
+    },
+    {
+      name: "highlights",
+      type: "array",
+      label: "Salgspunkt",
+      admin: {
+        description:
+          "Korte salgbare punkt (t.d. «Gratis frakt», «Foredrag ved 10+ bøker») som poppast fram rett ved kjøpsknappen",
+      },
+      fields: [
+        {
+          name: "icon",
+          type: "text",
+          label: "Ikon (emoji)",
+          admin: {
+            description: "Valgfri emoji, t.d. 🚚 eller 🎤",
+          },
+        },
+        {
+          name: "text",
+          type: "text",
+          required: true,
+          label: "Tekst",
+        },
+      ],
+    },
+    {
+      name: "allowQuantity",
+      type: "checkbox",
+      defaultValue: false,
+      label: "Tillat fleire (antal-veljar)",
+      admin: {
+        position: "sidebar",
+        description:
+          "Vis ein antal-veljar på produktsiden. Lat stå av for digitale produkt der ein berre treng éin.",
+      },
+    },
+    {
+      name: "variantLabel",
+      type: "text",
+      label: "Variant-spørsmål",
+      admin: {
+        description:
+          "T.d. «Signert?». Lat stå tom om produktet ikkje har variantar.",
+      },
+    },
+    {
+      name: "variantOptions",
+      type: "array",
+      label: "Variant-valg",
+      admin: {
+        description: "Vala kunden kan velje mellom (t.d. Ja / Nei).",
+        condition: (data) => Boolean(data?.variantLabel),
+      },
+      fields: [
+        {
+          name: "label",
+          type: "text",
+          required: true,
+          label: "Tekst",
+        },
+        {
+          name: "priceDelta",
+          type: "number",
+          label: "Prisdifferanse (kr)",
+          admin: {
+            description:
+              "Valfritt – legg til (eller trekk frå, med minus) basisprisen for dette valet. Lat stå tom for same pris.",
+          },
+        },
+      ],
+    },
+    {
+      name: "applyUrl",
+      type: "text",
+      label: "Søknadslenke",
+      defaultValue: "/kontakt",
+      admin: {
+        position: "sidebar",
+        description:
+          "Medlemskap kjøpes ikkje direkte – knappen «Søk om medlemskap» lenkjer hit",
+        condition: (data) => data?.type === "membership",
+      },
+    },
+    {
       name: "active",
       type: "checkbox",
       defaultValue: true,

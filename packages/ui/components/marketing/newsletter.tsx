@@ -92,18 +92,20 @@ export function Newsletter({
                 </Text>
               )}
 
-              {form ?? (
-                <div className="mx-auto mt-8 flex max-w-md flex-col gap-3 sm:flex-row">
-                  <input
-                    type="email"
-                    placeholder={placeholder}
-                    className="flex-1 rounded-2xl border-0 bg-background px-5 py-3 text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                  />
-                  <Button type="button" size="lg" variant={theme.button}>
-                    {buttonText}
-                  </Button>
-                </div>
-              )}
+              <div className="mx-auto mt-8 max-w-md">
+                {form ?? (
+                  <div className="flex flex-col gap-3 sm:flex-row">
+                    <input
+                      type="email"
+                      placeholder={placeholder}
+                      className="flex-1 rounded-2xl border-0 bg-background px-5 py-3 text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    />
+                    <Button type="button" size="lg" variant={theme.button}>
+                      {buttonText}
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </Reveal>

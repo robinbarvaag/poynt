@@ -1,4 +1,4 @@
-import { getResend } from "@poynt/email";
+import { sendMagicLinkEmail } from "@poynt/email";
 import { db } from "@poynt/planner-db";
 import * as schema from "@poynt/planner-db/schema";
 import { betterAuth } from "better-auth";
@@ -48,18 +48,7 @@ export const auth = betterAuth({
   plugins: [
     magicLink({
       sendMagicLink: async ({ email, url }) => {
-        const resend = getResend();
-        await resend.emails.send({
-          from: "On Poynt <onboarding@resend.dev>", // TODO: Change to verified domain
-          to: email,
-          subject: "Logg inn på On Poynt",
-          html: `
-            <h2>Logg inn på On Poynt</h2>
-            <p>Klikk på lenken under for å logge inn:</p>
-            <p><a href="${url}" style="display:inline-block;padding:12px 24px;background:#2563eb;color:#fff;text-decoration:none;border-radius:6px;">Logg inn</a></p>
-            <p style="color:#666;font-size:12px;">Denne lenken utløper om 10 minutter. Hvis du ikke ba om denne e-posten, kan du trygt ignorere den.</p>
-          `,
-        });
+        await sendMagicLinkEmail({ email, url, expiresInMinutes: 10 });
       },
       expiresIn: 60 * 10, // 10 minutes
     }),

@@ -51,7 +51,10 @@ const PRODUCT_PAGES: { slug: string; url: string }[] = [
 
 // Vår tjeneste-slug → Wix bilde-ID (fra /tjenester).
 const SERVICE_IMAGES: { slug: string; wixId: string }[] = [
-  { slug: "radgiving", wixId: "23f4c4_19761409f64e4c69b8bcdfe7bd7abf8d~mv2.jpg" },
+  {
+    slug: "radgiving",
+    wixId: "23f4c4_19761409f64e4c69b8bcdfe7bd7abf8d~mv2.jpg",
+  },
   { slug: "innholdsproduksjon", wixId: "c6b40877a8d443378894a5f7b31b9c7b.jpg" },
   {
     slug: "workshop-for-styret",

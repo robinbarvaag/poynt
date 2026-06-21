@@ -97,9 +97,13 @@ export function Footer({
                 {newsletter.title || "Meld deg på nyhetsbrevet"}
               </Heading>
               {newsletter.description && (
-                <Text variant="muted">{newsletter.description}</Text>
+                <Text variant="muted" customStyles="mt-2">
+                  {newsletter.description}
+                </Text>
               )}
-              <NewsletterForm buttonText={newsletter.buttonText} />
+              <div className="mt-6 max-w-md mx-auto">
+                <NewsletterForm buttonText={newsletter.buttonText} />
+              </div>
             </div>
           </div>
         )}
@@ -143,7 +147,9 @@ export function Footer({
 
           {columns.map((column) => (
             <div key={`${column.title}-column`}>
-              <Text>{column.title}</Text>
+              <Text weight="semibold" customStyles="mb-3 text-foreground">
+                {column.title}
+              </Text>
               <ul className="space-y-2">
                 {column.links?.map((link, linkIndex) => (
                   <li key={`${column.title}-link-${linkIndex}`}>

@@ -124,64 +124,131 @@ async function handleProductPurchase(session: Stripe.Checkout.Session) {
     throw new Error("Ingen kunde-epost i checkout session");
   }
 
-  // Hent line items frå Stripe
-  const lineItems = await stripe.checkout.sessions.listLineItems(session.id, {
-    expand: ["data.price.product"],
-  });
+  type OrderItem = {
+    product: number;
+    quantity: number;
+    variant?: string;
+    priceAtPurchase: number;
+    /** Kun til e-postkvittering – lagres ikke på ordren. */
+    name: string;
+  };
 
-  // Finn produkt i databasen basert på Stripe Product ID
-  const orderItems = await Promise.all(
-    lineItems.data.map(async (item) => {
-      const stripeProduct = item.price?.product;
-      const stripeProductId =
-        typeof stripeProduct === "string"
-          ? stripeProduct
-          : (stripeProduct as Stripe.Product)?.id;
+  // Føretrekk kurv-metadataen frå checkout (ber antal + variant). Fall tilbake
+  // på Stripe-line-items for sesjonar utan metadata.
+  const cartMeta = session.metadata?.cart;
+  let orderItems: OrderItem[];
 
-      if (!stripeProductId) {
-        throw new Error("Manglar Stripe Product ID på line item");
-      }
+  if (cartMeta) {
+    const cart = JSON.parse(cartMeta) as {
+      id: string;
+      q: number;
+      v: string | null;
+    }[];
 
-      const products = await payload.find({
-        collection: "products",
-        where: {
-          stripeID: {
-            equals: stripeProductId,
+    orderItems = await Promise.all(
+      cart.map(async (line) => {
+        const product = await payload.findByID({
+          collection: "products",
+          id: line.id,
+        });
+        if (!product) {
+          throw new Error(`Fann ikkje produkt: ${line.id}`);
+        }
+
+        const variantOption = line.v
+          ? (product.variantOptions ?? []).find((o) => o.label === line.v)
+          : undefined;
+        const unitPrice = product.price + (variantOption?.priceDelta ?? 0);
+        const variant =
+          line.v && product.variantLabel
+            ? `${product.variantLabel} ${line.v}`
+            : (line.v ?? undefined);
+
+        return {
+          product: product.id,
+          quantity: line.q,
+          variant,
+          priceAtPurchase: unitPrice,
+          name: product.name,
+        };
+      })
+    );
+  } else {
+    // Hent line items frå Stripe
+    const lineItems = await stripe.checkout.sessions.listLineItems(session.id, {
+      expand: ["data.price.product"],
+    });
+
+    orderItems = await Promise.all(
+      lineItems.data.map(async (item) => {
+        const stripeProduct = item.price?.product;
+        const stripeProductId =
+          typeof stripeProduct === "string"
+            ? stripeProduct
+            : (stripeProduct as Stripe.Product)?.id;
+
+        if (!stripeProductId) {
+          throw new Error("Manglar Stripe Product ID på line item");
+        }
+
+        const products = await payload.find({
+          collection: "products",
+          where: {
+            stripeID: {
+              equals: stripeProductId,
+            },
           },
-        },
-        limit: 1,
-      });
+          limit: 1,
+        });
 
-      if (products.docs.length === 0) {
-        throw new Error(`Fann ikkje produkt med Stripe ID: ${stripeProductId}`);
-      }
+        if (products.docs.length === 0) {
+          throw new Error(
+            `Fann ikkje produkt med Stripe ID: ${stripeProductId}`
+          );
+        }
 
-      const product = products.docs[0];
+        const product = products.docs[0];
 
-      return {
-        product: product.id,
-        priceAtPurchase: product.price,
-      };
-    })
-  );
+        return {
+          product: product.id,
+          quantity: item.quantity ?? 1,
+          priceAtPurchase: product.price,
+          name: product.name,
+        };
+      })
+    );
+  }
 
-  // Opprett ordre med kundeinfo frå Stripe
+  const total = Math.round((session.amount_total || 0) / 100);
+
+  // Opprett ordre med kundeinfo frå Stripe (utan e-post-feltet `name`)
   const order = await payload.create({
     collection: "orders",
     draft: false,
     data: {
       customerEmail,
       customerName: session.customer_details?.name || undefined,
-      items: orderItems,
-      total: Math.round((session.amount_total || 0) / 100),
+      items: orderItems.map(({ name: _name, ...item }) => item),
+      total,
       status: "paid",
       stripeSessionId: session.id,
       stripePaymentIntentId: session.payment_intent as string,
     },
   });
 
-  // Send bekreftelsesmail
-  await sendOrderConfirmation(customerEmail, String(order.id));
+  // Send branded bekreftelsesmail
+  await sendOrderConfirmation({
+    email: customerEmail,
+    orderNumber: String(order.id),
+    customerName: session.customer_details?.name || undefined,
+    items: orderItems.map((item) => ({
+      name: item.name,
+      quantity: item.quantity,
+      price: item.priceAtPurchase,
+      variant: item.variant,
+    })),
+    total,
+  });
 
   console.log("Ordre oppretta:", order.id);
 }

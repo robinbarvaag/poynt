@@ -1,7 +1,9 @@
+import { ContactLink } from "@/components/contact/contact-link";
 import { type MediaResource, PayloadImage } from "@/components/payload-image";
-import { Button, GridPattern, Heading, cn } from "@poynt/ui";
+import { Button, GridPattern, Heading, Section, cn } from "@poynt/ui";
 import { DriftingBlob } from "@poynt/ui/motion";
 import Link from "next/link";
+import type { ReactNode } from "react";
 
 interface CtaSectionBlockProps {
   variant?: "simple" | "colored" | "image";
@@ -30,6 +32,15 @@ export function CtaSectionBlock({
   // toner — ellers blir grønn tekst på grønn bunn (lav kontrast).
   const onDark = variant === "colored" || variant === "image";
 
+  // CTA-er mot /kontakt åpner skjemaet i modal (intercepting) og stemples med
+  // kilde; andre URL-er forblir vanlige lenker.
+  const ctaLink = (url: string, kilde: string, child: ReactNode) =>
+    url.startsWith("/kontakt") ? (
+      <ContactLink kilde={kilde}>{child}</ContactLink>
+    ) : (
+      <Link href={url}>{child}</Link>
+    );
+
   const content = (
     <div className="text-center max-w-2xl mx-auto">
       <Heading
@@ -50,14 +61,19 @@ export function CtaSectionBlock({
         </p>
       )}
       <div className="flex gap-4 justify-center flex-wrap">
-        <Link href={primaryCta.url}>
-          {/* Saffron-knapp popper på grønt og rimer med tall-båndet over. */}
+        {ctaLink(
+          primaryCta.url,
+          "cta-seksjon",
+          // Saffron-knapp popper på grønt og rimer med tall-båndet over.
           <Button size="lg" variant={onDark ? "saffron" : "default"}>
             {primaryCta.text}
           </Button>
-        </Link>
-        {secondaryCta?.text && secondaryCta?.url && (
-          <Link href={secondaryCta.url}>
+        )}
+        {secondaryCta?.text &&
+          secondaryCta?.url &&
+          ctaLink(
+            secondaryCta.url,
+            "cta-seksjon-sekundaer",
             <Button
               size="lg"
               variant="outline"
@@ -70,21 +86,20 @@ export function CtaSectionBlock({
             >
               {secondaryCta.text}
             </Button>
-          </Link>
-        )}
+          )}
       </div>
     </div>
   );
 
   if (variant === "image" && backgroundImage) {
     return (
-      <section className="relative py-20 md:py-28">
+      <Section>
         <div className="absolute inset-0 -z-10">
           <PayloadImage media={backgroundImage} fill className="object-cover" />
           <div className="absolute inset-0 bg-black/60" />
         </div>
         <div className="container mx-auto px-4 text-white">{content}</div>
-      </section>
+      </Section>
     );
   }
 
@@ -92,7 +107,7 @@ export function CtaSectionBlock({
     // Avrundet grønt PANEL som flyter på sidens jevne bakgrunn (ingen
     // fullbredde-søm). Blober/dot-tekstur klippes pent av panelets runding.
     return (
-      <section className="py-20 md:py-28">
+      <Section>
         <div className="container mx-auto px-4">
           <div className="relative overflow-hidden rounded-3xl bg-primary px-6 py-16 text-primary-foreground shadow-lg md:px-12 md:py-20">
             {/* Signaturflørt: organiske former bak innholdet — kun her, jf. docs/COMPOSITION.md §3 */}
@@ -109,15 +124,15 @@ export function CtaSectionBlock({
             <div className="relative z-10">{content}</div>
           </div>
         </div>
-      </section>
+      </Section>
     );
   }
 
   // «simple»: ingen egen fargeflate — hviler rolig på sidens bakgrunn (unngår
   // enda en grå boks i seksjonsrytmen).
   return (
-    <section className="py-20 md:py-28">
+    <Section>
       <div className="container mx-auto px-4">{content}</div>
-    </section>
+    </Section>
   );
 }

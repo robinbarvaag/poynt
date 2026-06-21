@@ -1,5 +1,6 @@
 import { PageHero } from "@/components/page-hero";
 import { RenderBlocks } from "@/components/render-blocks";
+import { buildMetadata, notFoundMetadata } from "@/lib/seo";
 import config from "@/payload.config";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
@@ -74,47 +75,17 @@ export async function generateMetadata({
   const page = await getPage(slug);
 
   if (!page) {
-    return { title: "Side ikke funnet" };
+    return notFoundMetadata("Side ikke funnet");
   }
-
-  const baseUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
-  const pageUrl = page.slug === "forside" ? baseUrl : `${baseUrl}/${page.slug}`;
 
   // Bruk SEO-feltene fra pluginet (legges til som 'meta' group)
   const seo = page.meta || {};
-  const title = seo.title || page.title;
-  const description = seo.description || "";
-  const image = seo.image;
-  const rawImageUrl = image && typeof image === "object" ? image.url : image;
-  const ogImageUrl = typeof rawImageUrl === "string" ? rawImageUrl : undefined;
-
-  return {
-    title,
-    description,
-    alternates: {
-      canonical: pageUrl,
-    },
-    openGraph: {
-      title,
-      description,
-      url: pageUrl,
-      type: "website",
-      ...(ogImageUrl && {
-        images: [
-          {
-            url: ogImageUrl,
-            width: 1200,
-            height: 630,
-          },
-        ],
-      }),
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-    },
-  };
+  return buildMetadata({
+    title: seo.title || page.title,
+    description: seo.description ?? undefined,
+    path: page.slug === "forside" ? "" : `/${page.slug}`,
+    image: seo.image,
+  });
 }
 
 export default async function Page({ params }: PageProps) {
@@ -154,9 +125,14 @@ export async function generateStaticParams() {
     limit: 1000,
   });
 
-  return pages.docs
-    .filter((page) => page.slug) // Filtrer ut sider uten slug
-    .map((page) => ({
-      slug: page.slug === "forside" ? [] : page.slug.split("/"),
-    }));
+  return (
+    pages.docs
+      .filter((page) => page.slug) // Filtrer ut sider uten slug
+      // /kontakt eies av en dedikert rute (app/(frontend)/kontakt) for å pare med
+      // intercepting-modalet — ikke generer den her, ellers kolliderer rutene.
+      .filter((page) => page.slug !== "kontakt")
+      .map((page) => ({
+        slug: page.slug === "forside" ? [] : page.slug.split("/"),
+      }))
+  );
 }

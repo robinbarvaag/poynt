@@ -1,8 +1,10 @@
 import { ProductDetailClient } from "@/components/product-detail";
+import { toProductGridItem } from "@/lib/product";
+import { buildMetadata, notFoundMetadata } from "@/lib/seo";
 import config from "@/payload.config";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getPayload } from "payload";
+import { type Where, getPayload } from "payload";
 
 interface ProductPageProps {
   params: Promise<{
@@ -25,31 +27,17 @@ export async function generateMetadata({
     limit: 1,
   });
 
-  if (products.docs.length === 0) {
-    return { title: "Produkt ikke funnet" };
+  const product = products.docs[0];
+  if (!product) {
+    return notFoundMetadata("Produkt ikke funnet");
   }
 
-  const product = products.docs[0];
-  const baseUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
-
-  return {
+  return buildMetadata({
     title: `${product.name} | Produkter | Poynt`,
-    description: product.shortDescription || "",
-    alternates: {
-      canonical: `${baseUrl}/produkter/${slug}`,
-    },
-    openGraph: {
-      title: product.name,
-      description: product.shortDescription || "",
-      url: `${baseUrl}/produkter/${slug}`,
-      type: "website",
-      ...(product.featuredImage &&
-        typeof product.featuredImage === "object" &&
-        product.featuredImage.url && {
-          images: [{ url: product.featuredImage.url }],
-        }),
-    },
-  };
+    description: product.shortDescription ?? undefined,
+    path: `/produkter/${slug}`,
+    image: product.featuredImage,
+  });
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
@@ -82,7 +70,48 @@ export default async function ProductPage({ params }: ProductPageProps) {
     .map((key) => allBenefits.find((b) => b.key === key)?.label)
     .filter((label): label is string => !!label);
 
-  return <ProductDetailClient product={product} benefits={productBenefits} />;
+  // «Andre produkter»: same kategori om mogleg, elles berre nyaste. Alltid
+  // ekskluder produktet sjølv, og fall tilbake på nyaste om kategori-treffet er
+  // tomt – slik at seksjonen aldri står tom på eit produkt utan kategori.
+  const categoryIds = (product.categories ?? [])
+    .map((c) => (typeof c === "object" ? c.id : c))
+    .filter((id): id is number => typeof id === "number");
+
+  const relatedWhere: Where = {
+    active: { equals: true },
+    id: { not_equals: product.id },
+    ...(categoryIds.length > 0 && {
+      categories: { in: categoryIds },
+    }),
+  };
+
+  let related = await payload.find({
+    collection: "products",
+    where: relatedWhere,
+    sort: "-createdAt",
+    depth: 1,
+    limit: 3,
+  });
+
+  if (related.docs.length === 0 && categoryIds.length > 0) {
+    related = await payload.find({
+      collection: "products",
+      where: { active: { equals: true }, id: { not_equals: product.id } },
+      sort: "-createdAt",
+      depth: 1,
+      limit: 3,
+    });
+  }
+
+  const relatedProducts = related.docs.map(toProductGridItem);
+
+  return (
+    <ProductDetailClient
+      product={product}
+      benefits={productBenefits}
+      relatedProducts={relatedProducts}
+    />
+  );
 }
 
 export async function generateStaticParams() {

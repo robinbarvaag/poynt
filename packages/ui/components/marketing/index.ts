@@ -45,6 +45,8 @@ export {
   type PodcastGridProps,
 } from "./podcast-grid";
 export {
+  type ProductBadge,
+  type ProductBadgeTone,
   ProductCard,
   type ProductCardProps,
   type ProductSurface,
@@ -59,6 +61,7 @@ export { ServiceCard, type ServiceCardProps } from "./service-card";
 export {
   ServiceShowcase,
   type ServiceShowcaseItem,
+  type ServiceShowcaseLinkProps,
   type ServiceShowcaseProps,
 } from "./service-showcase";
 export {

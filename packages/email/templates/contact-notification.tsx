@@ -8,6 +8,9 @@ export interface ContactNotificationProps {
   phone?: string;
   subject?: string;
   message: string;
+  /** Intern sporing: hvor henvendelsen ble sendt fra. */
+  source?: string;
+  sourcePath?: string;
 }
 
 /** Varsel til Poynt når noen sender inn kontaktskjemaet. */
@@ -17,6 +20,8 @@ export default function ContactNotificationEmail({
   phone,
   subject,
   message,
+  source,
+  sourcePath,
 }: ContactNotificationProps) {
   return (
     <EmailShell preview={`Ny henvendelse fra ${name}`}>
@@ -49,6 +54,15 @@ export default function ContactNotificationEmail({
 
         <Text style={emailStyles.label}>Melding</Text>
         <Text style={emailStyles.quote}>{message}</Text>
+
+        {source || sourcePath ? (
+          <>
+            <Text style={emailStyles.label}>Sendt fra</Text>
+            <Text style={emailStyles.value}>
+              {[source, sourcePath].filter(Boolean).join(" · ")}
+            </Text>
+          </>
+        ) : null}
       </Section>
 
       <Section style={{ marginTop: "24px" }}>

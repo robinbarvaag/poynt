@@ -3,6 +3,8 @@ export interface Product {
   name: string;
   slug: string;
   price: number;
+  /** Valgfri miniatyr-url (Payload `featuredImage`) — vises i handlekurven. */
+  image?: string;
 }
 
 export interface User {

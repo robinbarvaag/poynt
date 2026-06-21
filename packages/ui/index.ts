@@ -75,6 +75,12 @@ export {
 export { Eyebrow } from "./components/eyebrow";
 
 export {
+  Breadcrumbs,
+  type BreadcrumbsProps,
+  type BreadcrumbItem,
+} from "./components/breadcrumbs";
+
+export {
   Badge,
   badgeVariants,
   type BadgeProps,
@@ -270,6 +276,8 @@ export {
   PodcastGrid,
   type PodcastGridItem,
   type PodcastGridProps,
+  type ProductBadge,
+  type ProductBadgeTone,
   ProductCard,
   type ProductCardProps,
   type ProductSurface,
@@ -286,6 +294,7 @@ export {
   type ServiceGridProps,
   ServiceShowcase,
   type ServiceShowcaseItem,
+  type ServiceShowcaseLinkProps,
   type ServiceShowcaseProps,
   type Stat,
   StatsBand,

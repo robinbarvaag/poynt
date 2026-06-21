@@ -43,13 +43,13 @@ const navItems = [
         label: "Styre & rådgivning",
         description: "Styreverv og strategisk rådgivning",
         linkType: "custom" as const,
-        url: "/tjenester",
+        url: "/for-bedrifter#styre",
       },
       {
         label: "Foredrag",
         description: "Foredrag og workshops",
         linkType: "custom" as const,
-        url: "/tjenester",
+        url: "/for-bedrifter#foredrag",
       },
       {
         label: "Ta kontakt",

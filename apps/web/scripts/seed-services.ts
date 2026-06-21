@@ -19,6 +19,7 @@ const services = [
     includesVat: true,
     ctaText: "Ta kontakt",
     sortOrder: 0,
+    featured: true,
   },
   {
     name: "Innholdsproduksjon",

@@ -11,6 +11,7 @@ import { Search, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { CartDrawer } from "./cart-drawer";
+import { ContactLink } from "./contact/contact-link";
 
 interface SubNavItem {
   label: string;
@@ -62,7 +63,7 @@ function getHref(item: {
       break;
     case "blog":
       if (item.blogPost) {
-        return `/post/${item.blogPost.slug}`;
+        return `/blogg/${item.blogPost.slug}`;
       }
       break;
     case "product":
@@ -120,6 +121,11 @@ export function Header({
   );
 
   const hasCta = !!(ctaButton?.show && ctaButton.text && ctaButton.url);
+  // Peker CTA-en mot /kontakt? Da brukes ContactLink, som åpner skjemaet i et
+  // modal (intercepting-route) og stempler innsendingen med kilde "header".
+  const ctaUrl = ctaButton?.url ?? "#";
+  const ctaIsContact = ctaUrl.startsWith("/kontakt");
+  const ctaText = ctaButton?.text;
 
   const actions = (
     <>
@@ -154,7 +160,11 @@ export function Header({
           className="hidden h-9 rounded-full px-5 sm:flex"
           asChild
         >
-          <Link href={ctaButton?.url ?? "#"}>{ctaButton?.text}</Link>
+          {ctaIsContact ? (
+            <ContactLink kilde="header">{ctaText}</ContactLink>
+          ) : (
+            <Link href={ctaUrl}>{ctaText}</Link>
+          )}
         </Button>
       )}
     </>
@@ -173,7 +183,11 @@ export function Header({
         )}
         {hasCta && (
           <Button className="w-full rounded-full" asChild>
-            <Link href={ctaButton?.url ?? "#"}>{ctaButton?.text}</Link>
+            {ctaIsContact ? (
+              <ContactLink kilde="header-mobil">{ctaText}</ContactLink>
+            ) : (
+              <Link href={ctaUrl}>{ctaText}</Link>
+            )}
           </Button>
         )}
       </>

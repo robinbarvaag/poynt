@@ -58,7 +58,10 @@ export function NewsletterForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-2 max-w-md mx-auto">
+    <form
+      onSubmit={handleSubmit}
+      className="relative flex flex-col gap-3 sm:flex-row"
+    >
       <input
         type="email"
         value={email}
@@ -66,9 +69,9 @@ export function NewsletterForm({
         placeholder="Din e-postadresse"
         required
         disabled={status === "loading"}
-        className="flex-1 px-4 py-2 rounded-md border border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
+        className="flex-1 rounded-2xl border-0 bg-background px-5 py-3 text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50"
       />
-      <Button type="submit" disabled={status === "loading"}>
+      <Button type="submit" size="lg" disabled={status === "loading"}>
         {status === "loading" ? (
           <Loader2 className="h-4 w-4 animate-spin" />
         ) : (

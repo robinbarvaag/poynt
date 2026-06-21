@@ -52,7 +52,7 @@ const payload = await getPayload({ config });
 const data: any = {
   columns,
   bottomText: richText(
-    "© Poynt AS · Org.nr 930 714 151 MVA · Ramsvigstien 5A, 4015 Stavanger · hei@poynt.no",
+    "© Poynt AS · Org.nr 930 714 151 MVA · Ramsvigstien 5A, 4015 Stavanger · hei@poynt.no"
   ),
   showSocialLinks: true,
   showNewsletter: false,

@@ -42,6 +42,21 @@ export const Orders: CollectionConfig = {
           label: "Produkt",
         },
         {
+          name: "quantity",
+          type: "number",
+          required: true,
+          defaultValue: 1,
+          label: "Antal",
+        },
+        {
+          name: "variant",
+          type: "text",
+          label: "Variant",
+          admin: {
+            description: "Valgt variant, t.d. «Signert: Ja» (om aktuelt)",
+          },
+        },
+        {
           name: "priceAtPurchase",
           type: "number",
           required: true,

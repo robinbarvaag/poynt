@@ -1,7 +1,19 @@
 "use client";
 
-import { Button, Container, Heading, Label, Text, cn } from "@poynt/ui";
-import { useState } from "react";
+import {
+  Button,
+  Container,
+  Heading,
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Text,
+  cn,
+} from "@poynt/ui";
+import { type ReactNode, useEffect, useState } from "react";
 import type { Form as PayloadForm } from "../../payload-types";
 
 interface FormBlockProps {
@@ -11,6 +23,15 @@ interface FormBlockProps {
   variant?: "default" | "card" | "bordered" | null;
   alignment?: "left" | "center" | null;
   maxWidth?: "sm" | "md" | "lg" | "full" | null;
+  /** Dropp Container-wrapperen (brukes når skjemaet ligger i en dialog). */
+  bare?: boolean;
+}
+
+/** Sporings-/kontekstdata lest fra URL-en (?kilde=&emne=&fra=). */
+interface SubmissionContext {
+  kilde?: string;
+  sti?: string;
+  emne?: string;
 }
 
 export function FormBlockComponent({
@@ -20,10 +41,24 @@ export function FormBlockComponent({
   variant = "default",
   alignment = "left",
   maxWidth = "md",
+  bare = false,
 }: FormBlockProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Kilde/sti/emne hentes fra URL-ens query etter mount (samme query finnes
+  // både i modal- og fullside-konteksten). Tom på første render → ingen
+  // hydration-mismatch; fylles inn rett etter.
+  const [ctx, setCtx] = useState<SubmissionContext>({});
+
+  useEffect(() => {
+    const sp = new URLSearchParams(window.location.search);
+    setCtx({
+      kilde: sp.get("kilde") ?? undefined,
+      sti: sp.get("fra") ?? undefined,
+      emne: sp.get("emne") ?? undefined,
+    });
+  }, []);
 
   // If form is just an ID string, we can't render it
   if (typeof form === "string") {
@@ -67,6 +102,15 @@ export function FormBlockComponent({
       values[key] = value.toString();
     });
 
+    const submissionData = Object.entries(values).map(([field, value]) => ({
+      field,
+      value,
+    }));
+    // Intern sporing: hvor henvendelsen kom fra. Lagres som ekstra felt på
+    // innsendingen → synlig i admin og kan tas med i varsel-e-posten.
+    if (ctx.kilde) submissionData.push({ field: "kilde", value: ctx.kilde });
+    if (ctx.sti) submissionData.push({ field: "sti", value: ctx.sti });
+
     try {
       const response = await fetch("/api/form-submissions", {
         method: "POST",
@@ -75,10 +119,7 @@ export function FormBlockComponent({
         },
         body: JSON.stringify({
           form: formData.id,
-          submissionData: Object.entries(values).map(([field, value]) => ({
-            field,
-            value,
-          })),
+          submissionData,
         }),
       });
 
@@ -98,167 +139,188 @@ export function FormBlockComponent({
   const currentVariant = variant || "default";
   const currentAlignment = alignment || "left";
 
-  if (isSubmitted) {
-    return (
-      <Container size="sm">
-        <div
-          className={cn(
-            maxWidthClasses[currentMaxWidth],
-            currentAlignment === "center" && "mx-auto text-center",
-            variantClasses[currentVariant]
-          )}
-        >
-          <div className="flex flex-col items-center gap-4 py-8">
-            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-              <svg
-                className="w-8 h-8 text-primary"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <title>Checkmark Icon</title>
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
-            </div>
-            <Text>{confirmationMessage}</Text>
-          </div>
-        </div>
-      </Container>
+  // I dialog-modus (bare) droppes Container-wrapperen — dialogen styrer bredden.
+  const wrap = (node: ReactNode) =>
+    bare ? (
+      <div className="w-full">{node}</div>
+    ) : (
+      <Container size="sm">{node}</Container>
     );
-  }
 
-  return (
-    <Container size="sm">
+  if (isSubmitted) {
+    return wrap(
       <div
         className={cn(
           maxWidthClasses[currentMaxWidth],
-          currentAlignment === "center" && "mx-auto",
+          currentAlignment === "center" && "mx-auto text-center",
           variantClasses[currentVariant]
         )}
       >
-        {formTitle && <Heading variant="h2">{formTitle}</Heading>}
-        {description && <Text variant="muted">{description}</Text>}
+        <div className="flex flex-col items-center gap-4 py-8">
+          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+            <svg
+              className="w-8 h-8 text-primary"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <title>Checkmark Icon</title>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+          </div>
+          <Text>{confirmationMessage}</Text>
+        </div>
+      </div>
+    );
+  }
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {formData.fields
-              ?.filter((field) => "name" in field && field.name)
-              .map((field) => {
-                if (!("name" in field) || !field.name) return null;
+  return wrap(
+    <div
+      className={cn(
+        maxWidthClasses[currentMaxWidth],
+        currentAlignment === "center" && "mx-auto",
+        variantClasses[currentVariant]
+      )}
+    >
+      {(formTitle || description) && (
+        <div className="mb-7 space-y-2">
+          {formTitle && <Heading variant="h3">{formTitle}</Heading>}
+          {description && <Text variant="muted">{description}</Text>}
+        </div>
+      )}
 
-                const fieldName = field.name;
-                const fieldLabel =
-                  "label" in field ? field.label || field.name : field.name;
-                const isRequired =
-                  "required" in field ? (field.required ?? false) : false;
-                const fieldWidth =
-                  "width" in field ? (field.width ?? 100) : 100;
+      <form
+        key={ctx.emne ?? "default"}
+        onSubmit={handleSubmit}
+        className="space-y-5"
+      >
+        <div className="grid grid-cols-1 gap-x-4 gap-y-5 md:grid-cols-2">
+          {formData.fields
+            ?.filter((field) => "name" in field && field.name)
+            .map((field) => {
+              if (!("name" in field) || !field.name) return null;
 
-                return (
-                  <div
-                    key={`${fieldName}-${field.id}`}
-                    className={cn(
-                      fieldWidth === 50 ? "md:col-span-1" : "md:col-span-2"
-                    )}
-                  >
-                    <Label className="block mb-1.5">
+              const fieldName = field.name;
+              const fieldLabel =
+                "label" in field ? field.label || field.name : field.name;
+              const isRequired =
+                "required" in field ? (field.required ?? false) : false;
+              const fieldWidth = "width" in field ? (field.width ?? 100) : 100;
+
+              return (
+                <div
+                  key={`${fieldName}-${field.id}`}
+                  className={cn(
+                    fieldWidth === 50 ? "md:col-span-1" : "md:col-span-2"
+                  )}
+                >
+                  {/* Checkbox har egen inline-label under – unngå dobbel tekst. */}
+                  {field.blockType !== "checkbox" && (
+                    <Label className="mb-2 block font-heading font-semibold text-foreground">
                       {fieldLabel}
                       {isRequired && (
-                        <span className="text-destructive ml-1">*</span>
+                        <span className="text-destructive">&nbsp;*</span>
                       )}
                     </Label>
+                  )}
 
-                    {field.blockType === "text" && (
-                      <input
-                        type="text"
-                        name={fieldName}
-                        required={isRequired}
-                        className="w-full px-4 py-2.5 rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring"
-                      />
-                    )}
+                  {field.blockType === "text" && (
+                    <input
+                      type="text"
+                      name={fieldName}
+                      required={isRequired}
+                      className="w-full px-4 py-3 rounded-xl border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  )}
 
-                    {field.blockType === "email" && (
-                      <input
-                        type="email"
-                        name={fieldName}
-                        required={isRequired}
-                        className="w-full px-4 py-2.5 rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring"
-                      />
-                    )}
+                  {field.blockType === "email" && (
+                    <input
+                      type="email"
+                      name={fieldName}
+                      required={isRequired}
+                      className="w-full px-4 py-3 rounded-xl border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  )}
 
-                    {field.blockType === "number" && (
-                      <input
-                        type="number"
-                        name={fieldName}
-                        required={isRequired}
-                        className="w-full px-4 py-2.5 rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring"
-                      />
-                    )}
+                  {field.blockType === "number" && (
+                    <input
+                      type="number"
+                      name={fieldName}
+                      required={isRequired}
+                      className="w-full px-4 py-3 rounded-xl border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  )}
 
-                    {field.blockType === "textarea" && (
-                      <textarea
-                        name={fieldName}
-                        required={isRequired}
-                        rows={4}
-                        className="w-full px-4 py-2.5 rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none"
-                      />
-                    )}
+                  {field.blockType === "textarea" && (
+                    <textarea
+                      name={fieldName}
+                      required={isRequired}
+                      rows={4}
+                      className="w-full px-4 py-3 rounded-xl border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+                    />
+                  )}
 
-                    {field.blockType === "select" && "options" in field && (
-                      <select
-                        name={fieldName}
-                        required={isRequired}
-                        className="w-full px-4 py-2.5 rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring"
-                      >
-                        <option value="">Velg...</option>
+                  {field.blockType === "select" && "options" in field && (
+                    <Select
+                      name={fieldName}
+                      required={isRequired}
+                      defaultValue={fieldName === "emne" ? ctx.emne : undefined}
+                    >
+                      <SelectTrigger className="h-auto! w-full rounded-xl border-input bg-background px-4 py-3 text-base">
+                        <SelectValue placeholder="Velg..." />
+                      </SelectTrigger>
+                      <SelectContent>
                         {field.options?.map((option) => (
-                          <option key={option.value} value={option.value}>
+                          <SelectItem key={option.value} value={option.value}>
                             {option.label}
-                          </option>
+                          </SelectItem>
                         ))}
-                      </select>
-                    )}
+                      </SelectContent>
+                    </Select>
+                  )}
 
-                    {field.blockType === "checkbox" && (
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          name={fieldName}
-                          required={isRequired}
-                          className="w-4 h-4 rounded border-input"
-                        />
-                        <Text type="span" variant="muted">
-                          {fieldLabel}
-                        </Text>
-                      </label>
-                    )}
-                  </div>
-                );
-              })}
+                  {field.blockType === "checkbox" && (
+                    <label className="flex cursor-pointer items-start gap-3">
+                      <input
+                        type="checkbox"
+                        name={fieldName}
+                        required={isRequired}
+                        className="mt-0.5 size-4 shrink-0 rounded border-input"
+                      />
+                      <Text type="span" variant="muted">
+                        {fieldLabel}
+                        {isRequired && (
+                          <span className="text-destructive">&nbsp;*</span>
+                        )}
+                      </Text>
+                    </label>
+                  )}
+                </div>
+              );
+            })}
+        </div>
+
+        {error && (
+          <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
+            {error}
           </div>
+        )}
 
-          {error && (
-            <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
-              {error}
-            </div>
-          )}
-
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full md:w-auto"
-          >
-            {isSubmitting
-              ? "Sender..."
-              : formData.submitButtonLabel || "Send inn"}
-          </Button>
-        </form>
-      </div>
-    </Container>
+        <Button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full md:w-auto"
+        >
+          {isSubmitting
+            ? "Sender..."
+            : formData.submitButtonLabel || "Send inn"}
+        </Button>
+      </form>
+    </div>
   );
 }

@@ -71,8 +71,10 @@ const getCachedGlobals = unstable_cache(getGlobals, ["globals"], {
 
 export default async function FrontendLayout({
   children,
+  modal,
 }: {
   children: React.ReactNode;
+  modal: React.ReactNode;
 }) {
   const { siteSettings, header, footer } = await getCachedGlobals();
 
@@ -88,6 +90,8 @@ export default async function FrontendLayout({
           navItems={header?.navItems as unknown as HeaderProps["navItems"]}
         />
         <main className="min-h-screen pt-22">{children}</main>
+        {/* Parallel-route slot for intercepting-modaler (f.eks. /kontakt). */}
+        {modal}
         <Footer
           siteName={siteSettings?.siteName || "Poynt"}
           logo={siteSettings?.logo as { url: string; alt?: string } | null}

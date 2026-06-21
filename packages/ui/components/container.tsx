@@ -1,6 +1,6 @@
 import { cn } from "@poynt/ui";
 import { type VariantProps, cva } from "class-variance-authority";
-import * as React from "react";
+import type * as React from "react";
 
 const containerVariants = cva("mx-auto w-full px-4", {
   variants: {
@@ -24,27 +24,26 @@ const containerVariants = cva("mx-auto w-full px-4", {
   },
 });
 
-export interface ContainerProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof containerVariants> {
-  as?: "div" | "section" | "article" | "main" | "header" | "footer";
-}
+export type ContainerProps = React.ComponentProps<"div"> &
+  VariantProps<typeof containerVariants> & {
+    as?: "div" | "section" | "article" | "main" | "header" | "footer";
+  };
 
-const Container = React.forwardRef<HTMLDivElement, ContainerProps>(
-  ({ className, size, padding, as = "div", children, ...props }, ref) => {
-    const Component = as;
-    return (
-      <Component
-        ref={ref}
-        className={cn(containerVariants({ size, padding, className }))}
-        {...props}
-      >
-        {children}
-      </Component>
-    );
-  }
-);
-Container.displayName = "Container";
+function Container({
+  className,
+  size,
+  padding,
+  as: Component = "div",
+  ...props
+}: ContainerProps) {
+  return (
+    <Component
+      data-slot="container"
+      className={cn(containerVariants({ size, padding, className }))}
+      {...props}
+    />
+  );
+}
 
 // Full-bredde seksjon med fargevariant og fast vertikal rytme (spacing).
 const sectionVariants = cva("w-full", {
@@ -65,10 +64,10 @@ const sectionVariants = cva("w-full", {
     // Tillatte seksjons-avstander — hold deg til disse for konsistent rytme.
     spacing: {
       none: "py-0",
-      sm: "py-12 md:py-16",
-      md: "py-16 md:py-24",
-      lg: "py-24 md:py-32",
-      xl: "py-32 md:py-44",
+      sm: "py-8 md:py-12",
+      md: "py-10 md:py-14",
+      lg: "py-12 md:py-16",
+      xl: "py-24 md:py-32",
     },
   },
   defaultVariants: {
@@ -77,22 +76,18 @@ const sectionVariants = cva("w-full", {
   },
 });
 
-export interface SectionProps
-  extends React.HTMLAttributes<HTMLElement>,
-    VariantProps<typeof sectionVariants> {}
+export type SectionProps = React.ComponentProps<"section"> &
+  VariantProps<typeof sectionVariants>;
 
-const Section = React.forwardRef<HTMLElement, SectionProps>(
-  ({ className, variant, spacing, children, ...props }, ref) => (
+function Section({ className, variant, spacing, ...props }: SectionProps) {
+  return (
     <section
-      ref={ref}
+      data-slot="section"
       className={cn(sectionVariants({ variant, spacing, className }))}
       {...props}
-    >
-      {children}
-    </section>
-  )
-);
-Section.displayName = "Section";
+    />
+  );
+}
 
 // Vertikal stabel med fast avstand mellom barn (tillatte gap-verdier).
 const stackVariants = cva("flex flex-col", {
@@ -117,20 +112,18 @@ const stackVariants = cva("flex flex-col", {
   },
 });
 
-export interface StackProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof stackVariants> {}
+export type StackProps = React.ComponentProps<"div"> &
+  VariantProps<typeof stackVariants>;
 
-const Stack = React.forwardRef<HTMLDivElement, StackProps>(
-  ({ className, gap, align, ...props }, ref) => (
+function Stack({ className, gap, align, ...props }: StackProps) {
+  return (
     <div
-      ref={ref}
+      data-slot="stack"
       className={cn(stackVariants({ gap, align, className }))}
       {...props}
     />
-  )
-);
-Stack.displayName = "Stack";
+  );
+}
 
 // Responsivt rutenett med fast kolonnetall på desktop og fornuftig nedtrapping
 // på mindre skjermer. Brukes som komposisjons-primitiv (jf. FeatureGrid = Grid
@@ -157,20 +150,18 @@ const gridVariants = cva("grid grid-cols-1", {
   },
 });
 
-export interface GridProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof gridVariants> {}
+export type GridProps = React.ComponentProps<"div"> &
+  VariantProps<typeof gridVariants>;
 
-const Grid = React.forwardRef<HTMLDivElement, GridProps>(
-  ({ className, cols, gap, ...props }, ref) => (
+function Grid({ className, cols, gap, ...props }: GridProps) {
+  return (
     <div
-      ref={ref}
+      data-slot="grid"
       className={cn(gridVariants({ cols, gap, className }))}
       {...props}
     />
-  )
-);
-Grid.displayName = "Grid";
+  );
+}
 
 export {
   Container,

@@ -13,7 +13,7 @@ export const BlogPosts: CollectionConfig = {
     group: "Innhold",
     livePreview: {
       url: ({ data }) => {
-        return `${process.env.NEXT_PUBLIC_URL || "http://localhost:3000"}/post/${data?.slug}`;
+        return `${process.env.NEXT_PUBLIC_URL || "http://localhost:3000"}/blogg/${data?.slug}`;
       },
     },
   },

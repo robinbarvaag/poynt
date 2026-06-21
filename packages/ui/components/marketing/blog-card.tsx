@@ -1,5 +1,6 @@
 import type * as React from "react";
 import { cn } from "../../lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "../avatar";
 import { Card } from "../card";
 
 export type BlogSurface =
@@ -20,8 +21,8 @@ export interface BlogCardProps {
   date?: string;
   /** Forfatternavn (vises i bunnlinja). */
   authorName?: string;
-  /** Avatar-slot, f.eks. en `<Avatar>` eller `next/image`. */
-  authorAvatar?: React.ReactNode;
+  /** URL til forfatterens avatar. Uten URL vises initial-fallback. */
+  authorAvatarUrl?: string;
   /** Hovedbilde-slot. Uten bilde blir kortet et rent typografisk fargeblokk-kort. */
   image?: React.ReactNode;
   /** Fargeblokk-tint. `BlogGrid` roterer disse automatisk. */
@@ -59,15 +60,24 @@ function Eyebrow({
 
 function Meta({
   authorName,
-  authorAvatar,
+  authorAvatarUrl,
   date,
-}: Pick<BlogCardProps, "authorName" | "authorAvatar" | "date">) {
+}: Pick<BlogCardProps, "authorName" | "authorAvatarUrl" | "date">) {
   if (!(authorName || date)) {
     return null;
   }
   return (
     <div className="mt-auto flex items-center gap-2 pt-5 text-current/70 text-sm">
-      {authorAvatar}
+      {authorName && (
+        <Avatar className="size-6 ring-1 ring-current/10">
+          {authorAvatarUrl && (
+            <AvatarImage src={authorAvatarUrl} alt={authorName} />
+          )}
+          <AvatarFallback className="text-xs">
+            {authorName[0]?.toUpperCase() ?? "?"}
+          </AvatarFallback>
+        </Avatar>
+      )}
       {authorName && (
         <span className="font-medium text-current">{authorName}</span>
       )}
@@ -88,7 +98,7 @@ export function BlogCard({
   category,
   date,
   authorName,
-  authorAvatar,
+  authorAvatarUrl,
   image,
   surface = "default",
   featured = false,
@@ -129,7 +139,11 @@ export function BlogCard({
         </p>
       )}
 
-      <Meta authorName={authorName} authorAvatar={authorAvatar} date={date} />
+      <Meta
+        authorName={authorName}
+        authorAvatarUrl={authorAvatarUrl}
+        date={date}
+      />
     </div>
   );
 

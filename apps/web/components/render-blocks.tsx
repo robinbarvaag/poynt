@@ -1,3 +1,4 @@
+import { slugifyAnchor } from "@/lib/format";
 import type { Page } from "@/payload-types";
 import { BlockSection } from "@poynt/ui";
 import { type ComponentProps, Fragment, type ReactNode } from "react";
@@ -189,13 +190,17 @@ export function RenderBlocks({ blocks }: RenderBlocksProps) {
           return null;
         }
 
-        if (SPECIAL_BLOCK_TYPES.has(block.blockType)) {
-          return <Fragment key={key}>{element}</Fragment>;
-        }
+        // Et «Blokk-navn» i admin gir blokka en adresserbar #anker, slik at
+        // menyen kan lenke rett til seksjonen (f.eks. /for-bedrifter#styre).
+        // scroll-mt holder seksjonen klar av den faste headeren ved hopp.
+        const anchorId = block.blockName
+          ? slugifyAnchor(block.blockName)
+          : undefined;
 
-        return (
+        const content = SPECIAL_BLOCK_TYPES.has(block.blockType) ? (
+          element
+        ) : (
           <BlockSection
-            key={key}
             background="default"
             containerSize={false}
             reveal={!SELF_REVEAL_BLOCK_TYPES.has(block.blockType)}
@@ -203,6 +208,16 @@ export function RenderBlocks({ blocks }: RenderBlocksProps) {
             {element}
           </BlockSection>
         );
+
+        if (anchorId) {
+          return (
+            <div key={key} id={anchorId} className="scroll-mt-28">
+              {content}
+            </div>
+          );
+        }
+
+        return <Fragment key={key}>{content}</Fragment>;
       })}
     </div>
   );

@@ -8,6 +8,9 @@ import * as CartLineItemStories from "./CartLineItem.stories";
 
 Handlekurven som en **presentasjonell** `Sheet`-drawer. Triggeren «popper» — saffron-
 fylt med teller — når kurven har varer, og er et rolig ghost-ikon når den er tom.
+Selve telleren zoomer inn på nytt (`animate-in zoom-in`) hver gang tallet endres,
+og footeren har en liten trygghets-linje under checkout (`checkoutNote` — send
+`null` for å skjule, eller egen node for å overstyre).
 
 ## Når brukes den
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { formatPrice } from "@/lib/format";
 import { useCartReady } from "@/lib/use-cart-ready";
 import { useCart } from "@poynt/cart";
 import { Button, CartDrawer as CartDrawerShell, CartLineItem } from "@poynt/ui";
@@ -7,18 +8,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
-function formatPrice(price: number): string {
-  return new Intl.NumberFormat("nb-NO", {
-    style: "currency",
-    currency: "NOK",
-  }).format(price);
-}
-
 export function CartDrawer() {
   const [open, setOpen] = useState(false);
   const ready = useCartReady();
   const pathname = usePathname();
-  const { items, removeItem, clearCart, total } = useCart();
+  const { items, removeItem, updateQuantity, clearCart, total, count } =
+    useCart();
 
   // Lukk kurven ved navigasjon. `pathname` er en bevisst trigger.
   // biome-ignore lint/correctness/useExhaustiveDependencies: pathname brukes som trigger for å lukke kurven ved navigasjon, ikke i selve effekten
@@ -33,7 +28,7 @@ export function CartDrawer() {
     <CartDrawerShell
       open={open}
       onOpenChange={setOpen}
-      count={cartItems.length}
+      count={ready ? count() : 0}
       total={formatPrice(ready ? total() : 0)}
       onClear={clearCart}
       checkout={
@@ -53,10 +48,26 @@ export function CartDrawer() {
     >
       {cartItems.map((item) => (
         <CartLineItem
-          key={item.id}
+          key={item.key}
           name={item.name}
-          priceLabel={formatPrice(item.price)}
-          onRemove={() => removeItem(item.id)}
+          priceLabel={formatPrice(item.price * item.quantity)}
+          variantLabel={
+            item.variantLabel && item.variantValue
+              ? `${item.variantLabel} ${item.variantValue}`
+              : undefined
+          }
+          quantity={item.quantity}
+          incrementDisabled={
+            item.maxQuantity != null && item.quantity >= item.maxQuantity
+          }
+          onIncrement={() => updateQuantity(item.key, item.quantity + 1)}
+          onDecrement={() => updateQuantity(item.key, item.quantity - 1)}
+          image={
+            item.image ? (
+              <img src={item.image} alt="" className="size-full object-cover" />
+            ) : undefined
+          }
+          onRemove={() => removeItem(item.key)}
         />
       ))}
     </CartDrawerShell>

@@ -142,7 +142,7 @@ export default buildConfig({
           return doc.slug === "forside" ? siteUrl : `${siteUrl}/${doc.slug}`;
         }
         if (collectionSlug === "blog-posts") {
-          return `${siteUrl}/post/${doc.slug}`;
+          return `${siteUrl}/blogg/${doc.slug}`;
         }
         return `${siteUrl}/${collectionSlug}/${doc.slug}`;
       },
@@ -228,17 +228,57 @@ export default buildConfig({
                     names.includes((e.field ?? "").toLowerCase())
                   )?.value;
 
+                const { sendContactEmails } = await import("@poynt/email");
+
+                // Medlemskapssøknad har eget felt-sett (bedrift/faktura) – ingen
+                // "melding"/"epost". Gjenkjenn det og sett sammen et sammendrag.
+                const isMembership =
+                  !!get(["bedriftsnavn"]) || !!get(["orgnummer"]);
+                if (isMembership) {
+                  const applicantEmail = get(["dinepost", "epost", "email"]);
+                  if (!applicantEmail) return doc;
+
+                  const line = (label: string, names: string[]) => {
+                    const value = get(names);
+                    return value ? `${label}: ${value}` : null;
+                  };
+                  const message = [
+                    line("Bedrift", ["bedriftsnavn"]),
+                    line("Org.nr", ["orgnummer"]),
+                    line("E-post for faktura", ["fakturaepost"]),
+                    line("Omsetter over 1 mill/år", ["omsetning"]),
+                    line("EHF-faktura", ["ehffaktura"]),
+                    line("Fakturaoppdeling", ["fakturaoppdeling"]),
+                    line("Fakturainfo", ["fakturainfo"]),
+                    line("Om bedriften", ["ombedriften"]),
+                  ]
+                    .filter(Boolean)
+                    .join("\n");
+
+                  await sendContactEmails({
+                    name: get(["fulltnavn", "navn", "name"]) || "Ukjent",
+                    email: applicantEmail,
+                    subject: "Medlemskapssøknad – On Poynt",
+                    message,
+                    source: get(["kilde", "source"]),
+                    sourcePath: get(["sti", "path"]),
+                  });
+                  return doc;
+                }
+
                 const email = get(["epost", "email", "e-post"]);
                 const message = get(["melding", "message", "beskjed"]);
                 if (!email || !message) return doc;
 
-                const { sendContactEmails } = await import("@poynt/email");
                 await sendContactEmails({
                   name: get(["navn", "name"]) || "Ukjent",
                   email,
                   phone: get(["telefon", "phone", "tlf"]),
                   subject: get(["emne", "subject", "tema"]),
                   message,
+                  // Intern sporing: hvor henvendelsen ble sendt fra.
+                  source: get(["kilde", "source"]),
+                  sourcePath: get(["sti", "path"]),
                 });
               } catch (err) {
                 req.payload.logger.error(

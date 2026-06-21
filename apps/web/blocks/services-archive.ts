@@ -19,12 +19,42 @@ export const ServicesArchive: Block = {
       label: "Beskrivelse",
     },
     {
+      name: "selectionMode",
+      type: "select",
+      label: "Velg tjenester",
+      defaultValue: "auto",
+      options: [
+        { label: "Automatisk (alle aktive)", value: "auto" },
+        { label: "Manuelt utvalg", value: "manual" },
+      ],
+    },
+    {
+      name: "selectedServices",
+      type: "relationship",
+      relationTo: "services",
+      hasMany: true,
+      label: "Velg tjenester",
+      admin: {
+        condition: (data) => data?.selectionMode === "manual",
+        description: "Velg hvilke tjenester som skal vises, i ønsket rekkefølge",
+      },
+    },
+    {
+      name: "limit",
+      type: "number",
+      label: "Maks antall tjenester",
+      admin: {
+        description: "La stå tom for å vise alle",
+        condition: (data) => data?.selectionMode === "auto",
+      },
+    },
+    {
       name: "layout",
       type: "select",
       label: "Layout",
       defaultValue: "grid",
       options: [
-        { label: "Grid (2-4 kolonner)", value: "grid" },
+        { label: "Grid (3 kolonner)", value: "grid" },
         { label: "Liste", value: "list" },
       ],
     },

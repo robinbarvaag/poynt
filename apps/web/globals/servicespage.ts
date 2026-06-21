@@ -64,6 +64,59 @@ export const ServicesPage: GlobalConfig = {
                   "Tekst som vises når det ikke finnes noen aktive tjenester",
               },
             },
+            {
+              name: "detailCta",
+              type: "group",
+              label: "CTA på tjeneste-detaljsider",
+              admin: {
+                description:
+                  "Felles oppfordring som vises nederst på hver enkelt tjenesteside",
+              },
+              fields: [
+                {
+                  name: "variant",
+                  type: "select",
+                  label: "Stil",
+                  defaultValue: "colored",
+                  options: [
+                    { label: "Enkel (på sidebakgrunn)", value: "simple" },
+                    { label: "Farget panel", value: "colored" },
+                  ],
+                },
+                {
+                  name: "title",
+                  type: "text",
+                  label: "Tittel",
+                  defaultValue: "Interessert?",
+                },
+                {
+                  name: "description",
+                  type: "textarea",
+                  label: "Beskrivelse",
+                  defaultValue:
+                    "Ta kontakt for en uforpliktende prat om hvordan vi kan hjelpe deg.",
+                },
+                {
+                  name: "primaryCta",
+                  type: "group",
+                  label: "Knapp",
+                  fields: [
+                    {
+                      name: "text",
+                      type: "text",
+                      label: "Knappetekst",
+                      defaultValue: "Ta kontakt",
+                    },
+                    {
+                      name: "url",
+                      type: "text",
+                      label: "Lenke",
+                      defaultValue: "/kontakt",
+                    },
+                  ],
+                },
+              ],
+            },
           ],
         },
         {

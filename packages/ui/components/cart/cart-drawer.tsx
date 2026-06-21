@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@poynt/ui";
-import { ShoppingCart, Trash2 } from "lucide-react";
+import { ShieldCheck, ShoppingCart, Trash2 } from "lucide-react";
 import type * as React from "react";
 import { Button } from "../button";
 import {
@@ -29,6 +29,11 @@ export interface CartDrawerProps {
   emptyDescription?: string;
   clearLabel?: string;
   totalLabel?: string;
+  /**
+   * Liten trygghets-linje under checkout-knappen. Send `null` for å skjule den,
+   * eller en egen node for å overstyre standardteksten.
+   */
+  checkoutNote?: React.ReactNode;
   /** Kontrollert åpen-tilstand. Utelat for ukontrollert (bruk `defaultOpen`). */
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -51,6 +56,7 @@ export function CartDrawer({
   emptyDescription = "Utforsk produktene våre og legg noe i kurven",
   clearLabel = "Tøm handlekurv",
   totalLabel = "Totalt",
+  checkoutNote,
   open,
   onOpenChange,
   defaultOpen,
@@ -72,7 +78,14 @@ export function CartDrawer({
         >
           <ShoppingCart className="size-5" />
           {hasItems && (
-            <span className="font-semibold text-sm tabular-nums">{count}</span>
+            <span
+              // `key={count}` remonterer spennet når tallet endres, så «pop»-en
+              // (zoom-in) spilles av hver gang en vare legges til / fjernes.
+              key={count}
+              className="font-semibold text-sm tabular-nums duration-200 animate-in zoom-in-50"
+            >
+              {count}
+            </span>
           )}
         </Button>
       </SheetTrigger>
@@ -129,6 +142,13 @@ export function CartDrawer({
                 </Button>
               )}
             </div>
+
+            {checkoutNote === null ? null : (
+              <p className="flex items-center justify-center gap-2 text-muted-foreground text-xs">
+                <ShieldCheck className="size-3.5 text-primary" />
+                {checkoutNote ?? "Sikker betaling · tilgang umiddelbart"}
+              </p>
+            )}
           </div>
         )}
       </SheetContent>

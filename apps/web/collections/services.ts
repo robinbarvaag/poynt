@@ -127,6 +127,17 @@ export const Services: CollectionConfig = {
       },
     },
     {
+      name: "featured",
+      type: "checkbox",
+      label: "Fremhev (stort kort)",
+      defaultValue: false,
+      admin: {
+        position: "sidebar",
+        description:
+          "Vises som et bredt kort over 2 kolonner på tjenestesiden. Bruk på én tjeneste.",
+      },
+    },
+    {
       name: "active",
       type: "checkbox",
       label: "Aktiv",

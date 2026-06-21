@@ -718,6 +718,53 @@ export interface Product {
    */
   compareAtPrice?: number | null;
   /**
+   * Liten merkelapp som vises på produktkort og produktsiden (t.d. «Forhåndssalg»)
+   */
+  statusBadge?: ('none' | 'new' | 'presale' | 'soldout' | 'custom') | null;
+  statusBadgeLabel?: string | null;
+  /**
+   * Valgfri melding som vises tydeleg på produktsiden (t.d. «NB! Boka kjem i oktober 2026 – dette er forhåndssal»)
+   */
+  notice?: string | null;
+  /**
+   * Korte salgbare punkt (t.d. «Gratis frakt», «Foredrag ved 10+ bøker») som poppast fram rett ved kjøpsknappen
+   */
+  highlights?:
+    | {
+        /**
+         * Valgfri emoji, t.d. 🚚 eller 🎤
+         */
+        icon?: string | null;
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Vis ein antal-veljar på produktsiden. Lat stå av for digitale produkt der ein berre treng éin.
+   */
+  allowQuantity?: boolean | null;
+  /**
+   * T.d. «Signert?». Lat stå tom om produktet ikkje har variantar.
+   */
+  variantLabel?: string | null;
+  /**
+   * Vala kunden kan velje mellom (t.d. Ja / Nei).
+   */
+  variantOptions?:
+    | {
+        label: string;
+        /**
+         * Valfritt – legg til (eller trekk frå, med minus) basisprisen for dette valet. Lat stå tom for same pris.
+         */
+        priceDelta?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Medlemskap kjøpes ikkje direkte – knappen «Søk om medlemskap» lenkjer hit
+   */
+  applyUrl?: string | null;
+  /**
    * Deaktiver for å skjule produktet
    */
   active?: boolean | null;
@@ -808,11 +855,84 @@ export interface PodcastArchiveBlock {
 export interface ServicesArchiveBlock {
   title?: string | null;
   description?: string | null;
+  selectionMode?: ('auto' | 'manual') | null;
+  /**
+   * Velg hvilke tjenester som skal vises, i ønsket rekkefølge
+   */
+  selectedServices?: (number | Service)[] | null;
+  /**
+   * La stå tom for å vise alle
+   */
+  limit?: number | null;
   layout?: ('grid' | 'list') | null;
   showMoreLink?: boolean | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'servicesArchive';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "services".
+ */
+export interface Service {
+  id: number;
+  name: string;
+  /**
+   * Genereres automatisk fra navn
+   */
+  slug: string;
+  /**
+   * Vises i tjenesteoversikten
+   */
+  image?: (number | null) | Media;
+  /**
+   * Vises i oversikten på forsiden
+   */
+  shortDescription: string;
+  /**
+   * Valgfritt - vises på tjenestesiden
+   */
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  priceType: 'fixed' | 'from' | 'monthly' | 'contact';
+  /**
+   * Pris i hele kroner (eks. mva)
+   */
+  price?: number | null;
+  includesVat?: boolean | null;
+  ctaText?: string | null;
+  /**
+   * Valgfritt - overstyr standard lenke til tjenestesiden
+   */
+  ctaLink?: string | null;
+  /**
+   * Lavere tall vises først
+   */
+  sortOrder?: number | null;
+  /**
+   * Vises som et bredt kort over 2 kolonner på tjenestesiden. Bruk på én tjeneste.
+   */
+  featured?: boolean | null;
+  /**
+   * Deaktiver for å skjule tjenesten
+   */
+  active?: boolean | null;
+  categories?: (number | Category)[] | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1232,66 +1352,6 @@ export interface Podcast {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "services".
- */
-export interface Service {
-  id: number;
-  name: string;
-  /**
-   * Genereres automatisk fra navn
-   */
-  slug: string;
-  /**
-   * Vises i tjenesteoversikten
-   */
-  image?: (number | null) | Media;
-  /**
-   * Vises i oversikten på forsiden
-   */
-  shortDescription: string;
-  /**
-   * Valgfritt - vises på tjenestesiden
-   */
-  content?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  priceType: 'fixed' | 'from' | 'monthly' | 'contact';
-  /**
-   * Pris i hele kroner (eks. mva)
-   */
-  price?: number | null;
-  includesVat?: boolean | null;
-  ctaText?: string | null;
-  /**
-   * Valgfritt - overstyr standard lenke til tjenestesiden
-   */
-  ctaLink?: string | null;
-  /**
-   * Lavere tall vises først
-   */
-  sortOrder?: number | null;
-  /**
-   * Deaktiver for å skjule tjenesten
-   */
-  active?: boolean | null;
-  categories?: (number | Category)[] | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "orders".
  */
 export interface Order {
@@ -1300,6 +1360,11 @@ export interface Order {
   customerName?: string | null;
   items: {
     product: number | Product;
+    quantity: number;
+    /**
+     * Valgt variant, t.d. «Signert: Ja» (om aktuelt)
+     */
+    variant?: string | null;
     priceAtPurchase: number;
     id?: string | null;
   }[];
@@ -1846,6 +1911,9 @@ export interface PodcastArchiveBlockSelect<T extends boolean = true> {
 export interface ServicesArchiveBlockSelect<T extends boolean = true> {
   title?: T;
   description?: T;
+  selectionMode?: T;
+  selectedServices?: T;
+  limit?: T;
   layout?: T;
   showMoreLink?: T;
   id?: T;
@@ -1967,6 +2035,7 @@ export interface ServicesSelect<T extends boolean = true> {
   ctaText?: T;
   ctaLink?: T;
   sortOrder?: T;
+  featured?: T;
   active?: T;
   categories?: T;
   updatedAt?: T;
@@ -2061,6 +2130,26 @@ export interface ProductsSelect<T extends boolean = true> {
       };
   price?: T;
   compareAtPrice?: T;
+  statusBadge?: T;
+  statusBadgeLabel?: T;
+  notice?: T;
+  highlights?:
+    | T
+    | {
+        icon?: T;
+        text?: T;
+        id?: T;
+      };
+  allowQuantity?: T;
+  variantLabel?: T;
+  variantOptions?:
+    | T
+    | {
+        label?: T;
+        priceDelta?: T;
+        id?: T;
+      };
+  applyUrl?: T;
   active?: T;
   benefits?: T;
   categories?: T;
@@ -2090,6 +2179,8 @@ export interface OrdersSelect<T extends boolean = true> {
     | T
     | {
         product?: T;
+        quantity?: T;
+        variant?: T;
         priceAtPurchase?: T;
         id?: T;
       };
@@ -2534,6 +2625,18 @@ export interface Servicespage {
    * Tekst som vises når det ikke finnes noen aktive tjenester
    */
   emptyStateText?: string | null;
+  /**
+   * Felles oppfordring som vises nederst på hver enkelt tjenesteside
+   */
+  detailCta?: {
+    variant?: ('simple' | 'colored') | null;
+    title?: string | null;
+    description?: string | null;
+    primaryCta?: {
+      text?: string | null;
+      url?: string | null;
+    };
+  };
   meta?: {
     /**
      * Vises i nettleser-fanen og i søkeresultater
@@ -2835,6 +2938,19 @@ export interface ServicespageSelect<T extends boolean = true> {
         image?: T;
       };
   emptyStateText?: T;
+  detailCta?:
+    | T
+    | {
+        variant?: T;
+        title?: T;
+        description?: T;
+        primaryCta?:
+          | T
+          | {
+              text?: T;
+              url?: T;
+            };
+      };
   meta?:
     | T
     | {

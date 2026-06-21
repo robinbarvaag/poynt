@@ -5,6 +5,7 @@ import {
   type PodcastExplorerEpisode,
 } from "@/components/podcast-explorer";
 import { fetchPodcastEpisodes } from "@/lib/podcast-rss";
+import { buildMetadata } from "@/lib/seo";
 import config from "@/payload.config";
 import { Container } from "@poynt/ui";
 import type { Metadata } from "next";
@@ -14,33 +15,15 @@ export async function generateMetadata(): Promise<Metadata> {
   const payload = await getPayload({ config });
   const pageConfig = await payload.findGlobal({ slug: "podcastpage" });
 
-  const baseUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
-
-  return {
-    title: pageConfig?.meta?.title || "Podkast | Poynt",
+  const meta = pageConfig?.meta;
+  return buildMetadata({
+    title: meta?.title || "Podkast | Poynt",
     description:
-      pageConfig?.meta?.description ||
-      "Lytt til alle episoder av Poynt-podkasten",
-    alternates: {
-      canonical: `${baseUrl}/podkast`,
-    },
-    openGraph: {
-      title: pageConfig?.meta?.title || "Podkast | Poynt",
-      description:
-        pageConfig?.meta?.description ||
-        "Lytt til alle episoder av Poynt-podkasten",
-      url: `${baseUrl}/podkast`,
-      type: "website",
-      ...(pageConfig?.meta?.image &&
-        typeof pageConfig.meta.image === "object" &&
-        pageConfig.meta.image.url && {
-          images: [{ url: pageConfig.meta.image.url }],
-        }),
-    },
-    ...(pageConfig?.meta?.noIndex && {
-      robots: { index: false, follow: false },
-    }),
-  };
+      meta?.description || "Lytt til alle episoder av Poynt-podkasten",
+    path: "/podkast",
+    image: meta?.image,
+    noIndex: meta?.noIndex ?? undefined,
+  });
 }
 
 export default async function PodcastPage() {

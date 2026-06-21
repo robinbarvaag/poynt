@@ -1,10 +1,12 @@
+import { PayloadImage } from "@/components/payload-image";
+import { formatLongDate } from "@/lib/format";
+import { resolveMedia } from "@/lib/payload";
+import { buildMetadata, notFoundMetadata } from "@/lib/seo";
+import { SECTION_TITLES, detailBreadcrumbs } from "@/lib/ui-text";
 import config from "@/payload.config";
 import { RichText } from "@payloadcms/richtext-lexical/react";
-import { Container, Heading, Text } from "@poynt/ui";
-import { ArrowLeft } from "lucide-react";
+import { Breadcrumbs, Container, Heading, Text } from "@poynt/ui";
 import type { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPayload } from "payload";
 
@@ -38,31 +40,18 @@ export async function generateMetadata({
     limit: 1,
   });
 
-  if (podcasts.docs.length === 0) {
-    return { title: "Episode ikke funnet" };
+  const podcast = podcasts.docs[0];
+  if (!podcast) {
+    return notFoundMetadata("Episode ikke funnet");
   }
 
-  const podcast = podcasts.docs[0];
-  const baseUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
-
-  return {
+  return buildMetadata({
     title: `${podcast.title} | Podkast | Poynt`,
-    description: podcast.description || "",
-    alternates: {
-      canonical: `${baseUrl}/podkast/${slug}`,
-    },
-    openGraph: {
-      title: podcast.title,
-      description: podcast.description || "",
-      url: `${baseUrl}/podkast/${slug}`,
-      type: "article",
-      ...(podcast.coverImage &&
-        typeof podcast.coverImage === "object" &&
-        podcast.coverImage.url && {
-          images: [{ url: podcast.coverImage.url }],
-        }),
-    },
-  };
+    description: podcast.description ?? undefined,
+    path: `/podkast/${slug}`,
+    image: podcast.coverImage,
+    type: "article",
+  });
 }
 
 export default async function PodcastDetailPage({ params }: PodcastPageProps) {
@@ -84,26 +73,15 @@ export default async function PodcastDetailPage({ params }: PodcastPageProps) {
 
   const podcast = podcasts.docs[0];
   const embedUrl = getSpotifyEmbedUrl(podcast.spotifyUrl);
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("nb-NO", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
-  };
+  const coverImage = resolveMedia(podcast.coverImage);
 
   return (
     <Container size="sm" padding="default">
       <article>
-        {/* Back link */}
-        <Link
-          href="/podkast"
-          className="mb-8 inline-flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <ArrowLeft className="size-4" />
-          <span>Alle episoder</span>
-        </Link>
+        <Breadcrumbs
+          items={detailBreadcrumbs("podkast", podcast.title)}
+          className="mb-8"
+        />
 
         {/* Header */}
         <header className="mb-8">
@@ -118,7 +96,7 @@ export default async function PodcastDetailPage({ params }: PodcastPageProps) {
             {podcast.episodeNumber && podcast.duration && <span>·</span>}
             {podcast.duration && <span>{podcast.duration}</span>}
             <span>·</span>
-            <span>{formatDate(podcast.publishedAt)}</span>
+            <span>{formatLongDate(podcast.publishedAt)}</span>
           </Text>
 
           <Heading variant="h1" color="foreground" weight="bold">
@@ -131,19 +109,17 @@ export default async function PodcastDetailPage({ params }: PodcastPageProps) {
         </header>
 
         {/* Cover Image */}
-        {podcast.coverImage &&
-          typeof podcast.coverImage === "object" &&
-          podcast.coverImage.url && (
-            <div className="relative mx-auto mb-8 aspect-square max-w-md overflow-hidden rounded-3xl bg-muted">
-              <Image
-                src={podcast.coverImage.url}
-                alt={podcast.coverImage.alt || podcast.title}
-                fill
-                className="object-cover"
-                priority
-              />
-            </div>
-          )}
+        {coverImage?.url && (
+          <div className="relative mx-auto mb-8 aspect-square max-w-md overflow-hidden rounded-3xl bg-muted">
+            <PayloadImage
+              media={coverImage}
+              alt={coverImage.alt || podcast.title}
+              fill
+              className="object-cover"
+              priority
+            />
+          </div>
+        )}
 
         {/* Spotify Embed */}
         {embedUrl && (
@@ -170,7 +146,7 @@ export default async function PodcastDetailPage({ params }: PodcastPageProps) {
               weight="semibold"
               customStyles="mb-2 text-base"
             >
-              Gjester i denne episoden
+              {SECTION_TITLES.podcastGuests}
             </Heading>
             <ul className="space-y-1">
               {podcast.guests.map((guest) => (
