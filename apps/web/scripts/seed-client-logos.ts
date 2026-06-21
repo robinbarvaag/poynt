@@ -102,7 +102,7 @@ async function ensureLogo(
       console.log(`   ⚠️  ${res.status} for ${logo.wixId}`);
       return undefined;
     }
-    let buffer = Buffer.from(await res.arrayBuffer());
+    let buffer: Buffer = Buffer.from(await res.arrayBuffer());
 
     // Hvite logoer → inverter RGB (behold alpha) så de blir mørke på lys flate.
     buffer = logo.invert
