@@ -11,6 +11,7 @@ import {
   Input,
   Label,
 } from "@poynt/ui";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -81,7 +82,9 @@ export default function PlannerLoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Logg inn</CardTitle>
-          <CardDescription>Velkommen tilbake til On Poynt</CardDescription>
+          <CardDescription>
+            Innlogging er for godkjente medlemmer. Bruk e-posten du søkte med.
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {error && (
@@ -132,6 +135,16 @@ export default function PlannerLoginPage() {
               {isLoading ? "Sender..." : "Send innloggingslenke"}
             </Button>
           </form>
+
+          <p className="border-t pt-4 text-center text-sm text-muted-foreground">
+            Ikke medlem enda?{" "}
+            <Link
+              href="/bli-medlem"
+              className="font-medium text-primary hover:underline"
+            >
+              Søk om medlemskap
+            </Link>
+          </p>
         </CardContent>
       </Card>
     </div>

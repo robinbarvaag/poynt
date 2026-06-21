@@ -21,17 +21,21 @@ export default async function PlannerAppLayout({
     redirect("/on-poynt/innlogging");
   }
 
-  // Check if user has active access (handles canceled-but-within-period and past_due grace period)
-  if (hasActiveAccess(session.membership)) {
-    const users = await db
-      .select({ onboardingCompleted: plannerUser.onboardingCompleted })
-      .from(plannerUser)
-      .where(eq(plannerUser.id, session.user.id))
-      .limit(1);
+  // Tilgangs-gate: innlogging lager/autentiserer kontoen, men sjølve tilgangen
+  // krever eit aktivt medlemskap (handterer òg canceled-innanfor-periode og
+  // past_due-grace). Utan tilgang sendast brukaren til ei forklaringsside.
+  if (!hasActiveAccess(session.membership)) {
+    redirect("/on-poynt/ingen-tilgang");
+  }
 
-    if (users[0] && !users[0].onboardingCompleted) {
-      redirect("/on-poynt/onboarding");
-    }
+  const users = await db
+    .select({ onboardingCompleted: plannerUser.onboardingCompleted })
+    .from(plannerUser)
+    .where(eq(plannerUser.id, session.user.id))
+    .limit(1);
+
+  if (users[0] && !users[0].onboardingCompleted) {
+    redirect("/on-poynt/onboarding");
   }
 
   return (
