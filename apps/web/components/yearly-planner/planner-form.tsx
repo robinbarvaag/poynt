@@ -13,8 +13,6 @@ import {
   yearlyPlannerRequestSchema,
 } from "@poynt/planner-validators";
 import { Button } from "@poynt/ui";
-import { Progress } from "@poynt/ui";
-import { Card, CardContent } from "@poynt/ui";
 import { Textarea } from "@poynt/ui";
 import { Checkbox } from "@poynt/ui";
 import {
@@ -32,37 +30,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@poynt/ui";
+import { OptionCard, StepContainer } from "@poynt/ui";
 import { useForm, zodResolver } from "@poynt/ui/form";
-import {
-  ArrowLeft,
-  ArrowRight,
-  Award,
-  Briefcase,
-  Building2,
-  CalendarClock,
-  CalendarDays,
-  Clock,
-  Facebook,
-  Flame,
-  GraduationCap,
-  Handshake,
-  Headphones,
-  Heart,
-  Instagram,
-  Linkedin,
-  type LucideIcon,
-  Mail,
-  Music,
-  PenTool,
-  Rocket,
-  Share2,
-  Sparkles,
-  Timer,
-  UserCircle,
-  Users,
-  Youtube,
-  Zap,
-} from "@poynt/ui/icons";
+import { Icon, type IconName } from "@poynt/ui/icons";
 import { cn } from "@poynt/ui/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
@@ -86,7 +56,13 @@ interface PlannerFormProps {
 
 const TOTAL_STEPS = 5;
 
-const stepIcons: LucideIcon[] = [Building2, Share2, Clock, Users, CalendarDays];
+const stepIcons: IconName[] = [
+  "building-2",
+  "share",
+  "clock",
+  "users",
+  "calendar-days",
+];
 
 const stepTitles = [
   "Hvilken bransje?",
@@ -128,9 +104,7 @@ export function PlannerForm({
     mode: "onChange",
   });
 
-  const progressValue = ((currentStep + 1) / TOTAL_STEPS) * 100;
-
-  const StepIcon = stepIcons[currentStep] ?? Building2;
+  const stepIconName = stepIcons[currentStep] ?? "building-2";
 
   const canProceed = () => {
     switch (currentStep) {
@@ -178,92 +152,36 @@ export function PlannerForm({
     }),
   };
 
-  const renderOptionCard = (
-    value: string,
-    label: string,
-    isSelected: boolean,
-    onClick: () => void,
-    Icon?: LucideIcon
-  ) => (
-    <Card
-      key={value}
-      className={cn(
-        "cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-md",
-        isSelected
-          ? "ring-2 ring-primary bg-primary/5 border-primary"
-          : "hover:border-primary/50"
-      )}
-      onClick={(e) => {
-        e.preventDefault();
-        onClick();
-      }}
-    >
-      <CardContent className="flex items-center gap-3 p-4">
-        {Icon && (
-          <div
-            className={cn(
-              "size-10 rounded-lg flex items-center justify-center",
-              isSelected
-                ? "bg-primary/10 text-primary"
-                : "bg-muted text-muted-foreground"
-            )}
-          >
-            <Icon className="size-5" />
-          </div>
-        )}
-        <div
-          className={cn(
-            "size-5 rounded-full border-2 flex items-center justify-center transition-colors",
-            isSelected
-              ? "border-primary bg-primary"
-              : "border-muted-foreground/30"
-          )}
-        >
-          {isSelected && (
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              className="size-2 rounded-full bg-white"
-            />
-          )}
-        </div>
-        <span className={cn("font-medium", isSelected && "text-primary")}>
-          {label}
-        </span>
-      </CardContent>
-    </Card>
-  );
-
-  const channelIcons: Record<string, LucideIcon> = {
-    linkedin: Linkedin,
-    instagram: Instagram,
-    facebook: Facebook,
-    tiktok: Music,
-    youtube: Youtube,
-    newsletter: Mail,
-    blog: PenTool,
-    podcast: Headphones,
+  const channelIcons: Record<string, IconName> = {
+    linkedin: "linkedin",
+    instagram: "instagram",
+    facebook: "facebook",
+    tiktok: "music",
+    youtube: "youtube",
+    newsletter: "mail",
+    blog: "pen-tool",
+    podcast: "headphones",
   };
 
-  const frequencyIcons: Record<string, LucideIcon> = {
-    daily: Rocket,
-    "few-weekly": Flame,
-    weekly: Zap,
-    biweekly: Timer,
-    monthly: CalendarClock,
+  const frequencyIcons: Record<string, IconName> = {
+    daily: "rocket",
+    "few-weekly": "flame",
+    weekly: "zap",
+    biweekly: "timer",
+    monthly: "calendar-clock",
   };
 
-  const audienceIcons: Record<string, LucideIcon> = {
-    b2b: Briefcase,
-    b2c: UserCircle,
-    both: Handshake,
+  const audienceIcons: Record<string, IconName> = {
+    b2b: "briefcase",
+    b2c: "user-circle",
+    both: "handshake",
   };
 
-  const toneIcons: Record<string, LucideIcon> = {
-    professional: Award,
-    casual: Heart,
-    inspiring: Sparkles,
-    educational: GraduationCap,
+  const toneIcons: Record<string, IconName> = {
+    professional: "award",
+    casual: "heart",
+    inspiring: "sparkles",
+    educational: "graduation-cap",
   };
 
   const renderStep = () => {
@@ -305,7 +223,7 @@ export function PlannerForm({
                 <FormControl>
                   <div className="grid gap-3 sm:grid-cols-2">
                     {publishChannelTypes.map((type) => {
-                      const Icon = channelIcons[type];
+                      const iconName = channelIcons[type];
                       const isChecked = field.value?.includes(type);
                       return (
                         <label
@@ -332,8 +250,9 @@ export function PlannerForm({
                               }
                             }}
                           />
-                          {Icon && (
+                          {iconName && (
                             <Icon
+                              name={iconName}
                               className={cn(
                                 "size-5",
                                 isChecked
@@ -370,15 +289,16 @@ export function PlannerForm({
               <FormItem>
                 <FormControl>
                   <div className="grid gap-3">
-                    {frequencyTypes.map((type) =>
-                      renderOptionCard(
-                        type,
-                        frequencyLabels[type],
-                        field.value === type,
-                        () => field.onChange(type),
-                        frequencyIcons[type]
-                      )
-                    )}
+                    {frequencyTypes.map((type) => (
+                      <OptionCard
+                        key={type}
+                        value={type}
+                        label={frequencyLabels[type]}
+                        icon={frequencyIcons[type]}
+                        isSelected={field.value === type}
+                        onClick={() => field.onChange(type)}
+                      />
+                    ))}
                   </div>
                 </FormControl>
                 <FormMessage />
@@ -396,15 +316,16 @@ export function PlannerForm({
               <FormItem>
                 <FormControl>
                   <div className="grid gap-3">
-                    {audienceTypes.map((type) =>
-                      renderOptionCard(
-                        type,
-                        audienceLabels[type],
-                        field.value === type,
-                        () => field.onChange(type),
-                        audienceIcons[type]
-                      )
-                    )}
+                    {audienceTypes.map((type) => (
+                      <OptionCard
+                        key={type}
+                        value={type}
+                        label={audienceLabels[type]}
+                        icon={audienceIcons[type]}
+                        isSelected={field.value === type}
+                        onClick={() => field.onChange(type)}
+                      />
+                    ))}
                   </div>
                 </FormControl>
                 <FormMessage />
@@ -427,7 +348,7 @@ export function PlannerForm({
                   <FormControl>
                     <div className="grid gap-2 sm:grid-cols-2">
                       {contentToneTypes.map((type) => {
-                        const Icon = toneIcons[type];
+                        const iconName = toneIcons[type];
                         const isSelected = field.value === type;
                         return (
                           <button
@@ -442,8 +363,9 @@ export function PlannerForm({
                             )}
                             onClick={() => field.onChange(type)}
                           >
-                            {Icon && (
+                            {iconName && (
                               <Icon
+                                name={iconName}
                                 className={cn(
                                   "size-4",
                                   isSelected
@@ -524,34 +446,13 @@ export function PlannerForm({
   return (
     <Form {...form}>
       <form onSubmit={(e) => e.preventDefault()} className="space-y-8">
-        {/* Progress Section */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">
-              Steg {currentStep + 1} av {TOTAL_STEPS}
-            </span>
-            <span className="font-medium text-primary">
-              {Math.round(progressValue)}% fullført
-            </span>
-          </div>
-          <Progress value={progressValue} className="h-2" />
-        </div>
-
-        {/* Step Header */}
-        <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center size-12 rounded-full bg-primary/10 text-primary mb-2">
-            <StepIcon className="size-6" />
-          </div>
-          <h2 className="text-2xl font-semibold tracking-tight">
-            {stepTitles[currentStep]}
-          </h2>
-          <p className="text-muted-foreground text-balance">
-            {stepDescriptions[currentStep]}
-          </p>
-        </div>
-
-        {/* Step Content */}
-        <div className="min-h-80">
+        <StepContainer
+          currentStep={currentStep}
+          totalSteps={TOTAL_STEPS}
+          stepIcon={stepIconName}
+          stepTitle={stepTitles[currentStep] ?? ""}
+          stepDescription={stepDescriptions[currentStep] ?? ""}
+        >
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
               key={currentStep}
@@ -568,7 +469,7 @@ export function PlannerForm({
               {renderStep()}
             </motion.div>
           </AnimatePresence>
-        </div>
+        </StepContainer>
 
         {/* Navigation */}
         <div className="flex items-center justify-between pt-4">
@@ -579,7 +480,7 @@ export function PlannerForm({
             disabled={currentStep === 0}
             className={cn(currentStep === 0 && "invisible")}
           >
-            <ArrowLeft className="size-4 mr-2" />
+            <Icon name="arrow-left" className="size-4 mr-2" />
             Tilbake
           </Button>
 
@@ -591,14 +492,14 @@ export function PlannerForm({
               className="min-w-35"
             >
               Neste
-              <ArrowRight className="size-4 ml-2" />
+              <Icon name="arrow-right" className="size-4 ml-2" />
             </Button>
           ) : (
             <Button
               type="button"
               onClick={handleGenerate}
               disabled={isLoading}
-              className="min-w-45 bg-linear-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+              className="min-w-45"
             >
               {isLoading ? (
                 <>
@@ -610,15 +511,12 @@ export function PlannerForm({
                       ease: "linear",
                     }}
                   >
-                    <Sparkles className="size-4 mr-2" />
+                    <Icon name="loader" className="size-4 mr-2" />
                   </motion.div>
                   Genererer årsplan...
                 </>
               ) : (
-                <>
-                  <Sparkles className="size-4 mr-2" />
-                  Lag årshjul
-                </>
+                "Lag årshjul"
               )}
             </Button>
           )}

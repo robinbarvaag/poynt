@@ -27,12 +27,12 @@ export function PrefilledBadge({
           <div
             className={cn(
               "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full",
-              "bg-blue-500/10 text-blue-600 dark:text-blue-400",
+              "bg-muted text-muted-foreground",
               "text-xs font-medium cursor-help",
               className
             )}
           >
-            <Icon name="sparkles" className="size-3" />
+            <Icon name="check" className="size-3" />
             <span>Forhåndsutfylt</span>
           </div>
         </TooltipTrigger>

@@ -17,6 +17,10 @@ export {
   channelGuideRequestSchema,
   channelGuideResponseSchema,
   channelRecommendationSchema,
+  channelGuideStreamSchema,
+  channelMatchLevels,
+  channelMatchLevelLabels,
+  resolveChannelMatchLevel,
   targetAudienceTypes,
   targetAudienceLabels,
   mainGoalTypes,
@@ -30,6 +34,8 @@ export {
   type ChannelGuideRequest,
   type ChannelGuideResponse,
   type ChannelRecommendation,
+  type ChannelGuideStream,
+  type ChannelMatchLevel,
 } from "./channel-guide";
 
 // Marketing plan

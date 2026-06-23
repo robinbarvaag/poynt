@@ -4,10 +4,16 @@ import { trpc } from "@/lib/planner/trpc";
 import {
   type ProfileAudienceType,
   type ProfileCompanySize,
+  mainGoalLabels,
+  mainGoalTypes,
   profileAudienceTypeLabels,
   profileAudienceTypes,
   profileCompanySizeLabels,
   profileCompanySizes,
+  strengthLabels,
+  strengthTypes,
+  weeklyTimeLabels,
+  weeklyTimeTypes,
 } from "@poynt/planner-validators";
 import {
   Form,
@@ -41,6 +47,9 @@ const profileFormSchema = z.object({
   audienceType: z.enum(profileAudienceTypes).nullable(),
   companySize: z.enum(profileCompanySizes).nullable(),
   goals: z.string().nullable(),
+  mainGoal: z.enum(mainGoalTypes).nullable(),
+  weeklyTime: z.enum(weeklyTimeTypes).nullable(),
+  strengths: z.enum(strengthTypes).nullable(),
   customContext: z.string().nullable(),
 });
 
@@ -54,9 +63,14 @@ interface Industry {
 
 interface WorkspaceProfileFormProps {
   disabled?: boolean;
+  /** Hvilken bedrift profilen gjelder. Utelatt = aktiv bedrift. */
+  workspaceId?: string;
 }
 
-export function WorkspaceProfileForm({ disabled }: WorkspaceProfileFormProps) {
+export function WorkspaceProfileForm({
+  disabled,
+  workspaceId,
+}: WorkspaceProfileFormProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">(
     "idle"
@@ -73,6 +87,9 @@ export function WorkspaceProfileForm({ disabled }: WorkspaceProfileFormProps) {
       audienceType: null,
       companySize: null,
       goals: null,
+      mainGoal: null,
+      weeklyTime: null,
+      strengths: null,
       customContext: null,
     },
   });
@@ -81,7 +98,9 @@ export function WorkspaceProfileForm({ disabled }: WorkspaceProfileFormProps) {
     async function loadData() {
       try {
         const [profile, industriesList] = await Promise.all([
-          trpc.workspaceProfile.get.query(),
+          trpc.workspaceProfile.get.query(
+            workspaceId ? { workspaceId } : undefined
+          ),
           trpc.industry.list.query(),
         ]);
 
@@ -95,6 +114,9 @@ export function WorkspaceProfileForm({ disabled }: WorkspaceProfileFormProps) {
             audienceType: profile.audienceType as ProfileAudienceType | null,
             companySize: profile.companySize as ProfileCompanySize | null,
             goals: profile.goals ? profile.goals.join(", ") : null,
+            mainGoal: profile.mainGoal as ProfileFormValues["mainGoal"],
+            weeklyTime: profile.weeklyTime as ProfileFormValues["weeklyTime"],
+            strengths: profile.strengths as ProfileFormValues["strengths"],
             customContext: profile.customContext,
           });
         }
@@ -106,39 +128,46 @@ export function WorkspaceProfileForm({ disabled }: WorkspaceProfileFormProps) {
       }
     }
     loadData();
-  }, [form]);
+  }, [form, workspaceId]);
 
-  const saveProfile = useCallback(async (values: ProfileFormValues) => {
-    setSaveStatus("saving");
+  const saveProfile = useCallback(
+    async (values: ProfileFormValues) => {
+      setSaveStatus("saving");
 
-    try {
-      const goalsArray = values.goals
-        ? values.goals
-            .split(",")
-            .map((g) => g.trim())
-            .filter(Boolean)
-        : null;
+      try {
+        const goalsArray = values.goals
+          ? values.goals
+              .split(",")
+              .map((g) => g.trim())
+              .filter(Boolean)
+          : null;
 
-      await trpc.workspaceProfile.upsert.mutate({
-        industryId: values.industryId,
-        targetAudience: values.targetAudience,
-        audienceType: values.audienceType,
-        companySize: values.companySize,
-        goals: goalsArray,
-        customContext: values.customContext,
-      });
+        await trpc.workspaceProfile.upsert.mutate({
+          ...(workspaceId ? { workspaceId } : {}),
+          industryId: values.industryId,
+          targetAudience: values.targetAudience,
+          audienceType: values.audienceType,
+          companySize: values.companySize,
+          goals: goalsArray,
+          mainGoal: values.mainGoal,
+          weeklyTime: values.weeklyTime,
+          strengths: values.strengths,
+          customContext: values.customContext,
+        });
 
-      setSaveStatus("saved");
-      if (savedTimeoutRef.current) clearTimeout(savedTimeoutRef.current);
-      savedTimeoutRef.current = setTimeout(() => {
+        setSaveStatus("saved");
+        if (savedTimeoutRef.current) clearTimeout(savedTimeoutRef.current);
+        savedTimeoutRef.current = setTimeout(() => {
+          setSaveStatus("idle");
+        }, 2000);
+      } catch (error) {
+        console.error("Failed to save profile:", error);
         setSaveStatus("idle");
-      }, 2000);
-    } catch (error) {
-      console.error("Failed to save profile:", error);
-      setSaveStatus("idle");
-      toast.error("Kunne ikke lagre profil");
-    }
-  }, []);
+        toast.error("Kunne ikke lagre profil");
+      }
+    },
+    [workspaceId]
+  );
 
   useEffect(() => {
     const subscription = form.watch((values) => {
@@ -276,6 +305,114 @@ export function WorkspaceProfileForm({ disabled }: WorkspaceProfileFormProps) {
               </Select>
               <FormDescription>
                 Selger du til bedrifter eller forbrukere?
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="mainGoal"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Hovedmål</FormLabel>
+              <Select
+                disabled={disabled}
+                value={field.value ?? ""}
+                onValueChange={(value) =>
+                  field.onChange(
+                    (value as ProfileFormValues["mainGoal"]) || null
+                  )
+                }
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Hva er viktigst akkurat nå?" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {mainGoalTypes.map((goal) => (
+                    <SelectItem key={goal} value={goal}>
+                      {mainGoalLabels[goal]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormDescription>
+                Verktøyene bruker dette som standardmål
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="weeklyTime"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tid til markedsføring per uke</FormLabel>
+              <Select
+                disabled={disabled}
+                value={field.value ?? ""}
+                onValueChange={(value) =>
+                  field.onChange(
+                    (value as ProfileFormValues["weeklyTime"]) || null
+                  )
+                }
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Hvor mye tid har du?" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {weeklyTimeTypes.map((time) => (
+                    <SelectItem key={time} value={time}>
+                      {weeklyTimeLabels[time]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormDescription>
+                Vi anbefaler kanaler som passer kapasiteten din
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="strengths"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Din styrke</FormLabel>
+              <Select
+                disabled={disabled}
+                value={field.value ?? ""}
+                onValueChange={(value) =>
+                  field.onChange(
+                    (value as ProfileFormValues["strengths"]) || null
+                  )
+                }
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Hva er du best på?" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {strengthTypes.map((strength) => (
+                    <SelectItem key={strength} value={strength}>
+                      {strengthLabels[strength]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormDescription>
+                Spill på styrkene dine – tekst, video, visuelt eller en miks
               </FormDescription>
               <FormMessage />
             </FormItem>

@@ -1,3 +1,4 @@
+import { AppHeader } from "@/components/planner/app-header";
 import { AppSidebar } from "@/components/planner/app-sidebar";
 import { getSessionWithMembership } from "@/lib/membership";
 import { hasActiveAccess } from "@/lib/membership/has-active-access";
@@ -42,6 +43,7 @@ export default async function PlannerAppLayout({
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
+        <AppHeader />
         <main className="flex-1 p-4 md:p-6">{children}</main>
       </SidebarInset>
       <Toaster />

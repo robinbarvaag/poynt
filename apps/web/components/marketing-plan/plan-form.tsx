@@ -15,8 +15,6 @@ import {
   timeframeTypes,
 } from "@poynt/planner-validators";
 import { Button } from "@poynt/ui";
-import { Progress } from "@poynt/ui";
-import { Card, CardContent } from "@poynt/ui";
 import { Textarea } from "@poynt/ui";
 import { Input } from "@poynt/ui";
 import { Checkbox } from "@poynt/ui";
@@ -29,6 +27,7 @@ import {
   FormMessage,
 } from "@poynt/ui";
 import { cn } from "@poynt/ui";
+import { OptionCard, StepContainer } from "@poynt/ui";
 import { useForm, zodResolver } from "@poynt/ui/form";
 import { Icon, type IconName } from "@poynt/ui/icons";
 import { AnimatePresence, motion } from "framer-motion";
@@ -95,8 +94,6 @@ export function PlanForm({
     mode: "onChange",
   });
 
-  const progressValue = ((currentStep + 1) / TOTAL_STEPS) * 100;
-
   const stepIconName = stepIcons[currentStep] ?? "building-2";
 
   const canProceed = () => {
@@ -147,62 +144,6 @@ export function PlanForm({
       opacity: 0,
     }),
   };
-
-  const renderOptionCard = (
-    value: string,
-    label: string,
-    isSelected: boolean,
-    onClick: () => void,
-    iconName?: IconName
-  ) => (
-    <Card
-      key={value}
-      className={cn(
-        "cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-md",
-        isSelected
-          ? "ring-2 ring-primary bg-primary/5 border-primary"
-          : "hover:border-primary/50"
-      )}
-      onClick={(e) => {
-        e.preventDefault();
-        onClick();
-      }}
-    >
-      <CardContent className="flex items-center gap-3 p-4">
-        {iconName && (
-          <div
-            className={cn(
-              "size-10 rounded-lg flex items-center justify-center",
-              isSelected
-                ? "bg-primary/10 text-primary"
-                : "bg-muted text-muted-foreground"
-            )}
-          >
-            <Icon name={iconName} className="size-5" />
-          </div>
-        )}
-        <div
-          className={cn(
-            "size-5 rounded-full border-2 flex items-center justify-center transition-colors",
-            isSelected
-              ? "border-primary bg-primary"
-              : "border-muted-foreground/30"
-          )}
-        >
-          {isSelected && (
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              className="size-2 rounded-full bg-white"
-            />
-          )}
-        </div>
-        <span className={cn("font-medium", isSelected && "text-primary")}>
-          {label}
-        </span>
-      </CardContent>
-    </Card>
-  );
 
   const companySizeIcons: Record<string, IconName> = {
     solo: "user",
@@ -280,15 +221,16 @@ export function PlanForm({
                   </FormLabel>
                   <FormControl>
                     <div className="grid gap-3 sm:grid-cols-2">
-                      {companySizeTypes.map((type) =>
-                        renderOptionCard(
-                          type,
-                          companySizeLabels[type],
-                          field.value === type,
-                          () => field.onChange(type),
-                          companySizeIcons[type]
-                        )
-                      )}
+                      {companySizeTypes.map((type) => (
+                        <OptionCard
+                          key={type}
+                          value={type}
+                          label={companySizeLabels[type]}
+                          icon={companySizeIcons[type]}
+                          isSelected={field.value === type}
+                          onClick={() => field.onChange(type)}
+                        />
+                      ))}
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -307,15 +249,16 @@ export function PlanForm({
               <FormItem>
                 <FormControl>
                   <div className="grid gap-3">
-                    {marketingGoalTypes.map((type) =>
-                      renderOptionCard(
-                        type,
-                        marketingGoalLabels[type],
-                        field.value === type,
-                        () => field.onChange(type),
-                        mainGoalIcons[type]
-                      )
-                    )}
+                    {marketingGoalTypes.map((type) => (
+                      <OptionCard
+                        key={type}
+                        value={type}
+                        label={marketingGoalLabels[type]}
+                        icon={mainGoalIcons[type]}
+                        isSelected={field.value === type}
+                        onClick={() => field.onChange(type)}
+                      />
+                    ))}
                   </div>
                 </FormControl>
                 <FormMessage />
@@ -333,15 +276,16 @@ export function PlanForm({
               <FormItem>
                 <FormControl>
                   <div className="grid gap-3">
-                    {timeframeTypes.map((type) =>
-                      renderOptionCard(
-                        type,
-                        timeframeLabels[type],
-                        field.value === type,
-                        () => field.onChange(type),
-                        timeframeIcons[type]
-                      )
-                    )}
+                    {timeframeTypes.map((type) => (
+                      <OptionCard
+                        key={type}
+                        value={type}
+                        label={timeframeLabels[type]}
+                        icon={timeframeIcons[type]}
+                        isSelected={field.value === type}
+                        onClick={() => field.onChange(type)}
+                      />
+                    ))}
                   </div>
                 </FormControl>
                 <FormMessage />
@@ -359,15 +303,16 @@ export function PlanForm({
               <FormItem>
                 <FormControl>
                   <div className="grid gap-3 sm:grid-cols-2">
-                    {budgetTypes.map((type) =>
-                      renderOptionCard(
-                        type,
-                        budgetLabels[type],
-                        field.value === type,
-                        () => field.onChange(type),
-                        budgetIcons[type]
-                      )
-                    )}
+                    {budgetTypes.map((type) => (
+                      <OptionCard
+                        key={type}
+                        value={type}
+                        label={budgetLabels[type]}
+                        icon={budgetIcons[type]}
+                        isSelected={field.value === type}
+                        onClick={() => field.onChange(type)}
+                      />
+                    ))}
                   </div>
                 </FormControl>
                 <FormMessage />
@@ -499,31 +444,13 @@ export function PlanForm({
   return (
     <Form {...form}>
       <form onSubmit={(e) => e.preventDefault()} className="space-y-8">
-        <div className="space-y-3">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">
-              Steg {currentStep + 1} av {TOTAL_STEPS}
-            </span>
-            <span className="font-medium text-primary">
-              {Math.round(progressValue)}% fullført
-            </span>
-          </div>
-          <Progress value={progressValue} className="h-2" />
-        </div>
-
-        <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center size-12 rounded-full bg-primary/10 text-primary mb-2">
-            <Icon name={stepIconName} className="size-6" />
-          </div>
-          <h2 className="text-2xl font-semibold tracking-tight">
-            {stepTitles[currentStep]}
-          </h2>
-          <p className="text-muted-foreground text-balance">
-            {stepDescriptions[currentStep]}
-          </p>
-        </div>
-
-        <div className="min-h-80">
+        <StepContainer
+          currentStep={currentStep}
+          totalSteps={TOTAL_STEPS}
+          stepIcon={stepIconName}
+          stepTitle={stepTitles[currentStep] ?? ""}
+          stepDescription={stepDescriptions[currentStep] ?? ""}
+        >
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
               key={currentStep}
@@ -540,7 +467,7 @@ export function PlanForm({
               {renderStep()}
             </motion.div>
           </AnimatePresence>
-        </div>
+        </StepContainer>
 
         <div className="flex items-center justify-between pt-4">
           <Button
@@ -569,7 +496,7 @@ export function PlanForm({
               type="button"
               onClick={handleGenerate}
               disabled={isLoading}
-              className="min-w-45 bg-linear-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+              className="min-w-45"
             >
               {isLoading ? (
                 <>
@@ -586,10 +513,7 @@ export function PlanForm({
                   Lager plan...
                 </>
               ) : (
-                <>
-                  <Icon name="sparkles" className="size-4 mr-2" />
-                  Lag markedsplan
-                </>
+                "Lag markedsplan"
               )}
             </Button>
           )}

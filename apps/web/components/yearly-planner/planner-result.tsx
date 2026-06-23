@@ -1,19 +1,10 @@
 "use client";
 
 import type { MonthContent, YearlyPlan } from "@poynt/planner-validators";
-import { Card, CardContent, CardHeader, CardTitle } from "@poynt/ui";
+import { AiBadge, Card, CardContent, CardHeader, CardTitle } from "@poynt/ui";
 import { Button } from "@poynt/ui";
 import { Tabs, TabsList, TabsTrigger } from "@poynt/ui";
-import {
-  Calendar,
-  CalendarDays,
-  ChevronLeft,
-  ChevronRight,
-  Lightbulb,
-  type LucideIcon,
-  RefreshCcw,
-  Sparkles,
-} from "@poynt/ui/icons";
+import { Icon } from "@poynt/ui/icons";
 import { cn } from "@poynt/ui/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
@@ -22,36 +13,6 @@ interface PlannerResultProps {
   plan: YearlyPlan;
   onReset: () => void;
 }
-
-const monthColors = [
-  "from-blue-500/20 to-blue-600/20 border-blue-500/30",
-  "from-indigo-500/20 to-indigo-600/20 border-indigo-500/30",
-  "from-violet-500/20 to-violet-600/20 border-violet-500/30",
-  "from-purple-500/20 to-purple-600/20 border-purple-500/30",
-  "from-pink-500/20 to-pink-600/20 border-pink-500/30",
-  "from-rose-500/20 to-rose-600/20 border-rose-500/30",
-  "from-orange-500/20 to-orange-600/20 border-orange-500/30",
-  "from-amber-500/20 to-amber-600/20 border-amber-500/30",
-  "from-yellow-500/20 to-yellow-600/20 border-yellow-500/30",
-  "from-lime-500/20 to-lime-600/20 border-lime-500/30",
-  "from-green-500/20 to-green-600/20 border-green-500/30",
-  "from-teal-500/20 to-teal-600/20 border-teal-500/30",
-];
-
-const monthTextColors = [
-  "text-blue-600 dark:text-blue-400",
-  "text-indigo-600 dark:text-indigo-400",
-  "text-violet-600 dark:text-violet-400",
-  "text-purple-600 dark:text-purple-400",
-  "text-pink-600 dark:text-pink-400",
-  "text-rose-600 dark:text-rose-400",
-  "text-orange-600 dark:text-orange-400",
-  "text-amber-600 dark:text-amber-400",
-  "text-yellow-600 dark:text-yellow-400",
-  "text-lime-600 dark:text-lime-400",
-  "text-green-600 dark:text-green-400",
-  "text-teal-600 dark:text-teal-400",
-];
 
 export function PlannerResult({ plan, onReset }: PlannerResultProps) {
   const [selectedMonth, setSelectedMonth] = useState<MonthContent | null>(null);
@@ -92,14 +53,15 @@ export function PlannerResult({ plan, onReset }: PlannerResultProps) {
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: "spring", stiffness: 200, damping: 15 }}
-          className="inline-flex items-center justify-center size-16 rounded-full bg-linear-to-br from-primary/20 to-primary/10 text-primary mb-2"
+          className="inline-flex items-center justify-center size-16 rounded-full bg-primary/10 text-primary mb-2"
         >
-          <CalendarDays className="size-8" />
+          <Icon name="calendar-days" className="size-8" />
         </motion.div>
         <h2 className="text-3xl font-bold tracking-tight">
           Ditt årshjul {plan.year}
         </h2>
         <p className="text-muted-foreground text-lg mx-auto">{plan.summary}</p>
+        <AiBadge className="mt-1" />
       </div>
 
       {/* View Toggle */}
@@ -110,11 +72,11 @@ export function PlannerResult({ plan, onReset }: PlannerResultProps) {
         >
           <TabsList>
             <TabsTrigger value="wheel" className="gap-2">
-              <Sparkles className="size-4" />
+              <Icon name="calendar-days" className="size-4" />
               Årshjul
             </TabsTrigger>
             <TabsTrigger value="list" className="gap-2">
-              <Calendar className="size-4" />
+              <Icon name="calendar" className="size-4" />
               Listevisning
             </TabsTrigger>
           </TabsList>
@@ -139,12 +101,7 @@ export function PlannerResult({ plan, onReset }: PlannerResultProps) {
               className="w-full max-h-[80vh] overflow-y-auto"
               onClick={(e) => e.stopPropagation()}
             >
-              <Card
-                className={cn(
-                  "bg-linear-to-br border",
-                  monthColors[(selectedMonth.month - 1) % 12]
-                )}
-              >
+              <Card className="bg-muted border">
                 <CardHeader className="pb-4">
                   <div className="flex items-center justify-between">
                     <Button
@@ -152,18 +109,13 @@ export function PlannerResult({ plan, onReset }: PlannerResultProps) {
                       size="icon"
                       onClick={() => navigateMonth("prev")}
                     >
-                      <ChevronLeft className="size-5" />
+                      <Icon name="chevron-left" className="size-5" />
                     </Button>
                     <div className="text-center">
                       <CardTitle className="text-2xl">
                         {selectedMonth.monthName}
                       </CardTitle>
-                      <p
-                        className={cn(
-                          "text-sm font-medium",
-                          monthTextColors[(selectedMonth.month - 1) % 12]
-                        )}
-                      >
+                      <p className="text-sm font-medium text-muted-foreground">
                         {selectedMonth.theme}
                       </p>
                     </div>
@@ -172,7 +124,7 @@ export function PlannerResult({ plan, onReset }: PlannerResultProps) {
                       size="icon"
                       onClick={() => navigateMonth("next")}
                     >
-                      <ChevronRight className="size-5" />
+                      <Icon name="chevron-right" className="size-5" />
                     </Button>
                   </div>
                 </CardHeader>
@@ -180,7 +132,7 @@ export function PlannerResult({ plan, onReset }: PlannerResultProps) {
                   {/* Posts */}
                   <div>
                     <h4 className="font-semibold mb-3 flex items-center gap-2">
-                      <CalendarDays className="size-4" />
+                      <Icon name="calendar-days" className="size-4" />
                       Innholdsforslag
                     </h4>
                     <div className="space-y-2">
@@ -212,7 +164,7 @@ export function PlannerResult({ plan, onReset }: PlannerResultProps) {
                   {selectedMonth.keyDates.length > 0 && (
                     <div>
                       <h4 className="font-semibold mb-3 flex items-center gap-2">
-                        <Sparkles className="size-4" />
+                        <Icon name="calendar" className="size-4" />
                         Viktige datoer
                       </h4>
                       <div className="space-y-2">
@@ -242,7 +194,7 @@ export function PlannerResult({ plan, onReset }: PlannerResultProps) {
                   {selectedMonth.tips.length > 0 && (
                     <div>
                       <h4 className="font-semibold mb-3 flex items-center gap-2">
-                        <Lightbulb className="size-4" />
+                        <Icon name="lightbulb" className="size-4" />
                         Tips for måneden
                       </h4>
                       <ul className="space-y-1">
@@ -312,16 +264,13 @@ export function PlannerResult({ plan, onReset }: PlannerResultProps) {
               >
                 <div
                   className={cn(
-                    "size-20 sm:size-24 rounded-full bg-linear-to-br border-2 flex flex-col items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-lg",
-                    monthColors[index % 12]
+                    "size-20 sm:size-24 rounded-full border-2 flex flex-col items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-lg",
+                    selectedMonth?.month === month.month
+                      ? "bg-primary/10 border-primary text-primary"
+                      : "bg-muted border-border text-foreground"
                   )}
                 >
-                  <span
-                    className={cn(
-                      "text-lg sm:text-xl font-bold",
-                      monthTextColors[index % 12]
-                    )}
-                  >
+                  <span className="text-lg sm:text-xl font-bold">
                     {month.monthName.slice(0, 3)}
                   </span>
                   <span className="text-xs text-muted-foreground text-center px-1 line-clamp-1 max-w-[4rem]">
@@ -349,16 +298,11 @@ export function PlannerResult({ plan, onReset }: PlannerResultProps) {
               transition={{ delay: index * 0.05 }}
             >
               <Card
-                className={cn(
-                  "cursor-pointer bg-linear-to-br border transition-all duration-300 hover:shadow-lg hover:scale-[1.02]",
-                  monthColors[index % 12]
-                )}
+                className="cursor-pointer bg-muted border transition-all duration-300 hover:shadow-lg hover:scale-[1.02]"
                 onClick={() => handleMonthClick(month)}
               >
                 <CardHeader className="pb-2">
-                  <CardTitle
-                    className={cn("text-lg", monthTextColors[index % 12])}
-                  >
+                  <CardTitle className="text-lg text-foreground">
                     {month.monthName}
                   </CardTitle>
                   <p className="text-sm text-muted-foreground">{month.theme}</p>
@@ -391,7 +335,7 @@ export function PlannerResult({ plan, onReset }: PlannerResultProps) {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Lightbulb className="size-5 text-yellow-500" />
+              <Icon name="lightbulb" className="size-5 text-primary" />
               Generelle tips for året
             </CardTitle>
           </CardHeader>
@@ -411,7 +355,7 @@ export function PlannerResult({ plan, onReset }: PlannerResultProps) {
       {/* Reset Button */}
       <div className="flex justify-center pt-4">
         <Button variant="outline" onClick={onReset} className="gap-2">
-          <RefreshCcw className="size-4" />
+          <Icon name="refresh" className="size-4" />
           Lag nytt årshjul
         </Button>
       </div>

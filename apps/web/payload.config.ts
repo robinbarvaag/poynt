@@ -97,6 +97,19 @@ export default buildConfig({
     components: {
       afterNavLinks: ["/admin/components/on-poynt-nav-group#OnPoyntNavGroup"],
       views: {
+        applications: {
+          Component:
+            "/admin/views/applications/list#MembershipApplicationsListView",
+          path: "/soknader",
+          exact: true,
+          meta: { title: "Søknader" },
+        },
+        applicationDetail: {
+          Component:
+            "/admin/views/applications/detail#MembershipApplicationDetailView",
+          path: "/soknader/:id",
+          meta: { title: "Søknadsdetaljer" },
+        },
         members: {
           Component: "/admin/views/members/list#MembersListView",
           path: "/medlemmer",
@@ -241,6 +254,66 @@ export default buildConfig({
                 if (isMembership) {
                   const applicantEmail = get(["dinepost", "epost", "email"]);
                   if (!applicantEmail) return doc;
+
+                  // Speil søknaden inn i planner_membership_application slik at
+                  // partneren får en strukturert «pending → godkjenn»-innboks.
+                  try {
+                    const { db } = await import("@poynt/planner-db");
+                    const { plannerMembershipApplication } = await import(
+                      "@poynt/planner-db/schema"
+                    );
+                    const { canonicalizeEmail } = await import(
+                      "@poynt/utils/email-normalize"
+                    );
+
+                    const companySizeRaw = get(["bedriftsstorrelse"]);
+                    const companySize = [
+                      "solo",
+                      "small",
+                      "medium",
+                      "large",
+                    ].includes(companySizeRaw ?? "")
+                      ? (companySizeRaw as
+                          | "solo"
+                          | "small"
+                          | "medium"
+                          | "large")
+                      : null;
+
+                    const audienceRaw = get(["malgruppetype"]);
+                    const audienceType = ["b2b", "b2c", "both"].includes(
+                      audienceRaw ?? ""
+                    )
+                      ? (audienceRaw as "b2b" | "b2c" | "both")
+                      : null;
+
+                    await db.insert(plannerMembershipApplication).values({
+                      id: crypto.randomUUID(),
+                      status: "pending",
+                      fullName:
+                        get(["fulltnavn", "navn", "name"]) || applicantEmail,
+                      email: applicantEmail,
+                      canonicalEmail: canonicalizeEmail(applicantEmail),
+                      companyName: get(["bedriftsnavn"]) ?? null,
+                      orgNumber: get(["orgnummer"]) ?? null,
+                      invoiceEmail: get(["fakturaepost"]) ?? null,
+                      revenueOver1m: get(["omsetning"]) ?? null,
+                      ehfInvoice: get(["ehffaktura"]) ?? null,
+                      invoiceSplit: get(["fakturaoppdeling"]) ?? null,
+                      invoiceNotes: get(["fakturainfo"]) ?? null,
+                      aboutCompany: get(["ombedriften"]) ?? null,
+                      industryId: get(["bransje"]) ?? null,
+                      companySize,
+                      audienceType,
+                      targetAudience: get(["malgruppe"]) ?? null,
+                      rawSubmission: entries,
+                      formSubmissionId: String(doc.id),
+                    });
+                  } catch (dbErr) {
+                    req.payload.logger.error(
+                      `Lagring av medlemskapssøknad feilet: ${dbErr instanceof Error ? dbErr.message : dbErr}`
+                    );
+                  }
 
                   const line = (label: string, names: string[]) => {
                     const value = get(names);

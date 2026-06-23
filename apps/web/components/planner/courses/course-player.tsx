@@ -85,7 +85,7 @@ export function CoursePlayer({ course }: { course: Course }) {
   const active = rows.find((r) => r.key === selected) ?? null;
 
   return (
-    <div className="flex h-[calc(100svh-7rem)] min-h-[30rem] flex-col gap-4">
+    <div className="flex h-[calc(100svh-10rem)] min-h-120 flex-col gap-4">
       <div className="flex items-center gap-3">
         <Link
           href="/on-poynt/kurs"

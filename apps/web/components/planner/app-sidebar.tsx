@@ -1,6 +1,12 @@
 "use client";
 
-import { mainNavItems, settingsNavItems } from "@/lib/constants";
+import {
+  type NavItem,
+  accountNavItems,
+  homeNavItem,
+  learnNavItems,
+  toolNavItems,
+} from "@/lib/constants";
 import { trpc } from "@/lib/planner/trpc";
 import {
   Icon,
@@ -23,6 +29,33 @@ import { useEffect, useState } from "react";
 import { NavUser } from "./nav-user";
 import { WorkspaceSwitcher } from "./workspace-switcher";
 
+function NavItemLink({
+  item,
+  isActive,
+  locked,
+}: {
+  item: NavItem;
+  isActive: boolean;
+  locked: boolean;
+}) {
+  return (
+    <SidebarMenuItem>
+      <SidebarMenuButton asChild isActive={isActive}>
+        <Link href={item.url}>
+          <Icon name={item.icon} />
+          <span>{item.title}</span>
+          {locked && (
+            <Icon
+              name="sparkles"
+              className="ml-auto h-3 w-3 text-muted-foreground/60"
+            />
+          )}
+        </Link>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
+  );
+}
+
 export function AppSidebar() {
   const pathname = usePathname();
   const [isAdmin, setIsAdmin] = useState(false);
@@ -40,6 +73,18 @@ export function AppSidebar() {
       .catch(() => setIsAiTier(false));
   }, []);
 
+  const isItemActive = (url: string) =>
+    pathname === url || pathname.startsWith(`${url}/`);
+
+  const renderItem = (item: NavItem) => (
+    <NavItemLink
+      key={item.title}
+      item={item}
+      isActive={isItemActive(item.url)}
+      locked={!!item.requiresAi && isAiTier === false}
+    />
+  );
+
   return (
     <Sidebar variant="inset">
       <SidebarHeader>
@@ -47,64 +92,34 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
+        {/* Hjem — alene øverst, ikke et «verktøy» */}
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>{renderItem(homeNavItem)}</SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
         <SidebarGroup>
           <SidebarGroupLabel>Verktøy</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
-              {mainNavItems.map((item) => {
-                const isLocked = item.requiresAi && isAiTier === false;
-                return (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={
-                        pathname === item.url ||
-                        pathname.startsWith(`${item.url}/`)
-                      }
-                    >
-                      <Link href={item.url}>
-                        <Icon name={item.icon} />
-                        <span>{item.title}</span>
-                        {isLocked && (
-                          <Icon
-                            name="sparkles"
-                            className="ml-auto h-3 w-3 text-muted-foreground/60"
-                          />
-                        )}
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
+            <SidebarMenu>{toolNavItems.map(renderItem)}</SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
-        <SidebarSeparator />
 
         <SidebarGroup>
-          <SidebarGroupLabel>Innstillinger</SidebarGroupLabel>
+          <SidebarGroupLabel>Læring</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
-              {settingsNavItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={
-                      pathname === item.url ||
-                      pathname.startsWith(`${item.url}/`)
-                    }
-                  >
-                    <Link href={item.url}>
-                      <Icon name={item.icon} />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
+            <SidebarMenu>{learnNavItems.map(renderItem)}</SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Konto</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>{accountNavItems.map(renderItem)}</SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
         {isAdmin && (
           <>
             <SidebarSeparator />

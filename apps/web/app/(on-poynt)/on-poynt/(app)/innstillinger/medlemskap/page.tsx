@@ -6,6 +6,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  PageHeader,
 } from "@poynt/ui";
 import { Icon } from "@poynt/ui/icons";
 import { headers } from "next/headers";
@@ -36,7 +37,7 @@ export default async function MembershipSettingsPage() {
   // Map status to Norwegian display text and color
   const statusInfo = {
     active: { label: "Aktiv", color: "bg-green-100 text-green-800" },
-    inactive: { label: "Inaktiv", color: "bg-slate-100 text-slate-800" },
+    inactive: { label: "Inaktiv", color: "bg-muted text-muted-foreground" },
     canceled: { label: "Kansellert", color: "bg-red-100 text-red-800" },
     past_due: { label: "Forfalt", color: "bg-amber-100 text-amber-800" },
   };
@@ -50,12 +51,10 @@ export default async function MembershipSettingsPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Medlemskap</h1>
-        <p className="text-slate-600">
-          Administrer ditt On Poynt-medlemskap og abonnement.
-        </p>
-      </div>
+      <PageHeader
+        title="Medlemskap"
+        description="Administrer ditt On Poynt-medlemskap og abonnement."
+      />
 
       {/* No Membership State */}
       {hasNoMembership && (
@@ -69,10 +68,7 @@ export default async function MembershipSettingsPage() {
           </CardHeader>
           <CardContent>
             <Button asChild>
-              <Link href="/produkter">
-                <Icon name="sparkles" className="mr-2 size-4" />
-                Se medlemskapspriser
-              </Link>
+              <Link href="/produkter">Se medlemskapspriser</Link>
             </Button>
           </CardContent>
         </Card>
@@ -116,7 +112,7 @@ export default async function MembershipSettingsPage() {
                   </span>
                 </div>
                 {membership.stripeSubscriptionId && (
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-muted-foreground">
                     Subscription ID: {membership.stripeSubscriptionId}
                   </p>
                 )}
@@ -127,32 +123,32 @@ export default async function MembershipSettingsPage() {
           <CardContent className="pt-6 space-y-6">
             {/* Membership Features */}
             <div className="space-y-3">
-              <h3 className="font-semibold text-slate-900">
+              <h3 className="font-semibold text-foreground">
                 Inkludert i ditt medlemskap
               </h3>
               <ul className="space-y-2">
                 <li className="flex items-center gap-3">
                   <Icon name="check" className="size-5 text-green-600" />
-                  <span className="text-sm text-slate-700">
+                  <span className="text-sm text-muted-foreground">
                     Tilgang til alle artikler og guider
                   </span>
                 </li>
                 <li className="flex items-center gap-3">
                   <Icon name="check" className="size-5 text-green-600" />
-                  <span className="text-sm text-slate-700">
+                  <span className="text-sm text-muted-foreground">
                     Kanalveileder for markedsføring
                   </span>
                 </li>
                 <li className="flex items-center gap-3">
                   <Icon name="check" className="size-5 text-green-600" />
-                  <span className="text-sm text-slate-700">
+                  <span className="text-sm text-muted-foreground">
                     Månedlig markedsplan
                   </span>
                 </li>
                 {membership.tier === "community_ai" && (
                   <li className="flex items-center gap-3">
-                    <Icon name="sparkles" className="size-5 text-purple-600" />
-                    <span className="text-sm font-medium text-slate-900">
+                    <Icon name="check" className="size-5 text-primary" />
+                    <span className="text-sm font-medium text-foreground">
                       AI-assistert markedsføringsplanlegging
                     </span>
                   </li>

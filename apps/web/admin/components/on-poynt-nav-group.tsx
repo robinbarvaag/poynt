@@ -7,6 +7,10 @@ const baseClass = "nav";
 
 const links = [
   {
+    href: "/admin/soknader",
+    label: "Søknader",
+  },
+  {
     href: "/admin/medlemmer",
     label: "Medlemmer",
   },

@@ -3,7 +3,7 @@
 import { priorityConfig } from "@/lib/constants";
 import { trpc } from "@/lib/planner/trpc";
 import type { MarketingPlan } from "@poynt/planner-validators";
-import { Card, CardContent, CardHeader, CardTitle } from "@poynt/ui";
+import { AiBadge, Card, CardContent, CardHeader, CardTitle } from "@poynt/ui";
 import { Button } from "@poynt/ui";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@poynt/ui";
 import { Checkbox } from "@poynt/ui";
@@ -172,7 +172,7 @@ export function PlanResult({
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: "spring", stiffness: 200, damping: 15 }}
-            className="inline-flex items-center justify-center size-20 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 text-primary mb-2"
+            className="inline-flex items-center justify-center size-20 rounded-2xl bg-primary/10 text-primary mb-2"
           >
             <Icon name="calendar" className="size-10" />
           </motion.div>
@@ -261,7 +261,6 @@ export function PlanResult({
             onClick={onStartForm}
             className="gap-2 px-8 h-12 text-base"
           >
-            <Icon name="sparkles" className="size-5" />
             Lag min markedsplan
           </Button>
           <p className="text-sm text-muted-foreground mt-4">
@@ -294,17 +293,18 @@ export function PlanResult({
             damping: 15,
             delay: 0.2,
           }}
-          className="inline-flex items-center justify-center size-16 rounded-full bg-linear-to-br from-primary/20 to-primary/10 text-primary mb-2"
+          className="inline-flex items-center justify-center size-16 rounded-full bg-primary/10 text-primary mb-2"
         >
-          <Icon name="sparkles" className="size-8" />
+          <Icon name="bar-chart" className="size-8" />
         </motion.div>
         <h2 className="text-3xl font-bold tracking-tight">Din markedsplan</h2>
         <p className="text-muted-foreground text-lg mx-auto">{plan.summary}</p>
+        <AiBadge className="mt-1" />
       </motion.div>
 
       {plan.reasoning && (
         <motion.div variants={itemVariants}>
-          <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+          <Card className="border-primary/20 bg-primary/5">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Icon name="lightbulb" className="size-5 text-primary" />
@@ -730,31 +730,28 @@ export function PlanResult({
       </motion.div>
 
       <motion.div variants={itemVariants}>
-        <Card className="overflow-hidden relative border-[oklch(0.78_0.07_175)] dark:border-[oklch(0.40_0.10_175)]">
-          <div className="absolute inset-0 bg-gradient-to-br from-[oklch(0.88_0.04_175)] via-[oklch(0.85_0.05_175)] to-[oklch(0.82_0.06_175)] dark:from-[oklch(0.45_0.09_175)] dark:via-[oklch(0.40_0.10_175)] dark:to-[oklch(0.35_0.11_175)]" />
-          <CardHeader className="relative">
-            <CardTitle className="text-xl sm:text-2xl flex items-center gap-2 text-[oklch(0.25_0.05_175)] dark:text-[oklch(0.95_0.02_175)]">
-              <Icon name="zap" className="size-6 shrink-0" />
-              DITT NESTE STEG
+        <Card className="border-primary/20 bg-primary/5">
+          <CardHeader>
+            <CardTitle className="text-xl sm:text-2xl flex items-center gap-2">
+              <Icon name="zap" className="size-6 shrink-0 text-primary" />
+              Ditt neste steg
             </CardTitle>
-            <p className="text-sm text-[oklch(0.35_0.04_175)] dark:text-[oklch(0.85_0.03_175)]">
+            <p className="text-sm text-muted-foreground">
               Nå som du har planen, er det på tide å komme i gang. Start med ett
               av quick wins for å få fart på sakene.
             </p>
           </CardHeader>
-          <CardContent className="relative">
+          <CardContent>
             <div className="grid sm:grid-cols-2 gap-4">
               {plan.quickWins.slice(0, 4).map((win, idx) => (
                 <div
                   key={win}
-                  className="flex gap-3 p-4 rounded-lg bg-white/60 dark:bg-[oklch(0.25_0.05_175)]/40 backdrop-blur-sm border border-[oklch(0.75_0.05_175)]/30 dark:border-[oklch(0.45_0.08_175)]/30"
+                  className="flex gap-3 p-4 rounded-lg border bg-background"
                 >
-                  <div className="flex items-center justify-center size-8 rounded-lg bg-[oklch(0.75_0.07_175)] dark:bg-[oklch(0.45_0.10_175)] text-[oklch(0.25_0.05_175)] dark:text-[oklch(0.95_0.02_175)] font-bold text-sm shrink-0">
+                  <div className="flex items-center justify-center size-8 rounded-lg bg-primary/10 text-primary font-semibold text-sm shrink-0">
                     {idx + 1}
                   </div>
-                  <p className="text-sm text-[oklch(0.30_0.04_175)] dark:text-[oklch(0.90_0.02_175)] font-medium">
-                    {win}
-                  </p>
+                  <p className="text-sm font-medium">{win}</p>
                 </div>
               ))}
             </div>

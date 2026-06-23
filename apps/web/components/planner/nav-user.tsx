@@ -29,7 +29,7 @@ export function NavUser() {
 
   const handleSignOut = async () => {
     await signOut();
-    router.push("/planner");
+    router.push("/on-poynt");
     router.refresh();
   };
 
@@ -106,10 +106,6 @@ export function NavUser() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Icon name="user" className="mr-2 h-4 w-4" />
-                Profil
-              </DropdownMenuItem>
               <div className="flex items-center px-2 py-1.5">
                 <span className="flex-1 text-sm">Tema</span>
                 <ThemeToggle />
