@@ -28,6 +28,11 @@ export const mainNavItems: {
     icon: "graduation-cap",
   },
   {
+    title: "Ressurser",
+    url: "/on-poynt/ressurser",
+    icon: "layers",
+  },
+  {
     title: "Kanalveileder",
     url: "/on-poynt/verktoy/kanalveileder",
     icon: "compass",
