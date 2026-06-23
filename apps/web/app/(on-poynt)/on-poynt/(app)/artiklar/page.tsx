@@ -4,7 +4,7 @@ import { PayloadImage } from "@/components/payload-image";
 import { hexToRgba } from "@/lib/color-utils";
 import type { Article, Category, Media } from "@/payload-types";
 import config from "@/payload.config";
-import { Heading, Text } from "@poynt/ui";
+import { Heading, PageHeader, Text } from "@poynt/ui";
 import { Clock } from "lucide-react";
 import Link from "next/link";
 import { getPayload } from "payload";
@@ -71,12 +71,10 @@ export default async function ArticlesPage({ searchParams }: PageProps) {
 
   return (
     <div className="flex flex-col gap-8">
-      <div>
-        <Heading size="h1">Artiklar</Heading>
-        <Text variant="muted" customStyles="mt-1">
-          Guider og tips for marknadsføring og innhaldsproduksjon.
-        </Text>
-      </div>
+      <PageHeader
+        title="Artiklar"
+        description="Guider og tips for marknadsføring og innhaldsproduksjon."
+      />
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="w-full sm:max-w-xs">

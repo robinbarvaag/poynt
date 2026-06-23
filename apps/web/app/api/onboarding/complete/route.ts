@@ -1,10 +1,13 @@
 import { auth } from "@poynt/planner-auth/server";
-import { db, eq } from "@poynt/planner-db";
+import { and, db, desc, eq } from "@poynt/planner-db";
 import {
+  plannerIndustry,
+  plannerMembershipApplication,
   plannerUser,
   plannerUserPreferences,
   plannerWorkspace,
   plannerWorkspaceMember,
+  plannerWorkspaceProfile,
 } from "@poynt/planner-db/schema";
 import { type NextRequest, NextResponse } from "next/server";
 
@@ -15,6 +18,38 @@ function slugify(name: string): string {
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");
+}
+
+/** Hent den nyeste godkjente søknaden for brukeren (om noen). */
+async function getApprovedApplication(userId: string) {
+  const [application] = await db
+    .select()
+    .from(plannerMembershipApplication)
+    .where(
+      and(
+        eq(plannerMembershipApplication.userId, userId),
+        eq(plannerMembershipApplication.status, "approved")
+      )
+    )
+    .orderBy(desc(plannerMembershipApplication.reviewedAt))
+    .limit(1);
+  return application ?? null;
+}
+
+/**
+ * Forhåndsutfylte verdier til onboarding-skjemaet (fra godkjent søknad), slik at
+ * medlemmet slipper å skrive bedriftsnavnet på nytt.
+ */
+export async function GET(req: NextRequest) {
+  const session = await auth.api.getSession({ headers: req.headers });
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const application = await getApprovedApplication(session.user.id);
+  return NextResponse.json({
+    companyName: application?.companyName ?? null,
+  });
 }
 
 export async function POST(req: NextRequest) {
@@ -65,6 +100,45 @@ export async function POST(req: NextRequest) {
         target: plannerUserPreferences.userId,
         set: { activeWorkspaceId: workspaceId },
       });
+
+    // Forhåndsutfyll bedriftsprofilen fra en godkjent søknad, hvis vi har en.
+    const application = await getApprovedApplication(session.user.id);
+    if (application) {
+      // industryId valideres mot planner_industry (skjemaet er redigerbart).
+      let industryId: string | null = null;
+      if (application.industryId) {
+        const [industry] = await db
+          .select({ id: plannerIndustry.id })
+          .from(plannerIndustry)
+          .where(eq(plannerIndustry.id, application.industryId))
+          .limit(1);
+        industryId = industry?.id ?? null;
+      }
+
+      const hasProfileData =
+        industryId ||
+        application.companySize ||
+        application.audienceType ||
+        application.targetAudience ||
+        application.aboutCompany;
+
+      if (hasProfileData) {
+        await db
+          .insert(plannerWorkspaceProfile)
+          .values({
+            id: crypto.randomUUID(),
+            workspaceId,
+            industryId,
+            companySize: application.companySize ?? null,
+            audienceType: application.audienceType ?? null,
+            targetAudience: application.targetAudience ?? null,
+            customContext: application.aboutCompany ?? null,
+          })
+          .onConflictDoNothing({
+            target: plannerWorkspaceProfile.workspaceId,
+          });
+      }
+    }
 
     // Mark onboarding as completed
     await db

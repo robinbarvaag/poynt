@@ -1,7 +1,7 @@
 import { PayloadImage } from "@/components/payload-image";
 import type { Course, Media } from "@/payload-types";
 import config from "@/payload.config";
-import { Card, CardContent } from "@poynt/ui";
+import { Card, CardContent, PageHeader } from "@poynt/ui";
 import Link from "next/link";
 import { getPayload } from "payload";
 
@@ -26,12 +26,10 @@ export default async function KursPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Kurs</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Lær i ditt eige tempo med kursa våre.
-        </p>
-      </div>
+      <PageHeader
+        title="Kurs"
+        description="Lær i ditt eige tempo med kursa våre."
+      />
 
       {courses.length === 0 ? (
         <p className="text-sm text-muted-foreground">

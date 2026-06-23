@@ -1,7 +1,7 @@
 "use client";
 
 import { trpc } from "@/lib/planner/trpc";
-import { Button } from "@poynt/ui";
+import { AiBadge, Button } from "@poynt/ui";
 import { toast } from "@poynt/ui";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@poynt/ui";
 import { Icon } from "@poynt/ui/icons";
@@ -67,7 +67,7 @@ export function DeclineResult({
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: "spring", stiffness: 200, damping: 15 }}
-            className="inline-flex items-center justify-center size-20 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 text-primary mb-2"
+            className="inline-flex items-center justify-center size-20 rounded-2xl bg-primary/10 text-primary mb-2"
           >
             <Icon name="message-square-off" className="size-10" />
           </motion.div>
@@ -82,7 +82,6 @@ export function DeclineResult({
           <div className="rounded-xl border bg-card p-6">
             <div className="mb-6">
               <div className="flex items-center gap-2 text-xl font-semibold mb-2">
-                <Icon name="sparkles" className="size-5 text-primary" />
                 Dette får du
               </div>
             </div>
@@ -130,7 +129,6 @@ export function DeclineResult({
             onClick={onStartForm}
             className="gap-2 px-8 h-12 text-base"
           >
-            <Icon name="sparkles" className="size-5" />
             Lag mitt avslag
           </Button>
           <p className="text-sm text-muted-foreground mt-4">
@@ -218,7 +216,10 @@ export function DeclineResult({
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-medium">Ditt svar</h2>
+      <div className="flex items-center gap-3">
+        <h2 className="text-lg font-medium">Ditt svar</h2>
+        <AiBadge />
+      </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="w-full">

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { mainGoalTypes, strengthTypes, weeklyTimeTypes } from "./channel-guide";
 
 /**
  * Company size options
@@ -41,6 +42,10 @@ export const workspaceProfileSchema = z.object({
   audienceType: z.enum(profileAudienceTypes).nullable(),
   companySize: z.enum(profileCompanySizes).nullable(),
   goals: z.array(z.string()).nullable(),
+  // Varige verktøy-input («felles hjerne») — deles på tvers av verktøyene.
+  mainGoal: z.enum(mainGoalTypes).nullable(),
+  weeklyTime: z.enum(weeklyTimeTypes).nullable(),
+  strengths: z.enum(strengthTypes).nullable(),
   customContext: z.string().nullable(),
   createdAt: z.date(),
   updatedAt: z.date(),
@@ -54,6 +59,9 @@ export const updateWorkspaceProfileSchema = z.object({
   audienceType: z.enum(profileAudienceTypes).nullable().optional(),
   companySize: z.enum(profileCompanySizes).nullable().optional(),
   goals: z.array(z.string()).nullable().optional(),
+  mainGoal: z.enum(mainGoalTypes).nullable().optional(),
+  weeklyTime: z.enum(weeklyTimeTypes).nullable().optional(),
+  strengths: z.enum(strengthTypes).nullable().optional(),
   customContext: z.string().nullable().optional(),
 });
 

@@ -11,6 +11,10 @@
     "./trpc": {
       "types": "./trpc.ts",
       "default": "./trpc.ts"
+    },
+    "./lib/channel-guide-stream": {
+      "types": "./lib/channel-guide-stream.ts",
+      "default": "./lib/channel-guide-stream.ts"
     }
   },
   "scripts": {

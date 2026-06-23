@@ -75,6 +75,11 @@ export {
 export { Eyebrow } from "./components/eyebrow";
 
 export {
+  PageHeader,
+  type PageHeaderProps,
+} from "./components/page-header";
+
+export {
   Breadcrumbs,
   type BreadcrumbsProps,
   type BreadcrumbItem,
@@ -85,6 +90,8 @@ export {
   badgeVariants,
   type BadgeProps,
 } from "./components/badge";
+
+export { AiBadge } from "./components/ai-badge";
 
 export {
   Sheet,

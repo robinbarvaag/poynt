@@ -112,13 +112,6 @@ export function WorkspaceGeneralForm({
           )}
         />
 
-        <div className="flex items-center gap-4">
-          <div className="flex-1">
-            <p className="text-sm font-medium">URL-slug</p>
-            <p className="text-sm text-muted-foreground">{workspace.slug}</p>
-          </div>
-        </div>
-
         {!disabled && (
           <div className="flex justify-end">
             <Button type="submit" disabled={isSubmitting}>

@@ -118,11 +118,29 @@ export const channelGuideRequestSchema = z.object({
 export type ChannelGuideRequest = z.infer<typeof channelGuideRequestSchema>;
 
 /**
- * Kanal-anbefaling (utvidet med mer info)
+ * Match-nivå — erstatter den falske %-presisjonen (85 %, 80 % …) med tre
+ * ærlige nivåer. AI-en kan ikke vite en eksakt prosent; nivå er mer redelig.
+ */
+export const channelMatchLevels = ["strong", "good", "possible"] as const;
+export type ChannelMatchLevel = (typeof channelMatchLevels)[number];
+
+export const channelMatchLevelLabels: Record<ChannelMatchLevel, string> = {
+  strong: "Sterk match",
+  good: "God match",
+  possible: "Mulig match",
+};
+
+/**
+ * Kanal-anbefaling (utvidet med mer info).
+ *
+ * `matchLevel` er det nye, redelige feltet. `matchPercent` beholdes som
+ * valgfritt kun for bakoverkompabilitet med tidligere lagrede resultater —
+ * nye genereringer bruker `matchLevel`.
  */
 export const channelRecommendationSchema = z.object({
   name: z.string(),
-  matchPercent: z.number().min(0).max(100),
+  matchLevel: z.enum(channelMatchLevels).optional(),
+  matchPercent: z.number().min(0).max(100).optional(),
   reason: z.string(),
   whyNotHigher: z.string().optional(),
   timeToResults: z.string().optional(),
@@ -132,6 +150,49 @@ export const channelRecommendationSchema = z.object({
 });
 
 export type ChannelRecommendation = z.infer<typeof channelRecommendationSchema>;
+
+/**
+ * Utleder match-nivå fra enten det nye `matchLevel`-feltet eller en avlegs
+ * lagret `matchPercent`, så gamle og nye resultater vises likt.
+ */
+export function resolveChannelMatchLevel(rec: {
+  matchLevel?: ChannelMatchLevel | null;
+  matchPercent?: number | null;
+}): ChannelMatchLevel {
+  if (rec.matchLevel) return rec.matchLevel;
+  const percent = rec.matchPercent ?? 0;
+  if (percent >= 80) return "strong";
+  if (percent >= 60) return "good";
+  return "possible";
+}
+
+/**
+ * Skjema for det AI-en streamer (via `streamObject`). Strengere enn
+ * lagrings-skjemaet: `matchLevel` er påkrevd, og vi ber om `nextSteps` —
+ * de konkrete tingene brukeren bør gjøre denne uken for toppkanalen
+ * (løftet helt opp i resultatet i stedet for å ligge hardkodet nederst).
+ */
+// OpenAIs strenge structured-output krever at ALLE felter ligger i `required`.
+// Valgfrie felter må derfor være `.nullable()` (påkrevd, men kan være null),
+// ikke `.optional()`. UI-en behandler null som «ikke oppgitt» (null er falsy).
+const generatedChannelSchema = z.object({
+  name: z.string(),
+  matchLevel: z.enum(channelMatchLevels),
+  reason: z.string(),
+  whyNotHigher: z.string().nullable(),
+  timeToResults: z.string().nullable(),
+  weeklyTimeNeeded: z.string().nullable(),
+  idealFor: z.array(z.string()).nullable(),
+  challengingIf: z.array(z.string()).nullable(),
+});
+
+export const channelGuideStreamSchema = z.object({
+  reasoning: z.string(),
+  nextSteps: z.array(z.string()),
+  channels: z.array(generatedChannelSchema),
+});
+
+export type ChannelGuideStream = z.infer<typeof channelGuideStreamSchema>;
 
 /**
  * Response fra AI

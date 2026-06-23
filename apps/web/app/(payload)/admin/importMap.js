@@ -32,6 +32,8 @@ import { LinkToDoc as LinkToDoc_2e9be70cd13299dd4a11a5bd739a5a3c } from '@payloa
 import { FolderTypeField as FolderTypeField_3817bf644402e67bfe6577f60ef982de } from '@payloadcms/ui'
 import { OnPoyntNavGroup as OnPoyntNavGroup_cbdd0274d832c585cca0ce893b25cc1e } from '../../../admin/components/on-poynt-nav-group'
 import { VercelBlobClientUploadHandler as VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e } from '@payloadcms/storage-vercel-blob/client'
+import { MembershipApplicationsListView as MembershipApplicationsListView_be2a1da07cba706e1f042873ea9e9758 } from '../../../admin/views/applications/list'
+import { MembershipApplicationDetailView as MembershipApplicationDetailView_5da117e93eb9cc3778177b4984b41b2c } from '../../../admin/views/applications/detail'
 import { MembersListView as MembersListView_1c40f164a24fb9e841d3097dd58f8371 } from '../../../admin/views/members/list'
 import { MemberDetailView as MemberDetailView_dd13572451bb48f4b5e68a05e41ae812 } from '../../../admin/views/members/detail'
 import { IndustriesListView as IndustriesListView_2ad79ff1a29ece0a9f161db8e2982cd0 } from '../../../admin/views/industries/list'
@@ -73,6 +75,8 @@ export const importMap = {
   "@payloadcms/ui#FolderTypeField": FolderTypeField_3817bf644402e67bfe6577f60ef982de,
   "/admin/components/on-poynt-nav-group#OnPoyntNavGroup": OnPoyntNavGroup_cbdd0274d832c585cca0ce893b25cc1e,
   "@payloadcms/storage-vercel-blob/client#VercelBlobClientUploadHandler": VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e,
+  "/admin/views/applications/list#MembershipApplicationsListView": MembershipApplicationsListView_be2a1da07cba706e1f042873ea9e9758,
+  "/admin/views/applications/detail#MembershipApplicationDetailView": MembershipApplicationDetailView_5da117e93eb9cc3778177b4984b41b2c,
   "/admin/views/members/list#MembersListView": MembersListView_1c40f164a24fb9e841d3097dd58f8371,
   "/admin/views/members/detail#MemberDetailView": MemberDetailView_dd13572451bb48f4b5e68a05e41ae812,
   "/admin/views/industries/list#IndustriesListView": IndustriesListView_2ad79ff1a29ece0a9f161db8e2982cd0,

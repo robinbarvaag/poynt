@@ -10,7 +10,9 @@ export type Tool = {
 
 export interface ChannelRecommendation {
   name: string;
-  matchPercent: number;
+  // Nytt, ærlig felt. matchPercent beholdes valgfritt for gamle lagrede resultater.
+  matchLevel?: "strong" | "good" | "possible";
+  matchPercent?: number;
   reason: string;
   whyNotHigher?: string;
   timeToResults?: string;
@@ -22,9 +24,13 @@ export interface ChannelRecommendation {
 export interface GuideResultProps {
   channels?: ChannelRecommendation[];
   reasoning?: string | null;
+  /** Konkrete neste steg for toppkanalen (denne uken) — løftet opp i resultatet. */
+  nextSteps?: string[] | null;
   onReset?: () => void;
   mode?: "intro" | "result";
   onStartQuiz?: () => void;
+  /** Når true bygger resultatet seg fortsatt opp (streaming): vis skjelett + status. */
+  isStreaming?: boolean;
 }
 
 export interface MedalConfigItem {
@@ -49,6 +55,7 @@ export interface SavedResult {
   id: string;
   channels: ChannelRecommendation[];
   reasoning?: string;
+  nextSteps?: string[];
   createdAt: Date;
 }
 
@@ -59,7 +66,17 @@ export interface Industry {
   isActive: boolean;
 }
 
-export type ViewState = "intro" | "saved" | "quiz" | "result";
+export type ViewState = "intro" | "ready" | "saved" | "quiz" | "result";
+
+/** De varige profil-feltene kanalveilederen trenger for å bygge en forespørsel. */
+export interface ChannelGuideProfile {
+  industryId: string | null;
+  industryName: string | null;
+  audienceType: "b2b" | "b2c" | "both" | null;
+  mainGoal: "leads" | "sales" | "awareness" | "recruitment" | null;
+  weeklyTime: "1-2h" | "3-5h" | "5h+" | null;
+  strengths: "writing" | "speaking" | "visual" | "mixed" | null;
+}
 
 // Medal config for the 3 channels
 export type MedalConfig = {
@@ -77,8 +94,7 @@ export const medalConfigs: MedalConfig[] = [
 export interface ChannelGuideClientProps {
   initialSavedResult: SavedResult | null;
   industries: Industry[];
-  initialIndustryId: string | null;
-  initialTargetAudience: "b2b" | "b2c" | "both" | null;
+  profile: ChannelGuideProfile;
 }
 
 export interface ExtendedGuideResultProps extends GuideResultProps {

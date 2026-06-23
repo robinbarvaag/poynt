@@ -1,6 +1,10 @@
 import { TierGate } from "@/components/planner/tier-gate";
 import { createServerCaller } from "@/lib/planner/trpc-server";
-import type { ChannelRecommendation, SavedResult } from "@/lib/types";
+import type {
+  ChannelGuideProfile,
+  ChannelRecommendation,
+  SavedResult,
+} from "@/lib/types";
 import { ChannelGuideClient } from "./channel-guide-client";
 
 export default async function ChannelGuidePage() {
@@ -17,28 +21,44 @@ export default async function ChannelGuidePage() {
     const result = firstResult.result as {
       channels?: ChannelRecommendation[];
       reasoning?: string;
+      nextSteps?: string[];
     };
     if (result.channels) {
       initialSavedResult = {
         id: firstResult.id,
         channels: result.channels,
         reasoning: result.reasoning,
+        nextSteps: result.nextSteps,
         createdAt: new Date(firstResult.createdAt),
       };
     }
   }
 
   const activeIndustries = industries.filter((i) => i.isActive);
-  const initialIndustryId = workspaceProfile?.industryId ?? null;
-  const initialTargetAudience = workspaceProfile?.audienceType ?? null;
+  const industryId = workspaceProfile?.industryId ?? null;
+
+  const profile: ChannelGuideProfile = {
+    industryId,
+    industryName:
+      activeIndustries.find((i) => i.id === industryId)?.name ?? null,
+    audienceType:
+      (workspaceProfile?.audienceType as ChannelGuideProfile["audienceType"]) ??
+      null,
+    mainGoal:
+      (workspaceProfile?.mainGoal as ChannelGuideProfile["mainGoal"]) ?? null,
+    weeklyTime:
+      (workspaceProfile?.weeklyTime as ChannelGuideProfile["weeklyTime"]) ??
+      null,
+    strengths:
+      (workspaceProfile?.strengths as ChannelGuideProfile["strengths"]) ?? null,
+  };
 
   return (
     <TierGate>
       <ChannelGuideClient
         initialSavedResult={initialSavedResult}
         industries={activeIndustries}
-        initialIndustryId={initialIndustryId}
-        initialTargetAudience={initialTargetAudience}
+        profile={profile}
       />
     </TierGate>
   );

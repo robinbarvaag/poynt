@@ -214,7 +214,13 @@ export const plannerWorkspaceProfile = plannerSchema.table(
     targetAudience: text("target_audience"), // Freetext description of target customers
     audienceType: plannerAudienceTypeEnum("audience_type"), // B2B, B2C or both
     companySize: plannerCompanySizeEnum("company_size"),
-    goals: jsonb("goals").$type<string[]>(), // Marketing goals
+    goals: jsonb("goals").$type<string[]>(), // Marketing goals (freetext context)
+    // Varige verktøy-input flyttet inn i profilen («felles hjerne») slik at
+    // verktøyene slipper å spørre om dem på nytt. Lagres som text + valideres
+    // med zod-enums i app-laget (holder migrasjonen additiv og enkel).
+    mainGoal: text("main_goal"), // leads | sales | awareness | recruitment
+    weeklyTime: text("weekly_time"), // 1-2h | 3-5h | 5h+
+    strengths: text("strengths"), // writing | speaking | visual | mixed
     customContext: text("custom_context"), // Extra context for AI prompts
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")

@@ -1,11 +1,11 @@
-import { quickActions, tools } from "@/lib/constants";
+import { quickActions } from "@/lib/constants";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  Heading,
+  PageHeader,
 } from "@poynt/ui";
 import { Button } from "@poynt/ui";
 import { Icon } from "@poynt/ui/icons";
@@ -14,7 +14,10 @@ import Link from "next/link";
 export default function DashboardPage() {
   return (
     <div className="flex flex-col gap-8">
-      <Heading size="h1">Velkommen til On Poynt!</Heading>
+      <PageHeader
+        title="Velkommen til On Poynt!"
+        description="Verktøyene og innholdet ditt – samlet på ett sted."
+      />
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {quickActions.map((action) => (
@@ -57,7 +60,7 @@ export default function DashboardPage() {
                 komplett strategi.
               </CardDescription>
               <Button variant="link" className="mt-2 h-auto p-0" asChild>
-                <Link href="/tools/channel-guide">
+                <Link href="/on-poynt/verktoy/kanalveileder">
                   Prøv kanalveilederen
                   <Icon name="arrow-right" className="ml-1 h-4 w-4" />
                 </Link>

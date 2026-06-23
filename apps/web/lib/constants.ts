@@ -1,32 +1,21 @@
 import type { IconName } from "@poynt/ui/icons";
-import type { MedalConfigItem } from "./types";
 
-export const mainNavItems: {
+export type NavItem = {
   title: string;
   url: string;
   icon: IconName;
   requiresAi?: boolean;
-}[] = [
-  {
-    title: "Hjem",
-    url: "/on-poynt/oversikt",
-    icon: "home",
-  },
-  {
-    title: "Bedrifter",
-    url: "/on-poynt/bedrifter",
-    icon: "building-2",
-  },
-  {
-    title: "Artiklar",
-    url: "/on-poynt/artiklar",
-    icon: "newspaper",
-  },
-  {
-    title: "Kurs",
-    url: "/on-poynt/kurs",
-    icon: "graduation-cap",
-  },
+};
+
+/** Øverst, alene (ikke et «verktøy»). */
+export const homeNavItem: NavItem = {
+  title: "Hjem",
+  url: "/on-poynt/oversikt",
+  icon: "home",
+};
+
+/** Gruppe «Verktøy» — kun AI-verktøyene (tier-låst). */
+export const toolNavItems: NavItem[] = [
   {
     title: "Ressurser",
     url: "/on-poynt/ressurser",
@@ -64,14 +53,25 @@ export const mainNavItems: {
   },
 ];
 
-export const settingsNavItems: {
-  title: string;
-  url: string;
-  icon: IconName;
-}[] = [
+/** Gruppe «Læring» — innhold partneren publiserer. */
+export const learnNavItems: NavItem[] = [
   {
-    title: "Bedrift",
-    url: "/on-poynt/innstillinger/arbeidsomrade",
+    title: "Artiklar",
+    url: "/on-poynt/artiklar",
+    icon: "newspaper",
+  },
+  {
+    title: "Kurs",
+    url: "/on-poynt/kurs",
+    icon: "graduation-cap",
+  },
+];
+
+/** Gruppe «Konto» — min bedrift og abonnement. */
+export const accountNavItems: NavItem[] = [
+  {
+    title: "Min bedrift",
+    url: "/on-poynt/bedrifter",
     icon: "building-2",
   },
   {
@@ -104,7 +104,6 @@ export const tools: {
   title: string;
   description: string;
   href: string;
-  gradient: string;
   benefits: string[];
 }[] = [
   {
@@ -113,7 +112,6 @@ export const tools: {
     description:
       "Finn de beste markedsføringskanalene for din bedrift basert på målgruppe og ressurser.",
     href: "/on-poynt/verktoy/kanalveileder",
-    gradient: "from-sky-400/80 to-teal-400/80",
     benefits: ["Personlig analyse", "Prioritert liste"],
   },
   {
@@ -122,7 +120,6 @@ export const tools: {
     description:
       "Lag en komplett markedsplan med innholdsstrategi og publiseringsfrekvens.",
     href: "/on-poynt/verktoy/markedsplan",
-    gradient: "from-violet-400/80 to-indigo-400/80",
     benefits: ["Skreddersydd", "Ukentlig plan"],
   },
   {
@@ -130,7 +127,6 @@ export const tools: {
     title: "Si nei-generator",
     description: "Avslå forespørsler profesjonelt uten å brenne broer.",
     href: "/on-poynt/verktoy/avslag-generator",
-    gradient: "from-amber-400/80 to-orange-400/80",
     benefits: ["Profesjonelt", "Vennlig tone"],
   },
   {
@@ -139,7 +135,6 @@ export const tools: {
     description:
       "Planlegg innholdet ditt gjennom året med AI-genererte forslag.",
     href: "/on-poynt/verktoy/arsplanlegger",
-    gradient: "from-emerald-400/80 to-teal-400/80",
     benefits: ["12 måneder", "Sesongbasert"],
   },
   {
@@ -148,7 +143,6 @@ export const tools: {
     description:
       "Last opp ein podkast-episode og få blogginnlegg, sosiale postar og kapittelmerke automatisk.",
     href: "/on-poynt/verktoy/podcast-til-innhald",
-    gradient: "from-pink-400/80 to-rose-400/80",
     benefits: ["Whisper AI", "3 format på ein gong"],
   },
 ];
@@ -240,33 +234,6 @@ export const stats: {
     href: "/admin/users",
     icon: "users",
     disabled: true,
-  },
-];
-
-export const medalConfig: MedalConfigItem[] = [
-  {
-    icon: "trophy",
-    emoji: "🥇",
-    gradient: "from-yellow-500/20 to-amber-500/20",
-    border: "border-yellow-500/50",
-    iconColor: "text-yellow-500",
-    progressColor: "bg-yellow-500",
-  },
-  {
-    icon: "medal",
-    emoji: "🥈",
-    gradient: "from-slate-300/20 to-slate-400/20",
-    border: "border-slate-400/50",
-    iconColor: "text-slate-400",
-    progressColor: "bg-slate-400",
-  },
-  {
-    icon: "award",
-    emoji: "🥉",
-    gradient: "from-orange-400/20 to-orange-500/20",
-    border: "border-orange-500/50",
-    iconColor: "text-orange-500",
-    progressColor: "bg-orange-500",
   },
 ];
 

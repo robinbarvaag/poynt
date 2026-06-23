@@ -9,11 +9,27 @@
  *   bun run --cwd apps/web payload run scripts/seed-membership-application.ts
  */
 import config from "@payload-config";
+import { asc, db, eq } from "@poynt/planner-db";
+import { plannerIndustry } from "@poynt/planner-db/schema";
 import { getPayload } from "payload";
 import { richText } from "./_lexical";
 
 const FORM_TITLE = "Medlemskapssøknad";
 const PAGE_SLUG = "bli-medlem";
+
+// Bransje-valg hentes fra planner_industry slik at value = industry-id (matcher
+// det godkjenning forhåndsutfyller i bedriftsprofilen). Skjemaet er fortsatt
+// partner-redigerbart etterpå.
+const industries = await db
+  .select({ id: plannerIndustry.id, name: plannerIndustry.name })
+  .from(plannerIndustry)
+  .where(eq(plannerIndustry.isActive, true))
+  .orderBy(asc(plannerIndustry.sortOrder));
+
+const bransjeOptions = industries.map((i) => ({
+  label: i.name,
+  value: i.id,
+}));
 
 // Maskinnavn holdes lowercase – e-post-hook-en matcher feltnavn case-insensitivt.
 const formFields = [
@@ -99,6 +115,52 @@ const formFields = [
     blockType: "textarea",
     name: "ombedriften",
     label: "Skriv litt om bedriften eller deg selv",
+    required: false,
+    width: 100,
+  },
+  // On Poynt-profil – valgfritt, men forhåndsutfyller verktøyene når medlemmet
+  // tas i bruk, så de slipper å fylle inn det samme på nytt.
+  ...(bransjeOptions.length > 0
+    ? [
+        {
+          blockType: "select",
+          name: "bransje",
+          label: "Hvilken bransje er du i?",
+          required: false,
+          width: 50,
+          options: bransjeOptions,
+        },
+      ]
+    : []),
+  {
+    blockType: "select",
+    name: "bedriftsstorrelse",
+    label: "Hvor stor er bedriften?",
+    required: false,
+    width: 50,
+    options: [
+      { label: "Enmannsbedrift", value: "solo" },
+      { label: "2–10 ansatte", value: "small" },
+      { label: "11–50 ansatte", value: "medium" },
+      { label: "50+ ansatte", value: "large" },
+    ],
+  },
+  {
+    blockType: "select",
+    name: "malgruppetype",
+    label: "Hvem selger du til?",
+    required: false,
+    width: 50,
+    options: [
+      { label: "Bedrifter (B2B)", value: "b2b" },
+      { label: "Forbrukere (B2C)", value: "b2c" },
+      { label: "Begge deler", value: "both" },
+    ],
+  },
+  {
+    blockType: "textarea",
+    name: "malgruppe",
+    label: "Beskriv kort hvem kundene dine er",
     required: false,
     width: 100,
   },

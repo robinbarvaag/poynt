@@ -547,7 +547,7 @@ export function GuideQuiz({
               type="button"
               onClick={handleAnalyze}
               disabled={isLoading}
-              className="min-w-40 bg-linear-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+              className="min-w-40"
             >
               {isLoading ? (
                 <>
@@ -564,10 +564,7 @@ export function GuideQuiz({
                   Analyserer...
                 </>
               ) : (
-                <>
-                  <Icon name="sparkles" className="size-4 mr-2" />
-                  Se resultater
-                </>
+                "Se resultater"
               )}
             </Button>
           )}
