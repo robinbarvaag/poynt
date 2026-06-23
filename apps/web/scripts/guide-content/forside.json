@@ -1,0 +1,164 @@
+{
+  "slug": "forside",
+  "title": "On Poynt - forside",
+  "icon": "🎯",
+  "section": "forside",
+  "category": null,
+  "lede": "Velkommen til On Poynt, medlemskapet for deg som er ansvarlig for markedsføring eller kommunikasjon i en bedrift. Hold deg oppdatert og få et nettverk av andre fagpersoner.",
+  "coverDescription": "flatlay på trebord med mobil, datamus, fargestifter/tusjer og en notatbok med håndtegnede notater",
+  "content": [
+    {
+      "type": "callout",
+      "tone": "ink",
+      "icon": "💡",
+      "blocks": [
+        { "heading": "Start her:", "level": 3 },
+        { "list": [
+          "Meld deg inn i Facebook-gruppen",
+          "Sett deg inn i gruppereglene i Facebook-gruppen.",
+          "Kontakt hei@poynt.no hvis du lurer på noe!",
+          "Del dine spørsmål og utfordringer i Facebook-gruppen for å høre hva vi og de andre medlemmene kan hjelpe deg med!",
+          "Kom gjerne med innspill på ønskede kurs."
+        ] }
+      ]
+    },
+    {
+      "type": "bookmark",
+      "items": [
+        { "url": "https://www.youtube.com/watch?v=FrhFvIsq86g", "title": "Bli kjent med Notion som verktøy her", "description": "bli kjent med Notion som verktøy her. Notion er veldig gøy å bruke for å organisere livet ditt eller jobben din!" }
+      ]
+    },
+    {
+      "type": "callout",
+      "tone": "ink",
+      "icon": "📣",
+      "blocks": [
+        { "heading": "Neste gratiskurs/webinar:", "level": 3 },
+        "Planlegging av innhold",
+        "Dato kommer",
+        { "heading": "Kurs som har vært:", "level": 3 },
+        "(foreslå gjerne reprise om du ikke fikk det med deg)",
+        { "list": [
+          "Annonsering på Facebook og Instagram, med Mari Hult",
+          "AI for bedrifter",
+          "Instagram",
+          "LinkedIn",
+          "AI og Instagram",
+          "Siste nytt om AI og LinkedIn"
+        ] }
+      ]
+    },
+    {
+      "type": "callout",
+      "tone": "ink",
+      "icon": "💡",
+      "blocks": [ { "heading": "Generelt", "level": 2 } ]
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        { "list": [
+          "💡 Inspirasjon og trender",
+          "👋 Kommunikasjon",
+          "🖥️ AI",
+          "👷 Til gründere",
+          "📱 Apper som anbefales",
+          "📅 Innholdsplanlegger"
+        ] }
+      ]
+    },
+    {
+      "type": "callout",
+      "tone": "ink",
+      "icon": "💡",
+      "blocks": [ { "heading": "Kanaler", "level": 2 } ]
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        { "list": [
+          "Instagram",
+          "LinkedIn",
+          "Facebook",
+          "Youtube",
+          "Pinterest",
+          "Canva - tips og triks"
+        ] }
+      ]
+    },
+    {
+      "type": "callout",
+      "tone": "ink",
+      "icon": "💡",
+      "blocks": [ { "heading": "Nedlastbare maler", "level": 2 } ]
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        { "list": [
+          "📅 Innholdsplanlegger",
+          "👉 Last ned markedsplan her"
+        ] }
+      ]
+    },
+    {
+      "type": "callout",
+      "tone": "ink",
+      "icon": "💡",
+      "blocks": [ { "heading": "Dette inspirerer akkurat nå:", "level": 2 } ]
+    },
+    {
+      "type": "bookmark",
+      "items": [
+        { "url": "https://trends.pinterest.com/", "title": "Pinterest Trends", "description": "se hva som beveger seg på trendfronten her inne" },
+        { "url": "https://neatnik.net/calendar/?year=2026", "title": "Nytt år! Print denne kalenderen!", "description": "Print denne kalenderen!" },
+        { "url": "https://www.youtube.com/watch?v=I49YEojjtf8", "title": "Denne videoen med CapCut-hacks", "description": "denne videoen med CapCut-hacks" },
+        { "url": null, "title": "At bedrifter omfavner UGC/brukergenerert innhold.", "description": "At bedrifter omfavner UGC/brukergenerert innhold." },
+        { "url": "https://www.hootsuite.com/research/social-trends?srsltid=AfmBOoqnV4V8m4rUJFgISgDsD4qjMThD96kJjiNdWp-LU8zBoWV21SW5", "title": "Denne rapporten", "description": "Denne rapporten (Hootsuite social trends)" },
+        { "url": "https://www.linkedin.com/in/mattisbaarnes/", "title": "Mattis Bårner på LinkedIn", "description": "Denne fyren på LinkedIn! Mattis Bårner er bonde, morsom og uformell på LinkedIn. Gøy!" }
+      ]
+    },
+    {
+      "type": "image",
+      "width": "normal",
+      "caption": "LinkedIn-innlegg fra Mattis Bårnes: «Seks grove generaliseringer av ulike typer bønder» (84 reaksjoner, 85 kommentarer)",
+      "placeholder": "skjermbilde av LinkedIn-innlegg fra Mattis Bårnes med dokumentkarusell «Seks typer bønder»"
+    },
+    {
+      "type": "bookmark",
+      "items": [
+        { "url": null, "title": "Pinterest predicts 💕", "description": "Pinterest predicts (trend-rapport fra selveste Pinterest)" },
+        { "url": null, "title": "Podkasten Kom-podden", "description": "Podkasten Kom-podden - laget av Kommunikasjonsforeningen" },
+        { "url": "https://open.spotify.com/episode/62lm2rAtGVQbndV1DLv9WX?si=d431a8bcb37041e7", "title": "Podkast-episode om effektmåling", "description": "Denne podkast-episioden om effektmåling" },
+        { "url": "https://public.work/", "title": "public.work", "description": "Denne nettsiden (du kan printe hva som helst fra denne siden. Heng på veggen din eller ha som bakgrunnsbilde)" }
+      ]
+    },
+    {
+      "type": "callout",
+      "tone": "ink",
+      "icon": "💡",
+      "blocks": [ { "heading": "Gratis-ressurser til deg:", "level": 2 } ]
+    },
+    {
+      "type": "download",
+      "items": [
+        { "title": "40 ideer til Linkedin-innhold", "description": "40 ideer til LinkedIn-innhold.pdf (4282.7KB)", "kind": "pdf" },
+        { "title": "Kom i gang med Pinterest - tips for å lykkes 👇", "description": "Produkt Tips for å lykkes med Pinterest.pdf (17304.7KB)", "kind": "pdf" },
+        { "title": "75 innholdsideer til Instagram 👇", "description": "Produkt Innholdsideer til Instagram.pdf (20208.3KB)", "kind": "pdf" }
+      ]
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        { "heading": "Mer:", "level": 3 },
+        { "list": [
+          "🔑 Keywords",
+          "🔖 Markedsplan",
+          "🚀 Markedsstrategi",
+          "🎯 Mine mål",
+          "✴️ Vilkår og regler On Poynt"
+        ] }
+      ]
+    }
+  ]
+}

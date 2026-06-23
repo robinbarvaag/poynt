@@ -1,0 +1,98 @@
+{
+  "slug": "apper-som-anbefales",
+  "title": "Apper som anbefales",
+  "icon": null,
+  "section": "generelt",
+  "category": "Apper",
+  "lede": "Husk å laste ned Notion-appen både på Mac/PC og telefon",
+  "coverDescription": "nærbilde av en mobilskjerm med rader av fargerike app-ikoner",
+  "content": [
+    {
+      "type": "richText",
+      "blocks": [
+        { "heading": "Videoredigering:", "level": 3 },
+        { "list": ["InShot", "Capcut", "Splice"] }
+      ]
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        { "heading": "Teksting av video:", "level": 3 },
+        { "list": [
+          "Capcut",
+          "MixCaptions (AI tesker for deg. Funker best)",
+          "Captions (AI tekster for deg. Funker bra)"
+        ] }
+      ]
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        { "heading": "AI:", "level": 3 },
+        { "list": ["ChatGPT", "Google Gemini", "Claude", "Midjourney (bilder)"] }
+      ]
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        { "heading": "Nedlasting av publiserte reels på Instagram uten vannmerke:", "level": 3 },
+        { "list": ["Repost"] }
+      ]
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        { "heading": "Nedlasting av publiserte TikToks uten vannmerke:", "level": 3 },
+        { "list": ["TikSave"] }
+      ]
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        { "heading": "Andre apper som hjelper i produksjon av innhold til sosiale medier:", "level": 3 },
+        { "list": ["TikTok Studio", "YT Studio"] }
+      ]
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        { "heading": "Influenser-apper for å enten få oppdrag eller gi oppdrag:", "level": 3 },
+        { "list": ["Dream 2.0", "Inzpire.me", "Brandheroes"] }
+      ]
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        { "heading": "For Meta:", "level": 3 },
+        { "list": ["Business Suite (app til mobil)"] }
+      ]
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        { "heading": "Samhandling i team:", "level": 3 },
+        { "list": ["Slack", "Notion"] }
+      ]
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        { "heading": "Filoppbevaring og deling av filer", "level": 3 },
+        { "list": ["Google Drive", "Dropbox", "WeTransfer (sending av filer)"] }
+      ]
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        { "heading": "Inspirasjon", "level": 3 },
+        { "list": ["Pinterest", "Shuffles (laget av Pinterest)"] }
+      ]
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        "Firelies.ai for å ta opp møter"
+      ]
+    }
+  ]
+}

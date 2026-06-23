@@ -1,0 +1,63 @@
+{
+  "slug": "linkedin",
+  "title": "LinkedIn",
+  "icon": "💼",
+  "section": "kanaler",
+  "category": "LinkedIn",
+  "lede": "Trykk på pilene for utvide emnet du vil lære mer om.",
+  "coverDescription": "Skjermbilde av en LinkedIn-profilside på en laptop foran grønne planter. LinkedIn-logoen vises nederst til venstre som sideikon.",
+  "content": [
+    { "type": "columns", "columns": [
+      { "type": "text", "blocks": [
+        { "heading": "LinkedIn-annonser:", "level": 3 },
+        "Vi mener dette er en ekstremt undervurdert annonse-platform for deg som selger til bedrifter.",
+        "Ikke bry deg om anbefalingene fra LinkedIn om budsjett!",
+        "https://business.linkedin.com/marketing-solutions/ads",
+        "Start på denne linken for å forstå verktøyet og lære deg det mest grunnleggende.",
+        "Annonser i minst en måned for best effekt."
+      ] },
+      { "type": "text", "blocks": [
+        { "heading": "Video på LinkedIn", "level": 3 },
+        "Prøv å bruk 9:16-format på video. Eventuelt 4:5-format.",
+        "Vi anbefaler å tekste video. Beste app for å gjøre det enkelt på mobilen: MixCaptions (pleier til og med å være nokså godt på fange opp dialekter. Litt må du redigere i teksten, som for eks. egenavn.",
+        "Vær obs på at det er en tynn stripe nederst som blir dekket av teksten din, når noen ser videoen din på mobil."
+      ] }
+    ] },
+    { "type": "richText", "blocks": [
+      { "heading": "Noen tips:", "level": 3 },
+      { "list": [
+        "Last ned skrivebords-appen til LinkedIn om du bruker Windows, og på mobilen: https://members.linkedin.com/apps",
+        "Følg gjerne LinkedIn på YouTube. De deler masse gode tips og råd der.",
+        "Lær mer om LinkedIn, rett fra LinkedIn selv: https://www.linkedin.com/learning/",
+        "Sjekk ut www.business.linkedin.com"
+      ] }
+    ] },
+    { "type": "image", "width": "full", "caption": "LinkedIn For Business – Tools for success: Recruiter, Jobs, Campaign Manager, Sales Navigator og Premium Business, hver med kort beskrivelse og «Learn more»-lenke.", "placeholder": "skjermbilde av LinkedIn For Business «Tools for success»-oversikt med fem verktøy" },
+    { "type": "richText", "blocks": [
+      { "heading": "Profilen din:", "level": 3 },
+      "Legg til ferdigheter, da kan dine kontakter \"anerkjenne deg\" for disse, slik at det er enda mer troverdig at du kan det du sier at du kan. Dette gjør deg også søkbar for rekrutterere og andre.",
+      "1128 x 191 piksler for forsidebilde (mars 2025) Ikke plasser viktig tekst eller bilder helt til venstre i designet, det kan bli delvis skjult av profilbildet.",
+      "Be gjerne kolleger, bekjente og tidligere kudner om anbefalinger av deg. Hva har du hjulpet dem med? Hvordan er det å jobbe med deg?",
+      "Bruk tid på Om-delen på profilen din. Skriv personlig og ta det viktiste først. Ikke det som er viktig for deg, men det som er viktig for målgruppen din.",
+      "Tittelen din, som står like under profilbildet ditt er viktig. Den kommer opp når du kommenterer på andres innhold, og den vises nesten over alt på LinkedIn. Før sto det \"Daglig leder i Poynt\" der på min. Det sier veldig lite om hva jeg kan, og 99,99 av Norges befolkning vet ikka hva Poynt driver med heller. Da er det bedre at jeg skriver \"Journalist og markedsfører som er opptatt av AI. Holder foredrag.\" Da skjønner folk hva jeg driver med og hva jeg kan hjelpe dem med."
+    ] },
+    { "type": "richText", "blocks": [
+      { "heading": "Bedriftsprofil:", "level": 3 },
+      "1128 x 191 piksler for forsidebilde (februar 2025) Ikke plasser viktig teskt eller bilder helt til venstre i designet, det kan bli delvis skjult av profilbildet."
+    ] },
+    { "type": "richText", "blocks": [
+      "Se denne videoen med Fredrik Fornes hvis du lurer på LinkedIn er noe for deg:"
+    ] },
+    { "type": "video", "url": null, "caption": "YouTube-video: «Tre steg for å lykkes på LinkedIn» av Fredrik Fornes / For Overhuset." },
+    { "type": "richText", "blocks": [
+      "Til deg som ønsker å annonsere på LinkedIn:"
+    ] },
+    { "type": "video", "url": null, "caption": "YouTube-video: «How To Advertise Your Business On LinkedIn» (LINKEDIN ADS)." },
+    { "type": "richText", "blocks": [
+      "Her finner du vår nedlastbare fil med ideer til LinkedIn-innhold:"
+    ] },
+    { "type": "download", "items": [
+      { "title": "40 ideer til LinkedIn-innhold.pdf", "description": "4282.7KB", "kind": "pdf" }
+    ] }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "slug": "innholdsplanlegger",
+  "title": "Innholdsplanlegger",
+  "icon": "📅",
+  "section": "maler",
+  "category": "Innholdsplanlegger",
+  "lede": "Lag en kopi av denne siden og lagre den i din Notion-konto. Dette er bare et “skall” som du selv kan tilpasse. Du kan gjerne slette de kanalene du ikke er på, legge til andre filter, navngi filtrene selv, skrive dine egen overskrifter o.s.v.",
+  "coverDescription": "lyst cover-bilde av en arkitekt- eller plantegning med blyantnotater og målangivelser",
+  "content": [
+    {
+      "type": "richText",
+      "blocks": [
+        { "list": ["For å duplisere siden: https://www.notion.com/help/duplicate-public-pages"] }
+      ]
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        { "heading": "Kanaler", "level": 2 },
+        "Oversikt over kanalene du publiserer på, med fordeling i prosent."
+      ]
+    },
+    {
+      "type": "gallery",
+      "layout": "grid",
+      "caption": "Kanaler-database (galleri-visning): kort per kanal med andel i prosent",
+      "items": [
+        { "placeholder": "Facebook – 50.00%" },
+        { "placeholder": "TikTok – 50.00%" },
+        { "placeholder": "Instagram – 37.50%" },
+        { "placeholder": "Linkedin – 33.33%" },
+        { "placeholder": "YouTube – 25.00%" },
+        { "placeholder": "Nyhetsbrev" },
+        { "placeholder": "Andre kanaler" }
+      ]
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        { "heading": "Innhold", "level": 2 },
+        "Innholdsplan (board-visning) gruppert etter status: Ide, Påbegynt, Planlagt, Publisert. Hvert kort har felt for navn på innholdet, kanal og dato."
+      ]
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        { "heading": "Produksjon", "level": 2 },
+        "Board-visning gruppert etter innholdstype: Video, Bilde, Karusell, Kort video. Hvert kort har felt for navn på innholdet, kanal, dato og type."
+      ]
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        { "heading": "Kalender", "level": 2 },
+        "Månedskalender-visning av innholdet (eksempel viser januar 2026), der planlagt og publisert innhold legger seg på datoen sin."
+      ]
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        { "heading": "Innhold", "level": 2 },
+        "Tabell-visning av innholds-databasen med kolonnene Name, Status, Type, Dato, Kanal og URL."
+      ]
+    }
+  ]
+}

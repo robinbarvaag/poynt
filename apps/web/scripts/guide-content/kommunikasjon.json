@@ -1,0 +1,36 @@
+{
+  "slug": "kommunikasjon",
+  "title": "Kommunikasjon",
+  "icon": "💬",
+  "section": "generelt",
+  "category": "Kommunikasjon",
+  "lede": null,
+  "coverDescription": "Person i lys skjorte som holder en penn, sittende overfor en annen person i en blå stol – en samtale-/møtesituasjon i dempede toner.",
+  "content": [
+    { "type": "callout", "tone": "ink", "icon": "🔑",
+      "blocks": [ "Krisekommunikasjon:" ] },
+    { "type": "richText", "blocks": [
+      { "heading": "Åtte nøkkelpunkter for krisekommunikasjon", "level": 2 },
+      { "list": [
+        "Kanalstrategi — Etabler og utnytt egne kommunikasjonskanaler effektivt. Ha en gjennomtenkt strategi for både nettsider og sosiale medier, der hver kanal har sin tydelige rolle.",
+        "Levende kommunikasjon — Unngå gjentakelser av samme budskap. Utvikle og tilpass kommunikasjonen kontinuerlig for å holde målgruppens oppmerksomhet, samtidig som informasjonen forblir presis og oppdatert.",
+        "Digital balanse — Finn en god balanse mellom effektiv digital kommunikasjon og behovet for menneskelig kontakt. Vær oppmerksom på at kreative prosesser og samarbeid kan bli mer utfordrende i en heldigital hverdag.",
+        "Intern kommunikasjon — Prioriter hyppig og tydelig internkommunikasjon for å sikre at alle ansatte føler seg trygge og velinformerte.",
+        "Proaktiv mediehåndtering — Del informasjon aktivt og raskt med mediene. Dette kan redusere antall henvendelser og bygge et bedre forhold til journalister.",
+        "Språkbruk — Bruk et enkelt og tydelig språk som alle målgrupper kan forstå.",
+        "Etikk og personvern — Forbered etiske retningslinjer og personvernhensyn på forhånd. Vurder nøye hvilken informasjon som skal deles offentlig.",
+        "Tillitsbygging — Jobb systematisk med å bygge og opprettholde tillit hos målgruppene. God tillit er avgjørende for effektiv krisekommunikasjon."
+      ] }
+    ] },
+    { "type": "richText", "blocks": [
+      { "heading": "For å lykkes med krisekommunikasjon er det viktig å evaluere jevnlig. Vurder spesielt:", "level": 3 },
+      { "list": [
+        "Om planer og strategi fungerer tilfredsstillende og er oppdatert",
+        "Ressursbehov og sårbarheter",
+        "Kanalmiks og målgruppedekning - treffer du dem som trenger budskapet?",
+        "Egen evne til å nå spesielle målgrupper",
+        "Gå gjennom eller øv på samarbeidsrutiner med relevante aktører"
+      ] }
+    ] }
+  ]
+}

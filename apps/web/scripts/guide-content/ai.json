@@ -1,0 +1,71 @@
+{
+  "slug": "ai",
+  "title": "AI",
+  "icon": "🖥️",
+  "section": "generelt",
+  "category": "AI",
+  "lede": null,
+  "coverDescription": "robothånd som rekker ut over en stjernehimmel/galakse-bakgrunn",
+  "content": [
+    {
+      "type": "richText",
+      "blocks": [
+        "Lag deg konto på ChatGPT eller Claude for å bli kjent med verktøyet!",
+        "Lag mapper/prosjekter for å samle alle samtaler som handler om det samme."
+      ]
+    },
+    {
+      "type": "bookmark",
+      "items": [
+        { "url": null, "title": "TopAi-Tools", "description": "samler mange smart AI-verktøy for deg" }
+      ]
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        { "heading": "Løse oppgaver:", "level": 3 },
+        "Claude til sortering av data, statistikk, analyse og mer komplekse oppgaver.",
+        "ChatGPT til organisering, tekst, tabeller, planlegging og samtaler.",
+        "Google Gemini, samme som ChatGPT.",
+        "Otter.ai til møtereferater, lange lydopptak som skal gjøres om til tekst og oppsummering/sortering av ting jeg leser opp.",
+        "Fireflies er også konge for samme formål!",
+        "Integrert AI i Google sin e-post-klient eller Fyxer for e-post!"
+      ]
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        { "heading": "Google-utvidelser", "level": 3 },
+        "Merlin og Grammarly."
+      ]
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        { "heading": "Visuelt:", "level": 3 },
+        "Midjourney for bilder.",
+        "App for å lage video: Invideo AI",
+        "Canva begynner også å bli bedre på AI nå"
+      ]
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        { "heading": "Annet:", "level": 3 },
+        "NotebookLM gjør om en hvilken som helst fil til en podkast-episode (engelsk podkast)."
+      ]
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        { "heading": "Gratiskurs:", "level": 3 }
+      ]
+    },
+    {
+      "type": "bookmark",
+      "items": [
+        { "url": null, "title": "Kurs - Digital Norway", "description": "Digital Norway" }
+      ]
+    }
+  ]
+}

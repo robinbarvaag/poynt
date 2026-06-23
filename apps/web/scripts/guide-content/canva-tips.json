@@ -1,0 +1,272 @@
+{
+  "slug": "canva-tips",
+  "title": "Canva - tips og triks",
+  "icon": "📸",
+  "section": "kanaler",
+  "category": "Canva",
+  "lede": "Canvas egen side for nye funksjoner 👍",
+  "coverDescription": "Flatlay-bilde av en seng/tekstil med en laptop som viser et Canva-design («Velkommen til Poynt»), sett ovenfra.",
+  "content": [
+    {
+      "type": "richText",
+      "blocks": [
+        { "heading": "Slik skaper du liv i en karusell:", "level": 2 }
+      ]
+    },
+    {
+      "type": "columns",
+      "columns": [
+        {
+          "type": "text",
+          "blocks": [
+            "⭐ Opprett et design i Canva.",
+            "Legg til tekst, bilder eller grafiske elementer. Trykk på det du vil animere og velg «Animer» i menyen. Finn en animasjon du liker og juster gjerne med intensiteten på den.",
+            "Dupliser designet ditt og lag flere sider for karusellen din.",
+            "Last ned de sidene som har animasjoner som en mp4-fil.",
+            "(Last ned én og én side.)",
+            "Last ned sidene uten animasjoner som vanlige bilder.",
+            "Gå til Instagram for å laste opp flere bilder/videoer på likt.",
+            "Marker de du vil laste opp i riktig rekkefølge. Vi har brukt to videoer i vår karusell.",
+            "Legg til en lyd/musikk, og publiser karusellen din.",
+            "(Husk å plassere tekst eller viktige elementer i et kvadrat i senter hvis du bruker 4:5-format.)",
+            "Dette er et eksempel på ting du kan lære i vårt nye medlemskap, On Poynt. Send melding hvis du vil ha informasjon om det!"
+          ]
+        },
+        {
+          "type": "image",
+          "caption": null,
+          "placeholder": "Canva-video som viser en animert karusell med teksten «Slik skaper du liv i en karusell»."
+        }
+      ]
+    },
+    {
+      "type": "divider",
+      "label": ""
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        { "heading": "Slik lager du mockups i Canva:", "level": 2 }
+      ]
+    },
+    {
+      "type": "columns",
+      "columns": [
+        {
+          "type": "text",
+          "blocks": [
+            "Gå til apps og søk opp mockups. Legg til denne appen. Da vil den legge seg i ikonene på venstre side i Canva.",
+            "Søk opp det du har lyst til å lage en mockup av. For eksempel en kopp med eget design, t-skjorte, nettside, sosiale medie-kanal og mye mer.",
+            "Velg en passende mockup og dra ønsket bilde over i designet.",
+            "Du kan lage både video og bilder på denne måten."
+          ]
+        },
+        {
+          "type": "image",
+          "caption": null,
+          "placeholder": "Mockup-video i Canva: en hånd som drar et bilde ut av en trekloss/mockup."
+        }
+      ]
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        "Noen eksempler:"
+      ]
+    },
+    {
+      "type": "gallery",
+      "layout": "grid",
+      "caption": "*Klikk på bildene å se det i full størrelse",
+      "items": [
+        { "placeholder": "Mockup: nettbrett/laptop på skrivebord med notatbok og kaffe." },
+        { "placeholder": "Mockup: rosa kunstplakat liggende på bord med smykker rundt." },
+        { "placeholder": "Mockup: mobiltelefon stående på lyst bord som viser et design." }
+      ]
+    },
+    {
+      "type": "divider",
+      "label": ""
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        { "heading": "Triks for å endre farger til en ny palett i et eksisterende design uten å måtte endre én og én farge:", "level": 2 }
+      ]
+    },
+    {
+      "type": "columns",
+      "columns": [
+        {
+          "type": "text",
+          "blocks": [
+            "Finn en fargepalett på for eksempel Pinterest. Last denne opp i eksisterende design.",
+            "Høyreklikk på bildet og velg \"apply colors to page\". Hver gang du trykker på denne vil du få nye alternativer til fargebruk.",
+            "På denne måten kan du enkelt leke deg med forskjellige farger uten å måtte bytte farge på ett og ett element."
+          ]
+        },
+        {
+          "type": "image",
+          "caption": "*Klikk på bildet for å se det i full størrelse",
+          "placeholder": "Canva-design med selvomsorgs-mal og en fargepalett-meny («apply colors to page») åpen."
+        }
+      ]
+    },
+    {
+      "type": "divider",
+      "label": ""
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        { "heading": "Triks for å få bilde inn i en font:", "level": 2 }
+      ]
+    },
+    {
+      "type": "columns",
+      "columns": [
+        {
+          "type": "text",
+          "blocks": [
+            "Kunne du av og til tenkt deg å ha et bilde inn i favorittfonten din? Da kan denne appen hjelpe deg.",
+            "Gå til apps og søk på FontFrame. Legg til denne appen. Da vil den legge seg i ikonene på venstre side i Canva.",
+            "Her kan du velge forskjellige fonter og laste opp bilder."
+          ]
+        },
+        {
+          "type": "image",
+          "caption": "*Klikk på bildet for å se det i full størrelse",
+          "placeholder": "FontFrame-app i Canva: ordet «ITALIA» fylt med bilder/teksturer i fonten."
+        }
+      ]
+    },
+    {
+      "type": "divider",
+      "label": ""
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        { "heading": "Triks for å få alle elementer likestilt:", "level": 2 }
+      ]
+    },
+    {
+      "type": "columns",
+      "columns": [
+        {
+          "type": "text",
+          "blocks": [
+            "Syns du det er vanskelig å få alle elementer til å ha likt mellomrom mellom seg? Her er et enkelt triks for å få ting til å se ryddig ut:",
+            "Marker alle elementene du ønsker å rydde opp i. Klikk på \"position\" øverst til høyre og så \"tidy up\" til venstre i vinduet som åpner seg."
+          ]
+        },
+        {
+          "type": "image",
+          "caption": null,
+          "placeholder": "Canva-arbeidsflate med flere fargede bokser og «Position / Tidy up»-menyen åpen."
+        }
+      ]
+    },
+    {
+      "type": "divider",
+      "label": ""
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        { "heading": "Nyttige hurtigtaster i Canva:", "level": 2 }
+      ]
+    },
+    {
+      "type": "columns",
+      "columns": [
+        {
+          "type": "text",
+          "blocks": [
+            "For å se alle lagene du har laget i et enkelt design (på Mac):",
+            "Trykk Option + 1",
+            "Da får du opp dette bildet med oversikt over alle lagene du har i designet ditt.",
+            "Andre nyttige hurtigtaster for mac:",
+            { "list": [
+              "Legg til linje",
+              "Bare store bokstaver: Command + Shift + K",
+              "Marker alle elementer: Command + A",
+              "\"Group\" elementer: Command + G",
+              "\"UnGroup\" elementer: Shift + Command + G"
+            ] }
+          ]
+        },
+        {
+          "type": "image",
+          "caption": null,
+          "placeholder": "Canva-grensesnitt som viser lag-oversikten («Position / Layers») med alle lagene i designet."
+        }
+      ]
+    },
+    {
+      "type": "divider",
+      "label": ""
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        { "heading": "Video som viser deg hvordan du kan masseopprette innhold i Canva:", "level": 2 }
+      ]
+    },
+    {
+      "type": "video",
+      "url": null,
+      "caption": "YouTube-video: «Bulk Create Content with ChatGPT & Canva» (CREATE FASTER)."
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        { "list": [
+          "Opprett et Canva Doc på framsiden",
+          "Trykk på plusstegnet og bruk Magic Write til å lage for eks. ti tips til Instagram.",
+          "Høyreklikk for å oversette.",
+          "Kopier hele teksten inn i et Excel-ark eller Google sheets",
+          "Gå tilbake til Canva - Hjem.",
+          "Trykk på sosiale medier og søk på story for eks.",
+          "Velg et design som kan passe med innholdet og åpne det.",
+          "Trykk på apper om du ikke allerede har masseopprettelse som en app.",
+          "Trykk der og importer innholdet manuelt.",
+          "Tilpass i din merkevarestil."
+        ] }
+      ]
+    },
+    {
+      "type": "divider",
+      "label": ""
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        { "heading": "Artige funksjoner i Canva", "level": 2 },
+        { "heading": "Magic Eraser", "level": 3 },
+        "Ønsker du å fjerne en person eller et element fra bildet? Bruk Magic Eraser:",
+        "Fungerer som et viskelær og du kan stille inn \"brush size\". Du kan også velge \"click\" i stedet for brush, da kan du klikke på et element i bildet som du vil fjerne."
+      ]
+    },
+    {
+      "type": "image",
+      "width": "wide",
+      "caption": null,
+      "placeholder": "Canva: Magic Studio-meny med Magic Eraser uthevet ved siden av en illustrasjon av en person ved laptop."
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        { "heading": "Magic Grab", "level": 3 },
+        "Trykk på bildet og velg edit.",
+        "Velg funksjonen \"magic grab\". Velg brush eller click. Marker elementet i bildet du ønsker å flytte og trykk \"grab\". Flytt til ønsket plassering."
+      ]
+    },
+    {
+      "type": "image",
+      "width": "wide",
+      "caption": null,
+      "placeholder": "Canva-edit-grensesnitt med Magic Grab uthevet i Magic Studio-menyen og et element som flyttes i en rosa illustrasjon."
+    }
+  ]
+}

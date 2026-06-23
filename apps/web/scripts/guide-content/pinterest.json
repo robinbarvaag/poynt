@@ -1,0 +1,141 @@
+{
+  "slug": "pinterest",
+  "title": "Pinterest",
+  "icon": "📌",
+  "section": "kanaler",
+  "category": "Pinterest",
+  "lede": "Pinterest er først og fremst en søkemotor og skal behandles mer som Google enn som andre sosiale medier. Vi tenker først og fremst inspirasjon i form av bilder og video, deretter keywords og tekst.",
+  "coverDescription": "rød Pinterest-pin / lokasjonsmarkør-ikon på mørk bakgrunn",
+  "content": [
+    {
+      "type": "richText",
+      "blocks": [
+        "Som markedsføringskanal bruker vi først og fremst Pinterest til å generere trafikk til ønsket sted. Det viktigste vi gjør når vi jobber med Pinterest er å tenke mer på SEO enn vi gjør i andre kanaler. Keywords, tekst og linker er veldig viktig i jobben med Pinterest.",
+        "Konkurransen er lavere på denne kanalen enn på andre kanaler og det er derfor lettere å ta plass her."
+      ]
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        { "heading": "10 steg til en god Pinterest-profil:", "level": 3 },
+        { "list": [
+          "1: Opprett en businessprofil. Ikke konverter en gammel, privat konto. Lag en ny.",
+          "2: Keywords. Keywords are key! Bruk de i navn og profiltekst. Gjør en keywordanalyse.",
+          "3: Bilde. Bruk et profesjonelt profilbilde eller logo.",
+          "4: Verifiser nettsiden din.",
+          "5: Tavler: Lag detaljerte tavlebeskrivelser. Bruk keywords her også.",
+          "6: Personlige tavler. Lager du personlige tavler som ikke har noe med bedriften å gjøre? Gjør disse hemmelige.",
+          "7: Relevante tavler. Lag tavler og tavlebeskrivelser som er relevante for det du driver med.",
+          "8: Pins. Bruk alle formater for pins. Video og vanlige. En mix av disse er viktig.",
+          "9: Tid. Pinterest er en søkemotor, det tar tid før du ser resultater.",
+          "10: Fortell historier. Fortell hvilke problemer du løser og hva du kan hjelpe folk med i profilteksten og i \"pins\"."
+        ] }
+      ]
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        { "heading": "Tips for å lykkes med Pinterest:", "level": 3 },
+        { "list": [
+          "Last ned Pinterest extension for Chrome - før du begynner jobben",
+          "Last ned Pinterest-appen",
+          "Lag en bedriftsprofil (ikke privat profil) - da får du tilgang til analytics",
+          "Lag en profilbilde som er minimum 1080x1080 og logo som representerer",
+          "Lag en god grunnstruktur før du begynner: En tavle for inspirasjon, en tavle for kunnskapsdeling, en tavle om produkter og med produktbilder/informasjon",
+          "Folk bruker Pinterest for inspirasjon og ideer. Gi dem det!",
+          "Pin andres innhold også! Ikke bare ditt eget - det belønnes",
+          "Du kan også pinne til andre sosiale medier dersom hovedmålet ditt er å vokse på andre plattformer",
+          "Tenk som du gjør når du jobber med SEO. Pinterest er først og fremst en søkemotor. Keywords is the key!",
+          "Link direkte til innhold. Ikke til hovedside. Dersom du pinner et produkt, link direkte til PDP siden = kortere vei til kjøp",
+          "Freebie! Folk elsker freebies på Pinterest. Alt fra matoppskrifter til nedlastbare PDF-er og bloggposter",
+          "Bruk Pinterest-analytics aktivt",
+          "Video fungerer ofte bedre enn bilder, men bruk begge deler",
+          "Bruk Canva for å lage pins",
+          "Ta tiden til hjelp - det kan ta tid før du ser resultater",
+          "Bruk Pinterest Ads manager for å finne keywords",
+          "Har du nettside? Koble Pinterest opp mot den - og \"claim\" siden din",
+          "Publiser ofte og bruk innholdet ditt flere ganger",
+          "Publiser til rett tid",
+          "Eksempler (Kunnskap/Inspirasjon/shop the look/ Svar på spørsmål): Slik velger du rett farge på interiøret, 5 tips til ....., Hvordan lage xxx"
+        ] }
+      ]
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        { "heading": "Andre tips om Pinterest:", "level": 3 },
+        "Du kan «bulk-create» poster på Pinterest! Du kan legge ut mange pins på samme dag også, men det anbefales ikke å publisere samme URL mer enn en gang til dagen.",
+        "Why is that you say? For å unngå spamfilteret. Nå har jo de aller fleste nettsted mer enn én URL. Og alle disse kan postes hver dag. Men pass på at innholdet er relevant!",
+        "Link DIREKTE til det pin'en handler om, ikke til hovedsiden din.",
+        "Pinterest sitt spamfilter er nemlig djevelen på jord. Blir du først flagget, dropper visningene dine dramatisk og du har en enorm jobb foran deg. Du får ingen advarsel og heller igjen direkte beskjed om at du er flagget."
+      ]
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        { "heading": "Tre tips å ta med seg for å unngå dette:", "level": 3 },
+        { "list": [
+          "Ikke re-pin egne pins",
+          "Ikke bruk samme bilde flere ganger",
+          "Ikke publiser samme URL flere ganger per dag"
+        ] }
+      ]
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        { "heading": "Pinterest Pins", "level": 3 },
+        { "list": [
+          "Bruk ditt eget innhold (ikke stock-bilder)",
+          "Ikke overdriv størrelse på logo og nettadresse. Vi vil vite hva pinnen handler om",
+          "Keep it simple! Rene og pene bilder/video funker best.",
+          "Ha et tydelig budskap. Pass på at bildet matcher tema.",
+          "URL: Link direkte til en landingsside som inneholder det pinnen viser - ikke til en hovedside",
+          "Husk CTA!",
+          "Bruk gjerne video - men hold den til mellom 15 sek og 1 min. 9:16 funker bra akkurat nå.",
+          "Bruk fonter som er lettleste - du har ca 1-2 sek på å fortelle budskapet ditt"
+        ] }
+      ]
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        "Husk også:",
+        { "list": [
+          "I motsetning til andre kanaler, ser du ikke resultatene med en gang her",
+          "Dersom du vil bruke innhold laget til andre kanaler som Instagram Reels og Tiktok - pass på at budskapet passer Pinterest. Dans og «fjas» passer ikke inn, men interiør, DIY, fashion og mye mer passer veldig godt inn. Ikke bruk videoer med vannmerker."
+        ] }
+      ]
+    },
+    { "type": "divider", "label": "" },
+    {
+      "type": "richText",
+      "blocks": [
+        { "heading": "Keywords:", "level": 3 },
+        { "list": [
+          "Bruk keywords i display-navnet ditt",
+          "Bruk Keywords i bio-en din",
+          "Bruk keywords i tavlebeskrivelsen",
+          "Bruk keywords i selve Pin-beskrivelsen",
+          "Husk å bruk keywords i filnavnet på bilde/video"
+        ] }
+      ]
+    },
+    { "type": "divider", "label": "" },
+    {
+      "type": "columns",
+      "columns": [
+        { "type": "text", "blocks": [
+          { "heading": "Koble sammen Instagram og Pinterest", "level": 3 },
+          "Visste du at du kan koble sammen Instagram og Pinterest slik at Pinterest auto-publiserer innlegg fra Instagram til Pinterest? Det er lettest å koble disse sammen fra telefonen via appene så sørg først for at du et innlogget på rett konto i begge apper.",
+          "For å koble sammen gjør du slik:",
+          "Gå inn i Pinterest-appen. Trykk på de tre prikkene oppe til høyre (ligger litt gjemt bak cover-bildet).",
+          "Velg settings → claimed accounts → Connect Instagram → logg på Instagram-kontoen du ønsker å koble.",
+          "Du kan så velge om du ønsker at Pinterest skal publisere innlegg fra Instagram fra de siste 90 dagene. Disse kommer opp i en egen tavle. Denne kan du redigere og gi nytt navn om du ønsker det.",
+          "Nå er ikke dette den beste måten å bruke Pinterest på, men det er et alternativ for de som ønsker en enkel løsning eller de som ønsker å bruke Pinterest for å vokse på Instagram."
+        ] },
+        { "type": "image", "caption": "Skjermbilde fra Pinterest-appen: «Congrats! Your Pinterest is connected to @floetre» med dialogen «We created a new board for your Instagram posts», board-navn «Social», avkrysset «Also publish posts from the last 90 days» og rød Done-knapp", "placeholder": "telefon-skjermbilde av Pinterest-appens Instagram-tilkoblingsdialog" }
+      ]
+    }
+  ]
+}

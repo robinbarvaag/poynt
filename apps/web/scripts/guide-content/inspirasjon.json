@@ -1,0 +1,44 @@
+{
+  "slug": "inspirasjon",
+  "title": "Inspirasjon og trender",
+  "icon": "💚",
+  "section": "inspirasjon",
+  "category": null,
+  "lede": null,
+  "coverDescription": "Cover-bilde av en mobiltelefon som ligger på et trebord og viser en Poynt-profil/app, sett ovenfra.",
+  "content": [
+    {
+      "type": "richText",
+      "blocks": [
+        "I det siste:",
+        { "list": [
+          "Instagram: karuseller med flere bilder og musikk på får ofte god rekkevidde! Verdt å teste ut akkurat nå. Last opp to eller flere bilder og velg musikk som passer budskapet eller er populær akkurat nå.",
+          "Reels på Facebook går bedre og bedre for tiden. Test det gjerne ut!",
+          "Video gjør det dårlig på LinkedIn, hold deg til bilder eller karuseller"
+        ] }
+      ]
+    },
+    {
+      "type": "gallery",
+      "layout": "grid",
+      "caption": null,
+      "items": [
+        { "placeholder": "Vintage botanisk/dyre-illustrasjon (eldre kunsttrykk)." },
+        { "placeholder": "Eldre illustrasjon av flammer/ild på papir." },
+        { "placeholder": "Vintage fugleillustrasjon i sirkulær ramme." },
+        { "placeholder": "Eldre teknisk/naturhistorisk tegning av en kule/stein." },
+        { "placeholder": "Vintage botanisk plansje med planter." }
+      ]
+    },
+    {
+      "type": "bookmark",
+      "items": [
+        {
+          "url": "https://public.work/",
+          "title": "public.work",
+          "description": "tidenes mest episke nettsted. Disse bildene kan du bruke til hva du vil!"
+        }
+      ]
+    }
+  ]
+}
