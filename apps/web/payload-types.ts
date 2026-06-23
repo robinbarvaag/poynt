@@ -70,6 +70,7 @@ export interface Config {
     pages: Page;
     'blog-posts': BlogPost;
     articles: Article;
+    guides: Guide;
     courses: Course;
     podcasts: Podcast;
     services: Service;
@@ -96,6 +97,7 @@ export interface Config {
     pages: PagesSelect<false> | PagesSelect<true>;
     'blog-posts': BlogPostsSelect<false> | BlogPostsSelect<true>;
     articles: ArticlesSelect<false> | ArticlesSelect<true>;
+    guides: GuidesSelect<false> | GuidesSelect<true>;
     courses: CoursesSelect<false> | CoursesSelect<true>;
     podcasts: PodcastsSelect<false> | PodcastsSelect<true>;
     services: ServicesSelect<false> | ServicesSelect<true>;
@@ -1331,6 +1333,271 @@ export interface Article {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "guides".
+ */
+export interface Guide {
+  id: number;
+  title: string;
+  /**
+   * Genereres automatisk fra tittel
+   */
+  slug: string;
+  /**
+   * Vises ved tittelen, f.eks. 📸 eller ✨
+   */
+  icon?: string | null;
+  /**
+   * Full-bredde banner øverst på guiden
+   */
+  coverImage?: (number | null) | Media;
+  /**
+   * Kort introduksjon som vises i hero og i listevisning
+   */
+  lede?: string | null;
+  /**
+   * Styrer hvor guiden grupperes på ressurs-forsiden
+   */
+  section: 'generelt' | 'kanaler' | 'maler' | 'inspirasjon' | 'ressurser';
+  /**
+   * Gir farge og ikon-identitet (f.eks. Instagram)
+   */
+  category?: (number | null) | Category;
+  /**
+   * Lavere tall vises først innenfor seksjonen
+   */
+  order?: number | null;
+  isFeatured?: boolean | null;
+  content?:
+    | (
+        | GuideRichTextBlock
+        | GuideCalloutBlock
+        | GuideColumnsBlock
+        | GuideGalleryBlock
+        | GuideImageBlock
+        | GuideVideoBlock
+        | GuideToggleBlock
+        | GuideBookmarkBlock
+        | GuideDownloadBlock
+        | GuideDividerBlock
+      )[]
+    | null;
+  relatedGuides?: (number | Guide)[] | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GuideRichTextBlock".
+ */
+export interface GuideRichTextBlock {
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'guideRichText';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GuideCalloutBlock".
+ */
+export interface GuideCalloutBlock {
+  tone?: ('mint' | 'saffron' | 'salmon' | 'primary' | 'ink') | null;
+  /**
+   * F.eks. 💡, ✨, 📌
+   */
+  icon?: string | null;
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'guideCallout';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GuideColumnsBlock".
+ */
+export interface GuideColumnsBlock {
+  align?: ('top' | 'center') | null;
+  columns?:
+    | {
+        type?: ('text' | 'image') | null;
+        content?: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        } | null;
+        image?: (number | null) | Media;
+        caption?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'guideColumns';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GuideGalleryBlock".
+ */
+export interface GuideGalleryBlock {
+  layout?: ('grid' | 'carousel') | null;
+  images?:
+    | {
+        image?: (number | null) | Media;
+        caption?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  caption?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'guideGallery';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GuideImageBlock".
+ */
+export interface GuideImageBlock {
+  image?: (number | null) | Media;
+  caption?: string | null;
+  width?: ('normal' | 'wide' | 'full') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'guideImage';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GuideVideoBlock".
+ */
+export interface GuideVideoBlock {
+  /**
+   * YouTube-, Loom- eller Vimeo-lenke
+   */
+  url: string;
+  caption?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'guideVideo';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GuideToggleBlock".
+ */
+export interface GuideToggleBlock {
+  items?:
+    | {
+        title: string;
+        content?: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        } | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'guideToggle';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GuideBookmarkBlock".
+ */
+export interface GuideBookmarkBlock {
+  items?:
+    | {
+        url?: string | null;
+        title?: string | null;
+        description?: string | null;
+        image?: (number | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'guideBookmark';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GuideDownloadBlock".
+ */
+export interface GuideDownloadBlock {
+  items?:
+    | {
+        title: string;
+        description?: string | null;
+        kind?: ('pdf' | 'canva' | 'link' | 'other') | null;
+        /**
+         * Last opp fila som skal lastes ned
+         */
+        file?: (number | null) | Media;
+        url?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'guideDownload';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GuideDividerBlock".
+ */
+export interface GuideDividerBlock {
+  label?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'guideDivider';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "courses".
  */
 export interface Course {
@@ -1558,6 +1825,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'articles';
         value: number | Article;
+      } | null)
+    | ({
+        relationTo: 'guides';
+        value: number | Guide;
       } | null)
     | ({
         relationTo: 'courses';
@@ -2108,6 +2379,174 @@ export interface ArticlesSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "guides_select".
+ */
+export interface GuidesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  icon?: T;
+  coverImage?: T;
+  lede?: T;
+  section?: T;
+  category?: T;
+  order?: T;
+  isFeatured?: T;
+  content?:
+    | T
+    | {
+        guideRichText?: T | GuideRichTextBlockSelect<T>;
+        guideCallout?: T | GuideCalloutBlockSelect<T>;
+        guideColumns?: T | GuideColumnsBlockSelect<T>;
+        guideGallery?: T | GuideGalleryBlockSelect<T>;
+        guideImage?: T | GuideImageBlockSelect<T>;
+        guideVideo?: T | GuideVideoBlockSelect<T>;
+        guideToggle?: T | GuideToggleBlockSelect<T>;
+        guideBookmark?: T | GuideBookmarkBlockSelect<T>;
+        guideDownload?: T | GuideDownloadBlockSelect<T>;
+        guideDivider?: T | GuideDividerBlockSelect<T>;
+      };
+  relatedGuides?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GuideRichTextBlock_select".
+ */
+export interface GuideRichTextBlockSelect<T extends boolean = true> {
+  content?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GuideCalloutBlock_select".
+ */
+export interface GuideCalloutBlockSelect<T extends boolean = true> {
+  tone?: T;
+  icon?: T;
+  content?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GuideColumnsBlock_select".
+ */
+export interface GuideColumnsBlockSelect<T extends boolean = true> {
+  align?: T;
+  columns?:
+    | T
+    | {
+        type?: T;
+        content?: T;
+        image?: T;
+        caption?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GuideGalleryBlock_select".
+ */
+export interface GuideGalleryBlockSelect<T extends boolean = true> {
+  layout?: T;
+  images?:
+    | T
+    | {
+        image?: T;
+        caption?: T;
+        id?: T;
+      };
+  caption?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GuideImageBlock_select".
+ */
+export interface GuideImageBlockSelect<T extends boolean = true> {
+  image?: T;
+  caption?: T;
+  width?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GuideVideoBlock_select".
+ */
+export interface GuideVideoBlockSelect<T extends boolean = true> {
+  url?: T;
+  caption?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GuideToggleBlock_select".
+ */
+export interface GuideToggleBlockSelect<T extends boolean = true> {
+  items?:
+    | T
+    | {
+        title?: T;
+        content?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GuideBookmarkBlock_select".
+ */
+export interface GuideBookmarkBlockSelect<T extends boolean = true> {
+  items?:
+    | T
+    | {
+        url?: T;
+        title?: T;
+        description?: T;
+        image?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GuideDownloadBlock_select".
+ */
+export interface GuideDownloadBlockSelect<T extends boolean = true> {
+  items?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        kind?: T;
+        file?: T;
+        url?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GuideDividerBlock_select".
+ */
+export interface GuideDividerBlockSelect<T extends boolean = true> {
+  label?: T;
+  id?: T;
+  blockName?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
