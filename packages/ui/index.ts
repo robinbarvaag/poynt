@@ -337,6 +337,36 @@ export {
   PrefilledBadge,
 } from "./components/tool-form";
 
+export {
+  BookmarkCard,
+  type BookmarkCardProps,
+  Callout,
+  type CalloutProps,
+  type CalloutTone,
+  ColumnsLayout,
+  type ColumnsLayoutProps,
+  DownloadCard,
+  type DownloadCardProps,
+  type DownloadKind,
+  Gallery,
+  type GalleryItem,
+  type GalleryProps,
+  ImagePlaceholder,
+  type ImagePlaceholderProps,
+  GuideCard,
+  type GuideCardProps,
+  type GuideCardSurface,
+  GuideHero,
+  type GuideHeroAccent,
+  type GuideHeroProps,
+  GuideToggle,
+  type GuideToggleItem,
+  type GuideToggleProps,
+  toEmbedUrl,
+  VideoEmbed,
+  type VideoEmbedProps,
+} from "./components/guide";
+
 export { Switch };
 
 export { useIsMobile } from "./hooks/use-mobile";
