@@ -17,11 +17,6 @@ export const homeNavItem: NavItem = {
 /** Gruppe «Verktøy» — kun AI-verktøyene (tier-låst). */
 export const toolNavItems: NavItem[] = [
   {
-    title: "Ressurser",
-    url: "/on-poynt/ressurser",
-    icon: "layers",
-  },
-  {
     title: "Kanalveileder",
     url: "/on-poynt/verktoy/kanalveileder",
     icon: "compass",
@@ -64,6 +59,11 @@ export const learnNavItems: NavItem[] = [
     title: "Kurs",
     url: "/on-poynt/kurs",
     icon: "graduation-cap",
+  },
+  {
+    title: "Ressurser",
+    url: "/on-poynt/ressurser",
+    icon: "layers",
   },
 ];
 
