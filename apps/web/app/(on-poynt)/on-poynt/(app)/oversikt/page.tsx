@@ -1,3 +1,4 @@
+import { BrandGlimpseCard } from "@/components/planner/dashboard/brand-glimpse-card";
 import { UpcomingPostsCard } from "@/components/planner/dashboard/upcoming-posts-card";
 import { TasksCard } from "@/components/planner/tasks/tasks-card";
 import { getDashboardState } from "@/lib/planner/dashboard-state";
@@ -43,7 +44,7 @@ function RhythmCheck({
 }
 
 export default async function DashboardPage() {
-  const { hero, stages } = await getDashboardState();
+  const { hero, stages, brandIdentity } = await getDashboardState();
 
   return (
     <PageShell>

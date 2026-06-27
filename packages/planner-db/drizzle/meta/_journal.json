@@ -50,6 +50,20 @@
       "when": 1782588881153,
       "tag": "0006_nostalgic_white_tiger",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1782592830944,
+      "tag": "0007_nice_slayback",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1782592945926,
+      "tag": "0008_motionless_cerebro",
+      "breakpoints": true
     }
   ]
 }

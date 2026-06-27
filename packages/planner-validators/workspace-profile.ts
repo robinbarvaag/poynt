@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { brandBriefSchema } from "./brand-brief";
+import { brandIdentitySchema } from "./brand-identity";
 import { mainGoalTypes, strengthTypes, weeklyTimeTypes } from "./channel-guide";
 
 /**
@@ -50,6 +51,8 @@ export const workspaceProfileSchema = z.object({
   customContext: z.string().nullable(),
   // «Felles hjerne 2.0» — rik merkevarebrief som injiseres i alle verktøyene.
   brandBrief: brandBriefSchema.nullable(),
+  // Visuell merkevare-identitet («merkevare-boka»).
+  brandIdentity: brandIdentitySchema.nullable(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
@@ -67,6 +70,7 @@ export const updateWorkspaceProfileSchema = z.object({
   strengths: z.enum(strengthTypes).nullable().optional(),
   customContext: z.string().nullable().optional(),
   brandBrief: brandBriefSchema.nullable().optional(),
+  brandIdentity: brandIdentitySchema.nullable().optional(),
 });
 
 export type UpdateWorkspaceProfileInput = z.infer<

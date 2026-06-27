@@ -444,6 +444,21 @@ export {
   type VideoEmbedProps,
 } from "./components/guide";
 
+// Merkevare-bok-primitiver (visuell identitet): farger, fonter, logo-header
+export {
+  BrandHeader,
+  type BrandHeaderProps,
+  type BrandHeaderSurface,
+  ColorSwatch,
+  type ColorSwatchProps,
+  FontSpecimen,
+  type FontSpecimenProps,
+  SwatchGrid,
+  type SwatchGridColor,
+  type SwatchGridProps,
+  useWebFont,
+} from "./components/brand";
+
 export { Switch };
 
 export { useIsMobile } from "./hooks/use-mobile";

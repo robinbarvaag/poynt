@@ -1,4 +1,5 @@
 import { createServerCaller } from "@/lib/planner/trpc-server";
+import type { BrandIdentity } from "@poynt/planner-validators";
 import type { JourneyStage, NextStepHeroProps, StageStatus } from "@poynt/ui";
 
 export interface DashboardState {
@@ -6,6 +7,8 @@ export interface DashboardState {
   stages: JourneyStage[];
   /** Alle fire fasene er gjort — dashbordet går over i «rytme»-modus. */
   fullySetUp: boolean;
+  /** Den visuelle merkevaren (for et lite glimt på dashbordet). */
+  brandIdentity: BrandIdentity | null;
 }
 
 const PROFIL = "/on-poynt/bedrifter";
@@ -169,5 +172,10 @@ export async function getDashboardState(): Promise<DashboardState> {
       ? HERO_DONE
       : (HERO_BY_PHASE[activeIndex] ?? HERO_DONE);
 
-  return { hero, stages, fullySetUp };
+  return {
+    hero,
+    stages,
+    fullySetUp,
+    brandIdentity: (profile?.brandIdentity as BrandIdentity | null) ?? null,
+  };
 }

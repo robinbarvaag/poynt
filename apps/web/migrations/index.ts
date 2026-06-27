@@ -11,6 +11,7 @@ import * as migration_20260621_195315_services_featured from './20260621_195315_
 import * as migration_20260621_211840_add_seo_faq_fields from './20260621_211840_add_seo_faq_fields';
 import * as migration_20260621_221017_add_courses from './20260621_221017_add_courses';
 import * as migration_20260623_203800 from './20260623_203800';
+import * as migration_20260627_195306 from './20260627_195306';
 
 export const migrations = [
   {
@@ -76,6 +77,11 @@ export const migrations = [
   {
     up: migration_20260623_203800.up,
     down: migration_20260623_203800.down,
-    name: '20260623_203800'
+    name: '20260623_203800',
+  },
+  {
+    up: migration_20260627_195306.up,
+    down: migration_20260627_195306.down,
+    name: '20260627_195306'
   },
 ];

@@ -1,5 +1,6 @@
 "use client";
 
+import { BrandBookSection } from "@/components/workspace/brand-book-section";
 import { BrandBriefSection } from "@/components/workspace/brand-brief-section";
 import { WorkspaceGeneralForm } from "@/components/workspace/general-form";
 import { WorkspaceInviteForm } from "@/components/workspace/invite-form";
@@ -85,14 +86,32 @@ export function MyCompany({ workspace }: { workspace: Workspace }) {
           </Card>
         </TabsContent>
 
-        <TabsContent value="merkevare" className="mt-4">
+        <TabsContent value="merkevare" className="mt-4 space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Merkevare — hvordan verktøyene skriver</CardTitle>
+              <CardTitle>Merkevare-boka — den visuelle identiteten</CardTitle>
               <CardDescription>
-                Stemmen og budskapet: tone, kjernebudskap og det som skiller
-                dere ut. Mens profilen er hva verktøyene vet, er dette hvordan
-                de uttrykker det. Generert fra nettsiden.
+                Logo, farger, fonter og tagline. Dette er ansiktet til
+                merkevaren — og verktøyene tar hensyn til det når de lager
+                innhold for deg.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <BrandBookSection
+                workspaceId={workspace.id}
+                businessName={workspace.name}
+                disabled={!canManage}
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Stemmen — hvordan verktøyene skriver</CardTitle>
+              <CardDescription>
+                Tone, kjernebudskap og det som skiller dere ut. Mens boka over
+                er hvordan merkevaren ser ut, er dette hvordan den høres ut.
+                Kan genereres fra nettsiden.
               </CardDescription>
             </CardHeader>
             <CardContent>
