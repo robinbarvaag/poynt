@@ -274,6 +274,9 @@ export function WorkspaceProfileForm({
                     ))}
                   </SelectContent>
                 </Select>
+                <FormDescription>
+                  Liten eller stor – vi justerer rådene deretter
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
