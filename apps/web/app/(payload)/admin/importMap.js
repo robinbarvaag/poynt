@@ -31,7 +31,9 @@ import { FolderField as FolderField_ab83ff7e88da8d3530831f296ec4756a } from '@pa
 import { LinkToDoc as LinkToDoc_2e9be70cd13299dd4a11a5bd739a5a3c } from '@payloadcms/plugin-stripe/client'
 import { FolderTypeField as FolderTypeField_3817bf644402e67bfe6577f60ef982de } from '@payloadcms/ui'
 import { OnPoyntNavGroup as OnPoyntNavGroup_cbdd0274d832c585cca0ce893b25cc1e } from '../../../admin/components/on-poynt-nav-group'
+import { RadarWidget as RadarWidget_5b7947cd224091d66f29a1ea95235d6d } from '../../../admin/components/dashboard/radar-widget'
 import { VercelBlobClientUploadHandler as VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e } from '@payloadcms/storage-vercel-blob/client'
+import { RadarListView as RadarListView_a4e67c284447336809eb8f88f0de25c0 } from '../../../admin/views/radar/list'
 import { MembershipApplicationsListView as MembershipApplicationsListView_be2a1da07cba706e1f042873ea9e9758 } from '../../../admin/views/applications/list'
 import { MembershipApplicationDetailView as MembershipApplicationDetailView_5da117e93eb9cc3778177b4984b41b2c } from '../../../admin/views/applications/detail'
 import { MembersListView as MembersListView_1c40f164a24fb9e841d3097dd58f8371 } from '../../../admin/views/members/list'
@@ -74,7 +76,9 @@ export const importMap = {
   "@payloadcms/plugin-stripe/client#LinkToDoc": LinkToDoc_2e9be70cd13299dd4a11a5bd739a5a3c,
   "@payloadcms/ui#FolderTypeField": FolderTypeField_3817bf644402e67bfe6577f60ef982de,
   "/admin/components/on-poynt-nav-group#OnPoyntNavGroup": OnPoyntNavGroup_cbdd0274d832c585cca0ce893b25cc1e,
+  "/admin/components/dashboard/radar-widget#RadarWidget": RadarWidget_5b7947cd224091d66f29a1ea95235d6d,
   "@payloadcms/storage-vercel-blob/client#VercelBlobClientUploadHandler": VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e,
+  "/admin/views/radar/list#RadarListView": RadarListView_a4e67c284447336809eb8f88f0de25c0,
   "/admin/views/applications/list#MembershipApplicationsListView": MembershipApplicationsListView_be2a1da07cba706e1f042873ea9e9758,
   "/admin/views/applications/detail#MembershipApplicationDetailView": MembershipApplicationDetailView_5da117e93eb9cc3778177b4984b41b2c,
   "/admin/views/members/list#MembersListView": MembersListView_1c40f164a24fb9e841d3097dd58f8371,
