@@ -72,7 +72,6 @@ export function LogoUpload({
           )}
         >
           {value ? (
-            // biome-ignore lint/performance/noImgElement: ekstern blob-URL, ikke Payload-media
             <img
               src={value}
               alt="Logo-forhåndsvisning"

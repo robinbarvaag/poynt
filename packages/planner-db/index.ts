@@ -20,11 +20,17 @@ export * from "./schema";
 // Re-export commonly used drizzle-orm utilities
 export {
   eq,
+  ne,
   and,
   or,
   sql,
   desc,
   asc,
+  gte,
+  lte,
+  lt,
+  gt,
+  count,
   inArray,
   isNull,
   isNotNull,

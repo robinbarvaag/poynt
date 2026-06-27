@@ -25,7 +25,9 @@ export async function POST(req: NextRequest) {
 
   if (!process.env.BLOB_READ_WRITE_TOKEN) {
     return NextResponse.json(
-      { error: "Opplasting er ikke konfigurert (mangler BLOB_READ_WRITE_TOKEN)" },
+      {
+        error: "Opplasting er ikke konfigurert (mangler BLOB_READ_WRITE_TOKEN)",
+      },
       { status: 500 }
     );
   }

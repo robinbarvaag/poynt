@@ -189,6 +189,19 @@ export {
   type BrandIdentity,
 } from "./brand-identity";
 
+// Content radar (redaksjonell AI-assistent i admin)
+export {
+  contentSuggestionTypes,
+  contentSuggestionTypeLabels,
+  radarSignalKinds,
+  contentRadarOutputSchema,
+  type ContentSuggestionTypeValue,
+  type RadarSignalKind,
+  type RadarSignalInput,
+  type GeneratedSuggestion,
+  type ContentRadarOutput,
+} from "./content-radar";
+
 // Workspace profile & tool results
 export {
   profileCompanySizes,

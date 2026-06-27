@@ -14,7 +14,10 @@ export const homeNavItem: NavItem = {
   icon: "home",
 };
 
-/** Gruppe «Verktøy» — kun AI-verktøyene (tier-låst). */
+/**
+ * Gruppe «Verktøy» — kjernereisen (tier-låst). Speiler den guidede reisen på
+ * dashbordet: finn kanaler → lag plan → planlegg året.
+ */
 export const toolNavItems: NavItem[] = [
   {
     title: "Kanalveileder",
@@ -29,15 +32,22 @@ export const toolNavItems: NavItem[] = [
     requiresAi: true,
   },
   {
-    title: "Si nei med stil",
-    url: "/on-poynt/verktoy/avslag-generator",
-    icon: "message-square-off",
-    requiresAi: true,
-  },
-  {
     title: "Årshjul",
     url: "/on-poynt/verktoy/arsplanlegger",
     icon: "calendar-days",
+    requiresAi: true,
+  },
+];
+
+/**
+ * Gruppe «Verktøykassa» — hjelpe-verktøy utenom kjernereisen (tier-låst).
+ * Samme skille som «Verktøykassa»-seksjonen på dashbordet.
+ */
+export const toolboxNavItems: NavItem[] = [
+  {
+    title: "Si nei med stil",
+    url: "/on-poynt/verktoy/avslag-generator",
+    icon: "message-square-off",
     requiresAi: true,
   },
   {
@@ -60,19 +70,29 @@ export const learnNavItems: NavItem[] = [
   },
 ];
 
-/** Gruppe «Konto» — min bedrift og abonnement. */
-export const accountNavItems: NavItem[] = [
+/**
+ * Gruppe «Din bedrift» — alt som handler om bedriften din (ikke kontoen).
+ * Abonnement bor i bruker-menyen nederst (NavUser), ikke her.
+ */
+export const businessNavItems: NavItem[] = [
   {
     title: "Min bedrift",
     url: "/on-poynt/bedrifter",
     icon: "building-2",
   },
   {
-    title: "Abonnement",
-    url: "/on-poynt/innstillinger/medlemskap",
-    icon: "credit-card",
+    title: "Min strategi",
+    url: "/on-poynt/strategi",
+    icon: "target",
   },
 ];
+
+/** Abonnement/konto — lever i bruker-menyen (NavUser), ikke i hovedmenyen. */
+export const accountMenuItem: NavItem = {
+  title: "Abonnement",
+  url: "/on-poynt/innstillinger/medlemskap",
+  icon: "credit-card",
+};
 
 export const tierConfig = {
   free: {

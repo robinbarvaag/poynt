@@ -50,7 +50,6 @@ export function BrandGlimpseCard({ identity }: BrandGlimpseCardProps) {
       <CardContent className="flex items-center gap-4 py-5">
         <div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-background ring-1 ring-foreground/10">
           {identity?.logoUrl ? (
-            // biome-ignore lint/performance/noImgElement: ekstern blob-URL
             <img
               src={identity.logoUrl}
               alt="Logo"

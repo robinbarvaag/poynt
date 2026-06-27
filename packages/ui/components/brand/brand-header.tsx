@@ -49,11 +49,12 @@ export function BrandHeader({
       <div
         className={cn(
           "flex size-24 items-center justify-center overflow-hidden rounded-2xl ring-1 md:size-28",
-          onDark ? "bg-white/10 ring-white/15" : "bg-background ring-foreground/10"
+          onDark
+            ? "bg-white/10 ring-white/15"
+            : "bg-background ring-foreground/10"
         )}
       >
         {logoUrl ? (
-          // biome-ignore lint/performance/noImgElement: @poynt/ui er rammeverk-agnostisk
           <img
             src={logoUrl}
             alt={`${name} logo`}
@@ -68,7 +69,12 @@ export function BrandHeader({
           {name}
         </h2>
         {tagline && (
-          <p className={cn("text-lg", onDark ? "opacity-90" : "text-muted-foreground")}>
+          <p
+            className={cn(
+              "text-lg",
+              onDark ? "opacity-90" : "text-muted-foreground"
+            )}
+          >
             {tagline}
           </p>
         )}

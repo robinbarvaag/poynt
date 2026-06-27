@@ -2,10 +2,11 @@
 
 import {
   type NavItem,
-  accountNavItems,
+  businessNavItems,
   homeNavItem,
   learnNavItems,
   toolNavItems,
+  toolboxNavItems,
 } from "@/lib/constants";
 import { hasAiTools } from "@/lib/membership/has-active-access";
 import { trpc } from "@/lib/planner/trpc";
@@ -108,6 +109,13 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
+          <SidebarGroupLabel>Verktøykassa</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>{toolboxNavItems.map(renderItem)}</SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
           <SidebarGroupLabel>Læring</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>{learnNavItems.map(renderItem)}</SidebarMenu>
@@ -115,9 +123,9 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Konto</SidebarGroupLabel>
+          <SidebarGroupLabel>Din bedrift</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>{accountNavItems.map(renderItem)}</SidebarMenu>
+            <SidebarMenu>{businessNavItems.map(renderItem)}</SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
 

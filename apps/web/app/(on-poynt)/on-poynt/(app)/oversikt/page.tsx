@@ -62,30 +62,35 @@ export default async function DashboardPage() {
           <UpcomingPostsCard />
         </div>
 
-        {/* Samme Card-komponent som de andre flatene — ett tydelig merket kort
-            i stedet for to løse bokser. */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Din faste rytme</CardTitle>
-            <CardDescription>
-              To faste sjekkpunkter som holder markedsføringen i gang.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-5 sm:grid-cols-2">
-              <RhythmCheck
-                icon="clock"
-                title="Hver uke"
-                text="Sett av en halvtime til å lage og planlegge ukas innhold."
-              />
-              <RhythmCheck
-                icon="refresh"
-                title="Hvert kvartal"
-                text="Se over markedsplanen og juster kursen etter det som funker."
-              />
-            </div>
-          </CardContent>
-        </Card>
+        <div className="grid gap-6 lg:grid-cols-2">
+          {/* Samme Card-komponent som de andre flatene — ett tydelig merket kort
+              i stedet for to løse bokser. */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Din faste rytme</CardTitle>
+              <CardDescription>
+                To faste sjekkpunkter som holder markedsføringen i gang.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-5 sm:grid-cols-2">
+                <RhythmCheck
+                  icon="clock"
+                  title="Hver uke"
+                  text="Sett av en halvtime til å lage og planlegge ukas innhold."
+                />
+                <RhythmCheck
+                  icon="refresh"
+                  title="Hvert kvartal"
+                  text="Se over markedsplanen og juster kursen etter det som funker."
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Lite glimt av den visuelle merkevaren, med snarvei til boka */}
+          <BrandGlimpseCard identity={brandIdentity} />
+        </div>
       </section>
 
       {/* Verktøykassa — nyttige verktøy utenom kjernereisen */}

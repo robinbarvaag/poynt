@@ -98,7 +98,16 @@ export default buildConfig({
     user: "users",
     components: {
       afterNavLinks: ["/admin/components/on-poynt-nav-group#OnPoyntNavGroup"],
+      beforeDashboard: [
+        "/admin/components/dashboard/radar-widget#RadarWidget",
+      ],
       views: {
+        radar: {
+          Component: "/admin/views/radar/list#RadarListView",
+          path: "/radar",
+          exact: true,
+          meta: { title: "Innholdsradar" },
+        },
         applications: {
           Component:
             "/admin/views/applications/list#MembershipApplicationsListView",

@@ -45,6 +45,9 @@ const FONT_SUGGESTIONS = [
 
 const HEX_RE = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
 
+/** Fargerad i editoren — BrandColor med en stabil klient-id for React-keys. */
+type ColorRow = BrandColor & { _id: string };
+
 /** Liten feltetikett — speiler BrandBriefSection. */
 function FieldLabel({ children }: { children: React.ReactNode }) {
   return <p className="font-medium text-sm">{children}</p>;
@@ -67,7 +70,9 @@ export function BrandBookSection({
 
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [tagline, setTagline] = useState("");
-  const [colors, setColors] = useState<BrandColor[]>([]);
+  // Fargerader bærer en stabil klient-id (_id) så React-keys er trygge ved
+  // legg-til/fjern/reorder. Id-en strippes før lagring.
+  const [colors, setColors] = useState<ColorRow[]>([]);
   const [headingFont, setHeadingFont] = useState("");
   const [bodyFont, setBodyFont] = useState("");
 
@@ -75,9 +80,9 @@ export function BrandBookSection({
     setLogoUrl(identity.logoUrl ?? null);
     setTagline(identity.tagline ?? "");
     setColors(
-      (identity.colors ?? []).filter(
-        (c): c is BrandColor => Boolean(c?.hex)
-      )
+      (identity.colors ?? [])
+        .filter((c): c is BrandColor => Boolean(c?.hex))
+        .map((c) => ({ ...c, _id: crypto.randomUUID() }))
     );
     setHeadingFont(identity.fonts?.heading ?? "");
     setBodyFont(identity.fonts?.body ?? "");
@@ -107,7 +112,9 @@ export function BrandBookSection({
 
   /** Bygger identiteten fra nåværende state (med valgfrie overstyringer). */
   function buildIdentity(overrides?: Partial<BrandIdentity>): BrandIdentity {
-    const validColors = colors.filter((c) => HEX_RE.test(c.hex));
+    const validColors = colors
+      .filter((c) => HEX_RE.test(c.hex))
+      .map(({ _id, ...c }) => c);
     return {
       logoUrl: logoUrl || null,
       tagline: tagline.trim() || null,
@@ -146,16 +153,14 @@ export function BrandBookSection({
   function addColor() {
     setColors((cs) => [
       ...cs,
-      { hex: "#29664f", name: "", role: "primary" },
+      { hex: "#29664f", name: "", role: "primary", _id: crypto.randomUUID() },
     ]);
   }
-  function updateColor(index: number, patch: Partial<BrandColor>) {
-    setColors((cs) =>
-      cs.map((c, i) => (i === index ? { ...c, ...patch } : c))
-    );
+  function updateColor(id: string, patch: Partial<BrandColor>) {
+    setColors((cs) => cs.map((c) => (c._id === id ? { ...c, ...patch } : c)));
   }
-  function removeColor(index: number) {
-    setColors((cs) => cs.filter((_, i) => i !== index));
+  function removeColor(id: string) {
+    setColors((cs) => cs.filter((c) => c._id !== id));
   }
 
   if (loading) {
@@ -186,17 +191,11 @@ export function BrandBookSection({
             tagline={tagline || null}
             surface="cream"
           />
-          {previewColors.length > 0 && (
-            <SwatchGrid colors={previewColors} />
-          )}
+          {previewColors.length > 0 && <SwatchGrid colors={previewColors} />}
           {(headingFont || bodyFont) && (
             <div className="grid gap-4 sm:grid-cols-2">
-              {headingFont && (
-                <FontSpecimen fontFamily={headingFont} role="Overskrift" />
-              )}
-              {bodyFont && (
-                <FontSpecimen fontFamily={bodyFont} role="Brødtekst" />
-              )}
+              {headingFont && <FontSpecimen fontFamily={headingFont} />}
+              {bodyFont && <FontSpecimen fontFamily={bodyFont} />}
             </div>
           )}
         </div>
@@ -251,29 +250,29 @@ export function BrandBookSection({
           </p>
         ) : (
           <div className="space-y-2.5">
-            {colors.map((c, i) => (
+            {colors.map((c) => (
               <div
-                key={`color-${i}`}
+                key={c._id}
                 className="flex flex-wrap items-center gap-2.5 rounded-2xl bg-card p-2.5 ring-1 ring-foreground/10"
               >
                 <input
                   type="color"
                   value={HEX_RE.test(c.hex) ? c.hex : "#29664f"}
-                  onChange={(e) => updateColor(i, { hex: e.target.value })}
+                  onChange={(e) => updateColor(c._id, { hex: e.target.value })}
                   disabled={disabled}
                   className="size-9 shrink-0 cursor-pointer rounded-lg border-0 bg-transparent p-0"
                   aria-label="Velg farge"
                 />
                 <Input
                   value={c.hex}
-                  onChange={(e) => updateColor(i, { hex: e.target.value })}
+                  onChange={(e) => updateColor(c._id, { hex: e.target.value })}
                   disabled={disabled}
                   className="w-28 font-mono uppercase"
                   placeholder="#29664f"
                 />
                 <Input
                   value={c.name ?? ""}
-                  onChange={(e) => updateColor(i, { name: e.target.value })}
+                  onChange={(e) => updateColor(c._id, { name: e.target.value })}
                   disabled={disabled}
                   className="min-w-32 flex-1"
                   placeholder="Navn (f.eks. Skog)"
@@ -281,7 +280,9 @@ export function BrandBookSection({
                 <select
                   value={c.role ?? "primary"}
                   onChange={(e) =>
-                    updateColor(i, { role: e.target.value as BrandColorRole })
+                    updateColor(c._id, {
+                      role: e.target.value as BrandColorRole,
+                    })
                   }
                   disabled={disabled}
                   className="h-9 rounded-lg border border-input bg-background px-2 text-sm"
@@ -297,7 +298,7 @@ export function BrandBookSection({
                     type="button"
                     variant="ghost"
                     size="icon"
-                    onClick={() => removeColor(i)}
+                    onClick={() => removeColor(c._id)}
                     className="text-muted-foreground"
                     aria-label="Fjern farge"
                   >

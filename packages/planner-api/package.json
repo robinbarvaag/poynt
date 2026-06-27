@@ -35,6 +35,10 @@
     "./lib/adapt-post": {
       "types": "./lib/adapt-post.ts",
       "default": "./lib/adapt-post.ts"
+    },
+    "./lib/content-radar": {
+      "types": "./lib/content-radar.ts",
+      "default": "./lib/content-radar.ts"
     }
   },
   "scripts": {

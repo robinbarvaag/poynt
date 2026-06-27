@@ -1,9 +1,4 @@
-import {
-  BrandHeader,
-  ColorSwatch,
-  FontSpecimen,
-  SwatchGrid,
-} from "@poynt/ui";
+import { BrandHeader, ColorSwatch, FontSpecimen, SwatchGrid } from "@poynt/ui";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
 const PALETTE = [
@@ -57,8 +52,8 @@ export const Fargepalett: Story = {
 export const EnkeltFargekort: Story = {
   render: () => (
     <div className="flex max-w-xs gap-4">
-      <ColorSwatch hex="#29664f" name="Skog" role="Primær" />
-      <ColorSwatch hex="#f3c969" name="Saffran" role="Aksent" />
+      <ColorSwatch hex="#29664f" name="Skog" />
+      <ColorSwatch hex="#f3c969" name="Saffran" />
     </div>
   ),
 };
@@ -66,8 +61,8 @@ export const EnkeltFargekort: Story = {
 export const Typografi: Story = {
   render: () => (
     <div className="grid max-w-3xl gap-5 sm:grid-cols-2">
-      <FontSpecimen fontFamily="Bricolage Grotesque" role="Overskrift" />
-      <FontSpecimen fontFamily="Poppins" role="Brødtekst" />
+      <FontSpecimen fontFamily="Bricolage Grotesque" />
+      <FontSpecimen fontFamily="Poppins" />
     </div>
   ),
 };
@@ -82,8 +77,8 @@ export const HeleBoka: Story = {
       />
       <SwatchGrid colors={PALETTE} />
       <div className="grid gap-5 sm:grid-cols-2">
-        <FontSpecimen fontFamily="Bricolage Grotesque" role="Overskrift" />
-        <FontSpecimen fontFamily="Poppins" role="Brødtekst" />
+        <FontSpecimen fontFamily="Bricolage Grotesque" />
+        <FontSpecimen fontFamily="Poppins" />
       </div>
     </div>
   ),

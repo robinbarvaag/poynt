@@ -1,5 +1,5 @@
-import { ColorSwatch } from "./color-swatch";
 import { cn } from "../../lib/utils";
+import { ColorSwatch } from "./color-swatch";
 
 export interface SwatchGridColor {
   hex: string;

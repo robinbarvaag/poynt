@@ -22,6 +22,10 @@ const links = [
     href: "/admin/prompts",
     label: "Prompt-maler",
   },
+  {
+    href: "/admin/radar",
+    label: "Innholdsradar",
+  },
 ];
 
 export const OnPoyntNavGroup = () => {
