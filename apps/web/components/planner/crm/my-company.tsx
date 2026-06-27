@@ -61,16 +61,10 @@ export function MyCompany({ workspace }: { workspace: Workspace }) {
             <Icon name="palette" />
             Merkevare
           </TabsTrigger>
-          <TabsTrigger value="medlemmer" className="gap-2">
-            <Icon name="users" />
-            Medlemmer
+          <TabsTrigger value="innstillinger" className="gap-2">
+            <Icon name="settings" />
+            Innstillinger
           </TabsTrigger>
-          {canManage && (
-            <TabsTrigger value="innstillinger" className="gap-2">
-              <Icon name="settings" />
-              Innstillinger
-            </TabsTrigger>
-          )}
         </TabsList>
 
         <TabsContent value="profil" className="mt-4">
@@ -111,7 +105,9 @@ export function MyCompany({ workspace }: { workspace: Workspace }) {
           </Card>
         </TabsContent>
 
-        <TabsContent value="medlemmer" className="mt-4 space-y-4">
+        {/* Medlemmer + generelle innstillinger samlet — slått sammen så vi
+            slipper en nær-tom «Innstillinger»-fane. */}
+        <TabsContent value="innstillinger" className="mt-4 space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Medlemmer</CardTitle>
@@ -141,23 +137,19 @@ export function MyCompany({ workspace }: { workspace: Workspace }) {
               </CardContent>
             </Card>
           )}
-        </TabsContent>
 
-        {canManage && (
-          <TabsContent value="innstillinger" className="mt-4">
+          {canManage && (
             <Card>
               <CardHeader>
                 <CardTitle>Generelle innstillinger</CardTitle>
-                <CardDescription>
-                  Oppdater bedriftens grunnleggende informasjon.
-                </CardDescription>
+                <CardDescription>Oppdater bedriftens navn.</CardDescription>
               </CardHeader>
               <CardContent>
                 <WorkspaceGeneralForm workspace={workspace} />
               </CardContent>
             </Card>
-          </TabsContent>
-        )}
+          )}
+        </TabsContent>
       </Tabs>
     </PageShell>
   );

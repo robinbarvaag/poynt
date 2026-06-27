@@ -16,7 +16,6 @@ import {
   FormMessage,
 } from "@poynt/ui";
 import { Input } from "@poynt/ui";
-import { Textarea } from "@poynt/ui";
 import { toast } from "@poynt/ui";
 import { useForm, zodResolver } from "@poynt/ui/form";
 import { Icon } from "@poynt/ui/icons";
@@ -83,29 +82,6 @@ export function WorkspaceGeneralForm({
               </FormControl>
               <FormDescription>
                 Dette navnet vises i sidebar og i rapporter.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Beskrivelse</FormLabel>
-              <FormControl>
-                <Textarea
-                  {...field}
-                  value={field.value ?? ""}
-                  disabled={disabled}
-                  className="resize-none"
-                  rows={3}
-                />
-              </FormControl>
-              <FormDescription>
-                En kort beskrivelse av bedriften (valgfritt).
               </FormDescription>
               <FormMessage />
             </FormItem>

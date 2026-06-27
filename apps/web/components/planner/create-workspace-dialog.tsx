@@ -24,7 +24,6 @@ import {
   Icon,
   Input,
   Progress,
-  Textarea,
   toast,
 } from "@poynt/ui";
 import { useForm, zodResolver } from "@poynt/ui/form";
@@ -216,23 +215,6 @@ export function CreateWorkspaceDialog({
                     <FormDescription>
                       Navnet på bedriften eller kunden.
                     </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Beskrivelse (valgfritt)</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Kort beskrivelse av bedriften..."
-                        className="resize-none"
-                        {...field}
-                      />
-                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
