@@ -10,6 +10,7 @@ import {
 } from "@/lib/constants";
 import { SidebarTrigger } from "@poynt/ui";
 import { usePathname } from "next/navigation";
+import { SearchCommand } from "./search-command";
 
 // Ruter som ikke er i sidebar-navet, men som trenger en tittel i headeren.
 const extraTitles: { url: string; title: string }[] = [
@@ -42,9 +43,12 @@ export function AppHeader() {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b bg-background px-4 md:px-6">
+    <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-foreground/10 border-b bg-background px-4 md:px-6">
       <SidebarTrigger className="-ml-1" />
-      <span className="text-sm font-medium">{pageTitle(pathname)}</span>
+      <span className="font-medium text-sm">{pageTitle(pathname)}</span>
+      <div className="ml-auto">
+        <SearchCommand />
+      </div>
     </header>
   );
 }
