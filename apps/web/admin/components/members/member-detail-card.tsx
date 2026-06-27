@@ -13,6 +13,7 @@ const tierLabels: Record<string, string> = {
   none: "Ingen",
   community: "Community",
   community_ai: "Community + AI",
+  agency: "Byrå",
 };
 
 const statusLabels: Record<string, string> = {

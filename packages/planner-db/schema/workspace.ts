@@ -29,7 +29,7 @@ export const plannerWorkspaceRoleEnum = plannerSchema.enum(
  */
 export const plannerSubscriptionTierEnum = plannerSchema.enum(
   "planner_subscription_tier",
-  ["none", "community", "community_ai"]
+  ["none", "community", "community_ai", "agency"]
 );
 
 /**

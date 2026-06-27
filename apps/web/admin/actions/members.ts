@@ -4,7 +4,7 @@ import { db, eq, sql } from "@poynt/planner-db";
 import { plannerSubscription } from "@poynt/planner-db/schema";
 import { getStripe } from "@poynt/stripe";
 
-type MembershipTier = "none" | "community" | "community_ai";
+type MembershipTier = "none" | "community" | "community_ai" | "agency";
 
 export async function changeMemberTier(
   userId: string,

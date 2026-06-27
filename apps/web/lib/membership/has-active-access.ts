@@ -1,4 +1,15 @@
-import type { MembershipInfo } from "../membership";
+import type { MembershipInfo, MembershipTier } from "../membership";
+
+/**
+ * Nivåene som låser opp AI-verktøyene. «agency» (Byrå) arver alt fra
+ * Community AI, så all AI-gating skal sjekke begge — bruk denne i stedet for
+ * `tier === "community_ai"` (som ville stengt byrå-kunder ute).
+ */
+const AI_TIERS: readonly MembershipTier[] = ["community_ai", "agency"];
+
+export function hasAiTools(tier: MembershipTier): boolean {
+  return AI_TIERS.includes(tier);
+}
 
 /**
  * Determines if a user has active access to the On Poynt platform.

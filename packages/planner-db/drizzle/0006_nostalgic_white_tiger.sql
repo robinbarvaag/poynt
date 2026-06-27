@@ -1,0 +1,1 @@
+ALTER TYPE "planner"."planner_subscription_tier" ADD VALUE 'agency';

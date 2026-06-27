@@ -3,8 +3,9 @@
 import { trpc } from "@/lib/planner/trpc";
 import {
   type CreateWorkspaceInput,
+  type MembershipTier,
   createWorkspaceSchema,
-  subscriptionTierLabels,
+  membershipTierLabels,
 } from "@poynt/planner-validators";
 import {
   Button,
@@ -40,7 +41,7 @@ interface Workspace {
 }
 
 interface SubscriptionStatus {
-  tier: "free" | "pro" | "business";
+  tier: MembershipTier;
   usage: {
     workspaces: {
       current: number;
@@ -113,7 +114,7 @@ export function CreateWorkspaceDialog({
 
   const canCreate = subscriptionStatus?.usage.workspaces.canCreate ?? true;
   const usage = subscriptionStatus?.usage.workspaces;
-  const tier = subscriptionStatus?.tier ?? "free";
+  const tier = subscriptionStatus?.tier ?? "none";
   const isUnlimited = usage?.limit === -1;
 
   const handleViewPlans = () => {
@@ -150,7 +151,7 @@ export function CreateWorkspaceDialog({
 
             <div className="flex items-center justify-between">
               <span className="text-xs text-muted-foreground">
-                {subscriptionTierLabels[tier]} plan
+                {membershipTierLabels[tier]}-nivå
               </span>
               {!canCreate && (
                 <button
@@ -179,7 +180,7 @@ export function CreateWorkspaceDialog({
                   Du har nådd grensen
                 </p>
                 <p className="text-sm text-amber-700 dark:text-amber-300">
-                  Din {subscriptionTierLabels[tier]}-plan tillater maks{" "}
+                  {membershipTierLabels[tier]}-nivået ditt tillater maks{" "}
                   {usage?.limit} bedrift{usage?.limit === 1 ? "" : "er"}.
                   Oppgrader for å opprette flere.
                 </p>

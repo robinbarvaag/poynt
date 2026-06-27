@@ -105,13 +105,6 @@ export function NavUser() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <div className="flex items-center px-2 py-1.5">
-                <span className="flex-1 text-sm">Tema</span>
-                <ThemeToggle />
-              </div>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleSignOut}>
               <Icon name="log-out" className="mr-2 h-4 w-4" />
               Logg ut

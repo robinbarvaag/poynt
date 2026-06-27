@@ -1,5 +1,8 @@
 import { getSessionWithMembership } from "@/lib/membership";
-import { hasActiveAccess } from "@/lib/membership/has-active-access";
+import {
+  hasActiveAccess,
+  hasAiTools,
+} from "@/lib/membership/has-active-access";
 import { Button, Icon } from "@poynt/ui";
 import { headers } from "next/headers";
 import Link from "next/link";
@@ -25,12 +28,12 @@ export async function TierGate({
 
   const { tier, status, currentPeriodEnd } = session.membership;
 
-  // community-tier: show upgrade prompt
-  if (tier !== "community_ai") {
+  // community-tier (uten AI): vis oppgraderingsskjerm. Byrå arver AI-tilgang.
+  if (!hasAiTools(tier)) {
     return <UpgradePrompt />;
   }
 
-  // community_ai: show banners if needed, then children
+  // community_ai / agency: show banners if needed, then children
   return (
     <>
       {status === "canceled" && currentPeriodEnd && (

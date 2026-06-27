@@ -43,6 +43,13 @@
       "when": 1782579944854,
       "tag": "0005_aromatic_photon",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1782588881153,
+      "tag": "0006_nostalgic_white_tiger",
+      "breakpoints": true
     }
   ]
 }

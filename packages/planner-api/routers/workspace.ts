@@ -7,11 +7,12 @@ import {
   plannerWorkspaceMember,
 } from "@poynt/planner-db/schema";
 import {
+  type MembershipTier,
   acceptInvitationSchema,
   createWorkspaceSchema,
   inviteMemberSchema,
+  membershipTierLimits,
   removeMemberSchema,
-  subscriptionTierLimits,
   switchWorkspaceSchema,
   updateMemberRoleSchema,
   updateWorkspaceSchema,
@@ -23,21 +24,13 @@ import { nanoid } from "nanoid";
 import { z } from "zod";
 import { protectedProcedure, router } from "../trpc";
 
-// Define tier type locally since we need it for the lookup
-type TierKey = "free" | "pro" | "business";
-
-// `planner_subscription.tier` lagrer medlemskaps-enumet (none|community|
-// community_ai), mens grense-/pris-modellen bruker free|pro|business. Vi broer
-// mellom dem her, med en trygg fallback — uten den ga en ukjent tier-verdi
-// `subscriptionTierLimits[tier] = undefined` → `.maxWorkspaces` kastet → 500.
-const MEMBERSHIP_TO_PLAN: Record<string, TierKey> = {
-  none: "free",
-  community: "free",
-  community_ai: "pro",
-};
-
-function planTierFor(rawTier: string | null | undefined): TierKey {
-  return MEMBERSHIP_TO_PLAN[rawTier ?? "none"] ?? "free";
+/**
+ * Trygg innlesing av medlemskapsnivået. Faller tilbake til «none» om raden
+ * mangler, så `membershipTierLimits[tier]` aldri blir undefined (det var den
+ * gamle 500-bugen).
+ */
+function tierFor(rawTier: string | null | undefined): MembershipTier {
+  return (rawTier as MembershipTier) ?? "none";
 }
 
 /**
@@ -82,12 +75,12 @@ async function checkWorkspaceAccess(
 /**
  * Helper to get user's subscription tier
  */
-async function getUserSubscription(userId: string): Promise<TierKey> {
+async function getUserSubscription(userId: string): Promise<MembershipTier> {
   const sub = await db.query.plannerSubscription.findFirst({
     where: eq(plannerSubscription.userId, userId),
   });
 
-  return planTierFor(sub?.tier);
+  return tierFor(sub?.tier);
 }
 
 /**
@@ -116,7 +109,7 @@ export const workspaceRouter = router({
       // Check subscription limits
       const tier = await getUserSubscription(userId);
       const currentCount = await countUserWorkspaces(userId);
-      const limit = subscriptionTierLimits[tier].maxWorkspaces;
+      const limit = membershipTierLimits[tier].maxWorkspaces;
 
       if (limit !== -1 && currentCount >= limit) {
         throw new TRPCError({
@@ -652,8 +645,8 @@ export const workspaceRouter = router({
       where: eq(plannerSubscription.userId, userId),
     });
 
-    const tier = planTierFor(sub?.tier);
-    const limits = subscriptionTierLimits[tier];
+    const tier = tierFor(sub?.tier);
+    const limits = membershipTierLimits[tier];
     const workspaceCount = await countUserWorkspaces(userId);
 
     return {

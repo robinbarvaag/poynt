@@ -1,4 +1,7 @@
+import { MembershipPlans } from "@/components/subscription/membership-plans";
 import { getSessionWithMembership } from "@/lib/membership";
+import { hasAiTools } from "@/lib/membership/has-active-access";
+import { membershipTierLabels } from "@poynt/planner-validators";
 import { Button } from "@poynt/ui";
 import {
   Card,
@@ -29,11 +32,9 @@ export default async function MembershipSettingsPage() {
 
   // Map tier to display name
   const tierDisplayName =
-    membership.tier === "community"
-      ? "Community"
-      : membership.tier === "community_ai"
-        ? "Community + AI"
-        : "Ingen medlemskap";
+    membership.tier === "none"
+      ? "Ingen medlemskap"
+      : membershipTierLabels[membership.tier];
 
   // Map status to Norwegian display text and color
   const statusInfo = {
@@ -146,7 +147,7 @@ export default async function MembershipSettingsPage() {
                     Månedlig markedsplan
                   </span>
                 </li>
-                {membership.tier === "community_ai" && (
+                {hasAiTools(membership.tier) && (
                   <li className="flex items-center gap-3">
                     <Icon name="check" className="size-5 text-primary" />
                     <span className="text-sm font-medium text-foreground">
@@ -166,6 +167,20 @@ export default async function MembershipSettingsPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Nivåer — sammenlign og oppgrader */}
+      <section className="space-y-4">
+        <div className="space-y-1">
+          <h2 className="font-semibold text-foreground text-lg">
+            {hasNoMembership ? "Velg nivå" : "Nivåer"}
+          </h2>
+          <p className="text-muted-foreground text-sm">
+            Hvor mange bedrifter du kan styre, og hvilke verktøy du får,
+            avhenger av nivået ditt.
+          </p>
+        </div>
+        <MembershipPlans currentTier={membership.tier} />
+      </section>
 
       {/* Help Section */}
       <Card>

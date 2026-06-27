@@ -1,5 +1,8 @@
 import { getSessionWithMembership } from "@/lib/membership";
-import { hasActiveAccess } from "@/lib/membership/has-active-access";
+import {
+  hasActiveAccess,
+  hasAiTools,
+} from "@/lib/membership/has-active-access";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
@@ -26,7 +29,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Ikkje innlogga" }, { status: 401 });
   }
 
-  if (session.membership.tier !== "community_ai") {
+  if (!hasAiTools(session.membership.tier)) {
     return NextResponse.json(
       { error: "Krev Community AI-abonnement" },
       { status: 403 }

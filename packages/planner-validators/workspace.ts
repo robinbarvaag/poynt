@@ -26,61 +26,74 @@ export const workspaceRoleDescriptions: Record<
 };
 
 /**
- * Subscription tiers
+ * Medlemskapsnivå — de EKTE nivåene som selges, samme enum som
+ * `planner_subscription.tier`. «agency» (Byrå) er toppnivået for byrå og
+ * konsulenter som styrer mange kunder. Dette erstatter den gamle fiktive
+ * free/pro/business-stigen (oppdiktede priser) — det finnes nå én sannhet.
  */
-export const subscriptionTiers = ["free", "pro", "business"] as const;
+export const membershipTiers = [
+  "none",
+  "community",
+  "community_ai",
+  "agency",
+] as const;
 
-export const subscriptionTierLabels: Record<
-  (typeof subscriptionTiers)[number],
-  string
-> = {
-  free: "Gratis",
-  pro: "Pro",
-  business: "Business",
+export type MembershipTier = (typeof membershipTiers)[number];
+
+/** Nivåene man faktisk kan kjøpe/sammenligne (`none` = ikke medlem ennå). */
+export const paidMembershipTiers = [
+  "community",
+  "community_ai",
+  "agency",
+] as const;
+
+export const membershipTierLabels: Record<MembershipTier, string> = {
+  none: "Ingen",
+  community: "Community",
+  community_ai: "Community AI",
+  agency: "Byrå",
 };
 
-export const subscriptionTierLimits: Record<
-  (typeof subscriptionTiers)[number],
+/** Ett-linjes pitch per nivå (vises under tittelen i sammenligningskortene). */
+export const membershipTierTaglines: Record<MembershipTier, string> = {
+  none: "",
+  community: "Kom i gang med fagstoff og fellesskap",
+  community_ai: "Få AI-verktøyene som gjør jobben",
+  agency: "Skaler til alle kundene dine",
+};
+
+/**
+ * Grenser per nivå. `maxWorkspaces` = hvor mange bedrifter (kunder) du kan
+ * styre samtidig; -1 = ubegrenset. `none` er gated ute av On Poynt uansett,
+ * men får 1 som trygg fallback (f.eks. ved sync-forsinkelse eller lokal test).
+ */
+export const membershipTierLimits: Record<
+  MembershipTier,
   { maxWorkspaces: number; maxMembersPerWorkspace: number }
 > = {
-  free: { maxWorkspaces: 1, maxMembersPerWorkspace: 1 },
-  pro: { maxWorkspaces: 5, maxMembersPerWorkspace: 5 },
-  business: { maxWorkspaces: -1, maxMembersPerWorkspace: -1 }, // -1 = unlimited
+  none: { maxWorkspaces: 1, maxMembersPerWorkspace: 1 },
+  community: { maxWorkspaces: 1, maxMembersPerWorkspace: 1 },
+  community_ai: { maxWorkspaces: 5, maxMembersPerWorkspace: 5 },
+  agency: { maxWorkspaces: -1, maxMembersPerWorkspace: -1 },
 };
 
-export const subscriptionPricing: Record<
-  (typeof subscriptionTiers)[number],
-  { monthly: number; yearly: number }
-> = {
-  free: { monthly: 0, yearly: 0 },
-  pro: { monthly: 199, yearly: 1990 },
-  business: { monthly: 499, yearly: 4990 },
-};
-
-export const subscriptionFeatures: Record<
-  (typeof subscriptionTiers)[number],
-  string[]
-> = {
-  free: [
+/** Kort verdiløfte per nivå — brukt i sammenlignings-/oppgraderingsvisningen. */
+export const membershipTierFeatures: Record<MembershipTier, string[]> = {
+  none: [],
+  community: [
     "1 bedrift",
-    "Alle AI-verktøy",
-    "Grunnleggende rapporter",
-    "E-post support",
+    "Alle artikler og guider",
+    "Tilgang til fellesskapet",
   ],
-  pro: [
-    "5 bedrifter",
-    "Alle AI-verktøy",
-    "Avanserte rapporter",
-    "Prioritert support",
-    "Eksport til PDF",
+  community_ai: [
+    "Alt i Community",
+    "Alle AI-verktøy – kanalveileder, markedsplan, årshjul og mer",
+    "Opptil 5 bedrifter",
   ],
-  business: [
-    "Ubegrenset bedrifter",
-    "Alle AI-verktøy",
-    "Tilpassede rapporter",
-    "Dedikert support",
-    "API-tilgang",
-    "Team-funksjoner",
+  agency: [
+    "Alt i Community AI",
+    "Ubegrenset antall bedrifter",
+    "For byrå og konsulenter som styrer flere kunder",
   ],
 };
 
@@ -204,8 +217,8 @@ export type WorkspaceWithRole = z.infer<typeof workspaceWithRoleSchema>;
 export const subscriptionSchema = z.object({
   id: z.string(),
   userId: z.string(),
-  tier: z.enum(subscriptionTiers),
-  status: z.enum(["active", "canceled", "past_due", "trialing"]),
+  tier: z.enum(membershipTiers),
+  status: z.enum(["active", "inactive", "canceled", "past_due"]),
   currentPeriodEnd: z.date().nullable(),
   cancelAtPeriodEnd: z.boolean(),
 });

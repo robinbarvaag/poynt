@@ -7,6 +7,7 @@ import {
   learnNavItems,
   toolNavItems,
 } from "@/lib/constants";
+import { hasAiTools } from "@/lib/membership/has-active-access";
 import { trpc } from "@/lib/planner/trpc";
 import {
   Icon,
@@ -69,7 +70,7 @@ export function AppSidebar() {
 
     trpc.membership.getTier
       .query()
-      .then((result) => setIsAiTier(result.tier === "community_ai"))
+      .then((result) => setIsAiTier(hasAiTools(result.tier)))
       .catch(() => setIsAiTier(false));
   }, []);
 

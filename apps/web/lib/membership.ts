@@ -1,8 +1,9 @@
 import { auth } from "@poynt/planner-auth/server";
 import { db, eq } from "@poynt/planner-db";
 import { plannerSubscription } from "@poynt/planner-db/schema";
+import type { MembershipTier } from "@poynt/planner-validators";
 
-export type MembershipTier = "none" | "community" | "community_ai";
+export type { MembershipTier };
 export type MembershipStatus = "active" | "inactive" | "canceled" | "past_due";
 
 export interface MembershipInfo {

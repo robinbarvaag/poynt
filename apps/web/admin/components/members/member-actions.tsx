@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { changeMemberTier, deactivateMember } from "../../actions/members";
 
-type MembershipTier = "none" | "community" | "community_ai";
+type MembershipTier = "none" | "community" | "community_ai" | "agency";
 
 type Props = {
   userId: string;
@@ -17,6 +17,7 @@ const tiers: { value: MembershipTier; label: string }[] = [
   { value: "none", label: "Ingen" },
   { value: "community", label: "Community" },
   { value: "community_ai", label: "Community + AI" },
+  { value: "agency", label: "Byrå" },
 ];
 
 export const MemberActions = ({
