@@ -30,14 +30,17 @@ interface Upcoming {
   idea: string;
 }
 
-function formatDate(iso: string): string {
+/** Dato som dag + måned for en liten kalender-flis (tydeligere enn én linje). */
+function formatDay(iso: string): { day: string; month: string } {
   const p = parseISODate(iso);
-  if (!p) return "";
-  return new Intl.DateTimeFormat("nb-NO", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-  }).format(new Date(p.year, p.month - 1, p.day));
+  if (!p) return { day: "", month: "" };
+  const d = new Date(p.year, p.month - 1, p.day);
+  return {
+    day: String(p.day),
+    month: new Intl.DateTimeFormat("nb-NO", { month: "short" })
+      .format(d)
+      .replace(".", ""),
+  };
 }
 
 /**
@@ -119,29 +122,26 @@ export function UpcomingPostsCard() {
           </div>
         ) : (
           <>
-            <ul className="space-y-2">
+            <ul className="-my-1 divide-y divide-border/70">
               {upcoming.map((post) => {
                 const meta = channelMeta(post.channel);
+                const d = formatDay(post.iso);
                 return (
-                  <li
-                    key={post.id}
-                    className="flex items-center gap-3 rounded-lg border bg-card p-2.5"
-                  >
-                    <div className="flex w-14 shrink-0 flex-col items-center text-center">
-                      <span className="font-semibold text-primary text-xs capitalize">
-                        {formatDate(post.iso)}
+                  <li key={post.id} className="flex items-center gap-4 py-3">
+                    <div className="flex size-12 shrink-0 flex-col items-center justify-center rounded-xl bg-muted">
+                      <span className="font-bold text-base leading-none">
+                        {d.day}
+                      </span>
+                      <span className="text-[11px] text-muted-foreground uppercase">
+                        {d.month}
                       </span>
                     </div>
-                    <span
-                      className={cn("size-2 shrink-0 rounded-full", meta.dot)}
-                    />
-                    <span className="line-clamp-1 flex-1 text-sm">
+                    <p className="line-clamp-2 flex-1 font-medium text-sm leading-snug">
                       {post.idea}
-                    </span>
+                    </p>
                     {post.channel && (
                       <Badge
                         variant="outline"
-                        size="sm"
                         className={cn("shrink-0", meta.chip)}
                       >
                         {post.channel}

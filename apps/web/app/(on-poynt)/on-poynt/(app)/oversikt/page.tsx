@@ -1,81 +1,111 @@
+import { JourneyPath } from "@/components/planner/dashboard/journey-path";
+import { NextStepHero } from "@/components/planner/dashboard/next-step-hero";
+import { ToolboxCard } from "@/components/planner/dashboard/toolbox-card";
 import { UpcomingPostsCard } from "@/components/planner/dashboard/upcoming-posts-card";
 import { TasksCard } from "@/components/planner/tasks/tasks-card";
-import { quickActions } from "@/lib/constants";
+import { getDashboardState } from "@/lib/planner/dashboard-state";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  PageHeader,
 } from "@poynt/ui";
-import { Button } from "@poynt/ui";
-import { Icon } from "@poynt/ui/icons";
-import Link from "next/link";
+import { Icon, type IconName } from "@poynt/ui/icons";
 
-export default function DashboardPage() {
+/** Én rolig seksjonsoverskrift — samme stil overalt, så siden ikke spriker. */
+function SectionTitle({ children }: { children: string }) {
+  return <h2 className="font-heading font-semibold text-xl">{children}</h2>;
+}
+
+/** Ett sjekkpunkt i den faste rytmen (rad uten egen ramme — bor i ett kort). */
+function RhythmCheck({
+  icon,
+  title,
+  text,
+}: {
+  icon: IconName;
+  title: string;
+  text: string;
+}) {
   return (
-    <div className="flex flex-col gap-8">
-      <PageHeader
-        title="Velkommen til On Poynt!"
-        description="Verktøyene og innholdet ditt – samlet på ett sted."
-      />
-
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {quickActions.map((action) => (
-          <Link key={action.title} href={action.href}>
-            <Card className="group h-full transition-all hover:-translate-y-0.5">
-              <CardContent className="flex items-center gap-3 p-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-                  <Icon name={action.icon} className="h-5 w-5" />
-                </div>
-                <div>
-                  <div className="font-medium">{action.title}</div>
-                  <div className="text-sm text-muted-foreground">
-                    {action.description}
-                  </div>
-                </div>
-                <Icon
-                  name="arrow-right"
-                  className="ml-auto h-4 w-4 shrink-0 text-muted-foreground opacity-0 transition-all group-hover:translate-x-0.5 group-hover:opacity-100"
-                />
-              </CardContent>
-            </Card>
-          </Link>
-        ))}
+    <div className="flex items-start gap-3">
+      <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+        <Icon name={icon} className="size-4" />
+      </span>
+      <div>
+        <p className="font-medium text-sm">{title}</p>
+        <p className="text-muted-foreground text-sm">{text}</p>
       </div>
+    </div>
+  );
+}
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <TasksCard />
-        <UpcomingPostsCard />
-      </div>
+export default async function DashboardPage() {
+  const { hero, stages } = await getDashboardState();
 
-      <Card>
-        <CardHeader>
-          <div className="flex items-start gap-4">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
-              <Icon name="lightbulb" className="h-5 w-5 text-primary" />
+  return (
+    <div className="flex flex-col gap-10">
+      {/* Tilstandsstyrt topp — hvor du er + det ene neste steget */}
+      <NextStepHero {...hero} />
+
+      {/* Signaturen: den guidede veien gjennom oppsettet */}
+      <JourneyPath title="Slik kommer du i gang" stages={stages} />
+
+      {/* Din rytme — det daglige/ukentlige når oppsettet er i gang */}
+      <section className="space-y-5">
+        <SectionTitle>Din rytme</SectionTitle>
+        <div className="grid gap-6 lg:grid-cols-2">
+          <TasksCard />
+          <UpcomingPostsCard />
+        </div>
+
+        {/* Samme Card-komponent som de andre flatene — ett tydelig merket kort
+            i stedet for to løse bokser. */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Din faste rytme</CardTitle>
+            <CardDescription>
+              To faste sjekkpunkter som holder markedsføringen i gang.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-5 sm:grid-cols-2">
+              <RhythmCheck
+                icon="clock"
+                title="Hver uke"
+                text="Sett av en halvtime til å lage og planlegge ukas innhold."
+              />
+              <RhythmCheck
+                icon="refresh"
+                title="Hvert kvartal"
+                text="Se over markedsplanen og juster kursen etter det som funker."
+              />
             </div>
-            <div>
-              <CardTitle className="text-base">
-                Tips: Start med kanalveilederen
-              </CardTitle>
-              <CardDescription className="mt-1">
-                Ikke sikker på hvor du skal begynne? Kanalveilederen analyserer
-                bedriften din og anbefaler de beste markedsføringskanalene.
-                Deretter kan du bruke markedsplan-generatoren for å lage en
-                komplett strategi.
-              </CardDescription>
-              <Button variant="link" className="mt-2 h-auto p-0" asChild>
-                <Link href="/on-poynt/verktoy/kanalveileder">
-                  Prøv kanalveilederen
-                  <Icon name="arrow-right" className="ml-1 h-4 w-4" />
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
-      </Card>
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* Verktøykassa — nyttige verktøy utenom kjernereisen */}
+      <section className="space-y-5">
+        <SectionTitle>Verktøykassa</SectionTitle>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <ToolboxCard
+            name="Si nei med stil"
+            whatItDoes="Lag høflige, profesjonelle avslag på forespørsler du ikke rekker."
+            whenToUse="noen ber om noe du må takke nei til."
+            icon="message-square-off"
+            href="/on-poynt/verktoy/avslag-generator"
+          />
+          <ToolboxCard
+            name="Podcast til innhald"
+            whatItDoes="Gjør en podkast-episode om til blogginnlegg, sosiale poster og kapittelmerker."
+            whenToUse="du har en episode du vil få mer innhold ut av."
+            icon="mic"
+            href="/on-poynt/verktoy/podcast-til-innhald"
+          />
+        </div>
+      </section>
     </div>
   );
 }

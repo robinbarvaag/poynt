@@ -45,6 +45,10 @@ type AnyPlan =
   | null
   | undefined;
 
+// Utrullingsplanens faser materialiseres under en egen source, slik at de ikke
+// kolliderer med quick wins («marketing-plan») og kan hentes inn fase for fase.
+const TIMELINE_SOURCE = "marketing-plan-timeline";
+
 export function MarketingPlanClient({
   initialSavedPlan,
   initialIndustry,
@@ -60,6 +64,8 @@ export function MarketingPlanClient({
   );
   // Hindrer at vi materialiserer den samme genererte planen flere ganger.
   const syncedRef = useRef<string | null>(null);
+  // Hvilke utrullingsfaser er allerede hentet inn som oppgaver (etter månedsnavn).
+  const [pulledPhases, setPulledPhases] = useState<Set<string>>(new Set());
 
   const { generate, result, isPending, saved } = useToolStream<
     MarketingPlanRequest,
@@ -112,6 +118,52 @@ export function MarketingPlanClient({
     syncedRef.current = saved.id;
     materialize(result);
   }, [saved, result, shownSavedPlan, materialize]);
+
+  // Hent hvilke utrullingsfaser som allerede ligger i oppgavelista, så hver fase
+  // viser «Lagt i oppgavene» i stedet for «Legg i oppgavene».
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const rows = await trpc.task.list.query({ source: TIMELINE_SOURCE });
+        if (!active) return;
+        setPulledPhases(
+          new Set(
+            rows.map((r) => r.category).filter((c): c is string => Boolean(c))
+          )
+        );
+      } catch {
+        // stille — knappene faller tilbake til «Legg i oppgavene»
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // Hent inn én utrullingsfase som oppgaver (progressivt — én fase om gangen).
+  const pullPhase = useCallback(
+    async (phase: { label: string; tasks: string[] }) => {
+      if (!phase.label || phase.tasks.length === 0) return;
+      setPulledPhases((s) => new Set(s).add(phase.label)); // optimistisk
+      try {
+        await trpc.task.addPhase.mutate({
+          source: TIMELINE_SOURCE,
+          category: phase.label,
+          tasks: phase.tasks,
+        });
+        toast.success(`«${phase.label}» lagt i oppgavelista.`);
+      } catch {
+        setPulledPhases((s) => {
+          const next = new Set(s);
+          next.delete(phase.label);
+          return next;
+        });
+        toast.error("Kunne ikke legge fasen i oppgavelista.");
+      }
+    },
+    []
+  );
 
   async function handleSubmit(data: MarketingPlanRequest) {
     setShownSavedPlan(null);
@@ -178,6 +230,8 @@ export function MarketingPlanClient({
               mode="result"
               isStreaming={!shownSavedPlan && isPending}
               onSyncTasks={() => materialize(displayedPlan)}
+              pulledPhases={pulledPhases}
+              onPullPhase={pullPhase}
             />
           </motion.div>
         )}

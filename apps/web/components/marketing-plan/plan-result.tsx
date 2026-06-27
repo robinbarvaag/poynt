@@ -32,6 +32,10 @@ interface PlanResultProps {
   isStreaming?: boolean;
   /** Legg quick wins i oppgavelista på nytt (for lagrede planer). */
   onSyncTasks?: () => void;
+  /** Månedsnavn på utrullingsfaser som allerede er hentet inn som oppgaver. */
+  pulledPhases?: Set<string>;
+  /** Hent inn én utrullingsfase som oppgaver (progressivt). */
+  onPullPhase?: (phase: { label: string; tasks: string[] }) => void;
 }
 
 // Hver seksjon animerer seg selv på egen mount (samme rolige, streaming-klare
@@ -103,6 +107,8 @@ export function PlanResult({
   onStartForm,
   isStreaming = false,
   onSyncTasks,
+  pulledPhases,
+  onPullPhase,
 }: PlanResultProps) {
   // Roter «jobber»-meldingen mens vi streamer og før det første svaret kommer.
   const [messageTick, setMessageTick] = useState(0);
@@ -400,12 +406,17 @@ export function PlanResult({
           <SectionHeading
             icon="calendar"
             title="Slik ruller du det ut"
-            subtitle="Fase for fase gjennom året"
+            subtitle="Hent inn én fase om gangen når du er klar — så drukner du ikke i 12 måneder på en gang"
           />
           <ol className="space-y-3">
             {timeline.map((month, index) => {
               const tasks = (month.tasks ?? []).filter((t): t is string =>
                 Boolean(t)
+              );
+              const label = month.monthName ?? "";
+              const isPulled = Boolean(label && pulledPhases?.has(label));
+              const canPull = Boolean(
+                onPullPhase && !isStreaming && label && tasks.length > 0
               );
               return (
                 <li
@@ -435,6 +446,23 @@ export function PlanResult({
                         ))}
                       </ul>
                     )}
+                    {canPull &&
+                      (isPulled ? (
+                        <p className="mt-3 flex items-center gap-1.5 font-medium text-primary text-sm">
+                          <Icon name="check-circle" className="size-4" />
+                          Lagt i oppgavene
+                        </p>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="mt-3 gap-2"
+                          onClick={() => onPullPhase?.({ label, tasks })}
+                        >
+                          <Icon name="plus" className="size-4" />
+                          Legg fasen i oppgavene
+                        </Button>
+                      ))}
                   </div>
                 </li>
               );

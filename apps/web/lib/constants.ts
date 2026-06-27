@@ -29,9 +29,9 @@ export const toolNavItems: NavItem[] = [
     requiresAi: true,
   },
   {
-    title: "Si nei-generator",
+    title: "Si nei med stil",
     url: "/on-poynt/verktoy/avslag-generator",
-    icon: "hand-metal",
+    icon: "message-square-off",
     requiresAi: true,
   },
   {
@@ -123,9 +123,10 @@ export const tools: {
     benefits: ["Skreddersydd", "Ukentlig plan"],
   },
   {
-    icon: "hand-metal",
-    title: "Si nei-generator",
-    description: "Avslå forespørsler profesjonelt uten å brenne broer.",
+    icon: "message-square-off",
+    title: "Si nei med stil",
+    description:
+      "Lag høflige, profesjonelle avslag på forespørsler du ikke rekker — uten å brenne broer.",
     href: "/on-poynt/verktoy/avslag-generator",
     benefits: ["Profesjonelt", "Vennlig tone"],
   },
@@ -149,10 +150,10 @@ export const tools: {
 
 export const quickActions = [
   {
-    title: "Lag avslag",
-    description: "Profesjonelt nei",
+    title: "Si nei med stil",
+    description: "Høflige avslag",
     href: "/on-poynt/verktoy/avslag-generator",
-    icon: "hand-metal" as IconName,
+    icon: "message-square-off" as IconName,
   },
   {
     title: "Ny markedsplan",

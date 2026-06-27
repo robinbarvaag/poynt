@@ -123,6 +123,49 @@ export const taskRouter = router({
       return { count: rows.length };
     }),
 
+  /**
+   * Hent inn én fase (f.eks. en måned fra markedsplanens utrullingsplan) som
+   * oppgaver — progressivt, i stedet for å dumpe alle fasene på en gang. Scopet
+   * replace på (source + category): å hente fasen på nytt synkroniserer bare den
+   * fasen, og lar de andre fasene stå urørt. `category` er fase-etiketten
+   * (typisk månedsnavnet), så oppgavene grupperes riktig på dashbordet.
+   */
+  addPhase: protectedProcedure
+    .input(
+      z.object({
+        source: z.string().max(50),
+        category: z.string().min(1).max(100),
+        tasks: z.array(z.string().min(1).max(300)).max(50),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const workspaceId = await getActiveWorkspaceId(ctx.userId);
+
+      await db
+        .delete(plannerTask)
+        .where(
+          and(
+            eq(plannerTask.workspaceId, workspaceId),
+            eq(plannerTask.source, input.source),
+            eq(plannerTask.category, input.category)
+          )
+        );
+
+      if (input.tasks.length === 0) return { count: 0 };
+
+      const rows = input.tasks.map((title, i) => ({
+        id: crypto.randomUUID(),
+        workspaceId,
+        title,
+        note: null,
+        source: input.source,
+        category: input.category,
+        sortOrder: i,
+      }));
+      await db.insert(plannerTask).values(rows);
+      return { count: rows.length };
+    }),
+
   /** Hak av / på en oppgave. */
   toggle: protectedProcedure
     .input(z.object({ id: z.string() }))

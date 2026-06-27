@@ -2,6 +2,10 @@
 
 import { trpc } from "@/lib/planner/trpc";
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
   Badge,
   Button,
   Card,
@@ -38,7 +42,6 @@ export function TasksCard() {
   const [loading, setLoading] = useState(true);
   const [title, setTitle] = useState("");
   const [adding, setAdding] = useState(false);
-  const [showDone, setShowDone] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -107,29 +110,34 @@ export function TasksCard() {
     <li key={task.id} className="group flex items-start gap-3">
       <Checkbox
         id={`task-${task.id}`}
+        size="sm"
         checked={task.done}
         onCheckedChange={() => toggle(task)}
-        className="mt-0.5"
+        className="mt-0.5 shrink-0"
       />
-      <label
-        htmlFor={`task-${task.id}`}
-        className={cn(
-          "flex-1 cursor-pointer text-sm leading-snug",
-          task.done && "text-muted-foreground line-through"
-        )}
-      >
-        {task.title}
+      {/* Tittel og badge ligger side om side — gjennomstreking treffer KUN
+          tittelen, ikke badgen. */}
+      <div className="flex flex-1 flex-wrap items-center gap-x-2 gap-y-1">
+        <label
+          htmlFor={`task-${task.id}`}
+          className={cn(
+            "cursor-pointer text-sm leading-snug",
+            task.done && "text-muted-foreground line-through"
+          )}
+        >
+          {task.title}
+        </label>
         {task.category && (
-          <Badge variant="muted" size="sm" className="ml-2 align-middle">
+          <Badge variant="muted" size="sm">
             {task.category}
           </Badge>
         )}
-      </label>
+      </div>
       <button
         type="button"
         onClick={() => remove(task.id)}
         aria-label="Slett oppgaven"
-        className="text-muted-foreground opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
+        className="mt-0.5 shrink-0 text-muted-foreground opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
       >
         <Icon name="x" className="size-4" />
       </button>
@@ -201,27 +209,18 @@ export function TasksCard() {
               </div>
             )}
 
-            {/* Fullførte (sammenleggbart) */}
+            {/* Fullførte — den delte Accordion-komponenten (sammenleggbart) */}
             {done.length > 0 && (
-              <div className="border-t pt-3">
-                <button
-                  type="button"
-                  onClick={() => setShowDone((v) => !v)}
-                  className="flex items-center gap-1.5 text-muted-foreground text-xs hover:text-foreground"
-                >
-                  <Icon
-                    name="chevron-right"
-                    className={cn(
-                      "size-3.5 transition-transform",
-                      showDone && "rotate-90"
-                    )}
-                  />
-                  {done.length} fullført
-                </button>
-                {showDone && (
-                  <ul className="mt-2.5 space-y-2.5">{done.map(renderTask)}</ul>
-                )}
-              </div>
+              <Accordion type="single" collapsible className="border-t">
+                <AccordionItem value="fullfort" className="border-b-0">
+                  <AccordionTrigger className="py-3 text-muted-foreground text-xs hover:no-underline">
+                    {done.length} fullført
+                  </AccordionTrigger>
+                  <AccordionContent className="pb-0">
+                    <ul className="space-y-2.5">{done.map(renderTask)}</ul>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
             )}
 
             {/* Legg til */}

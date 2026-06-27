@@ -147,11 +147,12 @@ export function DeclineGeneratorClient({
             exit="exit"
           >
             <div className="mb-8 text-center">
-              <h1 className="text-2xl font-semibold tracking-tight">
-                Lag et avslag
+              <h1 className="font-semibold text-2xl tracking-tight">
+                Si nei med stil
               </h1>
-              <p className="text-muted-foreground mt-2">
-                Fyll ut skjemaet for å få 3 varianter
+              <p className="mt-2 text-muted-foreground">
+                Beskriv forespørselen, så får du tre høflige måter å takke nei
+                på.
               </p>
             </div>
             <DeclineForm onSubmit={handleSubmit} isLoading={isLoading} />

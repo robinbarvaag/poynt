@@ -73,7 +73,7 @@ function UpgradePrompt() {
             </li>
             <li className="flex items-center gap-2">
               <Icon name="check" className="h-4 w-4 text-primary shrink-0" />
-              Si nei-generator
+              Si nei med stil — høflige avslag
             </li>
             <li className="flex items-center gap-2">
               <Icon name="check" className="h-4 w-4 text-primary shrink-0" />
