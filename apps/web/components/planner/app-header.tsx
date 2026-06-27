@@ -1,10 +1,12 @@
 "use client";
 
 import {
-  accountNavItems,
+  accountMenuItem,
+  businessNavItems,
   homeNavItem,
   learnNavItems,
   toolNavItems,
+  toolboxNavItems,
 } from "@/lib/constants";
 import { SidebarTrigger } from "@poynt/ui";
 import { usePathname } from "next/navigation";
@@ -17,8 +19,10 @@ const extraTitles: { url: string; title: string }[] = [
 const titleEntries = [
   homeNavItem,
   ...toolNavItems,
+  ...toolboxNavItems,
   ...learnNavItems,
-  ...accountNavItems,
+  ...businessNavItems,
+  accountMenuItem,
   ...extraTitles,
 ];
 

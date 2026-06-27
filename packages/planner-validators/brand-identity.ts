@@ -30,7 +30,10 @@ export const brandColorRoleLabels: Record<BrandColorRole, string> = {
 export const brandColorSchema = z.object({
   hex: z
     .string()
-    .regex(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/, "Bruk et gyldig hex (f.eks. #29664f)"),
+    .regex(
+      /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/,
+      "Bruk et gyldig hex (f.eks. #29664f)"
+    ),
   name: z.string().max(60).nullable().optional(),
   role: z.enum(brandColorRoles).nullable().optional(),
 });

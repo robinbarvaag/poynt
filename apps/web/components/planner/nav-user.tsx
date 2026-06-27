@@ -1,5 +1,6 @@
 "use client";
 
+import { accountMenuItem } from "@/lib/constants";
 import { signOut, useSession } from "@poynt/planner-auth/client";
 import {
   Avatar,
@@ -19,6 +20,7 @@ import {
   Skeleton,
   useSidebar,
 } from "@poynt/ui";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ThemeToggle } from "./theme-toggle";
 
@@ -104,6 +106,13 @@ export function NavUser() {
                 </div>
               </div>
             </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link href={accountMenuItem.url}>
+                <Icon name={accountMenuItem.icon} className="mr-2 h-4 w-4" />
+                {accountMenuItem.title}
+              </Link>
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleSignOut}>
               <Icon name="log-out" className="mr-2 h-4 w-4" />
