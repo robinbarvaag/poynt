@@ -184,6 +184,54 @@ export const marketingPlanSchema = z.object({
 export type MarketingPlan = z.infer<typeof marketingPlanSchema>;
 
 /**
+ * Skjema for det AI-en streamer (via `streamText` + `Output.object`).
+ *
+ * OpenAIs strenge structured-output krever at ALLE felter ligger i `required`.
+ * Valgfrie felter må derfor være `.nullable()` (påkrevd, men kan være null),
+ * ikke `.optional()`. UI-en behandler null som «ikke oppgitt» (null er falsy).
+ *
+ * FELT-REKKEFØLGEN ER BEVISST: modellen genererer feltene i denne rekkefølgen,
+ * og under streaming fylles UI-et inn i samme rekkefølge topp→bunn
+ * (oppsummering → vurdering → kanaler → tidslinje → ukesrutine → quick wins →
+ * tips), så innholdet ikke streamer inn «over» noe som alt er vist.
+ */
+const streamChannelActivitySchema = z.object({
+  channel: z.string(),
+  frequency: z.string(),
+  priority: z.enum(["high", "medium", "low"]),
+  activities: z.array(z.string()),
+  expectedImpact: z.string().nullable(),
+  resourcesNeeded: z.string().nullable(),
+  potentialChallenges: z.array(z.string()).nullable(),
+  successMetrics: z.array(z.string()).nullable(),
+});
+
+const streamMonthPlanSchema = z.object({
+  month: z.number(),
+  monthName: z.string(),
+  focus: z.string(),
+  tasks: z.array(z.string()),
+});
+
+const streamWeeklyTaskSchema = z.object({
+  day: z.string(),
+  task: z.string(),
+  duration: z.string(),
+});
+
+export const marketingPlanStreamSchema = z.object({
+  summary: z.string(),
+  reasoning: z.string(),
+  channels: z.array(streamChannelActivitySchema),
+  timeline: z.array(streamMonthPlanSchema),
+  weeklyRoutine: z.array(streamWeeklyTaskSchema),
+  quickWins: z.array(z.string()),
+  tips: z.array(z.string()),
+});
+
+export type MarketingPlanStream = z.infer<typeof marketingPlanStreamSchema>;
+
+/**
  * Response fra AI
  */
 export const marketingPlanResponseSchema = z.object({

@@ -2,18 +2,18 @@
 
 import { GuideQuiz } from "@/components/channel-guide/guide-quiz";
 import { GuideResult } from "@/components/channel-guide/guide-result";
-import { trpc } from "@/lib/planner/trpc";
+import { channelGuideStreamAction } from "@/lib/planner/actions/channel-guide";
+import { useToolStream } from "@/lib/planner/use-tool-stream";
 import type {
   ChannelGuideClientProps,
   ChannelRecommendation,
-  SavedResult,
   ViewState,
 } from "@/lib/types";
-import { experimental_useObject as useObject } from "@ai-sdk/react";
+import type {
+  ChannelGuideRequest,
+  ChannelGuideStream,
+} from "@poynt/planner-validators";
 import {
-  type ChannelGuideRequest,
-  type ChannelGuideStream,
-  channelGuideStreamSchema,
   mainGoalLabels,
   strengthLabels,
   targetAudienceLabels,
@@ -33,14 +33,7 @@ import {
 import { Icon } from "@poynt/ui/icons";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
-import type { z } from "zod";
-
-// Presenter skjemaet som en grunn ZodType<T> for hooken. Uten dette prøver TS
-// å utlede RESULT gjennom de dype zod-typene og treffer "type instantiation
-// excessively deep" (og en zod-versjonskollisjon mot SDK-ens FlexibleSchema).
-const guideSchema =
-  channelGuideStreamSchema as unknown as z.ZodType<ChannelGuideStream>;
+import { useState } from "react";
 
 const fadeIn = {
   hidden: { opacity: 0, y: 10 },
@@ -68,62 +61,31 @@ export function ChannelGuideClient({
   const [view, setView] = useState<ViewState>(
     initialSavedResult ? "saved" : "ready"
   );
-  const [savedResult, setSavedResult] = useState<SavedResult | null>(
-    initialSavedResult
-  );
-  const lastInputs = useRef<ChannelGuideRequest | null>(null);
 
-  const { object, submit, isLoading, clear } = useObject({
-    api: "/on-poynt/api/ai/channel-guide",
-    schema: guideSchema,
-    onError() {
+  // Streaming-generering via server action + RSC streamable value. `result`
+  // (delobjekt) fylles inn bit for bit mens svaret genereres.
+  const { generate, result, isPending } = useToolStream<
+    ChannelGuideRequest,
+    ChannelGuideStream
+  >({
+    action: channelGuideStreamAction,
+    toolId: "channel-guide",
+    title: "Kanalanbefaling",
+    buildResult: (data) => ({
+      channels: data.channels,
+      reasoning: data.reasoning,
+      nextSteps: data.nextSteps,
+    }),
+    onError: () => {
       toast.error("Kunne ikke generere anbefalinger. Prøv igjen.");
+      setView("ready");
     },
   });
 
-  // Lagre resultatet når streamen er ferdig — fra `object` (akkurat det som
-  // vises), så det lagrede og det viste alltid er identisk. (onFinish-objektet
-  // kunne avvike fra det rendrede og førte til at refresh viste mindre.)
-  const savedRef = useRef(false);
-  const wasLoading = useRef(false);
-  useEffect(() => {
-    const finished = object;
-    if (
-      wasLoading.current &&
-      !isLoading &&
-      !savedRef.current &&
-      finished?.channels &&
-      finished.channels.length > 0
-    ) {
-      savedRef.current = true;
-      void (async () => {
-        try {
-          const saved = await trpc.toolResult.save.mutate({
-            toolId: "channel-guide",
-            title: "Kanalanbefaling",
-            inputs: (lastInputs.current ?? {}) as Record<string, unknown>,
-            result: {
-              channels: finished.channels,
-              reasoning: finished.reasoning,
-              nextSteps: finished.nextSteps,
-            },
-          });
-          if (saved) {
-            setSavedResult({
-              id: saved.id,
-              channels: finished.channels as ChannelRecommendation[],
-              reasoning: finished.reasoning,
-              nextSteps: (finished.nextSteps ?? []).filter(Boolean) as string[],
-              createdAt: new Date(saved.createdAt),
-            });
-          }
-        } catch (saveError) {
-          console.error("Could not save result:", saveError);
-        }
-      })();
-    }
-    wasLoading.current = isLoading;
-  }, [isLoading, object]);
+  function runGeneration(request: ChannelGuideRequest) {
+    setView("result");
+    generate(request);
+  }
 
   /** Bygger en forespørsel direkte fra bedriftsprofilen (profil-først). */
   function buildRequestFromProfile(): ChannelGuideRequest | null {
@@ -156,22 +118,14 @@ export function ChannelGuideClient({
       setView("quiz");
       return;
     }
-    lastInputs.current = request;
-    savedRef.current = false;
-    setView("result");
-    submit(request);
+    runGeneration(request);
   }
 
   async function handleSubmit(data: ChannelGuideRequest) {
-    lastInputs.current = data;
-    savedRef.current = false;
-    setView("result");
-    submit(data);
+    runGeneration(data);
   }
 
   function handleReset() {
-    clear();
-    lastInputs.current = null;
     setView("ready");
   }
 
@@ -188,11 +142,11 @@ export function ChannelGuideClient({
     profile.strengths ? strengthLabels[profile.strengths] : null,
   ].filter((chip): chip is string => Boolean(chip));
 
-  // Partial-objektet fra streamen → typene matcher displaykontrakten løst
-  // (felter er valgfrie mens det streamer); GuideResult vokter på `name`.
-  const streamingChannels = (object?.channels ??
+  // Delobjektet under streaming → display-kontrakten (GuideResult vokter på
+  // manglende felter; filtrer bort ev. udefinerte steg som ennå streamer inn).
+  const resultChannels = (result?.channels ??
     []) as unknown as ChannelRecommendation[];
-  const streamingNextSteps = ((object?.nextSteps ?? []) as string[]).filter(
+  const resultNextSteps = ((result?.nextSteps ?? []) as string[]).filter(
     Boolean
   );
 
@@ -302,7 +256,7 @@ export function ChannelGuideClient({
           </motion.div>
         )}
 
-        {view === "saved" && savedResult && (
+        {view === "saved" && initialSavedResult && (
           <motion.div
             key="saved"
             variants={fadeIn}
@@ -311,9 +265,9 @@ export function ChannelGuideClient({
             exit="exit"
           >
             <GuideResult
-              channels={savedResult.channels}
-              reasoning={savedResult.reasoning || null}
-              nextSteps={savedResult.nextSteps || null}
+              channels={initialSavedResult.channels}
+              reasoning={initialSavedResult.reasoning || null}
+              nextSteps={initialSavedResult.nextSteps || null}
               onReset={handleReset}
               mode="result"
             />
@@ -330,7 +284,7 @@ export function ChannelGuideClient({
           >
             <GuideQuiz
               onSubmit={handleSubmit}
-              isLoading={isLoading}
+              isLoading={isPending}
               industries={industries}
               initialIndustryId={profile.industryId}
               initialTargetAudience={profile.audienceType}
@@ -347,12 +301,12 @@ export function ChannelGuideClient({
             exit="exit"
           >
             <GuideResult
-              channels={streamingChannels}
-              reasoning={object?.reasoning ?? null}
-              nextSteps={streamingNextSteps}
+              channels={resultChannels}
+              reasoning={result?.reasoning ?? null}
+              nextSteps={resultNextSteps}
               onReset={handleReset}
               mode="result"
-              isStreaming={isLoading}
+              isStreaming={isPending}
             />
           </motion.div>
         )}

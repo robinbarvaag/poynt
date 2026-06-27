@@ -1,3 +1,5 @@
+import { UpcomingPostsCard } from "@/components/planner/dashboard/upcoming-posts-card";
+import { TasksCard } from "@/components/planner/tasks/tasks-card";
 import { quickActions } from "@/lib/constants";
 import {
   Card,
@@ -41,6 +43,11 @@ export default function DashboardPage() {
             </Card>
           </Link>
         ))}
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <TasksCard />
+        <UpcomingPostsCard />
       </div>
 
       <Card>

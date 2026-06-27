@@ -1,45 +1,154 @@
 "use client";
 
-import type { MonthContent, YearlyPlan } from "@poynt/planner-validators";
-import { AiBadge, Card, CardContent, CardHeader, CardTitle } from "@poynt/ui";
-import { Button } from "@poynt/ui";
-import { Tabs, TabsList, TabsTrigger } from "@poynt/ui";
+import {
+  type BusinessIdentity,
+  SCHEDULED_POST_TOOL_ID,
+  type ScheduledPost,
+  parseISODate,
+} from "@/lib/planner/scheduled-posts";
+import { trpc } from "@/lib/planner/trpc";
+import type {
+  GeneratePostRequest,
+  YearlyPlanStream,
+} from "@poynt/planner-validators";
+import {
+  AiBadge,
+  Button,
+  Card,
+  CardContent,
+  Heading,
+  Skeleton,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  Text,
+  toast,
+} from "@poynt/ui";
 import { Icon } from "@poynt/ui/icons";
 import { cn } from "@poynt/ui/lib/utils";
+import type { DeepPartial } from "ai";
 import { AnimatePresence, motion } from "framer-motion";
-import { useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { PlannerCalendar } from "./planner-calendar";
+import { PostComposer } from "./post-composer";
+import { SavedPostsDialog } from "./saved-posts-dialog";
 
-interface PlannerResultProps {
-  plan: YearlyPlan;
-  onReset: () => void;
+export interface CalendarFeed {
+  feedUrl: string;
+  webcalUrl: string;
 }
 
-export function PlannerResult({ plan, onReset }: PlannerResultProps) {
-  const [selectedMonth, setSelectedMonth] = useState<MonthContent | null>(null);
-  const [view, setView] = useState<"wheel" | "list">("wheel");
+interface PlannerResultProps {
+  // Under streaming er årshjulet et delobjekt; et ferdig lagret resultat er
+  // også gyldig her.
+  plan?: DeepPartial<YearlyPlanStream>;
+  onReset?: () => void;
+  /** Når true bygger årshjulet seg fortsatt opp (streaming): vis status. */
+  isStreaming?: boolean;
+  /** Signert .ics-feed for «abonner i kalender» (null før det finnes). */
+  calendarFeed?: CalendarFeed | null;
+  /** Bedriftsnavn + logo til forhåndsvisningen. */
+  business: BusinessIdentity;
+}
 
-  const handleMonthClick = (month: MonthContent) => {
-    setSelectedMonth(month);
-  };
+// Roterende «jobber»-meldinger mens vi venter på de første tokenene.
+const STREAM_MESSAGES = [
+  "Planlegger året ditt …",
+  "Finner norske merkedager og sesonger …",
+  "Fyller på innholdsideer måned for måned …",
+  "Setter sammen årshjulet …",
+];
 
-  const handleCloseMonth = () => {
-    setSelectedMonth(null);
-  };
+export function PlannerResult({
+  plan,
+  onReset,
+  isStreaming = false,
+  calendarFeed,
+  business,
+}: PlannerResultProps) {
+  // Standard = kalender (arbeidsflaten). «Oversikt» = hjulet (zoom ut).
+  const [view, setView] = useState<"calendar" | "wheel">("calendar");
+  const [monthIndex, setMonthIndex] = useState(0);
+  const [messageTick, setMessageTick] = useState(0);
+  // Planlagte/lagrede innlegg — løftet hit så både kalenderen og «Oversikt»-
+  // heatmap-et deler samme kilde (hentes på nytt når refreshKey endrer seg).
+  const [scheduled, setScheduled] = useState<ScheduledPost[]>([]);
+  // Drill-down: hvilken post-idé vi lager et ferdig innlegg av (null = ingen).
+  const [composingPost, setComposingPost] =
+    useState<GeneratePostRequest | null>(null);
+  const [composingDate, setComposingDate] = useState<string | null>(null);
+  const [showSaved, setShowSaved] = useState(false);
+  // Bumpes når et innlegg lagres/slettes, så kalenderen henter på nytt.
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  const navigateMonth = (direction: "prev" | "next") => {
-    if (!selectedMonth) return;
-    const currentIndex = plan.months.findIndex(
-      (m) => m.month === selectedMonth.month
-    );
-    const newIndex =
-      direction === "prev"
-        ? (currentIndex - 1 + 12) % 12
-        : (currentIndex + 1) % 12;
-    const newMonth = plan.months[newIndex];
-    if (newMonth) {
-      setSelectedMonth(newMonth);
+  // Åpne drilldown for ett innlegg på en gitt dato. Memoisert: sendes som
+  // onSaved/onComposePost ned i PostComposer, som har den i en effekt-dep —
+  // ustabile referanser ville trigget re-generering i loop.
+  const openComposer = useCallback(
+    (post: GeneratePostRequest, isoDate: string) => {
+      setComposingDate(isoDate);
+      setComposingPost(post);
+    },
+    []
+  );
+
+  const closeComposer = useCallback(() => {
+    setComposingPost(null);
+    setComposingDate(null);
+  }, []);
+
+  const bumpRefresh = useCallback(() => setRefreshKey((k) => k + 1), []);
+  // Fra «Oversikt» (hjulet): hopp inn i kalenderen på den valgte måneden.
+  const goToMonth = useCallback((index: number) => {
+    setMonthIndex(index);
+    setView("calendar");
+  }, []);
+
+  // Roter «jobber»-meldingen mens vi streamer.
+  useEffect(() => {
+    if (!isStreaming) return;
+    const id = setInterval(() => setMessageTick((t) => t + 1), 2200);
+    return () => clearInterval(id);
+  }, [isStreaming]);
+
+  // Hent planlagte innlegg (på nytt når et innlegg lagres/slettes).
+  // biome-ignore lint/correctness/useExhaustiveDependencies: refreshKey er en bevisst refetch-trigger
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const rows = await trpc.toolResult.list.query({
+          toolId: SCHEDULED_POST_TOOL_ID,
+          limit: 100,
+        });
+        if (active) setScheduled(rows as unknown as ScheduledPost[]);
+      } catch {
+        // stille
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [refreshKey]);
+
+  const months = (plan?.months ?? []).filter((m): m is NonNullable<typeof m> =>
+    Boolean(m?.monthName)
+  );
+
+  // Antall planlagte innlegg per måned-nummer — til heatmap-et på hjulet.
+  const countByMonth = useMemo(() => {
+    const map = new Map<number, number>();
+    for (const post of scheduled) {
+      const p = parseISODate(post.result?.scheduledDate ?? null);
+      if (!p) continue;
+      map.set(p.month, (map.get(p.month) ?? 0) + 1);
     }
-  };
+    return map;
+  }, [scheduled]);
+
+  if (!plan && !isStreaming) return null;
+
+  const streamingLabel = STREAM_MESSAGES[messageTick % STREAM_MESSAGES.length];
 
   return (
     <motion.div
@@ -48,233 +157,127 @@ export function PlannerResult({ plan, onReset }: PlannerResultProps) {
       className="space-y-8"
     >
       {/* Header */}
-      <div className="text-center space-y-3">
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: "spring", stiffness: 200, damping: 15 }}
-          className="inline-flex items-center justify-center size-16 rounded-full bg-primary/10 text-primary mb-2"
-        >
+      <div className="space-y-3 text-center">
+        <div className="mx-auto inline-flex size-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
           <Icon name="calendar-days" className="size-8" />
-        </motion.div>
-        <h2 className="text-3xl font-bold tracking-tight">
-          Ditt årshjul {plan.year}
-        </h2>
-        <p className="text-muted-foreground text-lg mx-auto">{plan.summary}</p>
-        <AiBadge className="mt-1" />
+        </div>
+        <Heading size="h2">
+          Ditt årshjul{plan?.year ? ` ${plan.year}` : ""}
+        </Heading>
+        {plan?.summary ? (
+          <Text>{plan.summary}</Text>
+        ) : (
+          isStreaming && (
+            <div className="mx-auto max-w-md space-y-2">
+              <Skeleton className="mx-auto h-4 w-3/4" />
+              <Skeleton className="mx-auto h-4 w-1/2" />
+            </div>
+          )
+        )}
+        <div className="flex justify-center">
+          <AiBadge />
+        </div>
+        {isStreaming && (
+          <span className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+            <Icon name="loader" className="size-4 animate-spin" />
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={streamingLabel}
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.25 }}
+              >
+                {streamingLabel}
+              </motion.span>
+            </AnimatePresence>
+          </span>
+        )}
       </div>
 
       {/* View Toggle */}
-      <div className="flex justify-center">
-        <Tabs
-          value={view}
-          onValueChange={(v) => setView(v as "wheel" | "list")}
-        >
-          <TabsList>
-            <TabsTrigger value="wheel" className="gap-2">
-              <Icon name="calendar-days" className="size-4" />
-              Årshjul
-            </TabsTrigger>
-            <TabsTrigger value="list" className="gap-2">
-              <Icon name="calendar" className="size-4" />
-              Listevisning
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </div>
-
-      <AnimatePresence mode="wait">
-        {/* Month Detail Modal */}
-        {selectedMonth && (
-          <motion.div
-            key="month-detail"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm"
-            onClick={handleCloseMonth}
+      {months.length > 0 && (
+        <div className="flex justify-center">
+          <Tabs
+            value={view}
+            onValueChange={(v) => setView(v as "calendar" | "wheel")}
           >
-            <motion.div
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
-              className="w-full max-h-[80vh] overflow-y-auto"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Card className="bg-muted border">
-                <CardHeader className="pb-4">
-                  <div className="flex items-center justify-between">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => navigateMonth("prev")}
-                    >
-                      <Icon name="chevron-left" className="size-5" />
-                    </Button>
-                    <div className="text-center">
-                      <CardTitle className="text-2xl">
-                        {selectedMonth.monthName}
-                      </CardTitle>
-                      <p className="text-sm font-medium text-muted-foreground">
-                        {selectedMonth.theme}
-                      </p>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => navigateMonth("next")}
-                    >
-                      <Icon name="chevron-right" className="size-5" />
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  {/* Posts */}
-                  <div>
-                    <h4 className="font-semibold mb-3 flex items-center gap-2">
-                      <Icon name="calendar-days" className="size-4" />
-                      Innholdsforslag
-                    </h4>
-                    <div className="space-y-2">
-                      {selectedMonth.posts.map((post) => (
-                        <div
-                          key={`${post.week}-${post.idea}`}
-                          className="flex items-start gap-3 p-3 rounded-lg bg-background/50"
-                        >
-                          <div className="flex items-center justify-center size-8 rounded-full bg-primary/10 text-primary text-xs font-bold shrink-0">
-                            U{post.week}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-muted">
-                                {post.channel}
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                {post.type}
-                              </span>
-                            </div>
-                            <p className="text-sm">{post.idea}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+            <TabsList>
+              <TabsTrigger value="calendar" className="gap-2">
+                <Icon name="calendar" className="size-4" />
+                Kalender
+              </TabsTrigger>
+              <TabsTrigger value="wheel" className="gap-2">
+                <Icon name="calendar-days" className="size-4" />
+                Oversikt
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+      )}
 
-                  {/* Key Dates */}
-                  {selectedMonth.keyDates.length > 0 && (
-                    <div>
-                      <h4 className="font-semibold mb-3 flex items-center gap-2">
-                        <Icon name="calendar" className="size-4" />
-                        Viktige datoer
-                      </h4>
-                      <div className="space-y-2">
-                        {selectedMonth.keyDates.map((date) => (
-                          <div
-                            key={`${date.date}-${date.event}`}
-                            className="p-3 rounded-lg bg-background/50"
-                          >
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="text-xs font-bold text-primary">
-                                {date.date}
-                              </span>
-                              <span className="text-sm font-medium">
-                                {date.event}
-                              </span>
-                            </div>
-                            <p className="text-sm text-muted-foreground">
-                              💡 {date.contentIdea}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Tips */}
-                  {selectedMonth.tips.length > 0 && (
-                    <div>
-                      <h4 className="font-semibold mb-3 flex items-center gap-2">
-                        <Icon name="lightbulb" className="size-4" />
-                        Tips for måneden
-                      </h4>
-                      <ul className="space-y-1">
-                        {selectedMonth.tips.map((tip) => (
-                          <li
-                            key={tip}
-                            className="text-sm flex items-start gap-2"
-                          >
-                            <span className="text-primary">•</span>
-                            {tip}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={handleCloseMonth}
-                  >
-                    Lukk
-                  </Button>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Wheel View */}
-      {view === "wheel" && (
+      {/* Wheel View (oversikt) */}
+      {months.length > 0 && view === "wheel" && (
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="relative w-full max-w-3xl mx-auto aspect-square"
+          className="relative mx-auto aspect-square w-full max-w-3xl"
         >
           {/* Center */}
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 size-32 rounded-full bg-primary/10 flex items-center justify-center z-10">
+          <div className="-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2 z-10 flex size-32 transform items-center justify-center rounded-full bg-primary/10">
             <div className="text-center">
-              <span className="text-3xl font-bold text-primary">
-                {plan.year}
+              <span className="font-bold text-3xl text-primary">
+                {plan?.year}
               </span>
               <p className="text-xs text-muted-foreground">Årshjul</p>
             </div>
           </div>
 
-          {/* Month segments */}
-          {plan.months.map((month, index) => {
+          {/* Month segments — med heatmap (antall planlagte innlegg) */}
+          {months.map((month, index) => {
             const angle = (index * 30 - 90) * (Math.PI / 180);
             const radius = 42; // percentage from center
             const x = 50 + radius * Math.cos(angle);
             const y = 50 + radius * Math.sin(angle);
 
+            const count = countByMonth.get(month.month ?? index + 1) ?? 0;
+            const heat =
+              count === 0
+                ? "border-border bg-muted"
+                : count <= 2
+                  ? "border-primary/40 bg-primary/10"
+                  : count <= 4
+                    ? "border-primary/60 bg-primary/20"
+                    : "border-primary bg-primary/30";
+
             return (
               <motion.div
-                key={month.month}
+                key={month.monthName ?? `month-${index}`}
                 initial={{ opacity: 0, scale: 0 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: index * 0.05 }}
-                className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer"
-                style={{
-                  left: `${x}%`,
-                  top: `${y}%`,
-                }}
-                onClick={() => handleMonthClick(month)}
+                transition={{ duration: 0.3 }}
+                className="-translate-x-1/2 -translate-y-1/2 absolute transform cursor-pointer"
+                style={{ left: `${x}%`, top: `${y}%` }}
+                onClick={() => goToMonth(index)}
               >
                 <div
                   className={cn(
-                    "size-20 sm:size-24 rounded-full border-2 flex flex-col items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-lg",
-                    selectedMonth?.month === month.month
-                      ? "bg-primary/10 border-primary text-primary"
-                      : "bg-muted border-border text-foreground"
+                    "relative flex size-20 flex-col items-center justify-center rounded-full border-2 text-foreground transition-all duration-300 hover:scale-110 hover:border-primary hover:shadow-lg sm:size-24",
+                    monthIndex === index
+                      ? "border-primary bg-primary/15 text-primary ring-2 ring-primary/30"
+                      : heat
                   )}
                 >
-                  <span className="text-lg sm:text-xl font-bold">
-                    {month.monthName.slice(0, 3)}
+                  {count > 0 && (
+                    <span className="absolute top-1 right-1 flex size-5 items-center justify-center rounded-full bg-primary font-bold text-[10px] text-primary-foreground shadow ring-2 ring-background">
+                      {count}
+                    </span>
+                  )}
+                  <span className="font-bold text-lg sm:text-xl">
+                    {(month.monthName ?? "").slice(0, 3)}
                   </span>
-                  <span className="text-xs text-muted-foreground text-center px-1 line-clamp-1 max-w-[4rem]">
-                    {month.theme.split(" ").slice(0, 2).join(" ")}
+                  <span className="line-clamp-1 max-w-16 px-1 text-center text-muted-foreground text-xs">
+                    {(month.theme ?? "").split(" ").slice(0, 2).join(" ")}
                   </span>
                 </div>
               </motion.div>
@@ -282,83 +285,120 @@ export function PlannerResult({ plan, onReset }: PlannerResultProps) {
           })}
         </motion.div>
       )}
+      {months.length > 0 && view === "wheel" && (
+        <p className="text-center text-muted-foreground text-xs">
+          Tallet viser hvor mange innlegg du har planlagt den måneden. Trykk en
+          måned for å åpne den i kalenderen.
+        </p>
+      )}
 
-      {/* List View */}
-      {view === "list" && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
-        >
-          {plan.months.map((month, index) => (
-            <motion.div
-              key={month.month}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05 }}
-            >
-              <Card
-                className="cursor-pointer bg-muted border transition-all duration-300 hover:shadow-lg hover:scale-[1.02]"
-                onClick={() => handleMonthClick(month)}
-              >
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg text-foreground">
-                    {month.monthName}
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground">{month.theme}</p>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Innlegg</span>
-                      <span className="font-medium">{month.posts.length}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Merkedager</span>
-                      <span className="font-medium">
-                        {month.keyDates.length}
-                      </span>
-                    </div>
-                    <Button variant="ghost" size="sm" className="w-full mt-2">
-                      Se detaljer →
-                    </Button>
+      {/* Calendar View */}
+      {months.length > 0 && view === "calendar" && (
+        <PlannerCalendar
+          months={months}
+          year={plan?.year}
+          scheduled={scheduled}
+          business={business}
+          onComposePost={openComposer}
+          onChanged={bumpRefresh}
+          monthIndex={monthIndex}
+          onMonthIndexChange={setMonthIndex}
+        />
+      )}
+
+      {/* Handlinger */}
+      {months.length > 0 && (
+        <div className="space-y-4 pt-2">
+          {/* Synk til kalenderen din — forklart */}
+          {!isStreaming && calendarFeed && (
+            <Card className="bg-muted/40">
+              <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-start gap-3">
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <Icon name="calendar-clock" className="size-5" />
                   </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </motion.div>
+                  <div>
+                    <p className="font-medium text-sm">
+                      Synk til kalenderen din
+                    </p>
+                    <p className="max-w-md text-muted-foreground text-sm">
+                      Samme plan, to måter inn: <strong>Abonner</strong> åpner
+                      Apple Kalender / Outlook direkte. For Google Kalender:{" "}
+                      <strong>Kopier lenke</strong> og lim inn under «Legg til
+                      kalender → Fra URL». Planen oppdaterer seg selv etterpå.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex shrink-0 gap-2">
+                  <Button
+                    asChild
+                    className="gap-2"
+                    title="Åpner Apple Kalender / Outlook"
+                  >
+                    <a href={calendarFeed.webcalUrl}>
+                      <Icon name="calendar-clock" className="size-4" />
+                      Abonner
+                    </a>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="gap-2"
+                    title="Kopier https-lenken (for Google Kalender)"
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(
+                          calendarFeed.feedUrl
+                        );
+                        toast("Abonnementslenken er kopiert");
+                      } catch {
+                        toast.error("Kunne ikke kopiere lenken");
+                      }
+                    }}
+                  >
+                    <Icon name="copy" className="size-4" />
+                    Kopier lenke
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Primær-handlinger */}
+          <div className="flex flex-wrap justify-center gap-3">
+            <Button
+              variant="outline"
+              onClick={() => setShowSaved(true)}
+              className="gap-2"
+            >
+              <Icon name="file-text" className="size-4" />
+              Alle innlegg
+            </Button>
+            {!isStreaming && onReset && (
+              <Button variant="ghost" onClick={onReset} className="gap-2">
+                <Icon name="refresh" className="size-4" />
+                Lag nytt årshjul
+              </Button>
+            )}
+          </div>
+        </div>
       )}
 
-      {/* Overall Tips */}
-      {plan.overallTips.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Icon name="lightbulb" className="size-5 text-primary" />
-              Generelle tips for året
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="grid gap-2 sm:grid-cols-2">
-              {plan.overallTips.map((tip, index) => (
-                <li key={tip} className="flex items-start gap-2 text-sm">
-                  <span className="text-primary font-bold">{index + 1}.</span>
-                  {tip}
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
+      {/* Overlays: drill-down + lagrede innlegg (egne Dialog-er m/ scroll-lås) */}
+      {composingPost && (
+        <PostComposer
+          post={composingPost}
+          scheduledDate={composingDate}
+          business={business}
+          onClose={closeComposer}
+          onSaved={bumpRefresh}
+        />
       )}
-
-      {/* Reset Button */}
-      <div className="flex justify-center pt-4">
-        <Button variant="outline" onClick={onReset} className="gap-2">
-          <Icon name="refresh" className="size-4" />
-          Lag nytt årshjul
-        </Button>
-      </div>
+      {showSaved && (
+        <SavedPostsDialog
+          onClose={() => setShowSaved(false)}
+          onChanged={bumpRefresh}
+        />
+      )}
     </motion.div>
   );
 }

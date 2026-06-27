@@ -33,15 +33,6 @@ export interface GuideResultProps {
   isStreaming?: boolean;
 }
 
-export interface MedalConfigItem {
-  icon: IconName;
-  emoji: string;
-  gradient: string;
-  border: string;
-  iconColor: string;
-  progressColor: string;
-}
-
 export interface Workspace {
   id: string;
   name: string;
@@ -77,19 +68,6 @@ export interface ChannelGuideProfile {
   weeklyTime: "1-2h" | "3-5h" | "5h+" | null;
   strengths: "writing" | "speaking" | "visual" | "mixed" | null;
 }
-
-// Medal config for the 3 channels
-export type MedalConfig = {
-  icon: "trophy" | "medal" | "award";
-  color: string;
-  bg: string;
-};
-
-export const medalConfigs: MedalConfig[] = [
-  { icon: "trophy", color: "text-yellow-500", bg: "bg-yellow-500/10" },
-  { icon: "medal", color: "text-slate-400", bg: "bg-slate-400/10" },
-  { icon: "award", color: "text-amber-600", bg: "bg-amber-600/10" },
-];
 
 export interface ChannelGuideClientProps {
   initialSavedResult: SavedResult | null;

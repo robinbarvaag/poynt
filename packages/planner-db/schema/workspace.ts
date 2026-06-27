@@ -2,6 +2,7 @@ import { relations } from "drizzle-orm";
 import {
   boolean,
   index,
+  integer,
   jsonb,
   text,
   timestamp,
@@ -222,6 +223,19 @@ export const plannerWorkspaceProfile = plannerSchema.table(
     weeklyTime: text("weekly_time"), // 1-2h | 3-5h | 5h+
     strengths: text("strengths"), // writing | speaking | visual | mixed
     customContext: text("custom_context"), // Extra context for AI prompts
+    // «Felles hjerne 2.0» — rik merkevarebrief (stemme, USP, kjernebudskap),
+    // typisk generert fra bedriftens nettside. Injiseres i alle AI-verktøyene.
+    // Strukturen valideres med zod (brandBriefSchema) i app-laget.
+    brandBrief: jsonb("brand_brief").$type<{
+      toneOfVoice?: string | null;
+      phrasesWeUse?: string[] | null;
+      phrasesWeAvoid?: string[] | null;
+      coreMessage?: string | null;
+      usp?: string | null;
+      audienceInsight?: string | null;
+      visualStyle?: string | null;
+      sourceUrl?: string | null;
+    }>(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()
@@ -262,34 +276,6 @@ export const plannerToolResult = plannerSchema.table(
 );
 
 /**
- * Marketing Plan Progress - Track completion of timeline tasks and quick wins
- */
-export const plannerMarketingPlanProgress = plannerSchema.table(
-  "planner_marketing_plan_progress",
-  {
-    id: text("id").primaryKey(),
-    toolResultId: text("tool_result_id")
-      .notNull()
-      .references(() => plannerToolResult.id, { onDelete: "cascade" }),
-    type: text("type").notNull(), // "timeline" | "quickwin"
-    monthIndex: text("month_index"), // "0"-"11" for timeline, null for quickwin
-    taskIndex: text("task_index").notNull(), // Index in tasks array
-    completedAt: timestamp("completed_at").defaultNow().notNull(),
-  },
-  (table) => [
-    index("planner_marketing_plan_progress_tool_result_idx").on(
-      table.toolResultId
-    ),
-    uniqueIndex("planner_marketing_plan_progress_unique_task").on(
-      table.toolResultId,
-      table.type,
-      table.monthIndex,
-      table.taskIndex
-    ),
-  ]
-);
-
-/**
  * Decline Generator Feedback - Track user feedback and variant usage
  */
 export const plannerDeclineGeneratorFeedback = plannerSchema.table(
@@ -310,6 +296,44 @@ export const plannerDeclineGeneratorFeedback = plannerSchema.table(
   ]
 );
 
+/**
+ * Task - Et førsteklasses, avhukbart gjøremål. Bindeleddet mellom verktøyene:
+ * markedsplanen (og andre) materialiserer oppgaver hit, og dashbordet + verktøyet
+ * viser/huker dem av. Hver oppgave er en egen rad med tittel (ikke index-basert
+ * fremgang knyttet til ett resultat), så den kan vises hvor som helst.
+ */
+export const plannerTask = plannerSchema.table(
+  "planner_task",
+  {
+    id: text("id").primaryKey(),
+    workspaceId: text("workspace_id")
+      .notNull()
+      .references(() => plannerWorkspace.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    note: text("note"),
+    // Hvor oppgaven kom fra: "manual" | "marketing-plan" | "yearly-planner" | …
+    source: text("source").notNull().default("manual"),
+    // Grupperingsetikett, f.eks. «Quick win», «Mars», «Ukentlig rutine».
+    category: text("category"),
+    done: boolean("done").notNull().default(false),
+    doneAt: timestamp("done_at"),
+    sortOrder: integer("sort_order").notNull().default(0),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index("planner_task_workspace_idx").on(table.workspaceId),
+    index("planner_task_done_idx").on(table.done),
+    index("planner_task_source_idx").on(table.source),
+  ]
+);
+
+export type PlannerTask = typeof plannerTask.$inferSelect;
+export type NewPlannerTask = typeof plannerTask.$inferInsert;
+
 // Relations
 export const plannerWorkspaceRelations = relations(
   plannerWorkspace,
@@ -318,8 +342,16 @@ export const plannerWorkspaceRelations = relations(
     invitations: many(plannerWorkspaceInvitation),
     profile: one(plannerWorkspaceProfile),
     toolResults: many(plannerToolResult),
+    tasks: many(plannerTask),
   })
 );
+
+export const plannerTaskRelations = relations(plannerTask, ({ one }) => ({
+  workspace: one(plannerWorkspace, {
+    fields: [plannerTask.workspaceId],
+    references: [plannerWorkspace.id],
+  }),
+}));
 
 export const plannerWorkspaceMemberRelations = relations(
   plannerWorkspaceMember,
@@ -394,18 +426,7 @@ export const plannerToolResultRelations = relations(
       fields: [plannerToolResult.workspaceId],
       references: [plannerWorkspace.id],
     }),
-    progress: many(plannerMarketingPlanProgress),
     feedback: many(plannerDeclineGeneratorFeedback),
-  })
-);
-
-export const plannerMarketingPlanProgressRelations = relations(
-  plannerMarketingPlanProgress,
-  ({ one }) => ({
-    toolResult: one(plannerToolResult, {
-      fields: [plannerMarketingPlanProgress.toolResultId],
-      references: [plannerToolResult.id],
-    }),
   })
 );
 
@@ -440,10 +461,6 @@ export type NewPlannerWorkspaceProfile =
   typeof plannerWorkspaceProfile.$inferInsert;
 export type PlannerToolResult = typeof plannerToolResult.$inferSelect;
 export type NewPlannerToolResult = typeof plannerToolResult.$inferInsert;
-export type PlannerMarketingPlanProgress =
-  typeof plannerMarketingPlanProgress.$inferSelect;
-export type NewPlannerMarketingPlanProgress =
-  typeof plannerMarketingPlanProgress.$inferInsert;
 export type PlannerDeclineGeneratorFeedback =
   typeof plannerDeclineGeneratorFeedback.$inferSelect;
 export type NewPlannerDeclineGeneratorFeedback =

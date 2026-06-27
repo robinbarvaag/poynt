@@ -1,5 +1,6 @@
 "use client";
 
+import { BrandBriefSection } from "@/components/workspace/brand-brief-section";
 import { WorkspaceGeneralForm } from "@/components/workspace/general-form";
 import { WorkspaceInviteForm } from "@/components/workspace/invite-form";
 import { WorkspaceMemberList } from "@/components/workspace/member-list";
@@ -55,6 +56,10 @@ export function MyCompany({ workspace }: { workspace: Workspace }) {
             <Icon name="target" />
             Profil
           </TabsTrigger>
+          <TabsTrigger value="merkevare" className="gap-2">
+            <Icon name="palette" />
+            Merkevare
+          </TabsTrigger>
           <TabsTrigger value="medlemmer" className="gap-2">
             <Icon name="users" />
             Medlemmer
@@ -79,6 +84,25 @@ export function MyCompany({ workspace }: { workspace: Workspace }) {
             <CardContent>
               <WorkspaceProfileForm
                 workspaceId={workspace.id}
+                disabled={!canManage}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="merkevare" className="mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Merkevarebrief</CardTitle>
+              <CardDescription>
+                Bedriftens stemme, kjernebudskap og det som skiller dere ut —
+                generert fra nettsiden. Alle AI-verktøyene skriver ut fra den.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <BrandBriefSection
+                workspaceId={workspace.id}
+                businessName={workspace.name}
                 disabled={!canManage}
               />
             </CardContent>

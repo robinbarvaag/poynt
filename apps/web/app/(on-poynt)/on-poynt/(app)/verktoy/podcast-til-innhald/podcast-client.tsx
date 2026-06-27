@@ -2,7 +2,7 @@
 
 import { trpc } from "@/lib/planner/trpc";
 import type { PodcastToContentResponse } from "@poynt/planner-validators";
-import { Button, Icon, toast } from "@poynt/ui";
+import { Button, Icon, PageHeader, toast } from "@poynt/ui";
 import type { IconName } from "@poynt/ui/icons";
 import { useRef, useState } from "react";
 
@@ -143,15 +143,10 @@ export function PodcastClient({ initialSavedResult }: PodcastClientProps) {
 
   return (
     <div className="max-w-3xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Podcast til innhald
-        </h1>
-        <p className="mt-1 text-muted-foreground">
-          Last opp ein podkast-episode og generer blogginnlegg, sosiale
-          medier-postar og kapittelmerke automatisk.
-        </p>
-      </div>
+      <PageHeader
+        title="Podcast til innhald"
+        description="Last opp ein podkast-episode og generer blogginnlegg, sosiale medier-postar og kapittelmerke automatisk."
+      />
 
       {/* Step 1: Upload */}
       {step === "upload" && (

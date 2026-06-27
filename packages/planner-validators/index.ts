@@ -43,6 +43,7 @@ export {
   marketingPlanRequestSchema,
   marketingPlanResponseSchema,
   marketingPlanSchema,
+  marketingPlanStreamSchema,
   channelActivitySchema,
   monthPlanSchema,
   weeklyTaskSchema,
@@ -59,6 +60,7 @@ export {
   type MarketingPlanRequest,
   type MarketingPlanResponse,
   type MarketingPlan,
+  type MarketingPlanStream,
   type ChannelActivity,
   type MonthPlan,
   type WeeklyTask,
@@ -69,6 +71,7 @@ export {
   yearlyPlannerRequestSchema,
   yearlyPlannerResponseSchema,
   yearlyPlanSchema,
+  yearlyPlanStreamSchema,
   monthContentSchema,
   publishChannelTypes,
   publishChannelLabels,
@@ -81,6 +84,7 @@ export {
   type YearlyPlannerRequest,
   type YearlyPlannerResponse,
   type YearlyPlan,
+  type YearlyPlanStream,
   type MonthContent,
 } from "./yearly-planner";
 
@@ -144,6 +148,31 @@ export {
   type PodcastToContentRequest,
   type PodcastToContentResponse,
 } from "./podcast-to-content";
+
+// Drill-down: generert innlegg fra en post-idé
+export {
+  postAngleTypes,
+  postAngleLabels,
+  generatePostRequestSchema,
+  generatedPostStreamSchema,
+  adaptPostRequestSchema,
+  adaptedPostsStreamSchema,
+  type PostAngle,
+  type GeneratePostRequest,
+  type GeneratedPostStream,
+  type AdaptPostRequest,
+  type AdaptedPostsStream,
+} from "./generated-post";
+
+// Brand brief («felles hjerne 2.0»)
+export {
+  brandBriefSchema,
+  brandBriefStreamSchema,
+  brandBriefRequestSchema,
+  type BrandBrief,
+  type BrandBriefStream,
+  type BrandBriefRequest,
+} from "./brand-brief";
 
 // Workspace profile & tool results
 export {

@@ -1,4 +1,6 @@
 import { TierGate } from "@/components/planner/tier-gate";
+import { getCalendarFeedUrls } from "@/lib/planner/calendar-feed";
+import { faviconFor } from "@/lib/planner/scheduled-posts";
 import { createServerCaller } from "@/lib/planner/trpc-server";
 import type { YearlyPlan } from "@poynt/planner-validators";
 import { YearlyPlannerClient } from "./yearly-planner-client";
@@ -20,13 +22,27 @@ export default async function YearlyPlannerPage() {
   const trpc = await createServerCaller();
 
   // Server-side data fetching in parallel
-  const [savedResults, industries, workspaceProfile] = await Promise.all([
-    trpc.toolResult
-      .list({ toolId: "yearly-planner", limit: 1 })
-      .catch(() => []),
-    trpc.industry.list().catch(() => []),
-    trpc.workspaceProfile.get().catch(() => null),
-  ]);
+  const [savedResults, industries, workspaceProfile, calendarFeed, workspace] =
+    await Promise.all([
+      trpc.toolResult
+        .list({ toolId: "yearly-planner", limit: 1 })
+        .catch(() => []),
+      trpc.industry.list().catch(() => []),
+      trpc.workspaceProfile.get().catch(() => null),
+      getCalendarFeedUrls().catch(() => null),
+      trpc.workspace.getCurrentWorkspace().catch(() => null),
+    ]);
+
+  // Bedrifts-identitet til forhåndsvisningen: navn + logo (favicon fra nettsiden
+  // i merkevarebriefen, hvis den finnes).
+  const brandBrief = workspaceProfile?.brandBrief as
+    | { sourceUrl?: string | null }
+    | null
+    | undefined;
+  const business = {
+    name: workspace?.name ?? "Din bedrift",
+    logoUrl: faviconFor(brandBrief?.sourceUrl),
+  };
 
   // Parse saved plan
   let initialSavedPlan: SavedPlan | null = null;
@@ -62,6 +78,8 @@ export default async function YearlyPlannerPage() {
         industries={activeIndustries}
         initialIndustry={initialIndustry}
         initialAudience={initialAudience}
+        calendarFeed={calendarFeed}
+        business={business}
       />
     </TierGate>
   );

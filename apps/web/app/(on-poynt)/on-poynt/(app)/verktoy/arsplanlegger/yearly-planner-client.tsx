@@ -2,9 +2,11 @@
 
 import { PlannerForm } from "@/components/yearly-planner/planner-form";
 import { PlannerResult } from "@/components/yearly-planner/planner-result";
-import { trpc } from "@/lib/planner/trpc";
+import { yearlyPlannerStreamAction } from "@/lib/planner/actions/yearly-planner";
+import { useToolStream } from "@/lib/planner/use-tool-stream";
 import type {
   YearlyPlan,
+  YearlyPlanStream,
   YearlyPlannerRequest,
 } from "@poynt/planner-validators";
 import { toast } from "@poynt/ui";
@@ -19,7 +21,7 @@ interface SavedPlan {
   createdAt: Date;
 }
 
-type ViewState = "intro" | "saved" | "form" | "result";
+type ViewState = "intro" | "form" | "result";
 
 type AudienceType = "b2b" | "b2c" | "both";
 
@@ -30,11 +32,23 @@ interface Industry {
   isActive: boolean;
 }
 
+interface CalendarFeed {
+  feedUrl: string;
+  webcalUrl: string;
+}
+
+interface BusinessIdentity {
+  name: string;
+  logoUrl: string | null;
+}
+
 interface YearlyPlannerClientProps {
   initialSavedPlan: SavedPlan | null;
   industries: Industry[];
   initialIndustry: string | null;
   initialAudience: AudienceType | null;
+  calendarFeed: CalendarFeed | null;
+  business: BusinessIdentity;
 }
 
 export function YearlyPlannerClient({
@@ -42,77 +56,48 @@ export function YearlyPlannerClient({
   industries,
   initialIndustry,
   initialAudience,
+  calendarFeed,
+  business,
 }: YearlyPlannerClientProps) {
+  // Har brukeren et lagret årshjul lander vi rett på det (kalenderen) — ingen
+  // mellomside. Førstegangsbrukere får intro-en.
   const [view, setView] = useState<ViewState>(
-    initialSavedPlan ? "saved" : "intro"
+    initialSavedPlan ? "result" : "intro"
   );
-  const [isLoading, setIsLoading] = useState(false);
-  const [result, setResult] = useState<YearlyPlan | null>(null);
-  const [savedPlan, setSavedPlan] = useState<SavedPlan | null>(
-    initialSavedPlan
+  // Det lagrede årshjulet vises direkte (ikke streaming-resultatet).
+  // null = vis det som streames akkurat nå.
+  const [shownSavedPlan, setShownSavedPlan] = useState<YearlyPlan | null>(
+    initialSavedPlan?.plan ?? null
   );
+
+  // Streaming-generering via server action + RSC streamable value.
+  const { generate, result, isPending } = useToolStream<
+    YearlyPlannerRequest,
+    YearlyPlanStream
+  >({
+    action: yearlyPlannerStreamAction,
+    toolId: "yearly-planner",
+    title: "Årshjul",
+    buildResult: (data) => ({ plan: data }),
+    onError: () => {
+      toast.error("Kunne ikke generere årshjul. Prøv igjen.");
+      setView("intro");
+    },
+  });
 
   async function handleSubmit(data: YearlyPlannerRequest) {
-    setIsLoading(true);
-
-    try {
-      const response = await trpc.ai.yearlyPlanner.mutate(data);
-
-      if (!response.success || response.error) {
-        toast.error(response.error || "Noe gikk galt. Prøv igjen.");
-      } else if (response.plan) {
-        setResult(response.plan);
-        setView("result");
-
-        // Save result to database
-        try {
-          const saved = await trpc.toolResult.save.mutate({
-            toolId: "yearly-planner",
-            title: "Årshjul",
-            inputs: data as Record<string, unknown>,
-            result: { plan: response.plan },
-          });
-          if (saved) {
-            setSavedPlan({
-              id: saved.id,
-              plan: response.plan,
-              createdAt: new Date(saved.createdAt),
-            });
-          }
-        } catch (saveError) {
-          console.error("Could not save result:", saveError);
-        }
-      }
-    } catch (error) {
-      console.error("tRPC error:", error);
-      toast.error("Kunne ikke koble til serveren. Prøv igjen.");
-    }
-
-    setIsLoading(false);
+    setShownSavedPlan(null);
+    setView("result");
+    await generate(data);
   }
 
   function handleReset() {
-    setResult(null);
-    setView("intro");
+    setShownSavedPlan(null);
+    setView("form");
   }
 
   function startForm() {
     setView("form");
-  }
-
-  function viewSavedResult() {
-    if (savedPlan) {
-      setResult(savedPlan.plan);
-      setView("result");
-    }
-  }
-
-  function formatDate(date: Date) {
-    return new Intl.DateTimeFormat("nb-NO", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    }).format(new Date(date));
   }
 
   const fadeIn = {
@@ -147,65 +132,13 @@ export function YearlyPlannerClient({
             </p>
 
             <Button size="lg" onClick={startForm} className="gap-2">
-              <Icon name="sparkles" className="size-4" />
+              <Icon name="calendar-days" className="size-4" />
               Lag mitt årshjul
             </Button>
 
             <p className="text-sm text-muted-foreground mt-6">
               Ca. 3 minutter • 12 måneder med innhold
             </p>
-          </motion.div>
-        )}
-
-        {view === "saved" && savedPlan && (
-          <motion.div
-            key="saved"
-            variants={fadeIn}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            className="flex flex-col items-center text-center"
-          >
-            <div className="size-16 rounded-2xl bg-green-500/10 flex items-center justify-center text-green-600 mb-6">
-              <Icon name="check-circle" className="size-8" />
-            </div>
-
-            <h1 className="text-3xl font-semibold tracking-tight mb-3">
-              Årshjul
-            </h1>
-
-            <p className="text-lg text-muted-foreground max-w-md mb-2">
-              Du har allerede et årshjul!
-            </p>
-
-            <p className="text-sm text-muted-foreground mb-8 flex items-center gap-2">
-              <Icon name="clock" className="size-4" />
-              Sist oppdatert {formatDate(savedPlan.createdAt)}
-            </p>
-
-            {/* Quick preview */}
-            <div className="w-full max-w-sm bg-muted/50 rounded-xl p-4 mb-8">
-              <p className="text-sm text-muted-foreground mb-2">Din plan:</p>
-              <p className="text-xl font-semibold">
-                {savedPlan.plan.months?.length || 12} måneder planlagt
-              </p>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Button size="lg" onClick={viewSavedResult} className="gap-2">
-                <Icon name="arrow-right" className="size-4" />
-                Se årshjulet
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={startForm}
-                className="gap-2"
-              >
-                <Icon name="refresh" className="size-4" />
-                Lag nytt årshjul
-              </Button>
-            </div>
           </motion.div>
         )}
 
@@ -220,7 +153,7 @@ export function YearlyPlannerClient({
           >
             <PlannerForm
               onSubmit={handleSubmit}
-              isLoading={isLoading}
+              isLoading={isPending}
               industries={industries}
               initialIndustry={initialIndustry}
               initialAudience={initialAudience}
@@ -228,7 +161,7 @@ export function YearlyPlannerClient({
           </motion.div>
         )}
 
-        {view === "result" && result && (
+        {view === "result" && (
           <motion.div
             key="result"
             variants={fadeIn}
@@ -236,7 +169,13 @@ export function YearlyPlannerClient({
             animate="visible"
             exit="exit"
           >
-            <PlannerResult plan={result} onReset={handleReset} />
+            <PlannerResult
+              plan={shownSavedPlan ?? result ?? undefined}
+              onReset={handleReset}
+              isStreaming={!shownSavedPlan && isPending}
+              calendarFeed={calendarFeed}
+              business={business}
+            />
           </motion.div>
         )}
       </AnimatePresence>

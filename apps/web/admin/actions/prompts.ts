@@ -97,6 +97,29 @@ export async function seedPromptTemplates() {
   return { success: true, count: inserted.length };
 }
 
+/**
+ * Tilbakestiller ÉN mal til den innebygde standard-teksten (`defaultPromptTemplates`).
+ * Brukes når kode-malen er endret og partneren vil hente inn fasiten igjen.
+ * Overskriver kun den valgte malen — andre (ev. redigerte) maler røres ikke.
+ */
+export async function resyncPromptTemplate(id: string) {
+  const def = defaultPromptTemplates.find((t) => t.id === id);
+  if (!def) {
+    return { success: false, notFound: true };
+  }
+
+  await upsertPromptTemplate({
+    id: def.id,
+    toolId: def.toolId,
+    name: def.name,
+    description: def.description,
+    template: def.template,
+    variables: def.variables,
+  });
+
+  return { success: true };
+}
+
 export async function togglePromptActive(id: string) {
   const [current] = await db
     .select({ isActive: plannerPromptTemplate.isActive })

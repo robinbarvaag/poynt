@@ -88,6 +88,7 @@ export const workspaceProfileRouter = router({
           weeklyTime: null,
           strengths: null,
           customContext: null,
+          brandBrief: null,
           industry: null,
         };
       }

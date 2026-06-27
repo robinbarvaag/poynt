@@ -1,0 +1,1 @@
+DROP TABLE "planner"."planner_marketing_plan_progress" CASCADE;

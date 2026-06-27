@@ -12,9 +12,29 @@
       "types": "./trpc.ts",
       "default": "./trpc.ts"
     },
-    "./lib/channel-guide-stream": {
-      "types": "./lib/channel-guide-stream.ts",
-      "default": "./lib/channel-guide-stream.ts"
+    "./lib/channel-guide": {
+      "types": "./lib/channel-guide.ts",
+      "default": "./lib/channel-guide.ts"
+    },
+    "./lib/marketing-plan": {
+      "types": "./lib/marketing-plan.ts",
+      "default": "./lib/marketing-plan.ts"
+    },
+    "./lib/yearly-planner": {
+      "types": "./lib/yearly-planner.ts",
+      "default": "./lib/yearly-planner.ts"
+    },
+    "./lib/brand-brief": {
+      "types": "./lib/brand-brief.ts",
+      "default": "./lib/brand-brief.ts"
+    },
+    "./lib/generated-post": {
+      "types": "./lib/generated-post.ts",
+      "default": "./lib/generated-post.ts"
+    },
+    "./lib/adapt-post": {
+      "types": "./lib/adapt-post.ts",
+      "default": "./lib/adapt-post.ts"
     }
   },
   "scripts": {

@@ -250,23 +250,15 @@ export const channelLinks: Record<string, string> = {
   Blogg: "#",
 };
 
-export const priorityConfig = {
-  high: {
-    label: "Høy prioritet",
-    color: "text-green-600 dark:text-green-400",
-    bg: "bg-green-500/10",
-    border: "border-green-500/30",
-  },
-  medium: {
-    label: "Medium prioritet",
-    color: "text-yellow-600 dark:text-yellow-400",
-    bg: "bg-yellow-500/10",
-    border: "border-yellow-500/30",
-  },
-  low: {
-    label: "Lav prioritet",
-    color: "text-slate-600 dark:text-slate-400",
-    bg: "bg-slate-500/10",
-    border: "border-slate-500/30",
-  },
+/**
+ * Prioritet vises som en dempet Badge (samme rolige uttrykk som match-nivå i
+ * kanalveilederen) i stedet for hardkodede grønn/gul/slate-farger.
+ */
+export const priorityConfig: Record<
+  "high" | "medium" | "low",
+  { label: string; badge: "soft-primary" | "secondary" | "outline" }
+> = {
+  high: { label: "Høy prioritet", badge: "soft-primary" },
+  medium: { label: "Medium prioritet", badge: "secondary" },
+  low: { label: "Lav prioritet", badge: "outline" },
 };

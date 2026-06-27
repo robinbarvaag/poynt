@@ -1,10 +1,10 @@
 "use client";
 
 import { trpc } from "@/lib/planner/trpc";
-import { AiBadge, Button } from "@poynt/ui";
+import { AiBadge, Button, Heading, Text } from "@poynt/ui";
 import { toast } from "@poynt/ui";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@poynt/ui";
-import { Icon } from "@poynt/ui/icons";
+import { Icon, type IconName } from "@poynt/ui/icons";
 import { motion } from "framer-motion";
 import { useMemo, useState } from "react";
 
@@ -22,30 +22,6 @@ interface Variant {
   content: string;
 }
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.1,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      type: "spring" as const,
-      stiffness: 100,
-      damping: 15,
-    },
-  },
-};
-
 export function DeclineResult({
   result,
   onReset,
@@ -55,86 +31,73 @@ export function DeclineResult({
 }: DeclineResultProps) {
   // Intro mode
   if (mode === "intro") {
+    const features: { icon: IconName; title: string; description: string }[] = [
+      {
+        icon: "zap",
+        title: "Kort & konsis",
+        description: "Rask og profesjonell variant",
+      },
+      {
+        icon: "heart",
+        title: "Varm & personlig",
+        description: "Empatisk med forklaring",
+      },
+      {
+        icon: "lightbulb",
+        title: "Med alternativ",
+        description: "Forslag til andre løsninger",
+      },
+    ];
+
     return (
       <motion.div
-        initial="hidden"
-        animate="visible"
-        variants={containerVariants}
-        className="space-y-10 max-w-5xl mx-auto"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: "easeOut" }}
+        className="mx-auto max-w-3xl space-y-8"
       >
-        <motion.div variants={itemVariants} className="text-center space-y-4">
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", stiffness: 200, damping: 15 }}
-            className="inline-flex items-center justify-center size-20 rounded-2xl bg-primary/10 text-primary mb-2"
-          >
-            <Icon name="message-square-off" className="size-10" />
-          </motion.div>
-          <h1 className="text-4xl font-bold tracking-tight">Si nei med stil</h1>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+        <div className="space-y-3 text-center">
+          <div className="mx-auto inline-flex size-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <Icon name="message-square-off" className="size-8" />
+          </div>
+          <Heading size="h1">Si nei med stil</Heading>
+          <Text>
             Profesjonelle avslag som bevarer relasjoner. Få 3 varianter
             tilpasset din situasjon.
-          </p>
-        </motion.div>
+          </Text>
+        </div>
 
-        <motion.div variants={itemVariants}>
-          <div className="rounded-xl border bg-card p-6">
-            <div className="mb-6">
-              <div className="flex items-center gap-2 text-xl font-semibold mb-2">
-                Dette får du
-              </div>
-            </div>
-            <div className="grid md:grid-cols-3 gap-6">
-              <div className="flex gap-3">
-                <div className="size-10 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
-                  <Icon name="zap" className="size-5 text-blue-600" />
+        <div className="rounded-xl border bg-card p-6">
+          <p className="mb-6 font-semibold">Dette får du</p>
+          <div className="grid gap-6 md:grid-cols-3">
+            {features.map((feature) => (
+              <div key={feature.title} className="flex gap-3">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                  <Icon name={feature.icon} className="size-5" />
                 </div>
                 <div>
-                  <h3 className="font-semibold mb-1">Kort & konsis</h3>
+                  <h3 className="mb-1 font-semibold">{feature.title}</h3>
                   <p className="text-sm text-muted-foreground">
-                    Rask og profesjonell variant
+                    {feature.description}
                   </p>
                 </div>
               </div>
-              <div className="flex gap-3">
-                <div className="size-10 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0">
-                  <Icon name="heart" className="size-5 text-purple-600" />
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-1">Varm & personlig</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Empatisk med forklaring
-                  </p>
-                </div>
-              </div>
-              <div className="flex gap-3">
-                <div className="size-10 rounded-lg bg-green-500/10 flex items-center justify-center shrink-0">
-                  <Icon name="lightbulb" className="size-5 text-green-600" />
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-1">Med alternativ</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Forslag til andre løsninger
-                  </p>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
-        </motion.div>
+        </div>
 
-        <motion.div variants={itemVariants} className="text-center pt-4">
+        <div className="text-center">
           <Button
             size="lg"
             onClick={onStartForm}
-            className="gap-2 px-8 h-12 text-base"
+            className="h-12 px-8 text-base"
           >
             Lag mitt avslag
           </Button>
-          <p className="text-sm text-muted-foreground mt-4">
+          <p className="mt-4 text-sm text-muted-foreground">
             Under 1 minutt • Helt gratis
           </p>
-        </motion.div>
+        </div>
       </motion.div>
     );
   }

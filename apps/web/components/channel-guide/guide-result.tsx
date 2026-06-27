@@ -33,7 +33,8 @@ import {
   cn,
 } from "@poynt/ui";
 import { Icon } from "@poynt/ui/icons";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 const levelBadgeVariant = {
@@ -266,16 +267,20 @@ export function GuideResult({
   // Ingenting å vise enda, og vi streamer ikke → ikke render noe.
   if (!top && !isStreaming) return null;
 
+  // Hver seksjon animerer seg selv på egen mount — slik at deler som dukker opp
+  // senere (vurdering, andre kanaler) også fader inn, uten stagger-orkestrering
+  // som etterlater sent-tillagte barn hengende på opacity 0 (og uten remount-blink).
+  const sectionMotion = {
+    initial: { opacity: 0, y: 16 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.35, ease: "easeOut" as const },
+  };
+
   return (
-    <motion.div
-      initial="hidden"
-      animate="visible"
-      variants={containerMotionVariants}
-      className="mx-auto max-w-3xl space-y-6"
-    >
+    <div className="mx-auto max-w-3xl space-y-6">
       {/* Header / status */}
       <motion.div
-        variants={headerMotionVariants}
+        {...sectionMotion}
         className="flex items-center justify-between"
       >
         <div className="flex items-center gap-2">
@@ -285,19 +290,23 @@ export function GuideResult({
         {isStreaming && (
           <span className="flex items-center gap-2 text-sm text-muted-foreground">
             <Icon name="loader" className="size-4 animate-spin" />
-            <motion.span
-              key={streamingLabel}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-            >
-              {streamingLabel}
-            </motion.span>
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={streamingLabel}
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.25 }}
+              >
+                {streamingLabel}
+              </motion.span>
+            </AnimatePresence>
           </span>
         )}
       </motion.div>
 
       {/* HERO — det ene svaret */}
-      <motion.div variants={itemMotionVariants}>
+      <motion.div {...sectionMotion}>
         {top?.name ? (
           <Card className="border-primary/20 bg-primary/5">
             <CardHeader>
@@ -390,7 +399,7 @@ export function GuideResult({
 
       {/* Poynts vurdering — sekundært, under svaret */}
       {reasoning && (
-        <motion.div variants={itemMotionVariants}>
+        <motion.div {...sectionMotion}>
           <div className="flex gap-3 rounded-lg border bg-card p-4">
             <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
               <Icon name="lightbulb" className="size-4" />
@@ -407,7 +416,7 @@ export function GuideResult({
 
       {/* Andre kanaler — kollapset */}
       {others.length > 0 && (
-        <motion.div variants={itemMotionVariants}>
+        <motion.div {...sectionMotion}>
           <Accordion type="multiple" className="rounded-lg border bg-card px-4">
             {others.map((channel) => (
               <AccordionItem key={channel.name} value={channel.name}>
@@ -431,18 +440,45 @@ export function GuideResult({
         </motion.div>
       )}
 
+      {/* Neste steg i trakten → hele markedsplanen. Kanalveilederen svarer på
+          «hvilke kanaler»; markedsplanen setter dem inn i en full strategi. */}
+      {!isStreaming && top?.name && (
+        <motion.div {...sectionMotion}>
+          <Card className="border-primary/20 bg-primary/5">
+            <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-start gap-3">
+                <Icon
+                  name="bar-chart"
+                  className="mt-0.5 size-5 shrink-0 text-primary"
+                />
+                <div>
+                  <p className="text-sm font-medium">Klar for hele planen?</p>
+                  <p className="text-sm text-muted-foreground">
+                    Kanalene er bestemt. Markedsplanen setter dem inn i en
+                    komplett strategi med tidslinje og oppgaver.
+                  </p>
+                </div>
+              </div>
+              <Button asChild className="shrink-0 gap-2">
+                <Link href="/on-poynt/verktoy/markedsplan">
+                  Lag markedsplan
+                  <Icon name="arrow-right" className="size-4" />
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
+
       {/* Handlinger */}
       {!isStreaming && onReset && (
-        <motion.div
-          variants={itemMotionVariants}
-          className="flex justify-center pt-2"
-        >
+        <motion.div {...sectionMotion} className="flex justify-center pt-2">
           <Button variant="outline" onClick={onReset} className="gap-2">
             <Icon name="refresh" className="size-4" />
             Ta quizen på nytt
           </Button>
         </motion.div>
       )}
-    </motion.div>
+    </div>
   );
 }

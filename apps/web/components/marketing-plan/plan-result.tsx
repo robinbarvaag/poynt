@@ -1,770 +1,559 @@
 "use client";
 
 import { priorityConfig } from "@/lib/constants";
-import { trpc } from "@/lib/planner/trpc";
-import type { MarketingPlan } from "@poynt/planner-validators";
-import { AiBadge, Card, CardContent, CardHeader, CardTitle } from "@poynt/ui";
-import { Button } from "@poynt/ui";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@poynt/ui";
-import { Checkbox } from "@poynt/ui";
-import { cn } from "@poynt/ui";
-import { Icon } from "@poynt/ui/icons";
-import { motion } from "framer-motion";
+import type { MarketingPlanStream } from "@poynt/planner-validators";
+import {
+  AiBadge,
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Heading,
+  Skeleton,
+  Text,
+} from "@poynt/ui";
+import { Icon, type IconName } from "@poynt/ui/icons";
+import type { DeepPartial } from "ai";
+import { AnimatePresence, motion } from "framer-motion";
+import Link from "next/link";
+import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 
-interface PlanProgressItem {
-  type?: string;
-  // Lagres som tekst i databasen (PlannerMarketingPlanProgress); leses kun i
-  // template-literals, så vi godtar både streng, tall og null.
-  monthIndex?: string | number | null;
-  taskIndex?: string | number | null;
-}
-
 interface PlanResultProps {
-  plan?: MarketingPlan;
+  // Under streaming er planen et delobjekt (felter fylles inn bit for bit), så
+  // typen er DeepPartial. Et ferdig lagret resultat er også gyldig her.
+  plan?: DeepPartial<MarketingPlanStream>;
   onReset?: () => void;
   mode?: "intro" | "result";
   onStartForm?: () => void;
-  toolResultId?: string;
-  initialProgress?: PlanProgressItem[];
+  /** Når true bygger planen seg fortsatt opp (streaming): vis status + skjelett. */
+  isStreaming?: boolean;
+  /** Legg quick wins i oppgavelista på nytt (for lagrede planer). */
+  onSyncTasks?: () => void;
 }
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.1,
-    },
-  },
+// Hver seksjon animerer seg selv på egen mount (samme rolige, streaming-klare
+// mønster som kanalveilederen) — ingen stagger-orkestrering, ingen spring-bounce.
+const sectionMotion = {
+  initial: { opacity: 0, y: 16 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.35, ease: "easeOut" as const },
 };
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      type: "spring" as const,
-      stiffness: 100,
-      damping: 15,
-    },
-  },
-};
+// Roterende «jobber»-meldinger mens vi venter på de første tokenene.
+const STREAM_MESSAGES = [
+  "Analyserer bedriften din …",
+  "Velger de viktigste kanalene …",
+  "Bygger tidslinjen måned for måned …",
+  "Setter sammen ukesrutinen …",
+];
+
+/** Dempet detalj-blokk på et kanalkort (token-basert, ingen regnbuefarger). */
+function DetailSection({
+  icon,
+  label,
+  children,
+}: {
+  icon: IconName;
+  label: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="mt-3 space-y-1">
+      <p className="flex items-center gap-1.5 font-medium text-muted-foreground text-xs uppercase tracking-wide">
+        <Icon name={icon} className="size-3.5 text-primary" />
+        {label}
+      </p>
+      {children}
+    </div>
+  );
+}
+
+/** Felles seksjonsoverskrift for strategi-siden. */
+function SectionHeading({
+  icon,
+  title,
+  subtitle,
+}: {
+  icon: IconName;
+  title: string;
+  subtitle?: string;
+}) {
+  return (
+    <div className="mb-4 flex items-center gap-2.5">
+      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+        <Icon name={icon} className="size-5" />
+      </div>
+      <div>
+        <h3 className="font-semibold text-lg leading-tight">{title}</h3>
+        {subtitle && (
+          <p className="text-muted-foreground text-sm">{subtitle}</p>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export function PlanResult({
   plan,
   onReset,
   mode = "result",
   onStartForm,
-  toolResultId,
-  initialProgress = [],
+  isStreaming = false,
+  onSyncTasks,
 }: PlanResultProps) {
-  const [completedTasks, setCompletedTasks] = useState<Set<string>>(new Set());
-
-  // Update completed tasks from initialProgress
+  // Roter «jobber»-meldingen mens vi streamer og før det første svaret kommer.
+  const [messageTick, setMessageTick] = useState(0);
   useEffect(() => {
-    if (initialProgress.length > 0) {
-      const completed = new Set<string>();
-      for (const progress of initialProgress) {
-        if (progress.type === "timeline") {
-          completed.add(
-            `timeline-${progress.monthIndex}-${progress.taskIndex}`
-          );
-        } else {
-          completed.add(`quickwin-${progress.taskIndex}`);
-        }
-      }
-      setCompletedTasks(completed);
-    }
-  }, [initialProgress]);
-
-  const handleTimelineTaskToggle = async (
-    monthIndex: number,
-    taskIndex: number
-  ) => {
-    if (!toolResultId) return;
-
-    const key = `timeline-${monthIndex}-${taskIndex}`;
-    const newCompleted = new Set(completedTasks);
-
-    if (completedTasks.has(key)) {
-      newCompleted.delete(key);
-    } else {
-      newCompleted.add(key);
-    }
-
-    setCompletedTasks(newCompleted);
-
-    try {
-      await trpc.marketingPlanProgress.toggleTimelineTask.mutate({
-        toolResultId,
-        monthIndex,
-        taskIndex,
-      });
-    } catch (error) {
-      console.error("Failed to toggle task:", error);
-      // Revert on error
-      setCompletedTasks(completedTasks);
-    }
-  };
-
-  const handleQuickWinToggle = async (taskIndex: number) => {
-    if (!toolResultId) return;
-
-    const key = `quickwin-${taskIndex}`;
-    const newCompleted = new Set(completedTasks);
-
-    if (completedTasks.has(key)) {
-      newCompleted.delete(key);
-    } else {
-      newCompleted.add(key);
-    }
-
-    setCompletedTasks(newCompleted);
-
-    try {
-      await trpc.marketingPlanProgress.toggleQuickWin.mutate({
-        toolResultId,
-        taskIndex,
-      });
-    } catch (error) {
-      console.error("Failed to toggle quick win:", error);
-      // Revert on error
-      setCompletedTasks(completedTasks);
-    }
-  };
-
-  const isTimelineTaskCompleted = (monthIndex: number, taskIndex: number) => {
-    return completedTasks.has(`timeline-${monthIndex}-${taskIndex}`);
-  };
-
-  const isQuickWinCompleted = (taskIndex: number) => {
-    return completedTasks.has(`quickwin-${taskIndex}`);
-  };
-
-  const getMonthProgress = (monthIndex: number, totalTasks: number) => {
-    let completed = 0;
-    for (let i = 0; i < totalTasks; i++) {
-      if (isTimelineTaskCompleted(monthIndex, i)) {
-        completed++;
-      }
-    }
-    return {
-      completed,
-      total: totalTasks,
-      percentage: (completed / totalTasks) * 100,
-    };
-  };
+    if (!isStreaming) return;
+    const id = setInterval(() => setMessageTick((t) => t + 1), 2200);
+    return () => clearInterval(id);
+  }, [isStreaming]);
 
   // Intro mode
   if (mode === "intro") {
+    const features: { icon: IconName; title: string; description: string }[] = [
+      {
+        icon: "target",
+        title: "Prioriterte kanaler",
+        description:
+          "Hvilke kanaler du bør satse på, hvor ofte, og konkret hva du skal gjøre",
+      },
+      {
+        icon: "calendar",
+        title: "Utrullingsplan",
+        description: "Måned-for-måned med fokusområder og konkrete steg",
+      },
+      {
+        icon: "clock",
+        title: "Ukentlig rutine",
+        description: "Forslag til fast ukesplan med tidsestimat",
+      },
+      {
+        icon: "zap",
+        title: "Oppgaver rett i lista",
+        description:
+          "Quick wins legges automatisk i oppgavelista på dashbordet, klare til avhuking",
+      },
+    ];
+
     return (
-      <motion.div
-        initial="hidden"
-        animate="visible"
-        variants={containerVariants}
-        className="space-y-10 max-w-5xl mx-auto"
-      >
-        <motion.div variants={itemVariants} className="text-center space-y-4">
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", stiffness: 200, damping: 15 }}
-            className="inline-flex items-center justify-center size-20 rounded-2xl bg-primary/10 text-primary mb-2"
-          >
-            <Icon name="calendar" className="size-10" />
-          </motion.div>
-          <h1 className="text-4xl font-bold tracking-tight">
-            Lag din skreddersydde markedsplan
-          </h1>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Slutt å gjette hva du skal gjøre. Få en komplett markedsplan
-            tilpasset din bransje, mål og ressurser - med konkrete aktiviteter
-            for hver uke.
-          </p>
-        </motion.div>
+      <motion.div {...sectionMotion} className="mx-auto max-w-3xl space-y-8">
+        <div className="space-y-3 text-center">
+          <div className="mx-auto inline-flex size-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <Icon name="bar-chart" className="size-8" />
+          </div>
+          <Heading size="h1">Lag din skreddersydde markedsplan</Heading>
+          <Text>
+            Slutt å gjette hva du skal gjøre. Få en komplett strategi tilpasset
+            din bransje, mål og ressurser — og oppgavene rett i lista di.
+          </Text>
+        </div>
 
-        <motion.div variants={itemVariants}>
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-xl">
-                <Icon name="compass" className="size-5 text-primary" />
-                Dette får du
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div className="flex gap-3">
-                    <div className="size-10 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
-                      <Icon name="target" className="size-5 text-blue-600" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold mb-1">
-                        Prioriterte kanaler
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        Hvilke kanaler du bør satse på, hvor ofte, og konkret
-                        hva du skal gjøre
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex gap-3">
-                    <div className="size-10 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0">
-                      <Icon
-                        name="calendar"
-                        className="size-5 text-purple-600"
-                      />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold mb-1">Månedlig tidslinje</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Måned-for-måned med fokusområder og konkrete oppgaver
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  <div className="flex gap-3">
-                    <div className="size-10 rounded-lg bg-green-500/10 flex items-center justify-center shrink-0">
-                      <Icon name="clock" className="size-5 text-green-600" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold mb-1">Ukentlig rutine</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Forslag til fast ukesplan med tidsestimat
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex gap-3">
-                    <div className="size-10 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
-                      <Icon name="zap" className="size-5 text-amber-600" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold mb-1">Quick wins</h3>
-                      <p className="text-sm text-muted-foreground">
-                        4-6 ting du kan gjøre denne uken som gir rask effekt
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div variants={itemVariants} className="text-center pt-4">
-          <Button
-            size="lg"
-            onClick={onStartForm}
-            className="gap-2 px-8 h-12 text-base"
-          >
-            Lag min markedsplan
-          </Button>
-          <p className="text-sm text-muted-foreground mt-4">
-            Ca. 3 minutter • Helt gratis
-          </p>
-        </motion.div>
-      </motion.div>
-    );
-  }
-
-  // Result mode
-  if (!plan) {
-    return null;
-  }
-
-  return (
-    <motion.div
-      initial="hidden"
-      animate="visible"
-      variants={containerVariants}
-      className="space-y-8"
-    >
-      <motion.div variants={itemVariants} className="text-center space-y-3">
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{
-            type: "spring",
-            stiffness: 200,
-            damping: 15,
-            delay: 0.2,
-          }}
-          className="inline-flex items-center justify-center size-16 rounded-full bg-primary/10 text-primary mb-2"
-        >
-          <Icon name="bar-chart" className="size-8" />
-        </motion.div>
-        <h2 className="text-3xl font-bold tracking-tight">Din markedsplan</h2>
-        <p className="text-muted-foreground text-lg mx-auto">{plan.summary}</p>
-        <AiBadge className="mt-1" />
-      </motion.div>
-
-      {plan.reasoning && (
-        <motion.div variants={itemVariants}>
-          <Card className="border-primary/20 bg-primary/5">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Icon name="lightbulb" className="size-5 text-primary" />
-                Vår vurdering av din situasjon
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-foreground/90 leading-relaxed whitespace-pre-line">
-                {plan.reasoning}
-              </p>
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
-
-      <motion.div variants={itemVariants}>
-        <Tabs defaultValue="channels" className="w-full">
-          <TabsList className="w-full grid grid-cols-4 h-auto">
-            <TabsTrigger value="channels" className="flex flex-col gap-1 py-3">
-              <div className="flex items-center gap-1.5">
-                <Icon name="target" className="size-3.5" />
-                <span className="font-medium">Kanaler</span>
-              </div>
-              <span className="text-[10px] text-muted-foreground font-normal leading-tight">
-                Prioritering
-              </span>
-            </TabsTrigger>
-            <TabsTrigger value="timeline" className="flex flex-col gap-1 py-3">
-              <div className="flex items-center gap-1.5">
-                <Icon name="calendar" className="size-3.5" />
-                <span className="font-medium">Tidslinje</span>
-              </div>
-              <span className="text-[10px] text-muted-foreground font-normal leading-tight">
-                Måned-for-måned
-              </span>
-            </TabsTrigger>
-            <TabsTrigger value="weekly" className="flex flex-col gap-1 py-3">
-              <div className="flex items-center gap-1.5">
-                <Icon name="clock" className="size-3.5" />
-                <span className="font-medium">Ukentlig rutine</span>
-              </div>
-              <span className="text-[10px] text-muted-foreground font-normal leading-tight">
-                Rutineforslag
-              </span>
-            </TabsTrigger>
-            <TabsTrigger value="quickwins" className="flex flex-col gap-1 py-3">
-              <div className="flex items-center gap-1.5">
-                <Icon name="zap" className="size-3.5" />
-                <span className="font-medium">Quick wins</span>
-              </div>
-              <span className="text-[10px] text-muted-foreground font-normal leading-tight">
-                Raske resultater
-              </span>
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="channels" className="mt-6">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {plan.channels.map((channel, index) => {
-                const config = priorityConfig[channel.priority];
-                return (
-                  <motion.div
-                    key={channel.channel}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <Card
-                      className={cn(
-                        "h-full transition-all duration-300 hover:shadow-md",
-                        config.border
-                      )}
-                    >
-                      <CardHeader className="pb-3">
-                        <div className="flex items-center justify-between">
-                          <CardTitle className="text-lg">
-                            {channel.channel}
-                          </CardTitle>
-                          <span
-                            className={cn(
-                              "text-xs px-2 py-1 rounded-full font-medium",
-                              config.bg,
-                              config.color
-                            )}
-                          >
-                            {config.label}
-                          </span>
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          {channel.frequency}
-                        </p>
-                      </CardHeader>
-                      <CardContent>
-                        <ul className="space-y-2">
-                          {channel.activities.map((activity) => (
-                            <li
-                              key={activity}
-                              className="flex items-start gap-2 text-sm"
-                            >
-                              <Icon
-                                name="arrow-right"
-                                className="size-4 text-primary mt-0.5 shrink-0"
-                              />
-                              <span>{activity}</span>
-                            </li>
-                          ))}
-                        </ul>
-
-                        {channel.expectedImpact && (
-                          <div className="mt-4 pt-4 border-t space-y-1">
-                            <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1.5">
-                              <Icon name="zap" className="size-3.5" />
-                              Forventet effekt
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {channel.expectedImpact}
-                            </p>
-                          </div>
-                        )}
-
-                        {channel.resourcesNeeded && (
-                          <div className="mt-3 space-y-1">
-                            <p className="text-xs font-semibold text-purple-600 dark:text-purple-400 flex items-center gap-1.5">
-                              <Icon name="settings" className="size-3.5" />
-                              Du trenger
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {channel.resourcesNeeded}
-                            </p>
-                          </div>
-                        )}
-
-                        {channel.potentialChallenges &&
-                          channel.potentialChallenges.length > 0 && (
-                            <div className="mt-3 space-y-1">
-                              <p className="text-xs font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
-                                <Icon
-                                  name="alert-triangle"
-                                  className="size-3.5"
-                                />
-                                Utfordringer
-                              </p>
-                              <ul className="space-y-1">
-                                {channel.potentialChallenges.map(
-                                  (challenge) => (
-                                    <li
-                                      key={challenge}
-                                      className="text-xs text-muted-foreground flex items-start gap-1.5"
-                                    >
-                                      <span className="text-amber-600 dark:text-amber-400 mt-0.5">
-                                        •
-                                      </span>
-                                      <span>{challenge}</span>
-                                    </li>
-                                  )
-                                )}
-                              </ul>
-                            </div>
-                          )}
-
-                        {channel.successMetrics &&
-                          channel.successMetrics.length > 0 && (
-                            <div className="mt-3 space-y-1">
-                              <p className="text-xs font-semibold text-green-600 dark:text-green-400 flex items-center gap-1.5">
-                                <Icon name="bar-chart" className="size-3.5" />
-                                Målepunkter
-                              </p>
-                              <ul className="space-y-1">
-                                {channel.successMetrics.map((metric) => (
-                                  <li
-                                    key={metric}
-                                    className="text-xs text-muted-foreground flex items-start gap-1.5"
-                                  >
-                                    <span className="text-green-600 dark:text-green-400 mt-0.5">
-                                      •
-                                    </span>
-                                    <span>{metric}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="timeline" className="mt-6">
-            <div className="relative">
-              <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-border hidden sm:block" />
-
-              <div className="space-y-6">
-                {plan.timeline.map((month, index) => (
-                  <motion.div
-                    key={month.month}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="relative"
-                  >
-                    <div className="absolute left-2 top-4 size-5 rounded-full bg-primary border-4 border-background hidden sm:block" />
-
-                    <Card className="sm:ml-12">
-                      <CardHeader className="pb-3">
-                        <div className="flex items-center gap-3">
-                          <div className="flex items-center justify-center size-10 rounded-lg bg-primary/10 text-primary font-bold">
-                            {month.month}
-                          </div>
-                          <div className="flex-1">
-                            <CardTitle className="text-lg">
-                              {month.monthName}
-                            </CardTitle>
-                            <p className="text-sm text-muted-foreground">
-                              {month.focus}
-                            </p>
-                          </div>
-                          {(() => {
-                            const progress = getMonthProgress(
-                              index,
-                              month.tasks.length
-                            );
-                            return progress.completed === progress.total &&
-                              progress.total > 0 ? (
-                              <motion.div
-                                initial={{ scale: 0 }}
-                                animate={{ scale: 1 }}
-                                className="flex items-center gap-2 text-sm font-semibold text-green-600 dark:text-green-400"
-                              >
-                                <Icon name="check-circle" className="size-5" />
-                                Fullført
-                              </motion.div>
-                            ) : null;
-                          })()}
-                        </div>
-                        {(() => {
-                          const progress = getMonthProgress(
-                            index,
-                            month.tasks.length
-                          );
-                          return progress.total > 0 ? (
-                            <div className="mt-3">
-                              <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-                                <span>Fremgang</span>
-                                <span>
-                                  {progress.completed} / {progress.total}
-                                </span>
-                              </div>
-                              <div className="h-2 bg-muted rounded-full overflow-hidden">
-                                <motion.div
-                                  initial={{ width: 0 }}
-                                  animate={{ width: `${progress.percentage}%` }}
-                                  transition={{
-                                    duration: 0.5,
-                                    ease: "easeOut",
-                                  }}
-                                  className="h-full bg-primary"
-                                />
-                              </div>
-                            </div>
-                          ) : null;
-                        })()}
-                      </CardHeader>
-                      <CardContent>
-                        <ul className="space-y-2">
-                          {month.tasks.map((task, i) => {
-                            const taskCompleted = isTimelineTaskCompleted(
-                              index,
-                              i
-                            );
-                            return (
-                              <li
-                                key={`${month.month}-${task}`}
-                                className="flex items-start gap-3"
-                              >
-                                <Checkbox
-                                  id={`task-${month.month}-${i}`}
-                                  checked={taskCompleted}
-                                  onCheckedChange={() =>
-                                    handleTimelineTaskToggle(index, i)
-                                  }
-                                />
-                                <label
-                                  htmlFor={`task-${month.month}-${i}`}
-                                  className={cn(
-                                    "text-sm leading-tight cursor-pointer",
-                                    taskCompleted &&
-                                      "line-through text-muted-foreground"
-                                  )}
-                                >
-                                  {task}
-                                </label>
-                              </li>
-                            );
-                          })}
-                        </ul>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="weekly" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Icon name="clock" className="size-5" />
-                  Din ukentlige rutine
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {plan.weeklyRoutine.map((task, index) => (
-                    <motion.div
-                      key={`${task.day}-${task.task}`}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      className="flex items-center gap-4 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
-                    >
-                      <div className="flex items-center justify-center size-10 rounded-lg bg-primary/10 text-primary font-medium text-sm">
-                        {task.day.slice(0, 3)}
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-medium">{task.task}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {task.day}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                        <Icon name="clock" className="size-4" />
-                        {task.duration}
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="quickwins" className="mt-6">
-            <div className="grid gap-6 md:grid-cols-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Icon name="zap" className="size-5 text-yellow-500" />
-                    Gjør dette først
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-3">
-                    {plan.quickWins.map((win, index) => {
-                      const winCompleted = isQuickWinCompleted(index);
-                      return (
-                        <motion.li
-                          key={win}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.05 }}
-                          className="flex items-start gap-3"
-                        >
-                          <Checkbox
-                            id={`quickwin-${index}`}
-                            checked={winCompleted}
-                            onCheckedChange={() => handleQuickWinToggle(index)}
-                            className="mt-1"
-                          />
-                          <label
-                            htmlFor={`quickwin-${index}`}
-                            className={cn(
-                              "text-sm cursor-pointer flex-1",
-                              winCompleted &&
-                                "line-through text-muted-foreground"
-                            )}
-                          >
-                            <div className="flex items-center gap-2">
-                              <div className="flex items-center justify-center size-6 rounded-full bg-yellow-500/10 text-yellow-500 text-xs font-bold shrink-0">
-                                {index + 1}
-                              </div>
-                              <span>{win}</span>
-                            </div>
-                          </label>
-                        </motion.li>
-                      );
-                    })}
-                  </ul>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Icon name="lightbulb" className="size-5 text-blue-500" />
-                    Tips for suksess
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-3">
-                    {plan.tips.map((tip, index) => (
-                      <motion.li
-                        key={tip}
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                        className="flex items-start gap-3"
-                      >
-                        <Icon
-                          name="check-circle"
-                          className="size-5 text-blue-500 shrink-0 mt-0.5"
-                        />
-                        <span className="text-sm">{tip}</span>
-                      </motion.li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-        </Tabs>
-      </motion.div>
-
-      <motion.div variants={itemVariants}>
-        <Card className="border-primary/20 bg-primary/5">
+        <Card>
           <CardHeader>
-            <CardTitle className="text-xl sm:text-2xl flex items-center gap-2">
-              <Icon name="zap" className="size-6 shrink-0 text-primary" />
-              Ditt neste steg
-            </CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Nå som du har planen, er det på tide å komme i gang. Start med ett
-              av quick wins for å få fart på sakene.
-            </p>
+            <CardTitle>Dette får du</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid sm:grid-cols-2 gap-4">
-              {plan.quickWins.slice(0, 4).map((win, idx) => (
-                <div
-                  key={win}
-                  className="flex gap-3 p-4 rounded-lg border bg-background"
-                >
-                  <div className="flex items-center justify-center size-8 rounded-lg bg-primary/10 text-primary font-semibold text-sm shrink-0">
-                    {idx + 1}
+            <div className="grid gap-6 md:grid-cols-2">
+              {features.map((feature) => (
+                <div key={feature.title} className="flex gap-3">
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                    <Icon name={feature.icon} className="size-5" />
                   </div>
-                  <p className="text-sm font-medium">{win}</p>
+                  <div>
+                    <h3 className="mb-1 font-semibold">{feature.title}</h3>
+                    <p className="text-muted-foreground text-sm">
+                      {feature.description}
+                    </p>
+                  </div>
                 </div>
               ))}
             </div>
           </CardContent>
         </Card>
+
+        <div className="text-center">
+          <Button
+            size="lg"
+            onClick={onStartForm}
+            className="h-12 px-8 text-base"
+          >
+            Lag min markedsplan
+          </Button>
+          <p className="mt-4 text-muted-foreground text-sm">
+            Ca. 3 minutter • Helt gratis
+          </p>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // Result mode — ingenting å vise enda, og vi streamer ikke → render ingenting.
+  if (!plan && !isStreaming) {
+    return null;
+  }
+
+  // Streaming-trygge avledninger: feltene fylles inn bit for bit, så vi vokter
+  // på delvise/manglende verdier overalt.
+  const channels = (plan?.channels ?? []).filter(
+    (c): c is NonNullable<typeof c> => Boolean(c?.channel)
+  );
+  const timeline = (plan?.timeline ?? []).filter(
+    (m): m is NonNullable<typeof m> => Boolean(m?.monthName)
+  );
+  const weeklyRoutine = (plan?.weeklyRoutine ?? []).filter(
+    (t): t is NonNullable<typeof t> => Boolean(t?.task)
+  );
+  const quickWins = (plan?.quickWins ?? []).filter(
+    (w): w is string => typeof w === "string" && w.length > 0
+  );
+  const tips = (plan?.tips ?? []).filter(
+    (t): t is string => typeof t === "string" && t.length > 0
+  );
+
+  const streamingLabel = !plan?.summary
+    ? STREAM_MESSAGES[messageTick % STREAM_MESSAGES.length]
+    : channels.length === 0
+      ? "Velger de viktigste kanalene …"
+      : timeline.length === 0
+        ? "Bygger tidslinjen måned for måned …"
+        : "Fullfører planen …";
+
+  return (
+    <div className="space-y-10">
+      {/* Header / status */}
+      <motion.div
+        {...sectionMotion}
+        className="flex items-center justify-between gap-3"
+      >
+        <div className="flex items-center gap-2">
+          <Heading size="h2">Din markedsplan</Heading>
+          <AiBadge />
+        </div>
+        {isStreaming && (
+          <span className="flex items-center gap-2 text-muted-foreground text-sm">
+            <Icon name="loader" className="size-4 animate-spin" />
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={streamingLabel}
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.25 }}
+              >
+                {streamingLabel}
+              </motion.span>
+            </AnimatePresence>
+          </span>
+        )}
       </motion.div>
 
-      <motion.div variants={itemVariants} className="flex justify-center pt-4">
-        <Button variant="outline" onClick={onReset} className="gap-2">
-          <Icon name="refresh" className="size-4" />
-          Lag ny plan
-        </Button>
-      </motion.div>
-    </motion.div>
+      {plan?.summary ? (
+        <motion.div {...sectionMotion}>
+          <Text>{plan.summary}</Text>
+        </motion.div>
+      ) : (
+        isStreaming && (
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+          </div>
+        )
+      )}
+
+      {/* Poynts vurdering — sekundært, dempet */}
+      {plan?.reasoning && (
+        <motion.div {...sectionMotion}>
+          <div className="flex gap-3 rounded-lg border bg-card p-4">
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+              <Icon name="lightbulb" className="size-4" />
+            </div>
+            <div>
+              <p className="mb-1 font-medium text-sm">
+                Vår vurdering av situasjonen din
+              </p>
+              <p className="whitespace-pre-line text-muted-foreground text-sm leading-relaxed">
+                {plan.reasoning}
+              </p>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Kanaler */}
+      {channels.length > 0 && (
+        <motion.section {...sectionMotion}>
+          <SectionHeading
+            icon="target"
+            title="Kanaler å satse på"
+            subtitle="Prioritert etter hva som gir mest for ressursene dine"
+          />
+          <div className="grid gap-4 md:grid-cols-2">
+            {channels.map((channel, index) => {
+              const config = channel.priority
+                ? priorityConfig[channel.priority]
+                : null;
+              return (
+                <Card
+                  key={channel.channel ?? `channel-${index}`}
+                  className="h-full"
+                >
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <CardTitle className="text-lg">
+                        {channel.channel}
+                      </CardTitle>
+                      {config && (
+                        <Badge variant={config.badge} size="sm">
+                          {config.label}
+                        </Badge>
+                      )}
+                    </div>
+                    {channel.frequency && (
+                      <p className="text-muted-foreground text-sm">
+                        {channel.frequency}
+                      </p>
+                    )}
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2">
+                      {(channel.activities ?? [])
+                        .filter((a): a is string => Boolean(a))
+                        .map((activity) => (
+                          <li
+                            key={activity}
+                            className="flex items-start gap-2 text-sm"
+                          >
+                            <Icon
+                              name="arrow-right"
+                              className="mt-0.5 size-4 shrink-0 text-primary"
+                            />
+                            <span>{activity}</span>
+                          </li>
+                        ))}
+                    </ul>
+
+                    {channel.expectedImpact && (
+                      <DetailSection icon="zap" label="Forventet effekt">
+                        <p className="text-muted-foreground text-sm">
+                          {channel.expectedImpact}
+                        </p>
+                      </DetailSection>
+                    )}
+
+                    {channel.resourcesNeeded && (
+                      <DetailSection icon="settings" label="Du trenger">
+                        <p className="text-muted-foreground text-sm">
+                          {channel.resourcesNeeded}
+                        </p>
+                      </DetailSection>
+                    )}
+
+                    {channel.successMetrics &&
+                      channel.successMetrics.length > 0 && (
+                        <DetailSection icon="bar-chart" label="Målepunkter">
+                          <ul className="space-y-1">
+                            {channel.successMetrics
+                              .filter((m): m is string => Boolean(m))
+                              .map((metric) => (
+                                <li
+                                  key={metric}
+                                  className="flex items-start gap-1.5 text-muted-foreground text-xs"
+                                >
+                                  <span className="mt-0.5">•</span>
+                                  <span>{metric}</span>
+                                </li>
+                              ))}
+                          </ul>
+                        </DetailSection>
+                      )}
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+
+          {/* Kanalveilederen er deep-dive-en for kanalvalget — lenk dit i stedet
+              for å duplisere analysen her. */}
+          {!isStreaming && (
+            <Button
+              asChild
+              variant="link"
+              size="sm"
+              className="mt-3 h-auto gap-1.5 p-0 text-muted-foreground"
+            >
+              <Link href="/on-poynt/verktoy/kanalveileder">
+                <Icon name="compass" className="size-4" />
+                Gå dypere på kanalvalget med Kanalveilederen
+              </Link>
+            </Button>
+          )}
+        </motion.section>
+      )}
+
+      {/* Utrullingsplan (tidslinje, read-only roadmap) */}
+      {timeline.length > 0 && (
+        <motion.section {...sectionMotion}>
+          <SectionHeading
+            icon="calendar"
+            title="Slik ruller du det ut"
+            subtitle="Fase for fase gjennom året"
+          />
+          <ol className="space-y-3">
+            {timeline.map((month, index) => {
+              const tasks = (month.tasks ?? []).filter((t): t is string =>
+                Boolean(t)
+              );
+              return (
+                <li
+                  key={month.monthName ?? `month-${index}`}
+                  className="flex gap-3 rounded-lg border bg-card p-4"
+                >
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 font-bold text-primary text-sm">
+                    {month.month ?? index + 1}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium">{month.monthName}</p>
+                    {month.focus && (
+                      <p className="text-muted-foreground text-sm">
+                        {month.focus}
+                      </p>
+                    )}
+                    {tasks.length > 0 && (
+                      <ul className="mt-2 space-y-1">
+                        {tasks.map((task) => (
+                          <li
+                            key={task}
+                            className="flex items-start gap-2 text-sm"
+                          >
+                            <span className="mt-0.5 text-primary">•</span>
+                            <span>{task}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+        </motion.section>
+      )}
+
+      {/* Ukentlig rutine (read-only referanse) */}
+      {weeklyRoutine.length > 0 && (
+        <motion.section {...sectionMotion}>
+          <SectionHeading
+            icon="clock"
+            title="Ukentlig rutine"
+            subtitle="En fast rytme du kan lene deg på"
+          />
+          <div className="space-y-2.5">
+            {weeklyRoutine.map((task, index) => (
+              <div
+                key={`${task.day}-${task.task}-${index}`}
+                className="flex items-center gap-4 rounded-lg border bg-card p-3"
+              >
+                <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 font-medium text-primary text-sm">
+                  {(task.day ?? "").slice(0, 3)}
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium">{task.task}</p>
+                  {task.day && (
+                    <p className="text-muted-foreground text-sm">{task.day}</p>
+                  )}
+                </div>
+                {task.duration && (
+                  <div className="flex items-center gap-1 text-muted-foreground text-sm">
+                    <Icon name="clock" className="size-4" />
+                    {task.duration}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </motion.section>
+      )}
+
+      {/* Oppgave-handoff → dashboardet */}
+      {!isStreaming && quickWins.length > 0 && (
+        <motion.section {...sectionMotion}>
+          <Card className="border-primary/20 bg-primary/5">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-xl">
+                <Icon name="zap" className="size-6 shrink-0 text-primary" />
+                Kom i gang — oppgavene dine er klare
+              </CardTitle>
+              <p className="text-muted-foreground text-sm">
+                Vi har lagt disse quick wins-ene i oppgavelista di. Hak dem av
+                på dashbordet etter hvert som du blir ferdig.
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {quickWins.length > 0 && (
+                <ul className="space-y-2">
+                  {quickWins.slice(0, 5).map((win, idx) => (
+                    <li key={win} className="flex items-start gap-2.5 text-sm">
+                      <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 font-bold text-primary text-xs">
+                        {idx + 1}
+                      </span>
+                      <span>{win}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <div className="flex flex-wrap gap-2 pt-1">
+                <Button asChild className="gap-2">
+                  <Link href="/on-poynt/oversikt">
+                    <Icon name="arrow-right" className="size-4" />
+                    Se oppgavene på dashbordet
+                  </Link>
+                </Button>
+                {onSyncTasks && (
+                  <Button
+                    variant="outline"
+                    onClick={onSyncTasks}
+                    className="gap-2"
+                  >
+                    <Icon name="refresh" className="size-4" />
+                    Legg til i lista på nytt
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.section>
+      )}
+
+      {/* Tips for suksess */}
+      {tips.length > 0 && (
+        <motion.section {...sectionMotion}>
+          <SectionHeading icon="lightbulb" title="Tips for suksess" />
+          <ul className="grid gap-2 sm:grid-cols-2">
+            {tips.map((tip) => (
+              <li key={tip} className="flex items-start gap-2.5 text-sm">
+                <Icon
+                  name="check-circle"
+                  className="mt-0.5 size-5 shrink-0 text-primary"
+                />
+                <span>{tip}</span>
+              </li>
+            ))}
+          </ul>
+        </motion.section>
+      )}
+
+      {!isStreaming && onReset && (
+        <motion.div {...sectionMotion} className="flex justify-center pt-2">
+          <Button variant="outline" onClick={onReset} className="gap-2">
+            <Icon name="refresh" className="size-4" />
+            Lag ny plan
+          </Button>
+        </motion.div>
+      )}
+    </div>
   );
 }

@@ -1,0 +1,1 @@
+ALTER TABLE "planner"."planner_workspace_profile" ADD COLUMN "brand_brief" jsonb;

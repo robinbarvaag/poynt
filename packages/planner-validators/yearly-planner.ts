@@ -152,6 +152,45 @@ export const yearlyPlanSchema = z.object({
 export type YearlyPlan = z.infer<typeof yearlyPlanSchema>;
 
 /**
+ * Skjema for det AI-en streamer (via `streamText` + `Output.object`). Alle
+ * felter er påkrevd (årshjulet har ingen valgfrie felter), uten `.min/.max`-
+ * refinements som OpenAIs strenge structured-output ikke alltid mapper.
+ *
+ * FELT-REKKEFØLGEN ER BEVISST: under streaming fylles UI-et inn topp→bunn
+ * (oppsummering → måneder → generelle tips).
+ */
+const streamMonthContentSchema = z.object({
+  month: z.number(),
+  monthName: z.string(),
+  theme: z.string(),
+  posts: z.array(
+    z.object({
+      week: z.number(),
+      channel: z.string(),
+      idea: z.string(),
+      type: z.string(),
+    })
+  ),
+  keyDates: z.array(
+    z.object({
+      date: z.string(),
+      event: z.string(),
+      contentIdea: z.string(),
+    })
+  ),
+  tips: z.array(z.string()),
+});
+
+export const yearlyPlanStreamSchema = z.object({
+  summary: z.string(),
+  year: z.number(),
+  months: z.array(streamMonthContentSchema),
+  overallTips: z.array(z.string()),
+});
+
+export type YearlyPlanStream = z.infer<typeof yearlyPlanStreamSchema>;
+
+/**
  * Response fra AI
  */
 export const yearlyPlannerResponseSchema = z.object({

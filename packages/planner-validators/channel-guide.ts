@@ -167,10 +167,14 @@ export function resolveChannelMatchLevel(rec: {
 }
 
 /**
- * Skjema for det AI-en streamer (via `streamObject`). Strengere enn
- * lagrings-skjemaet: `matchLevel` er påkrevd, og vi ber om `nextSteps` —
- * de konkrete tingene brukeren bør gjøre denne uken for toppkanalen
- * (løftet helt opp i resultatet i stedet for å ligge hardkodet nederst).
+ * Skjema for det AI-en streamer (via `streamText` + `Output.object`). Strengere
+ * enn lagrings-skjemaet: `matchLevel` er påkrevd, og vi ber om `nextSteps` —
+ * de konkrete tingene brukeren bør gjøre denne uken for toppkanalen.
+ *
+ * FELT-REKKEFØLGEN ER BEVISST: modellen genererer feltene i denne rekkefølgen,
+ * og under streaming fylles UI-et inn i samme rekkefølge. Den matcher visningen
+ * topp→bunn (hero med kanal+begrunnelse → neste steg → samlet vurdering), så
+ * innholdet ikke streamer inn «over» noe som alt er vist.
  */
 // OpenAIs strenge structured-output krever at ALLE felter ligger i `required`.
 // Valgfrie felter må derfor være `.nullable()` (påkrevd, men kan være null),
@@ -187,9 +191,9 @@ const generatedChannelSchema = z.object({
 });
 
 export const channelGuideStreamSchema = z.object({
-  reasoning: z.string(),
-  nextSteps: z.array(z.string()),
   channels: z.array(generatedChannelSchema),
+  nextSteps: z.array(z.string()),
+  reasoning: z.string(),
 });
 
 export type ChannelGuideStream = z.infer<typeof channelGuideStreamSchema>;

@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@ai-sdk/react": "^3.0.210",
+    "@ai-sdk/rsc": "^2.0.209",
     "@payloadcms/db-postgres": "3.70.0",
     "@payloadcms/email-resend": "3.70.0",
     "@payloadcms/next": "3.70.0",
@@ -45,6 +46,7 @@
     "@trpc/client": "^11.0.0",
     "@trpc/react-query": "^11.0.0",
     "@trpc/server": "^11.0.0",
+    "ai": "^6.0.209",
     "babel-plugin-react-compiler": "^1.0.0",
     "better-auth": "^1.2.5",
     "fast-xml-parser": "^5.9.2",

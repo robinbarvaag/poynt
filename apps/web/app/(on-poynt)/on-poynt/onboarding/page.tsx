@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Card, Input, Progress } from "@poynt/ui";
+import { Button, Card, Heading, Input, Progress, Text } from "@poynt/ui";
 import { Icon } from "@poynt/ui/icons";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -131,12 +131,10 @@ export default function OnboardingPage() {
           {currentStep === "workspace" && (
             <div className="space-y-6">
               <div className="text-center">
-                <h1 className="text-3xl font-bold text-foreground">
-                  Opprett din bedrift
-                </h1>
-                <p className="mt-2 text-muted-foreground">
+                <Heading size="h2">Opprett din bedrift</Heading>
+                <Text variant="muted" customStyles="mt-2">
                   Gi bedriften din et navn for å komme i gang
-                </p>
+                </Text>
               </div>
 
               <form onSubmit={handleWorkspaceSubmit} className="space-y-4">
@@ -193,12 +191,10 @@ export default function OnboardingPage() {
           {currentStep === "tour" && (
             <div className="space-y-6">
               <div className="text-center">
-                <h1 className="text-3xl font-bold text-foreground">
-                  Hva kan du gjøre på On Poynt?
-                </h1>
-                <p className="mt-2 text-muted-foreground">
+                <Heading size="h2">Hva kan du gjøre på On Poynt?</Heading>
+                <Text variant="muted" customStyles="mt-2">
                   Utforsk verktøyene som hjelper deg med markedsføringen
-                </p>
+                </Text>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
@@ -255,13 +251,11 @@ export default function OnboardingPage() {
               </div>
 
               <div>
-                <h1 className="text-3xl font-bold text-foreground">
-                  Du er klar!
-                </h1>
-                <p className="mt-2 text-muted-foreground">
+                <Heading size="h2">Du er klar!</Heading>
+                <Text variant="muted" customStyles="mt-2">
                   Alt er satt opp og klart. La oss komme i gang med
                   markedsføringen din.
-                </p>
+                </Text>
               </div>
 
               {error && (

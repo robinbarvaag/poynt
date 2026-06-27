@@ -3,7 +3,7 @@ import { CategoryFilter } from "@/components/category-filter";
 import { PayloadImage } from "@/components/payload-image";
 import type { Category, Guide, Media } from "@/payload-types";
 import config from "@/payload.config";
-import { GuideCard, Heading, Text } from "@poynt/ui";
+import { GuideCard, Heading, PageHeader, Text } from "@poynt/ui";
 import { Stagger, StaggerItem } from "@poynt/ui/motion";
 import { getPayload } from "payload";
 
@@ -94,13 +94,10 @@ export default async function ResourcesPage({ searchParams }: PageProps) {
 
   return (
     <div className="flex flex-col gap-10">
-      <header className="flex flex-col gap-2">
-        <Heading size="h1">Ressurser</Heading>
-        <Text variant="muted">
-          Guider, maler og inspirasjon for markedsføring og innholdsproduksjon —
-          alt samlet på ett sted.
-        </Text>
-      </header>
+      <PageHeader
+        title="Ressurser"
+        description="Guider, maler og inspirasjon for markedsføring og innholdsproduksjon — alt samlet på ett sted."
+      />
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="w-full sm:max-w-xs">

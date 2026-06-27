@@ -1,9 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import {
   deletePromptTemplate,
+  resyncPromptTemplate,
   seedPromptTemplates,
   togglePromptActive,
   upsertPromptTemplate,
@@ -112,6 +113,28 @@ export const PromptsTable = ({
       const result = await seedPromptTemplates();
       if (result.count === 0) {
         window.alert("Alle standard-prompts er allerede lagt inn.");
+      }
+      refresh();
+    } finally {
+      setLoading(null);
+    }
+  }
+
+  async function handleResync(id: string, name: string) {
+    if (
+      !window.confirm(
+        `Tilbakestill «${name}» til standard-teksten? Dette overskriver endringer i denne ene malen.`
+      )
+    ) {
+      return;
+    }
+    setLoading(id);
+    try {
+      const res = await resyncPromptTemplate(id);
+      if (res.notFound) {
+        window.alert(
+          "Denne malen har ingen innebygd standard å tilbakestille til."
+        );
       }
       refresh();
     } finally {
@@ -351,8 +374,8 @@ export const PromptsTable = ({
           </thead>
           <tbody>
             {templates.map((t) => (
-              <>
-                <tr key={t.id}>
+              <Fragment key={t.id}>
+                <tr>
                   <td style={tdStyle}>
                     <span
                       style={{
@@ -434,6 +457,14 @@ export const PromptsTable = ({
                         }
                       >
                         Rediger
+                      </button>
+                      <button
+                        type="button"
+                        style={btnStyle("ghost")}
+                        onClick={() => handleResync(t.id, t.name)}
+                        disabled={loading === t.id}
+                      >
+                        Tilbakestill
                       </button>
                       <button
                         type="button"
@@ -582,7 +613,7 @@ export const PromptsTable = ({
                     </td>
                   </tr>
                 )}
-              </>
+              </Fragment>
             ))}
             {templates.length === 0 && (
               <tr>
