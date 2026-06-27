@@ -1,6 +1,8 @@
-import { Button, Eyebrow, Heading, Text, cn } from "@poynt/ui";
-import { Icon, type IconName } from "@poynt/ui/icons";
-import Link from "next/link";
+import { Icon, type IconName } from "../../icons";
+import { cn } from "../../lib/utils";
+import { Button } from "../button";
+import { Eyebrow } from "../eyebrow";
+import { Heading, Text } from "../typography";
 
 type HeroAccent = "mint" | "saffron" | "salmon" | "primary";
 
@@ -30,9 +32,9 @@ const ACCENT: Record<HeroAccent, string> = {
 };
 
 /**
- * Tilstandsstyrt topp på dashbordet. I stedet for et generisk «velkommen» sier
+ * Tilstandsstyrt topp på et dashbord. I stedet for et generisk «velkommen» sier
  * den hvor du er og hva det ENE neste steget er — med en tydelig handling.
- * Fargen arves fra den aktive fasen, så toppen og veien snakker samme språk.
+ * Samme flate-språk som Card (rounded-3xl, tynn ring), bare tonet i fasefargen.
  */
 export function NextStepHero({
   eyebrow = "Din markedsføring",
@@ -45,8 +47,6 @@ export function NextStepHero({
   return (
     <section
       className={cn(
-        // Samme flate-språk som Card (rounded-3xl, tynn ring, mykt skygge), bare
-        // tonet i fasefargen — så heroen ikke ser ut som en annen type boks.
         "rounded-3xl p-6 shadow-sm ring-1 ring-foreground/10 sm:p-8",
         ACCENT[accent]
       )}
@@ -66,22 +66,22 @@ export function NextStepHero({
           <div className="flex flex-col gap-3 pt-2 sm:flex-row">
             {primary && (
               <Button asChild size="lg" className="gap-2">
-                <Link href={primary.href}>
+                <a href={primary.href}>
                   {primary.icon && (
                     <Icon name={primary.icon} className="size-4" />
                   )}
                   {primary.label}
-                </Link>
+                </a>
               </Button>
             )}
             {secondary && (
               <Button asChild variant="outline" size="lg" className="gap-2">
-                <Link href={secondary.href}>
+                <a href={secondary.href}>
                   {secondary.icon && (
                     <Icon name={secondary.icon} className="size-4" />
                   )}
                   {secondary.label}
-                </Link>
+                </a>
               </Button>
             )}
           </div>

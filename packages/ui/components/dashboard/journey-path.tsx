@@ -1,6 +1,8 @@
-import { Button, Card, Eyebrow, cn } from "@poynt/ui";
-import { Icon, type IconName } from "@poynt/ui/icons";
-import Link from "next/link";
+import { Icon, type IconName } from "../../icons";
+import { cn } from "../../lib/utils";
+import { Button } from "../button";
+import { Card } from "../card";
+import { Eyebrow } from "../eyebrow";
 
 export type StageStatus = "done" | "active" | "upcoming";
 export type StageSurface = "mint" | "saffron" | "salmon" | "primary";
@@ -54,10 +56,10 @@ const SURFACE: Record<
 };
 
 /**
- * Den guidede veien gjennom oppsettet — signaturen på dashbordet. Fire faser
- * vist som et fargespektrum, der vi alltid framhever ÉN aktiv fase med en
- * tydelig handling, mens ferdige faser er rolige og kommende faser er dempet.
- * Svarer på «hva gjør jeg først, så, så» uten å hindre den som vil hoppe.
+ * Den guidede veien gjennom et oppsett — fire faser vist som et fargespektrum,
+ * der vi alltid framhever ÉN aktiv fase med en tydelig handling, mens ferdige
+ * faser er rolige og kommende faser er dempet. Svarer på «hva gjør jeg først,
+ * så, så» uten å hindre den som vil hoppe. Presentasjons-only (plain `<a>`).
  */
 export function JourneyPath({ eyebrow, title, stages }: JourneyPathProps) {
   return (
@@ -124,10 +126,10 @@ export function JourneyPath({ eyebrow, title, stages }: JourneyPathProps) {
                 <div className="mt-4">
                   {isActive && (
                     <Button asChild size="sm" className="w-full gap-2">
-                      <Link href={stage.href}>
+                      <a href={stage.href}>
                         {stage.cta ?? "Start"}
                         <Icon name="arrow-right" className="size-4" />
-                      </Link>
+                      </a>
                     </Button>
                   )}
                   {isDone && (
@@ -137,10 +139,10 @@ export function JourneyPath({ eyebrow, title, stages }: JourneyPathProps) {
                       size="sm"
                       className="h-auto gap-1.5 p-0 text-muted-foreground hover:bg-transparent hover:text-foreground"
                     >
-                      <Link href={stage.href}>
+                      <a href={stage.href}>
                         <Icon name="check-circle" className="size-4" />
                         {stage.meta ?? "Ferdig"}
-                      </Link>
+                      </a>
                     </Button>
                   )}
                   {isUpcoming && (

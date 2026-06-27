@@ -1,6 +1,3 @@
-import { JourneyPath } from "@/components/planner/dashboard/journey-path";
-import { NextStepHero } from "@/components/planner/dashboard/next-step-hero";
-import { ToolboxCard } from "@/components/planner/dashboard/toolbox-card";
 import { UpcomingPostsCard } from "@/components/planner/dashboard/upcoming-posts-card";
 import { TasksCard } from "@/components/planner/tasks/tasks-card";
 import { getDashboardState } from "@/lib/planner/dashboard-state";
@@ -10,6 +7,9 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  JourneyPath,
+  NextStepHero,
+  ToolboxCard,
 } from "@poynt/ui";
 import { Icon, type IconName } from "@poynt/ui/icons";
 

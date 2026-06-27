@@ -1,9 +1,5 @@
-import type {
-  JourneyStage,
-  StageStatus,
-} from "@/components/planner/dashboard/journey-path";
-import type { NextStepHeroProps } from "@/components/planner/dashboard/next-step-hero";
 import { createServerCaller } from "@/lib/planner/trpc-server";
+import type { JourneyStage, NextStepHeroProps, StageStatus } from "@poynt/ui";
 
 export interface DashboardState {
   hero: NextStepHeroProps;

@@ -1,6 +1,6 @@
-import { Badge, Card, cn } from "@poynt/ui";
-import { Icon, type IconName } from "@poynt/ui/icons";
-import Link from "next/link";
+import { Icon, type IconName } from "../../icons";
+import { Badge } from "../badge";
+import { Card } from "../card";
 
 export interface ToolboxCardProps {
   name: string;
@@ -15,9 +15,9 @@ export interface ToolboxCardProps {
 }
 
 /**
- * Et verktøy i «Verktøykassa» — forklart slik en bruker forstår det: navn, hva
- * det gjør, og NÅR man bruker det. Erstatter de nakne flisene der man måtte
- * gjette hva «Lag avslag» egentlig betød.
+ * Et verktøy i en «verktøykasse» — forklart slik en bruker forstår det: navn,
+ * hva det gjør, og NÅR man bruker det. Erstatter nakne fliser der man måtte
+ * gjette hva verktøyet egentlig gjorde. Presentasjons-only (plain `<a>`).
  */
 export function ToolboxCard({
   name,
@@ -32,7 +32,7 @@ export function ToolboxCard({
       asChild
       className="group h-full p-0 transition-all hover:-translate-y-0.5"
     >
-      <Link href={href}>
+      <a href={href}>
         <div className="flex h-full flex-col gap-3 p-5">
           <div className="flex items-center justify-between gap-2">
             <span className="flex size-10 items-center justify-center rounded-lg bg-muted text-muted-foreground transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
@@ -50,17 +50,12 @@ export function ToolboxCard({
             <p className="text-muted-foreground text-sm">{whatItDoes}</p>
           </div>
 
-          <p
-            className={cn(
-              "border-t pt-3 text-muted-foreground text-xs",
-              "flex items-start gap-1.5"
-            )}
-          >
+          <p className="flex items-start gap-1.5 border-t pt-3 text-muted-foreground text-xs">
             <span className="font-semibold text-foreground">Når:</span>
             {whenToUse}
           </p>
         </div>
-      </Link>
+      </a>
     </Card>
   );
 }

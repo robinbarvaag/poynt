@@ -79,6 +79,23 @@ export {
   type PageHeaderProps,
 } from "./components/page-header";
 
+// Dashboard-primitiver (medlemsområde): tilstandsstyrt hero + guidet reise + verktøykasse
+export {
+  NextStepHero,
+  type NextStepHeroProps,
+} from "./components/dashboard/next-step-hero";
+export {
+  JourneyPath,
+  type JourneyPathProps,
+  type JourneyStage,
+  type StageStatus,
+  type StageSurface,
+} from "./components/dashboard/journey-path";
+export {
+  ToolboxCard,
+  type ToolboxCardProps,
+} from "./components/dashboard/toolbox-card";
+
 export {
   Breadcrumbs,
   type BreadcrumbsProps,
