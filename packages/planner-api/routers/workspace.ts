@@ -26,6 +26,20 @@ import { protectedProcedure, router } from "../trpc";
 // Define tier type locally since we need it for the lookup
 type TierKey = "free" | "pro" | "business";
 
+// `planner_subscription.tier` lagrer medlemskaps-enumet (none|community|
+// community_ai), mens grense-/pris-modellen bruker free|pro|business. Vi broer
+// mellom dem her, med en trygg fallback — uten den ga en ukjent tier-verdi
+// `subscriptionTierLimits[tier] = undefined` → `.maxWorkspaces` kastet → 500.
+const MEMBERSHIP_TO_PLAN: Record<string, TierKey> = {
+  none: "free",
+  community: "free",
+  community_ai: "pro",
+};
+
+function planTierFor(rawTier: string | null | undefined): TierKey {
+  return MEMBERSHIP_TO_PLAN[rawTier ?? "none"] ?? "free";
+}
+
 /**
  * Helper to generate a URL-friendly slug from a workspace name (max 50 chars).
  */
@@ -73,7 +87,7 @@ async function getUserSubscription(userId: string): Promise<TierKey> {
     where: eq(plannerSubscription.userId, userId),
   });
 
-  return (sub?.tier as TierKey) ?? "free";
+  return planTierFor(sub?.tier);
 }
 
 /**
@@ -636,7 +650,7 @@ export const workspaceRouter = router({
       where: eq(plannerSubscription.userId, userId),
     });
 
-    const tier = (sub?.tier as TierKey) ?? "free";
+    const tier = planTierFor(sub?.tier);
     const limits = subscriptionTierLimits[tier];
     const workspaceCount = await countUserWorkspaces(userId);
 

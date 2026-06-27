@@ -119,7 +119,7 @@ export function CreateWorkspaceDialog({
 
   const handleViewPlans = () => {
     onOpenChange(false);
-    router.push("/planner/settings/subscription");
+    router.push("/on-poynt/innstillinger/medlemskap");
   };
 
   return (
