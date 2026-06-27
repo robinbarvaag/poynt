@@ -1,10 +1,11 @@
 "use client";
 
 import { ArticleRichText } from "@/components/article-rich-text";
-import { resolveMediaUrl } from "@/components/payload-image";
+import { PayloadImage, resolveMediaUrl } from "@/components/payload-image";
 import type { Course, Media } from "@/payload-types";
 import type { SerializedEditorState } from "@payloadcms/richtext-lexical/lexical";
 import {
+  DeviceFrame,
   ListDetail,
   ListDetailDetail,
   ListDetailDetailContent,
@@ -14,6 +15,7 @@ import {
   ListDetailListContent,
   ListDetailListHeader,
   ListDetailRow,
+  StepBlock,
 } from "@poynt/ui";
 import { Icon } from "@poynt/ui/icons";
 import Link from "next/link";
@@ -108,7 +110,7 @@ export function CoursePlayer({ course }: { course: Course }) {
       >
         <ListDetailList>
           <ListDetailListHeader>
-            <span className="flex-1 text-sm font-medium">Innhald</span>
+            <span className="flex-1 text-sm font-medium">Innhold</span>
           </ListDetailListHeader>
           <ListDetailListContent>
             {modules.map((mod, mi) => (
@@ -122,7 +124,13 @@ export function CoursePlayer({ course }: { course: Course }) {
                     <ListDetailRow key={key} value={key}>
                       <span className="flex w-full items-center gap-2">
                         <Icon
-                          name={lesson.videoUrl ? "play" : "file-text"}
+                          name={
+                            lesson.videoUrl
+                              ? "play"
+                              : lesson.steps && lesson.steps.length > 0
+                                ? "layout-list"
+                                : "file-text"
+                          }
                           className="size-3.5 shrink-0 text-muted-foreground"
                         />
                         <span className="flex-1 truncate">{lesson.title}</span>
@@ -134,7 +142,7 @@ export function CoursePlayer({ course }: { course: Course }) {
             ))}
             {rows.length === 0 && (
               <p className="px-3 py-8 text-center text-sm text-muted-foreground">
-                Dette kurset har ingen leksjonar enda.
+                Dette kurset har ingen leksjoner enda.
               </p>
             )}
           </ListDetailListContent>
@@ -145,7 +153,7 @@ export function CoursePlayer({ course }: { course: Course }) {
             <ListDetailEmpty>
               <Icon name="graduation-cap" className="size-8 opacity-40" />
               <p className="text-sm">
-                Vel ein leksjon til venstre for å starte.
+                Velg en leksjon til venstre for å starte.
               </p>
             </ListDetailEmpty>
           }
@@ -184,10 +192,40 @@ export function CoursePlayer({ course }: { course: Course }) {
                   </div>
                 )}
 
+                {active.lesson.steps && active.lesson.steps.length > 0 && (
+                  <div className="mt-2 flex flex-col gap-2">
+                    {active.lesson.steps.map((step, si) => {
+                      const image =
+                        step.image && typeof step.image === "object"
+                          ? (step.image as Media)
+                          : null;
+                      return (
+                        <StepBlock
+                          key={step.id ?? `step-${si}`}
+                          number={si + 1}
+                          title={step.title}
+                          substeps={(step.substeps ?? []).map((s) => s.text)}
+                        >
+                          {step.body && (
+                            <ArticleRichText
+                              data={step.body as SerializedEditorState}
+                            />
+                          )}
+                          {image?.url && (
+                            <DeviceFrame variant="browser">
+                              <PayloadImage media={image} alt={step.title} />
+                            </DeviceFrame>
+                          )}
+                        </StepBlock>
+                      );
+                    })}
+                  </div>
+                )}
+
                 {active.lesson.resources &&
                   active.lesson.resources.length > 0 && (
                     <div className="mt-8 border-t border-border pt-6">
-                      <h3 className="mb-3 text-sm font-semibold">Ressursar</h3>
+                      <h3 className="mb-3 text-sm font-semibold">Ressurser</h3>
                       <ul className="space-y-2">
                         {active.lesson.resources.map((resource, ri) => {
                           const url =

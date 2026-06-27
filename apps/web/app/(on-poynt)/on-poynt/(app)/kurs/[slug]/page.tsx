@@ -1,5 +1,8 @@
 import { CoursePlayer } from "@/components/planner/courses/course-player";
+import { PayloadImage } from "@/components/payload-image";
+import type { Category, Course, Media } from "@/payload-types";
 import config from "@/payload.config";
+import { CourseHero, type ContentMetaItem } from "@poynt/ui";
 import { notFound } from "next/navigation";
 import { getPayload } from "payload";
 
@@ -25,5 +28,62 @@ export default async function KursDetailPage({ params }: CoursePageProps) {
     notFound();
   }
 
-  return <CoursePlayer course={result.docs[0]} />;
+  const course = result.docs[0];
+  const modules = course.modules ?? [];
+  const lessonCount = modules.reduce(
+    (sum, mod) => sum + (mod.lessons?.length ?? 0),
+    0
+  );
+
+  const cover =
+    course.featuredImage && typeof course.featuredImage === "object"
+      ? (course.featuredImage as Media)
+      : null;
+
+  const firstCat =
+    Array.isArray(course.categories) &&
+    course.categories.length > 0 &&
+    typeof course.categories[0] !== "number"
+      ? (course.categories[0] as Category)
+      : null;
+
+  const meta: ContentMetaItem[] = [
+    { icon: "graduation-cap", label: `${lessonCount} leksjoner` },
+    ...(modules.length > 1
+      ? [{ icon: "layers" as const, label: `${modules.length} moduler` }]
+      : []),
+    ...(firstCat ? [{ icon: "compass" as const, label: firstCat.name }] : []),
+  ];
+
+  const learn = modules
+    .map((mod) => mod.title)
+    .filter(Boolean)
+    .slice(0, 5);
+
+  return (
+    <div className="flex flex-col gap-10">
+      <CourseHero
+        title={course.title}
+        lede={course.excerpt ?? undefined}
+        meta={meta}
+        learn={learn.length > 0 ? learn : undefined}
+        ctaLabel="Start kurset"
+        ctaHref="#innhold"
+        cover={
+          cover?.url ? (
+            <PayloadImage
+              media={cover}
+              alt={cover.alt || course.title}
+              fill
+              priority
+            />
+          ) : undefined
+        }
+      />
+
+      <div id="innhold" className="scroll-mt-6">
+        <CoursePlayer course={course} />
+      </div>
+    </div>
+  );
 }

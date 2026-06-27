@@ -121,7 +121,7 @@ export const Articles: CollectionConfig = {
       type: "relationship",
       relationTo: "articles",
       hasMany: true,
-      label: "Relaterte artiklar",
+      label: "Relaterte artikler",
       admin: {
         position: "sidebar",
       },

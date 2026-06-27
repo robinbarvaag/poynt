@@ -3,10 +3,10 @@ import { generateSlug } from "../lib/generate-slug";
 
 /**
  * Kurs for medlemsområdet (On Poynt). I motsetning til den gamle
- * `course-content`-collectionen er desse IKKJE knytte til eit produktkjøp —
- * tilgangen styrast av medlemskap via `(app)`-layouten (getSessionWithMembership
- * + hasActiveAccess). Eit kurs har modular, og kvar modul har leksjonar med
- * video og rik-tekst-innhald.
+ * `course-content`-collectionen er disse IKKE knyttet til et produktkjøp —
+ * tilgangen styres av medlemskap via `(app)`-layouten (getSessionWithMembership
+ * + hasActiveAccess). Et kurs har moduler, og hver modul har leksjoner med
+ * video og rik-tekst-innhold.
  */
 export const Courses: CollectionConfig = {
   slug: "courses",
@@ -50,7 +50,7 @@ export const Courses: CollectionConfig = {
       label: "URL-slug",
       admin: {
         position: "sidebar",
-        description: "Genererast automatisk frå tittel",
+        description: "Genereres automatisk fra tittel",
       },
     },
     {
@@ -58,21 +58,21 @@ export const Courses: CollectionConfig = {
       type: "textarea",
       label: "Utdrag",
       admin: {
-        description: "Kort beskriving som visast i listeoversikter",
+        description: "Kort beskrivelse som vises i listeoversikter",
       },
     },
     {
       name: "featuredImage",
       type: "upload",
       relationTo: "media",
-      label: "Hovudbilde",
+      label: "Hovedbilde",
     },
     {
       name: "categories",
       type: "relationship",
       relationTo: "categories",
       hasMany: true,
-      label: "Kategoriar",
+      label: "Kategorier",
       admin: {
         position: "sidebar",
       },
@@ -92,20 +92,20 @@ export const Courses: CollectionConfig = {
     {
       name: "isFeatured",
       type: "checkbox",
-      label: "Framheva kurs",
+      label: "Fremhevet kurs",
       defaultValue: false,
       admin: {
         position: "sidebar",
-        description: "Vis som stort hero-kurs øvst på listesida",
+        description: "Vis som stort hero-kurs øverst på listesiden",
       },
     },
     {
       name: "modules",
       type: "array",
-      label: "Modular",
+      label: "Moduler",
       labels: {
         singular: "Modul",
-        plural: "Modular",
+        plural: "Moduler",
       },
       fields: [
         {
@@ -117,10 +117,10 @@ export const Courses: CollectionConfig = {
         {
           name: "lessons",
           type: "array",
-          label: "Leksjonar",
+          label: "Leksjoner",
           labels: {
             singular: "Leksjon",
-            plural: "Leksjonar",
+            plural: "Leksjoner",
           },
           fields: [
             {
@@ -140,12 +140,61 @@ export const Courses: CollectionConfig = {
             {
               name: "content",
               type: "richText",
-              label: "Innhald",
+              label: "Innhold",
+            },
+            {
+              name: "steps",
+              type: "array",
+              label: "Steg (steg-for-steg)",
+              labels: {
+                singular: "Steg",
+                plural: "Steg",
+              },
+              admin: {
+                description:
+                  "For praktiske steg-for-steg-leksjoner med bilde per steg. La stå tom for en vanlig video-/tekst-leksjon.",
+              },
+              fields: [
+                {
+                  name: "title",
+                  type: "text",
+                  required: true,
+                  label: "Stegtittel",
+                },
+                {
+                  name: "image",
+                  type: "upload",
+                  relationTo: "media",
+                  label: "Bilde / skjermbilde",
+                },
+                {
+                  name: "body",
+                  type: "richText",
+                  label: "Forklaring",
+                },
+                {
+                  name: "substeps",
+                  type: "array",
+                  label: "Delsteg",
+                  labels: {
+                    singular: "Delsteg",
+                    plural: "Delsteg",
+                  },
+                  fields: [
+                    {
+                      name: "text",
+                      type: "text",
+                      required: true,
+                      label: "Delsteg",
+                    },
+                  ],
+                },
+              ],
             },
             {
               name: "resources",
               type: "array",
-              label: "Ressursar",
+              label: "Ressurser",
               fields: [
                 {
                   name: "title",

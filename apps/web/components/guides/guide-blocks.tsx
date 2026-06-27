@@ -27,7 +27,7 @@ type GuideBlock = NonNullable<Guide["content"]>[number];
 const proseClass =
   "prose prose-lg max-w-none prose-headings:font-heading prose-headings:text-foreground prose-p:text-foreground prose-a:text-primary prose-strong:text-foreground prose-li:text-foreground";
 
-/** Felles lexical → JSX, samme renderer som artiklar bruker. */
+/** Felles lexical → JSX, samme renderer som artikler bruker. */
 function Rich({ data }: { data: unknown }) {
   return <ArticleRichText data={data as SerializedEditorState} />;
 }

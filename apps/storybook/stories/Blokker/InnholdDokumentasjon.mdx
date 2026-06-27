@@ -1,0 +1,96 @@
+import { Meta, Canvas } from "@storybook/addon-docs/blocks";
+import * as LesemodusStories from "./LesemodusRedesign.stories";
+import * as HubStories from "./LaeringHub.stories";
+import * as KursStories from "./KursPlayer.stories";
+import * as KompStories from "./Innholdskomponenter.stories";
+
+<Meta title="Blokker/Guide/Innhold – dokumentasjon" />
+
+# Innholdskomponenter
+
+Komponentfamilien for det «myke» innholdet i On Poynt – guider, artikler, kurs og
+podkast. Målet er ett sammenhengende, redaksjonelt språk på tvers av flatene, med
+gjenbrukbare deler som tar props (ikke kopiert markup per side).
+
+To prinsipper går igjen:
+
+- **Ikoner, ikke emoji, i strukturen.** All ikonbruk går via design-systemets
+  `Icon` (`IconName`). Emoji hører hjemme i _redaksjonelt innhold_ (hero-ikon,
+  callouts) som redaktøren skriver inn – aldri bakt inn i en gjenbrukbar komponent.
+- **Aldri tomme bokser.** Mangler et bilde, tegnes en merkevare-gradient med
+  format-ikon (`ContentCard`, `ContentFeature`) eller en ramme med «bilde kommer»
+  (`DeviceFrame` rundt `ImagePlaceholder`).
+
+Alt eksporteres fra `@poynt/ui` og bor i `packages/ui/components/guide/`.
+
+---
+
+## Lesemodus (guide/artikkel)
+
+Brukes på `ressurser/[slug]` og `artiklar/[slug]`.
+
+| Komponent | Hva | Nøkkel-props |
+| --- | --- | --- |
+| `DeviceFrame` | Rammer skjermbilder i nettleser/telefon-chrome. | `variant: "browser" \| "phone" \| "none"`, `url`, `caption` |
+| `ReadingProgress` | Tynn lesefremdrifts-bar i toppen (desktop). | `barClassName`, `className` |
+| `SectionRail` | Sticky, nummerert seksjons-stepper m/ scroll-spy (desktop). | `items: { id, label }[]`, `title` |
+| `ReadingNav` | Mobil-variant: sticky topplinje + utfellbar seksjonsliste. | `items`, `partLabel?` |
+| `ReadingMeta` | Chips: tid · nivå · format · oppdatert. | `items: { icon?: IconName, label }[]` |
+| `PullQuote` | Stort redaksjonelt uthevingssitat. | `accent`, `cite` |
+
+`SectionRail`/`ReadingNav` mates med `extractGuideToc`/`extractToc` (h2-overskrifter).
+Overskrifts-id-ene genereres med `generateSlug`, samme som ankrene i innholdet.
+
+<Canvas of={LesemodusStories.Lesemodus} />
+
+---
+
+## Hub / lister («inspirer»)
+
+Brukes på innholds-oversiktene.
+
+| Komponent | Hva | Nøkkel-props |
+| --- | --- | --- |
+| `ContentCard` | Ett format-bevisst kort (guide/artikkel/kurs/podkast). | `format`, `href`, `title`, `lede`, `category`, `cover`, `meta` |
+| `ContentRail` | Horisontal magasin-rail m/ scroll-snap. | `title`, `description`, `action`, `children` |
+| `ContentFeature` | Stort «redaksjonens valg»-felt. | `format`, `title`, `lede`, `cover`, `meta`, `surface` |
+
+`format` styrer ledetekst, ikon og gradient-fallback via `CONTENT_FORMATS`.
+
+<Canvas of={HubStories.Hub} />
+
+---
+
+## Kurs
+
+Fleksibelt: noen leksjoner er bare opptak/PDF, andre er steg-for-steg.
+
+| Komponent | Hva | Nøkkel-props |
+| --- | --- | --- |
+| `CourseHero` | Kurs-forside m/ «dette lærer du» + CTA. | `title`, `lede`, `cover`, `meta`, `learn`, `ctaLabel/Href` |
+| `LessonList` | Kapittel-/leksjonsliste m/ type + fullført-status. | `items: LessonItem[]`, `activeId`, `onSelect` |
+| `StepBlock` | Nummerert steg m/ bilde + delsteg-sjekkliste. | `number`, `title`, `children`, `substeps` |
+| `StepPager` | Forrige / marker fullført / neste. | `prev`, `next`, `completed`, `onToggleComplete` |
+
+`StepBlock` er bygd for den planlagte «steg»-blokken i kurs-schemaet (bilde per
+steg + delsteg). Inntil schemaet er utvidet, brukes `VideoEmbed`/`DownloadCard`
+for opptaks- og PDF-leksjoner.
+
+<Canvas of={KursStories.Player} />
+
+---
+
+## Lim-komponenter
+
+Binder flatene sammen.
+
+| Komponent | Hva | Nøkkel-props |
+| --- | --- | --- |
+| `CourseHero` | (se Kurs) | |
+| `EmptyState` | Tom-tilstand med retning. | `icon`, `title`, `description`, `action` |
+| `ContentFilterBar` | Felles format/kategori-filter. | `options`, `value`, `onChange` |
+| `AuthorByline` | Forfatter m/ avatar (fallback til initialer). | `name`, `role`, `date`, `avatar`, `size` |
+| `ShareRow` | Lagre/del-handlinger. | `actions`, `iconOnly` |
+| `RelatedContent` | «Les videre» som gjenbruker `ContentCard`. | `title`, `columns`, `children` |
+
+<Canvas of={KompStories.Alle} />

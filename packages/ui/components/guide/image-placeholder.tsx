@@ -1,3 +1,4 @@
+import { Icon } from "../../icons";
 import { cn } from "../../lib/utils";
 
 export interface ImagePlaceholderProps {
@@ -26,9 +27,12 @@ export function ImagePlaceholder({
         className
       )}
     >
-      <span aria-hidden="true" className="text-3xl opacity-60">
-        🖼️
-      </span>
+      <Icon
+        name="image"
+        aria-hidden="true"
+        className="size-7 text-foreground/40"
+        strokeWidth={1.5}
+      />
       {label && (
         <span className="max-w-xs text-balance text-foreground/60 text-xs leading-snug">
           {label}

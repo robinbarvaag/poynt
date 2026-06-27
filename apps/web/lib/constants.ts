@@ -48,22 +48,15 @@ export const toolNavItems: NavItem[] = [
   },
 ];
 
-/** Gruppe «Læring» — innhold partneren publiserer. */
+/**
+ * Gruppe «Læring» — alt mykt innhold (guider, artikler, kurs) samlet i én hub.
+ * Detalj-rutene (/ressurser, /artikler, /kurs) består; list-rutene redirecter hit.
+ */
 export const learnNavItems: NavItem[] = [
   {
-    title: "Artiklar",
-    url: "/on-poynt/artiklar",
-    icon: "newspaper",
-  },
-  {
-    title: "Kurs",
-    url: "/on-poynt/kurs",
-    icon: "graduation-cap",
-  },
-  {
-    title: "Ressurser",
-    url: "/on-poynt/ressurser",
-    icon: "layers",
+    title: "Læring",
+    url: "/on-poynt/laering",
+    icon: "compass",
   },
 ];
 

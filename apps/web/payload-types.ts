@@ -1604,18 +1604,18 @@ export interface Course {
   id: number;
   title: string;
   /**
-   * Genererast automatisk frå tittel
+   * Genereres automatisk fra tittel
    */
   slug: string;
   /**
-   * Kort beskriving som visast i listeoversikter
+   * Kort beskrivelse som vises i listeoversikter
    */
   excerpt?: string | null;
   featuredImage?: (number | null) | Media;
   categories?: (number | Category)[] | null;
   publishedAt: string;
   /**
-   * Vis som stort hero-kurs øvst på listesida
+   * Vis som stort hero-kurs øverst på listesiden
    */
   isFeatured?: boolean | null;
   modules?:
@@ -1643,6 +1643,37 @@ export interface Course {
                 };
                 [k: string]: unknown;
               } | null;
+              /**
+               * For praktiske steg-for-steg-leksjoner med bilde per steg. La stå tom for en vanlig video-/tekst-leksjon.
+               */
+              steps?:
+                | {
+                    title: string;
+                    image?: (number | null) | Media;
+                    body?: {
+                      root: {
+                        type: string;
+                        children: {
+                          type: any;
+                          version: number;
+                          [k: string]: unknown;
+                        }[];
+                        direction: ('ltr' | 'rtl') | null;
+                        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                        indent: number;
+                        version: number;
+                      };
+                      [k: string]: unknown;
+                    } | null;
+                    substeps?:
+                      | {
+                          text: string;
+                          id?: string | null;
+                        }[]
+                      | null;
+                    id?: string | null;
+                  }[]
+                | null;
               resources?:
                 | {
                     title: string;
@@ -2570,6 +2601,20 @@ export interface CoursesSelect<T extends boolean = true> {
               title?: T;
               videoUrl?: T;
               content?: T;
+              steps?:
+                | T
+                | {
+                    title?: T;
+                    image?: T;
+                    body?: T;
+                    substeps?:
+                      | T
+                      | {
+                          text?: T;
+                          id?: T;
+                        };
+                    id?: T;
+                  };
               resources?:
                 | T
                 | {
