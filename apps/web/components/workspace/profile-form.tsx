@@ -228,8 +228,8 @@ export function WorkspaceProfileForm({
                   onValueChange={(value) => field.onChange(value || null)}
                 >
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Velg bransje" />
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Ikke valgt" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -262,8 +262,8 @@ export function WorkspaceProfileForm({
                   }
                 >
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Velg størrelse" />
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Ikke valgt" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -293,8 +293,8 @@ export function WorkspaceProfileForm({
                   }
                 >
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="B2B, B2C eller begge?" />
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Ikke valgt" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -329,8 +329,8 @@ export function WorkspaceProfileForm({
                   }
                 >
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Hva er viktigst akkurat nå?" />
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Ikke valgt" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -365,8 +365,8 @@ export function WorkspaceProfileForm({
                   }
                 >
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Hvor mye tid har du?" />
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Ikke valgt" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -401,8 +401,8 @@ export function WorkspaceProfileForm({
                   }
                 >
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Hva er du best på?" />
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Ikke valgt" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>

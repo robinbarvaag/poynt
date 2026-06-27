@@ -129,7 +129,9 @@ export function MyCompany({ workspace }: { workspace: Workspace }) {
               <CardHeader>
                 <CardTitle>Inviter medlemmer</CardTitle>
                 <CardDescription>
-                  Send invitasjon til nye medlemmer eller kunder.
+                  Gi en kollega (f.eks. en SoMe-ansvarlig) tilgang til å jobbe i
+                  verktøyene sammen med deg, eller inviter en kunde for innsyn.
+                  Rollen du velger styrer hva de får lov til.
                 </CardDescription>
               </CardHeader>
               <CardContent>

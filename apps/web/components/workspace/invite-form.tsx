@@ -175,37 +175,25 @@ export function WorkspaceInviteForm({ workspaceId }: WorkspaceInviteFormProps) {
                   defaultValue={field.value}
                 >
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Velg rolle" />
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Ikke valgt" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="admin">
-                      <div className="flex flex-col items-start">
-                        <span>{workspaceRoleLabels.admin}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {workspaceRoleDescriptions.admin}
-                        </span>
-                      </div>
+                      {workspaceRoleLabels.admin}
                     </SelectItem>
                     <SelectItem value="member">
-                      <div className="flex flex-col items-start">
-                        <span>{workspaceRoleLabels.member}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {workspaceRoleDescriptions.member}
-                        </span>
-                      </div>
+                      {workspaceRoleLabels.member}
                     </SelectItem>
                     <SelectItem value="client">
-                      <div className="flex flex-col items-start">
-                        <span>{workspaceRoleLabels.client}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {workspaceRoleDescriptions.client}
-                        </span>
-                      </div>
+                      {workspaceRoleLabels.client}
                     </SelectItem>
                   </SelectContent>
                 </Select>
+                <FormDescription>
+                  {workspaceRoleDescriptions[field.value]}
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}

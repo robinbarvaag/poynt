@@ -4,15 +4,7 @@ import { brandBriefStreamAction } from "@/lib/planner/actions/brand-brief";
 import { trpc } from "@/lib/planner/trpc";
 import { readStreamableValue } from "@ai-sdk/rsc";
 import type { BrandBrief } from "@poynt/planner-validators";
-import {
-  Badge,
-  Button,
-  Input,
-  Skeleton,
-  Text,
-  Textarea,
-  toast,
-} from "@poynt/ui";
+import { Badge, Button, Input, Skeleton, Textarea, toast } from "@poynt/ui";
 import { Icon } from "@poynt/ui/icons";
 import { useCallback, useEffect, useState } from "react";
 
@@ -183,12 +175,6 @@ export function BrandBriefSection({
   if (screen === "input") {
     return (
       <div className="space-y-5">
-        <Text variant="muted">
-          Vi leser bedriftens nettside og destillerer stemmen, kjernebudskapet
-          og det som skiller dere ut. Briefen mater alle AI-verktøyene, så de
-          skriver som dere — ikke som en generisk robot.
-        </Text>
-
         {usePaste ? (
           <div className="space-y-2">
             <FieldLabel>Lim inn tekst om bedriften</FieldLabel>
@@ -212,6 +198,11 @@ export function BrandBriefSection({
             />
           </div>
         )}
+
+        <p className="text-muted-foreground text-sm">
+          Vi leser kilden og foreslår en merkevarebrief — du ser den over og
+          justerer før du lagrer.
+        </p>
 
         <div className="flex flex-wrap items-center gap-3">
           <Button
