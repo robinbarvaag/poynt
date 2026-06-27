@@ -24,27 +24,22 @@ export function ReadingNav({ items, partLabel, className }: ReadingNavProps) {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    if (items.length === 0) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) setActiveId(entry.target.id);
-        }
-      },
-      { rootMargin: "-10% 0px -80% 0px", threshold: 0 }
-    );
-    for (const item of items) {
-      const el = document.getElementById(item.id);
-      if (el) observer.observe(el);
-    }
-    return () => observer.disconnect();
-  }, [items]);
-
-  useEffect(() => {
+    // Posisjonsbasert scroll-spy + fremdrift i én handler (robust ved klikk-hopp).
     const update = () => {
       const el = document.documentElement;
       const max = el.scrollHeight - el.clientHeight;
       setProgress(max > 0 ? Math.min(100, (el.scrollTop / max) * 100) : 0);
+
+      if (items.length === 0) return;
+      const offset = 120;
+      let current = items[0]?.id;
+      for (const item of items) {
+        const node = document.getElementById(item.id);
+        if (node && node.getBoundingClientRect().top - offset <= 0) {
+          current = item.id;
+        }
+      }
+      setActiveId(current);
     };
     update();
     window.addEventListener("scroll", update, { passive: true });
@@ -53,7 +48,7 @@ export function ReadingNav({ items, partLabel, className }: ReadingNavProps) {
       window.removeEventListener("scroll", update);
       window.removeEventListener("resize", update);
     };
-  }, []);
+  }, [items]);
 
   const activeIndex = Math.max(
     0,

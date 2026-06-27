@@ -32,19 +32,27 @@ export function SectionRail({
 
   useEffect(() => {
     if (items.length === 0) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) setActiveId(entry.target.id);
+    // Posisjonsbasert scroll-spy: aktiv seksjon = den siste overskriften hvis
+    // topp er over en linje nær toppen. Mer robust enn et IntersectionObserver-
+    // bånd, som bommer når man klikker og hopper rett til en seksjon.
+    const onScroll = () => {
+      const offset = 140;
+      let current = items[0]?.id;
+      for (const item of items) {
+        const el = document.getElementById(item.id);
+        if (el && el.getBoundingClientRect().top - offset <= 0) {
+          current = item.id;
         }
-      },
-      { rootMargin: "-15% 0px -75% 0px", threshold: 0 }
-    );
-    for (const item of items) {
-      const el = document.getElementById(item.id);
-      if (el) observer.observe(el);
-    }
-    return () => observer.disconnect();
+      }
+      setActiveId(current);
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
   }, [items]);
 
   const activeIndex = Math.max(
