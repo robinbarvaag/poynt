@@ -1,4 +1,12 @@
-import { boolean, integer, jsonb, text, timestamp } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  date,
+  integer,
+  jsonb,
+  text,
+  timestamp,
+  uniqueIndex,
+} from "drizzle-orm/pg-core";
 import { plannerSchema } from "./_schema";
 
 /**
@@ -49,7 +57,8 @@ export const plannerContentSuggestion = plannerSchema.table(
       .notNull(),
     // Signalene som ga forslaget — revisjon og forklaring i UI.
     evidence: jsonb("evidence").$type<Record<string, unknown>>(),
-    source: text("source").$type<"radar" | "inspiration">()
+    source: text("source")
+      .$type<"radar" | "inspiration">()
       .default("radar")
       .notNull(),
     runId: text("run_id"),
@@ -109,6 +118,34 @@ export const plannerInspirationItem = plannerSchema.table(
   }
 );
 
+/**
+ * Lettvekts, aggregert visningstelling per innhold per dag. Bevisst INGEN PII
+ * (ingen bruker-id, ingen IP) — bare en teller per (collection, contentId, dag),
+ * så vi kan regne ut hva som faktisk leses og gjøre «promoter/oppdater»-forslag
+ * datadrevne i stedet for proxy-baserte. Se docs/CONTENT-RADAR.md (Fase 4).
+ */
+export const plannerContentView = plannerSchema.table(
+  "planner_content_view",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    collection: text("collection").notNull(),
+    contentId: text("content_id").notNull(),
+    slug: text("slug"),
+    day: date("day").notNull(),
+    count: integer("count").default(1).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (t) => [
+    uniqueIndex("content_view_unique").on(t.collection, t.contentId, t.day),
+  ]
+);
+
 /** Revisjonsspor for hver radar-/inspirasjonskjøring. */
 export const plannerRadarRun = plannerSchema.table("planner_radar_run", {
   id: text("id")
@@ -141,3 +178,5 @@ export type NewPlannerInspirationItem =
   typeof plannerInspirationItem.$inferInsert;
 export type PlannerRadarRun = typeof plannerRadarRun.$inferSelect;
 export type NewPlannerRadarRun = typeof plannerRadarRun.$inferInsert;
+export type PlannerContentView = typeof plannerContentView.$inferSelect;
+export type NewPlannerContentView = typeof plannerContentView.$inferInsert;

@@ -2,6 +2,11 @@
 
 import { GuideQuiz } from "@/components/channel-guide/guide-quiz";
 import { GuideResult } from "@/components/channel-guide/guide-result";
+import { ToolIntro, type ToolIntroStep } from "@/components/planner/tool-intro";
+import {
+  type ReadinessField,
+  ToolReadiness,
+} from "@/components/planner/tool-readiness";
 import { channelGuideStreamAction } from "@/lib/planner/actions/channel-guide";
 import { useToolStream } from "@/lib/planner/use-tool-stream";
 import type {
@@ -19,17 +24,7 @@ import {
   targetAudienceLabels,
   weeklyTimeLabels,
 } from "@poynt/planner-validators";
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Heading,
-  Text,
-  toast,
-} from "@poynt/ui";
+import { Button, PageShell, toast } from "@poynt/ui";
 import { Icon } from "@poynt/ui/icons";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
@@ -40,6 +35,25 @@ const fadeIn = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
   exit: { opacity: 0, y: -10, transition: { duration: 0.2 } },
 };
+
+const CHANNEL_STEPS: ToolIntroStep[] = [
+  {
+    icon: "target",
+    title: "Prioriterte kanaler",
+    description:
+      "Hvilke kanaler du bør satse på, rangert etter hva som gir mest igjen for innsatsen.",
+  },
+  {
+    icon: "compass",
+    title: "Konkret handling",
+    description: "Hvor ofte og nøyaktig hvilke aktiviteter du gjør per kanal.",
+  },
+  {
+    icon: "arrow-right",
+    title: "Neste steg",
+    description: "En tydelig liste å starte med, klar til å sette i gang.",
+  },
+];
 
 export function ChannelGuideClient({
   initialSavedResult,
@@ -133,14 +147,28 @@ export function ChannelGuideClient({
     setView("quiz");
   }
 
-  // Chips for «dette vet vi om deg».
-  const profileChips = [
-    profile.industryName,
-    profile.audienceType ? targetAudienceLabels[profile.audienceType] : null,
-    profile.mainGoal ? mainGoalLabels[profile.mainGoal] : null,
-    profile.weeklyTime ? weeklyTimeLabels[profile.weeklyTime] : null,
-    profile.strengths ? strengthLabels[profile.strengths] : null,
-  ].filter((chip): chip is string => Boolean(chip));
+  // Profilfelt for readiness-kortet («dette bruker vi om deg»).
+  const readinessFields: ReadinessField[] = [
+    { label: "Bransje", value: profile.industryName },
+    {
+      label: "Målgruppe",
+      value: profile.audienceType
+        ? targetAudienceLabels[profile.audienceType]
+        : null,
+    },
+    {
+      label: "Hovedmål",
+      value: profile.mainGoal ? mainGoalLabels[profile.mainGoal] : null,
+    },
+    {
+      label: "Tid per uke",
+      value: profile.weeklyTime ? weeklyTimeLabels[profile.weeklyTime] : null,
+    },
+    {
+      label: "Din styrke",
+      value: profile.strengths ? strengthLabels[profile.strengths] : null,
+    },
+  ];
 
   // Delobjektet under streaming → display-kontrakten (GuideResult vokter på
   // manglende felter; filtrer bort ev. udefinerte steg som ennå streamer inn).
@@ -151,7 +179,7 @@ export function ChannelGuideClient({
   );
 
   return (
-    <div className="container py-12 md:py-16">
+    <PageShell>
       <AnimatePresence mode="wait">
         {view === "ready" && (
           <motion.div
@@ -161,98 +189,55 @@ export function ChannelGuideClient({
             animate="visible"
             exit="exit"
           >
-            <div className="mx-auto max-w-3xl space-y-6">
-              <div className="space-y-3 text-center">
-                <div className="mx-auto inline-flex size-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                  <Icon name="compass" className="size-8" />
-                </div>
-                <Heading size="h1">
-                  Finn dine riktige markedsføringskanaler
-                </Heading>
-                <Text>
-                  Vi bruker det vi vet om bedriften din. Jo mer komplett
-                  profilen er, desto mer treffsikker blir anbefalingen.
-                </Text>
-              </div>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Dette vet vi om deg</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-5">
-                  {profileChips.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {profileChips.map((chip) => (
-                        <Badge key={chip} variant="muted" size="md">
-                          {chip}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
-
-                  {isComplete ? (
-                    <>
-                      <div className="flex flex-col gap-3 sm:flex-row">
-                        <Button onClick={handleGenerate} className="gap-2">
-                          <Icon name="compass" className="size-4" />
-                          Generer anbefaling
-                        </Button>
-                        <Button
-                          variant="outline"
-                          onClick={startQuiz}
-                          className="gap-2"
-                        >
-                          <Icon name="settings" className="size-4" />
-                          Juster forutsetninger
-                        </Button>
-                      </div>
-
-                      <Button
-                        asChild
-                        variant="link"
-                        size="sm"
-                        className="h-auto p-0 text-muted-foreground"
-                      >
-                        <Link href="/on-poynt/bedrifter">
-                          Rediger bedriftsprofilen
-                        </Link>
-                      </Button>
-                    </>
-                  ) : (
-                    <div className="space-y-4">
-                      <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
-                        <p className="text-sm font-medium">
-                          For en treffsikker anbefaling mangler vi:
-                        </p>
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          {missingFields.map((field) => (
-                            <Badge key={field} variant="outline" size="sm">
-                              {field}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col gap-3 sm:flex-row">
-                        <Button asChild className="gap-2">
-                          <Link href="/on-poynt/bedrifter">
-                            <Icon name="building-2" className="size-4" />
-                            Fullfør bedriftsprofilen
-                          </Link>
-                        </Button>
-                        <Button
-                          variant="outline"
-                          onClick={startQuiz}
-                          className="gap-2"
-                        >
-                          Svar på spørsmålene i stedet
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
+            <ToolIntro
+              icon="compass"
+              title="Finn dine riktige markedsføringskanaler"
+              description="Vi bruker det vi vet om bedriften din til å peke ut kanalene som faktisk passer. Jo mer komplett profilen er, desto mer treffsikker blir anbefalingen."
+              steps={CHANNEL_STEPS}
+              footnote="Bygger på bedriftsprofilen din • Tar under ett minutt"
+            >
+              <ToolReadiness
+                fields={readinessFields}
+                description={
+                  isComplete
+                    ? "Alt vi trenger er på plass — generer når du vil."
+                    : `Fyll inn det som mangler (${missingFields.join(", ")}), så blir anbefalingen mer treffsikker.`
+                }
+              >
+                {isComplete ? (
+                  <>
+                    <Button onClick={handleGenerate} className="gap-2">
+                      <Icon name="compass" className="size-4" />
+                      Generer anbefaling
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={startQuiz}
+                      className="gap-2"
+                    >
+                      <Icon name="settings" className="size-4" />
+                      Juster forutsetninger
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button asChild className="gap-2">
+                      <Link href="/on-poynt/bedrifter">
+                        <Icon name="building-2" className="size-4" />
+                        Fullfør bedriftsprofilen
+                      </Link>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={startQuiz}
+                      className="gap-2"
+                    >
+                      Svar på spørsmålene i stedet
+                    </Button>
+                  </>
+                )}
+              </ToolReadiness>
+            </ToolIntro>
           </motion.div>
         )}
 
@@ -311,6 +296,6 @@ export function ChannelGuideClient({
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </PageShell>
   );
 }

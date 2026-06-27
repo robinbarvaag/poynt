@@ -1,5 +1,6 @@
 import { GuideBlocks } from "@/components/guides/guide-blocks";
 import { PayloadImage } from "@/components/payload-image";
+import { ViewTracker } from "@/components/radar/view-tracker";
 import { extractGuideToc } from "@/lib/extract-guide-toc";
 import type { Category, Guide, Media } from "@/payload-types";
 import config from "@/payload.config";
@@ -94,6 +95,11 @@ export default async function GuidePage({ params }: GuidePageProps) {
 
   return (
     <div className="-mx-4 md:-mx-6">
+      <ViewTracker
+        collection="guides"
+        contentId={String(guide.id)}
+        slug={slug}
+      />
       <ReadingProgress className="hidden lg:block" />
       {hasRail && <ReadingNav items={sections} />}
 

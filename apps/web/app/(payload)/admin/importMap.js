@@ -34,6 +34,7 @@ import { OnPoyntNavGroup as OnPoyntNavGroup_cbdd0274d832c585cca0ce893b25cc1e } f
 import { RadarWidget as RadarWidget_5b7947cd224091d66f29a1ea95235d6d } from '../../../admin/components/dashboard/radar-widget'
 import { VercelBlobClientUploadHandler as VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e } from '@payloadcms/storage-vercel-blob/client'
 import { RadarListView as RadarListView_a4e67c284447336809eb8f88f0de25c0 } from '../../../admin/views/radar/list'
+import { InspirationListView as InspirationListView_6ea26fbacc6952d42b486351c5c52406 } from '../../../admin/views/inspiration/list'
 import { MembershipApplicationsListView as MembershipApplicationsListView_be2a1da07cba706e1f042873ea9e9758 } from '../../../admin/views/applications/list'
 import { MembershipApplicationDetailView as MembershipApplicationDetailView_5da117e93eb9cc3778177b4984b41b2c } from '../../../admin/views/applications/detail'
 import { MembersListView as MembersListView_1c40f164a24fb9e841d3097dd58f8371 } from '../../../admin/views/members/list'
@@ -79,6 +80,7 @@ export const importMap = {
   "/admin/components/dashboard/radar-widget#RadarWidget": RadarWidget_5b7947cd224091d66f29a1ea95235d6d,
   "@payloadcms/storage-vercel-blob/client#VercelBlobClientUploadHandler": VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e,
   "/admin/views/radar/list#RadarListView": RadarListView_a4e67c284447336809eb8f88f0de25c0,
+  "/admin/views/inspiration/list#InspirationListView": InspirationListView_6ea26fbacc6952d42b486351c5c52406,
   "/admin/views/applications/list#MembershipApplicationsListView": MembershipApplicationsListView_be2a1da07cba706e1f042873ea9e9758,
   "/admin/views/applications/detail#MembershipApplicationDetailView": MembershipApplicationDetailView_5da117e93eb9cc3778177b4984b41b2c,
   "/admin/views/members/list#MembersListView": MembersListView_1c40f164a24fb9e841d3097dd58f8371,

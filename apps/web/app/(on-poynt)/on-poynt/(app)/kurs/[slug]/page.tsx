@@ -1,8 +1,9 @@
-import { CoursePlayer } from "@/components/planner/courses/course-player";
 import { PayloadImage } from "@/components/payload-image";
+import { CoursePlayer } from "@/components/planner/courses/course-player";
+import { ViewTracker } from "@/components/radar/view-tracker";
 import type { Category, Course, Media } from "@/payload-types";
 import config from "@/payload.config";
-import { CourseHero, type ContentMetaItem } from "@poynt/ui";
+import { type ContentMetaItem, CourseHero } from "@poynt/ui";
 import { notFound } from "next/navigation";
 import { getPayload } from "payload";
 
@@ -62,6 +63,11 @@ export default async function KursDetailPage({ params }: CoursePageProps) {
 
   return (
     <div className="flex flex-col gap-10">
+      <ViewTracker
+        collection="courses"
+        contentId={String(course.id)}
+        slug={slug}
+      />
       <CourseHero
         title={course.title}
         lede={course.excerpt ?? undefined}

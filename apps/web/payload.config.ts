@@ -108,6 +108,12 @@ export default buildConfig({
           exact: true,
           meta: { title: "Innholdsradar" },
         },
+        inspiration: {
+          Component: "/admin/views/inspiration/list#InspirationListView",
+          path: "/inspirasjon",
+          exact: true,
+          meta: { title: "Inspirasjonskilder" },
+        },
         applications: {
           Component:
             "/admin/views/applications/list#MembershipApplicationsListView",

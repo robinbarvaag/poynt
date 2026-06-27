@@ -1,4 +1,5 @@
 import { PayloadImage } from "@/components/payload-image";
+import { ViewTracker } from "@/components/radar/view-tracker";
 import { formatLongDate } from "@/lib/format";
 import { resolveMedia } from "@/lib/payload";
 import { buildMetadata, notFoundMetadata } from "@/lib/seo";
@@ -77,6 +78,11 @@ export default async function PodcastDetailPage({ params }: PodcastPageProps) {
 
   return (
     <Container size="sm" padding="default">
+      <ViewTracker
+        collection="podcasts"
+        contentId={String(podcast.id)}
+        slug={slug}
+      />
       <article>
         <Breadcrumbs
           items={detailBreadcrumbs("podkast", podcast.title)}

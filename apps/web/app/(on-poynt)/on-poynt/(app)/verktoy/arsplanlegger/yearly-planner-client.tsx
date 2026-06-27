@@ -1,19 +1,48 @@
 "use client";
 
+import { ToolIntro, type ToolIntroStep } from "@/components/planner/tool-intro";
+import {
+  type ReadinessField,
+  ToolReadiness,
+} from "@/components/planner/tool-readiness";
 import { PlannerForm } from "@/components/yearly-planner/planner-form";
 import { PlannerResult } from "@/components/yearly-planner/planner-result";
 import { yearlyPlannerStreamAction } from "@/lib/planner/actions/yearly-planner";
 import { useToolStream } from "@/lib/planner/use-tool-stream";
-import type {
-  YearlyPlan,
-  YearlyPlanStream,
-  YearlyPlannerRequest,
+import {
+  type YearlyPlan,
+  type YearlyPlanStream,
+  type YearlyPlannerRequest,
+  audienceLabels,
 } from "@poynt/planner-validators";
-import { toast } from "@poynt/ui";
-import { Button } from "@poynt/ui";
+import { Button, PageShell, toast } from "@poynt/ui";
 import { Icon } from "@poynt/ui/icons";
 import { AnimatePresence, motion } from "framer-motion";
+import Link from "next/link";
 import { useState } from "react";
+
+const YEAR_STEPS: ToolIntroStep[] = [
+  {
+    icon: "calendar-days",
+    title: "12 måneder med innhold",
+    description: "En komplett innholdsplan for hele året, måned for måned.",
+  },
+  {
+    icon: "target",
+    title: "Tilpasset bransje og sesong",
+    description: "Forslag som treffer kundene dine når det er relevant.",
+  },
+  {
+    icon: "layers",
+    title: "Kanalene du velger",
+    description: "Vi planlegger for kanalene og frekvensen som passer deg.",
+  },
+  {
+    icon: "download",
+    title: "Rett i kalenderen",
+    description: "Eksporter hele årshjulet til kalenderen din.",
+  },
+];
 
 interface SavedPlan {
   id: string;
@@ -106,8 +135,22 @@ export function YearlyPlannerClient({
     exit: { opacity: 0, y: -10, transition: { duration: 0.2 } },
   };
 
+  // Profil-først: bransje + målgruppe kommer fra bedriftsprofilen. Mangler de,
+  // steres brukeren til å fullføre profilen først — lik logikk som de andre.
+  const readinessFields: ReadinessField[] = [
+    { label: "Bransje", value: initialIndustry },
+    {
+      label: "Målgruppe",
+      value: initialAudience ? audienceLabels[initialAudience] : null,
+    },
+  ];
+  const missingFields = readinessFields
+    .filter((f) => !f.value)
+    .map((f) => f.label);
+  const isComplete = missingFields.length === 0;
+
   return (
-    <div className="container py-12 md:py-16">
+    <PageShell>
       <AnimatePresence mode="wait">
         {view === "intro" && (
           <motion.div
@@ -116,29 +159,46 @@ export function YearlyPlannerClient({
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="flex flex-col items-center text-center"
           >
-            <div className="size-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-6">
-              <Icon name="calendar-days" className="size-8" />
-            </div>
-
-            <h1 className="text-3xl font-semibold tracking-tight mb-3">
-              Årshjul
-            </h1>
-
-            <p className="text-lg text-muted-foreground max-w-md mb-8">
-              Få en komplett innholdsplan for hele året, tilpasset din bransje
-              og sesonger.
-            </p>
-
-            <Button size="lg" onClick={startForm} className="gap-2">
-              <Icon name="calendar-days" className="size-4" />
-              Lag mitt årshjul
-            </Button>
-
-            <p className="text-sm text-muted-foreground mt-6">
-              Ca. 3 minutter • 12 måneder med innhold
-            </p>
+            <ToolIntro
+              icon="calendar-days"
+              title="Lag årshjulet ditt"
+              description="Få en komplett innholdsplan for hele året, tilpasset bransjen din og sesongene. Velg kanaler og frekvens, så setter vi sammen 12 måneder med innhold."
+              steps={YEAR_STEPS}
+              footnote="Ca. 3 minutter • 12 måneder med innhold"
+            >
+              <ToolReadiness
+                fields={readinessFields}
+                description={
+                  isComplete
+                    ? "Grunnlaget er på plass. Vi tar deg gjennom kanaler og frekvens før årshjulet lages."
+                    : `Fyll inn det som mangler (${missingFields.join(", ")}), så blir årshjulet mer treffsikkert.`
+                }
+              >
+                {isComplete ? (
+                  <Button onClick={startForm} className="gap-2">
+                    <Icon name="calendar-days" className="size-4" />
+                    Lag mitt årshjul
+                  </Button>
+                ) : (
+                  <>
+                    <Button asChild className="gap-2">
+                      <Link href="/on-poynt/bedrifter">
+                        <Icon name="building-2" className="size-4" />
+                        Fullfør bedriftsprofilen
+                      </Link>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={startForm}
+                      className="gap-2"
+                    >
+                      Lag det likevel
+                    </Button>
+                  </>
+                )}
+              </ToolReadiness>
+            </ToolIntro>
           </motion.div>
         )}
 
@@ -179,6 +239,6 @@ export function YearlyPlannerClient({
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </PageShell>
   );
 }

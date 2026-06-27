@@ -4,7 +4,7 @@ import { DeclineForm } from "@/components/decline-generator/decline-form";
 import { DeclineResult } from "@/components/decline-generator/decline-result";
 import { trpc } from "@/lib/planner/trpc";
 import type { DeclineRequest } from "@poynt/planner-validators";
-import { toast } from "@poynt/ui";
+import { PageShell, toast } from "@poynt/ui";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 
@@ -105,7 +105,7 @@ export function DeclineGeneratorClient({
   };
 
   return (
-    <div className="container py-12 md:py-16">
+    <PageShell>
       <AnimatePresence mode="wait">
         {/* Clean intro */}
         {view === "intro" && (
@@ -177,6 +177,6 @@ export function DeclineGeneratorClient({
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </PageShell>
   );
 }

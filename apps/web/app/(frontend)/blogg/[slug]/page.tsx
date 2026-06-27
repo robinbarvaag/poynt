@@ -1,5 +1,6 @@
 import { JsonLd } from "@/components/json-ld";
 import { PayloadImage } from "@/components/payload-image";
+import { ViewTracker } from "@/components/radar/view-tracker";
 import { RelatedPosts } from "@/components/related-posts";
 import { formatLongDate } from "@/lib/format";
 import { resolveMedia, resolveRelations } from "@/lib/payload";
@@ -91,6 +92,11 @@ export default async function PostPage({ params }: PostPageProps) {
 
   return (
     <Container size="sm" padding="default">
+      <ViewTracker
+        collection="blog-posts"
+        contentId={String(post.id)}
+        slug={slug}
+      />
       <JsonLd data={jsonLd} />
       <article>
         <Breadcrumbs

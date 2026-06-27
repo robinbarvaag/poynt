@@ -2,18 +2,51 @@
 
 import { PlanForm } from "@/components/marketing-plan/plan-form";
 import { PlanResult } from "@/components/marketing-plan/plan-result";
+import { ToolIntro, type ToolIntroStep } from "@/components/planner/tool-intro";
+import {
+  type ReadinessField,
+  ToolReadiness,
+} from "@/components/planner/tool-readiness";
 import { marketingPlanStreamAction } from "@/lib/planner/actions/marketing-plan";
 import { trpc } from "@/lib/planner/trpc";
 import { useToolStream } from "@/lib/planner/use-tool-stream";
-import type {
-  MarketingPlan,
-  MarketingPlanRequest,
-  MarketingPlanStream,
+import {
+  type MarketingPlan,
+  type MarketingPlanRequest,
+  type MarketingPlanStream,
+  profileCompanySizeLabels,
 } from "@poynt/planner-validators";
-import { toast } from "@poynt/ui";
+import { Button, PageShell, toast } from "@poynt/ui";
+import { Icon } from "@poynt/ui/icons";
 import type { DeepPartial } from "ai";
 import { AnimatePresence, motion } from "framer-motion";
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
+
+const PLAN_STEPS: ToolIntroStep[] = [
+  {
+    icon: "target",
+    title: "Prioriterte kanaler",
+    description:
+      "Hvilke kanaler du bør satse på, hvor ofte, og konkret hva du skal gjøre.",
+  },
+  {
+    icon: "calendar",
+    title: "Utrullingsplan",
+    description: "Måned-for-måned med fokusområder og konkrete steg.",
+  },
+  {
+    icon: "clock",
+    title: "Ukentlig rutine",
+    description: "Forslag til en fast ukesplan med tidsestimat.",
+  },
+  {
+    icon: "zap",
+    title: "Oppgaver rett i lista",
+    description:
+      "Quick wins legges automatisk i oppgavelista på dashbordet, klare til avhuking.",
+  },
+];
 
 interface SavedPlan {
   id: string;
@@ -182,8 +215,25 @@ export function MarketingPlanClient({
 
   const displayedPlan = shownSavedPlan ?? result ?? undefined;
 
+  // Profil-først: bygger på bedriftsprofilen, akkurat som kanalveilederen.
+  // Mangler kjernefeltene, steres brukeren til å fullføre profilen først.
+  const readinessFields: ReadinessField[] = [
+    { label: "Bransje", value: initialIndustry },
+    {
+      label: "Størrelse",
+      value: initialCompanySize
+        ? profileCompanySizeLabels[initialCompanySize]
+        : null,
+    },
+    { label: "Målgruppe", value: initialTargetAudience?.trim() || null },
+  ];
+  const missingFields = readinessFields
+    .filter((f) => !f.value)
+    .map((f) => f.label);
+  const isComplete = missingFields.length === 0;
+
   return (
-    <div className="container py-12 md:py-16">
+    <PageShell>
       <AnimatePresence mode="wait">
         {view === "intro" && (
           <motion.div
@@ -193,7 +243,45 @@ export function MarketingPlanClient({
             animate="visible"
             exit="exit"
           >
-            <PlanResult mode="intro" onStartForm={startForm} />
+            <ToolIntro
+              icon="bar-chart"
+              title="Lag din skreddersydde markedsplan"
+              description="Slutt å gjette hva du skal gjøre. Vi bygger en komplett strategi tilpasset bransjen, målet og ressursene dine — og legger oppgavene rett i lista di."
+              steps={PLAN_STEPS}
+              footnote="Ca. 3 minutter • Bygger på bedriftsprofilen din"
+            >
+              <ToolReadiness
+                fields={readinessFields}
+                description={
+                  isComplete
+                    ? "Grunnlaget er på plass. Vi tar deg gjennom et par siste valg før planen lages."
+                    : `Fyll inn det som mangler (${missingFields.join(", ")}), så blir planen mer treffsikker.`
+                }
+              >
+                {isComplete ? (
+                  <Button onClick={startForm} className="gap-2">
+                    <Icon name="bar-chart" className="size-4" />
+                    Lag markedsplan
+                  </Button>
+                ) : (
+                  <>
+                    <Button asChild className="gap-2">
+                      <Link href="/on-poynt/bedrifter">
+                        <Icon name="building-2" className="size-4" />
+                        Fullfør bedriftsprofilen
+                      </Link>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={startForm}
+                      className="gap-2"
+                    >
+                      Lag planen likevel
+                    </Button>
+                  </>
+                )}
+              </ToolReadiness>
+            </ToolIntro>
           </motion.div>
         )}
 
@@ -227,7 +315,6 @@ export function MarketingPlanClient({
             <PlanResult
               plan={displayedPlan}
               onReset={handleReset}
-              mode="result"
               isStreaming={!shownSavedPlan && isPending}
               onSyncTasks={() => materialize(displayedPlan)}
               pulledPhases={pulledPhases}
@@ -236,6 +323,6 @@ export function MarketingPlanClient({
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </PageShell>
   );
 }

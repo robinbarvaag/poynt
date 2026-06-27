@@ -26,6 +26,10 @@ const links = [
     href: "/admin/radar",
     label: "Innholdsradar",
   },
+  {
+    href: "/admin/inspirasjon",
+    label: "Inspirasjonskilder",
+  },
 ];
 
 export const OnPoyntNavGroup = () => {

@@ -1,5 +1,6 @@
 import { ArticleRichText } from "@/components/article-rich-text";
 import { PayloadImage } from "@/components/payload-image";
+import { ViewTracker } from "@/components/radar/view-tracker";
 import { extractToc } from "@/lib/extract-toc";
 import type { Article, Category, Media, User } from "@/payload-types";
 import config from "@/payload.config";
@@ -103,6 +104,11 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   return (
     <div className="-mx-4 md:-mx-6">
+      <ViewTracker
+        collection="articles"
+        contentId={String(article.id)}
+        slug={slug}
+      />
       <ReadingProgress className="hidden lg:block" />
       {hasRail && <ReadingNav items={sections} />}
 

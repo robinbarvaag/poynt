@@ -1,12 +1,30 @@
 "use client";
 
+import { ToolIntro, type ToolIntroStep } from "@/components/planner/tool-intro";
 import { trpc } from "@/lib/planner/trpc";
-import { AiBadge, Button, Heading, Text } from "@poynt/ui";
+import { AiBadge, Button } from "@poynt/ui";
 import { toast } from "@poynt/ui";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@poynt/ui";
-import { Icon, type IconName } from "@poynt/ui/icons";
-import { motion } from "framer-motion";
+import { Icon } from "@poynt/ui/icons";
 import { useMemo, useState } from "react";
+
+const DECLINE_STEPS: ToolIntroStep[] = [
+  {
+    icon: "zap",
+    title: "Kort & konsis",
+    description: "Et raskt og profesjonelt avslag.",
+  },
+  {
+    icon: "heart",
+    title: "Varm & personlig",
+    description: "Et empatisk avslag med en kort forklaring.",
+  },
+  {
+    icon: "lightbulb",
+    title: "Med alternativ",
+    description: "Et nei som peker på andre løsninger.",
+  },
+];
 
 interface DeclineResultProps {
   result?: string;
@@ -31,74 +49,21 @@ export function DeclineResult({
 }: DeclineResultProps) {
   // Intro mode
   if (mode === "intro") {
-    const features: { icon: IconName; title: string; description: string }[] = [
-      {
-        icon: "zap",
-        title: "Kort & konsis",
-        description: "Rask og profesjonell variant",
-      },
-      {
-        icon: "heart",
-        title: "Varm & personlig",
-        description: "Empatisk med forklaring",
-      },
-      {
-        icon: "lightbulb",
-        title: "Med alternativ",
-        description: "Forslag til andre løsninger",
-      },
-    ];
-
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35, ease: "easeOut" }}
-        className="mx-auto max-w-3xl space-y-8"
+      <ToolIntro
+        icon="message-square-off"
+        title="Si nei med stil"
+        description="Profesjonelle avslag som bevarer relasjoner. Beskriv forespørselen, så får du tre høflige måter å takke nei på — tilpasset situasjonen."
+        steps={DECLINE_STEPS}
+        footnote="Under 1 minutt • Helt gratis"
       >
-        <div className="space-y-3 text-center">
-          <div className="mx-auto inline-flex size-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-            <Icon name="message-square-off" className="size-8" />
-          </div>
-          <Heading size="h1">Si nei med stil</Heading>
-          <Text>
-            Profesjonelle avslag som bevarer relasjoner. Få 3 varianter
-            tilpasset din situasjon.
-          </Text>
-        </div>
-
-        <div className="rounded-xl border bg-card p-6">
-          <p className="mb-6 font-semibold">Dette får du</p>
-          <div className="grid gap-6 md:grid-cols-3">
-            {features.map((feature) => (
-              <div key={feature.title} className="flex gap-3">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-                  <Icon name={feature.icon} className="size-5" />
-                </div>
-                <div>
-                  <h3 className="mb-1 font-semibold">{feature.title}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {feature.description}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="text-center">
-          <Button
-            size="lg"
-            onClick={onStartForm}
-            className="h-12 px-8 text-base"
-          >
+        <div>
+          <Button onClick={onStartForm} className="gap-2">
+            <Icon name="message-square-off" className="size-4" />
             Lag mitt avslag
           </Button>
-          <p className="mt-4 text-sm text-muted-foreground">
-            Under 1 minutt • Helt gratis
-          </p>
         </div>
-      </motion.div>
+      </ToolIntro>
     );
   }
 

@@ -194,12 +194,18 @@ export {
   contentSuggestionTypes,
   contentSuggestionTypeLabels,
   radarSignalKinds,
+  inspirationSourceTypes,
+  inspirationSourceTypeLabels,
   contentRadarOutputSchema,
+  inspirationDistillOutputSchema,
   type ContentSuggestionTypeValue,
   type RadarSignalKind,
   type RadarSignalInput,
   type GeneratedSuggestion,
   type ContentRadarOutput,
+  type InspirationSourceTypeValue,
+  type DistilledInspirationItem,
+  type InspirationDistillOutput,
 } from "./content-radar";
 
 // Workspace profile & tool results

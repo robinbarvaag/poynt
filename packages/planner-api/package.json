@@ -39,6 +39,10 @@
     "./lib/content-radar": {
       "types": "./lib/content-radar.ts",
       "default": "./lib/content-radar.ts"
+    },
+    "./lib/inspiration": {
+      "types": "./lib/inspiration.ts",
+      "default": "./lib/inspiration.ts"
     }
   },
   "scripts": {

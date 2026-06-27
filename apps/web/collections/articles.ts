@@ -5,7 +5,7 @@ export const Articles: CollectionConfig = {
   slug: "articles",
   labels: {
     singular: "Artikkel",
-    plural: "Artiklar",
+    plural: "Artikler",
   },
   admin: {
     useAsTitle: "title",

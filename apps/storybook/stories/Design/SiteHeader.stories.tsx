@@ -10,7 +10,7 @@ const navItems: SiteHeaderNavItem[] = [
     subItems: [
       { label: "Blogg", href: "/blogg", description: "Tips om markedsføring" },
       { label: "Podkast", href: "/podkast", description: "Lytt til episodene" },
-      { label: "Artikler", href: "/artiklar", description: "Lengre dypdykk" },
+      { label: "Artikler", href: "/artikler", description: "Lengre dypdykk" },
     ],
   },
   { label: "Om oss", href: "/om-oss" },

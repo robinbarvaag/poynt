@@ -80,7 +80,7 @@ const navItems = [
         label: "Artikler",
         description: "Lengre dypdykk",
         linkType: "custom" as const,
-        url: "/artiklar",
+        url: "/artikler",
       },
     ],
   },

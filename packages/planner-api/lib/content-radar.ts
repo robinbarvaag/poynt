@@ -46,6 +46,8 @@ const kindLabels: Record<string, string> = {
   coverage_gap: "Kategori med lite/ingen dekning",
   featured_rotation: "Fremhevet innhold som bør roteres",
   demand: "Etterspørsel fra medlemmenes verktøybruk",
+  inspiration_gap: "Eksterne temaer On Poynt ikke dekker ennå",
+  popular: "Mye lest innhold (faktiske visninger)",
 };
 
 /**

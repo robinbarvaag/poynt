@@ -9,12 +9,16 @@ import { useMemo, useState } from "react";
 import { runRadarNow, setSuggestionStatus } from "../../actions/radar";
 import type { RadarRunItem, RadarSuggestionItem } from "../../views/radar/list";
 
+// Klartekst-etiketter — partner skal forstå hva som utløste forslaget uten å
+// kjenne radarens interne signaltyper.
 const kindLabels: Record<string, string> = {
-  stale: "Foreldet",
+  stale: "Ikke oppdatert på lenge",
   stuck_draft: "Fastlåst utkast",
-  coverage_gap: "Kategori-gap",
-  featured_rotation: "Fremhevet-rotasjon",
-  demand: "Etterspørsel",
+  coverage_gap: "Lite i kategorien",
+  featured_rotation: "Fremhevet lenge",
+  demand: "Medlemmene etterspør",
+  inspiration_gap: "Ekstern trend",
+  popular: "Mye lest",
 };
 
 const typeColors: Record<ContentSuggestionTypeValue, string> = {

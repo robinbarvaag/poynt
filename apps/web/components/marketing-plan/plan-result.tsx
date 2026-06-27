@@ -26,8 +26,6 @@ interface PlanResultProps {
   // typen er DeepPartial. Et ferdig lagret resultat er også gyldig her.
   plan?: DeepPartial<MarketingPlanStream>;
   onReset?: () => void;
-  mode?: "intro" | "result";
-  onStartForm?: () => void;
   /** Når true bygger planen seg fortsatt opp (streaming): vis status + skjelett. */
   isStreaming?: boolean;
   /** Legg quick wins i oppgavelista på nytt (for lagrede planer). */
@@ -103,8 +101,6 @@ function SectionHeading({
 export function PlanResult({
   plan,
   onReset,
-  mode = "result",
-  onStartForm,
   isStreaming = false,
   onSyncTasks,
   pulledPhases,
@@ -117,85 +113,6 @@ export function PlanResult({
     const id = setInterval(() => setMessageTick((t) => t + 1), 2200);
     return () => clearInterval(id);
   }, [isStreaming]);
-
-  // Intro mode
-  if (mode === "intro") {
-    const features: { icon: IconName; title: string; description: string }[] = [
-      {
-        icon: "target",
-        title: "Prioriterte kanaler",
-        description:
-          "Hvilke kanaler du bør satse på, hvor ofte, og konkret hva du skal gjøre",
-      },
-      {
-        icon: "calendar",
-        title: "Utrullingsplan",
-        description: "Måned-for-måned med fokusområder og konkrete steg",
-      },
-      {
-        icon: "clock",
-        title: "Ukentlig rutine",
-        description: "Forslag til fast ukesplan med tidsestimat",
-      },
-      {
-        icon: "zap",
-        title: "Oppgaver rett i lista",
-        description:
-          "Quick wins legges automatisk i oppgavelista på dashbordet, klare til avhuking",
-      },
-    ];
-
-    return (
-      <motion.div {...sectionMotion} className="mx-auto max-w-3xl space-y-8">
-        <div className="space-y-3 text-center">
-          <div className="mx-auto inline-flex size-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-            <Icon name="bar-chart" className="size-8" />
-          </div>
-          <Heading size="h1">Lag din skreddersydde markedsplan</Heading>
-          <Text>
-            Slutt å gjette hva du skal gjøre. Få en komplett strategi tilpasset
-            din bransje, mål og ressurser — og oppgavene rett i lista di.
-          </Text>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Dette får du</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-6 md:grid-cols-2">
-              {features.map((feature) => (
-                <div key={feature.title} className="flex gap-3">
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-                    <Icon name={feature.icon} className="size-5" />
-                  </div>
-                  <div>
-                    <h3 className="mb-1 font-semibold">{feature.title}</h3>
-                    <p className="text-muted-foreground text-sm">
-                      {feature.description}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="text-center">
-          <Button
-            size="lg"
-            onClick={onStartForm}
-            className="h-12 px-8 text-base"
-          >
-            Lag min markedsplan
-          </Button>
-          <p className="mt-4 text-muted-foreground text-sm">
-            Ca. 3 minutter • Helt gratis
-          </p>
-        </div>
-      </motion.div>
-    );
-  }
 
   // Result mode — ingenting å vise enda, og vi streamer ikke → render ingenting.
   if (!plan && !isStreaming) {

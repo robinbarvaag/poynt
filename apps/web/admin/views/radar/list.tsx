@@ -49,7 +49,7 @@ export const RadarListView = async (props: AdminViewServerProps) => {
           </div>
           <p
             style={{
-              marginBottom: "1.5rem",
+              marginBottom: "0.75rem",
               maxWidth: "60ch",
               color: "var(--theme-elevation-500)",
             }}
@@ -58,6 +58,19 @@ export const RadarListView = async (props: AdminViewServerProps) => {
             medlemmenes verktøybruk, regner ut signaler, og foreslår hva som bør
             lages, oppdateres, promoteres eller gjenbrukes. Prioriteten settes
             av signalet bak forslaget — ikke av AI-en.
+          </p>
+          <p
+            style={{
+              marginBottom: "1.5rem",
+              maxWidth: "60ch",
+              fontSize: "0.88em",
+              color: "var(--theme-elevation-500)",
+            }}
+          >
+            Slik leser du hvert kort: <strong>tittelen</strong> er handlingen
+            (hva som bør lages), <strong>begrunnelsen</strong> forklarer for
+            hvem og hvorfor, og <strong>«Hvorfor»</strong> nederst viser det rå
+            faktumet (signalet) forslaget bygger på.
           </p>
           <RadarBoard suggestions={suggestions} runs={runs} />
         </Gutter>

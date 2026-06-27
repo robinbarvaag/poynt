@@ -32,8 +32,23 @@ export const radarSignalKinds = [
   "coverage_gap",
   "featured_rotation",
   "demand",
+  "inspiration_gap",
+  "popular",
 ] as const;
 export type RadarSignalKind = (typeof radarSignalKinds)[number];
+
+/** Typer eksterne inspirasjonskilder partneren kan registrere. Kun offentlige feeds. */
+export const inspirationSourceTypes = ["website", "rss"] as const;
+export type InspirationSourceTypeValue =
+  (typeof inspirationSourceTypes)[number];
+
+export const inspirationSourceTypeLabels: Record<
+  InspirationSourceTypeValue,
+  string
+> = {
+  website: "Nettside",
+  rss: "RSS-feed",
+};
 
 /**
  * Ett deterministisk signal beregnet i kode og matet inn til AI-en. `key` er
@@ -74,3 +89,25 @@ export const contentRadarOutputSchema = z.object({
 
 export type GeneratedSuggestion = z.infer<typeof generatedSuggestionSchema>;
 export type ContentRadarOutput = z.infer<typeof contentRadarOutputSchema>;
+
+/**
+ * Det inspirasjons-destilleringen returnerer: relevante, offentlige saker gjort
+ * om til korte, tema-taggede notater. `url` er nullable fordi nettside-scraping
+ * ofte bare har én side-URL, mens RSS gir per-sak-lenker. Strenge OpenAI-felter
+ * → nullable, ikke optional.
+ */
+const inspirationItemSchema = z.object({
+  title: z.string(),
+  url: z.string().nullable(),
+  topics: z.array(z.string()),
+  summary: z.string(),
+});
+
+export const inspirationDistillOutputSchema = z.object({
+  items: z.array(inspirationItemSchema),
+});
+
+export type DistilledInspirationItem = z.infer<typeof inspirationItemSchema>;
+export type InspirationDistillOutput = z.infer<
+  typeof inspirationDistillOutputSchema
+>;

@@ -125,9 +125,15 @@ Lokalt: `npx inngest-cli dev`.
 - **Fase 1 — Radar-motoren.** Signal-innsamling + AI-syntese + upsert + revisjon;
   trigget av event og ukentlig schedule.
 - **Fase 2 — Widget + admin-view.** «Bindersen» + `/admin/radar` + handlinger.
-- **Fase 3 — Ekstern inspirasjon.** Kilde-CRUD + Inngest fetch/distill (RSS/Firecrawl).
-- **Fase 4 — Senere.** Lettvekts visningstelling (datadrevne «promoter»-forslag);
-  brand-visuals (logo/swatches/fonter) på Min profil → Min merkevare (eget spor).
+- **Fase 3 — Ekstern inspirasjon. ✅** Kilde-CRUD (`/admin/inspirasjon`) + Inngest
+  `inspiration/fetch` (RSS uten avhengighet + Firecrawl for nettsider) → distill →
+  `inspiration_item` → `inspiration_gap`-signaler i gap-analysen. Verifisert ende-til-ende.
+- **Fase 4 — Lettvekts visningstelling. ✅** `planner_content_view` (aggregert per dag,
+  ingen PII, migrasjon 0009), `/api/radar/track`-beacon + `<ViewTracker>` på alle fem
+  innholds-detaljsidene (artikler/kurs/ressurser/blogg/podkast), og view-baserte
+  `popular`-signaler som gjør «promoter/oppdater/gjenbruk»-forslag datadrevne i stedet
+  for proxy-baserte. Dormant til visninger akkumuleres. Verifisert. Brand-visuals
+  (logo/swatches/fonter) er eget spor (Robin).
 
 ## 9. Ærlige forbehold
 

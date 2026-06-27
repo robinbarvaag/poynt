@@ -1,10 +1,29 @@
 "use client";
 
+import { ToolIntro, type ToolIntroStep } from "@/components/planner/tool-intro";
 import { trpc } from "@/lib/planner/trpc";
 import type { PodcastToContentResponse } from "@poynt/planner-validators";
-import { Button, Icon, PageHeader, toast } from "@poynt/ui";
+import { Button, Icon, PageHeader, PageShell, toast } from "@poynt/ui";
 import type { IconName } from "@poynt/ui/icons";
 import { useRef, useState } from "react";
+
+const PODCAST_STEPS: ToolIntroStep[] = [
+  {
+    icon: "file-text",
+    title: "Blogginnlegg",
+    description: "Fullstendig artikkel med overskrifter og avsnitt.",
+  },
+  {
+    icon: "share",
+    title: "Sosiale medier-postar",
+    description: "Klare utkast til LinkedIn, Instagram og X/Twitter.",
+  },
+  {
+    icon: "clock",
+    title: "Kapittelmerke",
+    description: "Tidsstempel med emnenamn for YouTube og Spotify.",
+  },
+];
 
 interface SavedPodcastResult {
   id: string;
@@ -142,54 +161,61 @@ export function PodcastClient({ initialSavedResult }: PodcastClientProps) {
   }
 
   return (
-    <div className="max-w-3xl space-y-6">
-      <PageHeader
-        title="Podcast til innhald"
-        description="Last opp ein podkast-episode og generer blogginnlegg, sosiale medier-postar og kapittelmerke automatisk."
-      />
-
-      {/* Step 1: Upload */}
+    <PageShell>
+      {/* Step 1: Upload — full intro i verktøy-familiens uttrykk */}
       {step === "upload" && (
-        <div
-          className={`rounded-xl border-2 border-dashed p-10 text-center transition-colors ${
-            isDragging
-              ? "border-primary bg-primary/5"
-              : "border-border hover:border-primary/50"
-          }`}
-          onDragOver={(e) => {
-            e.preventDefault();
-            setIsDragging(true);
-          }}
-          onDragLeave={() => setIsDragging(false)}
-          onDrop={handleFileDrop}
+        <ToolIntro
+          icon="mic"
+          title="Podcast til innhald"
+          description="Last opp ein podkast-episode, så gjer vi om praten til ferdig innhald — blogginnlegg, sosiale medier-postar og kapittelmerke."
+          steps={PODCAST_STEPS}
         >
-          <div className="flex flex-col items-center gap-4">
-            <div className="rounded-full bg-muted p-4">
-              <Icon name="mic" className="h-8 w-8 text-muted-foreground" />
+          <button
+            type="button"
+            className={`w-full rounded-xl border-2 border-dashed p-10 text-center transition-colors ${
+              isDragging
+                ? "border-primary bg-primary/5"
+                : "border-border hover:border-primary/50"
+            }`}
+            onDragOver={(e) => {
+              e.preventDefault();
+              setIsDragging(true);
+            }}
+            onDragLeave={() => setIsDragging(false)}
+            onDrop={handleFileDrop}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <div className="flex flex-col items-center gap-4">
+              <div className="rounded-full bg-muted p-4">
+                <Icon name="mic" className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <div>
+                <p className="font-medium">Dra og slepp lydfila her</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Støttar MP3, M4A, WAV, OGG, FLAC — maks 25 MB
+                </p>
+              </div>
+              <span className="inline-flex items-center gap-2 rounded-lg border bg-background px-3 py-2 text-sm">
+                <Icon name="plus" className="h-4 w-4" />
+                Vel fil
+              </span>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="audio/mpeg,audio/mp4,audio/wav,audio/ogg,audio/flac,audio/x-m4a,audio/webm"
+                className="hidden"
+                onChange={handleFileChange}
+              />
             </div>
-            <div>
-              <p className="font-medium">Dra og slepp lydfila her</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Støttar MP3, M4A, WAV, OGG, FLAC — maks 25 MB
-              </p>
-            </div>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <Icon name="plus" className="h-4 w-4" />
-              Vel fil
-            </Button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="audio/mpeg,audio/mp4,audio/wav,audio/ogg,audio/flac,audio/x-m4a,audio/webm"
-              className="hidden"
-              onChange={handleFileChange}
-            />
-          </div>
-        </div>
+          </button>
+        </ToolIntro>
+      )}
+
+      {step !== "upload" && (
+        <PageHeader
+          title="Podcast til innhald"
+          description="Last opp ein podkast-episode og generer blogginnlegg, sosiale medier-postar og kapittelmerke automatisk."
+        />
       )}
 
       {/* Step 2: Transcribing */}
@@ -433,7 +459,7 @@ export function PodcastClient({ initialSavedResult }: PodcastClientProps) {
           </Button>
         </div>
       )}
-    </div>
+    </PageShell>
   );
 }
 
