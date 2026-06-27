@@ -1,22 +1,22 @@
 import { db } from "@poynt/planner-db";
-import {
-  plannerWorkspaceMember,
-  plannerWorkspaceProfile,
-} from "@poynt/planner-db/schema";
+import { plannerWorkspaceProfile } from "@poynt/planner-db/schema";
 import {
   profileAudienceTypeLabels,
   profileCompanySizeLabels,
 } from "@poynt/planner-validators";
 import { eq } from "drizzle-orm";
+import { getActiveWorkspaceId as resolveActiveWorkspaceId } from "./active-workspace";
 
-/** Finner brukerens aktive arbeidsområde (samme logikk som workspace-profile-routeren). */
-export async function getActiveWorkspaceId(
-  userId: string
-): Promise<string | null> {
-  const membership = await db.query.plannerWorkspaceMember.findFirst({
-    where: eq(plannerWorkspaceMember.userId, userId),
-  });
-  return membership?.workspaceId ?? null;
+/**
+ * Nullable-variant av det aktive arbeidsområdet — returnerer null i stedet for å
+ * kaste når brukeren ikke har noe, så profil-blokken bare faller pent tilbake.
+ */
+async function getActiveWorkspaceId(userId: string): Promise<string | null> {
+  try {
+    return await resolveActiveWorkspaceId(userId);
+  } catch {
+    return null;
+  }
 }
 
 /**

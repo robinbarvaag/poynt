@@ -76,10 +76,12 @@ export function WorkspaceSwitcher() {
     }
   };
 
-  const handleWorkspaceCreated = (newWorkspace: Workspace) => {
-    setWorkspaces((prev) => [newWorkspace, ...prev]);
-    setActiveWorkspace(newWorkspace);
+  const handleWorkspaceCreated = () => {
     setShowCreateDialog(false);
+    // Den nye bedriften er nå aktiv (satt server-side). Full reload så alle
+    // server-komponenter (dashbord, profil) leser den nye bedriftens data —
+    // ellers ble den forrige bedriftens innhold hengende igjen.
+    window.location.reload();
   };
 
   if (isLoading) {

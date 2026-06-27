@@ -7,26 +7,8 @@ import { updateWorkspaceProfileSchema } from "@poynt/planner-validators";
 import { TRPCError } from "@trpc/server";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
+import { getActiveWorkspaceId } from "../lib/active-workspace";
 import { protectedProcedure, router } from "../trpc";
-
-/**
- * Helper to get active workspace ID for user
- */
-async function getActiveWorkspaceId(userId: string): Promise<string> {
-  // Get the first workspace the user is a member of
-  const membership = await db.query.plannerWorkspaceMember.findFirst({
-    where: eq(plannerWorkspaceMember.userId, userId),
-  });
-
-  if (!membership) {
-    throw new TRPCError({
-      code: "NOT_FOUND",
-      message: "No workspace found for user",
-    });
-  }
-
-  return membership.workspaceId;
-}
 
 /**
  * Verifiserer at brukeren er medlem av et gitt arbeidsområde og returnerer id-en.

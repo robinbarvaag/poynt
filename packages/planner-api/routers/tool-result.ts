@@ -1,8 +1,5 @@
 import { db } from "@poynt/planner-db";
-import {
-  plannerToolResult,
-  plannerWorkspaceMember,
-} from "@poynt/planner-db/schema";
+import { plannerToolResult } from "@poynt/planner-db/schema";
 import {
   createToolResultSchema,
   updateToolResultSchema,
@@ -10,25 +7,8 @@ import {
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq } from "drizzle-orm";
 import { z } from "zod";
+import { getActiveWorkspaceId } from "../lib/active-workspace";
 import { protectedProcedure, router } from "../trpc";
-
-/**
- * Helper to get active workspace ID for user
- */
-async function getActiveWorkspaceId(userId: string): Promise<string> {
-  const membership = await db.query.plannerWorkspaceMember.findFirst({
-    where: eq(plannerWorkspaceMember.userId, userId),
-  });
-
-  if (!membership) {
-    throw new TRPCError({
-      code: "NOT_FOUND",
-      message: "No workspace found for user",
-    });
-  }
-
-  return membership.workspaceId;
-}
 
 export const toolResultRouter = router({
   /**

@@ -155,7 +155,9 @@ export const workspaceRouter = router({
         role: "owner",
       });
 
-      // Set as active workspace if user has no active workspace
+      // Gjør den nye bedriften til den aktive — når du oppretter en bedrift vil
+      // du inn i den for å sette den opp. Uten dette ble du værende i den
+      // forrige bedriften (og så dens data på dashbordet).
       const prefs = await db.query.plannerUserPreferences.findFirst({
         where: eq(plannerUserPreferences.userId, userId),
       });
@@ -166,7 +168,7 @@ export const workspaceRouter = router({
           userId,
           activeWorkspaceId: workspaceId,
         });
-      } else if (!prefs.activeWorkspaceId) {
+      } else {
         await db
           .update(plannerUserPreferences)
           .set({ activeWorkspaceId: workspaceId })
