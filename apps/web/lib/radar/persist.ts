@@ -38,7 +38,8 @@ export async function persistSuggestions(
     const evidence = sig
       ? { signalKey: sig.key, kind: sig.kind, summary: sig.summary }
       : { signalKey: s.signalKey };
-    const targetCollection = s.targetCollection ?? sig?.targetCollection ?? null;
+    const targetCollection =
+      s.targetCollection ?? sig?.targetCollection ?? null;
     const targetId = s.targetId ?? sig?.targetId ?? null;
     const category = s.category ?? sig?.category ?? null;
 

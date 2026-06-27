@@ -1,7 +1,7 @@
 import {
   type ContentRadarOutput,
-  contentRadarOutputSchema,
   type RadarSignalInput,
+  contentRadarOutputSchema,
 } from "@poynt/planner-validators";
 import { Output, streamText } from "ai";
 import { flagshipModel } from "./models";

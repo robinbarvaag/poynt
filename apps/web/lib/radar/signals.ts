@@ -27,11 +27,26 @@ interface CollectionConfig {
 }
 
 const CONTENT_COLLECTIONS: CollectionConfig[] = [
-  { slug: "articles", label: "Artikkel", hasDrafts: true, catField: "categories" },
+  {
+    slug: "articles",
+    label: "Artikkel",
+    hasDrafts: true,
+    catField: "categories",
+  },
   { slug: "courses", label: "Kurs", hasDrafts: true, catField: "categories" },
   { slug: "guides", label: "Guide", hasDrafts: true, catField: "category" },
-  { slug: "blog-posts", label: "Blogginnlegg", hasDrafts: true, catField: "categories" },
-  { slug: "podcasts", label: "Podkast", hasDrafts: false, catField: "categories" },
+  {
+    slug: "blog-posts",
+    label: "Blogginnlegg",
+    hasDrafts: true,
+    catField: "categories",
+  },
+  {
+    slug: "podcasts",
+    label: "Podkast",
+    hasDrafts: false,
+    catField: "categories",
+  },
 ];
 
 // Terskler
@@ -68,12 +83,17 @@ const clamp = (n: number, lo: number, hi: number) =>
 const monthsSince = (iso: string) =>
   (Date.now() - new Date(iso).getTime()) / (30 * 24 * 3600 * 1000);
 
-function extractCats(doc: RadarDoc, field: "categories" | "category"): CatRef[] {
+function extractCats(
+  doc: RadarDoc,
+  field: "categories" | "category"
+): CatRef[] {
   const rel = field === "categories" ? doc.categories : doc.category;
   if (!rel) return [];
   const arr = Array.isArray(rel) ? rel : [rel];
   return arr
-    .filter((c): c is Record<string, unknown> => Boolean(c) && typeof c === "object")
+    .filter(
+      (c): c is Record<string, unknown> => Boolean(c) && typeof c === "object"
+    )
     .map((c) => ({
       id: c.id as number | string,
       slug: typeof c.slug === "string" ? c.slug : undefined,
