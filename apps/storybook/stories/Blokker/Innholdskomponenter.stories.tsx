@@ -36,6 +36,7 @@ function Block({ label, children }: { label: string; children: React.ReactNode }
 export const Alle: Story = {
   render: () => {
     const [filter, setFilter] = useState("alt");
+    const [channel, setChannel] = useState("facebook");
     return (
       <div className="mx-auto flex max-w-5xl flex-col gap-14 py-6">
         <Block label="CourseHero">
@@ -57,18 +58,42 @@ export const Alle: Story = {
           />
         </Block>
 
-        <Block label="ContentFilterBar (interaktiv)">
-          <ContentFilterBar
-            value={filter}
-            onChange={setFilter}
-            options={[
-              { value: "alt", label: "Alt" },
-              { value: "guide", label: "Guider", icon: "compass" },
-              { value: "artikkel", label: "Artikler", icon: "newspaper" },
-              { value: "kurs", label: "Kurs", icon: "graduation-cap" },
-              { value: "podkast", label: "Podkast", icon: "mic" },
-            ]}
-          />
+        <Block label="Filter (helhet: type + kanal)">
+          <div className="flex flex-col gap-5 rounded-3xl bg-card p-5 ring-1 ring-foreground/10">
+            <div className="flex flex-col gap-2">
+              <span className="px-0.5 font-heading font-semibold text-muted-foreground text-xs uppercase tracking-[0.16em]">
+                Type
+              </span>
+              <ContentFilterBar
+                value={filter}
+                onChange={setFilter}
+                options={[
+                  { value: "alt", label: "Alt" },
+                  { value: "guide", label: "Guider", icon: "compass" },
+                  { value: "artikkel", label: "Artikler", icon: "newspaper" },
+                  { value: "kurs", label: "Kurs", icon: "graduation-cap" },
+                ]}
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <span className="px-0.5 font-heading font-semibold text-muted-foreground text-xs uppercase tracking-[0.16em]">
+                Kanal
+              </span>
+              <ContentFilterBar
+                value={channel}
+                onChange={setChannel}
+                options={[
+                  { value: "alle", label: "Alle kanaler" },
+                  { value: "instagram", label: "Instagram", dot: "#E1306C" },
+                  { value: "linkedin", label: "LinkedIn", dot: "#0A66C2" },
+                  { value: "facebook", label: "Facebook", dot: "#1877F2" },
+                  { value: "youtube", label: "YouTube", dot: "#FF0000" },
+                  { value: "canva", label: "Canva", dot: "#7D2AE8" },
+                  { value: "keywords", label: "Keywords", dot: "#16a34a" },
+                ]}
+              />
+            </div>
+          </div>
         </Block>
 
         <Block label="AuthorByline">

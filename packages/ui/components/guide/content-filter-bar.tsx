@@ -7,6 +7,8 @@ export interface ContentFilterOption {
   value: string;
   label: string;
   icon?: IconName;
+  /** Liten fargeprikk (hex) som identitet — brukt for kanaler i stedet for emoji. */
+  dot?: string;
 }
 
 export interface ContentFilterBarProps {
@@ -44,7 +46,18 @@ export function ContentFilterBar({
                 : "bg-foreground/[0.04] text-foreground/70 ring-1 ring-foreground/10 hover:bg-foreground/[0.07]"
             )}
           >
-            {option.icon && <Icon name={option.icon} className="size-3.5" />}
+            {option.dot ? (
+              <span
+                aria-hidden="true"
+                className={cn(
+                  "size-2 shrink-0 rounded-full ring-1",
+                  isActive ? "ring-primary-foreground/40" : "ring-foreground/10"
+                )}
+                style={{ backgroundColor: option.dot }}
+              />
+            ) : (
+              option.icon && <Icon name={option.icon} className="size-3.5" />
+            )}
             {option.label}
           </button>
         );

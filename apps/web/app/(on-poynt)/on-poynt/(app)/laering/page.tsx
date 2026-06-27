@@ -1,5 +1,5 @@
 import { ArticleSearch } from "@/components/article-search";
-import { CategoryFilter } from "@/components/category-filter";
+import { ChannelFilter } from "@/components/learning/channel-filter";
 import { LearningFilter } from "@/components/learning/learning-filter";
 import { PayloadImage } from "@/components/payload-image";
 import type { Article, Category, Course, Guide, Media } from "@/payload-types";
@@ -183,19 +183,25 @@ export default async function LearningPage({ searchParams }: PageProps) {
         description="Guider, artikler og kurs for markedsføring og innholdsproduksjon — alt samlet på ett sted."
       />
 
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <div className="w-full sm:max-w-xs">
-            <ArticleSearch />
-          </div>
+      <div className="flex flex-col gap-5 rounded-3xl bg-card p-4 ring-1 ring-foreground/10 sm:p-5">
+        <div className="w-full sm:max-w-sm">
+          <ArticleSearch />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <span className="px-0.5 font-heading font-semibold text-muted-foreground text-xs uppercase tracking-[0.16em]">
+            Type
+          </span>
           <LearningFilter />
         </div>
+
         {categories.length > 0 && (
-          <CategoryFilter
-            categories={categories}
-            paramName="kategori"
-            allLabel="Alle kanaler"
-          />
+          <div className="flex flex-col gap-2">
+            <span className="px-0.5 font-heading font-semibold text-muted-foreground text-xs uppercase tracking-[0.16em]">
+              Kanal
+            </span>
+            <ChannelFilter channels={categories} />
+          </div>
         )}
       </div>
 
