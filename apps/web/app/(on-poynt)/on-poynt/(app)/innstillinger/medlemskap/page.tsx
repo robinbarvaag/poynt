@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
   PageHeader,
+  PageShell,
 } from "@poynt/ui";
 import { Icon } from "@poynt/ui/icons";
 import { headers } from "next/headers";
@@ -50,7 +51,7 @@ export default async function MembershipSettingsPage() {
     membership.status === "canceled" && !hasNoMembership;
 
   return (
-    <div className="mx-auto max-w-4xl space-y-8">
+    <PageShell>
       <PageHeader
         title="Medlemskap"
         description="Administrer ditt On Poynt-medlemskap og abonnement."
@@ -185,6 +186,6 @@ export default async function MembershipSettingsPage() {
           </div>
         </CardContent>
       </Card>
-    </div>
+    </PageShell>
   );
 }

@@ -9,6 +9,7 @@ import {
   CardTitle,
   JourneyPath,
   NextStepHero,
+  PageShell,
   ToolboxCard,
 } from "@poynt/ui";
 import { Icon, type IconName } from "@poynt/ui/icons";
@@ -45,7 +46,7 @@ export default async function DashboardPage() {
   const { hero, stages } = await getDashboardState();
 
   return (
-    <div className="flex flex-col gap-10">
+    <PageShell>
       {/* Tilstandsstyrt topp — hvor du er + det ene neste steget */}
       <NextStepHero {...hero} />
 
@@ -106,6 +107,6 @@ export default async function DashboardPage() {
           />
         </div>
       </section>
-    </div>
+    </PageShell>
   );
 }

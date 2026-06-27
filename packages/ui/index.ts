@@ -79,6 +79,8 @@ export {
   type PageHeaderProps,
 } from "./components/page-header";
 
+export { PageShell, type PageShellProps } from "./components/page-shell";
+
 // Dashboard-primitiver (medlemsområde): tilstandsstyrt hero + guidet reise + verktøykasse
 export {
   NextStepHero,

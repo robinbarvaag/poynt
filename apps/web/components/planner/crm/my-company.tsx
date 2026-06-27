@@ -13,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
   Heading,
+  PageShell,
   Tabs,
   TabsContent,
   TabsList,
@@ -37,7 +38,7 @@ export function MyCompany({ workspace }: { workspace: Workspace }) {
   const canManage = workspace.role === "owner" || workspace.role === "admin";
 
   return (
-    <div className="container max-w-4xl space-y-6 py-8">
+    <PageShell>
       <div className="flex items-center gap-3">
         <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-accent text-accent-foreground">
           <Icon name="building-2" className="size-5" />
@@ -75,10 +76,10 @@ export function MyCompany({ workspace }: { workspace: Workspace }) {
         <TabsContent value="profil" className="mt-4">
           <Card>
             <CardHeader>
-              <CardTitle>Bedriftsprofil for AI</CardTitle>
+              <CardTitle>Profil — hva verktøyene vet</CardTitle>
               <CardDescription>
-                Bransje, målgruppe og mål som AI-verktøyene bruker for å gi
-                bedre, mer treffsikre svar.
+                Faktaene om bedriften: bransje, målgruppe, mål og ressurser.
+                Dette er rammene AI-verktøyene jobber innenfor.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -93,10 +94,11 @@ export function MyCompany({ workspace }: { workspace: Workspace }) {
         <TabsContent value="merkevare" className="mt-4">
           <Card>
             <CardHeader>
-              <CardTitle>Merkevarebrief</CardTitle>
+              <CardTitle>Merkevare — hvordan verktøyene skriver</CardTitle>
               <CardDescription>
-                Bedriftens stemme, kjernebudskap og det som skiller dere ut —
-                generert fra nettsiden. Alle AI-verktøyene skriver ut fra den.
+                Stemmen og budskapet: tone, kjernebudskap og det som skiller
+                dere ut. Mens profilen er hva verktøyene vet, er dette hvordan
+                de uttrykker det. Generert fra nettsiden.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -157,6 +159,6 @@ export function MyCompany({ workspace }: { workspace: Workspace }) {
           </TabsContent>
         )}
       </Tabs>
-    </div>
+    </PageShell>
   );
 }

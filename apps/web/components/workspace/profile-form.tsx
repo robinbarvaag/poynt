@@ -214,210 +214,213 @@ export function WorkspaceProfileForm({
           )}
         </div>
 
-        <FormField
-          control={form.control}
-          name="industryId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Bransje</FormLabel>
-              <Select
-                disabled={disabled}
-                value={field.value ?? ""}
-                onValueChange={(value) => field.onChange(value || null)}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Velg bransje" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {industries.map((industry) => (
-                    <SelectItem key={industry.id} value={industry.id}>
-                      {industry.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormDescription>
-                Brukes som standard i alle verktøy
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {/* Strukturerte felter i et tett 2-kolonners rutenett (mindre høyt). */}
+        <div className="grid gap-x-6 gap-y-6 sm:grid-cols-2">
+          <FormField
+            control={form.control}
+            name="industryId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Bransje</FormLabel>
+                <Select
+                  disabled={disabled}
+                  value={field.value ?? ""}
+                  onValueChange={(value) => field.onChange(value || null)}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Velg bransje" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {industries.map((industry) => (
+                      <SelectItem key={industry.id} value={industry.id}>
+                        {industry.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  Brukes som standard i alle verktøy
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="companySize"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Bedriftsstørrelse</FormLabel>
-              <Select
-                disabled={disabled}
-                value={field.value ?? ""}
-                onValueChange={(value) =>
-                  field.onChange((value as ProfileCompanySize) || null)
-                }
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Velg størrelse" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {profileCompanySizes.map((size) => (
-                    <SelectItem key={size} value={size}>
-                      {profileCompanySizeLabels[size]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="companySize"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Bedriftsstørrelse</FormLabel>
+                <Select
+                  disabled={disabled}
+                  value={field.value ?? ""}
+                  onValueChange={(value) =>
+                    field.onChange((value as ProfileCompanySize) || null)
+                  }
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Velg størrelse" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {profileCompanySizes.map((size) => (
+                      <SelectItem key={size} value={size}>
+                        {profileCompanySizeLabels[size]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="audienceType"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Målgruppetype</FormLabel>
-              <Select
-                disabled={disabled}
-                value={field.value ?? ""}
-                onValueChange={(value) =>
-                  field.onChange((value as ProfileAudienceType) || null)
-                }
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="B2B, B2C eller begge?" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {profileAudienceTypes.map((type) => (
-                    <SelectItem key={type} value={type}>
-                      {profileAudienceTypeLabels[type]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormDescription>
-                Selger du til bedrifter eller forbrukere?
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="audienceType"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Målgruppetype</FormLabel>
+                <Select
+                  disabled={disabled}
+                  value={field.value ?? ""}
+                  onValueChange={(value) =>
+                    field.onChange((value as ProfileAudienceType) || null)
+                  }
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="B2B, B2C eller begge?" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {profileAudienceTypes.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {profileAudienceTypeLabels[type]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  Selger du til bedrifter eller forbrukere?
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="mainGoal"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Hovedmål</FormLabel>
-              <Select
-                disabled={disabled}
-                value={field.value ?? ""}
-                onValueChange={(value) =>
-                  field.onChange(
-                    (value as ProfileFormValues["mainGoal"]) || null
-                  )
-                }
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Hva er viktigst akkurat nå?" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {mainGoalTypes.map((goal) => (
-                    <SelectItem key={goal} value={goal}>
-                      {mainGoalLabels[goal]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormDescription>
-                Verktøyene bruker dette som standardmål
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="mainGoal"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Hovedmål</FormLabel>
+                <Select
+                  disabled={disabled}
+                  value={field.value ?? ""}
+                  onValueChange={(value) =>
+                    field.onChange(
+                      (value as ProfileFormValues["mainGoal"]) || null
+                    )
+                  }
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Hva er viktigst akkurat nå?" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {mainGoalTypes.map((goal) => (
+                      <SelectItem key={goal} value={goal}>
+                        {mainGoalLabels[goal]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  Verktøyene bruker dette som standardmål
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="weeklyTime"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Tid til markedsføring per uke</FormLabel>
-              <Select
-                disabled={disabled}
-                value={field.value ?? ""}
-                onValueChange={(value) =>
-                  field.onChange(
-                    (value as ProfileFormValues["weeklyTime"]) || null
-                  )
-                }
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Hvor mye tid har du?" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {weeklyTimeTypes.map((time) => (
-                    <SelectItem key={time} value={time}>
-                      {weeklyTimeLabels[time]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormDescription>
-                Vi anbefaler kanaler som passer kapasiteten din
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="weeklyTime"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tid til markedsføring per uke</FormLabel>
+                <Select
+                  disabled={disabled}
+                  value={field.value ?? ""}
+                  onValueChange={(value) =>
+                    field.onChange(
+                      (value as ProfileFormValues["weeklyTime"]) || null
+                    )
+                  }
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Hvor mye tid har du?" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {weeklyTimeTypes.map((time) => (
+                      <SelectItem key={time} value={time}>
+                        {weeklyTimeLabels[time]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  Vi anbefaler kanaler som passer kapasiteten din
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="strengths"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Din styrke</FormLabel>
-              <Select
-                disabled={disabled}
-                value={field.value ?? ""}
-                onValueChange={(value) =>
-                  field.onChange(
-                    (value as ProfileFormValues["strengths"]) || null
-                  )
-                }
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Hva er du best på?" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {strengthTypes.map((strength) => (
-                    <SelectItem key={strength} value={strength}>
-                      {strengthLabels[strength]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormDescription>
-                Spill på styrkene dine – tekst, video, visuelt eller en miks
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="strengths"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Din styrke</FormLabel>
+                <Select
+                  disabled={disabled}
+                  value={field.value ?? ""}
+                  onValueChange={(value) =>
+                    field.onChange(
+                      (value as ProfileFormValues["strengths"]) || null
+                    )
+                  }
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Hva er du best på?" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {strengthTypes.map((strength) => (
+                      <SelectItem key={strength} value={strength}>
+                        {strengthLabels[strength]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  Spill på styrkene dine – tekst, video, visuelt eller en miks
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <FormField
           control={form.control}
