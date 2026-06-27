@@ -176,6 +176,19 @@ export {
   type BrandBriefRequest,
 } from "./brand-brief";
 
+// Brand identity (visuell merkevare-bok)
+export {
+  brandColorRoles,
+  brandColorRoleLabels,
+  brandColorSchema,
+  brandFontsSchema,
+  brandIdentitySchema,
+  type BrandColorRole,
+  type BrandColor,
+  type BrandFonts,
+  type BrandIdentity,
+} from "./brand-identity";
+
 // Workspace profile & tool results
 export {
   profileCompanySizes,

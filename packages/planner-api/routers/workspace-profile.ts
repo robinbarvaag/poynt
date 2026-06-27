@@ -71,6 +71,7 @@ export const workspaceProfileRouter = router({
           strengths: null,
           customContext: null,
           brandBrief: null,
+          brandIdentity: null,
           industry: null,
         };
       }

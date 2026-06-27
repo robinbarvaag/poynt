@@ -236,6 +236,21 @@ export const plannerWorkspaceProfile = plannerSchema.table(
       visualStyle?: string | null;
       sourceUrl?: string | null;
     }>(),
+    // Visuell merkevare-identitet («merkevare-boka») — brukerstyrt: logo, farger,
+    // fonter, tagline, moodboard. Skilt fra brandBrief så den visuelle identiteten
+    // og den AI-genererte stemmen lagres uavhengig. Valideres med brandIdentitySchema.
+    brandIdentity: jsonb("brand_identity").$type<{
+      logoUrl?: string | null;
+      logoDarkUrl?: string | null;
+      tagline?: string | null;
+      colors?: { hex: string; name?: string | null; role?: string | null }[] | null;
+      fonts?: {
+        heading?: string | null;
+        body?: string | null;
+        accent?: string | null;
+      } | null;
+      imagery?: string[] | null;
+    }>(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()

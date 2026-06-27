@@ -92,12 +92,42 @@ export async function getWorkspaceProfileBlock(
       }
     }
 
-    if (lines.length === 0 && !briefBlock) return "";
+    // Visuell merkevare-identitet («merkevare-boka»): tagline, farger og fonter
+    // gir modellen tone- og stil-signal. Logo-URL utelates (uten verdi for tekst).
+    const identity = profile.brandIdentity;
+    let identityBlock = "";
+    if (identity) {
+      const idLines: string[] = [];
+      if (identity.tagline) idLines.push(`Tagline: ${identity.tagline}`);
+      const colors = (identity.colors ?? []).filter((c) => c?.hex);
+      if (colors.length > 0) {
+        idLines.push(
+          `Farger: ${colors
+            .map((c) => (c.name ? `${c.name} (${c.hex})` : c.hex))
+            .join(", ")}`
+        );
+      }
+      const fontParts: string[] = [];
+      if (identity.fonts?.heading) {
+        fontParts.push(`overskrift «${identity.fonts.heading}»`);
+      }
+      if (identity.fonts?.body) {
+        fontParts.push(`brødtekst «${identity.fonts.body}»`);
+      }
+      if (fontParts.length > 0) {
+        idLines.push(`Fonter: ${fontParts.join(", ")}`);
+      }
+      if (idLines.length > 0) {
+        identityBlock = `\nVisuell identitet:\n${idLines.join("\n")}\n`;
+      }
+    }
+
+    if (lines.length === 0 && !briefBlock && !identityBlock) return "";
     const profileBlock =
       lines.length > 0
         ? `\nBedriftsprofil (bruk denne aktivt):\n${lines.join("\n")}\n`
         : "";
-    return `${profileBlock}${briefBlock}`;
+    return `${profileBlock}${briefBlock}${identityBlock}`;
   } catch {
     // profilberikelse er valgfri — fortsett uten
     return "";
