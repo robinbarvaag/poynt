@@ -1,5 +1,6 @@
 import type { CollectionConfig } from "payload";
 import { guideBlocks } from "../blocks/guide-blocks";
+import { stockPickerAfterInput } from "../fields/stock-picker-after-input";
 import { generateSlug } from "../lib/generate-slug";
 
 /**
@@ -68,6 +69,9 @@ export const Guides: CollectionConfig = {
       label: "Cover-bilde",
       admin: {
         description: "Full-bredde banner øverst på guiden",
+        components: {
+          afterInput: stockPickerAfterInput,
+        },
       },
     },
     {

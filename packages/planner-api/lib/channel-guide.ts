@@ -10,7 +10,13 @@ import {
   targetAudienceLabels,
   weeklyTimeLabels,
 } from "@poynt/planner-validators";
-import { type DeepPartial, Output, streamText } from "ai";
+import {
+  type DeepPartial,
+  type LanguageModel,
+  type LanguageModelUsage,
+  Output,
+  streamText,
+} from "ai";
 import { eq } from "drizzle-orm";
 import { flagshipModel } from "./models";
 import { getWorkspaceProfileBlock } from "./profile-context";
@@ -29,12 +35,22 @@ import { resolveSystemPrompt } from "./prompt-template";
 export async function streamChannelGuide({
   userId,
   input,
+  model = flagshipModel,
+  systemPromptOverride,
+  includeProfile = true,
 }: {
   userId: string;
   input: ChannelGuideRequest;
+  /** Overstyr modellen (brukes av Modell-laben). Default = flaggskip-modellen. */
+  model?: LanguageModel;
+  /** Overstyr system-prompten (brukes av Modell-laben). Default = DB/fallback. */
+  systemPromptOverride?: string;
+  /** «Felles hjerne»-berikelse på/av (laben skrur den av for ren sammenligning). */
+  includeProfile?: boolean;
 }): Promise<{
   partialOutputStream: AsyncIterable<DeepPartial<ChannelGuideStream>>;
   output: PromiseLike<ChannelGuideStream>;
+  usage: PromiseLike<LanguageModelUsage>;
 }> {
   const {
     industryId,
@@ -58,14 +74,17 @@ export async function streamChannelGuide({
   }
 
   // «Felles hjerne»: berik prompten med bedriftsprofilen (delt helper).
-  const profileBlock = await getWorkspaceProfileBlock(userId);
+  const profileBlock = includeProfile
+    ? await getWorkspaceProfileBlock(userId)
+    : "";
 
   const previousChannelsText =
     previousChannels && previousChannels.length > 0
       ? previousChannels.map((c) => previousChannelLabels[c]).join(", ")
       : "Ingen";
 
-  const system = await resolveSystemPrompt("channel-guide-system");
+  const system =
+    systemPromptOverride ?? (await resolveSystemPrompt("channel-guide-system"));
 
   const prompt = `
 Bransje: ${industryName}
@@ -83,7 +102,7 @@ Anbefal nøyaktig de 3 beste markedskanalene for denne brukeren (sterkeste førs
   // (progressive delobjekter) og `output` (ferdig, validert objekt).
   // (`streamObject`/`generateObject` + `experimental_*` er deprecated.)
   const result = streamText({
-    model: flagshipModel,
+    model,
     system,
     prompt,
     output: Output.object({ schema: channelGuideStreamSchema }),
@@ -92,5 +111,6 @@ Anbefal nøyaktig de 3 beste markedskanalene for denne brukeren (sterkeste førs
   return {
     partialOutputStream: result.partialOutputStream,
     output: result.output,
+    usage: result.usage,
   };
 }

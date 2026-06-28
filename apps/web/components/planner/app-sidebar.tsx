@@ -3,6 +3,7 @@
 import {
   type NavItem,
   businessNavItems,
+  feedbackNavItem,
   homeNavItem,
   learnNavItems,
   toolNavItems,
@@ -22,6 +23,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   SidebarRail,
   SidebarSeparator,
 } from "@poynt/ui";
@@ -129,6 +133,12 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>{renderItem(feedbackNavItem)}</SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
         {isAdmin && (
           <>
             <SidebarSeparator />
@@ -138,13 +148,39 @@ export function AppSidebar() {
                   <SidebarMenuItem>
                     <SidebarMenuButton
                       asChild
-                      isActive={pathname.startsWith("/on-poynt/admin")}
+                      isActive={pathname === "/on-poynt/admin"}
                     >
                       <Link href="/on-poynt/admin" className="text-primary">
                         <Icon name="shield" />
                         <span>Admin</span>
                       </Link>
                     </SidebarMenuButton>
+                    <SidebarMenuSub>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton
+                          asChild
+                          isActive={pathname.startsWith(
+                            "/on-poynt/admin/tilbakemeldinger"
+                          )}
+                        >
+                          <Link href="/on-poynt/admin/tilbakemeldinger">
+                            <Icon name="message-square" />
+                            <span>Tilbakemeldinger</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton
+                          asChild
+                          isActive={pathname.startsWith("/on-poynt/lab")}
+                        >
+                          <Link href="/on-poynt/lab">
+                            <Icon name="sparkles" />
+                            <span>Modell-lab</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
                   </SidebarMenuItem>
                 </SidebarMenu>
               </SidebarGroupContent>

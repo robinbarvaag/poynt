@@ -1,10 +1,16 @@
 import { db } from "@poynt/planner-db";
-import { plannerWorkspaceProfile } from "@poynt/planner-db/schema";
 import {
+  plannerToolResult,
+  plannerWorkspaceProfile,
+} from "@poynt/planner-db/schema";
+import {
+  type ChannelMatchLevel,
+  type ChannelRecommendation,
   profileAudienceTypeLabels,
   profileCompanySizeLabels,
+  resolveChannelMatchLevel,
 } from "@poynt/planner-validators";
-import { eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { getActiveWorkspaceId as resolveActiveWorkspaceId } from "./active-workspace";
 
 /**
@@ -130,6 +136,52 @@ export async function getWorkspaceProfileBlock(
     return `${profileBlock}${briefBlock}${identityBlock}`;
   } catch {
     // profilberikelse er valgfri — fortsett uten
+    return "";
+  }
+}
+
+const channelMatchLabels: Record<ChannelMatchLevel, string> = {
+  strong: "sterk match",
+  good: "god match",
+  possible: "mulig",
+};
+
+/**
+ * Henter brukerens siste Kanalveileder-resultat og bygger en kontekstblokk med
+ * de anbefalte kanalene. Markedsplanen bruker dette så den BYGGER PÅ retningen
+ * brukeren alt har valgt — i stedet for å gjette kanaler på nytt. Slik blir steg
+ * 2 (finn kanaler) og steg 3 (lag plan) i dashbord-reisen én sammenhengende
+ * flyt. Returnerer tom streng hvis Kanalveilederen ikke er kjørt ennå, så
+ * markedsplanen faller pent tilbake til kun skjema-svar. Kaster aldri.
+ */
+export async function getChannelGuideBlock(userId: string): Promise<string> {
+  try {
+    const workspaceId = await getActiveWorkspaceId(userId);
+    if (!workspaceId) return "";
+
+    const latest = await db.query.plannerToolResult.findFirst({
+      where: and(
+        eq(plannerToolResult.workspaceId, workspaceId),
+        eq(plannerToolResult.toolId, "channel-guide")
+      ),
+      orderBy: desc(plannerToolResult.createdAt),
+    });
+
+    const channels = (latest?.result as { channels?: ChannelRecommendation[] })
+      ?.channels;
+    if (!channels || channels.length === 0) return "";
+
+    const lines = channels
+      .filter((c) => c?.name)
+      .map((c) => {
+        const level = channelMatchLabels[resolveChannelMatchLevel(c)];
+        return `- ${c.name} (${level})${c.reason ? `: ${c.reason}` : ""}`;
+      });
+    if (lines.length === 0) return "";
+
+    return `\nKanaler brukeren alt har valgt i Kanalveilederen — BYGG PLANEN PÅ DISSE (ikke bytt til helt andre kanaler uten god grunn):\n${lines.join("\n")}\n`;
+  } catch {
+    // kanalberikelse er valgfri — fortsett uten
     return "";
   }
 }

@@ -30,7 +30,6 @@ import { useState } from "react";
 
 interface ProductDetailClientProps {
   product: Product;
-  benefits?: string[];
   relatedProducts?: ProductGridItem[];
 }
 
@@ -62,7 +61,6 @@ function MembershipApplyButton({ product }: { product: Product }) {
 
 function ProductDetailClient({
   product,
-  benefits = [],
   relatedProducts = [],
 }: ProductDetailClientProps) {
   const [selectedImage, setSelectedImage] = useState(0);
@@ -242,29 +240,6 @@ function ProductDetailClient({
                 : "Inkl. mva"}
             </Text>
           </div>
-
-          {/* Benefits list */}
-          {benefits.length > 0 && (
-            <div className="mb-8 rounded-3xl bg-mint p-6 md:p-8">
-              <Heading variant="h4" color="foreground" customStyles="mb-4">
-                Dette får du:
-              </Heading>
-              <ul className="space-y-3">
-                {benefits.map((benefit) => (
-                  <li
-                    key={`benefit-${benefit}`}
-                    className="flex items-start gap-3"
-                  >
-                    <span
-                      aria-hidden="true"
-                      className="mt-2.5 h-px w-4 shrink-0 rounded-full bg-primary"
-                    />
-                    <Text customStyles="text-sm">{benefit}</Text>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
 
           {/* Forhåndssalg / merknad – lekent callout rett over kjøpsknappen */}
           {product.notice && (

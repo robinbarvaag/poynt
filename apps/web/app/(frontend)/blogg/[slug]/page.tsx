@@ -1,4 +1,5 @@
 import { JsonLd } from "@/components/json-ld";
+import { MediaCredit } from "@/components/media-credit";
 import { PayloadImage } from "@/components/payload-image";
 import { ViewTracker } from "@/components/radar/view-tracker";
 import { RelatedPosts } from "@/components/related-posts";
@@ -153,6 +154,7 @@ export default async function PostPage({ params }: PostPageProps) {
                 className="object-cover"
                 priority
               />
+              <MediaCredit media={featuredImage} />
             </div>
           </div>
         )}

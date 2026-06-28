@@ -1,5 +1,6 @@
 import { CtaSectionBlock } from "@/components/blocks/cta-section-block";
 import { JsonLd } from "@/components/json-ld";
+import { MediaCredit } from "@/components/media-credit";
 import { PayloadImage } from "@/components/payload-image";
 import { resolveMedia } from "@/lib/payload";
 import { SITE_URL, buildMetadata, notFoundMetadata } from "@/lib/seo";
@@ -130,6 +131,7 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
                 className="object-cover"
                 priority
               />
+              <MediaCredit media={image} />
             </div>
           )}
 

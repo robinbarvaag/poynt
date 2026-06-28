@@ -42,19 +42,28 @@ export const MedProdukter: Story = {
         <CartLineItem
           name="Bygg en nettside fra bunnen"
           priceLabel="kr 1 490"
+          quantity={1}
           image={img("c1")}
+          onIncrement={() => {}}
+          onDecrement={() => {}}
           onRemove={() => {}}
         />
         <CartLineItem
           name="Sjekkliste for lansering"
           priceLabel="kr 199"
+          quantity={1}
           image={img("c2")}
+          onIncrement={() => {}}
+          onDecrement={() => {}}
           onRemove={() => {}}
         />
         <CartLineItem
           name="Alt-i-ett startpakke"
           priceLabel="kr 2 490"
+          quantity={1}
           image={img("c3")}
+          onIncrement={() => {}}
+          onDecrement={() => {}}
           onRemove={() => {}}
         />
       </CartDrawer>

@@ -12,6 +12,8 @@ import * as migration_20260621_211840_add_seo_faq_fields from './20260621_211840
 import * as migration_20260621_221017_add_courses from './20260621_221017_add_courses';
 import * as migration_20260623_203800 from './20260623_203800';
 import * as migration_20260627_195306 from './20260627_195306';
+import * as migration_20260628_173640_remove_product_benefits from './20260628_173640_remove_product_benefits';
+import * as migration_20260628_205846_stock_media_fields from './20260628_205846_stock_media_fields';
 
 export const migrations = [
   {
@@ -82,6 +84,16 @@ export const migrations = [
   {
     up: migration_20260627_195306.up,
     down: migration_20260627_195306.down,
-    name: '20260627_195306'
+    name: '20260627_195306',
+  },
+  {
+    up: migration_20260628_173640_remove_product_benefits.up,
+    down: migration_20260628_173640_remove_product_benefits.down,
+    name: '20260628_173640_remove_product_benefits',
+  },
+  {
+    up: migration_20260628_205846_stock_media_fields.up,
+    down: migration_20260628_205846_stock_media_fields.down,
+    name: '20260628_205846_stock_media_fields'
   },
 ];

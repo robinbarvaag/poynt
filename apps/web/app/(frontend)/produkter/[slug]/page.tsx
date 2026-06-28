@@ -46,31 +46,21 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params;
   const payload = await getPayload({ config });
 
-  const [productsResult, productSettings] = await Promise.all([
-    payload.find({
-      collection: "products",
-      where: {
-        slug: { equals: slug },
-        active: { equals: true },
-      },
-      depth: 2,
-      limit: 1,
-    }),
-    payload.findGlobal({ slug: "productSettings" }),
-  ]);
+  const productsResult = await payload.find({
+    collection: "products",
+    where: {
+      slug: { equals: slug },
+      active: { equals: true },
+    },
+    depth: 2,
+    limit: 1,
+  });
 
   if (productsResult.docs.length === 0) {
     notFound();
   }
 
   const product = productsResult.docs[0];
-
-  // Get the benefit labels for the product's selected benefit keys
-  const allBenefits = productSettings?.benefits || [];
-  const productBenefitKeys = (product.benefits as string[] | null) || [];
-  const productBenefits = productBenefitKeys
-    .map((key) => allBenefits.find((b) => b.key === key)?.label)
-    .filter((label): label is string => !!label);
 
   // «Andre produkter»: same kategori om mogleg, elles berre nyaste. Alltid
   // ekskluder produktet sjølv, og fall tilbake på nyaste om kategori-treffet er
@@ -128,7 +118,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
       <JsonLd data={jsonLd} />
       <ProductDetailClient
         product={product}
-        benefits={productBenefits}
         relatedProducts={relatedProducts}
       />
     </>

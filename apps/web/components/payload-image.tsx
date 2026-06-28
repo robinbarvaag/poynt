@@ -18,6 +18,13 @@ export type MediaResource = {
    * boksen — feltet leses kun hvis en plugin/hook fyller det ut senere.
    */
   blurDataURL?: string | null;
+  /**
+   * Kreditering for stock-bilder (Pexels/Giphy), satt ved import. Vises via
+   * `<MediaCredit>`. Tom for vanlige opplastede bilder.
+   */
+  creditLine?: string | null;
+  /** Lenke til kilden (fotografprofil / Giphy-side) for krediteringen. */
+  sourceUrl?: string | null;
 };
 
 type MediaInput = MediaResource | number | null | undefined;

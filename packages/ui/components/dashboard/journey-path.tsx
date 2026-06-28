@@ -5,7 +5,7 @@ import { Card } from "../card";
 import { Eyebrow } from "../eyebrow";
 
 export type StageStatus = "done" | "active" | "upcoming";
-export type StageSurface = "mint" | "saffron" | "salmon" | "primary";
+export type StageSurface = "mint" | "cream" | "saffron" | "salmon" | "primary";
 
 export interface JourneyStage {
   /** Hvor i reisen står brukeren med denne fasen. */
@@ -38,6 +38,11 @@ const SURFACE: Record<
   { cap: string; node: string; ring: string }
 > = {
   mint: { cap: "bg-mint", node: "bg-mint text-foreground", ring: "ring-mint" },
+  cream: {
+    cap: "bg-cream",
+    node: "bg-cream text-foreground",
+    ring: "ring-cream",
+  },
   saffron: {
     cap: "bg-saffron",
     node: "bg-saffron text-foreground",
@@ -56,7 +61,7 @@ const SURFACE: Record<
 };
 
 /**
- * Den guidede veien gjennom et oppsett — fire faser vist som et fargespektrum,
+ * Den guidede veien gjennom et oppsett — fem faser vist som et fargespektrum,
  * der vi alltid framhever ÉN aktiv fase med en tydelig handling, mens ferdige
  * faser er rolige og kommende faser er dempet. Svarer på «hva gjør jeg først,
  * så, så» uten å hindre den som vil hoppe. Presentasjons-only (plain `<a>`).
@@ -73,7 +78,7 @@ export function JourneyPath({ eyebrow, title, stages }: JourneyPathProps) {
         </div>
       )}
 
-      <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {stages.map((stage) => {
           const s = SURFACE[stage.surface];
           const isActive = stage.status === "active";

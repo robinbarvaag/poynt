@@ -4,7 +4,7 @@ import { Button } from "../button";
 import { Eyebrow } from "../eyebrow";
 import { Heading, Text } from "../typography";
 
-type HeroAccent = "mint" | "saffron" | "salmon" | "primary";
+type HeroAccent = "mint" | "cream" | "saffron" | "salmon" | "primary";
 
 interface HeroAction {
   label: string;
@@ -26,6 +26,7 @@ export interface NextStepHeroProps {
 // med veien under. Fargen knytter heroen til den aktive fasen.
 const ACCENT: Record<HeroAccent, string> = {
   mint: "bg-mint/12",
+  cream: "bg-cream/12",
   saffron: "bg-saffron/12",
   salmon: "bg-salmon/12",
   primary: "bg-primary/8",

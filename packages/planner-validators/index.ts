@@ -1,3 +1,35 @@
+// Svar på henvendelser
+export {
+  inquirySources,
+  inquirySourceLabels,
+  replySentiments,
+  replySentimentLabels,
+  inquiryGoals,
+  inquiryGoalLabels,
+  inquiryReplyRequestSchema,
+  inquiryReplyStreamSchema,
+  type InquirySource,
+  type ReplySentiment,
+  type InquiryGoal,
+  type InquiryVariant,
+  type InquiryReplyRequest,
+  type InquiryReplyStream,
+} from "./inquiry-reply";
+
+// Feedback / ønsker
+export {
+  feedbackCategories,
+  feedbackCategoryLabels,
+  feedbackStatuses,
+  feedbackStatusLabels,
+  createFeedbackSchema,
+  updateFeedbackStatusSchema,
+  type FeedbackCategory,
+  type FeedbackStatus,
+  type CreateFeedbackInput,
+  type UpdateFeedbackStatusInput,
+} from "./feedback";
+
 // Decline generator
 export {
   declineRequestSchema,

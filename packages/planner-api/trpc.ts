@@ -1,7 +1,8 @@
 import { db } from "@poynt/planner-db";
-import { plannerSubscription, plannerUser } from "@poynt/planner-db/schema";
+import { plannerSubscription } from "@poynt/planner-db/schema";
 import { TRPCError, initTRPC } from "@trpc/server";
 import { eq } from "drizzle-orm";
+import { getAdminInfo } from "./lib/admin-access";
 
 /**
  * Context type for tRPC procedures
@@ -108,14 +109,9 @@ export const adminProcedure = t.procedure.use(async ({ ctx, next }) => {
     });
   }
 
-  // Fetch user with role
-  const [dbUser] = await db
-    .select({ role: plannerUser.role })
-    .from(plannerUser)
-    .where(eq(plannerUser.id, ctx.userId))
-    .limit(1);
-
-  if (!dbUser || (dbUser.role !== "admin" && dbUser.role !== "super_admin")) {
+  // Tilgang på rolle ELLER e-post-allowlist (sentralisert).
+  const info = await getAdminInfo(ctx.userId);
+  if (!info.isAdmin) {
     throw new TRPCError({
       code: "FORBIDDEN",
       message: "Du har ikke tilgang til denne ressursen",
@@ -126,7 +122,7 @@ export const adminProcedure = t.procedure.use(async ({ ctx, next }) => {
     ctx: {
       ...ctx,
       userId: ctx.userId,
-      userRole: dbUser.role,
+      userRole: info.role,
     },
   });
 });

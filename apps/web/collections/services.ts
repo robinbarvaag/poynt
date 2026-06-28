@@ -1,5 +1,6 @@
 import type { CollectionConfig } from "payload";
 import { seoFaqField, seoMetaField } from "../fields/seo-meta";
+import { stockPickerAfterInput } from "../fields/stock-picker-after-input";
 import { generateSlug } from "../lib/generate-slug";
 
 export const Services: CollectionConfig = {
@@ -49,6 +50,9 @@ export const Services: CollectionConfig = {
       label: "Bilde",
       admin: {
         description: "Vises i tjenesteoversikten",
+        components: {
+          afterInput: stockPickerAfterInput,
+        },
       },
     },
     {

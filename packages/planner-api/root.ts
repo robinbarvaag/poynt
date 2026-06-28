@@ -1,6 +1,7 @@
 import { adminRouter } from "./routers/admin";
 import { aiRouter } from "./routers/ai";
 import { declineFeedbackRouter } from "./routers/decline-feedback";
+import { feedbackRouter } from "./routers/feedback";
 import { industryRouter } from "./routers/industry";
 import { membershipRouter } from "./routers/membership";
 import { taskRouter } from "./routers/task";
@@ -24,6 +25,7 @@ export const appRouter = router({
   task: taskRouter,
   membership: membershipRouter,
   declineFeedback: declineFeedbackRouter,
+  feedback: feedbackRouter,
 });
 
 // Export type definition of API

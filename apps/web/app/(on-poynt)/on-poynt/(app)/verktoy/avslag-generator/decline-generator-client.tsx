@@ -5,7 +5,6 @@ import { DeclineResult } from "@/components/decline-generator/decline-result";
 import { trpc } from "@/lib/planner/trpc";
 import type { DeclineRequest } from "@poynt/planner-validators";
 import { PageShell, toast } from "@poynt/ui";
-import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 
 interface SavedResult {
@@ -15,8 +14,6 @@ interface SavedResult {
   createdAt: Date;
 }
 
-type ViewState = "intro" | "saved" | "form" | "result";
-
 interface DeclineGeneratorClientProps {
   initialSavedResult: SavedResult | null;
 }
@@ -24,11 +21,10 @@ interface DeclineGeneratorClientProps {
 export function DeclineGeneratorClient({
   initialSavedResult,
 }: DeclineGeneratorClientProps) {
-  const [view, setView] = useState<ViewState>(
-    initialSavedResult ? "saved" : "intro"
-  );
   const [isLoading, setIsLoading] = useState(false);
-  const [result, setResult] = useState<string | null>(null);
+  const [result, setResult] = useState<string | null>(
+    initialSavedResult?.text ?? null
+  );
   const [savedResult, setSavedResult] = useState<SavedResult | null>(
     initialSavedResult
   );
@@ -44,7 +40,6 @@ export function DeclineGeneratorClient({
         toast.error(response.error || "Noe gikk galt");
       } else if (response.result) {
         setResult(response.result);
-        setView("result");
 
         // Save result to database
         try {
@@ -74,109 +69,25 @@ export function DeclineGeneratorClient({
     setIsLoading(false);
   }
 
-  function startForm() {
-    setView("form");
-  }
-
-  function viewSavedResult() {
-    if (savedResult) {
-      setResult(savedResult.text);
-      setView("result");
-    }
-  }
-
-  function handleReset() {
-    setResult(null);
-    setView("intro");
-  }
-
-  function formatDate(date: Date) {
-    return new Intl.DateTimeFormat("nb-NO", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    }).format(new Date(date));
-  }
-
-  const fadeIn = {
-    hidden: { opacity: 0, y: 10 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
-    exit: { opacity: 0, y: -10, transition: { duration: 0.2 } },
-  };
-
   return (
     <PageShell>
-      <AnimatePresence mode="wait">
-        {/* Clean intro */}
-        {view === "intro" && (
-          <motion.div
-            key="intro"
-            variants={fadeIn}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-          >
-            <DeclineResult mode="intro" onStartForm={startForm} />
-          </motion.div>
-        )}
+      <header className="space-y-1">
+        <h1 className="font-heading font-semibold text-2xl">Si nei med stil</h1>
+        <p className="text-muted-foreground text-sm">
+          Lim inn forespørselen, så får du tre høflige måter å takke nei på —
+          tilpasset situasjonen og klare til å sende.
+        </p>
+      </header>
 
-        {view === "saved" && savedResult && (
-          <motion.div
-            key="saved"
-            variants={fadeIn}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-          >
-            <DeclineResult
-              mode="result"
-              result={savedResult.text}
-              toolResultId={savedResult.id}
-              onReset={handleReset}
-            />
-          </motion.div>
-        )}
+      <DeclineForm onSubmit={handleSubmit} isLoading={isLoading} />
 
-        {/* Form */}
-        {view === "form" && (
-          <motion.div
-            key="form"
-            variants={fadeIn}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-          >
-            <div className="mb-8 text-center">
-              <h1 className="font-semibold text-2xl tracking-tight">
-                Si nei med stil
-              </h1>
-              <p className="mt-2 text-muted-foreground">
-                Beskriv forespørselen, så får du tre høflige måter å takke nei
-                på.
-              </p>
-            </div>
-            <DeclineForm onSubmit={handleSubmit} isLoading={isLoading} />
-          </motion.div>
-        )}
-
-        {/* Result */}
-        {view === "result" && result && savedResult && (
-          <motion.div
-            key="result"
-            variants={fadeIn}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-          >
-            <DeclineResult
-              mode="result"
-              result={result}
-              toolResultId={savedResult.id}
-              onReset={handleReset}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {result && (
+        <DeclineResult
+          mode="result"
+          result={result}
+          toolResultId={savedResult?.id}
+        />
+      )}
     </PageShell>
   );
 }

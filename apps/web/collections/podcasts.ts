@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { stockPickerAfterInput } from "../fields/stock-picker-after-input";
 import { generateSlug } from "../lib/generate-slug";
 
 export const Podcasts: CollectionConfig = {
@@ -74,6 +75,9 @@ export const Podcasts: CollectionConfig = {
       label: "Cover-bilde",
       admin: {
         description: "Episodebilde - vises i oversikten",
+        components: {
+          afterInput: stockPickerAfterInput,
+        },
       },
     },
     {

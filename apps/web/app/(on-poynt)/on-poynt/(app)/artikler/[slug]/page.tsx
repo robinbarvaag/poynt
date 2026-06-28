@@ -1,4 +1,5 @@
 import { ArticleRichText } from "@/components/article-rich-text";
+import { MediaCredit } from "@/components/media-credit";
 import { PayloadImage } from "@/components/payload-image";
 import { ViewTracker } from "@/components/radar/view-tracker";
 import { extractToc } from "@/lib/extract-toc";
@@ -119,12 +120,15 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         accent="saffron"
         cover={
           cover?.url ? (
-            <PayloadImage
-              media={cover}
-              alt={cover.alt || article.title}
-              fill
-              priority
-            />
+            <>
+              <PayloadImage
+                media={cover}
+                alt={cover.alt || article.title}
+                fill
+                priority
+              />
+              <MediaCredit media={cover} />
+            </>
           ) : undefined
         }
       />

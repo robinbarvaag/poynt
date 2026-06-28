@@ -1,3 +1,4 @@
+import { MediaCredit } from "@/components/media-credit";
 import { PayloadImage } from "@/components/payload-image";
 import { ViewTracker } from "@/components/radar/view-tracker";
 import { formatLongDate } from "@/lib/format";
@@ -124,6 +125,7 @@ export default async function PodcastDetailPage({ params }: PodcastPageProps) {
               className="object-cover"
               priority
             />
+            <MediaCredit media={coverImage} />
           </div>
         )}
 

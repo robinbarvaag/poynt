@@ -8,9 +8,18 @@ import {
   marketingPlanStreamSchema,
   timeframeLabels,
 } from "@poynt/planner-validators";
-import { type DeepPartial, Output, streamText } from "ai";
+import {
+  type DeepPartial,
+  type LanguageModel,
+  type LanguageModelUsage,
+  Output,
+  streamText,
+} from "ai";
 import { flagshipModel } from "./models";
-import { getWorkspaceProfileBlock } from "./profile-context";
+import {
+  getChannelGuideBlock,
+  getWorkspaceProfileBlock,
+} from "./profile-context";
 import { resolveSystemPrompt } from "./prompt-template";
 
 /**
@@ -26,12 +35,22 @@ import { resolveSystemPrompt } from "./prompt-template";
 export async function streamMarketingPlan({
   userId,
   input,
+  model = flagshipModel,
+  systemPromptOverride,
+  includeProfile = true,
 }: {
   userId: string;
   input: MarketingPlanRequest;
+  /** Overstyr modellen (brukes av Modell-laben). Default = flaggskip-modellen. */
+  model?: LanguageModel;
+  /** Overstyr system-prompten (brukes av Modell-laben). Default = DB/fallback. */
+  systemPromptOverride?: string;
+  /** «Felles hjerne»-berikelse på/av (laben skrur den av for ren sammenligning). */
+  includeProfile?: boolean;
 }): Promise<{
   partialOutputStream: AsyncIterable<DeepPartial<MarketingPlanStream>>;
   output: PromiseLike<MarketingPlanStream>;
+  usage: PromiseLike<LanguageModelUsage>;
 }> {
   const {
     industry,
@@ -46,16 +65,23 @@ export async function streamMarketingPlan({
 
   const monthCount = timeframe === "3m" ? 3 : timeframe === "6m" ? 6 : 12;
 
-  const system = await resolveSystemPrompt("marketing-plan-system", {
-    channelCount: monthCount <= 3 ? "1-2" : monthCount <= 6 ? "2-3" : "3-4",
-  });
+  const system =
+    systemPromptOverride ??
+    (await resolveSystemPrompt("marketing-plan-system", {
+      channelCount: monthCount <= 3 ? "1-2" : monthCount <= 6 ? "2-3" : "3-4",
+    }));
 
   const existingActivitiesText =
     existingActivities && existingActivities.length > 0
       ? existingActivities.map((a) => existingActivityLabels[a]).join(", ")
       : "Ingen fast aktivitet";
 
-  const profileBlock = await getWorkspaceProfileBlock(userId);
+  const [profileBlock, channelBlock] = includeProfile
+    ? await Promise.all([
+        getWorkspaceProfileBlock(userId),
+        getChannelGuideBlock(userId),
+      ])
+    : ["", ""];
 
   const prompt = `
 Lag en ${monthCount}-måneders markedsplan for denne bedriften:
@@ -68,11 +94,11 @@ Budsjett: ${budget ? budgetLabels[budget] : "Ikke oppgitt"}
 Eksisterende aktiviteter: ${existingActivitiesText}
 ${targetAudienceDescription ? `Målgruppe: ${targetAudienceDescription}` : ""}
 ${competitors ? `Konkurrenter: ${competitors}` : ""}
-${profileBlock}
+${profileBlock}${channelBlock}
 Lag en praktisk og gjennomførbar plan med fokus på ${marketingGoalLabels[mainGoal].toLowerCase()}. Tidslinjen skal ha nøyaktig ${monthCount} måneder.`;
 
   const result = streamText({
-    model: flagshipModel,
+    model,
     system,
     prompt,
     output: Output.object({ schema: marketingPlanStreamSchema }),
@@ -81,5 +107,6 @@ Lag en praktisk og gjennomførbar plan med fokus på ${marketingGoalLabels[mainG
   return {
     partialOutputStream: result.partialOutputStream,
     output: result.output,
+    usage: result.usage,
   };
 }

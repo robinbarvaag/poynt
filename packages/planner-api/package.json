@@ -20,6 +20,10 @@
       "types": "./lib/marketing-plan.ts",
       "default": "./lib/marketing-plan.ts"
     },
+    "./lib/inquiry-reply": {
+      "types": "./lib/inquiry-reply.ts",
+      "default": "./lib/inquiry-reply.ts"
+    },
     "./lib/yearly-planner": {
       "types": "./lib/yearly-planner.ts",
       "default": "./lib/yearly-planner.ts"
@@ -43,18 +47,26 @@
     "./lib/inspiration": {
       "types": "./lib/inspiration.ts",
       "default": "./lib/inspiration.ts"
+    },
+    "./lib/models": {
+      "types": "./lib/models.ts",
+      "default": "./lib/models.ts"
+    },
+    "./lib/playground": {
+      "types": "./lib/playground.ts",
+      "default": "./lib/playground.ts"
     }
   },
   "scripts": {
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@trpc/server": "^11.0.0",
-    "@poynt/planner-validators": "workspace:*",
-    "@poynt/planner-db": "workspace:*",
-    "@poynt/utils": "workspace:*",
-    "ai": "^6.0.5",
     "@ai-sdk/openai": "^3.0.2",
+    "@poynt/planner-db": "workspace:*",
+    "@poynt/planner-validators": "workspace:*",
+    "@poynt/utils": "workspace:*",
+    "@trpc/server": "^11.0.0",
+    "ai": "^6.0.5",
     "drizzle-orm": "^0.38.3",
     "nanoid": "^5.0.9",
     "zod": "^3.24.0"

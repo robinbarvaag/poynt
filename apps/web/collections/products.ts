@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { stockPickerAfterInput } from "../fields/stock-picker-after-input";
 import { generateSlug } from "../lib/generate-slug";
 
 export const Products: CollectionConfig = {
@@ -104,6 +105,9 @@ export const Products: CollectionConfig = {
       admin: {
         description:
           "Hovedbilde som vises i oversikter og øverst på produktsiden",
+        components: {
+          afterInput: stockPickerAfterInput,
+        },
       },
     },
     {
@@ -272,15 +276,6 @@ export const Products: CollectionConfig = {
       admin: {
         position: "sidebar",
         description: "Deaktiver for å skjule produktet",
-      },
-    },
-    {
-      name: "benefits",
-      type: "json",
-      label: "Fordeler",
-      admin: {
-        description:
-          "Velg fordeler som gjelder for dette produktet (hentes fra Produktinnstillinger)",
       },
     },
     {

@@ -1,6 +1,5 @@
 "use client";
 
-import { ToolIntro, type ToolIntroStep } from "@/components/planner/tool-intro";
 import { trpc } from "@/lib/planner/trpc";
 import { Button } from "@poynt/ui";
 import { toast } from "@poynt/ui";
@@ -8,29 +7,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@poynt/ui";
 import { Icon } from "@poynt/ui/icons";
 import { useMemo, useState } from "react";
 
-const DECLINE_STEPS: ToolIntroStep[] = [
-  {
-    icon: "zap",
-    title: "Kort & konsis",
-    description: "Et raskt og profesjonelt avslag.",
-  },
-  {
-    icon: "heart",
-    title: "Varm & personlig",
-    description: "Et empatisk avslag med en kort forklaring.",
-  },
-  {
-    icon: "lightbulb",
-    title: "Med alternativ",
-    description: "Et nei som peker på andre løsninger.",
-  },
-];
-
 interface DeclineResultProps {
   result?: string;
-  onReset?: () => void;
-  mode?: "intro" | "result";
-  onStartForm?: () => void;
+  mode?: "result";
   toolResultId?: string;
 }
 
@@ -40,34 +19,7 @@ interface Variant {
   content: string;
 }
 
-export function DeclineResult({
-  result,
-  onReset,
-  mode = "result",
-  onStartForm,
-  toolResultId,
-}: DeclineResultProps) {
-  // Intro mode
-  if (mode === "intro") {
-    return (
-      <ToolIntro
-        icon="message-square-off"
-        title="Si nei med stil"
-        description="Profesjonelle avslag som bevarer relasjoner. Beskriv forespørselen, så får du tre høflige måter å takke nei på — tilpasset situasjonen."
-        steps={DECLINE_STEPS}
-        footnote="Under 1 minutt • Helt gratis"
-      >
-        <div>
-          <Button onClick={onStartForm} className="gap-2">
-            <Icon name="message-square-off" className="size-4" />
-            Lag mitt avslag
-          </Button>
-        </div>
-      </ToolIntro>
-    );
-  }
-
-  // Result mode
+export function DeclineResult({ result, toolResultId }: DeclineResultProps) {
   if (!result) {
     return null;
   }
@@ -201,17 +153,6 @@ export function DeclineResult({
           <Icon name="mail" className="size-4" />
           Send som e-post
         </Button>
-        {onReset && (
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-2"
-            onClick={onReset}
-          >
-            <Icon name="refresh" className="size-4" />
-            Lag nytt
-          </Button>
-        )}
       </div>
     </div>
   );

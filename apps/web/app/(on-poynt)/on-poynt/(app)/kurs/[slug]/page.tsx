@@ -1,3 +1,4 @@
+import { MediaCredit } from "@/components/media-credit";
 import { PayloadImage } from "@/components/payload-image";
 import { CoursePlayer } from "@/components/planner/courses/course-player";
 import { ViewTracker } from "@/components/radar/view-tracker";
@@ -77,12 +78,15 @@ export default async function KursDetailPage({ params }: CoursePageProps) {
         ctaHref="#innhold"
         cover={
           cover?.url ? (
-            <PayloadImage
-              media={cover}
-              alt={cover.alt || course.title}
-              fill
-              priority
-            />
+            <>
+              <PayloadImage
+                media={cover}
+                alt={cover.alt || course.title}
+                fill
+                priority
+              />
+              <MediaCredit media={cover} />
+            </>
           ) : undefined
         }
       />

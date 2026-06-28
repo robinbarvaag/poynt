@@ -92,6 +92,7 @@ export const toolIds = [
   "marketing-plan",
   "yearly-planner",
   "podcast-to-content",
+  "inquiry-reply",
 ] as const;
 export type ToolId = (typeof toolIds)[number];
 
@@ -101,6 +102,7 @@ export const toolIdLabels: Record<ToolId, string> = {
   "marketing-plan": "Markedsplan",
   "yearly-planner": "Årshjul",
   "podcast-to-content": "Podcast til innhold",
+  "inquiry-reply": "Svar på henvendelser",
 };
 
 export const toolResultSchema = z.object({

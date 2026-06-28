@@ -51,6 +51,12 @@ export const toolboxNavItems: NavItem[] = [
     requiresAi: true,
   },
   {
+    title: "Svar på henvendelser",
+    url: "/on-poynt/verktoy/svar-pa-henvendelser",
+    icon: "send",
+    requiresAi: true,
+  },
+  {
     title: "Podcast til innhald",
     url: "/on-poynt/verktoy/podcast-til-innhald",
     icon: "mic",
@@ -86,6 +92,13 @@ export const businessNavItems: NavItem[] = [
     icon: "target",
   },
 ];
+
+/** Tilbakemelding / ønsker — lever litt for seg selv, nær bunnen av menyen. */
+export const feedbackNavItem: NavItem = {
+  title: "Tilbakemelding",
+  url: "/on-poynt/tilbakemelding",
+  icon: "message-square",
+};
 
 /** Abonnement/konto — lever i bruker-menyen (NavUser), ikke i hovedmenyen. */
 export const accountMenuItem: NavItem = {
@@ -158,6 +171,14 @@ export const tools: {
       "Last opp ein podkast-episode og få blogginnlegg, sosiale postar og kapittelmerke automatisk.",
     href: "/on-poynt/verktoy/podcast-til-innhald",
     benefits: ["Whisper AI", "3 format på ein gong"],
+  },
+  {
+    icon: "send",
+    title: "Svar på henvendelser",
+    description:
+      "Lim inn en anmeldelse eller kundehenvendelse og få ferdige svar i bedriftens stemme.",
+    href: "/on-poynt/verktoy/svar-pa-henvendelser",
+    benefits: ["2-3 varianter", "Klar til å sende"],
   },
 ];
 

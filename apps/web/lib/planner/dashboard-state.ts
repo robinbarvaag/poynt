@@ -5,7 +5,7 @@ import type { JourneyStage, NextStepHeroProps, StageStatus } from "@poynt/ui";
 export interface DashboardState {
   hero: NextStepHeroProps;
   stages: JourneyStage[];
-  /** Alle fire fasene er gjort — dashbordet går over i «rytme»-modus. */
+  /** Alle fem fasene er gjort — dashbordet går over i «rytme»-modus. */
   fullySetUp: boolean;
   /** Den visuelle merkevaren (for et lite glimt på dashbordet). */
   brandIdentity: BrandIdentity | null;
@@ -29,15 +29,24 @@ const STAGE_DEFS: Omit<JourneyStage, "status" | "meta">[] = [
   },
   {
     step: 2,
-    surface: "saffron",
+    surface: "cream",
     icon: "compass",
-    title: "Finn retningen",
-    payoff: "Finn kanalene du bør satse på — og en strategi å følge.",
+    title: "Finn kanalene",
+    payoff: "Få de 3 kanalene som passer bedriften din best — og hvorfor.",
+    href: KANALVEILEDER,
+    cta: "Finn kanaler",
+  },
+  {
+    step: 3,
+    surface: "saffron",
+    icon: "bar-chart",
+    title: "Lag markedsplanen",
+    payoff: "Gjør kanalvalget om til en konkret plan du kan følge.",
     href: MARKEDSPLAN,
     cta: "Lag markedsplan",
   },
   {
-    step: 3,
+    step: 4,
     surface: "salmon",
     icon: "calendar-days",
     title: "Planlegg året",
@@ -46,7 +55,7 @@ const STAGE_DEFS: Omit<JourneyStage, "status" | "meta">[] = [
     cta: "Lag årshjul",
   },
   {
-    step: 4,
+    step: 5,
     surface: "primary",
     icon: "send",
     title: "Lag & del innhold",
@@ -58,6 +67,7 @@ const STAGE_DEFS: Omit<JourneyStage, "status" | "meta">[] = [
 
 const DONE_META = [
   "Profilen er fylt ut",
+  "Kanalene er valgt",
   "Planen er klar",
   "Årshjulet er laget",
   "Du lager innhold",
@@ -66,6 +76,7 @@ const DONE_META = [
 const UPCOMING_META = [
   "",
   "Etter at profilen er fylt",
+  "Etter at du har valgt kanaler",
   "Etter at du har en plan",
   "Etter at året er planlagt",
 ];
@@ -81,11 +92,18 @@ const HERO_BY_PHASE: NextStepHeroProps[] = [
   },
   {
     eyebrow: "Neste steg",
-    title: "På tide å finne retningen",
-    body: "Vi finner kanalene som passer bedriften din, og lager en plan du kan følge.",
+    title: "Finn kanalene som passer bedriften din",
+    body: "Vi peker ut de 3 kanalene du bør satse på — og hvorfor. Da vet du hvor du skal være før du legger planen.",
+    accent: "cream",
+    primary: { label: "Finn kanaler", href: KANALVEILEDER, icon: "compass" },
+  },
+  {
+    eyebrow: "Neste steg",
+    title: "Gjør kanalene om til en plan",
+    body: "Du vet hvilke kanaler som passer. Nå lager vi en konkret markedsplan som bygger på dem.",
     accent: "saffron",
     primary: { label: "Lag markedsplan", href: MARKEDSPLAN, icon: "bar-chart" },
-    secondary: { label: "Finn kanaler", href: KANALVEILEDER, icon: "compass" },
+    secondary: { label: "Se kanalene", href: KANALVEILEDER, icon: "compass" },
   },
   {
     eyebrow: "Neste steg",
@@ -124,8 +142,9 @@ const HERO_DONE: NextStepHeroProps = {
 export async function getDashboardState(): Promise<DashboardState> {
   const trpc = await createServerCaller();
 
-  const [profile, plans, years, posts] = await Promise.all([
+  const [profile, channels, plans, years, posts] = await Promise.all([
     trpc.workspaceProfile.get().catch(() => null),
+    trpc.toolResult.list({ toolId: "channel-guide", limit: 1 }).catch(() => []),
     trpc.toolResult
       .list({ toolId: "marketing-plan", limit: 1 })
       .catch(() => []),
@@ -147,6 +166,7 @@ export async function getDashboardState(): Promise<DashboardState> {
 
   const done = [
     profileComplete,
+    channels.length > 0,
     plans.length > 0,
     years.length > 0,
     posts.length > 0,

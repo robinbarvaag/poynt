@@ -10,6 +10,9 @@ export * from "./content-radar";
 // Workspace and subscription tables
 export * from "./workspace";
 
+// Feedback / funksjonsønsker fra medlemmer
+export * from "./feedback";
+
 // Membership applications (søk → godkjenn)
 export * from "./membership-application";
 

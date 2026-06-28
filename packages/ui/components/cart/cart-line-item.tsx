@@ -36,63 +36,70 @@ export function CartLineItem({
   const showStepper = quantity != null && (onIncrement || onDecrement);
 
   return (
-    <li className="group flex items-center gap-4 rounded-2xl border border-border bg-card p-3 transition-colors hover:border-foreground/20">
+    <li className="group flex items-stretch gap-3 rounded-2xl border border-border bg-card p-3 transition-colors hover:border-foreground/20">
       <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-muted">
         {image ?? <ShoppingBag className="size-6 text-muted-foreground" />}
       </div>
 
-      <div className="min-w-0 flex-1">
-        <p className="truncate font-medium">{name}</p>
-        {variantLabel && (
-          <p className="truncate text-muted-foreground text-xs">
-            {variantLabel}
-          </p>
-        )}
-        <p className="text-muted-foreground text-sm">{priceLabel}</p>
-      </div>
+      <div className="flex min-w-0 flex-1 flex-col gap-2">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <p className="truncate font-medium">{name}</p>
+            {variantLabel && (
+              <p className="truncate text-muted-foreground text-xs">
+                {variantLabel}
+              </p>
+            )}
+          </div>
 
-      {showStepper && (
-        <div className="flex items-center gap-1 rounded-full border border-border p-0.5">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            aria-label="Færre"
-            className="size-7 rounded-full"
-            onClick={onDecrement}
-            disabled={quantity != null && quantity <= 1}
-          >
-            <Minus className="size-3.5" />
-          </Button>
-          <span className="min-w-5 text-center font-medium text-sm tabular-nums">
-            {quantity}
-          </span>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            aria-label="Fleire"
-            className="size-7 rounded-full"
-            onClick={onIncrement}
-            disabled={incrementDisabled}
-          >
-            <Plus className="size-3.5" />
-          </Button>
+          {onRemove && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              aria-label={`${removeLabel} ${name}`}
+              className="-mr-1 -mt-1 size-8 shrink-0 text-muted-foreground hover:text-destructive"
+              onClick={onRemove}
+            >
+              <Trash2 className="size-4" />
+            </Button>
+          )}
         </div>
-      )}
 
-      {onRemove && (
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          aria-label={`${removeLabel} ${name}`}
-          className="size-8 text-muted-foreground hover:text-destructive"
-          onClick={onRemove}
-        >
-          <Trash2 className="size-4" />
-        </Button>
-      )}
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-muted-foreground text-sm">{priceLabel}</p>
+
+          {showStepper && (
+            <div className="flex items-center gap-1 rounded-full border border-border p-0.5">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                aria-label="Færre"
+                className="size-7 rounded-full"
+                onClick={onDecrement}
+                disabled={quantity != null && quantity <= 1}
+              >
+                <Minus className="size-3.5" />
+              </Button>
+              <span className="min-w-5 text-center font-medium text-sm tabular-nums">
+                {quantity}
+              </span>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                aria-label="Fleire"
+                className="size-7 rounded-full"
+                onClick={onIncrement}
+                disabled={incrementDisabled}
+              >
+                <Plus className="size-3.5" />
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
     </li>
   );
 }

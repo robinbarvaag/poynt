@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { stockPickerAfterInput } from "../fields/stock-picker-after-input";
 import { generateSlug } from "../lib/generate-slug";
 
 export const BlogPosts: CollectionConfig = {
@@ -64,6 +65,11 @@ export const BlogPosts: CollectionConfig = {
       type: "upload",
       relationTo: "media",
       label: "Hovedbilde",
+      admin: {
+        components: {
+          afterInput: stockPickerAfterInput,
+        },
+      },
     },
     {
       name: "content",

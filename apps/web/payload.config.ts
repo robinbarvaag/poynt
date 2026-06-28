@@ -34,7 +34,6 @@ import {
   Header,
   Homepage,
   PodcastPage,
-  ProductSettings,
   ProductsPage,
   ServicesPage,
   SiteSettings,
@@ -92,7 +91,6 @@ export default buildConfig({
     Header,
     Footer,
     SiteSettings,
-    ProductSettings,
   ],
   admin: {
     user: "users",

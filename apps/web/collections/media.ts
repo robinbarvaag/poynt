@@ -5,6 +5,12 @@ export const Media: CollectionConfig = {
   folders: true,
   admin: {
     group: "Innhold",
+    components: {
+      // «Finn bilde»-knapp over media-lista: søk i Unsplash/Giphy og importér.
+      beforeListTable: [
+        "/admin/components/media/stock-picker#StockMediaPicker",
+      ],
+    },
   },
   access: {
     read: ({ req: { user } }) => {
@@ -44,6 +50,18 @@ export const Media: CollectionConfig = {
     mimeTypes: ["image/*", "application/pdf"],
   },
   fields: [
+    // «Finn bilde»-knapp øverst i skjemaet, så den også er tilgjengelig når man
+    // oppretter et nytt media (inkl. «Opprett ny» fra et bildefelt), ikke bare
+    // over media-lista.
+    {
+      name: "stockPicker",
+      type: "ui",
+      admin: {
+        components: {
+          Field: "/admin/components/media/stock-picker#StockMediaPicker",
+        },
+      },
+    },
     {
       name: "alt",
       type: "text",
@@ -57,6 +75,38 @@ export const Media: CollectionConfig = {
       admin: {
         description: "Kun synlig for innloggede brukere",
         position: "sidebar",
+      },
+    },
+    // Kilde-/krediteringsfelt fylles automatisk når bildet importeres fra
+    // Pexels/Giphy (se admin/actions/stock-media.ts). Tomme for opplastede
+    // bilder.
+    {
+      name: "source",
+      type: "text",
+      label: "Kilde",
+      admin: {
+        readOnly: true,
+        position: "sidebar",
+        description: "Hvor bildet kom fra (pexels / giphy / opplastet).",
+      },
+    },
+    {
+      name: "creditLine",
+      type: "text",
+      label: "Kreditering",
+      admin: {
+        position: "sidebar",
+        description: "Vises som bildekreditering, f.eks. «Foto: … / Unsplash».",
+      },
+    },
+    {
+      name: "sourceUrl",
+      type: "text",
+      label: "Kilde-URL",
+      admin: {
+        readOnly: true,
+        position: "sidebar",
+        description: "Lenke til originalen hos kilden.",
       },
     },
   ],

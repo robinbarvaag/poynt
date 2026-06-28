@@ -128,7 +128,6 @@ export interface Config {
     header: Header;
     footer: Footer;
     'site-settings': SiteSetting;
-    productSettings: ProductSetting;
   };
   globalsSelect: {
     homepage: HomepageSelect<false> | HomepageSelect<true>;
@@ -139,7 +138,6 @@ export interface Config {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
-    productSettings: ProductSettingsSelect<false> | ProductSettingsSelect<true>;
   };
   locale: null;
   user: User & {
@@ -295,6 +293,18 @@ export interface Media {
    * Kun synlig for innloggede brukere
    */
   isPrivate?: boolean | null;
+  /**
+   * Hvor bildet kom fra (pexels / giphy / opplastet).
+   */
+  source?: string | null;
+  /**
+   * Vises som bildekreditering, f.eks. «Foto: … / Unsplash».
+   */
+  creditLine?: string | null;
+  /**
+   * Lenke til originalen hos kilden.
+   */
+  sourceUrl?: string | null;
   folder?: (number | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
@@ -782,18 +792,6 @@ export interface Product {
    * Deaktiver for å skjule produktet
    */
   active?: boolean | null;
-  /**
-   * Velg fordeler som gjelder for dette produktet (hentes fra Produktinnstillinger)
-   */
-  benefits?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
   categories?: (number | Category)[] | null;
   meta?: {
     title?: string | null;
@@ -2712,6 +2710,9 @@ export interface CategoriesSelect<T extends boolean = true> {
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   isPrivate?: T;
+  source?: T;
+  creditLine?: T;
+  sourceUrl?: T;
   folder?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -2802,7 +2803,6 @@ export interface ProductsSelect<T extends boolean = true> {
       };
   applyUrl?: T;
   active?: T;
-  benefits?: T;
   categories?: T;
   meta?:
     | T
@@ -3440,31 +3440,6 @@ export interface SiteSetting {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "productSettings".
- */
-export interface ProductSetting {
-  id: number;
-  /**
-   * Definer fordeler som kan velges på produkter (f.eks. 'Livstidstilgang', 'PDF-nedlasting')
-   */
-  benefits?:
-    | {
-        /**
-         * Teksten som vises til kunden
-         */
-        label: string;
-        /**
-         * Unik identifikator (f.eks. 'lifetime-access')
-         */
-        key: string;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "homepage_select".
  */
 export interface HomepageSelect<T extends boolean = true> {
@@ -3704,22 +3679,6 @@ export interface SiteSettingsSelect<T extends boolean = true> {
     | {
         platform?: T;
         url?: T;
-        id?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "productSettings_select".
- */
-export interface ProductSettingsSelect<T extends boolean = true> {
-  benefits?:
-    | T
-    | {
-        label?: T;
-        key?: T;
         id?: T;
       };
   updatedAt?: T;

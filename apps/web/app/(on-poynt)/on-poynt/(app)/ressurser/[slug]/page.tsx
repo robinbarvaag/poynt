@@ -1,4 +1,5 @@
 import { GuideBlocks } from "@/components/guides/guide-blocks";
+import { MediaCredit } from "@/components/media-credit";
 import { PayloadImage } from "@/components/payload-image";
 import { ViewTracker } from "@/components/radar/view-tracker";
 import { extractGuideToc } from "@/lib/extract-guide-toc";
@@ -111,12 +112,15 @@ export default async function GuidePage({ params }: GuidePageProps) {
         accent={accentBySection[guide.section]}
         cover={
           cover?.url ? (
-            <PayloadImage
-              media={cover}
-              alt={cover.alt || guide.title}
-              fill
-              priority
-            />
+            <>
+              <PayloadImage
+                media={cover}
+                alt={cover.alt || guide.title}
+                fill
+                priority
+              />
+              <MediaCredit media={cover} />
+            </>
           ) : undefined
         }
       />
