@@ -1,0 +1,1 @@
+ALTER TABLE "planner"."planner_workspace_profile" ADD COLUMN "podcast_feed_url" text;

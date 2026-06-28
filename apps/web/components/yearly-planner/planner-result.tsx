@@ -12,7 +12,6 @@ import type {
   YearlyPlanStream,
 } from "@poynt/planner-validators";
 import {
-  AiBadge,
   Button,
   Card,
   CardContent,
@@ -51,6 +50,23 @@ interface PlannerResultProps {
   business: BusinessIdentity;
 }
 
+// Norske månedsnavn (jan→des) til hjulets 12 faste plasser, inkl. måneder som
+// ikke er generert (vises disabled).
+const MONTH_NAMES_NB = [
+  "Januar",
+  "Februar",
+  "Mars",
+  "April",
+  "Mai",
+  "Juni",
+  "Juli",
+  "August",
+  "September",
+  "Oktober",
+  "November",
+  "Desember",
+];
+
 // Roterende «jobber»-meldinger mens vi venter på de første tokenene.
 const STREAM_MESSAGES = [
   "Planlegger året ditt …",
@@ -68,7 +84,15 @@ export function PlannerResult({
 }: PlannerResultProps) {
   // Standard = kalender (arbeidsflaten). «Oversikt» = hjulet (zoom ut).
   const [view, setView] = useState<"calendar" | "wheel">("calendar");
-  const [monthIndex, setMonthIndex] = useState(0);
+  // Lander på inneværende måned hvis den finnes i planen (et lagret årshjul har
+  // alle månedene; et nytt starter uansett på inneværende måned). Ellers første.
+  const [monthIndex, setMonthIndex] = useState(() => {
+    const currentMonthNum = new Date().getMonth() + 1;
+    const idx = (plan?.months ?? []).findIndex(
+      (m) => m?.month === currentMonthNum
+    );
+    return idx >= 0 ? idx : 0;
+  });
   const [messageTick, setMessageTick] = useState(0);
   // Planlagte/lagrede innlegg — løftet hit så både kalenderen og «Oversikt»-
   // heatmap-et deler samme kilde (hentes på nytt når refreshKey endrer seg).
@@ -157,8 +181,8 @@ export function PlannerResult({
       className="space-y-8"
     >
       {/* Header */}
-      <div className="space-y-3 text-center">
-        <div className="mx-auto inline-flex size-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+      <div className="space-y-3">
+        <div className="inline-flex size-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
           <Icon name="calendar-days" className="size-8" />
         </div>
         <Heading size="h2">
@@ -168,17 +192,14 @@ export function PlannerResult({
           <Text>{plan.summary}</Text>
         ) : (
           isStreaming && (
-            <div className="mx-auto max-w-md space-y-2">
-              <Skeleton className="mx-auto h-4 w-3/4" />
-              <Skeleton className="mx-auto h-4 w-1/2" />
+            <div className="max-w-md space-y-2">
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-4 w-1/2" />
             </div>
           )
         )}
-        <div className="flex justify-center">
-          <AiBadge />
-        </div>
         {isStreaming && (
-          <span className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+          <span className="flex items-center gap-2 text-sm text-muted-foreground">
             <Icon name="loader" className="size-4 animate-spin" />
             <AnimatePresence mode="wait">
               <motion.span
@@ -197,7 +218,7 @@ export function PlannerResult({
 
       {/* View Toggle */}
       {months.length > 0 && (
-        <div className="flex justify-center">
+        <div className="flex justify-start">
           <Tabs
             value={view}
             onValueChange={(v) => setView(v as "calendar" | "wheel")}
@@ -233,14 +254,45 @@ export function PlannerResult({
             </div>
           </div>
 
-          {/* Month segments — med heatmap (antall planlagte innlegg) */}
-          {months.map((month, index) => {
-            const angle = (index * 30 - 90) * (Math.PI / 180);
+          {/* 12 faste plasser (jan→des). En generert måned legges på sin
+              kalenderplass; passerte/ikke-genererte måneder vises disabled,
+              men tar fortsatt plassen i ringen. */}
+          {Array.from({ length: 12 }, (_, slot) => {
+            const monthNumber = slot + 1;
+            const angle = (slot * 30 - 90) * (Math.PI / 180);
             const radius = 42; // percentage from center
             const x = 50 + radius * Math.cos(angle);
             const y = 50 + radius * Math.sin(angle);
 
-            const count = countByMonth.get(month.month ?? index + 1) ?? 0;
+            const planIndex = months.findIndex((m) => m.month === monthNumber);
+            const month = planIndex >= 0 ? months[planIndex] : null;
+            const label = (month?.monthName || MONTH_NAMES_NB[slot]).slice(
+              0,
+              3
+            );
+
+            // Disabled plassholder for måneder vi ikke har planlagt.
+            if (!month) {
+              return (
+                <motion.div
+                  key={`slot-${monthNumber}`}
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3 }}
+                  className="-translate-x-1/2 -translate-y-1/2 absolute transform cursor-default"
+                  style={{ left: `${x}%`, top: `${y}%` }}
+                  title="Ikke planlagt"
+                >
+                  <div className="flex size-20 flex-col items-center justify-center rounded-full border-2 border-border border-dashed bg-muted/30 text-muted-foreground/40 sm:size-24">
+                    <span className="font-bold text-lg sm:text-xl">
+                      {label}
+                    </span>
+                  </div>
+                </motion.div>
+              );
+            }
+
+            const count = countByMonth.get(monthNumber) ?? 0;
             const heat =
               count === 0
                 ? "border-border bg-muted"
@@ -252,18 +304,18 @@ export function PlannerResult({
 
             return (
               <motion.div
-                key={month.monthName ?? `month-${index}`}
+                key={`slot-${monthNumber}`}
                 initial={{ opacity: 0, scale: 0 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.3 }}
                 className="-translate-x-1/2 -translate-y-1/2 absolute transform cursor-pointer"
                 style={{ left: `${x}%`, top: `${y}%` }}
-                onClick={() => goToMonth(index)}
+                onClick={() => goToMonth(planIndex)}
               >
                 <div
                   className={cn(
                     "relative flex size-20 flex-col items-center justify-center rounded-full border-2 text-foreground transition-all duration-300 hover:scale-110 hover:border-primary hover:shadow-lg sm:size-24",
-                    monthIndex === index
+                    monthIndex === planIndex
                       ? "border-primary bg-primary/15 text-primary ring-2 ring-primary/30"
                       : heat
                   )}
@@ -273,9 +325,7 @@ export function PlannerResult({
                       {count}
                     </span>
                   )}
-                  <span className="font-bold text-lg sm:text-xl">
-                    {(month.monthName ?? "").slice(0, 3)}
-                  </span>
+                  <span className="font-bold text-lg sm:text-xl">{label}</span>
                   <span className="line-clamp-1 max-w-16 px-1 text-center text-muted-foreground text-xs">
                     {(month.theme ?? "").split(" ").slice(0, 2).join(" ")}
                   </span>
@@ -288,7 +338,8 @@ export function PlannerResult({
       {months.length > 0 && view === "wheel" && (
         <p className="text-center text-muted-foreground text-xs">
           Tallet viser hvor mange innlegg du har planlagt den måneden. Trykk en
-          måned for å åpne den i kalenderen.
+          måned for å åpne den i kalenderen. Grå, stiplede måneder er passert og
+          ikke planlagt.
         </p>
       )}
 

@@ -13,12 +13,14 @@
         "Hashtagger på LinkedIn kan du også bare skippe.",
         "Men hva er keywords? Keywords på norsk er søkeord eller nøkkelord, altså de ordene og begrepene vi bruker når vi for eksempel søker etter noe på nett.",
         "Når vi snakker om keywords, tenker mange fort på Google og søkemotorer, men nøkkelord er også gull verdt i sosiale medier. De kan hjelpe deg med å treffe riktig målgruppe, trigge algoritmene og gjøre at innholdet ditt faktisk blir sett. Når du jobber med tekst og innhold bør du tenke gjennom hvilke ord du bruker, og hvordan de kan jobbe for deg.",
-        { "list": [
-          "Ord i teksten din forteller algoritmene hva innlegget handler om — Algoritmene på plattformene trenger hjelp til å forstå hva du deler, og nøkkelordene du bruker i teksten din er med på å bestemme hvem som ser innlegget ditt.",
-          "Keywords handler om å snakke språket til målgruppen din — Det er ikke nødvendigvis om å bruke spesifikke lange søkefraser, men heller ord og uttrykk som folk i målgruppen din bruker. Det kan være ting de søker på eller ord de kjenner igjen og responderer på. Sørg for at du bygger inn relevante ord gjennom hele innlegget, ikke bare på slutten.",
-          "Følg trender og temaer som engasjerer følgerne dine — Ved å bruke aktuelle ord og trender som følgerne dine er opptatt av, kan du nå ut til et større publikum. Det handler om å holde teksten relevant for tiden, temaet eller hva som er populært nå.",
-          "Test og noter deg hva som fungerer — Det er viktig å prøve forskjellige nøkkelord og se hva som gir best engasjement. Se på hvilke typer tekster som fungerer godt, og juster deretter innholdet ditt for å treffe enda mer presist."
-        ] }
+        {
+          "list": [
+            "Ord i teksten din forteller algoritmene hva innlegget handler om — Algoritmene på plattformene trenger hjelp til å forstå hva du deler, og nøkkelordene du bruker i teksten din er med på å bestemme hvem som ser innlegget ditt.",
+            "Keywords handler om å snakke språket til målgruppen din — Det er ikke nødvendigvis om å bruke spesifikke lange søkefraser, men heller ord og uttrykk som folk i målgruppen din bruker. Det kan være ting de søker på eller ord de kjenner igjen og responderer på. Sørg for at du bygger inn relevante ord gjennom hele innlegget, ikke bare på slutten.",
+            "Følg trender og temaer som engasjerer følgerne dine — Ved å bruke aktuelle ord og trender som følgerne dine er opptatt av, kan du nå ut til et større publikum. Det handler om å holde teksten relevant for tiden, temaet eller hva som er populært nå.",
+            "Test og noter deg hva som fungerer — Det er viktig å prøve forskjellige nøkkelord og se hva som gir best engasjement. Se på hvilke typer tekster som fungerer godt, og juster deretter innholdet ditt for å treffe enda mer presist."
+          ]
+        }
       ]
     }
   ]

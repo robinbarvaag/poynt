@@ -12,6 +12,11 @@ interface BrandBriefSectionProps {
   workspaceId: string;
   businessName?: string;
   disabled?: boolean;
+  /**
+   * Nettside funnet via Brønnøysund-oppslaget i Profil. Forhåndsfyller URL-
+   * feltet så brukeren kan generere merkevarebriefen rett fra crawlen.
+   */
+  defaultUrl?: string;
 }
 
 const splitLines = (text: string): string[] =>
@@ -34,6 +39,7 @@ export function BrandBriefSection({
   workspaceId,
   businessName,
   disabled = false,
+  defaultUrl,
 }: BrandBriefSectionProps) {
   const [loading, setLoading] = useState(true);
   const [screen, setScreen] = useState<"input" | "brief">("input");
@@ -65,6 +71,14 @@ export function BrandBriefSection({
     setAvoidText((brief.phrasesWeAvoid ?? []).join("\n"));
     setSourceUrl(brief.sourceUrl ?? null);
   }, []);
+
+  // Forhåndsfyll URL-feltet når Profil-oppslaget finner en nettside.
+  useEffect(() => {
+    if (defaultUrl) {
+      setUrl(defaultUrl);
+      setUsePaste(false);
+    }
+  }, [defaultUrl]);
 
   // Last inn ev. eksisterende brief.
   useEffect(() => {
@@ -176,25 +190,33 @@ export function BrandBriefSection({
     return (
       <div className="space-y-5">
         {usePaste ? (
-          <div className="space-y-2">
-            <FieldLabel>Lim inn tekst om bedriften</FieldLabel>
+          <div className="space-y-1.5">
+            <FieldLabel>Tekst om bedriften</FieldLabel>
+            <p className="text-muted-foreground text-xs">
+              Lim inn tekst fra nettsiden, om-siden eller en beskrivelse av
+              bedriften. Jo mer, jo bedre treffer briefen.
+            </p>
             <Textarea
               value={pastedText}
               onChange={(e) => setPastedText(e.target.value)}
-              placeholder="Lim inn tekst fra nettsiden, om-siden, eller en beskrivelse av bedriften …"
               className="min-h-40 resize-none"
               disabled={disabled}
+              aria-label="Tekst om bedriften"
             />
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <FieldLabel>Nettside-URL</FieldLabel>
+            <p className="text-muted-foreground text-xs">
+              Adressen til bedriftens nettside, f.eks. https://dittfirma.no. Vi
+              leser forsiden og om-siden.
+            </p>
             <Input
               type="url"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://bedriften.no"
               disabled={disabled}
+              aria-label="Nettside-URL"
             />
           </div>
         )}

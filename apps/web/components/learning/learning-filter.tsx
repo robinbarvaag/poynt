@@ -34,5 +34,7 @@ export function LearningFilter() {
     [router, searchParams]
   );
 
-  return <ContentFilterBar options={OPTIONS} value={value} onChange={onChange} />;
+  return (
+    <ContentFilterBar options={OPTIONS} value={value} onChange={onChange} />
+  );
 }

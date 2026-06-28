@@ -3,7 +3,6 @@
 import { priorityConfig } from "@/lib/constants";
 import type { MarketingPlanStream } from "@poynt/planner-validators";
 import {
-  AiBadge,
   Badge,
   Button,
   Card,
@@ -152,10 +151,7 @@ export function PlanResult({
         {...sectionMotion}
         className="flex items-center justify-between gap-3"
       >
-        <div className="flex items-center gap-2">
-          <Heading size="h2">Din markedsplan</Heading>
-          <AiBadge />
-        </div>
+        <Heading size="h2">Din markedsplan</Heading>
         {isStreaming && (
           <span className="flex items-center gap-2 text-muted-foreground text-sm">
             <Icon name="loader" className="size-4 animate-spin" />

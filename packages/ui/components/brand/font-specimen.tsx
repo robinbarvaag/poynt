@@ -1,13 +1,18 @@
 "use client";
 
 import { cn } from "../../lib/utils";
-import { useWebFont } from "./use-web-font";
+import { useCustomFont, useWebFont } from "./use-web-font";
 
 export interface FontSpecimenProps {
   /** Font-familienavn, f.eks. «Bricolage Grotesque». */
   fontFamily: string;
+  /**
+   * URL til en egen-opplastet font (woff/woff2). Når satt lastes fonten via
+   * @font-face i stedet for Google Fonts.
+   */
+  fontUrl?: string | null;
   /** Rolle-etikett over prøven («Overskrift», «Brødtekst»). */
-  role?: string;
+  label?: string;
   /** Prøvetekst — default «Aa Bb Cc». */
   sampleText?: string;
   className?: string;
@@ -20,11 +25,15 @@ export interface FontSpecimenProps {
  */
 export function FontSpecimen({
   fontFamily,
-  role,
+  fontUrl,
+  label,
   sampleText = "Aa Bb Cc",
   className,
 }: FontSpecimenProps) {
-  useWebFont(fontFamily);
+  // Egen-opplastet font → @font-face; ellers Google Fonts. Begge er no-op når
+  // argumentet er tomt, så bare den relevante kjører.
+  useWebFont(fontUrl ? null : fontFamily);
+  useCustomFont(fontFamily, fontUrl);
 
   return (
     <div
@@ -33,9 +42,9 @@ export function FontSpecimen({
         className
       )}
     >
-      {role && (
+      {label && (
         <span className="font-medium text-muted-foreground text-xs uppercase tracking-[0.14em]">
-          {role}
+          {label}
         </span>
       )}
       <p

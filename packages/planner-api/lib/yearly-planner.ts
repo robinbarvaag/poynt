@@ -41,10 +41,29 @@ export async function streamYearlyPlan({
     focusTopics,
   } = input;
 
-  const currentYear = new Date().getFullYear();
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth() + 1; // 1-12
+  const monthNamesNb = [
+    "januar",
+    "februar",
+    "mars",
+    "april",
+    "mai",
+    "juni",
+    "juli",
+    "august",
+    "september",
+    "oktober",
+    "november",
+    "desember",
+  ];
+  const currentMonthName = monthNamesNb[now.getMonth()];
+  const remainingMonths = 12 - currentMonth + 1;
 
   const system = await resolveSystemPrompt("yearly-planner-system", {
     currentYear,
+    currentMonthName,
   });
 
   const channelsText = channels.map((c) => publishChannelLabels[c]).join(", ");
@@ -52,7 +71,7 @@ export async function streamYearlyPlan({
   const profileBlock = await getWorkspaceProfileBlock(userId);
 
   const prompt = `
-Lag en komplett årsplan for innholdspublisering for ${currentYear}:
+Lag en innholdsplan for resten av ${currentYear}, fra og med ${currentMonthName}:
 
 Bransje: ${industry}
 Kanaler: ${channelsText}
@@ -62,7 +81,7 @@ ${tone ? `Tone of voice: ${contentToneLabels[tone]}` : ""}
 ${importantDates ? `Viktige datoer for bedriften: ${importantDates}` : ""}
 ${focusTopics ? `Fokusområder/temaer: ${focusTopics}` : ""}
 ${profileBlock}
-Lag en praktisk årsplan med konkrete innholdsideer for alle 12 måneder, tilpasset bransjen og norske sesonger. Sett "year" til ${currentYear}.`;
+Lag en praktisk plan med konkrete innholdsideer, tilpasset bransjen og norske sesonger. Planen skal dekke månedene fra og med ${currentMonthName} (måned ${currentMonth}) til og med desember — ${remainingMonths} måneder totalt. IKKE lag innhold for måneder som allerede er passert i år. Bruk riktig "month"-nummer (${currentMonth}–12) og norsk "monthName" for hver måned. Sett "year" til ${currentYear}.`;
 
   const result = streamText({
     model: flagshipModel,

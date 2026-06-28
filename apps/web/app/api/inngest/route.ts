@@ -1,6 +1,6 @@
-import { serve } from "inngest/next";
 import { inngest } from "@/lib/inngest/client";
 import { functions } from "@/lib/inngest/functions";
+import { serve } from "inngest/next";
 
 /**
  * Inngest serve-endepunkt. Lokalt: kjør `npx inngest-cli@latest dev` og åpne

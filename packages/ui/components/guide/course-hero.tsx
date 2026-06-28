@@ -85,7 +85,10 @@ export function CourseHero({
         {meta && meta.length > 0 && (
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-foreground/60 text-sm">
             {meta.map((item) => (
-              <span key={item.label} className="inline-flex items-center gap-1.5">
+              <span
+                key={item.label}
+                className="inline-flex items-center gap-1.5"
+              >
                 {item.icon && <Icon name={item.icon} className="size-4" />}
                 {item.label}
               </span>

@@ -110,8 +110,6 @@ export {
   type BadgeProps,
 } from "./components/badge";
 
-export { AiBadge } from "./components/ai-badge";
-
 export {
   Sheet,
   SheetClose,
@@ -252,6 +250,7 @@ export {
   SelectContent,
   SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "./components/select";
@@ -457,6 +456,7 @@ export {
   type SwatchGridColor,
   type SwatchGridProps,
   useWebFont,
+  useCustomFont,
 } from "./components/brand";
 
 export { Switch };

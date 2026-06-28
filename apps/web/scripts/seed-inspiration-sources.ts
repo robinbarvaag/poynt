@@ -84,4 +84,6 @@ for (const s of SOURCES) {
   console.log(`✓ ${s.label}${s.note ? `  (${s.note})` : ""}`);
 }
 
-console.log(`\nFerdig: ${created} nye kilder lagt til (${SOURCES.length} totalt i pakken).`);
+console.log(
+  `\nFerdig: ${created} nye kilder lagt til (${SOURCES.length} totalt i pakken).`
+);

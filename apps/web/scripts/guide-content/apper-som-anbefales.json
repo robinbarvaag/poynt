@@ -18,45 +18,61 @@
       "type": "richText",
       "blocks": [
         { "heading": "Teksting av video:", "level": 3 },
-        { "list": [
-          "Capcut",
-          "MixCaptions (AI tesker for deg. Funker best)",
-          "Captions (AI tekster for deg. Funker bra)"
-        ] }
+        {
+          "list": [
+            "Capcut",
+            "MixCaptions (AI tesker for deg. Funker best)",
+            "Captions (AI tekster for deg. Funker bra)"
+          ]
+        }
       ]
     },
     {
       "type": "richText",
       "blocks": [
         { "heading": "AI:", "level": 3 },
-        { "list": ["ChatGPT", "Google Gemini", "Claude", "Midjourney (bilder)"] }
+        {
+          "list": ["ChatGPT", "Google Gemini", "Claude", "Midjourney (bilder)"]
+        }
       ]
     },
     {
       "type": "richText",
       "blocks": [
-        { "heading": "Nedlasting av publiserte reels på Instagram uten vannmerke:", "level": 3 },
+        {
+          "heading": "Nedlasting av publiserte reels på Instagram uten vannmerke:",
+          "level": 3
+        },
         { "list": ["Repost"] }
       ]
     },
     {
       "type": "richText",
       "blocks": [
-        { "heading": "Nedlasting av publiserte TikToks uten vannmerke:", "level": 3 },
+        {
+          "heading": "Nedlasting av publiserte TikToks uten vannmerke:",
+          "level": 3
+        },
         { "list": ["TikSave"] }
       ]
     },
     {
       "type": "richText",
       "blocks": [
-        { "heading": "Andre apper som hjelper i produksjon av innhold til sosiale medier:", "level": 3 },
+        {
+          "heading": "Andre apper som hjelper i produksjon av innhold til sosiale medier:",
+          "level": 3
+        },
         { "list": ["TikTok Studio", "YT Studio"] }
       ]
     },
     {
       "type": "richText",
       "blocks": [
-        { "heading": "Influenser-apper for å enten få oppdrag eller gi oppdrag:", "level": 3 },
+        {
+          "heading": "Influenser-apper for å enten få oppdrag eller gi oppdrag:",
+          "level": 3
+        },
         { "list": ["Dream 2.0", "Inzpire.me", "Brandheroes"] }
       ]
     },
@@ -90,9 +106,7 @@
     },
     {
       "type": "richText",
-      "blocks": [
-        "Firelies.ai for å ta opp møter"
-      ]
+      "blocks": ["Firelies.ai for å ta opp møter"]
     }
   ]
 }

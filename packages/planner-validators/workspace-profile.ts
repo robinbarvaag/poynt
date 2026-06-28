@@ -39,6 +39,8 @@ export const profileAudienceTypeLabels: Record<ProfileAudienceType, string> = {
 export const workspaceProfileSchema = z.object({
   id: z.string(),
   workspaceId: z.string(),
+  // Organisasjonsnummer — lar oss slå opp bedriften på nytt mot Brønnøysund.
+  orgNumber: z.string().nullable(),
   industryId: z.string().nullable(),
   targetAudience: z.string().nullable(),
   audienceType: z.enum(profileAudienceTypes).nullable(),
@@ -53,6 +55,8 @@ export const workspaceProfileSchema = z.object({
   brandBrief: brandBriefSchema.nullable(),
   // Visuell merkevare-identitet («merkevare-boka»).
   brandIdentity: brandIdentitySchema.nullable(),
+  // Bedriftens podkast-RSS-feed — lar «Podcast til innhold» forhåndsfylle feltet.
+  podcastFeedUrl: z.string().nullable(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
@@ -60,6 +64,7 @@ export const workspaceProfileSchema = z.object({
 export type WorkspaceProfileType = z.infer<typeof workspaceProfileSchema>;
 
 export const updateWorkspaceProfileSchema = z.object({
+  orgNumber: z.string().nullable().optional(),
   industryId: z.string().nullable().optional(),
   targetAudience: z.string().nullable().optional(),
   audienceType: z.enum(profileAudienceTypes).nullable().optional(),
@@ -71,6 +76,7 @@ export const updateWorkspaceProfileSchema = z.object({
   customContext: z.string().nullable().optional(),
   brandBrief: brandBriefSchema.nullable().optional(),
   brandIdentity: brandIdentitySchema.nullable().optional(),
+  podcastFeedUrl: z.string().nullable().optional(),
 });
 
 export type UpdateWorkspaceProfileInput = z.infer<
@@ -94,7 +100,7 @@ export const toolIdLabels: Record<ToolId, string> = {
   "decline-generator": "Avslå-generator",
   "marketing-plan": "Markedsplan",
   "yearly-planner": "Årshjul",
-  "podcast-to-content": "Podcast til innhald",
+  "podcast-to-content": "Podcast til innhold",
 };
 
 export const toolResultSchema = z.object({

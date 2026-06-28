@@ -1,6 +1,6 @@
 import type * as React from "react";
-import { Avatar, AvatarFallback } from "../avatar";
 import { cn } from "../../lib/utils";
+import { Avatar, AvatarFallback } from "../avatar";
 
 export interface AuthorBylineProps {
   name: string;

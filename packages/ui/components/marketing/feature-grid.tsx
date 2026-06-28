@@ -100,77 +100,74 @@ export function FeatureGrid({
           const cardBody = (
             <>
               {/* Tall — fast sone */}
-                <Text
-                  type="span"
-                  size="display-xl"
-                  weight="bold"
-                  color="inherit"
-                  customStyles={cn(
-                    "font-heading leading-none tracking-tight",
+              <Text
+                type="span"
+                size="display-xl"
+                weight="bold"
+                color="inherit"
+                customStyles={cn(
+                  "font-heading leading-none tracking-tight",
+                  theme.accent
+                )}
+              >
+                0{index + 1}
+              </Text>
+
+              {/* Tittel — alltid 2 rader avsatt */}
+              <Heading
+                variant="h3"
+                size="display-sm"
+                color="inherit"
+                weight="bold"
+                customStyles="mt-8 line-clamp-2 min-h-[4.2rem] leading-[1.1]"
+              >
+                {base}
+                {star && <span className={theme.accent}>*</span>}
+              </Heading>
+
+              <hr className={cn("my-5 border-t", theme.rule)} />
+
+              {/* Beskrivelse — line-clamp 4, men følger teksten i høyde */}
+              <Text
+                color="inherit"
+                customStyles={cn("line-clamp-4 leading-relaxed", theme.muted)}
+              >
+                {feature.text}
+              </Text>
+
+              {/* Footer — kun når det er en lenke eller et tall; pinnet til bunn.
+                    Hele kortet er lenken (Card asChild + <a>), så dette er kun
+                    et visuelt anker som animerer på hover over hele kortet. */}
+              {feature.link && (
+                <span
+                  className={cn(
+                    "mt-auto inline-flex w-fit flex-col gap-2 pt-8 font-bold text-sm",
                     theme.accent
                   )}
                 >
-                  0{index + 1}
-                </Text>
-
-                {/* Tittel — alltid 2 rader avsatt */}
-                <Heading
-                  variant="h3"
-                  size="display-sm"
-                  color="inherit"
-                  weight="bold"
-                  customStyles="mt-8 line-clamp-2 min-h-[4.2rem] leading-[1.1]"
-                >
-                  {base}
-                  {star && <span className={theme.accent}>*</span>}
-                </Heading>
-
-                <hr className={cn("my-5 border-t", theme.rule)} />
-
-                {/* Beskrivelse — line-clamp 4, men følger teksten i høyde */}
-                <Text
-                  color="inherit"
-                  customStyles={cn("line-clamp-4 leading-relaxed", theme.muted)}
-                >
-                  {feature.text}
-                </Text>
-
-                {/* Footer — kun når det er en lenke eller et tall; pinnet til bunn.
-                    Hele kortet er lenken (Card asChild + <a>), så dette er kun
-                    et visuelt anker som animerer på hover over hele kortet. */}
-                {feature.link && (
+                  {feature.link.label}
                   <span
-                    className={cn(
-                      "mt-auto inline-flex w-fit flex-col gap-2 pt-8 font-bold text-sm",
-                      theme.accent
-                    )}
+                    aria-hidden="true"
+                    className="h-0.75 w-9 rounded-full bg-current transition-all duration-300 ease-out group-hover/card:w-full"
+                  />
+                </span>
+              )}
+              {!feature.link && feature.stat && (
+                <div className="mt-auto pt-8">
+                  <Text
+                    type="div"
+                    size="display-md"
+                    weight="bold"
+                    color="inherit"
+                    customStyles="font-heading leading-none"
                   >
-                    {feature.link.label}
-                    <span
-                      aria-hidden="true"
-                      className="h-0.75 w-9 rounded-full bg-current transition-all duration-300 ease-out group-hover/card:w-full"
-                    />
-                  </span>
-                )}
-                {!feature.link && feature.stat && (
-                  <div className="mt-auto pt-8">
-                    <Text
-                      type="div"
-                      size="display-md"
-                      weight="bold"
-                      color="inherit"
-                      customStyles="font-heading leading-none"
-                    >
-                      {feature.stat.value}
-                    </Text>
-                    <Text
-                      color="inherit"
-                      customStyles={cn("mt-1", theme.muted)}
-                    >
-                      {feature.stat.label}
-                    </Text>
-                  </div>
-                )}
+                    {feature.stat.value}
+                  </Text>
+                  <Text color="inherit" customStyles={cn("mt-1", theme.muted)}>
+                    {feature.stat.label}
+                  </Text>
+                </div>
+              )}
             </>
           );
           return (

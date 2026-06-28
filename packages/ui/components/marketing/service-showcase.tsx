@@ -166,7 +166,8 @@ export function ServiceShowcase({
                   image={service.image}
                   className={cn(
                     "aspect-4/3",
-                    isFeatured && "sm:aspect-auto sm:h-full sm:w-1/2 sm:shrink-0"
+                    isFeatured &&
+                      "sm:aspect-auto sm:h-full sm:w-1/2 sm:shrink-0"
                   )}
                 />
                 <div

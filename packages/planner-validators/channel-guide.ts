@@ -52,6 +52,10 @@ export const strengthTypes = [
   "writing",
   "speaking",
   "visual",
+  "showcase",
+  "expertise",
+  "relationships",
+  "handson",
   "mixed",
 ] as const;
 
@@ -59,6 +63,10 @@ export const strengthLabels: Record<(typeof strengthTypes)[number], string> = {
   writing: "Skrive (tekst, artikler)",
   speaking: "Snakke (video, podcast)",
   visual: "Visuelt (design, foto)",
+  showcase: "Vise frem arbeid og resultater (før/etter, prosjekter)",
+  expertise: "Fagkunnskap og rådgivning",
+  relationships: "Kunderelasjoner og nettverk",
+  handson: "Praktisk og hands-on (mindre glad i å skrive/filme)",
   mixed: "Kombinasjon av flere",
 };
 

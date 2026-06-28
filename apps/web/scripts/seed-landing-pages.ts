@@ -16,9 +16,7 @@ const allServices = await payload.find({
   limit: 100,
   depth: 0,
 });
-const serviceIdBySlug = new Map(
-  allServices.docs.map((s) => [s.slug, s.id])
-);
+const serviceIdBySlug = new Map(allServices.docs.map((s) => [s.slug, s.id]));
 const pickServices = (slugs: string[]) =>
   slugs
     .map((slug) => serviceIdBySlug.get(slug))

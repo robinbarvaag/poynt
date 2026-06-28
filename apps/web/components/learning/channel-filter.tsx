@@ -39,5 +39,7 @@ export function ChannelFilter({ channels }: { channels: ChannelOption[] }) {
     ...channels.map((c) => ({ value: c.value, label: c.label, dot: c.color })),
   ];
 
-  return <ContentFilterBar options={options} value={value} onChange={onChange} />;
+  return (
+    <ContentFilterBar options={options} value={value} onChange={onChange} />
+  );
 }

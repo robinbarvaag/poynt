@@ -22,7 +22,10 @@ type Story = StoryObj<typeof meta>;
 
 const img = (src: string) => <img src={`${src}?w=900&q=70`} alt="" />;
 
-function Block({ label, children }: { label: string; children: React.ReactNode }) {
+function Block({
+  label,
+  children,
+}: { label: string; children: React.ReactNode }) {
   return (
     <section className="flex flex-col gap-3">
       <span className="font-heading font-semibold text-muted-foreground text-xs uppercase tracking-[0.18em]">
@@ -98,7 +101,11 @@ export const Alle: Story = {
 
         <Block label="AuthorByline">
           <div className="flex flex-wrap gap-8">
-            <AuthorByline name="Kari Nordmann" role="Innholdsansvarlig" date="12. juni 2026" />
+            <AuthorByline
+              name="Kari Nordmann"
+              role="Innholdsansvarlig"
+              date="12. juni 2026"
+            />
             <AuthorByline name="Ola Hansen" size="sm" date="3 min lesing" />
           </div>
         </Block>

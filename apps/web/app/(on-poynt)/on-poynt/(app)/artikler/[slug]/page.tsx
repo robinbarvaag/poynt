@@ -130,7 +130,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       />
 
       <div
-        className={`mx-auto px-4 md:px-6 ${hasRail ? "max-w-7xl" : "max-w-3xl"}`}
+        className={`mx-auto px-4 md:px-6 ${hasRail ? "max-w-6xl" : "max-w-3xl"}`}
       >
         <div className="-mt-6 relative z-10 mb-8 flex flex-wrap items-center gap-x-6 gap-y-3">
           <AuthorByline name={authorName} date={publishedDate} />
@@ -148,7 +148,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         <div
           className={
             hasRail
-              ? "lg:grid lg:grid-cols-[230px_minmax(0,1fr)] lg:gap-14"
+              ? "lg:grid lg:grid-cols-[230px_minmax(0,48rem)] lg:gap-14"
               : ""
           }
         >

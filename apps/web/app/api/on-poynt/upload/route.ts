@@ -2,14 +2,26 @@ import { auth } from "@poynt/planner-auth/server";
 import { put } from "@vercel/blob";
 import { type NextRequest, NextResponse } from "next/server";
 
-// Tillatte bildetyper + maks størrelse for merkevare-opplasting (logo/moodboard).
+// Tillatte typer + maks størrelse for merkevare-opplasting (logo/moodboard/font).
 const ALLOWED_TYPES = new Set([
   "image/png",
   "image/jpeg",
   "image/webp",
   "image/svg+xml",
   "image/gif",
+  // Egne merkevare-fonter
+  "font/woff",
+  "font/woff2",
+  "font/ttf",
+  "font/otf",
+  // Noen nettlesere sender disse for fonter
+  "application/font-woff",
+  "application/x-font-woff",
+  "application/font-sfnt",
+  "application/octet-stream",
 ]);
+// Fallback når nettleseren ikke setter en font-MIME (vanlig for .woff2/.otf).
+const ALLOWED_FONT_EXT = /\.(woff2?|ttf|otf)$/i;
 const MAX_BYTES = 5 * 1024 * 1024; // 5 MB
 
 /**
@@ -38,9 +50,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Ingen fil mottatt" }, { status: 400 });
   }
 
-  if (!ALLOWED_TYPES.has(file.type)) {
+  const typeOk =
+    ALLOWED_TYPES.has(file.type) || ALLOWED_FONT_EXT.test(file.name);
+  if (!typeOk) {
     return NextResponse.json(
-      { error: "Filtypen støttes ikke. Bruk PNG, JPG, WEBP, SVG eller GIF." },
+      {
+        error:
+          "Filtypen støttes ikke. Bruk PNG, JPG, WEBP, SVG, GIF eller WOFF/WOFF2/TTF/OTF.",
+      },
       { status: 415 }
     );
   }

@@ -11,20 +11,25 @@
       "type": "richText",
       "blocks": [
         { "heading": "Youtube shorts:", "level": 2 },
-        { "heading": "Hva er Youtube Shorts og hvordan bør det brukes?", "level": 3 },
+        {
+          "heading": "Hva er Youtube Shorts og hvordan bør det brukes?",
+          "level": 3
+        },
         "Youtube shorts er en av de mest populære kanalene i verden for korte og underholdende videoer. På verdensbasis har Youtube Shorts 50 milliarder avspillinger hver eneste dag. Som markedsfører, bedriftseier, influenser eller innholdsprodusent er det på tide å få øynene opp for verden av disse videoene.",
         "Og med Youtube Scheduler er det heller ingen unnskyldning til å la være å bruk, for det at video er begges beste virkemiddel, det bør du ha fått med deg. Dersom du allerede er aktiv på TikTok eller lage nye reels er du godt på vei allerede.",
         "Youtube Shorts har som TikTok og Reels høyformat, men på Youtube har du foreløpig en tidsbegrensning på 60 sekunder. Laster du opp høydevideo som er lenger enn dette vil den bli liggende som en breddevideo med sorte felter på sidene. Unngå det.",
         "Du kan laste opp shorts både fra desktop og mobil, men vi anbefaler klart mobil som verktøy til dette.",
         "Her er tips til hva du kan bruke Youtube shorts til:",
-        { "list": [
-          "Sneak peeks og teasere. Vis for eksempel nye produkter som kommer eller eventer du planlegger. Bruk det til å bygge forventning og skape nysgjerrighet.",
-          "Kjappe tips og tutorials. Del kunnskap ved å vise tips og triks og \"how to's\".",
-          "Bak fasaden. Ta teasere med bak fasaden og vis de glimt av livet ditt (eller hverdagen i bedriften).",
-          "Produkter. Vis produktene du selger i bruk, pakking av ordrer, forskjellige farger på produkter, forskjell mellom produkter osv.",
-          "Trender. I noen tilfeller dukker det opp trender som kan passe til bedriften (eller profilen) din. Ikke hopp på alle trender, men velg de som passer.",
-          "Svar på spørsmål. Får du spørsmål i kommentarfeltet bruk disse som en anledning til å lage nytt innhold."
-        ] }
+        {
+          "list": [
+            "Sneak peeks og teasere. Vis for eksempel nye produkter som kommer eller eventer du planlegger. Bruk det til å bygge forventning og skape nysgjerrighet.",
+            "Kjappe tips og tutorials. Del kunnskap ved å vise tips og triks og \"how to's\".",
+            "Bak fasaden. Ta teasere med bak fasaden og vis de glimt av livet ditt (eller hverdagen i bedriften).",
+            "Produkter. Vis produktene du selger i bruk, pakking av ordrer, forskjellige farger på produkter, forskjell mellom produkter osv.",
+            "Trender. I noen tilfeller dukker det opp trender som kan passe til bedriften (eller profilen) din. Ikke hopp på alle trender, men velg de som passer.",
+            "Svar på spørsmål. Får du spørsmål i kommentarfeltet bruk disse som en anledning til å lage nytt innhold."
+          ]
+        }
       ]
     },
     {
@@ -32,11 +37,13 @@
       "blocks": [
         { "heading": "Kan du tjene penger på Youtube?", "level": 3 },
         "For å bli en del av Youtube sitt partner program må du:",
-        { "list": [
-          "Ha over 1000 abonnenter",
-          "Ha lastet opp minst 3 videoer de siste 90 dagene",
-          "Ha mer enn 5000 seer-timer eller 10 millioner visninger (de siste 90 dagene)"
-        ] },
+        {
+          "list": [
+            "Ha over 1000 abonnenter",
+            "Ha lastet opp minst 3 videoer de siste 90 dagene",
+            "Ha mer enn 5000 seer-timer eller 10 millioner visninger (de siste 90 dagene)"
+          ]
+        },
         "Link til mer informasjon: https://support.google.com/youtube/answer/72851?hl=en&co=GENIE.Platform%3DAndroid",
         "I tillegg på to-trinns verifikasjon være slått på på kontoen og du må lage en Ad-sense-konto."
       ]

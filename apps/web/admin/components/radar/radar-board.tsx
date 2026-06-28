@@ -185,7 +185,11 @@ export const RadarBoard = ({
               }}
             >
               {fmtDate(lastRun.startedAt)} · {triggerLabel(lastRun.trigger)} ·{" "}
-              <RunStats stats={lastRun.stats} status={lastRun.status} />
+              <RunStats
+                stats={lastRun.stats}
+                status={lastRun.status}
+                startedAt={lastRun.startedAt}
+              />
             </span>
           ) : (
             <span
@@ -456,11 +460,20 @@ function statusLabel(s: string): string {
 function RunStats({
   stats,
   status,
+  startedAt,
 }: {
   stats: unknown;
   status: string;
+  startedAt?: unknown;
 }) {
-  if (status === "running") return <>kjører…</>;
+  if (status === "running") {
+    // En kjøring som har «hengt» i mer enn 15 min er nesten sikkert avbrutt
+    // (plattform-timeout e.l.) — ikke faktisk i gang.
+    const ageMin = startedAt
+      ? (Date.now() - new Date(startedAt as string).getTime()) / 60000
+      : 0;
+    return ageMin > 15 ? <span>avbrutt</span> : <>kjører…</>;
+  }
   if (status === "error") return <span>feilet</span>;
   const s = stats as {
     signals?: number;

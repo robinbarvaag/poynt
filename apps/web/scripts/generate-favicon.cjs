@@ -24,9 +24,7 @@ const GLYPH = { r: 171, g: 227, b: 227 }; // Celeste #abe3e3 (mint)
 async function main() {
   const img = sharp(SRC).ensureAlpha();
   const { width, height } = await img.metadata();
-  const { data } = await img
-    .raw()
-    .toBuffer({ resolveWithObject: true });
+  const { data } = await img.raw().toBuffer({ resolveWithObject: true });
   const channels = 4;
 
   // Luminans per piksel; "innhold" = mørkere enn nær-hvit.

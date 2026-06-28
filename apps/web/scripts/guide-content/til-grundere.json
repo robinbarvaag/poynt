@@ -9,22 +9,26 @@
   "content": [
     {
       "type": "richText",
-      "blocks": [
-        { "heading": "Nyttige linker:", "level": 3 }
-      ]
+      "blocks": [{ "heading": "Nyttige linker:", "level": 3 }]
     },
     {
       "type": "bookmark",
       "items": [
-        { "url": "https://www.entrepedia.com/", "title": "Entrepedia", "description": "https://www.entrepedia.com/" },
-        { "url": "https://kompetansesenter.innovasjonnorge.no/", "title": "Kompetansesenter - Innovasjon Norge", "description": "https://kompetansesenter.innovasjonnorge.no/" }
+        {
+          "url": "https://www.entrepedia.com/",
+          "title": "Entrepedia",
+          "description": "https://www.entrepedia.com/"
+        },
+        {
+          "url": "https://kompetansesenter.innovasjonnorge.no/",
+          "title": "Kompetansesenter - Innovasjon Norge",
+          "description": "https://kompetansesenter.innovasjonnorge.no/"
+        }
       ]
     },
     {
       "type": "richText",
-      "blocks": [
-        { "heading": "Støtteordninger", "level": 3 }
-      ]
+      "blocks": [{ "heading": "Støtteordninger", "level": 3 }]
     },
     {
       "type": "image",
@@ -34,9 +38,7 @@
     },
     {
       "type": "richText",
-      "blocks": [
-        { "heading": "Gratis kurs om AI, blant annet:", "level": 3 }
-      ]
+      "blocks": [{ "heading": "Gratis kurs om AI, blant annet:", "level": 3 }]
     }
   ]
 }

@@ -27,7 +27,10 @@
         {
           "type": "text",
           "blocks": [
-            { "heading": "Last ned 75 innholdsideer til Instagram", "level": 3 },
+            {
+              "heading": "Last ned 75 innholdsideer til Instagram",
+              "level": 3
+            },
             "Syns du det er vanskelig å komme på gode innholdsideer til Instagram? Last ned denne filen og lag deg en produksjonsplan med nye og friske ideer."
           ]
         },
@@ -41,7 +44,11 @@
     {
       "type": "download",
       "items": [
-        { "title": "Lastes ned her", "description": "Produkt Innholdsideer til Instagram", "kind": "pdf" }
+        {
+          "title": "Lastes ned her",
+          "description": "Produkt Innholdsideer til Instagram",
+          "kind": "pdf"
+        }
       ]
     },
     {
@@ -50,7 +57,10 @@
         {
           "type": "text",
           "blocks": [
-            { "heading": "Bli med på en 30 dagers Instagram-utfordring", "level": 3 },
+            {
+              "heading": "Bli med på en 30 dagers Instagram-utfordring",
+              "level": 3
+            },
             "Last ned filen og bli med på en 30 dagers Instagram-utfordring.",
             "På side 1 har vi laget et bingo-brett, se hvor mange rader du klarer å fylle.",
             "På side to kan du krysse ut hvor mange dager du har vært aktiv på stories."
@@ -66,14 +76,16 @@
     {
       "type": "download",
       "items": [
-        { "title": "Lastes ned her", "description": "Utfordringer On Poynt (1).pdf", "kind": "pdf" }
+        {
+          "title": "Lastes ned her",
+          "description": "Utfordringer On Poynt (1).pdf",
+          "kind": "pdf"
+        }
       ]
     },
     {
       "type": "richText",
-      "blocks": [
-        { "heading": "Rydd opp i Instagram-bioen din 👇", "level": 2 }
-      ]
+      "blocks": [{ "heading": "Rydd opp i Instagram-bioen din 👇", "level": 2 }]
     },
     {
       "type": "image",
@@ -83,9 +95,7 @@
     },
     {
       "type": "richText",
-      "blocks": [
-        { "heading": "Story-tips.", "level": 2 }
-      ]
+      "blocks": [{ "heading": "Story-tips.", "level": 2 }]
     },
     {
       "type": "columns",
@@ -110,12 +120,14 @@
         {
           "type": "text",
           "blocks": [
-            { "list": [
-              "Lag storien din i Instagram.",
-              "Trykk på elemnter",
-              "Velg bilde",
-              "Last opp bilde med fargekodene dine"
-            ] },
+            {
+              "list": [
+                "Lag storien din i Instagram.",
+                "Trykk på elemnter",
+                "Velg bilde",
+                "Last opp bilde med fargekodene dine"
+              ]
+            },
             "Skriv ønsket tekst og bruk fargevelgeren, hold den over bildet med fargekodene dine og velg den fargen du ønsker deg."
           ]
         },
@@ -162,12 +174,14 @@
         "Knapper og linker er også definert som call to action, for eksempel : Klikk her",
         "Husk å ta med en oppfordring til ønsket handling i Instagram-innlegg.",
         "Noen forslag til CTA:",
-        { "list": [
-          "Husk å lagre",
-          "Del gjerne",
-          "Send denne til noen du bryr deg om",
-          "Still et spørsmål"
-        ] }
+        {
+          "list": [
+            "Husk å lagre",
+            "Del gjerne",
+            "Send denne til noen du bryr deg om",
+            "Still et spørsmål"
+          ]
+        }
       ]
     },
     { "type": "divider", "label": "" },
@@ -183,7 +197,9 @@
       "layout": "grid",
       "caption": "Eksempler på tekst på innlegg",
       "items": [
-        { "placeholder": "Mobilskjerm med eksempel på innleggstekst (grønn/grå)" },
+        {
+          "placeholder": "Mobilskjerm med eksempel på innleggstekst (grønn/grå)"
+        },
         { "placeholder": "Mobilskjerm med eksempel på innleggstekst (grønn)" },
         { "placeholder": "Mobilskjerm med eksempel på innleggstekst (grønn)" }
       ]
@@ -199,14 +215,16 @@
             "Her er tre forslag til delbart innhold:",
             "Eksempel: Karusellposter med konkrete tips får ofte høy delingsrate, det samme gjør reels som lærer bort noe.",
             "Ta gjerne med en CTA (call to action).",
-            { "list": [
-              "Tips & triks",
-              "Steg-for-steg-guider",
-              "Lister",
-              "Overraskende fakta",
-              "Før/etter-bilder",
-              "Inspirerende historier"
-            ] }
+            {
+              "list": [
+                "Tips & triks",
+                "Steg-for-steg-guider",
+                "Lister",
+                "Overraskende fakta",
+                "Før/etter-bilder",
+                "Inspirerende historier"
+              ]
+            }
           ]
         },
         {
@@ -227,7 +245,10 @@
         {
           "type": "text",
           "blocks": [
-            { "heading": "Bruk Alt text når du publiserer et innlegg.", "level": 3 },
+            {
+              "heading": "Bruk Alt text når du publiserer et innlegg.",
+              "level": 3
+            },
             "Alt text gjør innlegget ditt mer søkbart. Beskriv innlegget ditt og bruk keywords."
           ]
         }
@@ -245,9 +266,15 @@
       "layout": "grid",
       "caption": "Slik finner du Inspirasjon-fanen i dashboardet",
       "items": [
-        { "placeholder": "Skjermbilde av Instagram-profil med «Professional dashboard» markert" },
-        { "placeholder": "Skjermbilde av Professional dashboard med «Inspiration» / «Tips and resources» markert" },
-        { "placeholder": "Skjermbilde av Inspiration-fanen med inspirasjonsinnhold" }
+        {
+          "placeholder": "Skjermbilde av Instagram-profil med «Professional dashboard» markert"
+        },
+        {
+          "placeholder": "Skjermbilde av Professional dashboard med «Inspiration» / «Tips and resources» markert"
+        },
+        {
+          "placeholder": "Skjermbilde av Inspiration-fanen med inspirasjonsinnhold"
+        }
       ]
     },
     {
@@ -263,9 +290,15 @@
       "layout": "grid",
       "caption": "Slik finner du Trending audio i dashboardet",
       "items": [
-        { "placeholder": "Skjermbilde av Instagram-profil med «Professional dashboard» markert" },
-        { "placeholder": "Skjermbilde av «Tips and resources» med «Trending audio» (Beta) markert" },
-        { "placeholder": "Skjermbilde av Trending audio-listen med låter rangert" }
+        {
+          "placeholder": "Skjermbilde av Instagram-profil med «Professional dashboard» markert"
+        },
+        {
+          "placeholder": "Skjermbilde av «Tips and resources» med «Trending audio» (Beta) markert"
+        },
+        {
+          "placeholder": "Skjermbilde av Trending audio-listen med låter rangert"
+        }
       ]
     }
   ]

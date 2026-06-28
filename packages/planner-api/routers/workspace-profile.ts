@@ -1,13 +1,18 @@
 import { db } from "@poynt/planner-db";
 import {
+  plannerIndustry,
   plannerWorkspaceMember,
   plannerWorkspaceProfile,
 } from "@poynt/planner-db/schema";
-import { updateWorkspaceProfileSchema } from "@poynt/planner-validators";
+import {
+  companyLookupRequestSchema,
+  updateWorkspaceProfileSchema,
+} from "@poynt/planner-validators";
 import { TRPCError } from "@trpc/server";
-import { and, eq } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { getActiveWorkspaceId } from "../lib/active-workspace";
+import { buildCompanyProfilePrefill } from "../lib/company-profile-prefill";
 import { protectedProcedure, router } from "../trpc";
 
 /**
@@ -61,6 +66,7 @@ export const workspaceProfileRouter = router({
         return {
           id: null,
           workspaceId,
+          orgNumber: null,
           industryId: null,
           targetAudience: null,
           audienceType: null,
@@ -72,6 +78,7 @@ export const workspaceProfileRouter = router({
           customContext: null,
           brandBrief: null,
           brandIdentity: null,
+          podcastFeedUrl: null,
           industry: null,
         };
       }
@@ -127,5 +134,36 @@ export const workspaceProfileRouter = router({
         .returning();
 
       return created;
+    }),
+
+  /**
+   * Slår opp en bedrift i Brønnøysundregistrene og returnerer et forhåndsfyll
+   * (bransje + størrelse + nettside) UI-et kan legge inn i skjemaet. Lagrer
+   * ingenting selv — brukeren ser over og bekrefter, så lagrer `upsert`.
+   */
+  lookupByOrgNumber: protectedProcedure
+    .input(companyLookupRequestSchema)
+    .mutation(async ({ input }) => {
+      const industries = await db
+        .select({
+          id: plannerIndustry.id,
+          name: plannerIndustry.name,
+          description: plannerIndustry.description,
+        })
+        .from(plannerIndustry)
+        .where(eq(plannerIndustry.isActive, true))
+        .orderBy(asc(plannerIndustry.sortOrder), asc(plannerIndustry.name));
+
+      try {
+        return await buildCompanyProfilePrefill(input.orgNumber, industries);
+      } catch (error) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message:
+            error instanceof Error
+              ? error.message
+              : "Oppslag mot Brønnøysund feilet.",
+        });
+      }
     }),
 });

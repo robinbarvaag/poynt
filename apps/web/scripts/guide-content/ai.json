@@ -17,7 +17,11 @@
     {
       "type": "bookmark",
       "items": [
-        { "url": null, "title": "TopAi-Tools", "description": "samler mange smart AI-verktøy for deg" }
+        {
+          "url": null,
+          "title": "TopAi-Tools",
+          "description": "samler mange smart AI-verktøy for deg"
+        }
       ]
     },
     {
@@ -57,14 +61,16 @@
     },
     {
       "type": "richText",
-      "blocks": [
-        { "heading": "Gratiskurs:", "level": 3 }
-      ]
+      "blocks": [{ "heading": "Gratiskurs:", "level": 3 }]
     },
     {
       "type": "bookmark",
       "items": [
-        { "url": null, "title": "Kurs - Digital Norway", "description": "Digital Norway" }
+        {
+          "url": null,
+          "title": "Kurs - Digital Norway",
+          "description": "Digital Norway"
+        }
       ]
     }
   ]

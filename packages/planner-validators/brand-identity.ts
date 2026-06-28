@@ -48,6 +48,17 @@ export const brandFontsSchema = z.object({
 export type BrandFonts = z.infer<typeof brandFontsSchema>;
 
 /**
+ * En egen-opplastet font (woff/woff2). `family` er navnet vi bruker i
+ * font-stacken og som @font-face-familie; `url` peker på Blob-filen. Egne
+ * fonter dukker opp i font-velgeren ved siden av Google Fonts-forslagene.
+ */
+export const brandCustomFontSchema = z.object({
+  family: z.string().min(1).max(120),
+  url: z.string().url(),
+});
+export type BrandCustomFont = z.infer<typeof brandCustomFontSchema>;
+
+/**
  * Lagret variant er lenient (alt valgfritt) så delvis utfylling og autolagring
  * er trygt.
  */
@@ -58,6 +69,8 @@ export const brandIdentitySchema = z.object({
   tagline: z.string().max(200).nullable().optional(),
   colors: z.array(brandColorSchema).max(24).nullable().optional(),
   fonts: brandFontsSchema.nullable().optional(),
+  /** Egen-opplastede fonter (woff/woff2) brukeren har lagt til. */
+  customFonts: z.array(brandCustomFontSchema).max(8).nullable().optional(),
   /** Moodboard / stemnings-bilder (URL-er). */
   imagery: z.array(z.string().url()).max(24).nullable().optional(),
 });

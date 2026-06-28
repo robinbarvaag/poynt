@@ -209,6 +209,9 @@ export const plannerWorkspaceProfile = plannerSchema.table(
       .notNull()
       .references(() => plannerWorkspace.id, { onDelete: "cascade" })
       .unique(), // 1:1 relationship with workspace
+    // Organisasjonsnummer (Brønnøysund) — lar oss forhåndsfylle profilen og slå
+    // opp bedriften på nytt for oppdaterte tall.
+    orgNumber: text("org_number"),
     industryId: text("industry_id").references(() => plannerIndustry.id, {
       onDelete: "set null",
     }),
@@ -243,7 +246,9 @@ export const plannerWorkspaceProfile = plannerSchema.table(
       logoUrl?: string | null;
       logoDarkUrl?: string | null;
       tagline?: string | null;
-      colors?: { hex: string; name?: string | null; role?: string | null }[] | null;
+      colors?:
+        | { hex: string; name?: string | null; role?: string | null }[]
+        | null;
       fonts?: {
         heading?: string | null;
         body?: string | null;
@@ -251,6 +256,9 @@ export const plannerWorkspaceProfile = plannerSchema.table(
       } | null;
       imagery?: string[] | null;
     }>(),
+    // Bedriftens podkast-RSS-feed — lar «Podcast til innhold» forhåndsfylle
+    // feltet og auto-liste episoder uten å lime inn lenken på nytt.
+    podcastFeedUrl: text("podcast_feed_url"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()

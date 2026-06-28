@@ -33,7 +33,9 @@ export function DeviceFrame({
   className,
 }: DeviceFrameProps) {
   const media = (
-    <div className="*:[img]:block *:[img]:h-auto *:[img]:w-full">{children}</div>
+    <div className="*:[img]:block *:[img]:h-auto *:[img]:w-full">
+      {children}
+    </div>
   );
 
   let frame: React.ReactNode;

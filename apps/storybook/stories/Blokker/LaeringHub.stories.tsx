@@ -1,7 +1,7 @@
 import {
   ContentCard,
-  type ContentFormat,
   ContentFeature,
+  type ContentFormat,
   ContentRail,
   Icon,
 } from "@poynt/ui";
@@ -43,8 +43,8 @@ export const Hub: Story = {
             Lær det du trenger, akkurat når du trenger det
           </h1>
           <p className="text-foreground/70 text-lg leading-relaxed">
-            Korte guider, dypere kurs og artikler som inspirerer – plukket ut for
-            små bedrifter som vil videre uten å drukne i teori.
+            Korte guider, dypere kurs og artikler som inspirerer – plukket ut
+            for små bedrifter som vil videre uten å drukne i teori.
           </p>
         </header>
 

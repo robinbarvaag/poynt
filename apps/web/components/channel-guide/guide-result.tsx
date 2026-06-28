@@ -19,7 +19,6 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-  AiBadge,
   Badge,
   Button,
   Card,
@@ -283,10 +282,7 @@ export function GuideResult({
         {...sectionMotion}
         className="flex items-center justify-between"
       >
-        <div className="flex items-center gap-2">
-          <Heading size="h2">Din anbefaling</Heading>
-          <AiBadge />
-        </div>
+        <Heading size="h2">Din anbefaling</Heading>
         {isStreaming && (
           <span className="flex items-center gap-2 text-sm text-muted-foreground">
             <Icon name="loader" className="size-4 animate-spin" />

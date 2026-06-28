@@ -185,6 +185,10 @@ export function GuideQuiz({
     writing: "pen-tool",
     speaking: "mic",
     visual: "image",
+    showcase: "trophy",
+    expertise: "graduation-cap",
+    relationships: "handshake",
+    handson: "hand-metal",
     mixed: "layers",
   };
 

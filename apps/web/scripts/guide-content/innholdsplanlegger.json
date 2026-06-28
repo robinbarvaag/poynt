@@ -10,7 +10,11 @@
     {
       "type": "richText",
       "blocks": [
-        { "list": ["For å duplisere siden: https://www.notion.com/help/duplicate-public-pages"] }
+        {
+          "list": [
+            "For å duplisere siden: https://www.notion.com/help/duplicate-public-pages"
+          ]
+        }
       ]
     },
     {

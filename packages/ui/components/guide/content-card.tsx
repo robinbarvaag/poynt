@@ -92,7 +92,7 @@ export function ContentCard({
       )}
     >
       <a href={href}>
-        <div className="relative aspect-[16/10] overflow-hidden">
+        <div className="relative aspect-[2/1] shrink-0 overflow-hidden">
           {cover ? (
             <div className="absolute inset-0 *:[img]:h-full *:[img]:w-full *:[img]:object-cover *:[img]:transition-transform *:[img]:duration-500 group-hover/content:*:[img]:scale-105">
               {cover}
@@ -134,16 +134,24 @@ export function ContentCard({
             </p>
           )}
 
-          {meta && meta.length > 0 && (
-            <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 pt-2 text-current/60 text-xs">
-              {meta.map((item) => (
-                <span key={item.label} className="inline-flex items-center gap-1">
-                  {item.icon && <Icon name={item.icon} className="size-3.5" />}
-                  {item.label}
-                </span>
-              ))}
-            </div>
-          )}
+          {/* Bunnrad forankret med mt-auto: absorberer høydeforskjellen i et
+              likt-høyde-rutenett, så strekket leses som en bevisst footer i
+              stedet for dødplass. Meta til venstre, «Les mer» alltid til høyre. */}
+          <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 pt-3 text-current/60 text-xs">
+            {meta?.map((item) => (
+              <span key={item.label} className="inline-flex items-center gap-1">
+                {item.icon && <Icon name={item.icon} className="size-3.5" />}
+                {item.label}
+              </span>
+            ))}
+            <span className="ml-auto inline-flex items-center gap-1.5 font-heading font-semibold text-primary text-sm">
+              Les mer
+              <Icon
+                name="arrow-right"
+                className="size-4 transition-transform duration-300 group-hover/content:translate-x-1"
+              />
+            </span>
+          </div>
         </div>
       </a>
     </Card>

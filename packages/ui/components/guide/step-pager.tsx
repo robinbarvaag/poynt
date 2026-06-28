@@ -63,7 +63,10 @@ export function StepPager({
               : "bg-primary text-primary-foreground hover:bg-primary/90"
           )}
         >
-          <Icon name={completed ? "check-circle" : "check"} className="size-4" />
+          <Icon
+            name={completed ? "check-circle" : "check"}
+            className="size-4"
+          />
           {completed ? "Fullført" : "Marker som fullført"}
         </button>
       )}

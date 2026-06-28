@@ -147,8 +147,10 @@ export {
 // Podcast to content
 export {
   podcastToContentRequestSchema,
+  podcastContentSchema,
   type PodcastToContentRequest,
   type PodcastToContentResponse,
+  type PodcastContent,
 } from "./podcast-to-content";
 
 // Drill-down: generert innlegg fra en post-idé
@@ -182,10 +184,12 @@ export {
   brandColorRoleLabels,
   brandColorSchema,
   brandFontsSchema,
+  brandCustomFontSchema,
   brandIdentitySchema,
   type BrandColorRole,
   type BrandColor,
   type BrandFonts,
+  type BrandCustomFont,
   type BrandIdentity,
 } from "./brand-identity";
 
@@ -207,6 +211,15 @@ export {
   type DistilledInspirationItem,
   type InspirationDistillOutput,
 } from "./content-radar";
+
+// Company lookup (Brønnøysund-forhåndsfyll)
+export {
+  orgNumberSchema,
+  companyLookupRequestSchema,
+  companyLookupResultSchema,
+  type CompanyLookupRequest,
+  type CompanyLookupResult,
+} from "./company-lookup";
 
 // Workspace profile & tool results
 export {

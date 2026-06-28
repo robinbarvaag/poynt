@@ -2,7 +2,7 @@
 
 import { ToolIntro, type ToolIntroStep } from "@/components/planner/tool-intro";
 import { trpc } from "@/lib/planner/trpc";
-import { AiBadge, Button } from "@poynt/ui";
+import { Button } from "@poynt/ui";
 import { toast } from "@poynt/ui";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@poynt/ui";
 import { Icon } from "@poynt/ui/icons";
@@ -140,14 +140,18 @@ export function DeclineResult({
     return null;
   }
 
+  const sendAsEmail = (text: string) => {
+    if (!text) return;
+    const subject = encodeURIComponent("Svar på din henvendelse");
+    const body = encodeURIComponent(text);
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+  };
+
   const activeVariant = variants.find((v) => v.id === activeTab) || variants[0];
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-3">
-        <h2 className="text-lg font-medium">Ditt svar</h2>
-        <AiBadge />
-      </div>
+      <h2 className="text-lg font-medium">Ditt svar</h2>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="w-full">
@@ -187,6 +191,15 @@ export function DeclineResult({
         >
           <Icon name="copy" className="size-4" />
           Kopier tekst
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-2"
+          onClick={() => sendAsEmail(activeVariant?.content || "")}
+        >
+          <Icon name="mail" className="size-4" />
+          Send som e-post
         </Button>
         {onReset && (
           <Button

@@ -16,6 +16,7 @@ import {
   weeklyTimeTypes,
 } from "@poynt/planner-validators";
 import {
+  Button,
   Form,
   FormControl,
   FormDescription,
@@ -42,6 +43,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { z } from "zod";
 
 const profileFormSchema = z.object({
+  orgNumber: z.string().nullable(),
   industryId: z.string().nullable(),
   targetAudience: z.string().nullable(),
   audienceType: z.enum(profileAudienceTypes).nullable(),
@@ -65,16 +67,23 @@ interface WorkspaceProfileFormProps {
   disabled?: boolean;
   /** Hvilken bedrift profilen gjelder. Utelatt = aktiv bedrift. */
   workspaceId?: string;
+  /**
+   * Kalles når et Brønnøysund-oppslag finner bedriftens nettside, så
+   * forelderen kan mate den videre til merkevare-crawlen (felles flyt).
+   */
+  onWebsiteFound?: (url: string) => void;
 }
 
 export function WorkspaceProfileForm({
   disabled,
   workspaceId,
+  onWebsiteFound,
 }: WorkspaceProfileFormProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">(
     "idle"
   );
+  const [isLookingUp, setIsLookingUp] = useState(false);
   const [industries, setIndustries] = useState<Industry[]>([]);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const savedTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -82,6 +91,7 @@ export function WorkspaceProfileForm({
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
+      orgNumber: null,
       industryId: null,
       targetAudience: null,
       audienceType: null,
@@ -109,6 +119,7 @@ export function WorkspaceProfileForm({
 
         if (profile) {
           form.reset({
+            orgNumber: profile.orgNumber,
             industryId: profile.industryId,
             targetAudience: profile.targetAudience,
             audienceType: profile.audienceType as ProfileAudienceType | null,
@@ -144,6 +155,7 @@ export function WorkspaceProfileForm({
 
         await trpc.workspaceProfile.upsert.mutate({
           ...(workspaceId ? { workspaceId } : {}),
+          orgNumber: values.orgNumber,
           industryId: values.industryId,
           targetAudience: values.targetAudience,
           audienceType: values.audienceType,
@@ -185,6 +197,50 @@ export function WorkspaceProfileForm({
     };
   }, [form, saveProfile]);
 
+  async function handleLookup() {
+    const orgNumber = (form.getValues("orgNumber") ?? "").trim();
+    if (!orgNumber) {
+      toast.error("Skriv inn et organisasjonsnummer først.");
+      return;
+    }
+    setIsLookingUp(true);
+    try {
+      const result = await trpc.workspaceProfile.lookupByOrgNumber.mutate({
+        orgNumber,
+      });
+
+      // Forhåndsfyll feltene vi fant — setValue trigger autolagring via watch.
+      const opts = { shouldDirty: true } as const;
+      form.setValue("orgNumber", result.orgNumber, opts);
+      if (result.industryId) {
+        form.setValue("industryId", result.industryId, opts);
+      }
+      if (result.companySize) {
+        form.setValue("companySize", result.companySize, opts);
+      }
+
+      const filled: string[] = [];
+      if (result.industryName) filled.push(`bransje (${result.industryName})`);
+      if (result.companySize) filled.push("størrelse");
+      toast.success(
+        `Fant ${result.companyName}.${
+          filled.length ? ` Fylte inn ${filled.join(" og ")}.` : ""
+        } Se over og juster.`
+      );
+
+      // Send nettsiden videre til merkevare-crawlen hvis vi fant en.
+      if (result.website) onWebsiteFound?.(result.website);
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Oppslag mot Brønnøysund feilet."
+      );
+    } finally {
+      setIsLookingUp(false);
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -212,6 +268,50 @@ export function WorkspaceProfileForm({
               <span className="text-green-600">Lagret</span>
             </>
           )}
+        </div>
+
+        {/* Brønnøysund-oppslag: fyller bransje + størrelse + nettside fra
+            org.nr, så brukeren slipper å gjette. Felles startpunkt for profilen. */}
+        <div className="rounded-xl border border-dashed bg-muted/30 p-4">
+          <FormField
+            control={form.control}
+            name="orgNumber"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Organisasjonsnummer</FormLabel>
+                <div className="flex flex-wrap items-center gap-2">
+                  <FormControl>
+                    <Input
+                      disabled={disabled || isLookingUp}
+                      placeholder="9 siffer, f.eks. 123 456 789"
+                      inputMode="numeric"
+                      className="max-w-xs"
+                      {...field}
+                      value={field.value ?? ""}
+                    />
+                  </FormControl>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={disabled || isLookingUp}
+                    onClick={handleLookup}
+                    className="gap-2"
+                  >
+                    <Icon
+                      name={isLookingUp ? "loader" : "search"}
+                      className={isLookingUp ? "size-4 animate-spin" : "size-4"}
+                    />
+                    {isLookingUp ? "Henter …" : "Hent fra Brønnøysund"}
+                  </Button>
+                </div>
+                <FormDescription>
+                  Vi henter bransje, størrelse og nettside automatisk – du ser
+                  over og justerer resten.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
 
         {/* Strukturerte felter i et tett 2-kolonners rutenett (mindre høyt). */}
@@ -417,7 +517,9 @@ export function WorkspaceProfileForm({
                   </SelectContent>
                 </Select>
                 <FormDescription>
-                  Spill på styrkene dine – tekst, video, visuelt eller en miks
+                  Hva er styrken din? Et innholdsformat (tekst, video, visuelt)
+                  eller noe mer praktisk – som å vise frem arbeid, fagkunnskap
+                  eller gode kunderelasjoner
                 </FormDescription>
                 <FormMessage />
               </FormItem>

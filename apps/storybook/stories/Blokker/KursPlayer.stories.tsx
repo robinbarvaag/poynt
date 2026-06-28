@@ -30,10 +30,25 @@ type Story = StoryObj<typeof meta>;
 
 const LESSONS: LessonItem[] = [
   { id: "intro", title: "Velkommen til kurset", type: "video", meta: "3 min" },
-  { id: "konto", title: "Sett opp Canva-kontoen", type: "steg", meta: "4 steg" },
+  {
+    id: "konto",
+    title: "Sett opp Canva-kontoen",
+    type: "steg",
+    meta: "4 steg",
+  },
   { id: "maler", title: "Malene du får av oss", type: "pdf", meta: "PDF" },
-  { id: "karusell", title: "Lag din første karusell", type: "steg", meta: "5 steg" },
-  { id: "opptak", title: "Opptak: live-workshop", type: "video", meta: "38 min" },
+  {
+    id: "karusell",
+    title: "Lag din første karusell",
+    type: "steg",
+    meta: "5 steg",
+  },
+  {
+    id: "opptak",
+    title: "Opptak: live-workshop",
+    type: "video",
+    meta: "38 min",
+  },
 ];
 
 function CoursePlayer() {
@@ -116,8 +131,8 @@ function CoursePlayer() {
                   ]}
                 >
                   <p>
-                    Du trenger ikke Pro for å komme i gang – gratisversjonen holder
-                    lenge.
+                    Du trenger ikke Pro for å komme i gang – gratisversjonen
+                    holder lenge.
                   </p>
                 </StepBlock>
                 <StepBlock
@@ -140,7 +155,10 @@ function CoursePlayer() {
                   </DeviceFrame>
                 </StepBlock>
                 <StepBlock number={3} title="Installer mobil-appen">
-                  <p>Da kan du lage innhold rett fra telefonen når ideen slår ned.</p>
+                  <p>
+                    Da kan du lage innhold rett fra telefonen når ideen slår
+                    ned.
+                  </p>
                   <Callout tone="saffron" icon="💡">
                     Logg inn med samme konto, så er alt synkronisert.
                   </Callout>
@@ -151,8 +169,8 @@ function CoursePlayer() {
             {activeId === "maler" && (
               <div className="flex flex-col gap-4">
                 <p className="text-foreground/80 text-lg leading-relaxed">
-                  Her er malene vi har laget til medlemmene. Last ned, åpne i Canva,
-                  og bytt ut tekst og bilder.
+                  Her er malene vi har laget til medlemmene. Last ned, åpne i
+                  Canva, og bytt ut tekst og bilder.
                 </p>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <DownloadCard
@@ -190,7 +208,10 @@ function CoursePlayer() {
                     "Bruk merkevarefargene dine.",
                   ]}
                 >
-                  <p>Den første siden avgjør om folk blar videre – bruk litt tid her.</p>
+                  <p>
+                    Den første siden avgjør om folk blar videre – bruk litt tid
+                    her.
+                  </p>
                 </StepBlock>
               </div>
             )}
@@ -209,7 +230,11 @@ function CoursePlayer() {
             )}
 
             <StepPager
-              prev={index > 0 ? { label: "Forrige", onClick: () => go(-1) } : undefined}
+              prev={
+                index > 0
+                  ? { label: "Forrige", onClick: () => go(-1) }
+                  : undefined
+              }
               next={
                 index < LESSONS.length - 1
                   ? { label: "Neste leksjon", onClick: () => go(1) }

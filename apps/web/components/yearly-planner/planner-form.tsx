@@ -15,7 +15,8 @@ import {
 import {
   Badge,
   Button,
-  Checkbox,
+  Card,
+  CardContent,
   Form,
   FormControl,
   FormField,
@@ -152,88 +153,90 @@ export function PlannerForm({
         </div>
 
         {/* Dette vet vi om deg */}
-        <section className="space-y-3 rounded-xl border bg-card p-5">
-          <SectionTitle>Dette vet vi om deg</SectionTitle>
+        <Card size="sm" className="hover:shadow-sm">
+          <CardContent className="space-y-3">
+            <SectionTitle>Dette vet vi om deg</SectionTitle>
 
-          {editKnown ? (
-            <div className="space-y-5">
-              <FormField
-                control={form.control}
-                name="industry"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Bransje</FormLabel>
-                    <FormControl>
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Velg din bransje …" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {industries.map((ind) => (
-                            <SelectItem key={ind.id} value={ind.name}>
-                              {ind.name}
-                            </SelectItem>
+            {editKnown ? (
+              <div className="space-y-5">
+                <FormField
+                  control={form.control}
+                  name="industry"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Bransje</FormLabel>
+                      <FormControl>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Velg din bransje …" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {industries.map((ind) => (
+                              <SelectItem key={ind.id} value={ind.name}>
+                                {ind.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="audience"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Målgruppe</FormLabel>
+                      <FormControl>
+                        <div className="grid gap-2 sm:grid-cols-3">
+                          {audienceTypes.map((type) => (
+                            <OptionCard
+                              key={type}
+                              value={type}
+                              label={audienceLabels[type]}
+                              icon={audienceIcons[type]}
+                              isSelected={field.value === type}
+                              onClick={() => field.onChange(type)}
+                            />
                           ))}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            ) : (
+              <div className="flex flex-wrap items-center gap-2">
+                {industry && (
+                  <Badge variant="muted" size="md">
+                    {industry}
+                  </Badge>
                 )}
-              />
-
-              <FormField
-                control={form.control}
-                name="audience"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Målgruppe</FormLabel>
-                    <FormControl>
-                      <div className="grid gap-2 sm:grid-cols-3">
-                        {audienceTypes.map((type) => (
-                          <OptionCard
-                            key={type}
-                            value={type}
-                            label={audienceLabels[type]}
-                            icon={audienceIcons[type]}
-                            isSelected={field.value === type}
-                            onClick={() => field.onChange(type)}
-                          />
-                        ))}
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+                {audience && (
+                  <Badge variant="muted" size="md">
+                    {audienceLabels[audience]}
+                  </Badge>
                 )}
-              />
-            </div>
-          ) : (
-            <div className="flex flex-wrap items-center gap-2">
-              {industry && (
-                <Badge variant="muted" size="md">
-                  {industry}
-                </Badge>
-              )}
-              {audience && (
-                <Badge variant="muted" size="md">
-                  {audienceLabels[audience]}
-                </Badge>
-              )}
-              <Button
-                type="button"
-                variant="link"
-                size="sm"
-                className="h-auto p-0 text-muted-foreground"
-                onClick={() => setEditKnown(true)}
-              >
-                Endre
-              </Button>
-            </div>
-          )}
-        </section>
+                <Button
+                  type="button"
+                  variant="link"
+                  size="sm"
+                  className="h-auto p-0 text-muted-foreground"
+                  onClick={() => setEditKnown(true)}
+                >
+                  Endre
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Kanaler */}
         <FormField
@@ -245,51 +248,24 @@ export function PlannerForm({
               <FormControl>
                 <div className="grid gap-3 sm:grid-cols-2">
                   {publishChannelTypes.map((type) => {
-                    const iconName = channelIcons[type];
-                    const isChecked = field.value?.includes(type);
+                    const isChecked = field.value?.includes(type) ?? false;
                     return (
-                      <label
+                      <OptionCard
                         key={type}
-                        htmlFor={`channel-${type}`}
-                        className={cn(
-                          "flex cursor-pointer items-center gap-3 rounded-lg border p-4 transition-all",
-                          isChecked
-                            ? "border-primary bg-primary/5 ring-2 ring-primary"
-                            : "border-border hover:border-primary/50"
-                        )}
-                      >
-                        <Checkbox
-                          id={`channel-${type}`}
-                          checked={isChecked}
-                          onCheckedChange={(checked) => {
-                            const current = field.value || [];
-                            if (checked) {
-                              field.onChange([...current, type]);
-                            } else {
-                              field.onChange(current.filter((v) => v !== type));
-                            }
-                          }}
-                        />
-                        {iconName && (
-                          <Icon
-                            name={iconName}
-                            className={cn(
-                              "size-5",
-                              isChecked
-                                ? "text-primary"
-                                : "text-muted-foreground"
-                            )}
-                          />
-                        )}
-                        <span
-                          className={cn(
-                            "font-medium",
-                            isChecked && "text-primary"
-                          )}
-                        >
-                          {publishChannelLabels[type]}
-                        </span>
-                      </label>
+                        value={type}
+                        label={publishChannelLabels[type]}
+                        icon={channelIcons[type]}
+                        indicator="checkbox"
+                        isSelected={isChecked}
+                        onClick={() => {
+                          const current = field.value || [];
+                          field.onChange(
+                            current.includes(type)
+                              ? current.filter((v) => v !== type)
+                              : [...current, type]
+                          );
+                        }}
+                      />
                     );
                   })}
                 </div>
@@ -348,96 +324,72 @@ export function PlannerForm({
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
-              className="space-y-6 overflow-hidden rounded-xl border bg-card p-5"
+              className="overflow-hidden"
             >
-              <FormField
-                control={form.control}
-                name="tone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Hvilken tone vil du ha?</FormLabel>
-                    <FormControl>
-                      <div className="grid gap-2 sm:grid-cols-2">
-                        {contentToneTypes.map((type) => {
-                          const iconName = toneIcons[type];
-                          const isSelected = field.value === type;
-                          return (
-                            <button
-                              key={type}
-                              type="button"
-                              aria-pressed={isSelected}
-                              className={cn(
-                                "flex cursor-pointer items-center gap-3 rounded-lg border p-3 text-left transition-all",
-                                isSelected
-                                  ? "border-primary bg-primary/5"
-                                  : "border-border hover:border-primary/50"
-                              )}
-                              onClick={() => field.onChange(type)}
-                            >
-                              {iconName && (
-                                <Icon
-                                  name={iconName}
-                                  className={cn(
-                                    "size-4",
-                                    isSelected
-                                      ? "text-primary"
-                                      : "text-muted-foreground"
-                                  )}
-                                />
-                              )}
-                              <span
-                                className={cn(
-                                  "text-sm",
-                                  isSelected && "font-medium text-primary"
-                                )}
-                              >
-                                {contentToneLabels[type]}
-                              </span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <Card size="sm" className="hover:shadow-sm">
+                <CardContent className="space-y-6">
+                  <FormField
+                    control={form.control}
+                    name="tone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Hvilken tone vil du ha?</FormLabel>
+                        <FormControl>
+                          <div className="grid gap-2 sm:grid-cols-2">
+                            {contentToneTypes.map((type) => (
+                              <OptionCard
+                                key={type}
+                                value={type}
+                                label={contentToneLabels[type]}
+                                icon={toneIcons[type]}
+                                isSelected={field.value === type}
+                                onClick={() => field.onChange(type)}
+                              />
+                            ))}
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              <FormField
-                control={form.control}
-                name="importantDates"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Viktige datoer for din bedrift</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="F.eks. Lansering i mars, jubileum i juni, messe i september …"
-                        className="min-h-20 resize-none"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  <FormField
+                    control={form.control}
+                    name="importantDates"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Viktige datoer for din bedrift</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="F.eks. Lansering i mars, jubileum i juni, messe i september …"
+                            className="min-h-20 resize-none"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              <FormField
-                control={form.control}
-                name="focusTopics"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Temaer du vil fokusere på</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="F.eks. Bærekraft, innovasjon, kundehistorier …"
-                        className="min-h-20 resize-none"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  <FormField
+                    control={form.control}
+                    name="focusTopics"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Temaer du vil fokusere på</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="F.eks. Bærekraft, innovasjon, kundehistorier …"
+                            className="min-h-20 resize-none"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
             </motion.div>
           )}
         </div>

@@ -32,13 +32,16 @@ import {
 } from "@poynt/planner-validators";
 import { generateText } from "ai";
 import { eq } from "drizzle-orm";
+import { flagshipModel } from "../lib/models";
+import { generatePodcastContent } from "../lib/podcast-to-content";
+import { getWorkspaceProfileBlock } from "../lib/profile-context";
 import { resolveSystemPrompt } from "../lib/prompt-template";
 import { aiProtectedProcedure, router } from "../trpc";
 
 export const aiRouter = router({
   decline: aiProtectedProcedure
     .input(declineRequestSchema)
-    .mutation(async ({ input }): Promise<DeclineResponse> => {
+    .mutation(async ({ input, ctx }): Promise<DeclineResponse> => {
       const {
         situationType,
         relationship,
@@ -47,6 +50,10 @@ export const aiRouter = router({
         additionalContext,
         originalMessage,
       } = input;
+
+      // «Felles hjerne»: skriv avslaget i bedriftens egen stemme når en
+      // merkevarebrief finnes. Faller pent tilbake til tom streng ellers.
+      const profileBlock = await getWorkspaceProfileBlock(ctx.userId);
 
       // Bygg prompt basert på om vi har originalMessage og/eller situationType
       let prompt: string;
@@ -65,7 +72,7 @@ Relasjon til personen: ${relationshipTypeLabels[relationship]}
 Ønsket tone: ${toneTypeLabels[tone]}
 Holde døren åpen for fremtiden: ${keepDoorOpen ? "Ja" : "Nei"}
 ${additionalContext ? `Ekstra kontekst: ${additionalContext}` : ""}
-
+${profileBlock}
 Analyser meldingen og forstå hva personen ber om. Skriv deretter 3 varianter av et avslag:
 
 ## Variant 1: Kort og direkte
@@ -91,7 +98,7 @@ Relasjon til personen: ${relationshipTypeLabels[relationship]}
 Ønsket tone: ${toneTypeLabels[tone]}
 Holde døren åpen for fremtiden: ${keepDoorOpen ? "Ja" : "Nei"}
 ${additionalContext ? `Ekstra kontekst: ${additionalContext}` : ""}
-
+${profileBlock}
 Skriv 3 varianter av et avslag som svar på meldingen ovenfor:
 
 ## Variant 1: Kort og direkte
@@ -112,7 +119,7 @@ Relasjon til personen: ${relationshipTypeLabels[relationship]}
 Ønsket tone: ${toneTypeLabels[tone]}
 Holde døren åpen for fremtiden: ${keepDoorOpen ? "Ja" : "Nei"}
 ${additionalContext ? `Ekstra kontekst: ${additionalContext}` : ""}
-
+${profileBlock}
 Skriv 3 varianter av et avslag:
 
 ## Variant 1: Kort og direkte
@@ -136,7 +143,7 @@ Skriv 3 varianter av et avslag:
       try {
         const systemToUse = await resolveSystemPrompt(promptId);
         const { text } = await generateText({
-          model: openai("gpt-4o-mini"),
+          model: flagshipModel,
           system: systemToUse,
           prompt,
         });
@@ -403,101 +410,8 @@ Lag en praktisk årsplan med konkrete innholdsideer for hver måned, tilpasset b
 
   podcastToContent: aiProtectedProcedure
     .input(podcastToContentRequestSchema)
-    .mutation(async ({ input }): Promise<PodcastToContentResponse> => {
-      const {
-        transcript,
-        generateBlogPost,
-        generateSocialPosts,
-        generateChapters,
-      } = input;
-
-      const sections: string[] = [];
-      if (generateBlogPost) sections.push("blogPost");
-      if (generateSocialPosts) sections.push("socialPosts");
-      if (generateChapters) sections.push("chapters");
-
-      if (sections.length === 0) {
-        return {
-          success: false,
-          error: "Vel minst ein type innhald å generera.",
-        };
-      }
-
-      // Selve JSON-formatet er dynamisk (avhenger av hvilke innholdstyper som
-      // er valgt), så det bygges i kode. Persona/regler ligger i prompt-malen.
-      const formatBlock = `Format:
-{
-  ${
-    generateBlogPost
-      ? `"blogPost": {
-    "title": "Tittel på blogginnlegget",
-    "content": "Fullstendig blogginnlegg i markdown-format (med overskrifter, avsnitt, ev. punktlister). Minst 400 ord."
-  },`
-      : ""
-  }
-  ${
-    generateSocialPosts
-      ? `"socialPosts": {
-    "linkedin": "LinkedIn-post (200-300 ord, profesjonell tone, med 3-5 relevante emneknaggar)",
-    "instagram": "Instagram-tekst (100-150 ord, engasjerande, med 5-8 emneknaggar)",
-    "twitter": "X/Twitter-post (maks 280 teikn, konsis og fengjande)"
-  },`
-      : ""
-  }
-  ${
-    generateChapters
-      ? `"chapters": [
-    {"timestamp": "00:00", "title": "Innleiing"},
-    {"timestamp": "05:30", "title": "Hovudpoeng 1"}
-  ]`
-      : ""
-  }
-}`;
-
-      const podcastSystemBase = await resolveSystemPrompt(
-        "podcast-to-content-system"
-      );
-      const podcastSystemPrompt = `${podcastSystemBase}
-
-${formatBlock}`;
-
-      const prompt = `Podkast-transkripsjon:
-"""
-${transcript}
-"""
-
-Generer${generateBlogPost ? " eit blogginnlegg" : ""}${generateSocialPosts ? " sosiale medier-postar" : ""}${generateChapters ? " og kapittelmerke" : ""} basert på denne transkripsjonens.`;
-
-      try {
-        const { text } = await generateText({
-          model: openai("gpt-4o-mini"),
-          system: podcastSystemPrompt,
-          prompt,
-        });
-
-        const parsed = JSON.parse(text);
-
-        return {
-          success: true,
-          blogPost: parsed.blogPost,
-          socialPosts: parsed.socialPosts,
-          chapters: parsed.chapters,
-        };
-      } catch (error) {
-        console.error("Podcast content generation failed:", error);
-
-        if (error instanceof SyntaxError) {
-          return {
-            success: false,
-            error: "Kunne ikkje tolka AI-respons. Prøv igjen.",
-          };
-        }
-
-        return {
-          success: false,
-          error:
-            "Kunne ikkje generera innhald. Sjekk at API-nøkkelen er satt opp.",
-        };
-      }
-    }),
+    .mutation(
+      async ({ input }): Promise<PodcastToContentResponse> =>
+        generatePodcastContent(input)
+    ),
 });

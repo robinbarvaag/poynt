@@ -58,7 +58,11 @@ export {
   RelatedContent,
   type RelatedContentProps,
 } from "./related-content";
-export { PullQuote, type PullQuoteAccent, type PullQuoteProps } from "./pull-quote";
+export {
+  PullQuote,
+  type PullQuoteAccent,
+  type PullQuoteProps,
+} from "./pull-quote";
 export {
   ReadingMeta,
   type ReadingMetaItem,

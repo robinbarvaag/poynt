@@ -15,7 +15,6 @@ import {
   postAngleLabels,
 } from "@poynt/planner-validators";
 import {
-  AiBadge,
   Badge,
   Button,
   Dialog,
@@ -232,10 +231,7 @@ export function PostComposer({
     >
       <DialogContent className="max-h-[85vh] max-w-lg overflow-y-auto">
         <DialogHeader>
-          <div className="flex items-center gap-2">
-            <DialogTitle>Forslag til innlegg</DialogTitle>
-            <AiBadge />
-          </div>
+          <DialogTitle>Forslag til innlegg</DialogTitle>
           <div className="flex flex-wrap items-center gap-2 pt-1">
             <Badge variant="outline" size="sm" className={channel.chip}>
               {post.channel}

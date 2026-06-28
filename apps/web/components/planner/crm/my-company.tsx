@@ -21,6 +21,7 @@ import {
   TabsTrigger,
 } from "@poynt/ui";
 import { Icon } from "@poynt/ui/icons";
+import { useState } from "react";
 
 type Workspace = {
   id: string;
@@ -37,6 +38,9 @@ type Workspace = {
  */
 export function MyCompany({ workspace }: { workspace: Workspace }) {
   const canManage = workspace.role === "owner" || workspace.role === "admin";
+  // Nettside funnet via Brønnøysund-oppslag i Profil — mates videre til
+  // merkevare-crawlen (Stemmen) så ett org.nr drar i gang hele profilen.
+  const [discoveredWebsite, setDiscoveredWebsite] = useState<string>();
 
   return (
     <PageShell>
@@ -81,6 +85,7 @@ export function MyCompany({ workspace }: { workspace: Workspace }) {
               <WorkspaceProfileForm
                 workspaceId={workspace.id}
                 disabled={!canManage}
+                onWebsiteFound={setDiscoveredWebsite}
               />
             </CardContent>
           </Card>
@@ -107,11 +112,11 @@ export function MyCompany({ workspace }: { workspace: Workspace }) {
 
           <Card>
             <CardHeader>
-              <CardTitle>Stemmen — hvordan verktøyene skriver</CardTitle>
+              <CardTitle>Merkevarebrief — tonen og budskapet</CardTitle>
               <CardDescription>
-                Tone, kjernebudskap og det som skiller dere ut. Mens boka over
-                er hvordan merkevaren ser ut, er dette hvordan den høres ut.
-                Kan genereres fra nettsiden.
+                Tone, kjernebudskap og det som skiller dere ut. Vi kan lese
+                nettsiden og foreslå en brief du ser over og justerer — den
+                styrer hvordan verktøyene skriver for deg.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -119,6 +124,7 @@ export function MyCompany({ workspace }: { workspace: Workspace }) {
                 workspaceId={workspace.id}
                 businessName={workspace.name}
                 disabled={!canManage}
+                defaultUrl={discoveredWebsite}
               />
             </CardContent>
           </Card>

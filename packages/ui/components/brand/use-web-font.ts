@@ -33,3 +33,34 @@ export function useWebFont(family?: string | null): void {
     // Lenken beholdes bevisst (delt cache på tvers av komponenter).
   }, [family]);
 }
+
+/** Enkel css-streng-escape så font-URL/familie ikke kan bryte ut av @font-face. */
+function cssSafe(value: string): string {
+  return value.replace(/["\\]/g, "\\$&");
+}
+
+/**
+ * Laster en egen-opplastet font via @font-face for live forhåndsvisning.
+ * Injiserer én delt `<style>` per familie+url i `<head>` (idempotent). No-op på
+ * server, for tomme navn eller manglende url. Brukes for fonter brukeren har
+ * lastet opp selv (woff/woff2), i motsetning til Google Fonts (`useWebFont`).
+ */
+export function useCustomFont(
+  family?: string | null,
+  url?: string | null
+): void {
+  useEffect(() => {
+    if (!family || !url || typeof document === "undefined") return;
+
+    const id = `poynt-customfont-${family.toLowerCase().replace(/\s+/g, "-")}`;
+    const existing = document.getElementById(id);
+    // Samme familie kan peke på en ny url (re-opplasting) — oppdater da kilden.
+    if (existing?.dataset.url === url) return;
+
+    const style = existing ?? document.createElement("style");
+    style.id = id;
+    style.dataset.url = url;
+    style.textContent = `@font-face{font-family:"${cssSafe(family)}";src:url("${cssSafe(url)}");font-display:swap;}`;
+    if (!existing) document.head.appendChild(style);
+  }, [family, url]);
+}

@@ -13,6 +13,11 @@ interface OptionCardProps {
   isSelected: boolean;
   onClick: () => void;
   className?: string;
+  /**
+   * Form på markøren. `radio` (default) for enkeltvalg, `checkbox` for fler-
+   * valg (f.eks. kanaler) — samme kort-look, men firkant med hake.
+   */
+  indicator?: "radio" | "checkbox";
 }
 
 export function OptionCard({
@@ -23,6 +28,7 @@ export function OptionCard({
   isSelected,
   onClick,
   className,
+  indicator = "radio",
 }: OptionCardProps) {
   return (
     <Card
@@ -58,22 +64,43 @@ export function OptionCard({
             </div>
           )}
 
-          <div
-            className={cn(
-              "size-5 rounded-full border-2 flex items-center justify-center transition-colors shrink-0",
-              isSelected
-                ? "border-primary bg-primary"
-                : "border-muted-foreground/30"
-            )}
-          >
-            {isSelected && (
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                className="size-2 rounded-full bg-white"
-              />
-            )}
-          </div>
+          {indicator === "checkbox" ? (
+            <div
+              className={cn(
+                "size-5 rounded-md border-2 flex items-center justify-center transition-colors shrink-0",
+                isSelected
+                  ? "border-primary bg-primary text-white"
+                  : "border-muted-foreground/30"
+              )}
+            >
+              {isSelected && (
+                <motion.span
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="flex"
+                >
+                  <Icon name="check" className="size-3.5" />
+                </motion.span>
+              )}
+            </div>
+          ) : (
+            <div
+              className={cn(
+                "size-5 rounded-full border-2 flex items-center justify-center transition-colors shrink-0",
+                isSelected
+                  ? "border-primary bg-primary"
+                  : "border-muted-foreground/30"
+              )}
+            >
+              {isSelected && (
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="size-2 rounded-full bg-white"
+                />
+              )}
+            </div>
+          )}
 
           <div className="flex-1 min-w-0">
             <span

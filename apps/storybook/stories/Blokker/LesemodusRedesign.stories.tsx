@@ -9,8 +9,8 @@ import {
   ReadingMeta,
   ReadingNav,
   ReadingProgress,
-  type SectionRailItem,
   SectionRail,
+  type SectionRailItem,
 } from "@poynt/ui";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
@@ -41,7 +41,10 @@ function Body({ children }: { children: React.ReactNode }) {
   );
 }
 
-function SectionTitle({ index, children }: { index: number; children: string }) {
+function SectionTitle({
+  index,
+  children,
+}: { index: number; children: string }) {
   return (
     <div className="flex items-baseline gap-3">
       <span className="font-bold font-heading text-3xl text-primary/35 tabular-nums">
@@ -101,7 +104,10 @@ export const Lesemodus: Story = {
                 url="canva.com/design"
                 caption="Dupliser første side og bytt bare ut tekst og bilde for resten."
               >
-                <img src={CANVA_SHOT} alt="Canva-arbeidsflate med en karusell" />
+                <img
+                  src={CANVA_SHOT}
+                  alt="Canva-arbeidsflate med en karusell"
+                />
               </DeviceFrame>
               <Callout tone="saffron" icon="💡">
                 Last ned karusellen som <strong>PNG (flere sider)</strong>, ikke
@@ -117,9 +123,9 @@ export const Lesemodus: Story = {
             <section id="mockups" className="flex scroll-mt-24 flex-col gap-5">
               <SectionTitle index={2}>Lag mockups på sekunder</SectionTitle>
               <Body>
-                Skal du vise frem produktet ditt på en skjerm, en t-skjorte eller
-                en kaffekopp? Søk «mockup» i appane-menyen, last opp designet ditt,
-                og Canva legger det på automatisk.
+                Skal du vise frem produktet ditt på en skjerm, en t-skjorte
+                eller en kaffekopp? Søk «mockup» i appane-menyen, last opp
+                designet ditt, og Canva legger det på automatisk.
               </Body>
               <DeviceFrame
                 variant="phone"
@@ -183,10 +189,10 @@ export const Lesemodus: Story = {
             <section id="magic" className="flex scroll-mt-24 flex-col gap-5">
               <SectionTitle index={5}>Magic Eraser & Magic Grab</SectionTitle>
               <Body>
-                To AI-funksjoner som føles som magi: <strong>Magic Eraser</strong>{" "}
-                fjerner uønskede ting i bildet med en pensel, og{" "}
-                <strong>Magic Grab</strong> løfter et motiv ut så du kan flytte det
-                fritt.
+                To AI-funksjoner som føles som magi:{" "}
+                <strong>Magic Eraser</strong> fjerner uønskede ting i bildet med
+                en pensel, og <strong>Magic Grab</strong> løfter et motiv ut så
+                du kan flytte det fritt.
               </Body>
               <Callout tone="mint" icon="✨">
                 Begge ligger under «Rediger bilde» når du har markert et bilde.

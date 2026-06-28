@@ -11,11 +11,13 @@
       "type": "richText",
       "blocks": [
         "I det siste:",
-        { "list": [
-          "Instagram: karuseller med flere bilder og musikk på får ofte god rekkevidde! Verdt å teste ut akkurat nå. Last opp to eller flere bilder og velg musikk som passer budskapet eller er populær akkurat nå.",
-          "Reels på Facebook går bedre og bedre for tiden. Test det gjerne ut!",
-          "Video gjør det dårlig på LinkedIn, hold deg til bilder eller karuseller"
-        ] }
+        {
+          "list": [
+            "Instagram: karuseller med flere bilder og musikk på får ofte god rekkevidde! Verdt å teste ut akkurat nå. Last opp to eller flere bilder og velg musikk som passer budskapet eller er populær akkurat nå.",
+            "Reels på Facebook går bedre og bedre for tiden. Test det gjerne ut!",
+            "Video gjør det dårlig på LinkedIn, hold deg til bilder eller karuseller"
+          ]
+        }
       ]
     },
     {
@@ -23,10 +25,14 @@
       "layout": "grid",
       "caption": null,
       "items": [
-        { "placeholder": "Vintage botanisk/dyre-illustrasjon (eldre kunsttrykk)." },
+        {
+          "placeholder": "Vintage botanisk/dyre-illustrasjon (eldre kunsttrykk)."
+        },
         { "placeholder": "Eldre illustrasjon av flammer/ild på papir." },
         { "placeholder": "Vintage fugleillustrasjon i sirkulær ramme." },
-        { "placeholder": "Eldre teknisk/naturhistorisk tegning av en kule/stein." },
+        {
+          "placeholder": "Eldre teknisk/naturhistorisk tegning av en kule/stein."
+        },
         { "placeholder": "Vintage botanisk plansje med planter." }
       ]
     },

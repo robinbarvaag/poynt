@@ -36,7 +36,8 @@ export const ServicesArchive: Block = {
       label: "Velg tjenester",
       admin: {
         condition: (data) => data?.selectionMode === "manual",
-        description: "Velg hvilke tjenester som skal vises, i ønsket rekkefølge",
+        description:
+          "Velg hvilke tjenester som skal vises, i ønsket rekkefølge",
       },
     },
     {

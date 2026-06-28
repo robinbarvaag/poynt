@@ -10,4 +10,4 @@ export {
   type BrandHeaderProps,
   type BrandHeaderSurface,
 } from "./brand-header";
-export { useWebFont } from "./use-web-font";
+export { useWebFont, useCustomFont } from "./use-web-font";

@@ -210,19 +210,10 @@ export function PlannerCalendar({
   };
 
   return (
-    <Card className="mx-auto max-w-4xl">
+    <Card>
       <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => onMonthIndexChange(Math.max(0, safeIndex - 1))}
-            disabled={safeIndex === 0}
-            aria-label="Forrige måned"
-          >
-            <Icon name="chevron-left" className="size-5" />
-          </Button>
-          <div className="text-center">
+        <div className="flex items-center justify-between gap-4">
+          <div>
             <p className="font-semibold text-lg">
               {month.monthName}{" "}
               <span className="text-muted-foreground">{calYear}</span>
@@ -231,17 +222,28 @@ export function PlannerCalendar({
               <p className="text-muted-foreground text-sm">{month.theme}</p>
             )}
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() =>
-              onMonthIndexChange(Math.min(months.length - 1, safeIndex + 1))
-            }
-            disabled={safeIndex >= months.length - 1}
-            aria-label="Neste måned"
-          >
-            <Icon name="chevron-right" className="size-5" />
-          </Button>
+          <div className="flex shrink-0 items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onMonthIndexChange(Math.max(0, safeIndex - 1))}
+              disabled={safeIndex === 0}
+              aria-label="Forrige måned"
+            >
+              <Icon name="chevron-left" className="size-5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() =>
+                onMonthIndexChange(Math.min(months.length - 1, safeIndex + 1))
+              }
+              disabled={safeIndex >= months.length - 1}
+              aria-label="Neste måned"
+            >
+              <Icon name="chevron-right" className="size-5" />
+            </Button>
+          </div>
         </div>
       </CardHeader>
 
@@ -391,7 +393,7 @@ export function PlannerCalendar({
         </motion.div>
 
         {/* Fargeforklaring + hjelp */}
-        <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 border-t pt-3 text-muted-foreground text-xs">
+        <div className="mt-4 flex flex-wrap items-center justify-start gap-x-4 gap-y-1.5 border-t pt-3 text-muted-foreground text-xs">
           {usedChannels.map((key) => (
             <span key={key} className="flex items-center gap-1.5">
               <span
@@ -408,7 +410,7 @@ export function PlannerCalendar({
             Forslag fra årshjulet
           </span>
         </div>
-        <p className="mt-2 text-center text-muted-foreground text-xs">
+        <p className="mt-2 text-muted-foreground text-xs">
           Trykk på en dag for å lage et innlegg — eller på et forslag for å
           fylle det ut.
         </p>

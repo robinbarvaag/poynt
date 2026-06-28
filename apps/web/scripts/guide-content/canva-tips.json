@@ -9,9 +9,7 @@
   "content": [
     {
       "type": "richText",
-      "blocks": [
-        { "heading": "Slik skaper du liv i en karusell:", "level": 2 }
-      ]
+      "blocks": [{ "heading": "Slik skaper du liv i en karusell:", "level": 2 }]
     },
     {
       "type": "columns",
@@ -45,9 +43,7 @@
     },
     {
       "type": "richText",
-      "blocks": [
-        { "heading": "Slik lager du mockups i Canva:", "level": 2 }
-      ]
+      "blocks": [{ "heading": "Slik lager du mockups i Canva:", "level": 2 }]
     },
     {
       "type": "columns",
@@ -70,18 +66,22 @@
     },
     {
       "type": "richText",
-      "blocks": [
-        "Noen eksempler:"
-      ]
+      "blocks": ["Noen eksempler:"]
     },
     {
       "type": "gallery",
       "layout": "grid",
       "caption": "*Klikk på bildene å se det i full størrelse",
       "items": [
-        { "placeholder": "Mockup: nettbrett/laptop på skrivebord med notatbok og kaffe." },
-        { "placeholder": "Mockup: rosa kunstplakat liggende på bord med smykker rundt." },
-        { "placeholder": "Mockup: mobiltelefon stående på lyst bord som viser et design." }
+        {
+          "placeholder": "Mockup: nettbrett/laptop på skrivebord med notatbok og kaffe."
+        },
+        {
+          "placeholder": "Mockup: rosa kunstplakat liggende på bord med smykker rundt."
+        },
+        {
+          "placeholder": "Mockup: mobiltelefon stående på lyst bord som viser et design."
+        }
       ]
     },
     {
@@ -91,7 +91,10 @@
     {
       "type": "richText",
       "blocks": [
-        { "heading": "Triks for å endre farger til en ny palett i et eksisterende design uten å måtte endre én og én farge:", "level": 2 }
+        {
+          "heading": "Triks for å endre farger til en ny palett i et eksisterende design uten å måtte endre én og én farge:",
+          "level": 2
+        }
       ]
     },
     {
@@ -173,9 +176,7 @@
     },
     {
       "type": "richText",
-      "blocks": [
-        { "heading": "Nyttige hurtigtaster i Canva:", "level": 2 }
-      ]
+      "blocks": [{ "heading": "Nyttige hurtigtaster i Canva:", "level": 2 }]
     },
     {
       "type": "columns",
@@ -187,13 +188,15 @@
             "Trykk Option + 1",
             "Da får du opp dette bildet med oversikt over alle lagene du har i designet ditt.",
             "Andre nyttige hurtigtaster for mac:",
-            { "list": [
-              "Legg til linje",
-              "Bare store bokstaver: Command + Shift + K",
-              "Marker alle elementer: Command + A",
-              "\"Group\" elementer: Command + G",
-              "\"UnGroup\" elementer: Shift + Command + G"
-            ] }
+            {
+              "list": [
+                "Legg til linje",
+                "Bare store bokstaver: Command + Shift + K",
+                "Marker alle elementer: Command + A",
+                "\"Group\" elementer: Command + G",
+                "\"UnGroup\" elementer: Shift + Command + G"
+              ]
+            }
           ]
         },
         {
@@ -210,7 +213,10 @@
     {
       "type": "richText",
       "blocks": [
-        { "heading": "Video som viser deg hvordan du kan masseopprette innhold i Canva:", "level": 2 }
+        {
+          "heading": "Video som viser deg hvordan du kan masseopprette innhold i Canva:",
+          "level": 2
+        }
       ]
     },
     {
@@ -221,18 +227,20 @@
     {
       "type": "richText",
       "blocks": [
-        { "list": [
-          "Opprett et Canva Doc på framsiden",
-          "Trykk på plusstegnet og bruk Magic Write til å lage for eks. ti tips til Instagram.",
-          "Høyreklikk for å oversette.",
-          "Kopier hele teksten inn i et Excel-ark eller Google sheets",
-          "Gå tilbake til Canva - Hjem.",
-          "Trykk på sosiale medier og søk på story for eks.",
-          "Velg et design som kan passe med innholdet og åpne det.",
-          "Trykk på apper om du ikke allerede har masseopprettelse som en app.",
-          "Trykk der og importer innholdet manuelt.",
-          "Tilpass i din merkevarestil."
-        ] }
+        {
+          "list": [
+            "Opprett et Canva Doc på framsiden",
+            "Trykk på plusstegnet og bruk Magic Write til å lage for eks. ti tips til Instagram.",
+            "Høyreklikk for å oversette.",
+            "Kopier hele teksten inn i et Excel-ark eller Google sheets",
+            "Gå tilbake til Canva - Hjem.",
+            "Trykk på sosiale medier og søk på story for eks.",
+            "Velg et design som kan passe med innholdet og åpne det.",
+            "Trykk på apper om du ikke allerede har masseopprettelse som en app.",
+            "Trykk der og importer innholdet manuelt.",
+            "Tilpass i din merkevarestil."
+          ]
+        }
       ]
     },
     {

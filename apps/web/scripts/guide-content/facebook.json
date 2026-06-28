@@ -7,54 +7,88 @@
   "lede": "Akkurat nå fungerer det svært bra med Reels på Facebook. Gjenbruk gjerne Reels du har laget til Instagram der inne, men skriv eget budskap i teksten på Facebook.",
   "coverDescription": "Mobiltelefon som viser en Facebook-profil, liggende på en notatbok med penn og blyant – flatlay i dempede toner. Facebook-logoen vises nederst til venstre som sideikon.",
   "content": [
-    { "type": "richText", "blocks": [
-      { "heading": "Tips og triks:", "level": 3 },
-      "Akkurat nå fungerer det svært bra med Reels på Facebook. Gjenbruk gjerne Reels du har laget til Instagram der inne, men skriv eget budskap i teksten på Facebook.",
-      "Husk å svar på alle kommentarer, det ser Facebook på som et pluss. Svar gjerne med å stille et nytt spørsmål, slik at du oppfordrer til dialog.",
-      "Forsidebilde akkurat nå: 1640 x 624 i Canva - plasser relevant tekst og innhold sentrert i bildet. Last ned som jpg."
-    ] },
-    { "type": "richText", "blocks": [
-      { "heading": "Verktøy:", "level": 3 },
-      "Planlegg og analyser innholdet ditt med Meta Business Suite 👇 (Creator studio er nå samlet der)"
-    ] },
-    { "type": "bookmark", "items": [
-      { "url": null, "title": "Meta Business Suite", "description": "husk å laste den ned på mobilen din også" }
-    ] },
-    { "type": "richText", "blocks": [
-      "Se på andre sine Facebook-annonser og finn inspirasjon til egne annonser her 👇"
-    ] },
-    { "type": "bookmark", "items": [
-      { "url": null, "title": "Facebook Ads Library", "description": null }
-    ] },
-    { "type": "richText", "blocks": [
-      "Lær mer om Facebook og Facebook-annonsering hos Meta med Meta Blueprint 👇"
-    ] },
-    { "type": "bookmark", "items": [
-      { "url": null, "title": "Meta Blueprint", "description": null }
-    ] },
-    { "type": "richText", "blocks": [
-      "✏️ Innholdsplanlegging på Facebook"
-    ] },
+    {
+      "type": "richText",
+      "blocks": [
+        { "heading": "Tips og triks:", "level": 3 },
+        "Akkurat nå fungerer det svært bra med Reels på Facebook. Gjenbruk gjerne Reels du har laget til Instagram der inne, men skriv eget budskap i teksten på Facebook.",
+        "Husk å svar på alle kommentarer, det ser Facebook på som et pluss. Svar gjerne med å stille et nytt spørsmål, slik at du oppfordrer til dialog.",
+        "Forsidebilde akkurat nå: 1640 x 624 i Canva - plasser relevant tekst og innhold sentrert i bildet. Last ned som jpg."
+      ]
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        { "heading": "Verktøy:", "level": 3 },
+        "Planlegg og analyser innholdet ditt med Meta Business Suite 👇 (Creator studio er nå samlet der)"
+      ]
+    },
+    {
+      "type": "bookmark",
+      "items": [
+        {
+          "url": null,
+          "title": "Meta Business Suite",
+          "description": "husk å laste den ned på mobilen din også"
+        }
+      ]
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        "Se på andre sine Facebook-annonser og finn inspirasjon til egne annonser her 👇"
+      ]
+    },
+    {
+      "type": "bookmark",
+      "items": [
+        { "url": null, "title": "Facebook Ads Library", "description": null }
+      ]
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        "Lær mer om Facebook og Facebook-annonsering hos Meta med Meta Blueprint 👇"
+      ]
+    },
+    {
+      "type": "bookmark",
+      "items": [{ "url": null, "title": "Meta Blueprint", "description": null }]
+    },
+    { "type": "richText", "blocks": ["✏️ Innholdsplanlegging på Facebook"] },
     { "type": "divider", "label": "" },
-    { "type": "richText", "blocks": [
-      { "heading": "Våre tips:", "level": 2 },
-      { "list": [
-        "Utnytt vertikal video og Reels — Facebook Reels og korte vertikale videoer fanger brukernes oppmerksomhet raskt. Bruk undertekster, fengende musikk og gripende fortellinger for å fremheve budskapet ditt. Eksperimenter med ulike formater, lengder og stilarter for å se hva din målgruppen din responderer best på.",
-        "Interaktivt innhold med AR og VR — Meta investerer tungt i AR (utvidet virkelighet) og VR (virtuell virkelighet). Ved å ta i bruk enkle AR-effekter i annonser eller opplevelser, kan du gi potensielle kunder mulighten til å \"teste\" produktene dine på en engasjerende måte.",
-        "Bruk AI-drevet annonsering og segmentering — Facebooks annonseringsplattform fortsetter å bli mer automatisert og presis. Legg til rette for at AI kan utføre optimaliseringsjobben for deg. Gi algoritmen nok data, bruk bredere målgrupper i starten, og la Facebook/Meta selv justere hvem som faktisk responderer best. NB! Ikke la Meta tulle til annonsene dine for mye uten at du vet hva de skrus på. Se opp for random musikk o.l.",
-        "Skap verdifulle fellesskap via Facebook Groups — Grupper blir stadig viktigere for å nå en dedikert og engasjert målgruppe. Etablér en gruppe for kunder eller fans av merkevaren din, og del eksklusive oppdateringer, arrangementer eller tilbud. Dette øker lojalitet og oppmuntrer til at eksisterende kunder blir ambassadører.",
-        "Personlig tilpasning i større skala — Personlig tilpasning er ikke lenger bare et buzzord. Når alle kjemper om brukernes oppmerksomhet, vil den som leverer innhold med reell relevans, vinne. Sett opp dynamiske annonser hvor innholdet (produktbilder, tekst, tilbud) tilpasses basert på tidligere interaksjoner og interesser.",
-        "Samspill mellom Facebook og andre Meta-plattformer — Bruk integrasjonen med Instagram, Messenger og WhatsApp for å skape helhetlige kampanjer på tvers av plattformer. Messenger- og WhatsApp-roboter (chatbots) kan svare på spørsmål, foreslå produkter, eller guide brukere videre i kjøpsprosessen. Dette gir en sømløs kundeopplevelse.",
-        "Bruk Influencere og samarbeidspartnere strategisk — På Facebook er det fortsatt rom for influencer-markedsføring, men velg influencere som har en troverdig relasjon til målgruppen din. Samarbeid om å lage merkevareinnhold som føles autentisk og relevant, gjerne med kreative videoer, livesendinger eller interaktive arrangementer. Husk kontrakt med influensere!",
-        "Korte og engasjerende tekster — Selv om du har mye å si, må du huske at brukerne scroller raskt forbi innhold i feeden. Konsise tekster med tydelige budskap, spørsmål og \"call to action\" fungerer best. Bruk emojier med måte, og test ulike varianter av samme budskap for å se hva som konverterer.",
-        "Hyppig testing og tilpasning — Facebooks algoritmer endres jevnlig, og det som fungerer i dag, fungerer kanskje ikke i morgen. Sett av tid og budsjett til kontinuerlig A/B-testing av alt fra annonsetekst og bildebruk til valg av publikum. Evaluer resultatene, optimalisér og gjenta.",
-        "Fokuser på etisk databruk og personvern — Personvern vil bare bli viktigere, og forbrukerne forventer at merkevarer håndterer data på en ansvarlig måte. Vær tydelig og gjennomsiktig på hvordan du samler og bruker data. Kvalitet, transparens og tillit blir avgjørende konkurransefortrinn når brukerne selv velger hvem de vil følge."
-      ] }
-    ] },
-    { "type": "richText", "blocks": [
-      "Vi kan sette opp Meta-annonse-kurs for nybegynnere til dere om det er ønskelig.",
-      "Nå kan du også legg musikk på vanlige innlegg på Facebook. Verd å prøve:"
-    ] },
-    { "type": "image", "width": "normal", "caption": "Skjermbilde fra Facebook-appen som viser «Create post» med eksempeltekst: «Hvilke prosjekter jobber du med i sommer? Fortell oss gjerne hva du jobber med i kommentarfeltet 👇» og et bildegalleri av treprodukter/snekkerarbeid, samt verktøylinjen med «Add music».", "placeholder": "mobil-skjermbilde av Facebook «Create post» med bildegalleri og «Add music»-knapp" }
+    {
+      "type": "richText",
+      "blocks": [
+        { "heading": "Våre tips:", "level": 2 },
+        {
+          "list": [
+            "Utnytt vertikal video og Reels — Facebook Reels og korte vertikale videoer fanger brukernes oppmerksomhet raskt. Bruk undertekster, fengende musikk og gripende fortellinger for å fremheve budskapet ditt. Eksperimenter med ulike formater, lengder og stilarter for å se hva din målgruppen din responderer best på.",
+            "Interaktivt innhold med AR og VR — Meta investerer tungt i AR (utvidet virkelighet) og VR (virtuell virkelighet). Ved å ta i bruk enkle AR-effekter i annonser eller opplevelser, kan du gi potensielle kunder mulighten til å \"teste\" produktene dine på en engasjerende måte.",
+            "Bruk AI-drevet annonsering og segmentering — Facebooks annonseringsplattform fortsetter å bli mer automatisert og presis. Legg til rette for at AI kan utføre optimaliseringsjobben for deg. Gi algoritmen nok data, bruk bredere målgrupper i starten, og la Facebook/Meta selv justere hvem som faktisk responderer best. NB! Ikke la Meta tulle til annonsene dine for mye uten at du vet hva de skrus på. Se opp for random musikk o.l.",
+            "Skap verdifulle fellesskap via Facebook Groups — Grupper blir stadig viktigere for å nå en dedikert og engasjert målgruppe. Etablér en gruppe for kunder eller fans av merkevaren din, og del eksklusive oppdateringer, arrangementer eller tilbud. Dette øker lojalitet og oppmuntrer til at eksisterende kunder blir ambassadører.",
+            "Personlig tilpasning i større skala — Personlig tilpasning er ikke lenger bare et buzzord. Når alle kjemper om brukernes oppmerksomhet, vil den som leverer innhold med reell relevans, vinne. Sett opp dynamiske annonser hvor innholdet (produktbilder, tekst, tilbud) tilpasses basert på tidligere interaksjoner og interesser.",
+            "Samspill mellom Facebook og andre Meta-plattformer — Bruk integrasjonen med Instagram, Messenger og WhatsApp for å skape helhetlige kampanjer på tvers av plattformer. Messenger- og WhatsApp-roboter (chatbots) kan svare på spørsmål, foreslå produkter, eller guide brukere videre i kjøpsprosessen. Dette gir en sømløs kundeopplevelse.",
+            "Bruk Influencere og samarbeidspartnere strategisk — På Facebook er det fortsatt rom for influencer-markedsføring, men velg influencere som har en troverdig relasjon til målgruppen din. Samarbeid om å lage merkevareinnhold som føles autentisk og relevant, gjerne med kreative videoer, livesendinger eller interaktive arrangementer. Husk kontrakt med influensere!",
+            "Korte og engasjerende tekster — Selv om du har mye å si, må du huske at brukerne scroller raskt forbi innhold i feeden. Konsise tekster med tydelige budskap, spørsmål og \"call to action\" fungerer best. Bruk emojier med måte, og test ulike varianter av samme budskap for å se hva som konverterer.",
+            "Hyppig testing og tilpasning — Facebooks algoritmer endres jevnlig, og det som fungerer i dag, fungerer kanskje ikke i morgen. Sett av tid og budsjett til kontinuerlig A/B-testing av alt fra annonsetekst og bildebruk til valg av publikum. Evaluer resultatene, optimalisér og gjenta.",
+            "Fokuser på etisk databruk og personvern — Personvern vil bare bli viktigere, og forbrukerne forventer at merkevarer håndterer data på en ansvarlig måte. Vær tydelig og gjennomsiktig på hvordan du samler og bruker data. Kvalitet, transparens og tillit blir avgjørende konkurransefortrinn når brukerne selv velger hvem de vil følge."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "richText",
+      "blocks": [
+        "Vi kan sette opp Meta-annonse-kurs for nybegynnere til dere om det er ønskelig.",
+        "Nå kan du også legg musikk på vanlige innlegg på Facebook. Verd å prøve:"
+      ]
+    },
+    {
+      "type": "image",
+      "width": "normal",
+      "caption": "Skjermbilde fra Facebook-appen som viser «Create post» med eksempeltekst: «Hvilke prosjekter jobber du med i sommer? Fortell oss gjerne hva du jobber med i kommentarfeltet 👇» og et bildegalleri av treprodukter/snekkerarbeid, samt verktøylinjen med «Add music».",
+      "placeholder": "mobil-skjermbilde av Facebook «Create post» med bildegalleri og «Add music»-knapp"
+    }
   ]
 }
