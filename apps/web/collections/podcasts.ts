@@ -12,6 +12,11 @@ export const Podcasts: CollectionConfig = {
     useAsTitle: "title",
     defaultColumns: ["title", "publishedAt", "updatedAt"],
     group: "Innhold",
+    // «Preview»-knapp i dokument-headeren → åpner episoden på nettsiden.
+    preview: (doc) =>
+      doc?.slug
+        ? `${process.env.NEXT_PUBLIC_URL || "http://localhost:3000"}/podkast/${doc.slug}`
+        : null,
   },
   hooks: {
     beforeChange: [

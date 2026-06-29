@@ -52,7 +52,9 @@ export default async function DashboardPage() {
       <NextStepHero {...hero} />
 
       {/* Signaturen: den guidede veien gjennom oppsettet */}
-      <JourneyPath title="Slik kommer du i gang" stages={stages} />
+      <div data-tour="journey">
+        <JourneyPath title="Slik kommer du i gang" stages={stages} />
+      </div>
 
       {/* Din rytme — det daglige/ukentlige når oppsettet er i gang */}
       <section className="space-y-5">

@@ -55,9 +55,16 @@ export function ReadingNav({ items, partLabel, className }: ReadingNavProps) {
     items.findIndex((i) => i.id === activeId)
   );
   const current = items[activeIndex];
+  // «Del X av Y» teller bare H2-hovedsteg, ikke H3-underpunkt.
+  const total = items.filter((i) => (i.level ?? 2) === 2).length;
+  let currentStep = 0;
+  for (let i = 0; i <= activeIndex && i < items.length; i++) {
+    if ((items[i].level ?? 2) === 2) currentStep += 1;
+  }
+  currentStep = Math.max(1, currentStep);
   const label = partLabel
-    ? partLabel(activeIndex + 1, items.length)
-    : `Del ${activeIndex + 1} av ${items.length}`;
+    ? partLabel(currentStep, total)
+    : `Del ${currentStep} av ${total}`;
 
   return (
     <div className={cn("sticky top-0 z-40 lg:hidden", className)}>
@@ -69,7 +76,7 @@ export function ReadingNav({ items, partLabel, className }: ReadingNavProps) {
           aria-expanded={open}
         >
           <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary font-heading font-semibold text-[0.7rem] text-primary-foreground">
-            {String(activeIndex + 1).padStart(2, "0")}
+            {String(currentStep).padStart(2, "0")}
           </span>
           <span className="flex min-w-0 flex-1 flex-col">
             <span className="font-heading text-[0.65rem] text-muted-foreground uppercase tracking-[0.16em]">
@@ -95,49 +102,68 @@ export function ReadingNav({ items, partLabel, className }: ReadingNavProps) {
       {open && (
         <div className="absolute inset-x-0 top-full border-foreground/10 border-b bg-background shadow-[0_20px_40px_-20px_rgba(0,64,41,0.35)]">
           <ol className="flex flex-col p-2">
-            {items.map((item, index) => {
-              const isActive = index === activeIndex;
-              const isDone = index < activeIndex;
-              return (
-                <li key={item.id}>
-                  <a
-                    href={`#${item.id}`}
-                    onClick={() => setOpen(false)}
-                    className={cn(
-                      "flex items-center gap-3 rounded-2xl px-3 py-2.5",
-                      isActive ? "bg-primary/10" : "active:bg-foreground/5"
-                    )}
-                  >
-                    <span
+            {(() => {
+              let mStep = 0;
+              return items.map((item, index) => {
+                const isActive = index === activeIndex;
+                const isDone = index < activeIndex;
+                const isSub = (item.level ?? 2) === 3;
+                if (!isSub) mStep += 1;
+                return (
+                  <li key={item.id}>
+                    <a
+                      href={`#${item.id}`}
+                      onClick={() => setOpen(false)}
                       className={cn(
-                        "flex size-6 shrink-0 items-center justify-center rounded-full font-heading font-semibold text-[0.65rem]",
-                        isActive
-                          ? "bg-primary text-primary-foreground"
-                          : isDone
-                            ? "bg-mint text-foreground"
-                            : "bg-foreground/5 text-muted-foreground"
+                        "flex items-center gap-3 rounded-2xl py-2.5",
+                        isSub ? "pr-3 pl-12" : "px-3",
+                        isActive ? "bg-primary/10" : "active:bg-foreground/5"
                       )}
                     >
-                      {isDone ? (
-                        <Icon name="check" className="size-3" />
+                      {isSub ? (
+                        <span
+                          className={cn(
+                            "size-1.5 shrink-0 rounded-full",
+                            isActive
+                              ? "bg-primary"
+                              : isDone
+                                ? "bg-mint"
+                                : "bg-foreground/25"
+                          )}
+                        />
                       ) : (
-                        String(index + 1).padStart(2, "0")
+                        <span
+                          className={cn(
+                            "flex size-6 shrink-0 items-center justify-center rounded-full font-heading font-semibold text-[0.65rem]",
+                            isActive
+                              ? "bg-primary text-primary-foreground"
+                              : isDone
+                                ? "bg-mint text-foreground"
+                                : "bg-foreground/5 text-muted-foreground"
+                          )}
+                        >
+                          {isDone ? (
+                            <Icon name="check" className="size-3" />
+                          ) : (
+                            String(mStep).padStart(2, "0")
+                          )}
+                        </span>
                       )}
-                    </span>
-                    <span
-                      className={cn(
-                        "text-sm",
-                        isActive
-                          ? "font-semibold text-foreground"
-                          : "text-muted-foreground"
-                      )}
-                    >
-                      {item.label}
-                    </span>
-                  </a>
-                </li>
-              );
-            })}
+                      <span
+                        className={cn(
+                          isSub ? "text-[0.8rem]" : "text-sm",
+                          isActive
+                            ? "font-semibold text-foreground"
+                            : "text-muted-foreground"
+                        )}
+                      >
+                        {item.label}
+                      </span>
+                    </a>
+                  </li>
+                );
+              });
+            })()}
           </ol>
         </div>
       )}

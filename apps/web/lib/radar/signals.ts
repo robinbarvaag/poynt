@@ -1,3 +1,4 @@
+import type { Guide } from "@/payload-types";
 import config from "@payload-config";
 import { count, db, desc, gte } from "@poynt/planner-db";
 import {
@@ -6,6 +7,10 @@ import {
 } from "@poynt/planner-db/schema";
 import { type RadarSignalInput, toolIdLabels } from "@poynt/planner-validators";
 import { getPayload } from "payload";
+import {
+  hashGuideContent,
+  serializeGuideContent,
+} from "../serialize-guide-content";
 import { getViewAggregates } from "./views";
 
 /**
@@ -58,6 +63,8 @@ const STALE_MONTHS = 6;
 const FEATURED_STALE_MONTHS = 3;
 const DRAFT_STUCK_DAYS = 30;
 const DEMAND_DAYS = 90;
+// Guider med AI-kvalitetsscore under dette regnes som forbedringsverdige.
+const LOW_QUALITY_MAX = 55;
 
 // Tak per signaltype (token-budsjett + støydemping)
 const MAX_STALE = 12;
@@ -67,6 +74,7 @@ const MAX_COVERAGE = 6;
 const MAX_INSPIRATION = 5;
 const MAX_INSPIRATION_ITEMS = 200;
 const MAX_POPULAR = 6;
+const MAX_LOW_QUALITY = 8;
 // Visningsvindu + minste antall visninger før noe regnes som «mye lest».
 const POPULAR_DAYS = 60;
 const MIN_VIEWS = 10;
@@ -80,6 +88,8 @@ interface RadarDoc {
   isFeatured?: boolean | null;
   categories?: unknown;
   category?: unknown;
+  qualityScore?: number | null;
+  qualityReview?: { contentHash?: string } | null;
 }
 
 interface CatRef {
@@ -147,6 +157,7 @@ export async function gatherSignals(): Promise<RadarSignalInput[]> {
   const staleCandidates: RadarSignalInput[] = [];
   const featuredCandidates: RadarSignalInput[] = [];
   const draftCandidates: RadarSignalInput[] = [];
+  const lowQualityCandidates: RadarSignalInput[] = [];
 
   // Metadata om publisert innhold, slått opp av visnings-analysen (Fase 4) for
   // å avgjøre om et mye lest innlegg bør oppdateres (gammelt) eller promoteres.
@@ -210,6 +221,31 @@ export async function gatherSignals(): Promise<RadarSignalInput[]> {
           category: cats[0]?.slug ?? null,
         });
       }
+
+      // Lav AI-kvalitetsscore (kun guider, som har vurderings-feltene). Vi
+      // stoler bare på scoren hvis den ble satt mot DAGENS innhold – derfor
+      // sammenligner vi lagret innholds-hash mot en fersk hash. Endret innhold
+      // → utdatert score → hopp over (ingen falske signaler).
+      if (
+        col.slug === "guides" &&
+        typeof doc.qualityScore === "number" &&
+        doc.qualityScore < LOW_QUALITY_MAX
+      ) {
+        const currentHash = hashGuideContent(
+          serializeGuideContent(doc as unknown as Guide)
+        );
+        if (doc.qualityReview?.contentHash === currentHash) {
+          lowQualityCandidates.push({
+            key: `low_quality:${col.slug}:${doc.id}`,
+            kind: "low_quality",
+            summary: `«${title}» (${col.label}) fikk kvalitetsscore ${doc.qualityScore}/100 i AI-vurderingen — under terskelen, så den bør skrives om eller styrkes.`,
+            priority: clamp(50 + (LOW_QUALITY_MAX - doc.qualityScore), 50, 90),
+            targetCollection: col.slug,
+            targetId: String(doc.id),
+            category: cats[0]?.slug ?? null,
+          });
+        }
+      }
     }
 
     // Fastlåste utkast
@@ -244,6 +280,9 @@ export async function gatherSignals(): Promise<RadarSignalInput[]> {
   signals.push(...staleCandidates.sort(byPriority).slice(0, MAX_STALE));
   signals.push(...draftCandidates.sort(byPriority).slice(0, MAX_DRAFTS));
   signals.push(...featuredCandidates.sort(byPriority).slice(0, MAX_FEATURED));
+  signals.push(
+    ...lowQualityCandidates.sort(byPriority).slice(0, MAX_LOW_QUALITY)
+  );
 
   // Kategori-gap (lite/ingen dekning). Tomme kategorier veier tyngst, og vi
   // beholder bare de mest presserende så lista ikke fylles av nesten like

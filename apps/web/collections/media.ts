@@ -47,7 +47,7 @@ export const Media: CollectionConfig = {
       },
     ],
     adminThumbnail: "thumbnail",
-    mimeTypes: ["image/*", "application/pdf"],
+    mimeTypes: ["image/*", "video/*", "application/pdf"],
   },
   fields: [
     // «Finn bilde»-knapp øverst i skjemaet, så den også er tilgjengelig når man
@@ -66,6 +66,15 @@ export const Media: CollectionConfig = {
       name: "alt",
       type: "text",
       label: "Alt-tekst",
+      admin: {
+        description:
+          "Beskrivelse av bildet for skjermlesere og SEO. Bruk «Generer alt-tekst» for et AI-forslag du kan justere.",
+        components: {
+          afterInput: [
+            "/admin/components/media/generate-alt-button#GenerateAltButton",
+          ],
+        },
+      },
     },
     {
       name: "isPrivate",

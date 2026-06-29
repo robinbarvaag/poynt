@@ -87,14 +87,18 @@ export function ContentCard({
       asChild
       surface={surface}
       className={cn(
-        "group/content h-full gap-0 overflow-hidden p-0 transition-transform duration-300 hover:-translate-y-1.5",
+        // transform-gpu + will-change holder kortet på et stabilt GPU-lag under
+        // hover-transformen. Uten dette dropper Chrome det avrundede klippet
+        // (overflow-hidden + rounded-3xl) midt i transisjonen, så hjørnene
+        // «popper» firkantet og runde igjen ved hover inn/ut.
+        "group/content h-full transform-gpu gap-0 overflow-hidden p-0 transition-transform duration-300 will-change-transform hover:-translate-y-1.5",
         className
       )}
     >
       <a href={href}>
-        <div className="relative aspect-[2/1] shrink-0 overflow-hidden">
+        <div className="relative aspect-[2/1] shrink-0 overflow-hidden rounded-t-3xl">
           {cover ? (
-            <div className="absolute inset-0 *:[img]:h-full *:[img]:w-full *:[img]:object-cover *:[img]:transition-transform *:[img]:duration-500 group-hover/content:*:[img]:scale-105">
+            <div className="absolute inset-0 transform-gpu *:[img]:h-full *:[img]:w-full *:[img]:object-cover *:[img]:transition-transform *:[img]:duration-500 group-hover/content:*:[img]:scale-105">
               {cover}
             </div>
           ) : (

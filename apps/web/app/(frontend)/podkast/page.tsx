@@ -1,3 +1,4 @@
+import { AdminBar } from "@/components/admin-bar";
 import { PageHero } from "@/components/page-hero";
 import { PayloadImage } from "@/components/payload-image";
 import {
@@ -106,6 +107,7 @@ export default async function PodcastPage() {
 
   return (
     <>
+      <AdminBar global="podcastpage" singular="podkastside" />
       {heroEnabled && (
         <PageHero title={heroTitle} description={heroDescription} />
       )}

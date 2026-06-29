@@ -27,8 +27,6 @@ export interface GuideResultProps {
   /** Konkrete neste steg for toppkanalen (denne uken) — løftet opp i resultatet. */
   nextSteps?: string[] | null;
   onReset?: () => void;
-  mode?: "intro" | "result";
-  onStartQuiz?: () => void;
   /** Når true bygger resultatet seg fortsatt opp (streaming): vis skjelett + status. */
   isStreaming?: boolean;
 }
@@ -73,9 +71,4 @@ export interface ChannelGuideClientProps {
   initialSavedResult: SavedResult | null;
   industries: Industry[];
   profile: ChannelGuideProfile;
-}
-
-export interface ExtendedGuideResultProps extends GuideResultProps {
-  mode?: "intro" | "result";
-  onStartQuiz?: () => void;
 }

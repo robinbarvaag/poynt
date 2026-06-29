@@ -1,12 +1,16 @@
 import type { CollectionConfig } from "payload";
 import { guideBlocks } from "../blocks/guide-blocks";
 import { stockPickerAfterInput } from "../fields/stock-picker-after-input";
+import { enrichBookmarks } from "../lib/enrich-bookmarks";
 import { generateSlug } from "../lib/generate-slug";
 
 /**
  * Guider = On-Poynt sitt ressursbibliotek (tidligere i Notion). Blokk-basert
  * innhold som rendres med leken motion på `/on-poynt/ressurser`. `section`
  * styrer grupperingen på hub-en (speiler Notion-forsidens seksjoner).
+ *
+ * Hovedkolonnen er delt i faner: «Innhold» (selve guiden) og «Kvalitet»
+ * (AI-vurderingen), så kvalitetsverktøyet ikke ligger midt i skriveflyten.
  */
 export const Guides: CollectionConfig = {
   slug: "guides",
@@ -16,8 +20,21 @@ export const Guides: CollectionConfig = {
   },
   admin: {
     useAsTitle: "title",
-    defaultColumns: ["title", "section", "category", "order", "status"],
+    defaultColumns: [
+      "title",
+      "section",
+      "category",
+      "qualityScore",
+      "order",
+      "status",
+    ],
     group: "Innhold",
+    // «Preview»-knapp i dokument-headeren → åpner guiden på nettsiden.
+    // Motsatt vei av den egenbygde <AdminBar> ute på frontend.
+    preview: (doc) =>
+      doc?.slug
+        ? `${process.env.NEXT_PUBLIC_URL || "http://localhost:3000"}/on-poynt/ressurser/${doc.slug}`
+        : null,
   },
   versions: {
     drafts: {
@@ -32,14 +49,71 @@ export const Guides: CollectionConfig = {
         }
         return data;
       },
+      enrichBookmarks,
     ],
   },
   fields: [
     {
-      name: "title",
-      type: "text",
-      required: true,
-      label: "Tittel",
+      type: "tabs",
+      tabs: [
+        {
+          label: "Innhold",
+          description: "Selve guiden.",
+          fields: [
+            {
+              name: "title",
+              type: "text",
+              required: true,
+              label: "Tittel",
+            },
+            {
+              name: "coverImage",
+              type: "upload",
+              relationTo: "media",
+              label: "Cover-bilde",
+              admin: {
+                description: "Full-bredde banner øverst på guiden",
+                components: {
+                  afterInput: stockPickerAfterInput,
+                },
+              },
+            },
+            {
+              name: "lede",
+              type: "textarea",
+              label: "Ingress",
+              admin: {
+                description:
+                  "Kort introduksjon som vises i hero og i listevisning",
+              },
+            },
+            {
+              name: "content",
+              type: "blocks",
+              label: "Innhold",
+              blocks: guideBlocks,
+            },
+          ],
+        },
+        {
+          label: "Kvalitet",
+          description:
+            "AI-vurdering av nytteverdi. Påvirker ikke det publiserte innholdet — kun et redaksjonelt hjelpemiddel.",
+          fields: [
+            {
+              name: "kvalitetsvurdering",
+              type: "ui",
+              label: "Kvalitetsvurdering",
+              admin: {
+                components: {
+                  Field:
+                    "/admin/components/guides/review-guide-button#ReviewGuideButton",
+                },
+              },
+            },
+          ],
+        },
+      ],
     },
     {
       name: "slug",
@@ -60,26 +134,6 @@ export const Guides: CollectionConfig = {
       admin: {
         position: "sidebar",
         description: "Vises ved tittelen, f.eks. 📸 eller ✨",
-      },
-    },
-    {
-      name: "coverImage",
-      type: "upload",
-      relationTo: "media",
-      label: "Cover-bilde",
-      admin: {
-        description: "Full-bredde banner øverst på guiden",
-        components: {
-          afterInput: stockPickerAfterInput,
-        },
-      },
-    },
-    {
-      name: "lede",
-      type: "textarea",
-      label: "Ingress",
-      admin: {
-        description: "Kort introduksjon som vises i hero og i listevisning",
       },
     },
     {
@@ -130,10 +184,49 @@ export const Guides: CollectionConfig = {
       },
     },
     {
-      name: "content",
-      type: "blocks",
-      label: "Innhold",
-      blocks: guideBlocks,
+      name: "showToc",
+      type: "checkbox",
+      label: "Vis innholdsmeny",
+      defaultValue: true,
+      admin: {
+        position: "sidebar",
+        description:
+          "Viser en seksjonsmeny (innholdsfortegnelse) ved siden av guiden når den har minst to H2-overskrifter. Skru av for å skjule den.",
+      },
+    },
+    {
+      name: "qualityScore",
+      type: "number",
+      label: "Kvalitetsscore",
+      min: 0,
+      max: 100,
+      admin: {
+        position: "sidebar",
+        readOnly: true,
+        description:
+          "Settes av AI-vurderingen (0–100). Kjør den under «Kvalitet»-fanen.",
+      },
+    },
+    {
+      name: "qualityReviewedAt",
+      type: "date",
+      label: "Sist vurdert",
+      admin: {
+        position: "sidebar",
+        readOnly: true,
+        date: { displayFormat: "dd.MM.yyyy HH:mm" },
+      },
+    },
+    {
+      // Hele vurderingen (oppsummering, delscore, fiks, innholds-hash). Rendres
+      // av panelet i «Kvalitet»-fanen; skjult som rått felt fordi JSON-en er
+      // stor og stygg.
+      name: "qualityReview",
+      type: "json",
+      label: "Kvalitetsvurdering (rådata)",
+      admin: {
+        hidden: true,
+      },
     },
     {
       name: "relatedGuides",

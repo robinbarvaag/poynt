@@ -288,6 +288,9 @@ export interface HeroBlock {
  */
 export interface Media {
   id: number;
+  /**
+   * Beskrivelse av bildet for skjermlesere og SEO. Bruk «Generer alt-tekst» for et AI-forslag du kan justere.
+   */
   alt?: string | null;
   /**
    * Kun synlig for innloggede brukere
@@ -1337,14 +1340,6 @@ export interface Guide {
   id: number;
   title: string;
   /**
-   * Genereres automatisk fra tittel
-   */
-  slug: string;
-  /**
-   * Vises ved tittelen, f.eks. 📸 eller ✨
-   */
-  icon?: string | null;
-  /**
    * Full-bredde banner øverst på guiden
    */
   coverImage?: (number | null) | Media;
@@ -1352,19 +1347,6 @@ export interface Guide {
    * Kort introduksjon som vises i hero og i listevisning
    */
   lede?: string | null;
-  /**
-   * Styrer hvor guiden grupperes på ressurs-forsiden
-   */
-  section: 'generelt' | 'kanaler' | 'maler' | 'inspirasjon' | 'ressurser';
-  /**
-   * Gir farge og ikon-identitet (f.eks. Instagram)
-   */
-  category?: (number | null) | Category;
-  /**
-   * Lavere tall vises først innenfor seksjonen
-   */
-  order?: number | null;
-  isFeatured?: boolean | null;
   content?:
     | (
         | GuideRichTextBlock
@@ -1378,6 +1360,45 @@ export interface Guide {
         | GuideDownloadBlock
         | GuideDividerBlock
       )[]
+    | null;
+  /**
+   * Genereres automatisk fra tittel
+   */
+  slug: string;
+  /**
+   * Vises ved tittelen, f.eks. 📸 eller ✨
+   */
+  icon?: string | null;
+  /**
+   * Styrer hvor guiden grupperes på ressurs-forsiden
+   */
+  section: 'generelt' | 'kanaler' | 'maler' | 'inspirasjon' | 'ressurser';
+  /**
+   * Gir farge og ikon-identitet (f.eks. Instagram)
+   */
+  category?: (number | null) | Category;
+  /**
+   * Lavere tall vises først innenfor seksjonen
+   */
+  order?: number | null;
+  isFeatured?: boolean | null;
+  /**
+   * Viser en seksjonsmeny (innholdsfortegnelse) ved siden av guiden når den har minst to H2-overskrifter. Skru av for å skjule den.
+   */
+  showToc?: boolean | null;
+  /**
+   * Settes av AI-vurderingen (0–100). Kjør den under «Kvalitet»-fanen.
+   */
+  qualityScore?: number | null;
+  qualityReviewedAt?: string | null;
+  qualityReview?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
     | null;
   relatedGuides?: (number | Guide)[] | null;
   updatedAt: string;
@@ -1442,10 +1463,22 @@ export interface GuideCalloutBlock {
  * via the `definition` "GuideColumnsBlock".
  */
 export interface GuideColumnsBlock {
+  /**
+   * Vises som tittel over innholdet i denne blokken.
+   */
+  title?: string | null;
+  /**
+   * Kort tekst rett under overskriften.
+   */
+  intro?: string | null;
   align?: ('top' | 'center') | null;
+  /**
+   * Kolonner blir fort trange i lesespalten — «Bred» eller «Full» gir dem mer plass. «Full» dempes automatisk når innholdsmenyen er på.
+   */
+  width?: ('normal' | 'wide' | 'full') | null;
   columns?:
     | {
-        type?: ('text' | 'image') | null;
+        type?: ('text' | 'image' | 'video') | null;
         content?: {
           root: {
             type: string;
@@ -1462,6 +1495,24 @@ export interface GuideColumnsBlock {
           [k: string]: unknown;
         } | null;
         image?: (number | null) | Media;
+        /**
+         * Last opp en MP4- eller WebM-fil.
+         */
+        videoFile?: (number | null) | Media;
+        /**
+         * Stillbilde som vises før avspilling starter (valgfri).
+         */
+        poster?: (number | null) | Media;
+        /**
+         * Starter når videoen kommer i visning. Krever «Uten lyd».
+         */
+        autoplay?: boolean | null;
+        muted?: boolean | null;
+        loop?: boolean | null;
+        /**
+         * Skru av for en stille bakgrunns-/loop-video uten avspillerknapper.
+         */
+        showControls?: boolean | null;
         caption?: string | null;
         id?: string | null;
       }[]
@@ -1475,6 +1526,14 @@ export interface GuideColumnsBlock {
  * via the `definition` "GuideGalleryBlock".
  */
 export interface GuideGalleryBlock {
+  /**
+   * Vises som tittel over innholdet i denne blokken.
+   */
+  title?: string | null;
+  /**
+   * Kort tekst rett under overskriften.
+   */
+  intro?: string | null;
   layout?: ('grid' | 'carousel') | null;
   images?:
     | {
@@ -1493,9 +1552,21 @@ export interface GuideGalleryBlock {
  * via the `definition` "GuideImageBlock".
  */
 export interface GuideImageBlock {
+  /**
+   * Vises som tittel over innholdet i denne blokken.
+   */
+  title?: string | null;
+  /**
+   * Kort tekst rett under overskriften.
+   */
+  intro?: string | null;
   image?: (number | null) | Media;
   caption?: string | null;
   width?: ('normal' | 'wide' | 'full') | null;
+  /**
+   * Gjelder for normal bredde (bred/full fyller alltid bredden)
+   */
+  align?: ('center' | 'left' | 'right') | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'guideImage';
@@ -1506,9 +1577,36 @@ export interface GuideImageBlock {
  */
 export interface GuideVideoBlock {
   /**
+   * Vises som tittel over innholdet i denne blokken.
+   */
+  title?: string | null;
+  /**
+   * Kort tekst rett under overskriften.
+   */
+  intro?: string | null;
+  source?: ('embed' | 'upload') | null;
+  /**
    * YouTube-, Loom- eller Vimeo-lenke
    */
-  url: string;
+  url?: string | null;
+  /**
+   * Last opp en MP4- eller WebM-fil.
+   */
+  videoFile?: (number | null) | Media;
+  /**
+   * Stillbilde som vises før avspilling starter (valgfri).
+   */
+  poster?: (number | null) | Media;
+  /**
+   * Starter når videoen kommer i visning. Krever «Uten lyd».
+   */
+  autoplay?: boolean | null;
+  muted?: boolean | null;
+  loop?: boolean | null;
+  /**
+   * Skru av for en stille bakgrunns-/loop-video uten avspillerknapper.
+   */
+  showControls?: boolean | null;
   caption?: string | null;
   id?: string | null;
   blockName?: string | null;
@@ -1519,6 +1617,14 @@ export interface GuideVideoBlock {
  * via the `definition` "GuideToggleBlock".
  */
 export interface GuideToggleBlock {
+  /**
+   * Vises som tittel over innholdet i denne blokken.
+   */
+  title?: string | null;
+  /**
+   * Kort tekst rett under overskriften.
+   */
+  intro?: string | null;
   items?:
     | {
         title: string;
@@ -1549,12 +1655,40 @@ export interface GuideToggleBlock {
  * via the `definition` "GuideBookmarkBlock".
  */
 export interface GuideBookmarkBlock {
+  /**
+   * Vises som tittel over innholdet i denne blokken.
+   */
+  title?: string | null;
+  /**
+   * Kort tekst rett under overskriften.
+   */
+  intro?: string | null;
+  /**
+   * Lim inn URL og lagre – tittel, beskrivelse og bilde hentes automatisk fra lenkens OG-data. Fyll inn feltene manuelt for å overstyre.
+   */
   items?:
     | {
+        /**
+         * Lim inn en lenke – forhåndsvisningen hentes automatisk.
+         */
         url?: string | null;
+        /**
+         * Hentes automatisk hvis tom
+         */
         title?: string | null;
+        /**
+         * Hentes automatisk hvis tom
+         */
         description?: string | null;
         image?: (number | null) | Media;
+        /**
+         * Bilde-URL hentet fra lenken. Tøm dette feltet for å hente på nytt ved neste lagring.
+         */
+        imageUrl?: string | null;
+        /**
+         * Hva som ble hentet fra lenken sist du lagret. Tøm OG-bilde-feltet for å forsøke på nytt.
+         */
+        ogStatus?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -1567,6 +1701,14 @@ export interface GuideBookmarkBlock {
  * via the `definition` "GuideDownloadBlock".
  */
 export interface GuideDownloadBlock {
+  /**
+   * Vises som tittel over innholdet i denne blokken.
+   */
+  title?: string | null;
+  /**
+   * Kort tekst rett under overskriften.
+   */
+  intro?: string | null;
   items?:
     | {
         title: string;
@@ -2415,14 +2557,8 @@ export interface ArticlesSelect<T extends boolean = true> {
  */
 export interface GuidesSelect<T extends boolean = true> {
   title?: T;
-  slug?: T;
-  icon?: T;
   coverImage?: T;
   lede?: T;
-  section?: T;
-  category?: T;
-  order?: T;
-  isFeatured?: T;
   content?:
     | T
     | {
@@ -2437,6 +2573,16 @@ export interface GuidesSelect<T extends boolean = true> {
         guideDownload?: T | GuideDownloadBlockSelect<T>;
         guideDivider?: T | GuideDividerBlockSelect<T>;
       };
+  slug?: T;
+  icon?: T;
+  section?: T;
+  category?: T;
+  order?: T;
+  isFeatured?: T;
+  showToc?: T;
+  qualityScore?: T;
+  qualityReviewedAt?: T;
+  qualityReview?: T;
   relatedGuides?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -2467,13 +2613,22 @@ export interface GuideCalloutBlockSelect<T extends boolean = true> {
  * via the `definition` "GuideColumnsBlock_select".
  */
 export interface GuideColumnsBlockSelect<T extends boolean = true> {
+  title?: T;
+  intro?: T;
   align?: T;
+  width?: T;
   columns?:
     | T
     | {
         type?: T;
         content?: T;
         image?: T;
+        videoFile?: T;
+        poster?: T;
+        autoplay?: T;
+        muted?: T;
+        loop?: T;
+        showControls?: T;
         caption?: T;
         id?: T;
       };
@@ -2485,6 +2640,8 @@ export interface GuideColumnsBlockSelect<T extends boolean = true> {
  * via the `definition` "GuideGalleryBlock_select".
  */
 export interface GuideGalleryBlockSelect<T extends boolean = true> {
+  title?: T;
+  intro?: T;
   layout?: T;
   images?:
     | T
@@ -2502,9 +2659,12 @@ export interface GuideGalleryBlockSelect<T extends boolean = true> {
  * via the `definition` "GuideImageBlock_select".
  */
 export interface GuideImageBlockSelect<T extends boolean = true> {
+  title?: T;
+  intro?: T;
   image?: T;
   caption?: T;
   width?: T;
+  align?: T;
   id?: T;
   blockName?: T;
 }
@@ -2513,7 +2673,16 @@ export interface GuideImageBlockSelect<T extends boolean = true> {
  * via the `definition` "GuideVideoBlock_select".
  */
 export interface GuideVideoBlockSelect<T extends boolean = true> {
+  title?: T;
+  intro?: T;
+  source?: T;
   url?: T;
+  videoFile?: T;
+  poster?: T;
+  autoplay?: T;
+  muted?: T;
+  loop?: T;
+  showControls?: T;
   caption?: T;
   id?: T;
   blockName?: T;
@@ -2523,6 +2692,8 @@ export interface GuideVideoBlockSelect<T extends boolean = true> {
  * via the `definition` "GuideToggleBlock_select".
  */
 export interface GuideToggleBlockSelect<T extends boolean = true> {
+  title?: T;
+  intro?: T;
   items?:
     | T
     | {
@@ -2538,6 +2709,8 @@ export interface GuideToggleBlockSelect<T extends boolean = true> {
  * via the `definition` "GuideBookmarkBlock_select".
  */
 export interface GuideBookmarkBlockSelect<T extends boolean = true> {
+  title?: T;
+  intro?: T;
   items?:
     | T
     | {
@@ -2545,6 +2718,8 @@ export interface GuideBookmarkBlockSelect<T extends boolean = true> {
         title?: T;
         description?: T;
         image?: T;
+        imageUrl?: T;
+        ogStatus?: T;
         id?: T;
       };
   id?: T;
@@ -2555,6 +2730,8 @@ export interface GuideBookmarkBlockSelect<T extends boolean = true> {
  * via the `definition` "GuideDownloadBlock_select".
  */
 export interface GuideDownloadBlockSelect<T extends boolean = true> {
+  title?: T;
+  intro?: T;
   items?:
     | T
     | {

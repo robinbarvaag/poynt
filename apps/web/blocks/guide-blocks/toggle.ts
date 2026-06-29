@@ -1,4 +1,5 @@
 import type { Block } from "payload";
+import { sectionHeaderFields } from "./_shared";
 
 /** Sammenleggbare seksjoner (accordion / Notion-toggle). */
 export const GuideToggle: Block = {
@@ -6,6 +7,7 @@ export const GuideToggle: Block = {
   interfaceName: "GuideToggleBlock",
   labels: { singular: "Toggle", plural: "Toggles" },
   fields: [
+    ...sectionHeaderFields,
     {
       name: "items",
       type: "array",

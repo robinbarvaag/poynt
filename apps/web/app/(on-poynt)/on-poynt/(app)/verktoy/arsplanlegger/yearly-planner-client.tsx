@@ -209,7 +209,6 @@ export function YearlyPlannerClient({
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="mx-auto"
           >
             <PlannerForm
               onSubmit={handleSubmit}

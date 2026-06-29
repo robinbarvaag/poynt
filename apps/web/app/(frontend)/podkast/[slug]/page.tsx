@@ -1,3 +1,4 @@
+import { AdminBar } from "@/components/admin-bar";
 import { MediaCredit } from "@/components/media-credit";
 import { PayloadImage } from "@/components/payload-image";
 import { ViewTracker } from "@/components/radar/view-tracker";
@@ -79,6 +80,11 @@ export default async function PodcastDetailPage({ params }: PodcastPageProps) {
 
   return (
     <Container size="sm" padding="default">
+      <AdminBar
+        collection="podcasts"
+        id={String(podcast.id)}
+        singular="episode"
+      />
       <ViewTracker
         collection="podcasts"
         contentId={String(podcast.id)}

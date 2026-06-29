@@ -82,6 +82,7 @@ export {
   ImagePlaceholder,
   type ImagePlaceholderProps,
 } from "./image-placeholder";
+export { Lightbox, type LightboxProps, type LightboxTone } from "./lightbox";
 export {
   GuideCard,
   type GuideCardProps,
@@ -102,3 +103,4 @@ export {
   VideoEmbed,
   type VideoEmbedProps,
 } from "./video-embed";
+export { VideoPlayer, type VideoPlayerProps } from "./video-player";

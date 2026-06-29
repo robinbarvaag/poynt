@@ -1,3 +1,4 @@
+import { AdminBar } from "@/components/admin-bar";
 import { JsonLd } from "@/components/json-ld";
 import { PageHero } from "@/components/page-hero";
 import { RenderBlocks } from "@/components/render-blocks";
@@ -115,6 +116,7 @@ export default async function Page({ params }: PageProps) {
 
   return (
     <>
+      <AdminBar collection="pages" id={String(page.id)} singular="side" />
       {faqLd && <JsonLd data={faqLd} />}
       {!hasHeroBlock && <PageHero title={page.title} size="large" />}
       {page.layout && <RenderBlocks blocks={page.layout} />}

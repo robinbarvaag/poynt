@@ -13,6 +13,11 @@ export const Services: CollectionConfig = {
     useAsTitle: "name",
     defaultColumns: ["name", "priceType", "sortOrder", "updatedAt"],
     group: "Innhold",
+    // «Preview»-knapp i dokument-headeren → åpner tjenesten på nettsiden.
+    preview: (doc) =>
+      doc?.slug
+        ? `${process.env.NEXT_PUBLIC_URL || "http://localhost:3000"}/tjenester/${doc.slug}`
+        : null,
   },
   hooks: {
     beforeChange: [

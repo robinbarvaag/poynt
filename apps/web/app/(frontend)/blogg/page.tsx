@@ -1,3 +1,4 @@
+import { AdminBar } from "@/components/admin-bar";
 import { BlogExplorer } from "@/components/blog-explorer";
 import { PageHero } from "@/components/page-hero";
 import { toBlogCard } from "@/lib/blog";
@@ -73,6 +74,7 @@ export default async function BlogPage() {
 
   return (
     <>
+      <AdminBar global="blogpage" singular="bloggside" />
       <PageHero title={title} description={description} size="large" />
 
       <Container padding="default" className="py-8">

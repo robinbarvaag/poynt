@@ -11,7 +11,9 @@
       "type": "callout",
       "tone": "ink",
       "icon": "🔑",
-      "blocks": ["Krisekommunikasjon:"]
+      "blocks": [
+        "Krisekommunikasjon handler om å bygge tillit *før* krisen inntreffer — ikke under."
+      ]
     },
     {
       "type": "richText",

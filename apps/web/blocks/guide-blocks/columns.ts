@@ -1,4 +1,5 @@
 import type { Block } from "payload";
+import { sectionHeaderFields, uploadVideoFields } from "./_shared";
 
 /**
  * To eller flere kolonner side ved side (typisk tekst + bilde). Hver kolonne er
@@ -9,6 +10,7 @@ export const GuideColumns: Block = {
   interfaceName: "GuideColumnsBlock",
   labels: { singular: "Kolonner", plural: "Kolonner" },
   fields: [
+    ...sectionHeaderFields,
     {
       name: "align",
       type: "select",
@@ -17,6 +19,21 @@ export const GuideColumns: Block = {
       options: [
         { label: "Topp", value: "top" },
         { label: "Midtstilt", value: "center" },
+      ],
+    },
+    {
+      name: "width",
+      type: "select",
+      label: "Bredde",
+      defaultValue: "wide",
+      admin: {
+        description:
+          "Kolonner blir fort trange i lesespalten — «Bred» eller «Full» gir dem mer plass. «Full» dempes automatisk når innholdsmenyen er på.",
+      },
+      options: [
+        { label: "Normal", value: "normal" },
+        { label: "Bred", value: "wide" },
+        { label: "Full", value: "full" },
       ],
     },
     {
@@ -34,6 +51,7 @@ export const GuideColumns: Block = {
           options: [
             { label: "Tekst", value: "text" },
             { label: "Bilde", value: "image" },
+            { label: "Video", value: "video" },
           ],
         },
         {
@@ -49,11 +67,15 @@ export const GuideColumns: Block = {
           label: "Bilde",
           admin: { condition: (_, sibling) => sibling?.type === "image" },
         },
+        ...uploadVideoFields((_, sibling) => sibling?.type === "video"),
         {
           name: "caption",
           type: "text",
           label: "Bildetekst",
-          admin: { condition: (_, sibling) => sibling?.type === "image" },
+          admin: {
+            condition: (_, sibling) =>
+              sibling?.type === "image" || sibling?.type === "video",
+          },
         },
       ],
     },

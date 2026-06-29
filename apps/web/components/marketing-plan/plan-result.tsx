@@ -15,10 +15,12 @@ import {
 } from "@poynt/ui";
 import { Icon, type IconName } from "@poynt/ui/icons";
 import type { DeepPartial } from "ai";
+import type { DriveStep } from "driver.js";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
+import { TourButton } from "../planner/tour";
 
 interface PlanResultProps {
   // Under streaming er planen et delobjekt (felter fylles inn bit for bit), så
@@ -49,6 +51,42 @@ const STREAM_MESSAGES = [
   "Velger de viktigste kanalene …",
   "Bygger tidslinjen måned for måned …",
   "Setter sammen ukesrutinen …",
+];
+
+const PLAN_TOUR_KEY = "on-poynt-tour-plan-v1";
+
+// Mikro-omvisning av de ikke-åpenbare «lim»-delene av markedsplanen.
+const PLAN_TOUR_STEPS: DriveStep[] = [
+  {
+    element: '[data-tour="plan-header"]',
+    popover: {
+      title: "Din markedsplan",
+      description:
+        "En komplett strategi bygd på bedriftsprofilen din — kanaler, utrullingsplan, ukerutine og quick wins.",
+      side: "bottom",
+      align: "start",
+    },
+  },
+  {
+    element: '[data-tour="plan-timeline"]',
+    popover: {
+      title: "Hent inn én fase om gangen",
+      description:
+        "Trykk «Legg fasen i oppgavene» når du er klar for en måned — så drukner du ikke i 12 måneder på en gang, og oppgavene havner rett på dashbordet.",
+      side: "top",
+      align: "start",
+    },
+  },
+  {
+    element: '[data-tour="plan-tasks"]',
+    popover: {
+      title: "Oppgavene dine er allerede klare",
+      description:
+        "Disse quick wins-ene ligger nå i oppgavelista på dashbordet, klare til avhuking.",
+      side: "top",
+      align: "start",
+    },
+  },
 ];
 
 /** Dempet detalj-blokk på et kanalkort (token-basert, ingen regnbuefarger). */
@@ -150,9 +188,10 @@ export function PlanResult({
       <motion.div
         {...sectionMotion}
         className="flex items-center justify-between gap-3"
+        data-tour="plan-header"
       >
         <Heading size="h2">Din markedsplan</Heading>
-        {isStreaming && (
+        {isStreaming ? (
           <span className="flex items-center gap-2 text-muted-foreground text-sm">
             <Icon name="loader" className="size-4 animate-spin" />
             <AnimatePresence mode="wait">
@@ -167,6 +206,8 @@ export function PlanResult({
               </motion.span>
             </AnimatePresence>
           </span>
+        ) : (
+          <TourButton tourKey={PLAN_TOUR_KEY} steps={PLAN_TOUR_STEPS} autoRun />
         )}
       </motion.div>
 
@@ -315,7 +356,7 @@ export function PlanResult({
 
       {/* Utrullingsplan (tidslinje, read-only roadmap) */}
       {timeline.length > 0 && (
-        <motion.section {...sectionMotion}>
+        <motion.section {...sectionMotion} data-tour="plan-timeline">
           <SectionHeading
             icon="calendar"
             title="Slik ruller du det ut"
@@ -421,7 +462,7 @@ export function PlanResult({
 
       {/* Oppgave-handoff → dashboardet */}
       {!isStreaming && quickWins.length > 0 && (
-        <motion.section {...sectionMotion}>
+        <motion.section {...sectionMotion} data-tour="plan-tasks">
           <Card className="border-primary/20 bg-primary/5">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-xl">

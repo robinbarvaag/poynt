@@ -48,5 +48,9 @@ interface ArticleRichTextProps {
 }
 
 export function ArticleRichText({ data }: ArticleRichTextProps) {
-  return <RichText converters={jsxConverters} data={data} />;
+  // disableContainer fjerner Payloads <div class="payload-richtext">-wrapper, så
+  // avsnittene blir direkte barn av .prose. Ellers treffer Tailwinds
+  // `.prose > :first-child { margin-top: 0 }` wrapperen i stedet for første <p>,
+  // og toppmarginen blir stående.
+  return <RichText converters={jsxConverters} data={data} disableContainer />;
 }

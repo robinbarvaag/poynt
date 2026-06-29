@@ -27,7 +27,10 @@ import { MetaDescriptionComponent as MetaDescriptionComponent_a8a977ebc872c5d5ea
 import { MetaImageComponent as MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { PreviewComponent as PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { StockFieldButton as StockFieldButton_e1d51fcd745605f9c32df95d9becf02c } from '../../../admin/components/media/stock-field-button'
+import { BookmarkOgFetch as BookmarkOgFetch_62526a99516db3c8451d3b97a5d7d286 } from '../../../admin/components/guides/bookmark-og-fetch'
+import { ReviewGuideButton as ReviewGuideButton_fdcbc9c46343a42e1ea86e19afb2ba37 } from '../../../admin/components/guides/review-guide-button'
 import { StockMediaPicker as StockMediaPicker_7d8c930913c9c09e14d244ff8c96b4e3 } from '../../../admin/components/media/stock-picker'
+import { GenerateAltButton as GenerateAltButton_040810ca926965e5b8a67fcc6e0594ab } from '../../../admin/components/media/generate-alt-button'
 import { FolderTableCell as FolderTableCell_ab83ff7e88da8d3530831f296ec4756a } from '@payloadcms/ui/rsc'
 import { FolderField as FolderField_ab83ff7e88da8d3530831f296ec4756a } from '@payloadcms/ui/rsc'
 import { LinkToDoc as LinkToDoc_2e9be70cd13299dd4a11a5bd739a5a3c } from '@payloadcms/plugin-stripe/client'
@@ -75,7 +78,10 @@ export const importMap = {
   "@payloadcms/plugin-seo/client#MetaImageComponent": MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@payloadcms/plugin-seo/client#PreviewComponent": PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "/admin/components/media/stock-field-button#StockFieldButton": StockFieldButton_e1d51fcd745605f9c32df95d9becf02c,
+  "/admin/components/guides/bookmark-og-fetch#BookmarkOgFetch": BookmarkOgFetch_62526a99516db3c8451d3b97a5d7d286,
+  "/admin/components/guides/review-guide-button#ReviewGuideButton": ReviewGuideButton_fdcbc9c46343a42e1ea86e19afb2ba37,
   "/admin/components/media/stock-picker#StockMediaPicker": StockMediaPicker_7d8c930913c9c09e14d244ff8c96b4e3,
+  "/admin/components/media/generate-alt-button#GenerateAltButton": GenerateAltButton_040810ca926965e5b8a67fcc6e0594ab,
   "@payloadcms/ui/rsc#FolderTableCell": FolderTableCell_ab83ff7e88da8d3530831f296ec4756a,
   "@payloadcms/ui/rsc#FolderField": FolderField_ab83ff7e88da8d3530831f296ec4756a,
   "@payloadcms/plugin-stripe/client#LinkToDoc": LinkToDoc_2e9be70cd13299dd4a11a5bd739a5a3c,

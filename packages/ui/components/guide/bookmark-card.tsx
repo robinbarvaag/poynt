@@ -8,6 +8,11 @@ export interface BookmarkCardProps {
   description?: string;
   /** Forhåndsvisningsbilde (typisk et <Image>). */
   image?: React.ReactNode;
+  /**
+   * Stor variant – fyller bredden og viser et større forhåndsvisningsbilde, så
+   * et enkelt bokmerke ser ut som en ordentlig lenke-/OG-presentasjon.
+   */
+  featured?: boolean;
   className?: string;
 }
 
@@ -29,6 +34,7 @@ export function BookmarkCard({
   title,
   description,
   image,
+  featured,
   className,
 }: BookmarkCardProps) {
   const host = url ? hostOf(url) : null;
@@ -39,17 +45,33 @@ export function BookmarkCard({
         ? { href: url, target: "_blank", rel: "noopener noreferrer" }
         : {})}
       className={cn(
-        "group/bm flex items-stretch justify-between gap-4 overflow-hidden rounded-2xl bg-card ring-1 ring-foreground/10 transition-all duration-300",
+        "group/bm flex items-stretch justify-between overflow-hidden rounded-2xl bg-card ring-1 ring-foreground/10 transition-all duration-300",
+        featured ? "gap-6 sm:min-h-[180px]" : "gap-4",
         url && "hover:-translate-y-0.5 hover:shadow-md",
         className
       )}
     >
-      <div className="flex min-w-0 flex-col gap-1 p-4">
-        <span className="line-clamp-1 font-heading font-semibold text-foreground">
+      <div
+        className={cn(
+          "flex min-w-0 flex-col",
+          featured ? "gap-1.5 p-5 sm:p-7" : "gap-1 p-4"
+        )}
+      >
+        <span
+          className={cn(
+            "font-heading font-semibold text-foreground",
+            featured ? "line-clamp-2 text-lg sm:text-xl" : "line-clamp-1"
+          )}
+        >
           {title || host || "Lenke"}
         </span>
         {description && (
-          <span className="line-clamp-2 text-muted-foreground text-sm">
+          <span
+            className={cn(
+              "text-muted-foreground text-sm",
+              featured ? "line-clamp-3 sm:text-base" : "line-clamp-2"
+            )}
+          >
             {description}
           </span>
         )}
@@ -68,7 +90,12 @@ export function BookmarkCard({
         )}
       </div>
       {image && (
-        <div className="relative aspect-[4/3] w-28 shrink-0 overflow-hidden bg-muted/40 sm:w-40 *:[img]:h-full *:[img]:w-full *:[img]:object-cover">
+        <div
+          className={cn(
+            "relative shrink-0 overflow-hidden bg-muted/40 *:[img]:h-full *:[img]:w-full *:[img]:object-cover",
+            featured ? "w-36 sm:w-56 lg:w-72" : "aspect-[4/3] w-28 sm:w-40"
+          )}
+        >
           {image}
         </div>
       )}

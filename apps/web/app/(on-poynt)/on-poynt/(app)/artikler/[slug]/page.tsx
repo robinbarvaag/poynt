@@ -1,3 +1,4 @@
+import { AdminBar } from "@/components/admin-bar";
 import { ArticleRichText } from "@/components/article-rich-text";
 import { MediaCredit } from "@/components/media-credit";
 import { PayloadImage } from "@/components/payload-image";
@@ -105,6 +106,11 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   return (
     <div className="-mx-4 md:-mx-6">
+      <AdminBar
+        collection="articles"
+        id={String(article.id)}
+        singular="artikkel"
+      />
       <ViewTracker
         collection="articles"
         contentId={String(article.id)}

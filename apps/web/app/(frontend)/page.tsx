@@ -1,3 +1,4 @@
+import { AdminBar } from "@/components/admin-bar";
 import { RenderBlocks } from "@/components/render-blocks";
 import { buildMetadata } from "@/lib/seo";
 import config from "@/payload.config";
@@ -25,6 +26,7 @@ export default async function HomePage() {
   if (!homepage?.layout?.length) {
     return (
       <div className="max-w-6xl mx-auto py-12 ">
+        <AdminBar global="homepage" singular="forside" />
         <p className="text-gray-500">
           Rediger forsiden i admin under "Forside"
         </p>
@@ -32,5 +34,10 @@ export default async function HomePage() {
     );
   }
 
-  return <RenderBlocks blocks={homepage.layout} />;
+  return (
+    <>
+      <AdminBar global="homepage" singular="forside" />
+      <RenderBlocks blocks={homepage.layout} />
+    </>
+  );
 }

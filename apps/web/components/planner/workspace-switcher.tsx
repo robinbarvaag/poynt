@@ -105,7 +105,7 @@ export function WorkspaceSwitcher() {
     return (
       <>
         <SidebarMenu>
-          <SidebarMenuItem>
+          <SidebarMenuItem data-tour="workspace-switcher">
             <SidebarMenuButton
               size="lg"
               className="w-full"
@@ -135,7 +135,7 @@ export function WorkspaceSwitcher() {
   return (
     <>
       <SidebarMenu>
-        <SidebarMenuItem>
+        <SidebarMenuItem data-tour="workspace-switcher">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <SidebarMenuButton

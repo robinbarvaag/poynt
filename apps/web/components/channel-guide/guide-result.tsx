@@ -1,15 +1,7 @@
 "use client";
 
 import { channelLinks } from "@/lib/constants";
-import {
-  containerMotionVariants,
-  headerMotionVariants,
-  itemMotionVariants,
-} from "@/lib/motion-variants";
-import type {
-  ChannelRecommendation,
-  ExtendedGuideResultProps,
-} from "@/lib/types";
+import type { ChannelRecommendation, GuideResultProps } from "@/lib/types";
 import {
   channelMatchLevelLabels,
   resolveChannelMatchLevel,
@@ -28,13 +20,13 @@ import {
   CardTitle,
   Heading,
   Skeleton,
-  Text,
-  cn,
 } from "@poynt/ui";
 import { Icon } from "@poynt/ui/icons";
+import type { DriveStep } from "driver.js";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { TourButton } from "../planner/tour";
 
 const levelBadgeVariant = {
   strong: "soft-primary",
@@ -49,6 +41,32 @@ const STREAM_MESSAGES = [
   "Vurderer hvilke kanaler som passer …",
   "Veier tid, målgruppe og styrke …",
   "Setter sammen anbefalingen …",
+];
+
+const GUIDE_TOUR_KEY = "on-poynt-tour-channel-v1";
+
+// Mikro-omvisning av kanalanbefalingen.
+const GUIDE_TOUR_STEPS: DriveStep[] = [
+  {
+    element: '[data-tour="guide-hero"]',
+    popover: {
+      title: "Start her",
+      description:
+        "Toppkanalen din — den vi mener gir mest igjen for innsatsen — med de konkrete neste stegene dine denne uken.",
+      side: "bottom",
+      align: "start",
+    },
+  },
+  {
+    element: '[data-tour="guide-others"]',
+    popover: {
+      title: "De andre kanalene",
+      description:
+        "Resten av de aktuelle kanalene ligger kollapset her. Trykk en for å se hvorfor den passer og hva den krever.",
+      side: "top",
+      align: "start",
+    },
+  },
 ];
 
 function LevelBadge({ channel }: { channel: ChannelRecommendation }) {
@@ -154,10 +172,8 @@ export function GuideResult({
   reasoning,
   nextSteps,
   onReset,
-  mode = "result",
-  onStartQuiz,
   isStreaming = false,
-}: ExtendedGuideResultProps) {
+}: GuideResultProps) {
   // Roter «jobber»-meldingen mens vi streamer og før det første svaret kommer.
   const [messageTick, setMessageTick] = useState(0);
   useEffect(() => {
@@ -165,89 +181,6 @@ export function GuideResult({
     const id = setInterval(() => setMessageTick((t) => t + 1), 2200);
     return () => clearInterval(id);
   }, [isStreaming]);
-
-  if (mode === "intro") {
-    return (
-      <motion.div
-        initial="hidden"
-        animate="visible"
-        variants={containerMotionVariants}
-        className="mx-auto max-w-5xl space-y-10"
-      >
-        <motion.div
-          variants={headerMotionVariants}
-          className="space-y-4 text-center"
-        >
-          <div className="mb-2 inline-flex size-20 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-            <Icon name="compass" className="size-10" />
-          </div>
-          <Heading size="h1">Finn dine riktige markedsføringskanaler</Heading>
-          <Text>
-            Det finnes hundrevis av måter å nå målgruppen din på. Men med
-            begrenset tid og ressurser må du velge riktig. Denne veilederen
-            vurderer situasjonen din og anbefaler kanalene med størst potensial
-            for <strong>akkurat deg</strong>.
-          </Text>
-        </motion.div>
-
-        <motion.div variants={itemMotionVariants}>
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                <Heading size="h3" variant="h2">
-                  Hvordan fungerer det?
-                </Heading>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-8 md:grid-cols-3">
-                <div className="space-y-3">
-                  <Heading size="body-heading" weight="medium">
-                    Fortell oss om deg
-                  </Heading>
-                  <Text>
-                    Vi spør om bransje, målgruppe, tid og styrkene dine. Jo mer
-                    vi vet, desto bedre anbefalinger får du.
-                  </Text>
-                </div>
-                <div className="space-y-3">
-                  <Heading size="body-heading" weight="medium">
-                    Vi vurderer
-                  </Heading>
-                  <Text>
-                    Vi veier situasjonen din mot det som faktisk fungerer for
-                    norske småbedrifter — ikke generiske «beste praksis».
-                  </Text>
-                </div>
-                <div className="space-y-3">
-                  <Heading size="body-heading" weight="medium">
-                    Få din anbefaling
-                  </Heading>
-                  <Text>
-                    Se hvilken kanal du bør starte med, hvorfor, og hva du bør
-                    gjøre allerede denne uken.
-                  </Text>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div variants={itemMotionVariants} className="pt-2 text-center">
-          <Button
-            size="lg"
-            onClick={onStartQuiz}
-            className="h-12 px-8 text-base"
-          >
-            Start kanalveilederen
-          </Button>
-          <p className="mt-4 text-sm text-muted-foreground">
-            6 spørsmål • Ca. 2 minutter
-          </p>
-        </motion.div>
-      </motion.div>
-    );
-  }
 
   const list = channels ?? [];
   const top = list[0];
@@ -276,14 +209,14 @@ export function GuideResult({
   };
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="space-y-6">
       {/* Header / status */}
       <motion.div
         {...sectionMotion}
         className="flex items-center justify-between"
       >
         <Heading size="h2">Din anbefaling</Heading>
-        {isStreaming && (
+        {isStreaming ? (
           <span className="flex items-center gap-2 text-sm text-muted-foreground">
             <Icon name="loader" className="size-4 animate-spin" />
             <AnimatePresence mode="wait">
@@ -298,11 +231,17 @@ export function GuideResult({
               </motion.span>
             </AnimatePresence>
           </span>
+        ) : (
+          <TourButton
+            tourKey={GUIDE_TOUR_KEY}
+            steps={GUIDE_TOUR_STEPS}
+            autoRun
+          />
         )}
       </motion.div>
 
       {/* HERO — det ene svaret */}
-      <motion.div {...sectionMotion}>
+      <motion.div {...sectionMotion} data-tour="guide-hero">
         {top?.name ? (
           <Card className="border-primary/20 bg-primary/5">
             <CardHeader>
@@ -412,7 +351,7 @@ export function GuideResult({
 
       {/* Andre kanaler — kollapset */}
       {others.length > 0 && (
-        <motion.div {...sectionMotion}>
+        <motion.div {...sectionMotion} data-tour="guide-others">
           <Accordion type="multiple" className="rounded-lg border bg-card px-4">
             {others.map((channel) => (
               <AccordionItem key={channel.name} value={channel.name}>

@@ -46,7 +46,7 @@ export function AppHeader() {
     <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-foreground/10 border-b bg-background px-4 md:px-6">
       <SidebarTrigger className="-ml-1" />
       <span className="font-medium text-sm">{pageTitle(pathname)}</span>
-      <div className="ml-auto">
+      <div className="ml-auto" data-tour="search">
         <SearchCommand />
       </div>
     </header>

@@ -1,4 +1,5 @@
 import type { Block } from "payload";
+import { sectionHeaderFields } from "./_shared";
 
 /** Nedlastbare ressurser / gratis filer. */
 export const GuideDownload: Block = {
@@ -6,6 +7,7 @@ export const GuideDownload: Block = {
   interfaceName: "GuideDownloadBlock",
   labels: { singular: "Nedlastinger", plural: "Nedlastinger" },
   fields: [
+    ...sectionHeaderFields,
     {
       name: "items",
       type: "array",

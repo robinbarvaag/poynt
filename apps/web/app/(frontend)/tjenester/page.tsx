@@ -1,3 +1,4 @@
+import { AdminBar } from "@/components/admin-bar";
 import { PageHero } from "@/components/page-hero";
 import { ServiceExplorer } from "@/components/service-explorer";
 import { buildMetadata } from "@/lib/seo";
@@ -56,6 +57,7 @@ export default async function ServicesPage() {
 
   return (
     <>
+      <AdminBar global="servicespage" singular="tjenesteside" />
       {heroEnabled && (
         <PageHero
           title={heroTitle}

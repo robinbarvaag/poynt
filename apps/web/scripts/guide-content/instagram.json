@@ -84,21 +84,15 @@
       ]
     },
     {
-      "type": "richText",
-      "blocks": [{ "heading": "Rydd opp i Instagram-bioen din 👇", "level": 2 }]
-    },
-    {
       "type": "image",
+      "title": "Rydd opp i Instagram-bioen din 👇",
       "width": "wide",
       "caption": "Rydd opp i din Instagram-bio",
       "placeholder": "Infografikk «Instagram-bio» som forklarer hvordan du rydder opp i bioen: «Klart og tydelig profilbilde eller logo», «Fortell hva du eller produktene dine hjelper kundene med / tenk på søkeord når du skriver teksten», «Navn/firmanavn og hva du driver med», «Link til nettside. Pass på at alle linker er oppdatert», «Gjør det enkelt å komme i kontakt med deg»"
     },
     {
-      "type": "richText",
-      "blocks": [{ "heading": "Story-tips.", "level": 2 }]
-    },
-    {
       "type": "columns",
+      "title": "Story-tips",
       "columns": [
         {
           "type": "text",
@@ -186,14 +180,9 @@
     },
     { "type": "divider", "label": "" },
     {
-      "type": "richText",
-      "blocks": [
-        { "heading": "Tekst på innlegg", "level": 2 },
-        "Klikk på bildet for å gjøre det større:"
-      ]
-    },
-    {
       "type": "gallery",
+      "title": "Tekst på innlegg",
+      "intro": "Klikk på bildet for å gjøre det større:",
       "layout": "grid",
       "caption": "Eksempler på tekst på innlegg",
       "items": [

@@ -14,6 +14,11 @@ import * as migration_20260623_203800 from './20260623_203800';
 import * as migration_20260627_195306 from './20260627_195306';
 import * as migration_20260628_173640_remove_product_benefits from './20260628_173640_remove_product_benefits';
 import * as migration_20260628_205846_stock_media_fields from './20260628_205846_stock_media_fields';
+import * as migration_20260629_184810_guide_toc_image_align from './20260629_184810_guide_toc_image_align';
+import * as migration_20260629_195235_add_guide_block_headers from './20260629_195235_add_guide_block_headers';
+import * as migration_20260629_201652_guide_quality_fields from './20260629_201652_guide_quality_fields';
+import * as migration_20260629_224500_add_bookmark_og_status from './20260629_224500_add_bookmark_og_status';
+import * as migration_20260629_225839_guide_columns_width from './20260629_225839_guide_columns_width';
 
 export const migrations = [
   {
@@ -94,6 +99,31 @@ export const migrations = [
   {
     up: migration_20260628_205846_stock_media_fields.up,
     down: migration_20260628_205846_stock_media_fields.down,
-    name: '20260628_205846_stock_media_fields'
+    name: '20260628_205846_stock_media_fields',
+  },
+  {
+    up: migration_20260629_184810_guide_toc_image_align.up,
+    down: migration_20260629_184810_guide_toc_image_align.down,
+    name: '20260629_184810_guide_toc_image_align',
+  },
+  {
+    up: migration_20260629_195235_add_guide_block_headers.up,
+    down: migration_20260629_195235_add_guide_block_headers.down,
+    name: '20260629_195235_add_guide_block_headers',
+  },
+  {
+    up: migration_20260629_201652_guide_quality_fields.up,
+    down: migration_20260629_201652_guide_quality_fields.down,
+    name: '20260629_201652_guide_quality_fields',
+  },
+  {
+    up: migration_20260629_224500_add_bookmark_og_status.up,
+    down: migration_20260629_224500_add_bookmark_og_status.down,
+    name: '20260629_224500_add_bookmark_og_status',
+  },
+  {
+    up: migration_20260629_225839_guide_columns_width.up,
+    down: migration_20260629_225839_guide_columns_width.down,
+    name: '20260629_225839_guide_columns_width'
   },
 ];

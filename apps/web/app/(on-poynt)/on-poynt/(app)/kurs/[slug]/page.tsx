@@ -1,3 +1,4 @@
+import { AdminBar } from "@/components/admin-bar";
 import { MediaCredit } from "@/components/media-credit";
 import { PayloadImage } from "@/components/payload-image";
 import { CoursePlayer } from "@/components/planner/courses/course-player";
@@ -64,6 +65,7 @@ export default async function KursDetailPage({ params }: CoursePageProps) {
 
   return (
     <div className="flex flex-col gap-10">
+      <AdminBar collection="courses" id={String(course.id)} singular="kurs" />
       <ViewTracker
         collection="courses"
         contentId={String(course.id)}

@@ -18,14 +18,9 @@
       ]
     },
     {
-      "type": "richText",
-      "blocks": [
-        { "heading": "Kanaler", "level": 2 },
-        "Oversikt over kanalene du publiserer på, med fordeling i prosent."
-      ]
-    },
-    {
       "type": "gallery",
+      "title": "Kanaler",
+      "intro": "Oversikt over kanalene du publiserer på, med fordeling i prosent.",
       "layout": "grid",
       "caption": "Kanaler-database (galleri-visning): kort per kanal med andel i prosent",
       "items": [

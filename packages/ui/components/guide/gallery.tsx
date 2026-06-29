@@ -3,11 +3,16 @@
 import type * as React from "react";
 import { cn } from "../../lib/utils";
 import { Stagger, StaggerItem } from "../motion/reveal";
+import { Lightbox } from "./lightbox";
 
 export interface GalleryItem {
   /** Bilde-node (typisk et <Image>). */
   node: React.ReactNode;
   caption?: string;
+  /** Full-størrelse-URL → klikk åpner bildet i lightbox. */
+  src?: string;
+  /** Alt-tekst for lightbox-visningen. */
+  alt?: string;
 }
 
 export interface GalleryProps {
@@ -19,11 +24,23 @@ export interface GalleryProps {
 }
 
 function Figure({ item }: { item: GalleryItem }) {
+  const imageClass =
+    "relative aspect-[4/5] overflow-hidden *:[img]:h-full *:[img]:w-full *:[img]:object-cover *:[img]:transition-transform *:[img]:duration-500 group-hover/figure:*:[img]:scale-105";
   return (
     <figure className="group/figure overflow-hidden rounded-2xl bg-muted/40 ring-1 ring-foreground/10">
-      <div className="relative aspect-[4/5] overflow-hidden *:[img]:h-full *:[img]:w-full *:[img]:object-cover *:[img]:transition-transform *:[img]:duration-500 group-hover/figure:*:[img]:scale-105">
-        {item.node}
-      </div>
+      {item.src ? (
+        <Lightbox
+          src={item.src}
+          alt={item.alt}
+          caption={item.caption}
+          tone="salmon"
+          className={imageClass}
+        >
+          {item.node}
+        </Lightbox>
+      ) : (
+        <div className={imageClass}>{item.node}</div>
+      )}
       {item.caption && (
         <figcaption className="px-3 py-2 text-current/70 text-sm">
           {item.caption}

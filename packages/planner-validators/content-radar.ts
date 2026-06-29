@@ -34,6 +34,7 @@ export const radarSignalKinds = [
   "demand",
   "inspiration_gap",
   "popular",
+  "low_quality",
 ] as const;
 export type RadarSignalKind = (typeof radarSignalKinds)[number];
 

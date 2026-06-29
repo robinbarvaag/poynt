@@ -12,6 +12,11 @@ export const Articles: CollectionConfig = {
     useAsTitle: "title",
     defaultColumns: ["title", "author", "categories", "publishedAt", "status"],
     group: "Innhold",
+    // «Preview»-knapp i dokument-headeren → åpner artikkelen på nettsiden.
+    preview: (doc) =>
+      doc?.slug
+        ? `${process.env.NEXT_PUBLIC_URL || "http://localhost:3000"}/on-poynt/artikler/${doc.slug}`
+        : null,
   },
   versions: {
     drafts: {

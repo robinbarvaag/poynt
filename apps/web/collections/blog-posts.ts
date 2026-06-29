@@ -17,6 +17,11 @@ export const BlogPosts: CollectionConfig = {
         return `${process.env.NEXT_PUBLIC_URL || "http://localhost:3000"}/blogg/${data?.slug}`;
       },
     },
+    // «Preview»-knapp i dokument-headeren → åpner innlegget på nettsiden.
+    preview: (doc) =>
+      doc?.slug
+        ? `${process.env.NEXT_PUBLIC_URL || "http://localhost:3000"}/blogg/${doc.slug}`
+        : null,
   },
   versions: {
     drafts: {

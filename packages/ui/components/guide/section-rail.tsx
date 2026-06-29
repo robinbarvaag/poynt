@@ -8,6 +8,8 @@ export interface SectionRailItem {
   /** Må matche `id` på tilhørende seksjon i innholdet. */
   id: string;
   label: string;
+  /** H2 = nummerert hovedsteg, H3 = innrykket underpunkt. Default 2. */
+  level?: 2 | 3;
 }
 
 export interface SectionRailProps {
@@ -60,6 +62,8 @@ export function SectionRail({
     items.findIndex((i) => i.id === activeId)
   );
 
+  let step = 0;
+
   return (
     <nav className={cn("flex flex-col", className)} aria-label={title}>
       <span className="mb-3 px-2.5 font-heading font-semibold text-muted-foreground text-xs uppercase tracking-[0.18em]">
@@ -69,34 +73,51 @@ export function SectionRail({
         {items.map((item, index) => {
           const isActive = index === activeIndex;
           const isDone = index < activeIndex;
+          const isSub = (item.level ?? 2) === 3;
+          if (!isSub) step += 1;
           return (
             <li key={item.id}>
               <a
                 href={`#${item.id}`}
                 className={cn(
-                  "group flex items-center gap-3 rounded-2xl px-2.5 py-2 transition-colors",
+                  "group flex items-center gap-3 rounded-2xl transition-colors",
+                  isSub ? "py-1.5 pr-2.5 pl-11" : "px-2.5 py-2",
                   isActive ? "bg-primary/10" : "hover:bg-foreground/5"
                 )}
               >
+                {isSub ? (
+                  <span
+                    className={cn(
+                      "size-1.5 shrink-0 rounded-full transition-colors",
+                      isActive
+                        ? "bg-primary"
+                        : isDone
+                          ? "bg-mint"
+                          : "bg-foreground/25"
+                    )}
+                  />
+                ) : (
+                  <span
+                    className={cn(
+                      "flex size-7 shrink-0 items-center justify-center rounded-full font-heading font-semibold text-[0.7rem] ring-1 transition-colors",
+                      isActive
+                        ? "bg-primary text-primary-foreground ring-primary"
+                        : isDone
+                          ? "bg-mint text-foreground ring-transparent"
+                          : "bg-background text-muted-foreground ring-foreground/15"
+                    )}
+                  >
+                    {isDone ? (
+                      <Icon name="check" className="size-3.5" />
+                    ) : (
+                      String(step).padStart(2, "0")
+                    )}
+                  </span>
+                )}
                 <span
                   className={cn(
-                    "flex size-7 shrink-0 items-center justify-center rounded-full font-heading font-semibold text-[0.7rem] ring-1 transition-colors",
-                    isActive
-                      ? "bg-primary text-primary-foreground ring-primary"
-                      : isDone
-                        ? "bg-mint text-foreground ring-transparent"
-                        : "bg-background text-muted-foreground ring-foreground/15"
-                  )}
-                >
-                  {isDone ? (
-                    <Icon name="check" className="size-3.5" />
-                  ) : (
-                    String(index + 1).padStart(2, "0")
-                  )}
-                </span>
-                <span
-                  className={cn(
-                    "text-sm leading-snug transition-colors",
+                    "leading-snug transition-colors",
+                    isSub ? "text-[0.8rem]" : "text-sm",
                     isActive
                       ? "font-semibold text-foreground"
                       : "text-muted-foreground group-hover:text-foreground"

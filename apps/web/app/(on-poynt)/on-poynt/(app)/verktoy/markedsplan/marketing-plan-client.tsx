@@ -248,7 +248,7 @@ export function MarketingPlanClient({
               title="Lag din skreddersydde markedsplan"
               description="Slutt å gjette hva du skal gjøre. Vi bygger en komplett strategi tilpasset bransjen, målet og ressursene dine — og legger oppgavene rett i lista di."
               steps={PLAN_STEPS}
-              footnote="Ca. 3 minutter • Bygger på bedriftsprofilen din"
+              footnote="Ca. 1 minutt • Bygger på bedriftsprofilen din"
             >
               <ToolReadiness
                 fields={readinessFields}
@@ -292,7 +292,6 @@ export function MarketingPlanClient({
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="mx-auto"
           >
             <PlanForm
               onSubmit={handleSubmit}

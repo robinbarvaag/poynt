@@ -105,7 +105,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup>
+        <SidebarGroup data-tour="nav-tools">
           <SidebarGroupLabel>Verktøy</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>{toolNavItems.map(renderItem)}</SidebarMenu>
@@ -119,14 +119,14 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup>
+        <SidebarGroup data-tour="nav-learn">
           <SidebarGroupLabel>Læring</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>{learnNavItems.map(renderItem)}</SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup>
+        <SidebarGroup data-tour="nav-business">
           <SidebarGroupLabel>Din bedrift</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>{businessNavItems.map(renderItem)}</SidebarMenu>

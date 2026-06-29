@@ -22,6 +22,7 @@ import {
 } from "@poynt/ui";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { startShellTour } from "./shell-tour";
 import { ThemeToggle } from "./theme-toggle";
 
 export function NavUser() {
@@ -112,6 +113,10 @@ export function NavUser() {
                 <Icon name={accountMenuItem.icon} className="mr-2 h-4 w-4" />
                 {accountMenuItem.title}
               </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => startShellTour()}>
+              <Icon name="lightbulb" className="mr-2 h-4 w-4" />
+              Vis omvisning
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleSignOut}>

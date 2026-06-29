@@ -19,6 +19,11 @@ export const Courses: CollectionConfig = {
     useAsTitle: "title",
     defaultColumns: ["title", "categories", "publishedAt", "status"],
     group: "Innhold",
+    // «Preview»-knapp i dokument-headeren → åpner kurset på nettsiden.
+    preview: (doc) =>
+      doc?.slug
+        ? `${process.env.NEXT_PUBLIC_URL || "http://localhost:3000"}/on-poynt/kurs/${doc.slug}`
+        : null,
   },
   versions: {
     drafts: {

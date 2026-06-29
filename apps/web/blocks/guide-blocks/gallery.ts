@@ -1,4 +1,5 @@
 import type { Block } from "payload";
+import { sectionHeaderFields } from "./_shared";
 
 /** Rad/rutenett av flere bilder, evt. som karusell. */
 export const GuideGallery: Block = {
@@ -6,6 +7,7 @@ export const GuideGallery: Block = {
   interfaceName: "GuideGalleryBlock",
   labels: { singular: "Galleri", plural: "Gallerier" },
   fields: [
+    ...sectionHeaderFields,
     {
       name: "layout",
       type: "select",

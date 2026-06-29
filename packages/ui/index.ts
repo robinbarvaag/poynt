@@ -429,6 +429,9 @@ export {
   type GalleryProps,
   ImagePlaceholder,
   type ImagePlaceholderProps,
+  Lightbox,
+  type LightboxProps,
+  type LightboxTone,
   GuideCard,
   type GuideCardProps,
   type GuideCardSurface,
@@ -441,6 +444,8 @@ export {
   toEmbedUrl,
   VideoEmbed,
   type VideoEmbedProps,
+  VideoPlayer,
+  type VideoPlayerProps,
 } from "./components/guide";
 
 // Merkevare-bok-primitiver (visuell identitet): farger, fonter, logo-header

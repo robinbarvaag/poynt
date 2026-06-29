@@ -12,6 +12,11 @@ export const Products: CollectionConfig = {
     useAsTitle: "name",
     defaultColumns: ["name", "type", "price", "active", "updatedAt"],
     group: "Nettbutikk",
+    // «Preview»-knapp i dokument-headeren → åpner produktet på nettsiden.
+    preview: (doc) =>
+      doc?.slug
+        ? `${process.env.NEXT_PUBLIC_URL || "http://localhost:3000"}/produkter/${doc.slug}`
+        : null,
   },
   hooks: {
     beforeChange: [

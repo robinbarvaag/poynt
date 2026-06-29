@@ -111,13 +111,8 @@
       ]
     },
     {
-      "type": "callout",
-      "tone": "ink",
-      "icon": "💡",
-      "blocks": [{ "heading": "Dette inspirerer akkurat nå:", "level": 2 }]
-    },
-    {
       "type": "bookmark",
+      "title": "Dette inspirerer akkurat nå",
       "items": [
         {
           "url": "https://trends.pinterest.com/",
@@ -183,13 +178,8 @@
       ]
     },
     {
-      "type": "callout",
-      "tone": "ink",
-      "icon": "💡",
-      "blocks": [{ "heading": "Gratis-ressurser til deg:", "level": 2 }]
-    },
-    {
       "type": "download",
+      "title": "Gratis-ressurser til deg",
       "items": [
         {
           "title": "40 ideer til Linkedin-innhold",

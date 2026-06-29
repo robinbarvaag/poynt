@@ -1,3 +1,4 @@
+import { AdminBar } from "@/components/admin-bar";
 import { JsonLd } from "@/components/json-ld";
 import { ProductDetailClient } from "@/components/product-detail";
 import { toProductGridItem } from "@/lib/product";
@@ -115,6 +116,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   return (
     <>
+      <AdminBar
+        collection="products"
+        id={String(product.id)}
+        singular="produkt"
+      />
       <JsonLd data={jsonLd} />
       <ProductDetailClient
         product={product}

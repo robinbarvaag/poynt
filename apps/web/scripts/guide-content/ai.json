@@ -60,11 +60,8 @@
       ]
     },
     {
-      "type": "richText",
-      "blocks": [{ "heading": "Gratiskurs:", "level": 3 }]
-    },
-    {
       "type": "bookmark",
+      "title": "Gratiskurs",
       "items": [
         {
           "url": null,

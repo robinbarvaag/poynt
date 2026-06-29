@@ -254,7 +254,6 @@ export function ChannelGuideClient({
               reasoning={initialSavedResult.reasoning || null}
               nextSteps={initialSavedResult.nextSteps || null}
               onReset={handleReset}
-              mode="result"
             />
           </motion.div>
         )}
@@ -290,7 +289,6 @@ export function ChannelGuideClient({
               reasoning={result?.reasoning ?? null}
               nextSteps={resultNextSteps}
               onReset={handleReset}
-              mode="result"
               isStreaming={isPending}
             />
           </motion.div>

@@ -8,11 +8,8 @@
   "coverDescription": "Flatlay-bilde av en seng/tekstil med en laptop som viser et Canva-design («Velkommen til Poynt»), sett ovenfra.",
   "content": [
     {
-      "type": "richText",
-      "blocks": [{ "heading": "Slik skaper du liv i en karusell:", "level": 2 }]
-    },
-    {
       "type": "columns",
+      "title": "Slik skaper du liv i en karusell",
       "columns": [
         {
           "type": "text",
@@ -42,11 +39,8 @@
       "label": ""
     },
     {
-      "type": "richText",
-      "blocks": [{ "heading": "Slik lager du mockups i Canva:", "level": 2 }]
-    },
-    {
       "type": "columns",
+      "title": "Slik lager du mockups i Canva",
       "columns": [
         {
           "type": "text",
@@ -65,11 +59,8 @@
       ]
     },
     {
-      "type": "richText",
-      "blocks": ["Noen eksempler:"]
-    },
-    {
       "type": "gallery",
+      "intro": "Noen eksempler:",
       "layout": "grid",
       "caption": "*Klikk på bildene å se det i full størrelse",
       "items": [
@@ -89,16 +80,8 @@
       "label": ""
     },
     {
-      "type": "richText",
-      "blocks": [
-        {
-          "heading": "Triks for å endre farger til en ny palett i et eksisterende design uten å måtte endre én og én farge:",
-          "level": 2
-        }
-      ]
-    },
-    {
       "type": "columns",
+      "title": "Triks for å endre farger til en ny palett i et eksisterende design uten å måtte endre én og én farge",
       "columns": [
         {
           "type": "text",
@@ -120,13 +103,8 @@
       "label": ""
     },
     {
-      "type": "richText",
-      "blocks": [
-        { "heading": "Triks for å få bilde inn i en font:", "level": 2 }
-      ]
-    },
-    {
       "type": "columns",
+      "title": "Triks for å få bilde inn i en font",
       "columns": [
         {
           "type": "text",
@@ -148,13 +126,8 @@
       "label": ""
     },
     {
-      "type": "richText",
-      "blocks": [
-        { "heading": "Triks for å få alle elementer likestilt:", "level": 2 }
-      ]
-    },
-    {
       "type": "columns",
+      "title": "Triks for å få alle elementer likestilt",
       "columns": [
         {
           "type": "text",
@@ -175,11 +148,8 @@
       "label": ""
     },
     {
-      "type": "richText",
-      "blocks": [{ "heading": "Nyttige hurtigtaster i Canva:", "level": 2 }]
-    },
-    {
       "type": "columns",
+      "title": "Nyttige hurtigtaster i Canva",
       "columns": [
         {
           "type": "text",
@@ -211,16 +181,8 @@
       "label": ""
     },
     {
-      "type": "richText",
-      "blocks": [
-        {
-          "heading": "Video som viser deg hvordan du kan masseopprette innhold i Canva:",
-          "level": 2
-        }
-      ]
-    },
-    {
       "type": "video",
+      "title": "Video som viser deg hvordan du kan masseopprette innhold i Canva",
       "url": null,
       "caption": "YouTube-video: «Bulk Create Content with ChatGPT & Canva» (CREATE FASTER)."
     },

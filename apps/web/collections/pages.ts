@@ -21,6 +21,12 @@ export const Pages: CollectionConfig = {
         return `${process.env.NEXT_PUBLIC_URL || "http://localhost:3000"}/${slug}`;
       },
     },
+    // «Preview»-knapp i dokument-headeren → åpner siden på nettsiden.
+    preview: (doc) => {
+      const base = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
+      if (!doc?.slug) return null;
+      return doc.slug === "forside" ? base : `${base}/${doc.slug}`;
+    },
   },
   versions: {
     drafts: {

@@ -26,8 +26,10 @@ import {
 import { Icon } from "@poynt/ui/icons";
 import { cn } from "@poynt/ui/lib/utils";
 import type { DeepPartial } from "ai";
+import type { DriveStep } from "driver.js";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { TourButton } from "../planner/tour";
 import { PlannerCalendar } from "./planner-calendar";
 import { PostComposer } from "./post-composer";
 import { SavedPostsDialog } from "./saved-posts-dialog";
@@ -73,6 +75,52 @@ const STREAM_MESSAGES = [
   "Finner norske merkedager og sesonger …",
   "Fyller på innholdsideer måned for måned …",
   "Setter sammen årshjulet …",
+];
+
+const YEAR_TOUR_KEY = "on-poynt-tour-year-v1";
+
+// Mikro-omvisning av de ikke-åpenbare delene av årshjulet.
+const YEAR_TOUR_STEPS: DriveStep[] = [
+  {
+    element: '[data-tour="year-header"]',
+    popover: {
+      title: "Årshjulet ditt",
+      description:
+        "Hele året på ett sted — 12 måneder med innhold tilpasset bransjen og sesongene dine.",
+      side: "bottom",
+      align: "start",
+    },
+  },
+  {
+    element: '[data-tour="year-view-toggle"]',
+    popover: {
+      title: "To måter å se det på",
+      description:
+        "«Kalender» er arbeidsflaten din. «Oversikt» zoomer ut til hjulet — der ser du hele året og hvor mange innlegg du har planlagt per måned.",
+      side: "bottom",
+      align: "start",
+    },
+  },
+  {
+    element: '[data-tour="year-calendar"]',
+    popover: {
+      title: "Fra idé til ferdig innlegg",
+      description:
+        "Trykk en innholdsidé i kalenderen for å lage et ferdig innlegg — i bedriftens stemme, klart til å publisere.",
+      side: "top",
+      align: "start",
+    },
+  },
+  {
+    element: '[data-tour="year-sync"]',
+    popover: {
+      title: "Få planen i din egen kalender",
+      description:
+        "Abonner, så dukker årshjulet opp i Apple Kalender, Outlook eller Google — og oppdaterer seg selv.",
+      side: "top",
+      align: "start",
+    },
+  },
 ];
 
 export function PlannerResult({
@@ -181,44 +229,53 @@ export function PlannerResult({
       className="space-y-8"
     >
       {/* Header */}
-      <div className="space-y-3">
-        <div className="inline-flex size-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-          <Icon name="calendar-days" className="size-8" />
+      <div className="flex items-start justify-between gap-3">
+        <div className="space-y-3" data-tour="year-header">
+          <div className="inline-flex size-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <Icon name="calendar-days" className="size-8" />
+          </div>
+          <Heading size="h2">
+            Ditt årshjul{plan?.year ? ` ${plan.year}` : ""}
+          </Heading>
+          {plan?.summary ? (
+            <Text>{plan.summary}</Text>
+          ) : (
+            isStreaming && (
+              <div className="max-w-md space-y-2">
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+              </div>
+            )
+          )}
+          {isStreaming && (
+            <span className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Icon name="loader" className="size-4 animate-spin" />
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={streamingLabel}
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  {streamingLabel}
+                </motion.span>
+              </AnimatePresence>
+            </span>
+          )}
         </div>
-        <Heading size="h2">
-          Ditt årshjul{plan?.year ? ` ${plan.year}` : ""}
-        </Heading>
-        {plan?.summary ? (
-          <Text>{plan.summary}</Text>
-        ) : (
-          isStreaming && (
-            <div className="max-w-md space-y-2">
-              <Skeleton className="h-4 w-3/4" />
-              <Skeleton className="h-4 w-1/2" />
-            </div>
-          )
-        )}
-        {isStreaming && (
-          <span className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Icon name="loader" className="size-4 animate-spin" />
-            <AnimatePresence mode="wait">
-              <motion.span
-                key={streamingLabel}
-                initial={{ opacity: 0, y: 4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -4 }}
-                transition={{ duration: 0.25 }}
-              >
-                {streamingLabel}
-              </motion.span>
-            </AnimatePresence>
-          </span>
+        {!isStreaming && months.length > 0 && (
+          <TourButton
+            tourKey={YEAR_TOUR_KEY}
+            steps={YEAR_TOUR_STEPS}
+            autoRun={!isStreaming}
+          />
         )}
       </div>
 
       {/* View Toggle */}
       {months.length > 0 && (
-        <div className="flex justify-start">
+        <div className="flex justify-start" data-tour="year-view-toggle">
           <Tabs
             value={view}
             onValueChange={(v) => setView(v as "calendar" | "wheel")}
@@ -345,16 +402,18 @@ export function PlannerResult({
 
       {/* Calendar View */}
       {months.length > 0 && view === "calendar" && (
-        <PlannerCalendar
-          months={months}
-          year={plan?.year}
-          scheduled={scheduled}
-          business={business}
-          onComposePost={openComposer}
-          onChanged={bumpRefresh}
-          monthIndex={monthIndex}
-          onMonthIndexChange={setMonthIndex}
-        />
+        <div data-tour="year-calendar">
+          <PlannerCalendar
+            months={months}
+            year={plan?.year}
+            scheduled={scheduled}
+            business={business}
+            onComposePost={openComposer}
+            onChanged={bumpRefresh}
+            monthIndex={monthIndex}
+            onMonthIndexChange={setMonthIndex}
+          />
+        </div>
       )}
 
       {/* Handlinger */}
@@ -362,7 +421,7 @@ export function PlannerResult({
         <div className="space-y-4 pt-2">
           {/* Synk til kalenderen din — forklart */}
           {!isStreaming && calendarFeed && (
-            <Card className="bg-muted/40">
+            <Card className="bg-muted/40" data-tour="year-sync">
               <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-start gap-3">
                   <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">

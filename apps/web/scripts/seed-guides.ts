@@ -28,15 +28,44 @@ type RichBlock =
   | { list: string[] }
   | { quote: string };
 
-const textNode = (text: string) => ({
+const TEXT_FORMAT_BOLD = 1;
+const TEXT_FORMAT_ITALIC = 2;
+
+const textNode = (text: string, format = 0) => ({
   type: "text",
   mode: "normal" as const,
   text,
   detail: 0,
-  format: 0,
+  format,
   style: "",
   version: 1,
 });
+
+/**
+ * Deler en streng på `**fet**` og `*kursiv*` → lexical-tekstnoder. Resten av
+ * teksten blir vanlige noder. Captions går utenom denne, så `*`-fotnoter der
+ * påvirkes ikke.
+ */
+function inlineNodes(text: string) {
+  const nodes: ReturnType<typeof textNode>[] = [];
+  const regex = /\*\*([^*]+)\*\*|\*([^*]+)\*/g;
+  let last = 0;
+  let match: RegExpExecArray | null = regex.exec(text);
+  while (match !== null) {
+    if (match.index > last) {
+      nodes.push(textNode(text.slice(last, match.index)));
+    }
+    if (match[1] !== undefined) {
+      nodes.push(textNode(match[1], TEXT_FORMAT_BOLD));
+    } else if (match[2] !== undefined) {
+      nodes.push(textNode(match[2], TEXT_FORMAT_ITALIC));
+    }
+    last = regex.lastIndex;
+    match = regex.exec(text);
+  }
+  if (last < text.length) nodes.push(textNode(text.slice(last)));
+  return nodes.length > 0 ? nodes : [textNode(text)];
+}
 
 const paragraphNode = (text: string) => ({
   type: "paragraph",
@@ -45,7 +74,7 @@ const paragraphNode = (text: string) => ({
   version: 1,
   direction: "ltr" as const,
   textFormat: 0,
-  children: [textNode(text)],
+  children: inlineNodes(text),
 });
 
 function buildLexical(blocks: RichBlock[] | undefined) {
@@ -59,7 +88,7 @@ function buildLexical(blocks: RichBlock[] | undefined) {
         indent: 0,
         version: 1,
         direction: "ltr" as const,
-        children: [textNode(block.heading)],
+        children: inlineNodes(block.heading),
       };
     }
     if ("quote" in block) {
@@ -69,7 +98,7 @@ function buildLexical(blocks: RichBlock[] | undefined) {
         indent: 0,
         version: 1,
         direction: "ltr" as const,
-        children: [textNode(block.quote)],
+        children: inlineNodes(block.quote),
       };
     }
     return {
@@ -88,7 +117,7 @@ function buildLexical(blocks: RichBlock[] | undefined) {
         indent: 0,
         version: 1,
         direction: "ltr" as const,
-        children: [textNode(item)],
+        children: inlineNodes(item),
       })),
     };
   });
@@ -161,6 +190,9 @@ interface JsonColumn {
 }
 interface JsonContentBlock {
   type: string;
+  // seksjonsoverskrift som hører til blokken (container-blokker)
+  title?: string | null;
+  intro?: string | null;
   // richText / callout
   blocks?: RichBlock[];
   tone?: string;
@@ -191,8 +223,26 @@ interface JsonGuide {
 const VALID_TONES = new Set(["mint", "saffron", "salmon", "primary", "ink"]);
 const VALID_KINDS = new Set(["pdf", "canva", "link", "other"]);
 
+/**
+ * En lang `caption` fra kilden er i praksis en bildebeskrivelse (alt-stil), ikke
+ * en redaksjonell bildetekst. Alt-tekst hører hjemme på Media-dokumentet, så slike
+ * (og rene `placeholder`-beskrivelser) seedes IKKE som synlig bildetekst.
+ */
+const isLongDesc = (s: unknown): boolean =>
+  typeof s === "string" && s.trim().length > 70;
+
+/** Kun ekte, korte bildetekster beholdes som synlig caption. */
+const seedCaption = (caption?: string | null): string | null =>
+  isLongDesc(caption) ? null : (caption ?? null);
+
 function mapContent(json: JsonGuide): Array<Record<string, unknown>> {
   const out: Array<Record<string, unknown>> = [];
+
+  // Valgfri seksjonsoverskrift som hører til container-blokken.
+  const header = (b: JsonContentBlock) => ({
+    title: b.title ?? null,
+    intro: b.intro ?? null,
+  });
 
   for (const b of json.content) {
     switch (b.type) {
@@ -215,13 +265,14 @@ function mapContent(json: JsonGuide): Array<Record<string, unknown>> {
       case "columns":
         out.push({
           blockType: "guideColumns",
+          ...header(b),
           align: b.align ?? "top",
           columns: (b.columns ?? []).map((c) =>
             c.type === "image"
               ? {
                   type: "image",
                   image: null,
-                  caption: c.caption ?? c.placeholder ?? null,
+                  caption: seedCaption(c.caption),
                 }
               : { type: "text", content: buildLexical(c.blocks) }
           ),
@@ -231,12 +282,12 @@ function mapContent(json: JsonGuide): Array<Record<string, unknown>> {
       case "gallery":
         out.push({
           blockType: "guideGallery",
+          ...header(b),
           layout: b.layout ?? "grid",
           caption: b.caption ?? null,
           images: (b.items ?? []).map((it) => ({
             image: null,
-            caption:
-              (it.placeholder as string) ?? (it.caption as string) ?? null,
+            caption: seedCaption(it.caption as string | null | undefined),
           })),
         });
         break;
@@ -244,9 +295,10 @@ function mapContent(json: JsonGuide): Array<Record<string, unknown>> {
       case "image":
         out.push({
           blockType: "guideImage",
+          ...header(b),
           image: null,
           width: b.width ?? "normal",
-          caption: b.caption ?? b.placeholder ?? null,
+          caption: seedCaption(b.caption),
         });
         break;
 
@@ -254,6 +306,7 @@ function mapContent(json: JsonGuide): Array<Record<string, unknown>> {
         if (b.url) {
           out.push({
             blockType: "guideVideo",
+            ...header(b),
             url: b.url,
             caption: b.caption ?? null,
           });
@@ -271,6 +324,7 @@ function mapContent(json: JsonGuide): Array<Record<string, unknown>> {
       case "toggle":
         out.push({
           blockType: "guideToggle",
+          ...header(b),
           items: (b.items ?? []).map((it) => ({
             title: (it.title as string) ?? "Punkt",
             content: it.blocks
@@ -283,6 +337,7 @@ function mapContent(json: JsonGuide): Array<Record<string, unknown>> {
       case "bookmark":
         out.push({
           blockType: "guideBookmark",
+          ...header(b),
           items: (b.items ?? []).map((it) => ({
             url: (it.url as string) ?? null,
             title: (it.title as string) ?? null,
@@ -294,6 +349,7 @@ function mapContent(json: JsonGuide): Array<Record<string, unknown>> {
       case "download":
         out.push({
           blockType: "guideDownload",
+          ...header(b),
           items: (b.items ?? []).map((it) => {
             const kind = (it.kind as string) ?? "pdf";
             return {

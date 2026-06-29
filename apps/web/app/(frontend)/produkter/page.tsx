@@ -1,3 +1,4 @@
+import { AdminBar } from "@/components/admin-bar";
 import { CategoryFilter } from "@/components/category-filter";
 import { PageHero } from "@/components/page-hero";
 import { PRODUCT_TYPE_FILTERS, toProductGridItem } from "@/lib/product";
@@ -60,6 +61,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
 
   return (
     <>
+      <AdminBar global="productspage" singular="produktside" />
       {heroEnabled && (
         <PageHero
           eyebrow="Nettbutikk"

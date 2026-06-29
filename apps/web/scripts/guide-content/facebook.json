@@ -17,14 +17,9 @@
       ]
     },
     {
-      "type": "richText",
-      "blocks": [
-        { "heading": "Verktøy:", "level": 3 },
-        "Planlegg og analyser innholdet ditt med Meta Business Suite 👇 (Creator studio er nå samlet der)"
-      ]
-    },
-    {
       "type": "bookmark",
+      "title": "Verktøy",
+      "intro": "Planlegg og analyser innholdet ditt med Meta Business Suite 👇 (Creator studio er nå samlet der)",
       "items": [
         {
           "url": null,
@@ -34,25 +29,15 @@
       ]
     },
     {
-      "type": "richText",
-      "blocks": [
-        "Se på andre sine Facebook-annonser og finn inspirasjon til egne annonser her 👇"
-      ]
-    },
-    {
       "type": "bookmark",
+      "intro": "Se på andre sine Facebook-annonser og finn inspirasjon til egne annonser her 👇",
       "items": [
         { "url": null, "title": "Facebook Ads Library", "description": null }
       ]
     },
     {
-      "type": "richText",
-      "blocks": [
-        "Lær mer om Facebook og Facebook-annonsering hos Meta med Meta Blueprint 👇"
-      ]
-    },
-    {
       "type": "bookmark",
+      "intro": "Lær mer om Facebook og Facebook-annonsering hos Meta med Meta Blueprint 👇",
       "items": [{ "url": null, "title": "Meta Blueprint", "description": null }]
     },
     { "type": "richText", "blocks": ["✏️ Innholdsplanlegging på Facebook"] },

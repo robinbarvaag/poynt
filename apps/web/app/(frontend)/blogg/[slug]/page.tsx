@@ -1,3 +1,4 @@
+import { AdminBar } from "@/components/admin-bar";
 import { JsonLd } from "@/components/json-ld";
 import { MediaCredit } from "@/components/media-credit";
 import { PayloadImage } from "@/components/payload-image";
@@ -93,6 +94,11 @@ export default async function PostPage({ params }: PostPageProps) {
 
   return (
     <Container size="sm" padding="default">
+      <AdminBar
+        collection="blog-posts"
+        id={String(post.id)}
+        singular="innlegg"
+      />
       <ViewTracker
         collection="blog-posts"
         contentId={String(post.id)}

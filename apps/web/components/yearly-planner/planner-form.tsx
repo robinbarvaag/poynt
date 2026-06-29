@@ -140,13 +140,10 @@ export function PlannerForm({
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={(e) => e.preventDefault()}
-        className="mx-auto max-w-2xl space-y-8"
-      >
-        <div className="space-y-2 text-center">
+      <form onSubmit={(e) => e.preventDefault()} className="space-y-8">
+        <div className="space-y-2">
           <Heading size="h2">Lag årshjulet ditt</Heading>
-          <Text>
+          <Text customStyles="max-w-2xl">
             Vi bruker det vi vet om bedriften din. Velg kanalene og frekvensen,
             så setter vi sammen 12 måneder med innhold.
           </Text>
@@ -303,22 +300,26 @@ export function PlannerForm({
 
         {/* Flere detaljer (valgfritt) */}
         <div className="space-y-4">
-          <Button
+          <button
             type="button"
-            variant="ghost"
-            size="sm"
-            className="gap-2 text-muted-foreground"
             onClick={() => setShowMore((v) => !v)}
+            className="flex w-full items-center justify-between rounded-lg border bg-muted/30 px-4 py-3 text-left transition-colors hover:bg-muted/50"
           >
+            <span className="flex items-center gap-2.5">
+              <Icon name="settings" className="size-4 text-muted-foreground" />
+              <span className="font-medium text-sm">Flere detaljer</span>
+              <Badge variant="muted" size="sm">
+                valgfritt
+              </Badge>
+            </span>
             <Icon
               name="chevron-right"
               className={cn(
-                "size-4 transition-transform",
+                "size-4 text-muted-foreground transition-transform",
                 showMore && "rotate-90"
               )}
             />
-            Flere detaljer (valgfritt)
-          </Button>
+          </button>
 
           {showMore && (
             <motion.div

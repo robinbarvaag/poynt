@@ -19,6 +19,7 @@ const kindLabels: Record<string, string> = {
   demand: "Medlemmene etterspør",
   inspiration_gap: "Ekstern trend",
   popular: "Mye lest",
+  low_quality: "Lav kvalitetsscore",
 };
 
 const typeColors: Record<ContentSuggestionTypeValue, string> = {

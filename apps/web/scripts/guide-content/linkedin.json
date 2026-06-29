@@ -71,33 +71,20 @@
       ]
     },
     {
-      "type": "richText",
-      "blocks": [
-        "Se denne videoen med Fredrik Fornes hvis du lurer på LinkedIn er noe for deg:"
-      ]
-    },
-    {
       "type": "video",
-      "url": null,
+      "intro": "Se denne videoen med Fredrik Fornes hvis du lurer på LinkedIn er noe for deg:",
+      "url": "https://www.youtube.com/watch?v=gebos71lblM",
       "caption": "YouTube-video: «Tre steg for å lykkes på LinkedIn» av Fredrik Fornes / For Overhuset."
     },
     {
-      "type": "richText",
-      "blocks": ["Til deg som ønsker å annonsere på LinkedIn:"]
-    },
-    {
       "type": "video",
-      "url": null,
+      "intro": "Til deg som ønsker å annonsere på LinkedIn:",
+      "url": "https://www.youtube.com/watch?v=WMKldiJ8mEw&t=62s",
       "caption": "YouTube-video: «How To Advertise Your Business On LinkedIn» (LINKEDIN ADS)."
     },
     {
-      "type": "richText",
-      "blocks": [
-        "Her finner du vår nedlastbare fil med ideer til LinkedIn-innhold:"
-      ]
-    },
-    {
       "type": "download",
+      "intro": "Her finner du vår nedlastbare fil med ideer til LinkedIn-innhold:",
       "items": [
         {
           "title": "40 ideer til LinkedIn-innhold.pdf",

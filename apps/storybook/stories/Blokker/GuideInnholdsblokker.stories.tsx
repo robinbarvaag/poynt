@@ -7,6 +7,7 @@ import {
   GuideToggle,
   ImagePlaceholder,
   VideoEmbed,
+  VideoPlayer,
 } from "@poynt/ui";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
@@ -136,6 +137,27 @@ export const Video: Story = {
         url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
         caption="Eksempel-video"
       />
+    </div>
+  ),
+};
+
+// Selv-hostet (opplastet) video med våre egne kontroller — én med kontroller,
+// én som stille auto-loop (uten kontroller).
+const sampleVideo =
+  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
+
+export const OpplastetVideo: Story = {
+  render: () => (
+    <div className="max-w-2xl">
+      <VideoPlayer src={sampleVideo} caption="Opplastet video med kontroller" />
+    </div>
+  ),
+};
+
+export const AutoLoopVideo: Story = {
+  render: () => (
+    <div className="max-w-2xl">
+      <VideoPlayer src={sampleVideo} autoPlay muted loop controls={false} />
     </div>
   ),
 };

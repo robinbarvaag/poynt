@@ -48,6 +48,7 @@ const kindLabels: Record<string, string> = {
   demand: "Etterspørsel fra medlemmenes verktøybruk",
   inspiration_gap: "Eksterne temaer On Poynt ikke dekker ennå",
   popular: "Mye lest innhold (faktiske visninger)",
+  low_quality: "Lav kvalitetsscore (AI-vurdering)",
 };
 
 /**

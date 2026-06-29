@@ -1,3 +1,4 @@
+import { AdminBar } from "@/components/admin-bar";
 import { CtaSectionBlock } from "@/components/blocks/cta-section-block";
 import { JsonLd } from "@/components/json-ld";
 import { MediaCredit } from "@/components/media-credit";
@@ -97,6 +98,11 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
 
   return (
     <>
+      <AdminBar
+        collection="services"
+        id={String(service.id)}
+        singular="tjeneste"
+      />
       <JsonLd data={jsonLd} />
       <Container size="sm" padding="default">
         <article>
