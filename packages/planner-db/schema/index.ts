@@ -10,6 +10,9 @@ export * from "./content-radar";
 // Workspace and subscription tables
 export * from "./workspace";
 
+// Medlemsfellesskap (kanaler, grupper, DM, meldinger, vedlegg)
+export * from "./chat";
+
 // Feedback / funksjonsønsker fra medlemmer
 export * from "./feedback";
 

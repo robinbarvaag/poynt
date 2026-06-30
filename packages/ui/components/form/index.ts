@@ -21,3 +21,4 @@ export {
 export { Input, type InputProps } from "./input";
 export { Textarea } from "./textarea";
 export { Label } from "./label";
+export { FormSuccess, type FormSuccessProps } from "./form-success";

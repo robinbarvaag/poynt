@@ -14,6 +14,13 @@ export const homeNavItem: NavItem = {
   icon: "home",
 };
 
+/** Medlemsfellesskapet — kanaler/grupper/DM på tvers av bedrifter. */
+export const communityNavItem: NavItem = {
+  title: "Fellesskap",
+  url: "/on-poynt/fellesskap",
+  icon: "users",
+};
+
 /**
  * Gruppe «Verktøy» — kjernereisen (tier-låst). Speiler den guidede reisen på
  * dashbordet: finn kanaler → lag plan → planlegg året.

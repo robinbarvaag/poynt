@@ -39,6 +39,9 @@ const buttonVariants = cva(
         sm: `${CONTROL_HEIGHTS.sm} px-3`,
         lg: `${CONTROL_HEIGHTS.lg} px-8`,
         icon: `${CONTROL_HEIGHTS.default} w-10`,
+        // Kompakte ikon-knapper (brukt av chat-primitivene fra shadcn).
+        "icon-sm": "size-8",
+        "icon-xs": "size-6 [&_svg:not([class*='size-'])]:size-3.5",
       },
     },
     defaultVariants: {

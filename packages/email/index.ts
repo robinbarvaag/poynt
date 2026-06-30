@@ -23,6 +23,47 @@ export const resend = new Proxy({} as Resend, {
   },
 });
 
+/**
+ * Bygg avsender-adressa. Sett `EMAIL_FROM` til et verifisert domene i Resend,
+ * f.eks. `no-reply@poynt.no` eller hele strengen `On Poynt <no-reply@poynt.no>`.
+ *
+ * Faller tilbake til Resend sitt sandbox-domene `onboarding@resend.dev`, som i
+ * test-modus KUN leverer til Resend-kontoens egen e-postadresse — derfor må
+ * `EMAIL_FROM` settes (og domenet verifiseres) for å sende til andre.
+ */
+function buildFrom(displayName: string): string {
+  const configured = process.env.EMAIL_FROM;
+  if (!configured) {
+    return `${displayName} <onboarding@resend.dev>`;
+  }
+  // Tillat enten en bar adresse ("no-reply@poynt.no") eller full "Navn <adr>".
+  return configured.includes("<")
+    ? configured
+    : `${displayName} <${configured}>`;
+}
+
+type SendPayload = Parameters<Resend["emails"]["send"]>[0];
+
+/**
+ * Send via Resend og kast på feil. Resend-SDK-en kaster IKKE selv på API-feil
+ * (den returnerer `{ data, error }`), så uten denne sjekken feiler utsending
+ * stille og kallere tror alt gikk bra.
+ */
+async function sendEmail(payload: SendPayload) {
+  const { data, error } = await getResend().emails.send(payload);
+  if (error) {
+    console.error("Resend e-post feilet:", {
+      to: payload.to,
+      subject: payload.subject,
+      error,
+    });
+    throw new Error(
+      `Resend e-post feilet (${payload.subject}): ${error.message ?? "ukjent feil"}`
+    );
+  }
+  return data;
+}
+
 export async function sendOrderConfirmation(params: {
   email: string;
   orderNumber: string;
@@ -47,8 +88,8 @@ export async function sendOrderConfirmation(params: {
     })
   );
 
-  await getResend().emails.send({
-    from: "Poynt <onboarding@resend.dev>", // TODO: bytt til verifisert domene
+  await sendEmail({
+    from: buildFrom("Poynt"),
     to: params.email,
     subject: `Ordrebekreftelse #${params.orderNumber}`,
     html,
@@ -76,8 +117,8 @@ export async function sendMagicLinkEmail(params: {
     })
   );
 
-  await getResend().emails.send({
-    from: "On Poynt <onboarding@resend.dev>", // TODO: bytt til verifisert domene
+  await sendEmail({
+    from: buildFrom("On Poynt"),
     to: params.email,
     subject: "Logg inn på On Poynt",
     html,
@@ -168,15 +209,12 @@ export async function sendContactEmails(params: {
     "./templates/contact-confirmation"
   );
 
-  const resendClient = getResend();
-  // TODO: bytt til verifisert avsender-domene (onboarding@resend.dev kan i
-  // test-modus kun levere til Resend-kontoens egen adresse).
-  const from = "Poynt <onboarding@resend.dev>";
+  const from = buildFrom("Poynt");
 
   const notifyTo = process.env.CONTACT_EMAIL;
   if (notifyTo) {
     const html = await render(ContactNotificationEmail(params));
-    await resendClient.emails.send({
+    await sendEmail({
       from,
       to: notifyTo,
       replyTo: params.email,
@@ -188,7 +226,7 @@ export async function sendContactEmails(params: {
   const confirmationHtml = await render(
     ContactConfirmationEmail({ name: params.name, message: params.message })
   );
-  await resendClient.emails.send({
+  await sendEmail({
     from,
     to: params.email,
     subject: "Takk for din henvendelse – Poynt",
@@ -203,8 +241,8 @@ export async function sendContactEmails(params: {
 export async function sendWelcomeEmail(email: string, magicLinkUrl: string) {
   if (!process.env.RESEND_API_KEY) return;
 
-  await getResend().emails.send({
-    from: "On Poynt <onboarding@resend.dev>", // TODO: Change to verified domain
+  await sendEmail({
+    from: buildFrom("On Poynt"),
     to: email,
     subject: "Velkommen til On Poynt!",
     html: `
@@ -243,8 +281,8 @@ export async function sendMemberWelcomeEmail(params: {
     })
   );
 
-  await getResend().emails.send({
-    from: "On Poynt <velkommen@resend.dev>", // TODO: Change to verified domain
+  await sendEmail({
+    from: buildFrom("On Poynt"),
     to: params.email,
     subject: "Velkommen til On Poynt!",
     html: emailHtml,

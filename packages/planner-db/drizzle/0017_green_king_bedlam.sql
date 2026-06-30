@@ -1,0 +1,2 @@
+ALTER TABLE "planner"."planner_message" ADD COLUMN "parent_message_id" text;--> statement-breakpoint
+ALTER TABLE "planner"."planner_message" ADD CONSTRAINT "planner_message_parent_message_id_planner_message_id_fk" FOREIGN KEY ("parent_message_id") REFERENCES "planner"."planner_message"("id") ON DELETE set null ON UPDATE no action;

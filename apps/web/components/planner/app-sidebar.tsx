@@ -3,6 +3,7 @@
 import {
   type NavItem,
   businessNavItems,
+  communityNavItem,
   feedbackNavItem,
   homeNavItem,
   learnNavItems,
@@ -21,6 +22,7 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
@@ -29,6 +31,7 @@ import {
   SidebarRail,
   SidebarSeparator,
 } from "@poynt/ui";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -79,6 +82,14 @@ export function AppSidebar() {
       .catch(() => setIsAiTier(false));
   }, []);
 
+  // Uleste meldinger i fellesskapet — driver merket på «Fellesskap».
+  const unreadQuery = useQuery({
+    queryKey: ["chat", "unreadCount"],
+    queryFn: () => trpc.chat.unreadCount.query(),
+    refetchInterval: 30_000,
+  });
+  const unread = unreadQuery.data?.total ?? 0;
+
   const isItemActive = (url: string) =>
     pathname === url || pathname.startsWith(`${url}/`);
 
@@ -98,10 +109,28 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        {/* Hjem — alene øverst, ikke et «verktøy» */}
+        {/* Hjem + Fellesskap — alene øverst, ikke «verktøy» */}
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu>{renderItem(homeNavItem)}</SidebarMenu>
+            <SidebarMenu>
+              {renderItem(homeNavItem)}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={isItemActive(communityNavItem.url)}
+                >
+                  <Link href={communityNavItem.url}>
+                    <Icon name={communityNavItem.icon} />
+                    <span>{communityNavItem.title}</span>
+                  </Link>
+                </SidebarMenuButton>
+                {unread > 0 && (
+                  <SidebarMenuBadge>
+                    {unread > 99 ? "99+" : unread}
+                  </SidebarMenuBadge>
+                )}
+              </SidebarMenuItem>
+            </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
 

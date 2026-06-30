@@ -48,7 +48,22 @@ export const auth = betterAuth({
   plugins: [
     magicLink({
       sendMagicLink: async ({ email, url }) => {
-        await sendMagicLinkEmail({ email, url, expiresInMinutes: 10 });
+        // I utvikling: logg lenka til konsollen så innlogging kan testes for
+        // hvilken som helst e-post UTEN et verifisert Resend-domene (sandbox
+        // leverer kun til kontoens egen adresse).
+        if (process.env.NODE_ENV !== "production") {
+          console.log(`\n🔗 Magic link for ${email}:\n${url}\n`);
+        }
+        try {
+          await sendMagicLinkEmail({ email, url, expiresInMinutes: 10 });
+        } catch (err) {
+          // I produksjon må feilen boble opp; i utvikling har vi lenka i loggen.
+          if (process.env.NODE_ENV === "production") throw err;
+          console.warn(
+            "Magic-link e-post ikke sendt (bruk logget lenke over):",
+            err
+          );
+        }
       },
       expiresIn: 60 * 10, // 10 minutes
     }),

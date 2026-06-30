@@ -190,6 +190,8 @@ export {
   FormField,
   Field,
   type FieldProps,
+  FormSuccess,
+  type FormSuccessProps,
 } from "./components/form";
 
 export { Toaster, toast } from "./components/sonner";
@@ -465,5 +467,37 @@ export {
 } from "./components/brand";
 
 export { Switch };
+
+// Chat-primitiver (medlemsfellesskap) — shadcn radix-registeret
+export {
+  MessageGroup,
+  Message,
+  MessageAvatar,
+  MessageContent,
+  MessageHeader,
+  MessageFooter,
+  BubbleGroup,
+  Bubble,
+  BubbleContent,
+  BubbleReactions,
+  Attachment,
+  AttachmentGroup,
+  AttachmentMedia,
+  AttachmentContent,
+  AttachmentTitle,
+  AttachmentDescription,
+  AttachmentActions,
+  AttachmentAction,
+  AttachmentTrigger,
+  MessageScrollerProvider,
+  MessageScroller,
+  MessageScrollerViewport,
+  MessageScrollerContent,
+  MessageScrollerItem,
+  MessageScrollerButton,
+  useMessageScroller,
+  useMessageScrollerScrollable,
+  useMessageScrollerVisibility,
+} from "./components/chat";
 
 export { useIsMobile } from "./hooks/use-mobile";

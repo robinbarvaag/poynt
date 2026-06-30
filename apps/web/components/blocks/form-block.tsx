@@ -3,6 +3,7 @@
 import {
   Button,
   Container,
+  FormSuccess,
   Heading,
   Label,
   Select,
@@ -13,7 +14,7 @@ import {
   Text,
   cn,
 } from "@poynt/ui";
-import { type ReactNode, useEffect, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import type { Form as PayloadForm } from "../../payload-types";
 
 interface FormBlockProps {
@@ -50,6 +51,9 @@ export function FormBlockComponent({
   // både i modal- og fullside-konteksten). Tom på første render → ingen
   // hydration-mismatch; fylles inn rett etter.
   const [ctx, setCtx] = useState<SubmissionContext>({});
+  // Kvitterings-kortet rulles inn i visning når innsendingen lykkes – ellers
+  // blir brukeren stående nederst på en lang skjema-side uten å se bekreftelsen.
+  const successRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const sp = new URLSearchParams(window.location.search);
@@ -59,6 +63,15 @@ export function FormBlockComponent({
       emne: sp.get("emne") ?? undefined,
     });
   }, []);
+
+  useEffect(() => {
+    if (isSubmitted) {
+      successRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  }, [isSubmitted]);
 
   // If form is just an ID string, we can't render it
   if (typeof form === "string") {
@@ -150,31 +163,15 @@ export function FormBlockComponent({
   if (isSubmitted) {
     return wrap(
       <div
+        ref={successRef}
         className={cn(
+          "scroll-mt-24",
           maxWidthClasses[currentMaxWidth],
-          currentAlignment === "center" && "mx-auto text-center",
+          "mx-auto",
           variantClasses[currentVariant]
         )}
       >
-        <div className="flex flex-col items-center gap-4 py-8">
-          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-            <svg
-              className="w-8 h-8 text-primary"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <title>Checkmark Icon</title>
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
-          </div>
-          <Text>{confirmationMessage}</Text>
-        </div>
+        <FormSuccess message={confirmationMessage} />
       </div>
     );
   }
@@ -221,11 +218,13 @@ export function FormBlockComponent({
                 >
                   {/* Checkbox har egen inline-label under – unngå dobbel tekst. */}
                   {field.blockType !== "checkbox" && (
-                    <Label className="mb-2 block font-heading font-semibold text-foreground">
-                      {fieldLabel}
-                      {isRequired && (
-                        <span className="text-destructive">&nbsp;*</span>
-                      )}
+                    <Label className="mb-2 flex items-start font-heading font-semibold text-foreground leading-snug md:min-h-[2lh]">
+                      <span>
+                        {fieldLabel}
+                        {isRequired && (
+                          <span className="text-destructive">&nbsp;*</span>
+                        )}
+                      </span>
                     </Label>
                   )}
 

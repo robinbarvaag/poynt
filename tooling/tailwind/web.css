@@ -215,6 +215,33 @@
   animation: blob 12s ease-in-out infinite;
 }
 
+/* Engangs «pop» for kvitterings-/suksess-ikoner: zoomer inn med en liten
+   rotasjon, skyter litt forbi og setter seg. Kjører ÉN gang (ingen loop). */
+.animate-success-pop {
+  animation: success-pop 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes success-pop {
+  0% {
+    transform: scale(0.5) rotate(-12deg);
+    opacity: 0;
+  }
+  55% {
+    transform: scale(1.12) rotate(5deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-success-pop {
+    animation: none;
+  }
+}
+
 @keyframes float-slow {
   0%,
   100% {
@@ -284,4 +311,74 @@
 .rounded-full {
   /* biome-ignore lint/correctness/noUnknownProperty: corner-shape (CSS Corners L4) er nyere enn Biome sin liste */
   corner-shape: round;
+}
+
+/* Shimmer — sveipende lys over tekst, brukt på «laster …» / streamet innhold
+   og av shadcn-attachment (state=uploading/processing). Definert som @utility
+   så den kan komponeres med varianter (f.eks. group-data-[…]:shimmer). */
+@utility shimmer {
+  background: linear-gradient(
+    100deg,
+    currentColor 40%,
+    color-mix(in oklab, currentColor 35%, transparent) 50%,
+    currentColor 60%
+  );
+  background-size: 200% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: shimmer-sweep 2s linear infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    -webkit-text-fill-color: currentColor;
+    color: inherit;
+  }
+}
+
+@keyframes shimmer-sweep {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* Hjelpe-utilities som shadcn chat-primitivene (message-scroller/attachment)
+   forventer. shadcn leverer dem via sin egen tailwind.css; vi definerer kun de
+   få vi trenger, for å ikke kollidere med vårt eget tema. */
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@utility scrollbar-thin {
+  scrollbar-width: thin;
+}
+
+@utility scrollbar-gutter-stable {
+  scrollbar-gutter: stable;
+}
+
+/* Mykt uttonende kant nederst/på sidene av rullbare lister. */
+@utility scroll-fade-b {
+  mask-image: linear-gradient(
+    to bottom,
+    black calc(100% - 1.5rem),
+    transparent
+  );
+}
+
+@utility scroll-fade-x {
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 1rem,
+    black calc(100% - 1rem),
+    transparent
+  );
 }

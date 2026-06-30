@@ -3,6 +3,23 @@
 @plugin "tailwindcss-animate";
 @source "../../../packages/ui/";
 
+/* Reserver alltid plass til scrollbaren, så layouten ikke hopper
+   mellom korte (uten scroll) og lange (med scroll) sider. */
+html {
+  scrollbar-gutter: stable;
+}
+
+/* Radix (react-remove-scroll) legger til margin-right på body for å
+   kompensere for scrollbaren den skjuler når en select/dialog/dropdown
+   åpnes. Vi reserverer allerede plassen via scrollbar-gutter over, så
+   kompensasjonen blir dobbel og gir et sidelengs hopp. Nøytraliser den.
+   `html`-prefikset gir oss høyere spesifisitet enn Radix sin egen
+   `body[data-scroll-locked]`-regel, som ellers vinner fordi den
+   injiseres sist i <head> på runtime. */
+html body[data-scroll-locked] {
+  margin-right: 0 !important;
+}
+
 /* Rich text styling for Lexical content */
 .rich-text {
   p {
