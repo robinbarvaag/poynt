@@ -34,6 +34,7 @@ import {
   Message,
   MessageAvatar,
   MessageContent,
+  MessageFooter,
   MessageHeader,
   MessageScroller,
   MessageScrollerButton,
@@ -46,15 +47,27 @@ import {
   cn,
   toast,
   useIsMobile,
+  useMessageScroller,
   useMessageScrollerVisibility,
 } from "@poynt/ui";
 import { Icon } from "@poynt/ui/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
-import { type ReactNode, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Composer } from "./composer";
 import { ConversationActions } from "./conversation-actions";
 import { CreateChannelDialog } from "./create-channel-dialog";
+import { FeedView } from "./feed-view";
+import {
+  ReactionChip,
+  avatarColor,
+  formatDayLabel,
+  formatSize,
+  initials,
+  renderBody,
+  sameDay,
+  timeFmt,
+} from "./helpers";
 import { NewConversationDialog } from "./new-conversation-dialog";
 
 type CurrentUser = { id: string; name: string; image: string | null };
@@ -65,46 +78,6 @@ type Conversation = Awaited<
 type ChatMessage = Awaited<
   ReturnType<typeof trpc.chat.getMessages.query>
 >["messages"][number];
-
-const timeFmt = new Intl.DateTimeFormat("nb-NO", {
-  hour: "2-digit",
-  minute: "2-digit",
-});
-
-function initials(name: string): string {
-  return name
-    .split(" ")
-    .map((p) => p[0])
-    .filter(Boolean)
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-}
-
-const dayFmt = new Intl.DateTimeFormat("nb-NO", {
-  day: "numeric",
-  month: "long",
-});
-
-function sameDay(a: string | Date, b: string | Date): boolean {
-  const da = new Date(a);
-  const db = new Date(b);
-  return (
-    da.getFullYear() === db.getFullYear() &&
-    da.getMonth() === db.getMonth() &&
-    da.getDate() === db.getDate()
-  );
-}
-
-function formatDayLabel(value: string | Date): string {
-  const d = new Date(value);
-  const today = new Date();
-  const yesterday = new Date();
-  yesterday.setDate(today.getDate() - 1);
-  if (sameDay(d, today)) return "I dag";
-  if (sameDay(d, yesterday)) return "I går";
-  return dayFmt.format(d);
-}
 
 /** Dato-skille mellom meldinger fra ulike dager. */
 function DayDivider({ date }: { date: string | Date }) {
@@ -119,23 +92,66 @@ function DayDivider({ date }: { date: string | Date }) {
 
 /**
  * Flytende «hvor er jeg»-dato-pille øverst som oppdaterer seg mens man ruller —
- * drevet av shadcn `useMessageScrollerVisibility` (currentAnchorId).
+ * drevet av shadcn `useMessageScrollerVisibility` (currentAnchorId). Pilla er
+ * også en hoppmeny: klikk for å hoppe rett til en annen dag i samtalen, med
+ * gjeldende dag uthevet (à la «Transcript Outline»-eksempelet i docs).
  */
 function ScrollDateBar({ messages }: { messages: ChatMessage[] }) {
   const { currentAnchorId } = useMessageScrollerVisibility();
+  const { scrollToMessage } = useMessageScroller();
   const first = messages[0];
   const lastMsg = messages[messages.length - 1];
+  // Første melding per dag — «innholdsfortegnelsen» i hoppmenyen.
+  const days = useMemo(() => {
+    const out: { label: string; messageId: string }[] = [];
+    for (const m of messages) {
+      const label = formatDayLabel(m.createdAt);
+      if (!out.some((d) => d.label === label)) {
+        out.push({ label, messageId: m.id });
+      }
+    }
+    return out;
+  }, [messages]);
   // Vis bare når samtalen strekker seg over mer enn én dag — ellers er pilla
   // bare støy (alt er «I dag»).
   const spansDays =
     !!first && !!lastMsg && !sameDay(first.createdAt, lastMsg.createdAt);
   const anchor = messages.find((m) => m.id === currentAnchorId) ?? first;
   if (!spansDays || !anchor) return null;
+  const currentLabel = formatDayLabel(anchor.createdAt);
   return (
     <div className="pointer-events-none absolute inset-x-0 top-2 z-10 flex justify-center">
-      <span className="rounded-full bg-background/90 px-3 py-0.5 text-muted-foreground text-xs shadow-sm ring-1 ring-border backdrop-blur">
-        {formatDayLabel(anchor.createdAt)}
-      </span>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button
+            type="button"
+            aria-label="Hopp til dag"
+            className="pointer-events-auto flex items-center gap-1 rounded-full bg-background/90 px-3 py-0.5 text-muted-foreground text-xs shadow-sm ring-1 ring-border backdrop-blur transition-colors hover:text-foreground"
+          >
+            {currentLabel}
+            <Icon name="chevron-down" className="size-3" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="center" className="w-44">
+          {days.map((d) => (
+            <DropdownMenuItem
+              key={d.label}
+              onSelect={() =>
+                scrollToMessage(d.messageId, {
+                  align: "start",
+                  behavior: "smooth",
+                })
+              }
+              className={cn(
+                d.label === currentLabel && "font-semibold text-primary"
+              )}
+            >
+              <Icon name="calendar" className="size-3.5" />
+              {d.label}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }
@@ -162,12 +178,19 @@ export function CommunityClient({ currentUser }: { currentUser: CurrentUser }) {
   const conversationsQuery = useQuery({
     queryKey: ["chat", "conversations"],
     queryFn: () => trpc.chat.listConversations.query(),
-    refetchInterval: 10_000,
+    refetchInterval: 15_000,
   });
   const conversations = useMemo(
     () => conversationsQuery.data ?? [],
     [conversationsQuery.data]
   );
+
+  // Fellesskapets vegg (innlegg) — fast destinasjon øverst i lista.
+  const feedQuery = useQuery({
+    queryKey: ["chat", "feed"],
+    queryFn: () => trpc.chat.getFeed.query(),
+  });
+  const feedId = feedQuery.data?.id ?? null;
 
   // Dyplenke fra varsel-bjella: /on-poynt/fellesskap?c=<id> åpner den samtalen.
   const searchParams = useSearchParams();
@@ -176,13 +199,13 @@ export function CommunityClient({ currentUser }: { currentUser: CurrentUser }) {
     if (deepLinkId) setSelectedId(deepLinkId);
   }, [deepLinkId]);
 
-  // Auto-velg den første samtalen på desktop (lander i #generelt). På mobil lar
-  // vi brukeren velge selv, så vi ikke åpner detalj-arket umiddelbart.
+  // Auto-velg Innlegg (veggen) på desktop — det er «forsiden» av fellesskapet.
+  // På mobil lar vi brukeren velge selv, så vi ikke åpner detalj-arket rett vekk.
   useEffect(() => {
-    if (!isMobile && !selectedId && conversations.length > 0) {
-      setSelectedId(conversations[0]?.id ?? null);
+    if (!isMobile && !selectedId && feedId) {
+      setSelectedId(feedId);
     }
-  }, [isMobile, selectedId, conversations]);
+  }, [isMobile, selectedId, feedId]);
 
   const selected = conversations.find((c) => c.id === selectedId) ?? null;
 
@@ -196,12 +219,38 @@ export function CommunityClient({ currentUser }: { currentUser: CurrentUser }) {
     [membersQuery.data]
   );
 
+  // Smart polling: i stedet for å hente hele meldingslista hvert 3. sekund
+  // poller vi en billig «versjon» (getActivity) og henter meldinger på nytt
+  // KUN når noe faktisk har endret seg (ny/redigert/slettet melding, reaksjon).
+  const isFeedSelected = !!selectedId && selectedId === feedId;
+  const activityQuery = useQuery({
+    queryKey: ["chat", "activity", selectedId],
+    queryFn: () =>
+      trpc.chat.getActivity.query({ conversationId: selectedId as string }),
+    enabled: !!selectedId && !isFeedSelected,
+    refetchInterval: 3_000,
+  });
+  const activityVersion = activityQuery.data?.version;
+  const prevVersionRef = useRef<string | undefined>(undefined);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reager kun på versjons-endring
+  useEffect(() => {
+    if (
+      activityVersion &&
+      prevVersionRef.current &&
+      activityVersion !== prevVersionRef.current
+    ) {
+      queryClient.invalidateQueries({
+        queryKey: ["chat", "messages", selectedId],
+      });
+    }
+    prevVersionRef.current = activityVersion;
+  }, [activityVersion]);
+
   const messagesQuery = useQuery({
     queryKey: ["chat", "messages", selectedId],
     queryFn: () =>
       trpc.chat.getMessages.query({ conversationId: selectedId as string }),
-    enabled: !!selectedId,
-    refetchInterval: 3_000,
+    enabled: !!selectedId && !isFeedSelected,
   });
   // Den pollede «siste siden» pluss eldre meldinger lastet på forespørsel.
   const latest = useMemo(
@@ -344,7 +393,24 @@ export function CommunityClient({ currentUser }: { currentUser: CurrentUser }) {
           </span>
         </ListDetailListHeader>
 
-        <ListDetailListContent>
+        <ListDetailListContent className="scrollbar-brand">
+          {/* Innlegg (veggen) — fast destinasjon øverst, à la Facebook-gruppa. */}
+          {feedId && (
+            <ListDetailRow value={feedId} className="gap-0">
+              <span className="flex w-full items-center gap-3">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-accent-1 text-accent-1-foreground">
+                  <Icon name="newspaper" className="size-4" />
+                </span>
+                <span className="flex min-w-0 flex-1 flex-col">
+                  <span className="truncate font-medium">Innlegg</span>
+                  <span className="truncate text-muted-foreground text-xs">
+                    Fellesskapets vegg — del, spør og feir
+                  </span>
+                </span>
+              </span>
+            </ListDetailRow>
+          )}
+
           {conversationsQuery.isLoading ? (
             <div className="flex flex-col gap-2 p-1">
               {[0, 1, 2, 3].map((i) => (
@@ -384,7 +450,23 @@ export function CommunityClient({ currentUser }: { currentUser: CurrentUser }) {
           </ListDetailEmpty>
         }
       >
-        {selected && (
+        {isFeedSelected ? (
+          <>
+            <ListDetailDetailHeader>
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-accent-1 text-accent-1-foreground">
+                <Icon name="newspaper" className="size-4" />
+              </span>
+              <div className="flex min-w-0 flex-col">
+                <span className="truncate font-semibold text-sm">Innlegg</span>
+                <span className="truncate text-muted-foreground text-xs">
+                  Fellesskapets vegg — del, spør og feir
+                </span>
+              </div>
+            </ListDetailDetailHeader>
+            <FeedView currentUser={currentUser} memberNames={memberNames} />
+          </>
+        ) : null}
+        {!isFeedSelected && selected && (
           <>
             <ListDetailDetailHeader>
               <ConversationIcon conversation={selected} />
@@ -423,7 +505,7 @@ export function CommunityClient({ currentUser }: { currentUser: CurrentUser }) {
                     <ScrollDateBar messages={messages} />
                     <MessageScrollerViewport
                       preserveScrollOnPrepend
-                      className="p-4"
+                      className="scrollbar-brand p-4"
                     >
                       <MessageScrollerContent className="gap-0.5">
                         {messages.length === 0 ? (
@@ -478,6 +560,9 @@ export function CommunityClient({ currentUser }: { currentUser: CurrentUser }) {
                                 <MessageScrollerItem
                                   key={m.id}
                                   messageId={m.id}
+                                  // scrollAnchor kreves for at primitivets
+                                  // lese-posisjon (currentAnchorId) skal spore.
+                                  scrollAnchor
                                   className={startsRun ? "mt-3" : undefined}
                                 >
                                   {showDay && <DayDivider date={m.createdAt} />}
@@ -647,39 +732,6 @@ function preview(body: string | null): string {
   return body.length > 48 ? `${body.slice(0, 48)}…` : body;
 }
 
-function escapeRegExp(s: string): string {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-/**
- * Uthever `@Navn` for kjente medlemmer i meldingsteksten.
- */
-function renderBody(text: string, memberNames: string[]): ReactNode {
-  if (memberNames.length === 0) return text;
-  const names = [...memberNames].sort((a, b) => b.length - a.length);
-  const re = new RegExp(`@(${names.map(escapeRegExp).join("|")})`, "g");
-  const out: ReactNode[] = [];
-  let last = 0;
-  let match: RegExpExecArray | null = re.exec(text);
-  let key = 0;
-  while (match !== null) {
-    if (match.index > last) out.push(text.slice(last, match.index));
-    out.push(
-      <span
-        key={`m-${key}`}
-        className="rounded bg-primary/15 px-0.5 font-medium text-primary"
-      >
-        {match[0]}
-      </span>
-    );
-    key += 1;
-    last = match.index + match[0].length;
-    match = re.exec(text);
-  }
-  if (last < text.length) out.push(text.slice(last));
-  return out;
-}
-
 type MessageRowProps = {
   message: ChatMessage;
   isMe: boolean;
@@ -691,57 +743,6 @@ type MessageRowProps = {
   onEdit: (messageId: string, body: string) => void;
   onDelete: (messageId: string) => void;
 };
-
-function formatSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-// Faste, fargerike avatar-flater fra merkepaletten — gir liv og lar deg kjenne
-// igjen folk på farge. Deterministisk per bruker-id.
-const AVATAR_COLORS = [
-  "bg-saffron text-foreground",
-  "bg-salmon text-foreground",
-  "bg-mint text-foreground",
-  "bg-cream text-foreground",
-  "bg-yellow-green text-foreground",
-  "bg-bright-pink text-foreground",
-];
-function avatarColor(id: string): string {
-  let h = 0;
-  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
-  return AVATAR_COLORS[h % AVATAR_COLORS.length] as string;
-}
-
-/** Synlig reaksjons-pille (alltid i flyt, aldri klippet bort). */
-function ReactionChip({
-  emoji,
-  count,
-  mine,
-  onClick,
-}: {
-  emoji: string;
-  count: number;
-  mine: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs transition-colors",
-        mine
-          ? "border-primary/40 bg-primary/10 text-primary"
-          : "border-border bg-card text-foreground hover:bg-muted"
-      )}
-    >
-      <span className="text-sm leading-none">{emoji}</span>
-      <span className="font-semibold">{count}</span>
-    </button>
-  );
-}
 
 function MessageRow({
   message: m,
@@ -756,6 +757,7 @@ function MessageRow({
 }: MessageRowProps) {
   const [editing, setEditing] = useState(false);
   const [editText, setEditText] = useState(m.body ?? "");
+  const { scrollToMessage } = useMessageScroller();
 
   function saveEdit() {
     const trimmed = editText.trim();
@@ -766,7 +768,9 @@ function MessageRow({
 
   return (
     <Message align={isMe ? "end" : "start"}>
-      <MessageAvatar>
+      {/* bg-transparent: shadcn-wrapperen har bg-muted, som ellers vises som en
+          grå «spøkelses-sirkel» på plassholderne midt i en blokk. */}
+      <MessageAvatar className="bg-transparent">
         {/* Avatar vises ÉN gang per blokk — nederst (self-end), à la Messenger. */}
         {endsRun ? (
           <Avatar className="size-8 ring-2 ring-card">
@@ -786,27 +790,12 @@ function MessageRow({
       </MessageAvatar>
       <MessageContent>
         {startsRun && (
-          <MessageHeader className={isMe ? "flex-row-reverse" : ""}>
+          <MessageHeader className={cn("gap-2", isMe && "flex-row-reverse")}>
             <span className="font-semibold text-foreground">
               {isMe ? "Du" : m.author.name}
             </span>
             <span>{timeFmt.format(new Date(m.createdAt))}</span>
           </MessageHeader>
-        )}
-
-        {/* «Svarer på»-sitat over bobla. */}
-        {m.replyTo && (
-          <div
-            className={cn(
-              "flex max-w-full items-center gap-1.5 rounded-md border-primary/50 border-l-2 bg-muted/40 px-2 py-1 text-xs",
-              isMe ? "self-end" : "self-start"
-            )}
-          >
-            <span className="font-medium">{m.replyTo.authorName}</span>
-            <span className="truncate text-muted-foreground">
-              {m.replyTo.body ?? "📎 Vedlegg"}
-            </span>
-          </div>
         )}
 
         {editing ? (
@@ -848,45 +837,70 @@ function MessageRow({
             </div>
           </div>
         ) : (
-          m.body && (
+          (m.body || m.replyTo) && (
+            // Sitat + boble er ÉN visuell enhet: sitatet stikker opp bak bobla
+            // (negativ mb + bobla malt over), så det er tydelig hva svaret
+            // hører til. Klikk på sitatet hopper til originalmeldingen.
             <div
               className={cn(
-                "group/msg flex items-center gap-1",
-                isMe ? "flex-row-reverse" : "flex-row"
+                "flex w-fit max-w-full flex-col",
+                isMe ? "items-end self-end" : "items-start self-start"
               )}
             >
-              <Bubble
-                variant={isMe ? "default" : "muted"}
-                align={isMe ? "end" : "start"}
-              >
-                <BubbleContent>{renderBody(m.body, memberNames)}</BubbleContent>
-              </Bubble>
-              {/* Hover-verktøy: reaksjon + meny. */}
-              <div className="flex items-center gap-0.5 opacity-0 transition-opacity focus-within:opacity-100 group-hover/msg:opacity-100">
-                <ReactionPicker onPick={(emoji) => onReact(m.id, emoji)} />
-                <MessageActions
-                  isMe={isMe}
-                  onReply={() => onReply(m)}
-                  onEdit={() => {
-                    setEditText(m.body ?? "");
-                    setEditing(true);
+              {m.replyTo && (
+                <button
+                  type="button"
+                  title="Gå til meldingen"
+                  onClick={() => {
+                    if (m.replyTo) {
+                      scrollToMessage(m.replyTo.id, {
+                        align: "center",
+                        behavior: "smooth",
+                      });
+                    }
                   }}
-                  onDelete={() => onDelete(m.id)}
-                />
-              </div>
+                  className="-mb-2 flex max-w-72 items-baseline gap-1.5 rounded-xl border-primary/50 border-l-2 bg-secondary/60 px-2.5 pt-1.5 pb-3.5 text-left text-xs transition-colors hover:bg-secondary"
+                >
+                  <span className="shrink-0 font-medium">
+                    {m.replyTo.authorName}
+                  </span>
+                  <span className="truncate text-muted-foreground">
+                    {m.replyTo.body ?? "📎 Vedlegg"}
+                  </span>
+                </button>
+              )}
+              {m.body && (
+                <div
+                  className={cn(
+                    "group/msg relative flex items-center gap-1",
+                    isMe ? "flex-row-reverse" : "flex-row"
+                  )}
+                >
+                  <Bubble
+                    variant={isMe ? "default" : "muted"}
+                    align={isMe ? "end" : "start"}
+                  >
+                    <BubbleContent>
+                      {renderBody(m.body, memberNames, { onPrimary: isMe })}
+                    </BubbleContent>
+                  </Bubble>
+                  {/* Hover-verktøy: reaksjon + meny. */}
+                  <div className="flex items-center gap-0.5 opacity-0 transition-opacity focus-within:opacity-100 group-hover/msg:opacity-100">
+                    <ReactionPicker onPick={(emoji) => onReact(m.id, emoji)} />
+                    <MessageActions
+                      isMe={isMe}
+                      onReply={() => onReply(m)}
+                      onEdit={() => {
+                        setEditText(m.body ?? "");
+                        setEditing(true);
+                      }}
+                      onDelete={() => onDelete(m.id)}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           )
-        )}
-
-        {m.editedAt && !editing && (
-          <span
-            className={cn(
-              "px-1 text-[10px] text-muted-foreground",
-              isMe && "self-end"
-            )}
-          >
-            (redigert)
-          </span>
         )}
 
         {m.attachments.map((a) => {
@@ -942,12 +956,14 @@ function MessageRow({
           );
         })}
 
-        {/* Reaksjoner — alltid synlige, i flyt under bobla. */}
+        {/* Reaksjoner — tett inntil egen boble (2px) og med ekstra luft ned mot
+            neste melding, så det aldri er tvil om hvilken de hører til. Ingen
+            overlapp — det blødde inn i meldingen under. */}
         {m.reactions.length > 0 && (
           <div
             className={cn(
-              "flex flex-wrap gap-1 pt-0.5",
-              isMe ? "justify-end" : "justify-start"
+              "-mt-2 mb-0.5 flex flex-wrap gap-1",
+              isMe ? "justify-end pr-2" : "justify-start pl-2"
             )}
           >
             {m.reactions.map((r) => (
@@ -960,6 +976,12 @@ function MessageRow({
               />
             ))}
           </div>
+        )}
+
+        {m.editedAt && !editing && (
+          <MessageFooter>
+            Redigert kl. {timeFmt.format(new Date(m.editedAt))}
+          </MessageFooter>
         )}
       </MessageContent>
     </Message>

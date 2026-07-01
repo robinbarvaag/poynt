@@ -127,6 +127,20 @@
       "when": 1782857676588,
       "tag": "0017_green_king_bedlam",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1782937194729,
+      "tag": "0018_lowly_blizzard",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1782937405391,
+      "tag": "0019_strong_nighthawk",
+      "breakpoints": true
     }
   ]
 }

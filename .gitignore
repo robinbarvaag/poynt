@@ -105,7 +105,8 @@ dist
 .bun/
 bun.lockb
 
-media
+# Payload local media uploads (scoped so it doesn't match source dirs like admin/components/media)
+/apps/web/public/media/
 
 screenshots
 

@@ -18,9 +18,11 @@ import {
   deleteMessageSchema,
   deletePushSubscriptionSchema,
   editMessageSchema,
+  getCommentsSchema,
   listMembersSchema,
   listMessagesSchema,
   listNotificationsSchema,
+  listPostsSchema,
   markReadSchema,
   renameConversationSchema,
   savePushSubscriptionSchema,
@@ -79,6 +81,66 @@ function aggregateReactions(
   return Array.from(map.values());
 }
 
+type MessageWithRelations = typeof plannerMessage.$inferSelect & {
+  author: { id: string; name: string; image: string | null };
+  attachments: (typeof plannerMessageAttachment.$inferSelect)[];
+  reactions: { emoji: string; userId: string }[];
+};
+
+/** Felles klient-form for en melding/innlegg/kommentar. */
+function mapMessage(m: MessageWithRelations, userId: string) {
+  return {
+    id: m.id,
+    body: m.body,
+    createdAt: m.createdAt,
+    editedAt: m.editedAt,
+    author: publicUser(m.author),
+    attachments: m.attachments.map((a) => ({
+      id: a.id,
+      url: a.url,
+      fileName: a.fileName,
+      mimeType: a.mimeType,
+      sizeBytes: a.sizeBytes,
+      width: a.width,
+      height: a.height,
+    })),
+    reactions: aggregateReactions(m.reactions, userId),
+  };
+}
+
+/**
+ * Fellesskapets «vegg» — én global feed-samtale. Opprettes ved første bruk
+ * (slug-unik, så parallelle kall kolliderer trygt).
+ */
+async function ensureFeedConversation() {
+  const existing = await db.query.plannerConversation.findFirst({
+    where: eq(plannerConversation.type, "feed"),
+  });
+  if (existing) return existing;
+
+  await db
+    .insert(plannerConversation)
+    .values({
+      id: nanoid(),
+      type: "feed",
+      name: "Innlegg",
+      slug: "innlegg",
+      description: "Fellesskapets vegg — del, spør og feir.",
+    })
+    .onConflictDoNothing({ target: plannerConversation.slug });
+
+  const created = await db.query.plannerConversation.findFirst({
+    where: eq(plannerConversation.type, "feed"),
+  });
+  if (!created) {
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Kunne ikke opprette veggen",
+    });
+  }
+  return created;
+}
+
 /**
  * Sjekk at brukeren har tilgang til samtalen og returner samtalen.
  * - Kanaler: åpne for alle innloggede medlemmer (app-laget krever aktivt
@@ -97,7 +159,8 @@ async function getAccessibleConversation(
     throw new TRPCError({ code: "NOT_FOUND", message: "Samtalen finnes ikke" });
   }
 
-  if (conversation.type === "channel") {
+  // Kanaler og feeden («veggen») er åpne for alle aktive medlemmer.
+  if (conversation.type === "channel" || conversation.type === "feed") {
     if (conversation.isArchived) {
       throw new TRPCError({
         code: "FORBIDDEN",
@@ -410,12 +473,14 @@ export const chatRouter = router({
       // Avsenderen har «lest» sin egen melding.
       await markConversationRead(userId, input.conversationId);
 
-      // Varsler: omtaler (alle samtaletyper) + ny DM til motparten.
+      // Varsler: omtaler (alle typer), DM til motparten, kommentar til
+      // innleggs-forfatteren.
       await createMessageNotifications({
         authorId: userId,
         conversation,
         messageId,
         mentionUserIds: input.mentionUserIds ?? [],
+        parentMessageId,
       });
 
       const created = await db.query.plannerMessage.findFirst({
@@ -939,6 +1004,142 @@ export const chatRouter = router({
   }),
 
   /**
+   * Lettvekts «versjon» av en samtale for smart polling: klienten poller denne
+   * (billig) og henter meldinger på nytt KUN når versjonen endrer seg.
+   * Fanger nye/redigerte/slettede meldinger og reaksjoner (antall).
+   */
+  getActivity: protectedProcedure
+    .input(markReadSchema)
+    .query(async ({ ctx, input }) => {
+      await getAccessibleConversation(ctx.userId, input.conversationId);
+
+      const [msg] = await db
+        .select({
+          ts: sql<
+            string | null
+          >`greatest(max(${plannerMessage.createdAt}), max(${plannerMessage.editedAt}), max(${plannerMessage.deletedAt}))`,
+          count: sql<number>`cast(count(*) as int)`,
+        })
+        .from(plannerMessage)
+        .where(eq(plannerMessage.conversationId, input.conversationId));
+
+      const [react] = await db
+        .select({ count: sql<number>`cast(count(*) as int)` })
+        .from(plannerMessageReaction)
+        .innerJoin(
+          plannerMessage,
+          eq(plannerMessageReaction.messageId, plannerMessage.id)
+        )
+        .where(eq(plannerMessage.conversationId, input.conversationId));
+
+      return {
+        version: `${msg?.ts ?? ""}:${msg?.count ?? 0}:${react?.count ?? 0}`,
+      };
+    }),
+
+  /**
+   * Fellesskapets «vegg» (feed-samtalen) — opprettes ved første kall.
+   */
+  getFeed: protectedProcedure.query(async () => {
+    const feed = await ensureFeedConversation();
+    return {
+      id: feed.id,
+      name: feed.name,
+      description: feed.description,
+    };
+  }),
+
+  /**
+   * Innlegg på veggen: toppnivå-meldinger (nyeste først) med kommentar-antall.
+   */
+  listPosts: protectedProcedure
+    .input(listPostsSchema)
+    .query(async ({ ctx, input }) => {
+      const feed = await ensureFeedConversation();
+      const limit = input?.limit ?? 20;
+
+      const where = [
+        eq(plannerMessage.conversationId, feed.id),
+        isNull(plannerMessage.parentMessageId),
+        isNull(plannerMessage.deletedAt),
+      ];
+      if (input?.before) {
+        where.push(lt(plannerMessage.createdAt, new Date(input.before)));
+      }
+
+      const rows = await db.query.plannerMessage.findMany({
+        where: and(...where),
+        with: { author: true, attachments: true, reactions: true },
+        orderBy: desc(plannerMessage.createdAt),
+        limit,
+      });
+
+      // Kommentar-antall i én batch.
+      const postIds = rows.map((r) => r.id);
+      const counts = postIds.length
+        ? await db
+            .select({
+              parentId: plannerMessage.parentMessageId,
+              count: sql<number>`cast(count(*) as int)`,
+            })
+            .from(plannerMessage)
+            .where(
+              and(
+                inArray(plannerMessage.parentMessageId, postIds),
+                isNull(plannerMessage.deletedAt)
+              )
+            )
+            .groupBy(plannerMessage.parentMessageId)
+        : [];
+      const countMap = new Map(
+        counts.map((c) => [c.parentId, Number(c.count) || 0])
+      );
+
+      const hasMore = rows.length === limit;
+      return {
+        feedId: feed.id,
+        posts: rows.map((m) => ({
+          ...mapMessage(m, ctx.userId),
+          commentCount: countMap.get(m.id) ?? 0,
+        })),
+        nextCursor: hasMore
+          ? (rows[rows.length - 1]?.createdAt.toISOString() ?? null)
+          : null,
+      };
+    }),
+
+  /**
+   * Kommentarene til et innlegg (eldste først).
+   */
+  getComments: protectedProcedure
+    .input(getCommentsSchema)
+    .query(async ({ ctx, input }) => {
+      const post = await db.query.plannerMessage.findFirst({
+        where: eq(plannerMessage.id, input.postId),
+        columns: { id: true, conversationId: true },
+      });
+      if (!post) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Innlegget finnes ikke",
+        });
+      }
+      await getAccessibleConversation(ctx.userId, post.conversationId);
+
+      const rows = await db.query.plannerMessage.findMany({
+        where: and(
+          eq(plannerMessage.parentMessageId, input.postId),
+          isNull(plannerMessage.deletedAt)
+        ),
+        with: { author: true, attachments: true, reactions: true },
+        orderBy: asc(plannerMessage.createdAt),
+        limit: 200,
+      });
+
+      return rows.map((m) => mapMessage(m, ctx.userId));
+    }),
+
+  /**
    * Lagre (eller oppdatere) et Web Push-abonnement for denne brukeren.
    */
   savePushSubscription: protectedProcedure
@@ -995,18 +1196,21 @@ async function createMessageNotifications({
   conversation,
   messageId,
   mentionUserIds,
+  parentMessageId,
 }: {
   authorId: string;
   conversation: ConversationRow;
   messageId: string;
   mentionUserIds: string[];
+  parentMessageId?: string | null;
 }) {
-  // type per mottaker — «mention» vinner over «dm».
-  const recipients = new Map<string, "mention" | "dm">();
+  // type per mottaker — «mention» vinner over «dm»/«comment».
+  const recipients = new Map<string, "mention" | "dm" | "comment">();
 
-  // Gyldige omtaler: i kanaler kan alle nevnes; i grupper/DM kun medlemmer.
+  // Gyldige omtaler: i kanaler/feeden kan alle nevnes; i grupper/DM kun medlemmer.
   let validMentions = mentionUserIds.filter((id) => id !== authorId);
-  if (conversation.type !== "channel" && validMentions.length) {
+  const openTypes = ["channel", "feed"];
+  if (!openTypes.includes(conversation.type) && validMentions.length) {
     const members = await db.query.plannerConversationMember.findMany({
       where: and(
         eq(plannerConversationMember.conversationId, conversation.id),
@@ -1034,6 +1238,21 @@ async function createMessageNotifications({
       );
     for (const o of others) {
       if (!recipients.has(o.userId)) recipients.set(o.userId, "dm");
+    }
+  }
+
+  // Feed: en kommentar varsler innleggs-forfatteren.
+  if (conversation.type === "feed" && parentMessageId) {
+    const parent = await db.query.plannerMessage.findFirst({
+      where: eq(plannerMessage.id, parentMessageId),
+      columns: { authorId: true },
+    });
+    if (
+      parent &&
+      parent.authorId !== authorId &&
+      !recipients.has(parent.authorId)
+    ) {
+      recipients.set(parent.authorId, "comment");
     }
   }
 
@@ -1067,9 +1286,18 @@ async function createMessageNotifications({
   await Promise.all(
     Array.from(recipients.entries()).map(([userId, type]) =>
       sendPushToUser(userId, {
-        title: type === "mention" ? `${actorName} nevnte deg` : actorName,
+        title:
+          type === "mention"
+            ? `${actorName} nevnte deg`
+            : type === "comment"
+              ? `${actorName} kommenterte innlegget ditt`
+              : actorName,
         body:
-          type === "mention" ? `Du ble nevnt${where}` : "Sendte deg en melding",
+          type === "mention"
+            ? `Du ble nevnt${where}`
+            : type === "comment"
+              ? "Se svaret i fellesskapet"
+              : "Sendte deg en melding",
         url,
       })
     )

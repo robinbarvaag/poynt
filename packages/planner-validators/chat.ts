@@ -100,7 +100,7 @@ export const listMembersSchema = z
   .optional();
 export type ListMembersInput = z.infer<typeof listMembersSchema>;
 
-export const notificationTypes = ["mention", "dm"] as const;
+export const notificationTypes = ["mention", "dm", "comment"] as const;
 export type NotificationType = (typeof notificationTypes)[number];
 
 /** Emoji-settet plukkeren tilbyr (holdt lite og bevisst). */
@@ -173,3 +173,17 @@ export const listMessagesSchema = z.object({
   limit: z.number().int().min(1).max(100).optional(),
 });
 export type ListMessagesInput = z.infer<typeof listMessagesSchema>;
+
+// Innlegg («veggen») — toppnivå-meldinger i feed-samtalen.
+export const listPostsSchema = z
+  .object({
+    before: z.string().optional(),
+    limit: z.number().int().min(1).max(50).optional(),
+  })
+  .optional();
+export type ListPostsInput = z.infer<typeof listPostsSchema>;
+
+export const getCommentsSchema = z.object({
+  postId: z.string().min(1),
+});
+export type GetCommentsInput = z.infer<typeof getCommentsSchema>;

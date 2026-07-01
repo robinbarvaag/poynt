@@ -197,6 +197,57 @@ async function run() {
       "unreadCount OK med lesestatus"
     );
 
+    // ---- Smart polling: getActivity-versjonen endrer seg ved aktivitet ----
+    console.log("\n[11] getActivity:");
+    const v1 = await A.chat.getActivity({ conversationId: channelId });
+    assert(!!v1.version, "getActivity gir en versjon");
+    await A.chat.sendMessage({ conversationId: channelId, body: "ping" });
+    const v2 = await A.chat.getActivity({ conversationId: channelId });
+    assert(v2.version !== v1.version, "versjonen endres ved ny melding");
+
+    // ---- Feed (innlegg + kommentarer + varsel) ----
+    console.log("\n[12] Feed:");
+    const feed = await A.chat.getFeed();
+    assert(!!feed.id, "getFeed gir feed-samtalen");
+
+    const post = await A.chat.sendMessage({
+      conversationId: feed.id,
+      body: "Testinnlegg på veggen",
+    });
+    const postsPage = await B.chat.listPosts();
+    assert(
+      postsPage.posts.some((p) => p.id === post.id),
+      "innlegget vises i listPosts"
+    );
+
+    const comment = await B.chat.sendMessage({
+      conversationId: feed.id,
+      body: "Fin kommentar!",
+      parentMessageId: post.id,
+    });
+    const comments = await A.chat.getComments({ postId: post.id });
+    assert(
+      comments.some((c) => c.id === comment.id),
+      "kommentaren vises i getComments"
+    );
+    const postsPage2 = await A.chat.listPosts();
+    assert(
+      postsPage2.posts.find((p) => p.id === post.id)?.commentCount === 1,
+      "commentCount teller kommentaren"
+    );
+    const aNotifs = await A.chat.listNotifications();
+    assert(
+      aNotifs.some((n) => n.type === "comment" && n.actor?.id === userBId),
+      "A fikk comment-varsel fra B"
+    );
+    // Kommentaren skal IKKE dukke opp som toppnivå-innlegg.
+    assert(
+      !postsPage2.posts.some((p) => p.id === comment.id),
+      "kommentar er ikke et innlegg"
+    );
+    // Rydd testinnlegget (kaskade tar kommentaren).
+    await A.chat.deleteMessage({ messageId: post.id });
+
     console.log("\n✅ ALLE TESTER PASSERTE\n");
   } catch (err) {
     console.error("\n❌ TEST FEILET:\n", err);

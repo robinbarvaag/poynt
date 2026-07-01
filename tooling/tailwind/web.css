@@ -364,13 +364,22 @@
   scrollbar-gutter: stable;
 }
 
+/* Tynn, merkevarefarget scrollbar (primær-tommel på gjennomsiktig spor) for
+   chat/feed/lister. Bruker standard-egenskapene, som virker i alle moderne
+   nettlesere — webkit-pseudoelementene overstyres av disse i Chromium. */
+@utility scrollbar-brand {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklab, var(--color-primary) 35%, transparent)
+    transparent;
+  &:hover {
+    scrollbar-color: color-mix(in oklab, var(--color-primary) 55%, transparent)
+      transparent;
+  }
+}
+
 /* Mykt uttonende kant nederst/på sidene av rullbare lister. */
 @utility scroll-fade-b {
-  mask-image: linear-gradient(
-    to bottom,
-    black calc(100% - 1.5rem),
-    transparent
-  );
+  mask-image: linear-gradient(to bottom, black calc(100% - 1.5rem), transparent);
 }
 
 @utility scroll-fade-x {

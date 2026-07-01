@@ -27,7 +27,9 @@ import { plannerUser } from "./auth";
 
 export const plannerConversationTypeEnum = plannerSchema.enum(
   "planner_conversation_type",
-  ["channel", "group", "dm"]
+  // `feed` = fellesskapets «vegg»: toppnivå-meldinger er innlegg, svar er
+  // kommentarer. Deler alt meldings-maskineri med chatten.
+  ["channel", "group", "dm", "feed"]
 );
 
 export const plannerConversationMemberRoleEnum = plannerSchema.enum(
@@ -230,7 +232,7 @@ export const plannerPushSubscription = plannerSchema.table(
 
 export const plannerNotificationTypeEnum = plannerSchema.enum(
   "planner_notification_type",
-  ["mention", "dm"]
+  ["mention", "dm", "comment"]
 );
 
 /**

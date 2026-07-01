@@ -8,6 +8,7 @@ import {
   AttachmentActions,
   AttachmentContent,
   AttachmentDescription,
+  AttachmentGroup,
   AttachmentMedia,
   AttachmentTitle,
   Avatar,
@@ -21,12 +22,16 @@ import {
 import { Icon } from "@poynt/ui/icons";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useRef, useState } from "react";
+import { formatSize } from "./helpers";
 
 type Pending = {
   id: string;
   fileName: string;
+  sizeBytes: number;
   data?: MessageAttachmentInput;
   uploading: boolean;
+  /** Lokal forhåndsvisning (objectURL) for bilder. */
+  previewUrl?: string;
 };
 
 type MentionState = { atIndex: number; query: string; caret: number };
@@ -52,6 +57,7 @@ export function Composer({
   placeholder = "Skriv en melding …",
   replyTo,
   onCancelReply,
+  frameless = false,
 }: {
   onSend: (input: {
     body: string;
@@ -62,6 +68,8 @@ export function Composer({
   placeholder?: string;
   replyTo?: { authorName: string; body: string | null } | null;
   onCancelReply?: () => void;
+  /** Uten border/bakgrunn — for bruk inni et kort (f.eks. nytt innlegg). */
+  frameless?: boolean;
 }) {
   const [body, setBody] = useState("");
   const [pending, setPending] = useState<Pending[]>([]);
@@ -122,7 +130,19 @@ export function Composer({
       const id = `${file.name}-${file.size}-${pending.length}-${Math.round(
         file.lastModified
       )}`;
-      setPending((p) => [...p, { id, fileName: file.name, uploading: true }]);
+      const previewUrl = file.type.startsWith("image/")
+        ? URL.createObjectURL(file)
+        : undefined;
+      setPending((p) => [
+        ...p,
+        {
+          id,
+          fileName: file.name,
+          sizeBytes: file.size,
+          uploading: true,
+          previewUrl,
+        },
+      ]);
 
       try {
         const form = new FormData();
@@ -174,6 +194,9 @@ export function Composer({
     setSending(true);
     try {
       await onSend({ body: body.trim(), attachments, mentionUserIds });
+      for (const p of pending) {
+        if (p.previewUrl) URL.revokeObjectURL(p.previewUrl);
+      }
       setBody("");
       setPending([]);
       mentionsRef.current = {};
@@ -186,7 +209,12 @@ export function Composer({
   }
 
   return (
-    <div className="relative shrink-0 border-t bg-card p-3">
+    <div
+      className={cn(
+        "relative shrink-0 p-3",
+        frameless ? "bg-transparent" : "border-t bg-card"
+      )}
+    >
       {replyTo && (
         <div className="mb-2 flex items-center gap-2 rounded-lg border-primary border-l-2 bg-muted/40 py-1.5 pr-1 pl-2.5 text-sm">
           <Icon name="message-square" className="size-3.5 text-primary" />
@@ -237,16 +265,26 @@ export function Composer({
       )}
 
       {pending.length > 0 && (
-        <div className="mb-2 flex flex-wrap gap-2">
+        <AttachmentGroup className="mb-2">
           {pending.map((p) => (
+            // Bilder: stående kort med stor forhåndsvisning (shadcn-stil).
+            // Andre filer: liggende brikke med ikon. Shimmer mens de laster opp.
             <Attachment
               key={p.id}
-              size="sm"
+              size={p.previewUrl ? "default" : "sm"}
               state={p.uploading ? "uploading" : "done"}
-              className="w-56"
+              orientation={p.previewUrl ? "vertical" : "horizontal"}
+              className={p.previewUrl ? undefined : "w-56"}
             >
-              <AttachmentMedia variant="icon">
-                {p.uploading ? (
+              <AttachmentMedia
+                variant={p.previewUrl ? "image" : "icon"}
+                className={
+                  p.previewUrl ? undefined : "bg-primary/10 text-primary"
+                }
+              >
+                {p.previewUrl ? (
+                  <img src={p.previewUrl} alt={p.fileName} />
+                ) : p.uploading ? (
                   <Icon name="loader" className="animate-spin" />
                 ) : (
                   <Icon name="file-text" />
@@ -255,23 +293,29 @@ export function Composer({
               <AttachmentContent>
                 <AttachmentTitle>{p.fileName}</AttachmentTitle>
                 <AttachmentDescription>
-                  {p.uploading ? "Laster opp …" : "Klar"}
+                  {p.uploading ? "Laster opp …" : formatSize(p.sizeBytes)}
                 </AttachmentDescription>
               </AttachmentContent>
               <AttachmentActions>
                 <AttachmentAction
                   type="button"
                   aria-label="Fjern vedlegg"
-                  onClick={() =>
-                    setPending((items) => items.filter((i) => i.id !== p.id))
+                  className={
+                    p.previewUrl
+                      ? "bg-background/80 shadow-sm backdrop-blur-sm hover:bg-background"
+                      : undefined
                   }
+                  onClick={() => {
+                    if (p.previewUrl) URL.revokeObjectURL(p.previewUrl);
+                    setPending((items) => items.filter((i) => i.id !== p.id));
+                  }}
                 >
                   <Icon name="x" />
                 </AttachmentAction>
               </AttachmentActions>
             </Attachment>
           ))}
-        </div>
+        </AttachmentGroup>
       )}
 
       <div className="flex items-end gap-1 rounded-2xl border bg-background p-1.5 transition-all focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/15">
@@ -282,16 +326,17 @@ export function Composer({
           hidden
           onChange={(e) => handleFiles(e.target.files)}
         />
+        {/* size-9 = samme høyde som tekstfeltets min-h → flukter i items-end-raden. */}
         <Button
           type="button"
-          size="icon-sm"
+          size="icon"
           variant="ghost"
           className="shrink-0 rounded-full"
           aria-label="Legg ved fil"
           disabled={disabled || sending}
           onClick={() => fileRef.current?.click()}
         >
-          <Icon name="upload" className="size-4" />
+          <Icon name="paperclip" className="size-4" />
         </Button>
         <Textarea
           ref={textareaRef}
@@ -344,7 +389,7 @@ export function Composer({
         />
         <Button
           type="button"
-          size="icon-sm"
+          size="icon"
           aria-label="Send melding"
           className="shrink-0 rounded-full transition-transform hover:scale-105"
           disabled={!hasContent || !ready || sending || disabled}

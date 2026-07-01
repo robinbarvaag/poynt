@@ -53,6 +53,9 @@ function notificationText(n: Notification): string {
       : "";
     return `${who} nevnte deg${where}`;
   }
+  if (n.type === "comment") {
+    return `${who} kommenterte innlegget ditt`;
+  }
   return `${who} sendte deg en melding`;
 }
 

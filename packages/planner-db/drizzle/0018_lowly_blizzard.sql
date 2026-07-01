@@ -1,0 +1,1 @@
+ALTER TYPE "planner"."planner_conversation_type" ADD VALUE 'feed';

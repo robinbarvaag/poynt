@@ -1,0 +1,1 @@
+ALTER TYPE "planner"."planner_notification_type" ADD VALUE 'comment';
