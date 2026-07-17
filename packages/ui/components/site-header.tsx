@@ -119,13 +119,18 @@ export function SiteHeader({
     >
       <nav
         className={cn(
-          "pointer-events-auto mx-auto max-w-6xl rounded-full transition-all duration-300",
+          // Full bredde-bar på mobil; kompakt, sentrert «øy» som hugger
+          // innholdet fra md og opp — ligger da ikke lenger på linje med
+          // innholdskolonnen, men flyter som et eget element.
+          "pointer-events-auto mx-auto w-full rounded-full transition-all duration-300 md:w-fit",
           scrolled
             ? "bg-background/85 shadow-foreground/5 shadow-lg ring-1 ring-foreground/10 backdrop-blur-xl"
             : "bg-background/55 ring-1 ring-foreground/5 backdrop-blur-md"
         )}
       >
-        <div className="flex h-16 items-center justify-between gap-2 pr-3.5 pl-5 sm:pl-6">
+        <div className="flex h-16 items-center justify-between gap-2 pr-3.5 pl-5 sm:pl-6 md:gap-8 md:pr-3">
+          {/* Merk: på md+ hugger pillen innholdet, så gap-8 gir luft mellom
+              logo / nav / handlinger i stedet for at justify-between strekker. */}
           <Link
             href={homeHref}
             className="flex shrink-0 items-center gap-2 font-bold font-heading text-foreground text-xl tracking-tight"
