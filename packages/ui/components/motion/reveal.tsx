@@ -30,7 +30,7 @@ export function Reveal({
     <motion.div
       initial={reduce ? { opacity: 0 } : { opacity: 0, y: rise }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once, amount: 0.2 }}
+      viewport={{ once, amount: "some", margin: "0px 0px -10% 0px" }}
       transition={{ duration: duration.base, ease: easeSoft, delay }}
       {...props}
     >
@@ -56,7 +56,7 @@ export function Stagger({
     <motion.div
       initial="hidden"
       whileInView="visible"
-      viewport={{ once, amount: 0.2 }}
+      viewport={{ once, amount: "some", margin: "0px 0px -10% 0px" }}
       variants={{ visible: { transition: { staggerChildren: step } } }}
       {...props}
     >

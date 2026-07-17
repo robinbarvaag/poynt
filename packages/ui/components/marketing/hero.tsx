@@ -3,14 +3,8 @@ import { Icon, type IconName } from "../../icons";
 import { cn } from "../../lib/utils";
 import { Badge } from "../badge";
 import { Button } from "../button";
-import {
-  CountUp,
-  DriftingBlob,
-  Parallax,
-  Reveal,
-  Stagger,
-  StaggerItem,
-} from "../motion";
+import { GridPattern } from "../decorative";
+import { CountUp, Reveal, Stagger, StaggerItem } from "../motion";
 import { Heading, Text } from "../typography";
 
 export interface HeroStat {
@@ -105,11 +99,9 @@ export function Hero({
     <section
       className={cn("relative w-full overflow-hidden bg-secondary", className)}
     >
-      {/* Drivende, pustende dekor */}
-      <DriftingBlob className="-left-24 top-4 size-96 bg-primary/25" />
-      <Parallax amount={40} className="-right-16 absolute top-24 z-0">
-        <div className="size-72 rounded-[60%_40%_55%_45%/50%_60%_40%_50%] bg-accent/40 blur-2xl" />
-      </Parallax>
+      {/* Subtil rutenett-tekstur — roligere og mer «laget» enn myke
+          gradient-blobber. Toner ut mot kantene. */}
+      <GridPattern variant="grid" size={40} fade className="text-foreground/6" />
 
       <div
         className={cn(
@@ -216,11 +208,6 @@ export function Hero({
             delay={0.2}
             className="relative mx-auto hidden w-full max-w-md lg:block"
           >
-            {/* Myk, animert blob bak bildet — driver sakte rundt formen */}
-            <div
-              aria-hidden="true"
-              className="-inset-5 absolute animate-blob rounded-[60%_40%_42%_58%/55%_45%_55%_45%] bg-accent/25 motion-reduce:animate-none"
-            />
             <div className="relative aspect-4/5 w-full overflow-hidden rounded-[60%_40%_42%_58%/55%_45%_55%_45%] shadow-xl ring-1 ring-foreground/10">
               {media}
               {duotone && (
@@ -228,12 +215,12 @@ export function Hero({
                   {/* Duotone-tint i merkefarge */}
                   <div
                     aria-hidden="true"
-                    className="absolute inset-0 bg-primary/45 mix-blend-multiply"
+                    className="absolute inset-0 bg-primary/30 mix-blend-multiply"
                   />
                   {/* Mykt fargedybde-overlegg (teal → coral) */}
                   <div
                     aria-hidden="true"
-                    className="absolute inset-0 bg-linear-to-br from-primary/30 via-transparent to-accent/50 mix-blend-screen"
+                    className="absolute inset-0 bg-linear-to-br from-primary/20 via-transparent to-accent/35 mix-blend-screen"
                   />
                 </>
               )}
