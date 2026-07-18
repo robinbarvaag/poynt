@@ -144,25 +144,24 @@ export function SiteHeader({
   return (
     <header
       className={cn(
-        "pointer-events-none fixed top-0 z-50 w-full px-4 pt-4 transition-[transform,opacity] duration-300 ease-out sm:px-6 lg:px-8",
+        "pointer-events-none fixed top-0 z-50 w-full transition-[transform,opacity] duration-300 ease-out",
         isHidden && "-translate-y-full opacity-0",
         className
       )}
     >
       <nav
         className={cn(
-          // Full bredde-bar på mobil; kompakt, sentrert «øy» som hugger
-          // innholdet fra md og opp — ligger da ikke lenger på linje med
-          // innholdskolonnen, men flyter som et eget element.
-          "pointer-events-auto mx-auto w-full rounded-full transition-all duration-300 md:w-fit",
+          // Full-bredde bar limt til toppen. Gjennomsiktig over heroen; blir
+          // en tett glass-flate med bunnkant når man scroller.
+          "pointer-events-auto w-full border-b transition-colors duration-300",
           scrolled
-            ? "bg-background/85 shadow-foreground/5 shadow-lg ring-1 ring-foreground/10 backdrop-blur-xl"
-            : "bg-background/55 ring-1 ring-foreground/5 backdrop-blur-md"
+            ? "border-foreground/10 bg-background/85 shadow-foreground/5 shadow-sm backdrop-blur-xl"
+            : "border-transparent bg-background/0"
         )}
       >
-        <div className="flex h-16 items-center justify-between gap-2 pr-3.5 pl-5 sm:pl-6 md:gap-8 md:pr-3">
-          {/* Merk: på md+ hugger pillen innholdet, så gap-8 gir luft mellom
-              logo / nav / handlinger i stedet for at justify-between strekker. */}
+        {/* Innholdet ligger på samme max-w-6xl-grid som resten av siden, med
+            vanlige side-gutters — konvensjonell full-bredde topmeny. */}
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-4 sm:px-6 lg:px-8">
           <Link
             href={homeHref}
             className="flex shrink-0 items-center gap-2 font-bold font-heading text-foreground text-xl tracking-tight"
@@ -257,7 +256,7 @@ export function SiteHeader({
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
         <SheetContent
           side="right"
-          className="pointer-events-auto flex w-full max-w-none flex-col gap-0 p-0"
+          className="pointer-events-auto flex w-[88vw] max-w-sm flex-col gap-0 p-0"
         >
           <SheetHeader className="border-foreground/5 border-b px-6 pt-[max(1.25rem,env(safe-area-inset-top))] pb-5">
             <SheetTitle className="text-left font-bold font-heading text-xl tracking-tight">
