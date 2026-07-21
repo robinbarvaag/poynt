@@ -54,10 +54,10 @@ export function LogoCloud({
                   src={logo.src}
                   alt={logo.name}
                   className={cn(
-                    "max-h-full w-auto max-w-[150px] object-contain transition-all duration-300",
+                    "max-h-full w-auto max-w-[120px] object-contain transition-all duration-300",
                     contrast
                       ? "opacity-80 hover:opacity-100"
-                      : "opacity-50 grayscale hover:opacity-100 hover:grayscale-0"
+                      : "opacity-60 grayscale hover:opacity-100 hover:grayscale-0"
                   )}
                 />
               ) : (

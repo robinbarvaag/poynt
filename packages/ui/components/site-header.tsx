@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@poynt/ui";
+import { motion, useReducedMotion } from "framer-motion";
 import { ChevronDown, Menu } from "lucide-react";
 import * as React from "react";
 import { Button } from "./button";
@@ -82,18 +83,48 @@ export function SiteHeader({
   className,
 }: SiteHeaderProps) {
   const Link = linkComponent ?? DefaultLink;
+  const reduce = useReducedMotion();
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [openDropdown, setOpenDropdown] = React.useState<number | null>(null);
   const [scrolled, setScrolled] = React.useState(false);
+  const [hidden, setHidden] = React.useState(false);
+  const lastY = React.useRef(0);
 
   React.useEffect(() => {
     function handleScroll() {
-      setScrolled(window.scrollY > 16);
+      const y = window.scrollY;
+      setScrolled(y > 16);
+      // Skjul headeren ved scroll nedover (forbi 120px), vis igjen ved scroll
+      // opp — gir mer ro og plass til innholdet mens man leser.
+      if (y > lastY.current && y > 120) {
+        setHidden(true);
+      } else if (y < lastY.current) {
+        setHidden(false);
+      }
+      lastY.current = y;
     }
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Vis alltid headeren når mobil-menyen er åpen.
+  const isHidden = hidden && !mobileOpen;
+
+  const listVariants = {
+    hidden: {},
+    visible: { transition: { staggerChildren: 0.05, delayChildren: 0.12 } },
+  };
+  const itemVariants = reduce
+    ? { hidden: { opacity: 0 }, visible: { opacity: 1 } }
+    : {
+        hidden: { opacity: 0, x: 20 },
+        visible: {
+          opacity: 1,
+          x: 0,
+          transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as const },
+        },
+      };
 
   // Lukk mobil-draweren når ruten endrer seg. `pathname` er en bevisst trigger.
   // biome-ignore lint/correctness/useExhaustiveDependencies: pathname brukes som trigger for å lukke draweren ved navigasjon, ikke i selve effekten
@@ -113,19 +144,24 @@ export function SiteHeader({
   return (
     <header
       className={cn(
-        "pointer-events-none fixed top-0 z-50 w-full px-4 pt-4 sm:px-6 lg:px-8",
+        "pointer-events-none fixed top-0 z-50 w-full transition-[transform,opacity] duration-300 ease-out",
+        isHidden && "-translate-y-full opacity-0",
         className
       )}
     >
       <nav
         className={cn(
-          "pointer-events-auto mx-auto max-w-6xl rounded-full transition-all duration-300",
+          // Full-bredde bar limt til toppen. Gjennomsiktig over heroen; blir
+          // en tett glass-flate med bunnkant når man scroller.
+          "pointer-events-auto w-full border-b transition-colors duration-300",
           scrolled
-            ? "bg-background/85 shadow-foreground/5 shadow-lg ring-1 ring-foreground/10 backdrop-blur-xl"
-            : "bg-background/55 ring-1 ring-foreground/5 backdrop-blur-md"
+            ? "border-foreground/10 bg-background/85 shadow-foreground/5 shadow-sm backdrop-blur-xl"
+            : "border-transparent bg-background/0"
         )}
       >
-        <div className="flex h-16 items-center justify-between gap-2 pr-3.5 pl-5 sm:pl-6">
+        {/* Innholdet ligger på samme max-w-6xl-grid som resten av siden, med
+            vanlige side-gutters — konvensjonell full-bredde topmeny. */}
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-4 sm:px-6 lg:px-8">
           <Link
             href={homeHref}
             className="flex shrink-0 items-center gap-2 font-bold font-heading text-foreground text-xl tracking-tight"
@@ -220,17 +256,22 @@ export function SiteHeader({
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
         <SheetContent
           side="right"
-          className="pointer-events-auto w-[88vw] max-w-sm gap-0 p-0"
+          className="pointer-events-auto flex w-[88vw] max-w-sm flex-col gap-0 p-0"
         >
-          <SheetHeader className="border-foreground/5 border-b px-6 py-5">
+          <SheetHeader className="border-foreground/5 border-b px-6 pt-[max(1.25rem,env(safe-area-inset-top))] pb-5">
             <SheetTitle className="text-left font-bold font-heading text-xl tracking-tight">
               {logo}
             </SheetTitle>
           </SheetHeader>
 
-          <nav className="flex flex-1 flex-col gap-1 overflow-y-auto px-4 py-5">
+          <motion.nav
+            initial="hidden"
+            animate="visible"
+            variants={listVariants}
+            className="flex flex-1 flex-col gap-1 overflow-y-auto px-4 py-5"
+          >
             {navItems.map((item) => (
-              <div key={item.label}>
+              <motion.div key={item.label} variants={itemVariants}>
                 <Link
                   href={item.href}
                   target={linkTarget(item.external)}
@@ -261,12 +302,12 @@ export function SiteHeader({
                     ))}
                   </div>
                 )}
-              </div>
+              </motion.div>
             ))}
-          </nav>
+          </motion.nav>
 
           {mobileFooter && (
-            <div className="flex flex-col gap-2 border-foreground/5 border-t px-6 py-5">
+            <div className="flex flex-col gap-2 border-foreground/5 border-t px-6 pt-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
               {mobileFooter}
             </div>
           )}
