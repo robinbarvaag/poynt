@@ -1,6 +1,5 @@
 import { AdminBar } from "@/components/admin-bar";
 import { PageHero } from "@/components/page-hero";
-import { PayloadImage } from "@/components/payload-image";
 import {
   PodcastExplorer,
   type PodcastExplorerEpisode,
@@ -45,65 +44,31 @@ export default async function PodcastPage() {
       year: "numeric",
     });
 
-  // Automatisk fra RSS når PODCAST_RSS_URL er satt — ellers fall tilbake til de
-  // manuelle Payload-episodene (så siden virker i dag og bytter til RSS av seg
-  // selv når feed-URL-en er på plass).
+  // Episodene hentes fra podkastens RSS-feed (PODCAST_RSS_URL) — Spotify er
+  // sannhetskilden, ingenting vedlikeholdes manuelt i Payload.
   const feedUrl = process.env.PODCAST_RSS_URL;
-  let episodes: PodcastExplorerEpisode[];
-
-  if (feedUrl) {
-    const rss = await fetchPodcastEpisodes(feedUrl, { limit: 200 });
-    episodes = rss.map((episode, index) => ({
-      id: episode.id,
-      href: episode.link ?? "#",
-      title: episode.title,
-      description: episode.description,
-      episodeNumber: episode.episodeNumber,
-      duration: episode.durationLabel,
-      date: episode.publishedAt ? formatDate(episode.publishedAt) : undefined,
-      cover: episode.coverUrl ? (
-        // RSS-cover kommer fra ukjente domener → vanlig <img> (ikke next/image)
-        <img
-          src={episode.coverUrl}
-          alt={episode.title}
-          className="size-full object-cover"
-        />
-      ) : undefined,
-      badge: index === 0 ? "Siste episode" : undefined,
-      search: `${episode.title} ${episode.description ?? ""}`.toLowerCase(),
-    }));
-  } else {
-    const podcasts = await payload.find({
-      collection: "podcasts",
-      sort: "-publishedAt",
-      limit: 200,
-    });
-    episodes = podcasts.docs.map((podcast, index) => {
-      const media =
-        podcast.coverImage && typeof podcast.coverImage === "object"
-          ? podcast.coverImage
-          : null;
-      return {
-        id: podcast.id,
-        href: `/podkast/${podcast.slug}`,
-        title: podcast.title,
-        description: podcast.description ?? undefined,
-        episodeNumber: podcast.episodeNumber ?? undefined,
-        duration: podcast.duration ?? undefined,
-        date: formatDate(podcast.publishedAt),
-        cover: media?.url ? (
-          <PayloadImage
-            media={media}
-            alt={media.alt || podcast.title}
-            fill
-            className="object-cover"
-          />
-        ) : undefined,
-        badge: index === 0 ? "Siste episode" : undefined,
-        search: `${podcast.title} ${podcast.description ?? ""}`.toLowerCase(),
-      };
-    });
-  }
+  const rss = feedUrl
+    ? await fetchPodcastEpisodes(feedUrl, { limit: 200 })
+    : [];
+  const episodes: PodcastExplorerEpisode[] = rss.map((episode, index) => ({
+    id: episode.id,
+    href: episode.link ?? "#",
+    title: episode.title,
+    description: episode.description,
+    episodeNumber: episode.episodeNumber,
+    duration: episode.durationLabel,
+    date: episode.publishedAt ? formatDate(episode.publishedAt) : undefined,
+    cover: episode.coverUrl ? (
+      // RSS-cover kommer fra ukjente domener → vanlig <img> (ikke next/image)
+      <img
+        src={episode.coverUrl}
+        alt={episode.title}
+        className="size-full object-cover"
+      />
+    ) : undefined,
+    badge: index === 0 ? "Siste episode" : undefined,
+    search: `${episode.title} ${episode.description ?? ""}`.toLowerCase(),
+  }));
 
   return (
     <>

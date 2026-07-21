@@ -101,8 +101,6 @@ export default async function FrontendLayout({
         <Header
           siteName={siteSettings?.siteName || "Poynt"}
           logo={siteSettings?.logo as { url: string; alt?: string } | null}
-          showSearch={false}
-          showLogin={false}
           ctaButton={header?.ctaButton as HeaderProps["ctaButton"]}
           navItems={header?.navItems as unknown as HeaderProps["navItems"]}
         />

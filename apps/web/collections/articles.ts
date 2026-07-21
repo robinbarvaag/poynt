@@ -11,7 +11,9 @@ export const Articles: CollectionConfig = {
   admin: {
     useAsTitle: "title",
     defaultColumns: ["title", "author", "categories", "publishedAt", "status"],
-    group: "Innhold",
+    // Ligger i den egenbygde «On Poynt»-nav-gruppen (on-poynt-nav-group.tsx),
+    // ikke i Payloads standard-nav.
+    group: false,
     // «Preview»-knapp i dokument-headeren → åpner artikkelen på nettsiden.
     preview: (doc) =>
       doc?.slug

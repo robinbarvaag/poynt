@@ -28,7 +28,9 @@ export const Guides: CollectionConfig = {
       "order",
       "status",
     ],
-    group: "Innhold",
+    // Ligger i den egenbygde «On Poynt»-nav-gruppen (on-poynt-nav-group.tsx),
+    // ikke i Payloads standard-nav.
+    group: false,
     // «Preview»-knapp i dokument-headeren → åpner guiden på nettsiden.
     // Motsatt vei av den egenbygde <AdminBar> ute på frontend.
     preview: (doc) =>

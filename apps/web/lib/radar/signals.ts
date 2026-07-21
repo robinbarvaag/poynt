@@ -20,12 +20,7 @@ import { getViewAggregates } from "./views";
  * forslagene; denne filen eier tallene. Se docs/CONTENT-RADAR.md.
  */
 
-type ContentSlug =
-  | "articles"
-  | "courses"
-  | "guides"
-  | "blog-posts"
-  | "podcasts";
+type ContentSlug = "articles" | "courses" | "guides" | "blog-posts";
 
 interface CollectionConfig {
   slug: ContentSlug;
@@ -48,12 +43,6 @@ const CONTENT_COLLECTIONS: CollectionConfig[] = [
     slug: "blog-posts",
     label: "Blogginnlegg",
     hasDrafts: true,
-    catField: "categories",
-  },
-  {
-    slug: "podcasts",
-    label: "Podkast",
-    hasDrafts: false,
     catField: "categories",
   },
 ];

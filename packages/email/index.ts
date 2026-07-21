@@ -166,8 +166,17 @@ export async function subscribeToNewsletter(
     });
 
     if (result.error) {
-      // Handle "already exists" as success
+      // Kontakten finnes fra før — kan være avmeldt, så re-abonner eksplisitt
+      // (contacts.create setter aldri unsubscribed tilbake til false).
       if (result.error.message?.includes("already exists")) {
+        const update = await getResend().contacts.update({
+          audienceId,
+          email,
+          unsubscribed: false,
+        });
+        if (update.error) {
+          return { success: false, error: update.error.message };
+        }
         return { success: true };
       }
       return { success: false, error: result.error.message };
@@ -181,6 +190,87 @@ export async function subscribeToNewsletter(
       error: error instanceof Error ? error.message : "Ukjent feil",
     };
   }
+}
+
+async function renderNewsletterHtml(params: {
+  preview: string;
+  contentHtml: string;
+  unsubscribeUrl: string;
+}): Promise<string> {
+  const { render } = await import("@react-email/render");
+  const { default: NewsletterEmail } = await import("./templates/newsletter");
+  return render(NewsletterEmail(params));
+}
+
+/**
+ * Send en testversjon av nyhetsbrevet til én adresse (vanlig e-post, ikke
+ * broadcast). Avmeldingslenken peker på "#" siden Resend kun bytter ut
+ * plassholderen ved ekte broadcasts.
+ */
+export async function sendNewsletterTest(params: {
+  to: string;
+  subject: string;
+  preview: string;
+  contentHtml: string;
+}) {
+  const html = await renderNewsletterHtml({
+    preview: params.preview,
+    contentHtml: params.contentHtml,
+    unsubscribeUrl: "#",
+  });
+
+  await sendEmail({
+    from: buildFrom("Poynt"),
+    to: params.to,
+    subject: `[TEST] ${params.subject}`,
+    html,
+  });
+}
+
+/**
+ * Opprett og send nyhetsbrevet som en Resend Broadcast til hele audiencen
+ * (RESEND_AUDIENCE_ID). Resend håndterer avmelding per mottaker via
+ * `{{{RESEND_UNSUBSCRIBE_URL}}}`-plassholderen i malen.
+ */
+export async function sendNewsletterBroadcast(params: {
+  subject: string;
+  preview: string;
+  contentHtml: string;
+}): Promise<{ broadcastId: string }> {
+  const audienceId = process.env.RESEND_AUDIENCE_ID;
+  if (!audienceId) {
+    throw new Error(
+      "RESEND_AUDIENCE_ID er ikke satt — opprett en Audience i Resend-dashboardet først"
+    );
+  }
+
+  const html = await renderNewsletterHtml({
+    preview: params.preview,
+    contentHtml: params.contentHtml,
+    unsubscribeUrl: "{{{RESEND_UNSUBSCRIBE_URL}}}",
+  });
+
+  const created = await getResend().broadcasts.create({
+    audienceId,
+    from: buildFrom("Poynt"),
+    subject: params.subject,
+    html,
+    name: params.subject,
+  });
+  if (created.error || !created.data) {
+    throw new Error(
+      `Kunne ikke opprette broadcast: ${created.error?.message ?? "ukjent feil"}`
+    );
+  }
+
+  const sent = await getResend().broadcasts.send(created.data.id);
+  if (sent.error) {
+    throw new Error(
+      `Kunne ikke sende broadcast: ${sent.error.message ?? "ukjent feil"}`
+    );
+  }
+
+  return { broadcastId: created.data.id };
 }
 
 /**

@@ -1,10 +1,7 @@
-import { PayloadImage } from "@/components/payload-image";
 import { fetchPodcastEpisodes } from "@/lib/podcast-rss";
-import config from "@/payload.config";
 import { BlockSection, Heading, Text } from "@poynt/ui";
 import { ArrowRight, Play } from "lucide-react";
 import Link from "next/link";
-import { getPayload } from "payload";
 import type { ReactNode } from "react";
 
 interface PodcastArchiveBlockProps {
@@ -14,11 +11,9 @@ interface PodcastArchiveBlockProps {
   showMoreLink?: boolean;
 }
 
-// Normalisert kort-data uavhengig av kilde (RSS eller Payload-collection).
 interface EpisodeCard {
   id: string;
   href: string;
-  external: boolean;
   title: string;
   description?: string;
   episodeNumber?: number;
@@ -35,10 +30,10 @@ function formatDate(value: string): string {
 }
 
 /**
- * «Fra podkasten» på forsiden. Henter automatisk fra RSS når `PODCAST_RSS_URL`
- * er satt (Avdelingsmøte med Poynt), ellers fra de manuelle Payload-episodene.
- * Rendrer ingenting (null) hvis ingen episoder finnes — selv-pakket i
- * BlockSection så det ikke blir en tom seksjon.
+ * «Fra podkasten» på forsiden. Henter episodene fra RSS-feeden
+ * (`PODCAST_RSS_URL` — Avdelingsmøte med Poynt). Rendrer ingenting (null) hvis
+ * feed mangler eller er tom — selv-pakket i BlockSection så det ikke blir en
+ * tom seksjon.
  */
 export async function PodcastArchiveBlock({
   title,
@@ -47,17 +42,16 @@ export async function PodcastArchiveBlock({
   showMoreLink = true,
 }: PodcastArchiveBlockProps) {
   const feedUrl = process.env.PODCAST_RSS_URL;
-  let episodes: EpisodeCard[] = [];
-  let total = 0;
+  if (!feedUrl) {
+    return null;
+  }
 
-  if (feedUrl) {
-    const rss = await fetchPodcastEpisodes(feedUrl, { limit: limit || 100 });
-    const all = await fetchPodcastEpisodes(feedUrl);
-    total = all.length;
-    episodes = rss.map((episode) => ({
+  const all = await fetchPodcastEpisodes(feedUrl);
+  const total = all.length;
+  const episodes: EpisodeCard[] = (limit ? all.slice(0, limit) : all).map(
+    (episode) => ({
       id: episode.id,
       href: episode.link ?? "#",
-      external: true,
       title: episode.title,
       description: episode.description,
       episodeNumber: episode.episodeNumber,
@@ -71,40 +65,8 @@ export async function PodcastArchiveBlock({
           className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
         />
       ) : undefined,
-    }));
-  } else {
-    const payload = await getPayload({ config });
-    const result = await payload.find({
-      collection: "podcasts",
-      limit: limit || 100,
-      sort: "-publishedAt",
-    });
-    total = result.totalDocs;
-    episodes = result.docs.map((podcast) => {
-      const media =
-        podcast.coverImage && typeof podcast.coverImage === "object"
-          ? podcast.coverImage
-          : null;
-      return {
-        id: String(podcast.id),
-        href: `/podkast/${podcast.slug}`,
-        external: false,
-        title: podcast.title,
-        description: podcast.description ?? undefined,
-        episodeNumber: podcast.episodeNumber ?? undefined,
-        duration: podcast.duration ?? undefined,
-        date: formatDate(podcast.publishedAt),
-        cover: media?.url ? (
-          <PayloadImage
-            media={media}
-            alt={media.alt || podcast.title}
-            fill
-            className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-          />
-        ) : undefined,
-      };
-    });
-  }
+    })
+  );
 
   if (!episodes.length) {
     return null;
@@ -150,7 +112,7 @@ export async function PodcastArchiveBlock({
   );
 }
 
-/** Ett episode-kort — felles markup for begge kilder, ekstern eller intern lenke. */
+/** Ett episode-kort — lenker ut til episoden hos Spotify. */
 function EpisodeTile({ episode }: { episode: EpisodeCard }) {
   const body = (
     <>
@@ -202,22 +164,14 @@ function EpisodeTile({ episode }: { episode: EpisodeCard }) {
     </>
   );
 
-  if (episode.external) {
-    return (
-      <a
-        href={episode.href}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="group block"
-      >
-        {body}
-      </a>
-    );
-  }
-
   return (
-    <Link href={episode.href} className="group block">
+    <a
+      href={episode.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group block"
+    >
       {body}
-    </Link>
+    </a>
   );
 }

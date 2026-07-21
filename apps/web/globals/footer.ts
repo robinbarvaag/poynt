@@ -12,6 +12,12 @@ export const Footer: GlobalConfig = {
       type: "array",
       label: "Kolonner",
       maxRows: 4,
+      admin: {
+        initCollapsed: true,
+        components: {
+          RowLabel: "/admin/components/row-labels#ColumnRowLabel",
+        },
+      },
       fields: [
         {
           name: "title",
@@ -24,6 +30,12 @@ export const Footer: GlobalConfig = {
           type: "array",
           label: "Lenker",
           maxRows: 8,
+          admin: {
+            initCollapsed: true,
+            components: {
+              RowLabel: "/admin/components/row-labels#LinkRowLabel",
+            },
+          },
           fields: [
             {
               name: "label",
@@ -82,27 +94,36 @@ export const Footer: GlobalConfig = {
       },
     },
     {
-      name: "showNewsletter",
-      type: "checkbox",
-      defaultValue: false,
-      label: "Vis nyhetsbrev-påmelding",
-    },
-    {
-      name: "newsletterTitle",
-      type: "text",
-      label: "Nyhetsbrev-tittel",
-      defaultValue: "Hold deg oppdatert",
+      type: "collapsible",
+      label: "Nyhetsbrev",
       admin: {
-        condition: (_, siblingData) => siblingData?.showNewsletter,
+        initCollapsed: true,
       },
-    },
-    {
-      name: "newsletterDescription",
-      type: "text",
-      label: "Nyhetsbrev-beskrivelse",
-      admin: {
-        condition: (_, siblingData) => siblingData?.showNewsletter,
-      },
+      fields: [
+        {
+          name: "showNewsletter",
+          type: "checkbox",
+          defaultValue: false,
+          label: "Vis nyhetsbrev-påmelding",
+        },
+        {
+          name: "newsletterTitle",
+          type: "text",
+          label: "Nyhetsbrev-tittel",
+          defaultValue: "Hold deg oppdatert",
+          admin: {
+            condition: (_, siblingData) => siblingData?.showNewsletter,
+          },
+        },
+        {
+          name: "newsletterDescription",
+          type: "text",
+          label: "Nyhetsbrev-beskrivelse",
+          admin: {
+            condition: (_, siblingData) => siblingData?.showNewsletter,
+          },
+        },
+      ],
     },
   ],
 };

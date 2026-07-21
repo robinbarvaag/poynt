@@ -2,11 +2,6 @@ import { recordView } from "@/lib/radar/views";
 import { TRACKED_COLLECTIONS } from "@/lib/radar/views";
 import { NextResponse } from "next/server";
 
-/**
- * Lettvekts visnings-beacon (Fase 4). Innholdssidene poster hit én gang per
- * lesning. Aggregeres per dag uten PII. Feiler stille — telling skal aldri
- * forstyrre lesningen. Se docs/CONTENT-RADAR.md.
- */
 export async function POST(req: Request) {
   try {
     const body = (await req.json()) as {

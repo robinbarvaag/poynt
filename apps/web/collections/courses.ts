@@ -18,7 +18,9 @@ export const Courses: CollectionConfig = {
   admin: {
     useAsTitle: "title",
     defaultColumns: ["title", "categories", "publishedAt", "status"],
-    group: "Innhold",
+    // Ligger i den egenbygde «On Poynt»-nav-gruppen (on-poynt-nav-group.tsx),
+    // ikke i Payloads standard-nav.
+    group: false,
     // «Preview»-knapp i dokument-headeren → åpner kurset på nettsiden.
     preview: (doc) =>
       doc?.slug

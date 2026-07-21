@@ -69,13 +69,13 @@ export interface Config {
   collections: {
     pages: Page;
     'blog-posts': BlogPost;
-    articles: Article;
-    guides: Guide;
-    courses: Course;
-    podcasts: Podcast;
     services: Service;
     categories: Category;
     media: Media;
+    newsletters: Newsletter;
+    articles: Article;
+    guides: Guide;
+    courses: Course;
     products: Product;
     orders: Order;
     users: User;
@@ -96,13 +96,13 @@ export interface Config {
   collectionsSelect: {
     pages: PagesSelect<false> | PagesSelect<true>;
     'blog-posts': BlogPostsSelect<false> | BlogPostsSelect<true>;
-    articles: ArticlesSelect<false> | ArticlesSelect<true>;
-    guides: GuidesSelect<false> | GuidesSelect<true>;
-    courses: CoursesSelect<false> | CoursesSelect<true>;
-    podcasts: PodcastsSelect<false> | PodcastsSelect<true>;
     services: ServicesSelect<false> | ServicesSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    newsletters: NewslettersSelect<false> | NewslettersSelect<true>;
+    articles: ArticlesSelect<false> | ArticlesSelect<true>;
+    guides: GuidesSelect<false> | GuidesSelect<true>;
+    courses: CoursesSelect<false> | CoursesSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
     orders: OrdersSelect<false> | OrdersSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -1286,6 +1286,43 @@ export interface User {
   password?: string | null;
 }
 /**
+ * Skriv nyhetsbrevet her, send en test til deg selv, og send så til alle abonnenter.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "newsletters".
+ */
+export interface Newsletter {
+  id: number;
+  /**
+   * Emnefeltet mottakerne ser i innboksen
+   */
+  subject: string;
+  /**
+   * Kort tekst som vises etter emnet i innboksen (valgfritt — emnet brukes hvis tomt)
+   */
+  previewText?: string | null;
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  status?: ('draft' | 'sent') | null;
+  sentAt?: string | null;
+  broadcastId?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "articles".
  */
@@ -1833,67 +1870,6 @@ export interface Course {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "podcasts".
- */
-export interface Podcast {
-  id: number;
-  title: string;
-  /**
-   * Genereres automatisk fra tittel
-   */
-  slug: string;
-  /**
-   * Vises i oversikten og brukes til SEO
-   */
-  description?: string | null;
-  /**
-   * Valgfritt - vises på episode-siden
-   */
-  content?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  /**
-   * Full Spotify-URL til episoden (f.eks. https://open.spotify.com/episode/...)
-   */
-  spotifyUrl: string;
-  /**
-   * Episodebilde - vises i oversikten
-   */
-  coverImage?: (number | null) | Media;
-  /**
-   * Valgfritt - legg til gjester i episoden
-   */
-  guests?:
-    | {
-        name: string;
-        title?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * F.eks. '45 min'
-   */
-  duration?: string | null;
-  episodeNumber?: number | null;
-  publishedAt: string;
-  categories?: (number | Category)[] | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "orders".
  */
 export interface Order {
@@ -1994,22 +1970,6 @@ export interface PayloadLockedDocument {
         value: number | BlogPost;
       } | null)
     | ({
-        relationTo: 'articles';
-        value: number | Article;
-      } | null)
-    | ({
-        relationTo: 'guides';
-        value: number | Guide;
-      } | null)
-    | ({
-        relationTo: 'courses';
-        value: number | Course;
-      } | null)
-    | ({
-        relationTo: 'podcasts';
-        value: number | Podcast;
-      } | null)
-    | ({
         relationTo: 'services';
         value: number | Service;
       } | null)
@@ -2020,6 +1980,22 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'newsletters';
+        value: number | Newsletter;
+      } | null)
+    | ({
+        relationTo: 'articles';
+        value: number | Article;
+      } | null)
+    | ({
+        relationTo: 'guides';
+        value: number | Guide;
+      } | null)
+    | ({
+        relationTo: 'courses';
+        value: number | Course;
       } | null)
     | ({
         relationTo: 'products';
@@ -2533,6 +2509,127 @@ export interface BlogPostsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "services_select".
+ */
+export interface ServicesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  image?: T;
+  shortDescription?: T;
+  content?: T;
+  priceType?: T;
+  price?: T;
+  includesVat?: T;
+  ctaText?: T;
+  ctaLink?: T;
+  sortOrder?: T;
+  featured?: T;
+  active?: T;
+  categories?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+        noIndex?: T;
+      };
+  faq?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories_select".
+ */
+export interface CategoriesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  description?: T;
+  color?: T;
+  icon?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media_select".
+ */
+export interface MediaSelect<T extends boolean = true> {
+  alt?: T;
+  isPrivate?: T;
+  source?: T;
+  creditLine?: T;
+  sourceUrl?: T;
+  folder?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        card?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        tablet?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "newsletters_select".
+ */
+export interface NewslettersSelect<T extends boolean = true> {
+  subject?: T;
+  previewText?: T;
+  content?: T;
+  status?: T;
+  sentAt?: T;
+  broadcastId?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "articles_select".
  */
 export interface ArticlesSelect<T extends boolean = true> {
@@ -2804,138 +2901,6 @@ export interface CoursesSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "podcasts_select".
- */
-export interface PodcastsSelect<T extends boolean = true> {
-  title?: T;
-  slug?: T;
-  description?: T;
-  content?: T;
-  spotifyUrl?: T;
-  coverImage?: T;
-  guests?:
-    | T
-    | {
-        name?: T;
-        title?: T;
-        id?: T;
-      };
-  duration?: T;
-  episodeNumber?: T;
-  publishedAt?: T;
-  categories?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "services_select".
- */
-export interface ServicesSelect<T extends boolean = true> {
-  name?: T;
-  slug?: T;
-  image?: T;
-  shortDescription?: T;
-  content?: T;
-  priceType?: T;
-  price?: T;
-  includesVat?: T;
-  ctaText?: T;
-  ctaLink?: T;
-  sortOrder?: T;
-  featured?: T;
-  active?: T;
-  categories?: T;
-  meta?:
-    | T
-    | {
-        title?: T;
-        description?: T;
-        image?: T;
-        noIndex?: T;
-      };
-  faq?:
-    | T
-    | {
-        question?: T;
-        answer?: T;
-        id?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories_select".
- */
-export interface CategoriesSelect<T extends boolean = true> {
-  name?: T;
-  slug?: T;
-  description?: T;
-  color?: T;
-  icon?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media_select".
- */
-export interface MediaSelect<T extends boolean = true> {
-  alt?: T;
-  isPrivate?: T;
-  source?: T;
-  creditLine?: T;
-  sourceUrl?: T;
-  folder?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  url?: T;
-  thumbnailURL?: T;
-  filename?: T;
-  mimeType?: T;
-  filesize?: T;
-  width?: T;
-  height?: T;
-  focalX?: T;
-  focalY?: T;
-  sizes?:
-    | T
-    | {
-        thumbnail?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        card?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        tablet?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3492,22 +3457,17 @@ export interface Servicespage {
  */
 export interface Header {
   id: number;
-  showSearch?: boolean | null;
-  showLogin?: boolean | null;
   ctaButton?: {
     show?: boolean | null;
     text?: string | null;
     url?: string | null;
   };
   /**
-   * Anbefalt struktur (målgruppe-først): «For gründere» (undermeny: On Poynt, Verktøy, Produkter & kurs), «For bedrifter» (undermeny: Styre & verv, Rådgivning, Foredrag), «Ressurser» (undermeny: Blogg, Podkast, Artikler) og «Om». Bruk undermenypunkter for å samle relaterte sider under hvert hovedpunkt.
+   * Bruk undermenypunkter for å samle relaterte sider under hvert hovedpunkt.
    */
   navItems?:
     | {
         label: string;
-        /**
-         * Velg type lenke. Bruk 'Egendefinert URL' for /blogg, /produkter eller eksterne lenker.
-         */
         linkType?: ('custom' | 'page' | 'blog' | 'product') | null;
         /**
          * F.eks. /blogg, /produkter, eller https://ekstern-side.no
@@ -3522,6 +3482,9 @@ export interface Header {
               label: string;
               description?: string | null;
               linkType?: ('custom' | 'page' | 'blog' | 'product') | null;
+              /**
+               * F.eks. /blogg, /produkter, eller https://ekstern-side.no
+               */
               url?: string | null;
               page?: (number | null) | Page;
               blogPost?: (number | null) | BlogPost;
@@ -3771,8 +3734,6 @@ export interface ServicespageSelect<T extends boolean = true> {
  * via the `definition` "header_select".
  */
 export interface HeaderSelect<T extends boolean = true> {
-  showSearch?: T;
-  showLogin?: T;
   ctaButton?:
     | T
     | {

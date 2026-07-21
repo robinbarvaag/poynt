@@ -20,9 +20,9 @@ import { Categories } from "./collections/categories";
 import { Courses } from "./collections/courses";
 import { Guides } from "./collections/guides";
 import { Media } from "./collections/media";
+import { Newsletters } from "./collections/newsletters";
 import { Orders } from "./collections/orders";
 import { Pages } from "./collections/pages";
-import { Podcasts } from "./collections/podcasts";
 import { Products } from "./collections/products";
 import { Services } from "./collections/services";
 import { Users } from "./collections/users";
@@ -67,13 +67,14 @@ export default buildConfig({
     // Innhold
     Pages,
     BlogPosts,
-    Articles,
-    Guides,
-    Courses,
-    Podcasts,
     Services,
     Categories,
     Media,
+    Newsletters,
+    // On Poynt-innhold (vises i den egenbygde «On Poynt»-nav-gruppen)
+    Articles,
+    Guides,
+    Courses,
     // Nettbutikk
     Products,
     Orders,

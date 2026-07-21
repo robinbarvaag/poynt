@@ -6,6 +6,21 @@ import { usePathname } from "next/navigation";
 const baseClass = "nav";
 
 const links = [
+  // Innholds-collections for medlemsområdet (skjult fra standard-nav via
+  // `group: false` i collection-configen, så de bare vises her).
+  {
+    href: "/admin/collections/guides",
+    label: "Guider",
+  },
+  {
+    href: "/admin/collections/courses",
+    label: "Kurs",
+  },
+  {
+    href: "/admin/collections/articles",
+    label: "Artikler",
+  },
+  // Egenbygde admin-views (leser fra planner-skjemaet).
   {
     href: "/admin/soknader",
     label: "Søknader",

@@ -1,4 +1,5 @@
 import type { GlobalConfig } from "payload";
+import { navLinkFields } from "../fields/nav-link";
 
 export const Header: GlobalConfig = {
   slug: "header",
@@ -7,18 +8,6 @@ export const Header: GlobalConfig = {
     group: "Innstillinger",
   },
   fields: [
-    {
-      name: "showSearch",
-      type: "checkbox",
-      defaultValue: true,
-      label: "Vis søkefelt",
-    },
-    {
-      name: "showLogin",
-      type: "checkbox",
-      defaultValue: true,
-      label: "Vis logg inn-knapp",
-    },
     {
       name: "ctaButton",
       type: "group",
@@ -31,16 +20,21 @@ export const Header: GlobalConfig = {
           label: "Vis CTA-knapp",
         },
         {
-          name: "text",
-          type: "text",
-          label: "Knappetekst",
-          defaultValue: "Ta kontakt",
-        },
-        {
-          name: "url",
-          type: "text",
-          label: "Lenke",
-          defaultValue: "/kontakt",
+          type: "row",
+          fields: [
+            {
+              name: "text",
+              type: "text",
+              label: "Knappetekst",
+              defaultValue: "Ta kontakt",
+            },
+            {
+              name: "url",
+              type: "text",
+              label: "Lenke",
+              defaultValue: "/kontakt",
+            },
+          ],
         },
       ],
     },
@@ -50,8 +44,12 @@ export const Header: GlobalConfig = {
       label: "Hovedmeny",
       maxRows: 8,
       admin: {
+        initCollapsed: true,
         description:
-          "Anbefalt struktur (målgruppe-først): «For gründere» (undermeny: On Poynt, Verktøy, Produkter & kurs), «For bedrifter» (undermeny: Styre & verv, Rådgivning, Foredrag), «Ressurser» (undermeny: Blogg, Podkast, Artikler) og «Om». Bruk undermenypunkter for å samle relaterte sider under hvert hovedpunkt.",
+          "Bruk undermenypunkter for å samle relaterte sider under hvert hovedpunkt.",
+        components: {
+          RowLabel: "/admin/components/row-labels#LinkRowLabel",
+        },
       },
       fields: [
         {
@@ -60,70 +58,18 @@ export const Header: GlobalConfig = {
           required: true,
           label: "Lenketekst",
         },
-        {
-          name: "linkType",
-          type: "select",
-          defaultValue: "custom",
-          options: [
-            { label: "Egendefinert URL", value: "custom" },
-            { label: "CMS-side", value: "page" },
-            { label: "Blogginnlegg", value: "blog" },
-            { label: "Produkt", value: "product" },
-          ],
-          label: "Lenketype",
-          admin: {
-            description:
-              "Velg type lenke. Bruk 'Egendefinert URL' for /blogg, /produkter eller eksterne lenker.",
-          },
-        },
-        {
-          name: "url",
-          type: "text",
-          label: "URL",
-          admin: {
-            condition: (_, siblingData) => siblingData?.linkType === "custom",
-            description:
-              "F.eks. /blogg, /produkter, eller https://ekstern-side.no",
-          },
-        },
-        {
-          name: "page",
-          type: "relationship",
-          relationTo: "pages",
-          label: "Velg side",
-          admin: {
-            condition: (_, siblingData) => siblingData?.linkType === "page",
-          },
-        },
-        {
-          name: "blogPost",
-          type: "relationship",
-          relationTo: "blog-posts",
-          label: "Velg blogginnlegg",
-          admin: {
-            condition: (_, siblingData) => siblingData?.linkType === "blog",
-          },
-        },
-        {
-          name: "product",
-          type: "relationship",
-          relationTo: "products",
-          label: "Velg produkt",
-          admin: {
-            condition: (_, siblingData) => siblingData?.linkType === "product",
-          },
-        },
-        {
-          name: "openInNewTab",
-          type: "checkbox",
-          label: "Åpne i ny fane",
-          defaultValue: false,
-        },
+        ...navLinkFields(),
         {
           name: "subItems",
           type: "array",
           label: "Undermenypunkter",
           maxRows: 6,
+          admin: {
+            initCollapsed: true,
+            components: {
+              RowLabel: "/admin/components/row-labels#LinkRowLabel",
+            },
+          },
           fields: [
             {
               name: "label",
@@ -136,61 +82,7 @@ export const Header: GlobalConfig = {
               type: "text",
               label: "Beskrivelse",
             },
-            {
-              name: "linkType",
-              type: "select",
-              defaultValue: "custom",
-              options: [
-                { label: "Egendefinert URL", value: "custom" },
-                { label: "CMS-side", value: "page" },
-                { label: "Blogginnlegg", value: "blog" },
-                { label: "Produkt", value: "product" },
-              ],
-              label: "Lenketype",
-            },
-            {
-              name: "url",
-              type: "text",
-              label: "URL",
-              admin: {
-                condition: (_, siblingData) =>
-                  siblingData?.linkType === "custom",
-              },
-            },
-            {
-              name: "page",
-              type: "relationship",
-              relationTo: "pages",
-              label: "Velg side",
-              admin: {
-                condition: (_, siblingData) => siblingData?.linkType === "page",
-              },
-            },
-            {
-              name: "blogPost",
-              type: "relationship",
-              relationTo: "blog-posts",
-              label: "Velg blogginnlegg",
-              admin: {
-                condition: (_, siblingData) => siblingData?.linkType === "blog",
-              },
-            },
-            {
-              name: "product",
-              type: "relationship",
-              relationTo: "products",
-              label: "Velg produkt",
-              admin: {
-                condition: (_, siblingData) =>
-                  siblingData?.linkType === "product",
-              },
-            },
-            {
-              name: "openInNewTab",
-              type: "checkbox",
-              label: "Åpne i ny fane",
-              defaultValue: false,
-            },
+            ...navLinkFields(),
           ],
         },
       ],

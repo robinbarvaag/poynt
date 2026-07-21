@@ -13,7 +13,7 @@ type Entry = MetadataRoute.Sitemap[number];
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const payload = await getPayload({ config });
 
-  const [pages, products, posts, services, podcasts] = await Promise.all([
+  const [pages, products, posts, services] = await Promise.all([
     payload
       .find({ collection: "pages", limit: 1000, depth: 0 })
       .catch(() => null),
@@ -40,9 +40,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         limit: 1000,
         depth: 0,
       })
-      .catch(() => null),
-    payload
-      .find({ collection: "podcasts", limit: 1000, depth: 0 })
       .catch(() => null),
   ]);
 
@@ -91,19 +88,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }));
 
-  const podcastRoutes: Entry[] = (podcasts?.docs ?? []).map((p) => ({
-    url: `${SITE_URL}/podkast/${p.slug}`,
-    lastModified: p.updatedAt,
-    changeFrequency: "monthly",
-    priority: 0.5,
-  }));
-
   return [
     ...staticRoutes,
     ...pageRoutes,
     ...productRoutes,
     ...postRoutes,
     ...serviceRoutes,
-    ...podcastRoutes,
   ];
 }

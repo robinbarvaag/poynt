@@ -13,7 +13,6 @@ export const TRACKED_COLLECTIONS = [
   "courses",
   "guides",
   "blog-posts",
-  "podcasts",
 ] as const;
 export type TrackedCollection = (typeof TRACKED_COLLECTIONS)[number];
 

@@ -95,8 +95,6 @@ const payload = await getPayload({ config });
 
 // biome-ignore lint/suspicious/noExplicitAny: seed-data matcher header-skjemaet
 const data: any = {
-  showSearch: true,
-  showLogin: true,
   ctaButton: { show: true, text: "Ta kontakt", url: "/kontakt" },
   navItems,
 };

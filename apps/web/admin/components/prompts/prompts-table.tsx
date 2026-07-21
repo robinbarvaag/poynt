@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import { Fragment, useState } from "react";
 import {
-  deletePromptTemplate,
   resyncPromptTemplate,
   seedPromptTemplates,
   togglePromptActive,
@@ -11,19 +10,15 @@ import {
 } from "../../actions/prompts";
 import type { PromptTemplateListItem } from "../../views/prompts/list";
 
-function generateId(toolId: string, name: string): string {
-  return `${toolId}-${name}`
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
-
 const toolIdLabels: Record<string, string> = {
   "channel-guide": "Kanalveileder",
   "decline-generator": "Si nei-generator",
   "marketing-plan": "Markedsplan",
   "yearly-planner": "Årshjul",
   "podcast-to-content": "Podcast til innhold",
+  "brand-brief": "Merkevarebrief",
+  "content-radar": "Innholdsradar",
+  "inquiry-reply": "Svar på henvendelser",
 };
 
 type EditingState = {
@@ -42,13 +37,6 @@ export const PromptsTable = ({
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
   const [editing, setEditing] = useState<EditingState | null>(null);
-  const [showAdd, setShowAdd] = useState(false);
-  const [newTemplate, setNewTemplate] = useState({
-    toolId: "",
-    name: "",
-    description: "",
-    template: "",
-  });
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const refresh = () => router.refresh();
@@ -65,32 +53,6 @@ export const PromptsTable = ({
         template: editing.template,
       });
       setEditing(null);
-      refresh();
-    } finally {
-      setLoading(null);
-    }
-  }
-
-  async function handleAdd() {
-    if (!newTemplate.name || !newTemplate.template || !newTemplate.toolId)
-      return;
-    const id = generateId(newTemplate.toolId, newTemplate.name);
-    setLoading("new");
-    try {
-      await upsertPromptTemplate({
-        id,
-        toolId: newTemplate.toolId,
-        name: newTemplate.name,
-        description: newTemplate.description || undefined,
-        template: newTemplate.template,
-      });
-      setShowAdd(false);
-      setNewTemplate({
-        toolId: "",
-        name: "",
-        description: "",
-        template: "",
-      });
       refresh();
     } finally {
       setLoading(null);
@@ -136,17 +98,6 @@ export const PromptsTable = ({
           "Denne malen har ingen innebygd standard å tilbakestille til."
         );
       }
-      refresh();
-    } finally {
-      setLoading(null);
-    }
-  }
-
-  async function handleDelete(id: string, name: string) {
-    if (!window.confirm(`Slett malen "${name}"?`)) return;
-    setLoading(id);
-    try {
-      await deletePromptTemplate(id);
       refresh();
     } finally {
       setLoading(null);
@@ -210,14 +161,6 @@ export const PromptsTable = ({
       <div style={{ marginBottom: "1rem", display: "flex", gap: "0.5rem" }}>
         <button
           type="button"
-          style={btnStyle("primary")}
-          onClick={() => setShowAdd(true)}
-          disabled={showAdd}
-        >
-          + Ny mal
-        </button>
-        <button
-          type="button"
           style={btnStyle("ghost")}
           onClick={handleSeed}
           disabled={loading === "seed"}
@@ -225,136 +168,6 @@ export const PromptsTable = ({
           {loading === "seed" ? "Seeder..." : "Seed standard-prompts"}
         </button>
       </div>
-
-      {showAdd && (
-        <div
-          style={{
-            border: "1px solid var(--theme-elevation-200)",
-            borderRadius: "var(--style-radius-s)",
-            padding: "1rem",
-            marginBottom: "1rem",
-            background: "var(--theme-elevation-50)",
-          }}
-        >
-          <h3 style={{ marginTop: 0, marginBottom: "1rem" }}>Ny prompt-mal</h3>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "0.75rem",
-              marginBottom: "0.75rem",
-            }}
-          >
-            <div>
-              <label
-                htmlFor="new-template-tool"
-                style={{
-                  display: "block",
-                  marginBottom: "0.25rem",
-                  fontWeight: 500,
-                }}
-              >
-                Verktøy
-              </label>
-              <select
-                id="new-template-tool"
-                style={inputStyle}
-                value={newTemplate.toolId}
-                onChange={(e) =>
-                  setNewTemplate((p) => ({ ...p, toolId: e.target.value }))
-                }
-              >
-                <option value="">Velg verktøy</option>
-                {Object.entries(toolIdLabels).map(([id, label]) => (
-                  <option key={id} value={id}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label
-                htmlFor="new-template-name"
-                style={{
-                  display: "block",
-                  marginBottom: "0.25rem",
-                  fontWeight: 500,
-                }}
-              >
-                Navn
-              </label>
-              <input
-                id="new-template-name"
-                style={inputStyle}
-                placeholder="Navn"
-                value={newTemplate.name}
-                onChange={(e) =>
-                  setNewTemplate((p) => ({ ...p, name: e.target.value }))
-                }
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="new-template-description"
-                style={{
-                  display: "block",
-                  marginBottom: "0.25rem",
-                  fontWeight: 500,
-                }}
-              >
-                Beskrivelse (valgfritt)
-              </label>
-              <input
-                id="new-template-description"
-                style={inputStyle}
-                placeholder="Beskrivelse"
-                value={newTemplate.description}
-                onChange={(e) =>
-                  setNewTemplate((p) => ({ ...p, description: e.target.value }))
-                }
-              />
-            </div>
-          </div>
-          <div style={{ marginBottom: "0.75rem" }}>
-            <label
-              htmlFor="new-template-text"
-              style={{
-                display: "block",
-                marginBottom: "0.25rem",
-                fontWeight: 500,
-              }}
-            >
-              Prompt-tekst
-            </label>
-            <textarea
-              id="new-template-text"
-              style={textareaStyle}
-              placeholder="Skriv prompt-teksten her..."
-              value={newTemplate.template}
-              onChange={(e) =>
-                setNewTemplate((p) => ({ ...p, template: e.target.value }))
-              }
-            />
-          </div>
-          <div style={{ display: "flex", gap: "0.5rem" }}>
-            <button
-              type="button"
-              style={btnStyle("primary")}
-              onClick={handleAdd}
-              disabled={loading === "new"}
-            >
-              {loading === "new" ? "Lagrer..." : "Lagre"}
-            </button>
-            <button
-              type="button"
-              style={btnStyle("ghost")}
-              onClick={() => setShowAdd(false)}
-            >
-              Avbryt
-            </button>
-          </div>
-        </div>
-      )}
 
       <div
         style={{
@@ -473,14 +286,6 @@ export const PromptsTable = ({
                         disabled={loading === t.id}
                       >
                         {t.isActive ? "Deaktiver" : "Aktiver"}
-                      </button>
-                      <button
-                        type="button"
-                        style={btnStyle("danger")}
-                        onClick={() => handleDelete(t.id, t.name)}
-                        disabled={loading === t.id}
-                      >
-                        Slett
                       </button>
                     </div>
                   </td>
@@ -626,7 +431,8 @@ export const PromptsTable = ({
                     padding: "2rem",
                   }}
                 >
-                  Ingen prompt-maler enda. Klikk «+ Ny mal» for å komme i gang.
+                  Ingen prompt-maler enda. Klikk «Seed standard-prompts» for å
+                  legge inn standard-malene.
                 </td>
               </tr>
             )}

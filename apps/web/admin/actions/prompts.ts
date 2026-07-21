@@ -51,13 +51,6 @@ export async function upsertPromptTemplate(data: {
   return created;
 }
 
-export async function deletePromptTemplate(id: string) {
-  await db
-    .delete(plannerPromptTemplate)
-    .where(eq(plannerPromptTemplate.id, id));
-  return { success: true };
-}
-
 /**
  * Seeder de hardkodede standard-promptene inn i databasen. Idempotent: legger
  * kun inn maler som mangler (på id), så eksisterende/redigerte prompts røres

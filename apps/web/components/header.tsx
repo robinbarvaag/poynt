@@ -7,7 +7,6 @@ import {
   type SiteHeaderLinkProps,
   type SiteHeaderNavItem,
 } from "@poynt/ui";
-import { Search, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { CartDrawer } from "./cart-drawer";
@@ -38,8 +37,6 @@ interface NavItem {
 interface HeaderProps {
   siteName?: string;
   logo?: MediaResource | null;
-  showSearch?: boolean;
-  showLogin?: boolean;
   ctaButton?: {
     show?: boolean;
     text?: string;
@@ -89,8 +86,6 @@ function NavLink({ href, children, ...rest }: SiteHeaderLinkProps) {
 export function Header({
   siteName = "Poynt",
   logo,
-  showSearch = true,
-  showLogin = true,
   ctaButton,
   navItems = [],
 }: HeaderProps) {
@@ -129,30 +124,6 @@ export function Header({
 
   const actions = (
     <>
-      {showSearch && (
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          aria-label="Søk"
-          className="hidden size-9 rounded-full sm:flex"
-        >
-          <Search className="size-4" />
-        </Button>
-      )}
-      {showLogin && (
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label="Logg inn"
-          className="hidden size-9 rounded-full sm:flex"
-          asChild
-        >
-          <Link href="/min-side">
-            <User className="size-4" />
-          </Link>
-        </Button>
-      )}
       <CartDrawer />
       {hasCta && (
         <Button
@@ -170,28 +141,15 @@ export function Header({
     </>
   );
 
-  const mobileFooter =
-    showLogin || hasCta ? (
-      <>
-        {showLogin && (
-          <Button variant="outline" className="w-full rounded-full" asChild>
-            <Link href="/min-side">
-              <User className="mr-2 size-4" />
-              Logg inn
-            </Link>
-          </Button>
-        )}
-        {hasCta && (
-          <Button className="w-full rounded-full" asChild>
-            {ctaIsContact ? (
-              <ContactLink kilde="header-mobil">{ctaText}</ContactLink>
-            ) : (
-              <Link href={ctaUrl}>{ctaText}</Link>
-            )}
-          </Button>
-        )}
-      </>
-    ) : undefined;
+  const mobileFooter = hasCta ? (
+    <Button className="w-full rounded-full" asChild>
+      {ctaIsContact ? (
+        <ContactLink kilde="header-mobil">{ctaText}</ContactLink>
+      ) : (
+        <Link href={ctaUrl}>{ctaText}</Link>
+      )}
+    </Button>
+  ) : undefined;
 
   return (
     <SiteHeader
