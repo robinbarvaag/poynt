@@ -38,7 +38,7 @@ const formFields = [
     blockType: "select",
     name: "emne",
     label: "Hva gjelder det?",
-    required: false,
+    required: true,
     width: 50,
     options: [
       { label: "Rådgivning", value: "Rådgivning" },

@@ -6,6 +6,7 @@ import { SITE_URL, buildMetadata, notFoundMetadata } from "@/lib/seo";
 import { breadcrumbSchema, productSchema } from "@/lib/structured-data";
 import config from "@/payload.config";
 import type { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import { notFound } from "next/navigation";
 import { type Where, getPayload } from "payload";
 
@@ -15,38 +16,11 @@ interface ProductPageProps {
   }>;
 }
 
-export async function generateMetadata({
-  params,
-}: ProductPageProps): Promise<Metadata> {
-  const { slug } = await params;
-  const payload = await getPayload({ config });
+async function getProductPageData(slug: string) {
+  "use cache";
+  cacheTag("cms");
+  cacheLife("minutes");
 
-  const products = await payload.find({
-    collection: "products",
-    where: {
-      slug: { equals: slug },
-      active: { equals: true },
-    },
-    limit: 1,
-  });
-
-  const product = products.docs[0];
-  if (!product) {
-    return notFoundMetadata("Produkt ikke funnet");
-  }
-
-  return buildMetadata({
-    title: product.meta?.title || `${product.name} | Produkter`,
-    description: product.meta?.description || product.shortDescription || "",
-    path: `/produkter/${slug}`,
-    image: product.meta?.image || product.featuredImage,
-    noIndex: product.meta?.noIndex ?? undefined,
-    canonicalUrl: product.meta?.canonicalUrl,
-  });
-}
-
-export default async function ProductPage({ params }: ProductPageProps) {
-  const { slug } = await params;
   const payload = await getPayload({ config });
 
   const productsResult = await payload.find({
@@ -59,11 +33,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
     limit: 1,
   });
 
-  if (productsResult.docs.length === 0) {
-    notFound();
-  }
-
   const product = productsResult.docs[0];
+  if (!product) return null;
 
   // «Andre produkter»: same kategori om mogleg, elles berre nyaste. Alltid
   // ekskluder produktet sjølv, og fall tilbake på nyaste om kategori-treffet er
@@ -98,6 +69,39 @@ export default async function ProductPage({ params }: ProductPageProps) {
     });
   }
 
+  return { product, related };
+}
+
+export async function generateMetadata({
+  params,
+}: ProductPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const data = await getProductPageData(slug);
+
+  const product = data?.product;
+  if (!product) {
+    return notFoundMetadata("Produkt ikke funnet");
+  }
+
+  return buildMetadata({
+    title: product.meta?.title || `${product.name} | Produkter`,
+    description: product.meta?.description || product.shortDescription || "",
+    path: `/produkter/${slug}`,
+    image: product.meta?.image || product.featuredImage,
+    noIndex: product.meta?.noIndex ?? undefined,
+    canonicalUrl: product.meta?.canonicalUrl,
+  });
+}
+
+export default async function ProductPage({ params }: ProductPageProps) {
+  const { slug } = await params;
+  const data = await getProductPageData(slug);
+
+  if (!data) {
+    notFound();
+  }
+
+  const { product, related } = data;
   const relatedProducts = related.docs.map(toProductGridItem);
 
   const productUrl = `${SITE_URL}/produkter/${slug}`;

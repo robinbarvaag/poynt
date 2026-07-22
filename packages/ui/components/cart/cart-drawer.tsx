@@ -72,7 +72,7 @@ export function CartDrawer({
           variant={hasItems ? "saffron" : "ghost"}
           size="sm"
           className={cn(
-            "h-9 gap-1.5 rounded-full px-2.5",
+            "h-9 gap-2 rounded-full px-3.5",
             !hasItems && "size-9 px-0"
           )}
         >

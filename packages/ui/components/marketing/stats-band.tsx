@@ -107,15 +107,18 @@ export function StatsBand({
               )}
             </div>
 
-            {/* Tallene som motvekt — venstrestilt, primærfarge som anker. */}
-            <div className="grid grid-cols-1 gap-8 sm:grid-cols-3 lg:col-span-6">
+            {/* Tallene som motvekt — venstrestilt, primærfarge som anker.
+                Mindre enn i `band`: kolonnene er halv bredde delt på tre, så
+                7xl-tall brekker («19+ år» over to linjer). Hold suffikser
+                korte (+/%) — enheter («år») hører hjemme i etiketten. */}
+            <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-3 lg:col-span-6">
               {stats.map((stat) => (
                 <div key={stat.label}>
                   <CountUp
                     to={stat.value}
                     prefix={stat.prefix}
                     suffix={stat.suffix}
-                    className="block font-bold font-heading text-6xl text-primary leading-none tracking-tight md:text-7xl"
+                    className="block whitespace-nowrap font-bold font-heading text-5xl text-primary leading-none tracking-tight md:text-6xl"
                   />
                   <Text variant="muted" customStyles="mt-3">
                     {stat.label}

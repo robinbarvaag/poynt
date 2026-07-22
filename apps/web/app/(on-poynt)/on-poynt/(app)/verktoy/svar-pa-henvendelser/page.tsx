@@ -3,8 +3,6 @@ import { createServerCaller } from "@/lib/planner/trpc-server";
 import type { InquiryReplyStream } from "@poynt/planner-validators";
 import { InquiryReplyClient } from "./inquiry-reply-client";
 
-export const dynamic = "force-dynamic";
-
 export default async function InquiryReplyPage() {
   const trpc = await createServerCaller();
 

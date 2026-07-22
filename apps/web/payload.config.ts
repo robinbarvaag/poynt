@@ -15,6 +15,7 @@ import { stripePlugin } from "@payloadcms/plugin-stripe";
 
 // Collections
 import { BlogPosts } from "./collections/blog-posts";
+import { CaseStudies } from "./collections/case-studies";
 import { Categories } from "./collections/categories";
 import { Courses } from "./collections/courses";
 import { Guides } from "./collections/guides";
@@ -66,6 +67,7 @@ export default buildConfig({
     // Innhold
     Pages,
     BlogPosts,
+    CaseStudies,
     Services,
     Categories,
     Media,
@@ -160,7 +162,7 @@ export default buildConfig({
         ]
       : []),
     seoPlugin({
-      collections: ["pages", "products", "blog-posts"],
+      collections: ["pages", "products", "blog-posts", "case-studies"],
       uploadsCollection: "media",
       // «| Poynt»-suffikset legges på automatisk i frontend (title.template),
       // så meta-tittelen lagres uten suffiks for å unngå dobbel «| Poynt».
@@ -172,6 +174,9 @@ export default buildConfig({
         }
         if (collectionSlug === "blog-posts") {
           return `${siteUrl}/blogg/${doc.slug}`;
+        }
+        if (collectionSlug === "case-studies") {
+          return `${siteUrl}/kundehistorier/${doc.slug}`;
         }
         return `${siteUrl}/${collectionSlug}/${doc.slug}`;
       },
@@ -229,7 +234,7 @@ export default buildConfig({
       ],
     }),
     redirectsPlugin({
-      collections: ["pages", "products", "blog-posts"],
+      collections: ["pages", "products", "blog-posts", "case-studies"],
       overrides: {
         admin: {
           group: "Innstillinger",

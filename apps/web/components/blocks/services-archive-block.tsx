@@ -2,6 +2,7 @@ import type { Service } from "@/payload-types";
 import config from "@/payload.config";
 import { BlockSection, Container, SectionHeader, cn } from "@poynt/ui";
 import { ArrowRight } from "lucide-react";
+import { cacheLife, cacheTag } from "next/cache";
 import Link from "next/link";
 import { getPayload } from "payload";
 import type { ComponentProps } from "react";
@@ -26,6 +27,10 @@ export async function ServicesArchiveBlock({
   layout = "grid",
   showMoreLink = false,
 }: ServicesArchiveBlockProps) {
+  "use cache";
+  cacheTag("cms");
+  cacheLife("minutes");
+
   const payload = await getPayload({ config });
 
   let docs: Service[] = [];

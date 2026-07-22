@@ -1,5 +1,9 @@
 import type { CollectionConfig } from "payload";
 import { guideBlocks } from "../blocks/guide-blocks";
+import {
+  qualityDataFields,
+  qualityReviewPanel,
+} from "../fields/quality-review";
 import { stockPickerAfterInput } from "../fields/stock-picker-after-input";
 import { enrichBookmarks } from "../lib/enrich-bookmarks";
 import { generateSlug } from "../lib/generate-slug";
@@ -63,6 +67,17 @@ export const Guides: CollectionConfig = {
           description: "Selve guiden.",
           fields: [
             {
+              // Visuell skrivehjelp øverst: hvem/steg/neste + live sjekkliste.
+              name: "retningslinjer",
+              type: "ui",
+              admin: {
+                components: {
+                  Field:
+                    "/admin/components/content-guidelines#ContentGuidelines",
+                },
+              },
+            },
+            {
               name: "title",
               type: "text",
               required: true,
@@ -101,19 +116,7 @@ export const Guides: CollectionConfig = {
           label: "Kvalitet",
           description:
             "AI-vurdering av nytteverdi. Påvirker ikke det publiserte innholdet — kun et redaksjonelt hjelpemiddel.",
-          fields: [
-            {
-              name: "kvalitetsvurdering",
-              type: "ui",
-              label: "Kvalitetsvurdering",
-              admin: {
-                components: {
-                  Field:
-                    "/admin/components/guides/review-guide-button#ReviewGuideButton",
-                },
-              },
-            },
-          ],
+          fields: [qualityReviewPanel()],
         },
       ],
     },
@@ -139,106 +142,85 @@ export const Guides: CollectionConfig = {
       },
     },
     {
-      name: "section",
-      type: "select",
-      required: true,
-      label: "Seksjon",
-      defaultValue: "generelt",
+      // Sidebar-ro: plasseringsvalgene samlet i én sammenleggbar seksjon
+      // (kun presentasjon — feltnavn og DB-skjema er uendret).
+      type: "collapsible",
+      label: "Plassering",
       admin: {
         position: "sidebar",
-        description: "Styrer hvor guiden grupperes på ressurs-forsiden",
+        initCollapsed: false,
       },
-      options: [
-        { label: "Generelt", value: "generelt" },
-        { label: "Kanaler", value: "kanaler" },
-        { label: "Maler", value: "maler" },
-        { label: "Inspirasjon", value: "inspirasjon" },
-        { label: "Gratis ressurser", value: "ressurser" },
+      fields: [
+        {
+          name: "section",
+          type: "select",
+          required: true,
+          label: "Seksjon",
+          defaultValue: "generelt",
+          admin: {
+            description: "Styrer hvor guiden grupperes på ressurs-forsiden",
+          },
+          options: [
+            { label: "Generelt", value: "generelt" },
+            { label: "Kanaler", value: "kanaler" },
+            { label: "Maler", value: "maler" },
+            { label: "Inspirasjon", value: "inspirasjon" },
+            { label: "Gratis ressurser", value: "ressurser" },
+          ],
+        },
+        {
+          name: "category",
+          type: "relationship",
+          relationTo: "categories",
+          label: "Kategori / kanal",
+          admin: {
+            description: "Gir farge og ikon-identitet (f.eks. Instagram)",
+          },
+        },
+        {
+          name: "order",
+          type: "number",
+          label: "Rekkefølge",
+          defaultValue: 0,
+          admin: {
+            description: "Lavere tall vises først innenfor seksjonen",
+          },
+        },
+        {
+          name: "isFeatured",
+          type: "checkbox",
+          label: "Framhevet",
+          defaultValue: false,
+        },
       ],
     },
     {
-      name: "category",
-      type: "relationship",
-      relationTo: "categories",
-      label: "Kategori / kanal",
+      type: "collapsible",
+      label: "Visning",
       admin: {
         position: "sidebar",
-        description: "Gir farge og ikon-identitet (f.eks. Instagram)",
+        initCollapsed: true,
       },
+      fields: [
+        {
+          name: "showToc",
+          type: "checkbox",
+          label: "Vis innholdsmeny",
+          defaultValue: true,
+          admin: {
+            description:
+              "Viser en seksjonsmeny (innholdsfortegnelse) ved siden av guiden når den har minst to H2-overskrifter. Skru av for å skjule den.",
+          },
+        },
+        {
+          name: "relatedGuides",
+          type: "relationship",
+          relationTo: "guides",
+          hasMany: true,
+          label: "Relaterte guider",
+        },
+      ],
     },
-    {
-      name: "order",
-      type: "number",
-      label: "Rekkefølge",
-      defaultValue: 0,
-      admin: {
-        position: "sidebar",
-        description: "Lavere tall vises først innenfor seksjonen",
-      },
-    },
-    {
-      name: "isFeatured",
-      type: "checkbox",
-      label: "Framhevet",
-      defaultValue: false,
-      admin: {
-        position: "sidebar",
-      },
-    },
-    {
-      name: "showToc",
-      type: "checkbox",
-      label: "Vis innholdsmeny",
-      defaultValue: true,
-      admin: {
-        position: "sidebar",
-        description:
-          "Viser en seksjonsmeny (innholdsfortegnelse) ved siden av guiden når den har minst to H2-overskrifter. Skru av for å skjule den.",
-      },
-    },
-    {
-      name: "qualityScore",
-      type: "number",
-      label: "Kvalitetsscore",
-      min: 0,
-      max: 100,
-      admin: {
-        position: "sidebar",
-        readOnly: true,
-        description:
-          "Settes av AI-vurderingen (0–100). Kjør den under «Kvalitet»-fanen.",
-      },
-    },
-    {
-      name: "qualityReviewedAt",
-      type: "date",
-      label: "Sist vurdert",
-      admin: {
-        position: "sidebar",
-        readOnly: true,
-        date: { displayFormat: "dd.MM.yyyy HH:mm" },
-      },
-    },
-    {
-      // Hele vurderingen (oppsummering, delscore, fiks, innholds-hash). Rendres
-      // av panelet i «Kvalitet»-fanen; skjult som rått felt fordi JSON-en er
-      // stor og stygg.
-      name: "qualityReview",
-      type: "json",
-      label: "Kvalitetsvurdering (rådata)",
-      admin: {
-        hidden: true,
-      },
-    },
-    {
-      name: "relatedGuides",
-      type: "relationship",
-      relationTo: "guides",
-      hasMany: true,
-      label: "Relaterte guider",
-      admin: {
-        position: "sidebar",
-      },
-    },
+    ...qualityDataFields({ sidebarSection: true }),
   ],
 };

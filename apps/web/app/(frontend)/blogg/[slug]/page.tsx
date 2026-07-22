@@ -14,6 +14,7 @@ import config from "@/payload.config";
 import { RichText } from "@payloadcms/richtext-lexical/react";
 import { Badge, Breadcrumbs, Container, Heading, Text } from "@poynt/ui";
 import type { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import { notFound } from "next/navigation";
 import { getPayload } from "payload";
 
@@ -23,10 +24,11 @@ interface PostPageProps {
   }>;
 }
 
-export async function generateMetadata({
-  params,
-}: PostPageProps): Promise<Metadata> {
-  const { slug } = await params;
+async function getPost(slug: string) {
+  "use cache";
+  cacheTag("cms");
+  cacheLife("minutes");
+
   const payload = await getPayload({ config });
 
   const posts = await payload.find({
@@ -35,10 +37,18 @@ export async function generateMetadata({
       slug: { equals: slug },
       _status: { equals: "published" },
     },
+    depth: 2,
     limit: 1,
   });
 
-  const post = posts.docs[0];
+  return posts.docs[0] || null;
+}
+
+export async function generateMetadata({
+  params,
+}: PostPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const post = await getPost(slug);
   if (!post) {
     return notFoundMetadata("Innlegg ikke funnet");
   }
@@ -58,19 +68,7 @@ export async function generateMetadata({
 
 export default async function PostPage({ params }: PostPageProps) {
   const { slug } = await params;
-  const payload = await getPayload({ config });
-
-  const posts = await payload.find({
-    collection: "blog-posts",
-    where: {
-      slug: { equals: slug },
-      _status: { equals: "published" },
-    },
-    depth: 2,
-    limit: 1,
-  });
-
-  const post = posts.docs[0];
+  const post = await getPost(slug);
   if (!post) {
     notFound();
   }

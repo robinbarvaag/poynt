@@ -6,6 +6,7 @@ import { buildMetadata, notFoundMetadata } from "@/lib/seo";
 import { faqSchema } from "@/lib/structured-data";
 import config from "@/payload.config";
 import type { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import { notFound, redirect } from "next/navigation";
 import { getPayload } from "payload";
 
@@ -17,6 +18,10 @@ interface PageProps {
 1;
 
 async function getPage(slug: string) {
+  "use cache";
+  cacheTag("cms");
+  cacheLife("minutes");
+
   const payload = await getPayload({ config });
 
   const pages = await payload.find({
@@ -34,6 +39,10 @@ async function getPage(slug: string) {
 }
 
 async function checkRedirect(pathname: string) {
+  "use cache";
+  cacheTag("cms");
+  cacheLife("minutes");
+
   const payload = await getPayload({ config });
 
   // Bruk redirects-pluginets collection-skjema

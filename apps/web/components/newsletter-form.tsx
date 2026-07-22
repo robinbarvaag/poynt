@@ -49,10 +49,14 @@ export function NewsletterForm({
   };
 
   if (status === "success") {
+    // Suksess-øyeblikket får et lite pop på ikonet og en myk inntoning av
+    // teksten — samme grammatikk som FormSuccess/kvitteringssiden.
     return (
       <div className="flex items-center justify-center gap-2 text-primary py-2">
-        <CheckCircle className="h-5 w-5" />
-        <span className="font-medium">Takk! Du er nå påmeldt.</span>
+        <CheckCircle className="animate-success-pop h-5 w-5" />
+        <span className="motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-1 motion-safe:animate-in font-medium motion-safe:duration-300 motion-safe:delay-150 motion-safe:ease-soft motion-safe:fill-mode-both">
+          Takk! Du er nå påmeldt.
+        </span>
       </div>
     );
   }
@@ -79,7 +83,7 @@ export function NewsletterForm({
         )}
       </Button>
       {status === "error" && (
-        <p className="absolute -bottom-6 left-0 text-sm text-destructive">
+        <p className="swap-in absolute -bottom-6 left-0 text-sm text-destructive">
           {errorMessage}
         </p>
       )}

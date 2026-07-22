@@ -71,6 +71,12 @@ const navItems = [
         url: "/blogg",
       },
       {
+        label: "Kundehistorier",
+        description: "Ekte historier og resultater",
+        linkType: "custom" as const,
+        url: "/kundehistorier",
+      },
+      {
         label: "Podkast",
         description: "Lytt til episodene",
         linkType: "custom" as const,

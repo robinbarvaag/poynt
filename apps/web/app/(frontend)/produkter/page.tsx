@@ -1,16 +1,41 @@
 import { AdminBar } from "@/components/admin-bar";
-import { CategoryFilter } from "@/components/category-filter";
 import { PageHero } from "@/components/page-hero";
+import {
+  ProductExplorer,
+  type ProductExplorerItem,
+} from "@/components/product-explorer";
 import { PRODUCT_TYPE_FILTERS, toProductGridItem } from "@/lib/product";
 import { buildMetadata } from "@/lib/seo";
 import config from "@/payload.config";
-import { Container, ProductGrid, Text } from "@poynt/ui";
+import { Container } from "@poynt/ui";
 import type { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import { getPayload } from "payload";
 
-export async function generateMetadata(): Promise<Metadata> {
+async function getProductsPageData() {
+  "use cache";
+  cacheTag("cms");
+  cacheLife("minutes");
+
   const payload = await getPayload({ config });
-  const pageConfig = await payload.findGlobal({ slug: "productspage" });
+
+  const [pageConfig, products] = await Promise.all([
+    payload.findGlobal({ slug: "productspage" }),
+    payload.find({
+      collection: "products",
+      where: {
+        active: { equals: true },
+      },
+      sort: "-createdAt",
+      limit: 100,
+    }),
+  ]);
+
+  return { pageConfig, products };
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { pageConfig } = await getProductsPageData();
 
   const meta = pageConfig?.meta;
   return buildMetadata({
@@ -22,26 +47,8 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
-interface PageProps {
-  searchParams: Promise<{ type?: string }>;
-}
-
-export default async function ProductsPage({ searchParams }: PageProps) {
-  const { type } = await searchParams;
-  const payload = await getPayload({ config });
-
-  const [pageConfig, products] = await Promise.all([
-    payload.findGlobal({ slug: "productspage" }),
-    payload.find({
-      collection: "products",
-      where: {
-        active: { equals: true },
-        ...(type && { type: { equals: type } }),
-      },
-      sort: "-createdAt",
-      limit: 100,
-    }),
-  ]);
+export default async function ProductsPage() {
+  const { pageConfig, products } = await getProductsPageData();
 
   const heroEnabled = pageConfig?.hero?.enabled ?? true;
   const heroTitle = pageConfig?.hero?.title || "Produkter";
@@ -59,6 +66,21 @@ export default async function ProductsPage({ searchParams }: PageProps) {
   const emptyStateText =
     pageConfig?.emptyStateText || "Ingen produkter tilgjengelig.";
 
+  // Samme mønster som bloggen: filter + søk skjer på klienten over hele
+  // lista, plassert over gridet — ikke URL-param-filter inne i heroen.
+  const items: ProductExplorerItem[] = products.docs.map((product) => ({
+    ...toProductGridItem(product),
+    type: product.type,
+    search: [product.name, product.shortDescription]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase(),
+  }));
+
+  // Vis kun filterpiller for typer som faktisk finnes i sortimentet.
+  const presentTypes = new Set(items.map((item) => item.type));
+  const filters = PRODUCT_TYPE_FILTERS.filter((f) => presentTypes.has(f.value));
+
   return (
     <>
       <AdminBar global="productspage" singular="produktside" />
@@ -68,23 +90,15 @@ export default async function ProductsPage({ searchParams }: PageProps) {
           title={heroTitle}
           description={heroDescription}
           size="large"
-        >
-          <CategoryFilter
-            categories={PRODUCT_TYPE_FILTERS}
-            paramName="type"
-            allLabel="Alle"
-          />
-        </PageHero>
+        />
       )}
 
       <Container padding="default" className="py-8">
-        {products.docs.length > 0 ? (
-          <ProductGrid products={products.docs.map(toProductGridItem)} />
-        ) : (
-          <Text variant="muted" customStyles="text-center py-12">
-            {emptyStateText}
-          </Text>
-        )}
+        <ProductExplorer
+          products={items}
+          filters={filters}
+          emptyStateText={emptyStateText}
+        />
       </Container>
     </>
   );

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
+import { Suspense } from "react";
 
 export interface ContactLinkProps
   extends Omit<React.ComponentPropsWithoutRef<typeof Link>, "href"> {
@@ -28,17 +29,44 @@ export const ContactLink = React.forwardRef<
   HTMLAnchorElement,
   ContactLinkProps
 >(({ kilde, emne, href = "/kontakt", children, ...rest }, ref) => {
-  const pathname = usePathname();
+  const buildHref = (pathname: string | null) => {
+    const params = new URLSearchParams();
+    params.set("kilde", kilde);
+    if (emne) params.set("emne", emne);
+    if (pathname) params.set("fra", pathname);
+    return `${href}?${params.toString()}`;
+  };
 
-  const params = new URLSearchParams();
-  params.set("kilde", kilde);
-  if (emne) params.set("emne", emne);
-  if (pathname) params.set("fra", pathname);
-
+  // usePathname er runtime-data under prerendering (cacheComponents) — les den
+  // bak en Suspense-grense. Fallbacket er samme lenke uten «fra»-stempel, så
+  // skallet er komplett mens stien streamer inn.
   return (
-    <Link ref={ref} href={`${href}?${params.toString()}`} {...rest}>
+    <Suspense
+      fallback={
+        <Link ref={ref} href={buildHref(null)} {...rest}>
+          {children}
+        </Link>
+      }
+    >
+      <PathStampedLink ref={ref} buildHref={buildHref} {...rest}>
+        {children}
+      </PathStampedLink>
+    </Suspense>
+  );
+});
+ContactLink.displayName = "ContactLink";
+
+const PathStampedLink = React.forwardRef<
+  HTMLAnchorElement,
+  Omit<React.ComponentPropsWithoutRef<typeof Link>, "href"> & {
+    buildHref: (pathname: string | null) => string;
+  }
+>(({ buildHref, children, ...rest }, ref) => {
+  const pathname = usePathname();
+  return (
+    <Link ref={ref} href={buildHref(pathname)} {...rest}>
       {children}
     </Link>
   );
 });
-ContactLink.displayName = "ContactLink";
+PathStampedLink.displayName = "PathStampedLink";

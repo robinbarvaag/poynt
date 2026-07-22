@@ -3,6 +3,7 @@ import { RenderBlocks } from "@/components/render-blocks";
 import { buildMetadata, notFoundMetadata } from "@/lib/seo";
 import config from "@/payload.config";
 import type { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import { notFound } from "next/navigation";
 import { getPayload } from "payload";
 
@@ -14,6 +15,10 @@ import { getPayload } from "payload";
  * klient-navigasjon overtar modalet.
  */
 async function getContactPage() {
+  "use cache";
+  cacheTag("cms");
+  cacheLife("minutes");
+
   const payload = await getPayload({ config });
   const pages = await payload.find({
     collection: "pages",

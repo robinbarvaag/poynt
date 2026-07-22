@@ -1,3 +1,4 @@
+import { BlockLink } from "@/components/block-link";
 import { type MediaResource, PayloadImage } from "@/components/payload-image";
 import { Hero } from "@poynt/ui";
 
@@ -40,20 +41,28 @@ export function HeroBlock({
 }: HeroBlockProps) {
   const mainCta = primaryCta?.text ? primaryCta : cta;
 
+  // Kontakt-lenker merkes med kilde=hero (uten emne — heroen har ikke ett
+  // konkret tema); ?fra= festes klientside i BlockLink.
+  const stamp = (url: string) =>
+    url.startsWith("/kontakt") && !url.includes("kilde=")
+      ? `${url}${url.includes("?") ? "&" : "?"}kilde=hero`
+      : url;
+
   return (
     <Hero
       className="-mt-22"
+      linkComponent={BlockLink}
       eyebrow={tagsLabel ?? undefined}
       title={title}
       subtitle={subtitle ?? undefined}
       primaryCta={
         mainCta?.text && mainCta?.url
-          ? { text: mainCta.text, href: mainCta.url }
+          ? { text: mainCta.text, href: stamp(mainCta.url) }
           : undefined
       }
       secondaryCta={
         secondaryCta?.text && secondaryCta?.url
-          ? { text: secondaryCta.text, href: secondaryCta.url }
+          ? { text: secondaryCta.text, href: stamp(secondaryCta.url) }
           : undefined
       }
       pills={tags?.map((tag) => ({ label: tag.label }))}

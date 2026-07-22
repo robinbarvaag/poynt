@@ -33,6 +33,7 @@ const columns = [
     links: [
       link("Om Poynt", "/om"),
       link("Kontakt", "/kontakt"),
+      link("Kundehistorier", "/kundehistorier"),
       link("Blogg", "/blogg"),
       link("Podkast", "/podkast"),
     ],

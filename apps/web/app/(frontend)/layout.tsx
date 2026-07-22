@@ -6,7 +6,7 @@ import { organizationSchema, websiteSchema } from "@/lib/structured-data";
 import config from "@payload-config";
 import { Grain, cn } from "@poynt/ui";
 import type { Metadata } from "next";
-import { unstable_cache } from "next/cache";
+import { cacheLife, cacheTag } from "next/cache";
 import { Bricolage_Grotesque, Poppins } from "next/font/google";
 import { getPayload } from "payload";
 
@@ -55,6 +55,10 @@ export const metadata: Metadata = {
 };
 
 async function getGlobals() {
+  "use cache";
+  cacheTag("globals");
+  cacheLife("minutes");
+
   const payload = await getPayload({ config });
 
   const [siteSettings, header, footer] = await Promise.all([
@@ -66,11 +70,6 @@ async function getGlobals() {
   return { siteSettings, header, footer };
 }
 
-const getCachedGlobals = unstable_cache(getGlobals, ["globals"], {
-  tags: ["globals"],
-  revalidate: 60,
-});
-
 export default async function FrontendLayout({
   children,
   modal,
@@ -78,7 +77,7 @@ export default async function FrontendLayout({
   children: React.ReactNode;
   modal: React.ReactNode;
 }) {
-  const { siteSettings, header, footer } = await getCachedGlobals();
+  const { siteSettings, header, footer } = await getGlobals();
 
   // Nettstedsdekkende strukturert data (GEO/SEO): organisasjon + nettsted.
   const siteJsonLd = [

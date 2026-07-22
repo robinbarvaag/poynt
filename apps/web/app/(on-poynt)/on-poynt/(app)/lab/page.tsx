@@ -4,9 +4,6 @@ import { getPlaygroundTools } from "@poynt/planner-api/lib/playground";
 import { redirect } from "next/navigation";
 import { PlaygroundClient } from "./playground-client";
 
-// Laben leser live prompt-maler + sesjon — aldri statisk.
-export const dynamic = "force-dynamic";
-
 export default async function LabPage() {
   const session = await getPlaygroundSession();
   if (!session) redirect("/on-poynt/oversikt");

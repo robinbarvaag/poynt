@@ -1,5 +1,6 @@
 import type { Form } from "@/payload-types";
 import config from "@/payload.config";
+import { cacheLife, cacheTag } from "next/cache";
 import { getPayload } from "payload";
 
 /** Tittelen på kontaktskjemaet (seedes i scripts/seed-kontakt.ts). */
@@ -11,6 +12,10 @@ export const CONTACT_FORM_TITLE = "Kontakt";
  * nøyaktig samme skjema.
  */
 export async function getContactForm(): Promise<Form | null> {
+  "use cache";
+  cacheTag("cms");
+  cacheLife("minutes");
+
   const payload = await getPayload({ config });
   const res = await payload.find({
     collection: "forms",

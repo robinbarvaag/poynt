@@ -115,7 +115,7 @@ const pages = [
         title: "Erfaring dere kan lene dere på",
         variant: "primary",
         stats: [
-          { value: 10, suffix: " år", label: "som selvstendig" },
+          { value: 10, label: "år som selvstendig" },
           { value: 5, label: "egne bedrifter startet" },
           { value: 9, suffix: "+", label: "merkevarer jobbet med" },
         ],
@@ -140,7 +140,8 @@ const pages = [
             title: "Gründer- og investorblikk",
             text: "Har startet fem bedrifter selv og investert i lokale oppstartsselskap. Vet hvordan det er å stå i det.",
             linkLabel: "Ta en prat",
-            linkUrl: "/kontakt",
+            // Emne matcher et valg i «Hva gjelder det?» → prefylles i modalet.
+            linkUrl: "/kontakt?emne=Styrearbeid",
           },
         ],
       },
@@ -164,7 +165,8 @@ const pages = [
             title: "Workshop for team og styre",
             text: "Skreddersydde samlinger for ledergrupper, team og styrer.",
             linkLabel: "Book et foredrag",
-            linkUrl: "/kontakt",
+            // Emne matcher et valg i «Hva gjelder det?» → prefylles i modalet.
+            linkUrl: "/kontakt?emne=Kurs og foredrag",
           },
         ],
       },

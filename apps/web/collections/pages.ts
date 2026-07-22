@@ -1,5 +1,9 @@
 import type { CollectionConfig } from "payload";
 import { layoutBlocks } from "../blocks/layout-blocks";
+import {
+  qualityDataFields,
+  qualityReviewPanel,
+} from "../fields/quality-review";
 import { seoFaqField } from "../fields/seo-meta";
 import { generateSlug } from "../lib/generate-slug";
 
@@ -77,6 +81,17 @@ export const Pages: CollectionConfig = {
       },
     },
     {
+      // Visuell skrivehjelp øverst: løfte/bevis/handling + live sjekkliste.
+      // Komposisjonssjekken under tar seg av de deterministiske blokk-reglene.
+      name: "retningslinjer",
+      type: "ui",
+      admin: {
+        components: {
+          Field: "/admin/components/content-guidelines#ContentGuidelines",
+        },
+      },
+    },
+    {
       name: "komposisjonssjekk",
       type: "ui",
       admin: {
@@ -85,6 +100,7 @@ export const Pages: CollectionConfig = {
         },
       },
     },
+    qualityReviewPanel(),
     {
       name: "layout",
       type: "blocks",
@@ -97,6 +113,7 @@ export const Pages: CollectionConfig = {
     },
     // SEO-felt kommer automatisk fra seoPlugin
     seoFaqField(),
+    ...qualityDataFields({ sidebarSection: true }),
     {
       name: "publishedAt",
       type: "date",

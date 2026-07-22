@@ -1,9 +1,15 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { useEffect } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import type * as React from "react";
 import { cn } from "../../lib/utils";
+import {
+  CloseIcon,
+  ImageFrame,
+  PanelFade,
+  ShowcaseModal,
+  useModalBehavior,
+} from "./showcase-modal";
 
 export interface ServiceShowcaseItem {
   id: string | number;
@@ -23,12 +29,15 @@ export interface ServiceShowcaseItem {
   /** Handlingslenke i panelet. */
   ctaLabel?: string;
   ctaHref?: string;
+  /** Mål-URL for kortet i `ServiceShowcaseGrid` (rute-drevet variant). */
+  href?: string;
 }
 
 export interface ServiceShowcaseLinkProps {
   href: string;
   className?: string;
   children: React.ReactNode;
+  "aria-label"?: string;
 }
 
 export interface ServiceShowcaseProps {
@@ -44,23 +53,6 @@ export interface ServiceShowcaseProps {
    * som gir full sidelast.
    */
   ctaLinkComponent?: React.ComponentType<ServiceShowcaseLinkProps>;
-}
-
-function CloseIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className="size-5"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.25"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M18 6 6 18M6 6l12 12" />
-    </svg>
-  );
 }
 
 function ArrowRight() {
@@ -80,24 +72,199 @@ function ArrowRight() {
   );
 }
 
-function ImageFrame({
-  image,
-  className,
+/** Innholdet i et tjenestekort — delt mellom knapp- og lenkevarianten. */
+function CardBody({
+  service,
+  featured,
 }: {
-  image?: React.ReactNode;
-  className?: string;
+  service: ServiceShowcaseItem;
+  featured: boolean;
 }) {
   return (
-    <div className={cn("relative overflow-hidden bg-muted", className)}>
-      {image ?? (
-        <div className="flex size-full items-center justify-center bg-foreground/5">
-          <span
-            aria-hidden="true"
-            className="size-12 rounded-[58%_42%_55%_45%/55%_48%_52%_45%] bg-foreground/10"
-          />
-        </div>
+    <>
+      <ImageFrame
+        image={service.image}
+        className={cn(
+          "aspect-4/3",
+          featured && "sm:aspect-auto sm:h-full sm:w-1/2 sm:shrink-0"
+        )}
+      />
+      <div
+        className={cn(
+          "flex flex-1 flex-col p-6",
+          featured && "sm:justify-center sm:p-8"
+        )}
+      >
+        <span className="font-heading font-semibold text-primary text-xs uppercase tracking-[0.18em]">
+          {service.eyebrow ?? "Tjeneste"}
+        </span>
+        <h3
+          className={cn(
+            "mt-1.5 font-bold font-heading text-lg leading-snug tracking-tight",
+            featured && "sm:text-2xl"
+          )}
+        >
+          {service.name}
+        </h3>
+        {service.price && (
+          <p className="mt-1 font-semibold text-primary">{service.price}</p>
+        )}
+        <p
+          className={cn(
+            "mt-3 text-muted-foreground text-sm leading-relaxed",
+            featured ? "line-clamp-3" : "line-clamp-2"
+          )}
+        >
+          {service.description}
+        </p>
+        <span className="mt-4 inline-flex items-center gap-1.5 font-semibold text-foreground text-sm transition-all group-hover:gap-2.5">
+          Les mer
+          <ArrowRight />
+        </span>
+      </div>
+    </>
+  );
+}
+
+const cardShellClasses =
+  "group flex h-full w-full cursor-pointer flex-col overflow-hidden rounded-3xl bg-card text-left shadow-sm ring-1 ring-foreground/10 transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary";
+
+/** Tekst- og CTA-innholdet i det åpne panelet — delt mellom variantene. */
+function PanelBody({
+  service,
+  ctaLinkComponent: CtaLink,
+}: {
+  service: ServiceShowcaseItem;
+  ctaLinkComponent?: React.ComponentType<ServiceShowcaseLinkProps>;
+}) {
+  return (
+    <>
+      <span className="font-heading font-semibold text-primary text-xs uppercase tracking-[0.18em]">
+        {service.eyebrow ?? "Tjeneste"}
+      </span>
+      <h2 className="mt-2 font-bold font-heading text-3xl leading-tight tracking-tight md:text-4xl">
+        {service.name}
+      </h2>
+      {service.price && (
+        <p className="mt-2 font-semibold text-primary text-xl">
+          {service.price}
+        </p>
       )}
-    </div>
+      <p className="mt-5 text-base text-muted-foreground leading-relaxed">
+        {service.description}
+      </p>
+      {service.details && (
+        <div className="mt-5 text-base leading-relaxed">{service.details}</div>
+      )}
+      {service.ctaHref &&
+        (CtaLink ? (
+          <CtaLink
+            href={service.ctaHref}
+            className="mt-8 inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3 font-semibold text-primary-foreground text-sm transition-all hover:gap-3"
+          >
+            {service.ctaLabel ?? "Ta kontakt"}
+            <ArrowRight />
+          </CtaLink>
+        ) : (
+          <a
+            href={service.ctaHref}
+            className="mt-8 inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3 font-semibold text-primary-foreground text-sm transition-all hover:gap-3"
+          >
+            {service.ctaLabel ?? "Ta kontakt"}
+            <ArrowRight />
+          </a>
+        ))}
+    </>
+  );
+}
+
+export interface ServiceShowcaseGridProps {
+  services: ServiceShowcaseItem[];
+  className?: string;
+  /**
+   * Lenkekomponent for kortene (typisk next/link). Kort uten `href` hoppes
+   * over. Default er en vanlig <a>.
+   */
+  linkComponent?: React.ComponentType<ServiceShowcaseLinkProps>;
+}
+
+/**
+ * Rute-drevet variant av tjeneste-oversikten: hvert kort er en ekte lenke
+ * (crawlbar, delbar) i stedet for en knapp med lokal stat. Kortene bærer samme
+ * `layoutId` som `ServiceShowcaseModal`, så når lenken fanges av en
+ * intercepting-route og modalet monteres, «zoomer» kortet åpent via delt
+ * layout-animasjon — samme lekenhet som den stat-drevne `ServiceShowcase`.
+ */
+export function ServiceShowcaseGrid({
+  services,
+  className,
+  linkComponent: LinkComp,
+}: ServiceShowcaseGridProps) {
+  return (
+    <ul
+      className={cn(
+        "grid grid-flow-row-dense grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3",
+        className
+      )}
+    >
+      {services.map((service) => {
+        if (!service.href) {
+          return null;
+        }
+        const isFeatured = service.featured ?? false;
+        const linkProps = {
+          href: service.href,
+          "aria-label": `Vis mer om ${service.name}`,
+          className: cn(cardShellClasses, isFeatured && "sm:flex-row"),
+          children: <CardBody service={service} featured={isFeatured} />,
+        } satisfies ServiceShowcaseLinkProps;
+        return (
+          <li
+            key={service.id}
+            className={cn("h-full", isFeatured && "sm:col-span-2")}
+          >
+            <motion.div
+              layoutId={`service-${service.id}`}
+              className="h-full overflow-hidden rounded-3xl"
+            >
+              {LinkComp ? <LinkComp {...linkProps} /> : <a {...linkProps} />}
+            </motion.div>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+export interface ServiceShowcaseModalProps {
+  service: ServiceShowcaseItem;
+  /**
+   * Kalles ETTER at exit-animasjonen er ferdig — typisk `router.back()` når
+   * modalet rendres via en intercepting-route.
+   */
+  onClosed: () => void;
+  ctaLinkComponent?: React.ComponentType<ServiceShowcaseLinkProps>;
+}
+
+/**
+ * Det åpne tjenestepanelet som frittstående modal, ment for en
+ * intercepting-route (`@modal/(.)tjenester/[slug]`). Deler `layoutId` med
+ * kortene i `ServiceShowcaseGrid` — se `ShowcaseModal` for skall-oppførselen.
+ */
+export function ServiceShowcaseModal({
+  service,
+  onClosed,
+  ctaLinkComponent,
+}: ServiceShowcaseModalProps) {
+  return (
+    <ShowcaseModal
+      onClosed={onClosed}
+      ariaLabel={service.name}
+      image={service.image}
+      layoutId={`service-${service.id}`}
+    >
+      <PanelBody service={service} ctaLinkComponent={ctaLinkComponent} />
+    </ShowcaseModal>
   );
 }
 
@@ -106,6 +273,10 @@ function ImageFrame({
  * layout-animasjon (framer-motion `layoutId`). Egner seg når hver tjeneste er
  * en kort beskrivelse + pris + «ta kontakt» — da slipper man tynne egne sider.
  * Presentasjons-only og kontrollert (appen eier åpen/lukk-staten).
+ *
+ * NB: nettsiden bruker den rute-drevne `ServiceShowcaseGrid` +
+ * `ServiceShowcaseModal` i stedet (URL per tjeneste, bedre SEO); denne
+ * kontrollerte varianten beholdes for enkle innslag uten egne ruter.
  */
 export function ServiceShowcase({
   services,
@@ -113,29 +284,11 @@ export function ServiceShowcase({
   onSelect,
   onClose,
   className,
-  ctaLinkComponent: CtaLink,
+  ctaLinkComponent,
 }: ServiceShowcaseProps) {
-  const reduce = useReducedMotion();
   const active = services.find((s) => s.id === activeId) ?? null;
 
-  // Escape lukker, og lås body-scroll mens panelet er åpent.
-  useEffect(() => {
-    if (!active) {
-      return;
-    }
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prevOverflow;
-    };
-  }, [active, onClose]);
+  useModalBehavior(!!active, onClose);
 
   return (
     <>
@@ -157,54 +310,9 @@ export function ServiceShowcase({
                 layoutId={`service-${service.id}`}
                 onClick={() => onSelect(service.id)}
                 aria-label={`Vis mer om ${service.name}`}
-                className={cn(
-                  "group flex h-full w-full cursor-pointer flex-col overflow-hidden rounded-3xl bg-card text-left shadow-sm ring-1 ring-foreground/10 transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
-                  isFeatured && "sm:flex-row"
-                )}
+                className={cn(cardShellClasses, isFeatured && "sm:flex-row")}
               >
-                <ImageFrame
-                  image={service.image}
-                  className={cn(
-                    "aspect-4/3",
-                    isFeatured &&
-                      "sm:aspect-auto sm:h-full sm:w-1/2 sm:shrink-0"
-                  )}
-                />
-                <div
-                  className={cn(
-                    "flex flex-1 flex-col p-6",
-                    isFeatured && "sm:justify-center sm:p-8"
-                  )}
-                >
-                  <span className="font-heading font-semibold text-primary text-xs uppercase tracking-[0.18em]">
-                    {service.eyebrow ?? "Tjeneste"}
-                  </span>
-                  <h3
-                    className={cn(
-                      "mt-1.5 font-bold font-heading text-lg leading-snug tracking-tight",
-                      isFeatured && "sm:text-2xl"
-                    )}
-                  >
-                    {service.name}
-                  </h3>
-                  {service.price && (
-                    <p className="mt-1 font-semibold text-primary">
-                      {service.price}
-                    </p>
-                  )}
-                  <p
-                    className={cn(
-                      "mt-3 text-muted-foreground text-sm leading-relaxed",
-                      isFeatured ? "line-clamp-3" : "line-clamp-2"
-                    )}
-                  >
-                    {service.description}
-                  </p>
-                  <span className="mt-4 inline-flex items-center gap-1.5 font-semibold text-foreground text-sm transition-all group-hover:gap-2.5">
-                    Les mer
-                    <ArrowRight />
-                  </span>
-                </div>
+                <CardBody service={service} featured={isFeatured} />
               </motion.button>
             </li>
           );
@@ -242,50 +350,12 @@ export function ServiceShowcase({
                 <CloseIcon />
               </button>
 
-              <motion.div
-                className="flex-1 overflow-y-auto p-8 md:p-10"
-                initial={reduce ? false : { opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.15, duration: 0.25 }}
-              >
-                <span className="font-heading font-semibold text-primary text-xs uppercase tracking-[0.18em]">
-                  {active.eyebrow ?? "Tjeneste"}
-                </span>
-                <h2 className="mt-2 font-bold font-heading text-3xl leading-tight tracking-tight md:text-4xl">
-                  {active.name}
-                </h2>
-                {active.price && (
-                  <p className="mt-2 font-semibold text-primary text-xl">
-                    {active.price}
-                  </p>
-                )}
-                <p className="mt-5 text-base text-muted-foreground leading-relaxed">
-                  {active.description}
-                </p>
-                {active.details && (
-                  <div className="mt-5 text-base leading-relaxed">
-                    {active.details}
-                  </div>
-                )}
-                {active.ctaHref &&
-                  (CtaLink ? (
-                    <CtaLink
-                      href={active.ctaHref}
-                      className="mt-8 inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3 font-semibold text-primary-foreground text-sm transition-all hover:gap-3"
-                    >
-                      {active.ctaLabel ?? "Ta kontakt"}
-                      <ArrowRight />
-                    </CtaLink>
-                  ) : (
-                    <a
-                      href={active.ctaHref}
-                      className="mt-8 inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3 font-semibold text-primary-foreground text-sm transition-all hover:gap-3"
-                    >
-                      {active.ctaLabel ?? "Ta kontakt"}
-                      <ArrowRight />
-                    </a>
-                  ))}
-              </motion.div>
+              <PanelFade>
+                <PanelBody
+                  service={active}
+                  ctaLinkComponent={ctaLinkComponent}
+                />
+              </PanelFade>
             </motion.dialog>
           </div>
         )}

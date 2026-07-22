@@ -1,4 +1,8 @@
 import type { CollectionConfig } from "payload";
+import {
+  qualityDataFields,
+  qualityReviewPanel,
+} from "../fields/quality-review";
 import { stockPickerAfterInput } from "../fields/stock-picker-after-input";
 import { generateSlug } from "../lib/generate-slug";
 
@@ -12,6 +16,8 @@ export const BlogPosts: CollectionConfig = {
     useAsTitle: "title",
     defaultColumns: ["title", "author", "publishedAt", "status"],
     group: "Innhold",
+    description:
+      "Fag og aktualitet med dato: tips, innsikt, meninger og nyheter. Handler teksten om én kundes reise og resultat, skriv den som Kundehistorie i stedet.",
     livePreview: {
       url: ({ data }) => {
         return `${process.env.NEXT_PUBLIC_URL || "http://localhost:3000"}/blogg/${data?.slug}`;
@@ -39,6 +45,16 @@ export const BlogPosts: CollectionConfig = {
     ],
   },
   fields: [
+    {
+      // Visuell skrivehjelp øverst: krok/kjøtt/landing + live sjekkliste.
+      name: "retningslinjer",
+      type: "ui",
+      admin: {
+        components: {
+          Field: "/admin/components/content-guidelines#ContentGuidelines",
+        },
+      },
+    },
     {
       name: "title",
       type: "text",
@@ -76,6 +92,7 @@ export const BlogPosts: CollectionConfig = {
         },
       },
     },
+    qualityReviewPanel(),
     {
       name: "content",
       type: "richText",
@@ -83,45 +100,48 @@ export const BlogPosts: CollectionConfig = {
       label: "Innhold",
     },
     {
-      name: "author",
-      type: "relationship",
-      relationTo: "users",
-      label: "Forfatter",
+      // Sidebar-ro: publiseringsvalgene samlet i én sammenleggbar seksjon
+      // (kun presentasjon — feltnavn og DB-skjema er uendret).
+      type: "collapsible",
+      label: "Publisering",
       admin: {
         position: "sidebar",
+        initCollapsed: false,
       },
-    },
-    {
-      name: "categories",
-      type: "relationship",
-      relationTo: "categories",
-      hasMany: true,
-      label: "Kategorier",
-      admin: {
-        position: "sidebar",
-      },
-    },
-    {
-      name: "publishedAt",
-      type: "date",
-      required: true,
-      label: "Publiseringsdato",
-      admin: {
-        position: "sidebar",
-        date: {
-          pickerAppearance: "dayAndTime",
+      fields: [
+        {
+          name: "author",
+          type: "relationship",
+          relationTo: "users",
+          label: "Forfatter",
         },
-      },
+        {
+          name: "categories",
+          type: "relationship",
+          relationTo: "categories",
+          hasMany: true,
+          label: "Kategorier",
+        },
+        {
+          name: "publishedAt",
+          type: "date",
+          required: true,
+          label: "Publiseringsdato",
+          admin: {
+            date: {
+              pickerAppearance: "dayAndTime",
+            },
+          },
+        },
+        {
+          name: "relatedPosts",
+          type: "relationship",
+          relationTo: "blog-posts",
+          hasMany: true,
+          label: "Relaterte innlegg",
+        },
+      ],
     },
-    {
-      name: "relatedPosts",
-      type: "relationship",
-      relationTo: "blog-posts",
-      hasMany: true,
-      label: "Relaterte innlegg",
-      admin: {
-        position: "sidebar",
-      },
-    },
+    ...qualityDataFields({ sidebarSection: true }),
   ],
 };

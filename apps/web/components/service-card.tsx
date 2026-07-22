@@ -45,6 +45,7 @@ export function ServiceCard({ service }: ServiceCardProps) {
   return (
     <Link
       href={href}
+      scroll={false}
       className="group block bg-muted/50 rounded-2xl overflow-hidden hover:bg-muted transition-colors"
     >
       {service.image && (

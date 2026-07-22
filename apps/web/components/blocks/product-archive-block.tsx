@@ -3,6 +3,7 @@ import type { Product } from "@/payload-types";
 import config from "@/payload.config";
 import { BlockSection, Container, ProductGrid, SectionHeader } from "@poynt/ui";
 import { ArrowRight } from "lucide-react";
+import { cacheLife, cacheTag } from "next/cache";
 import Link from "next/link";
 import { type Where, getPayload } from "payload";
 
@@ -26,6 +27,10 @@ export async function ProductArchiveBlock({
   limit = 8,
   showMoreLink = false,
 }: ProductArchiveBlockProps) {
+  "use cache";
+  cacheTag("cms");
+  cacheLife("minutes");
+
   const payload = await getPayload({ config });
 
   let products: Product[] = [];

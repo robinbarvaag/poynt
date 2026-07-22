@@ -30,6 +30,8 @@ export interface SiteHeaderLinkProps {
   target?: string;
   rel?: string;
   onClick?: () => void;
+  "aria-haspopup"?: boolean;
+  "aria-expanded"?: boolean;
 }
 
 /** Lenkekomponent — send inn `next/link` for klient-navigasjon. Default: <a>. */
@@ -89,19 +91,38 @@ export function SiteHeader({
   const [scrolled, setScrolled] = React.useState(false);
   const [hidden, setHidden] = React.useState(false);
   const lastY = React.useRef(0);
+  // Akkumulert scroll i én retning — nullstilles ved retningsskifte, slik at
+  // trackpad-jitter og rubber-band ikke flipper headeren frem og tilbake.
+  const scrollAccum = React.useRef(0);
 
   React.useEffect(() => {
     function handleScroll() {
-      const y = window.scrollY;
-      setScrolled(y > 16);
-      // Skjul headeren ved scroll nedover (forbi 120px), vis igjen ved scroll
-      // opp — gir mer ro og plass til innholdet mens man leser.
-      if (y > lastY.current && y > 120) {
+      // Clamp mot negative verdier (iOS-overscroll rapporterer y < 0).
+      const y = Math.max(0, window.scrollY);
+      const delta = y - lastY.current;
+      lastY.current = y;
+
+      // Hysterese på glass-tilstanden så den ikke blafrer rundt terskelen.
+      setScrolled((prev) => (prev ? y > 8 : y > 24));
+
+      if (delta === 0) {
+        return;
+      }
+      if (Math.sign(delta) !== Math.sign(scrollAccum.current)) {
+        scrollAccum.current = 0;
+      }
+      scrollAccum.current += delta;
+
+      // Skjul headeren ved bevisst scroll nedover (forbi 120px), vis igjen ved
+      // scroll opp — men først etter 12px sammenhengende bevegelse, så små
+      // rykk ikke teller som intensjon.
+      if (y < 120) {
+        setHidden(false);
+      } else if (scrollAccum.current > 12) {
         setHidden(true);
-      } else if (y < lastY.current) {
+      } else if (scrollAccum.current < -12) {
         setHidden(false);
       }
-      lastY.current = y;
     }
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
@@ -111,18 +132,42 @@ export function SiteHeader({
   // Vis alltid headeren når mobil-menyen er åpen.
   const isHidden = hidden && !mobileOpen;
 
+  // Hover-intent for dropdowns: liten lukke-forsinkelse så en kort avstikker
+  // med pekeren (eller diagonalen ned mot panelet) ikke lukker menyen.
+  const closeTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const openMenu = React.useCallback((index: number) => {
+    if (closeTimer.current) {
+      clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+    }
+    setOpenDropdown(index);
+  }, []);
+  const scheduleClose = React.useCallback(() => {
+    if (closeTimer.current) {
+      clearTimeout(closeTimer.current);
+    }
+    closeTimer.current = setTimeout(() => setOpenDropdown(null), 120);
+  }, []);
+  React.useEffect(() => {
+    return () => {
+      if (closeTimer.current) {
+        clearTimeout(closeTimer.current);
+      }
+    };
+  }, []);
+
   const listVariants = {
     hidden: {},
-    visible: { transition: { staggerChildren: 0.05, delayChildren: 0.12 } },
+    visible: { transition: { staggerChildren: 0.04, delayChildren: 0.05 } },
   };
   const itemVariants = reduce
     ? { hidden: { opacity: 0 }, visible: { opacity: 1 } }
     : {
-        hidden: { opacity: 0, x: 20 },
+        hidden: { opacity: 0, x: 12 },
         visible: {
           opacity: 1,
           x: 0,
-          transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as const },
+          transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] as const },
         },
       };
 
@@ -132,31 +177,54 @@ export function SiteHeader({
     setMobileOpen(false);
   }, [pathname]);
 
+  // Segment-bevisst match: «/om» treffer «/om» og «/om/team», ikke «/omsetning».
+  const matchesPath = (href: string) => {
+    if (pathname == null || href === "#") {
+      return false;
+    }
+    if (href === "/") {
+      return pathname === "/";
+    }
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
+
+  // Et toppunkt er aktivt når stien treffer lenken selv ELLER en av
+  // under-lenkene — barn av et menypunkt holder foreldren markert.
   const isActive = (item: SiteHeaderNavItem) => {
     if (pathname == null) {
       return item.active ?? false;
     }
-    return item.href === "/"
-      ? pathname === "/"
-      : pathname.startsWith(item.href);
+    return (
+      matchesPath(item.href) ||
+      (item.subItems?.some((sub) => matchesPath(sub.href)) ?? false)
+    );
   };
 
   return (
     <header
       className={cn(
-        "pointer-events-none fixed top-0 z-50 w-full transition-[transform,opacity] duration-300 ease-out",
-        isHidden && "-translate-y-full opacity-0",
+        // Kun transform — å fade samtidig gjør gjeninntreden grøtete; baren
+        // sklir ut og inn langs samme bane (spatial konsistens).
+        "pointer-events-none fixed top-0 z-50 w-full transition-transform duration-300 ease-drawer",
+        reduce && "transition-opacity duration-200 ease-out",
+        isHidden && (reduce ? "opacity-0" : "-translate-y-full"),
         className
       )}
     >
       <nav
         className={cn(
           // Full-bredde bar limt til toppen. Gjennomsiktig over heroen; blir
-          // en tett glass-flate med bunnkant når man scroller.
-          "pointer-events-auto w-full border-b transition-colors duration-300",
+          // en tett glass-flate når man scroller. Backdrop-filter og skygge
+          // må med i transition-listen — ellers popper bluren inn brått mens
+          // fargene toner. Ingen hard 1px-bunnkant — kanten males som en myk
+          // gradient under baren (scroll-edge-effekt) i stedet.
+          "pointer-events-auto relative w-full transition-[background-color,box-shadow,backdrop-filter] duration-300 ease-out",
           scrolled
-            ? "border-foreground/10 bg-background/85 shadow-foreground/5 shadow-sm backdrop-blur-xl"
-            : "border-transparent bg-background/0"
+            ? "bg-background/85 shadow-foreground/5 shadow-sm backdrop-blur-xl"
+            : "bg-background/0 shadow-none backdrop-blur-0",
+          // Ved redusert bevegelse fader baren i stedet for å skli — da må
+          // den også slutte å fange pekeren mens den er usynlig.
+          isHidden && "pointer-events-none"
         )}
       >
         {/* Innholdet ligger på samme max-w-6xl-grid som resten av siden, med
@@ -177,27 +245,54 @@ export function SiteHeader({
                 <div
                   key={item.label}
                   className="relative"
-                  onMouseEnter={() => hasSub && setOpenDropdown(index)}
-                  onMouseLeave={() => setOpenDropdown(null)}
+                  onMouseEnter={() => hasSub && openMenu(index)}
+                  onMouseLeave={scheduleClose}
+                  onFocus={() => hasSub && openMenu(index)}
+                  onBlur={(e) => {
+                    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                      scheduleClose();
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Escape") {
+                      setOpenDropdown(null);
+                    }
+                  }}
                 >
                   <Link
                     href={item.href}
                     target={linkTarget(item.external)}
                     rel={linkRel(item.external)}
+                    aria-haspopup={hasSub || undefined}
+                    aria-expanded={hasSub ? openDropdown === index : undefined}
                     className={cn(
-                      "flex items-center gap-1 rounded-full px-4 py-2 font-medium text-sm transition-colors",
+                      "relative flex items-center gap-1 rounded-full px-4 py-2 font-medium text-sm transition-colors",
                       isActive(item)
-                        ? "bg-foreground/8 text-foreground"
+                        ? "text-foreground"
                         : "text-foreground/65 hover:bg-foreground/5 hover:text-foreground",
                       openDropdown === index &&
                         "bg-foreground/5 text-foreground"
                     )}
                   >
-                    {item.label}
+                    {/* Delt pille som glir mellom aktive lenker ved
+                        navigasjon (layoutId). */}
+                    {isActive(item) && (
+                      <motion.span
+                        layoutId="site-header-active-pill"
+                        aria-hidden
+                        className="absolute inset-0 rounded-full bg-foreground/8"
+                        transition={
+                          reduce
+                            ? { duration: 0 }
+                            : { type: "spring", bounce: 0, duration: 0.4 }
+                        }
+                      />
+                    )}
+                    <span className="relative">{item.label}</span>
                     {hasSub && (
                       <ChevronDown
                         className={cn(
-                          "size-3.5 transition-transform",
+                          "relative size-3.5 transition-transform",
                           openDropdown === index && "rotate-180"
                         )}
                       />
@@ -206,16 +301,26 @@ export function SiteHeader({
 
                   {hasSub && openDropdown === index && (
                     <div className="absolute top-full left-0 w-72 pt-2">
-                      <div className="rounded-3xl bg-background/95 p-2 shadow-foreground/5 shadow-xl ring-1 ring-foreground/10 backdrop-blur-xl">
+                      {/* Origin-bevisst inngang: panelet vokser ut fra
+                          triggeren (oppe-venstre), aldri fra scale(0). */}
+                      <div className="origin-top-left rounded-3xl bg-background/95 p-2 shadow-foreground/5 shadow-xl ring-1 ring-foreground/10 backdrop-blur-xl motion-safe:fade-in-0 motion-safe:zoom-in-95 motion-safe:slide-in-from-top-1 motion-safe:animate-in motion-safe:duration-200">
                         {item.subItems?.map((subItem) => (
                           <Link
                             key={subItem.label}
                             href={subItem.href}
                             target={linkTarget(subItem.external)}
                             rel={linkRel(subItem.external)}
-                            className="block rounded-2xl px-3 py-2.5 transition-colors hover:bg-foreground/5"
+                            className={cn(
+                              "block rounded-2xl px-3 py-2.5 transition-colors hover:bg-foreground/5",
+                              matchesPath(subItem.href) && "bg-foreground/5"
+                            )}
                           >
-                            <span className="block font-medium text-sm">
+                            <span
+                              className={cn(
+                                "block font-medium text-sm",
+                                matchesPath(subItem.href) && "text-foreground"
+                              )}
+                            >
                               {subItem.label}
                             </span>
                             {subItem.description && (
@@ -234,7 +339,7 @@ export function SiteHeader({
           </div>
 
           {/* Handlinger */}
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2.5">
             {actions}
             {navItems.length > 0 && (
               <Button
@@ -250,6 +355,16 @@ export function SiteHeader({
             )}
           </div>
         </div>
+
+        {/* Scroll-edge: myk gradientkant der innhold møter glass-flaten,
+            i stedet for en hard 1px-strek. */}
+        <div
+          aria-hidden
+          className={cn(
+            "pointer-events-none absolute inset-x-0 top-full h-3 bg-gradient-to-b from-foreground/6 to-transparent transition-opacity duration-300",
+            scrolled ? "opacity-100" : "opacity-0"
+          )}
+        />
       </nav>
 
       {/* Mobil-drawer */}
@@ -295,7 +410,12 @@ export function SiteHeader({
                         target={linkTarget(subItem.external)}
                         rel={linkRel(subItem.external)}
                         onClick={() => setMobileOpen(false)}
-                        className="block rounded-xl px-3 py-2 text-muted-foreground text-sm transition-colors hover:text-foreground"
+                        className={cn(
+                          "block rounded-xl px-3 py-2 text-sm transition-colors",
+                          matchesPath(subItem.href)
+                            ? "font-medium text-foreground"
+                            : "text-muted-foreground hover:text-foreground"
+                        )}
                       >
                         {subItem.label}
                       </Link>

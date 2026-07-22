@@ -125,7 +125,7 @@ const layout = [
       "Jeg er Susanne Todnem – markedsfører, journalist og foredragsholder, med bakgrunn fra bank, IT og fintech. Jeg jobber med alt fra børsnoterte selskaper til bedrifter med to ansatte.",
     cta: { text: "Bli kjent med meg", url: "/om" },
     stats: [
-      { value: 19, suffix: "+ år", label: "med markedsføring" },
+      { value: 19, suffix: "+", label: "år med markedsføring" },
       { value: 5, label: "egne bedrifter startet" },
       { value: 9, suffix: "+", label: "merkevarer jeg har jobbet med" },
     ],

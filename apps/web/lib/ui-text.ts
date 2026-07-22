@@ -12,6 +12,7 @@ export const BREADCRUMB_HOME: BreadcrumbItem = { label: "Hjem", href: "/" };
 /** Oversikts-leddene detaljsidene henger under. */
 export const BREADCRUMB_ROOTS = {
   blogg: { label: "Blogg", href: "/blogg" },
+  kundehistorier: { label: "Kundehistorier", href: "/kundehistorier" },
   podkast: { label: "Podkast", href: "/podkast" },
   tjenester: { label: "Tjenester", href: "/tjenester" },
   produkter: { label: "Produkter", href: "/produkter" },

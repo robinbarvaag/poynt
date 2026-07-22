@@ -3,6 +3,7 @@ import type { SerializedEditorState } from "@payloadcms/richtext-lexical/lexical
 import { RichText } from "@payloadcms/richtext-lexical/react";
 import { FloatingShapes, Heading, Text } from "@poynt/ui";
 import { Facebook, Instagram, Linkedin, Twitter, Youtube } from "lucide-react";
+import { cacheLife } from "next/cache";
 import Link from "next/link";
 import { NewsletterForm } from "./newsletter-form";
 
@@ -70,7 +71,15 @@ const socialIcons = {
   ),
 };
 
-export function Footer({
+// Årstallet i copyright-linjen: cacheComponents tillater ikke `new Date()`
+// under prerender, så det caches med døgn-levetid i stedet.
+async function getCurrentYear() {
+  "use cache";
+  cacheLife("days");
+  return new Date().getFullYear();
+}
+
+export async function Footer({
   siteName = "Poynt",
   logo,
   columns = [],
@@ -79,7 +88,7 @@ export function Footer({
   socialLinks = [],
   newsletter,
 }: FooterProps) {
-  const currentYear = new Date().getFullYear();
+  const currentYear = await getCurrentYear();
 
   return (
     <footer className="relative mt-20 overflow-hidden">

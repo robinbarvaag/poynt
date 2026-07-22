@@ -201,7 +201,8 @@ export function InquiryReplyClient({
       </Card>
 
       {current && (
-        <section className="space-y-4">
+        // Toner inn ved mount (ikke keyet på innholdet — det strømmer).
+        <section className="motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:animate-in space-y-4 motion-safe:duration-300 motion-safe:ease-soft">
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="font-heading font-semibold text-lg">Forslag</h2>
             {current.detectedSentiment && (

@@ -82,11 +82,18 @@ export function DeclineGeneratorClient({
       <DeclineForm onSubmit={handleSubmit} isLoading={isLoading} />
 
       {result && (
-        <DeclineResult
-          mode="result"
-          result={result}
-          toolResultId={savedResult?.id}
-        />
+        // Samme rolige resultat-inntoning som de andre AI-verktøyene
+        // (markedsplan/kanalveileder), her som ren CSS.
+        <div
+          key={result}
+          className="motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:animate-in motion-safe:duration-300 motion-safe:ease-soft"
+        >
+          <DeclineResult
+            mode="result"
+            result={result}
+            toolResultId={savedResult?.id}
+          />
+        </div>
       )}
     </PageShell>
   );

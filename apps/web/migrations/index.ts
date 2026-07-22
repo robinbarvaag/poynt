@@ -26,6 +26,9 @@ import * as migration_20260721_234521_seo_og_image_size from './20260721_234521_
 import * as migration_20260722_000820_remove_articles from './20260722_000820_remove_articles';
 import * as migration_20260722_001638_og_share_card_settings from './20260722_001638_og_share_card_settings';
 import * as migration_20260722_003828 from './20260722_003828';
+import * as migration_20260722_010839_media_blur_data_url from './20260722_010839_media_blur_data_url';
+import * as migration_20260722_095544 from './20260722_095544';
+import * as migration_20260722_102057 from './20260722_102057';
 
 export const migrations = [
   {
@@ -166,6 +169,21 @@ export const migrations = [
   {
     up: migration_20260722_003828.up,
     down: migration_20260722_003828.down,
-    name: '20260722_003828'
+    name: '20260722_003828',
+  },
+  {
+    up: migration_20260722_010839_media_blur_data_url.up,
+    down: migration_20260722_010839_media_blur_data_url.down,
+    name: '20260722_010839_media_blur_data_url',
+  },
+  {
+    up: migration_20260722_095544.up,
+    down: migration_20260722_095544.down,
+    name: '20260722_095544',
+  },
+  {
+    up: migration_20260722_102057.up,
+    down: migration_20260722_102057.down,
+    name: '20260722_102057'
   },
 ];

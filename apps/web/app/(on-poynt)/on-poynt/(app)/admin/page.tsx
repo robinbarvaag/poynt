@@ -4,8 +4,6 @@ import { Icon, type IconName } from "@poynt/ui/icons";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-export const dynamic = "force-dynamic";
-
 const ADMIN_TOOLS: {
   title: string;
   description: string;

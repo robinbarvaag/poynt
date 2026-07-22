@@ -13,7 +13,7 @@ type Entry = MetadataRoute.Sitemap[number];
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const payload = await getPayload({ config });
 
-  const [pages, products, posts, services] = await Promise.all([
+  const [pages, products, posts, services, caseStudies] = await Promise.all([
     payload
       .find({ collection: "pages", limit: 1000, depth: 0 })
       .catch(() => null),
@@ -41,6 +41,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         depth: 0,
       })
       .catch(() => null),
+    payload
+      .find({
+        collection: "case-studies",
+        where: { _status: { equals: "published" } },
+        limit: 1000,
+        depth: 0,
+      })
+      .catch(() => null),
   ]);
 
   // Statiske oversiktssider.
@@ -49,6 +57,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/tjenester`, changeFrequency: "weekly", priority: 0.8 },
     { url: `${SITE_URL}/produkter`, changeFrequency: "weekly", priority: 0.8 },
     { url: `${SITE_URL}/blogg`, changeFrequency: "weekly", priority: 0.7 },
+    {
+      url: `${SITE_URL}/kundehistorier`,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
     { url: `${SITE_URL}/podkast`, changeFrequency: "weekly", priority: 0.7 },
     { url: `${SITE_URL}/kontakt`, changeFrequency: "monthly", priority: 0.6 },
   ];
@@ -90,11 +103,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }));
 
+  const caseStudyRoutes: Entry[] = (caseStudies?.docs ?? [])
+    .filter((c) => !c.meta?.noIndex)
+    .map((c) => ({
+      url: `${SITE_URL}/kundehistorier/${c.slug}`,
+      lastModified: c.updatedAt,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    }));
+
   return [
     ...staticRoutes,
     ...pageRoutes,
     ...productRoutes,
     ...postRoutes,
     ...serviceRoutes,
+    ...caseStudyRoutes,
   ];
 }

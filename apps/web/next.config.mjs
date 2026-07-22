@@ -5,6 +5,10 @@ const nextConfig = {
   // Your Next.js config here
   // reactCompiler: true, // Disabled - not compatible with Payload CMS yet
   turbopack: false,
+  // Instant Navigations (Next 16.3 preview): dynamisk-som-standard + gjenbrukbart
+  // rute-skall som prefetches én gang per rute i stedet for per lenke
+  cacheComponents: true,
+  partialPrefetching: true,
   images: {
     // Bruk optimalisering i produksjon, unoptimized lokalt for raskere dev
     unoptimized: process.env.NODE_ENV === "development",

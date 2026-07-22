@@ -84,6 +84,9 @@
      Én delt easing + varigheter slik at all bevegelse føles designet, ikke
      tilfeldig. Gir Tailwind-utilities: ease-soft, duration-fast/base/slow. */
   --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  /* iOS-aktig drawer/sheet-kurve (Ionic): rask start, myk landing. Brukes av
+     Sheet og header-skjul/vis. Gir utility: ease-drawer. */
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
   --duration-fast: 200ms;
   --duration-base: 500ms;
   --duration-slow: 800ms;
@@ -239,6 +242,48 @@
 @media (prefers-reduced-motion: reduce) {
   .animate-success-pop {
     animation: none;
+  }
+
+  /* Dekorative sveve-løkker skal stå stille ved redusert bevegelse. */
+  .animate-float-slow,
+  .animate-float-medium,
+  .animate-float-fast,
+  .animate-blob {
+    animation: none;
+  }
+}
+
+/* Trykk-feedback for alt klikkbart: krymper 3 % mens pekeren holder nede,
+   slik at grensesnittet kvitterer umiddelbart. Bruker CSS `scale` (ikke
+   transform) så den komponeres med hover-translate uten konflikt. */
+@utility pressable {
+  transition: scale 160ms var(--ease-soft);
+
+  @media (prefers-reduced-motion: no-preference) {
+    &:active {
+      scale: 97%;
+    }
+  }
+}
+
+/* Myk innbytting av kort innhold som skifter tilstand (f.eks. knappetekst
+   «Legg i handlekurv» → «Lagt til!»). Blur-broen får øyet til å lese én
+   forvandling i stedet for to objekter som byttes. Re-mount elementet med
+   `key` for å trigge den. */
+@utility swap-in {
+  @media (prefers-reduced-motion: no-preference) {
+    animation: swap-in var(--duration-fast) var(--ease-soft) both;
+  }
+}
+
+@keyframes swap-in {
+  from {
+    opacity: 0;
+    filter: blur(2px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
   }
 }
 

@@ -4,25 +4,16 @@ import { ServiceExplorer } from "@/components/service-explorer";
 import { buildMetadata } from "@/lib/seo";
 import { toServiceExplorerItem } from "@/lib/service";
 import config from "@/payload.config";
-import { Container, Section, Text } from "@poynt/ui";
+import { Container, Text } from "@poynt/ui";
 import type { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import { getPayload } from "payload";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const payload = await getPayload({ config });
-  const pageConfig = await payload.findGlobal({ slug: "servicespage" });
+async function getServicesPageData() {
+  "use cache";
+  cacheTag("cms");
+  cacheLife("minutes");
 
-  const meta = pageConfig?.meta;
-  return buildMetadata({
-    title: meta?.title || "Tjenester",
-    description: meta?.description || "Se alle tjenester vi tilbyr",
-    path: "/tjenester",
-    image: meta?.image,
-    noIndex: meta?.noIndex ?? undefined,
-  });
-}
-
-export default async function ServicesPage() {
   const payload = await getPayload({ config });
 
   const [pageConfig, services] = await Promise.all([
@@ -38,6 +29,25 @@ export default async function ServicesPage() {
       limit: 100,
     }),
   ]);
+
+  return { pageConfig, services };
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { pageConfig } = await getServicesPageData();
+
+  const meta = pageConfig?.meta;
+  return buildMetadata({
+    title: meta?.title || "Tjenester",
+    description: meta?.description || "Se alle tjenester vi tilbyr",
+    path: "/tjenester",
+    image: meta?.image,
+    noIndex: meta?.noIndex ?? undefined,
+  });
+}
+
+export default async function ServicesPage() {
+  const { pageConfig, services } = await getServicesPageData();
 
   const heroEnabled = pageConfig?.hero?.enabled ?? true;
   const heroTitle = pageConfig?.hero?.title || "Tjenester";
@@ -67,19 +77,20 @@ export default async function ServicesPage() {
         />
       )}
 
-      <Section variant="muted" spacing="md">
-        <Container padding="none">
-          {services.docs.length > 0 ? (
-            <ServiceExplorer
-              services={services.docs.map(toServiceExplorerItem)}
-            />
-          ) : (
-            <Text variant="muted" customStyles="text-center py-12">
-              {emptyStateText}
-            </Text>
-          )}
-        </Container>
-      </Section>
+      {/* Innholdet ligger rett på sidens bakgrunn (som blogg/produkter) — en
+          `muted`-Section her ga en hard grå-mot-grå-overgang mot PageHero-en
+          og dobbel vertikal padding. */}
+      <Container padding="default" className="py-8">
+        {services.docs.length > 0 ? (
+          <ServiceExplorer
+            services={services.docs.map(toServiceExplorerItem)}
+          />
+        ) : (
+          <Text variant="muted" customStyles="text-center py-12">
+            {emptyStateText}
+          </Text>
+        )}
+      </Container>
     </>
   );
 }

@@ -2,8 +2,6 @@ import { createServerCaller } from "@/lib/planner/trpc-server";
 import { redirect } from "next/navigation";
 import { AdminFeedbackClient } from "./admin-feedback-client";
 
-export const dynamic = "force-dynamic";
-
 export default async function AdminFeedbackPage() {
   const trpc = await createServerCaller();
 

@@ -6,6 +6,7 @@ import { buildMetadata } from "@/lib/seo";
 import config from "@/payload.config";
 import { Container } from "@poynt/ui";
 import type { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import { getPayload } from "payload";
 
 interface BlogPageData {
@@ -20,24 +21,11 @@ interface BlogPageData {
   };
 }
 
-export async function generateMetadata(): Promise<Metadata> {
-  const payload = await getPayload({ config });
-  const blogPage = (await payload.findGlobal({
-    slug: "blogpage" as "homepage",
-    depth: 1,
-  })) as unknown as BlogPageData;
+async function getBlogPageData() {
+  "use cache";
+  cacheTag("cms");
+  cacheLife("minutes");
 
-  const meta = blogPage?.meta || {};
-  return buildMetadata({
-    title: meta.title || blogPage?.title || "Blogg",
-    description: meta.description || blogPage?.description,
-    path: "/blogg",
-    image: meta.image,
-    noIndex: meta.noIndex,
-  });
-}
-
-export default async function BlogPage() {
   const payload = await getPayload({ config });
 
   const [blogPage, posts] = await Promise.all([
@@ -55,6 +43,25 @@ export default async function BlogPage() {
       limit: 200,
     }),
   ]);
+
+  return { blogPage, posts };
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { blogPage } = await getBlogPageData();
+
+  const meta = blogPage?.meta || {};
+  return buildMetadata({
+    title: meta.title || blogPage?.title || "Blogg",
+    description: meta.description || blogPage?.description,
+    path: "/blogg",
+    image: meta.image,
+    noIndex: meta.noIndex,
+  });
+}
+
+export default async function BlogPage() {
+  const { blogPage, posts } = await getBlogPageData();
 
   const title = blogPage?.title || "Blogg";
   const description = blogPage?.description;

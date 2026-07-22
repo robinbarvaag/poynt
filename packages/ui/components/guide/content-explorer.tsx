@@ -90,7 +90,15 @@ export function ContentExplorer<T>({
         searchLabel={searchLabel}
       />
 
-      {visible.length > 0 ? children(visible, context) : emptyState}
+      {/* Re-mount på filterbytte gir en kort, rolig inntoning av det nye
+          resultatsettet i stedet for at gridden snapper. Bevisst IKKE nøklet
+          på søketeksten — å re-animere per tastetrykk ville vært støy. */}
+      <div
+        key={activeFilter}
+        className="motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-1 motion-safe:animate-in motion-safe:duration-200 motion-safe:ease-soft"
+      >
+        {visible.length > 0 ? children(visible, context) : emptyState}
+      </div>
     </div>
   );
 }

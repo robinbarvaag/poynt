@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     pages: Page;
     'blog-posts': BlogPost;
+    'case-studies': CaseStudy;
     services: Service;
     categories: Category;
     media: Media;
@@ -95,6 +96,7 @@ export interface Config {
   collectionsSelect: {
     pages: PagesSelect<false> | PagesSelect<true>;
     'blog-posts': BlogPostsSelect<false> | BlogPostsSelect<true>;
+    'case-studies': CaseStudiesSelect<false> | CaseStudiesSelect<true>;
     services: ServicesSelect<false> | ServicesSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
@@ -215,6 +217,20 @@ export interface Page {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Settes av AI-vurderingen (0–100).
+   */
+  qualityScore?: number | null;
+  qualityReviewedAt?: string | null;
+  qualityReview?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   publishedAt?: string | null;
   meta?: {
     title?: string | null;
@@ -290,6 +306,7 @@ export interface Media {
    * Beskrivelse av bildet for skjermlesere og SEO. Bruk «Generer alt-tekst» for et AI-forslag du kan justere.
    */
   alt?: string | null;
+  blurDataURL?: string | null;
   /**
    * Kun synlig for innloggede brukere
    */
@@ -1214,6 +1231,8 @@ export interface SpotifyEmbedBlock {
   blockType: 'spotify-embed';
 }
 /**
+ * Fag og aktualitet med dato: tips, innsikt, meninger og nyheter. Handler teksten om én kundes reise og resultat, skriv den som Kundehistorie i stedet.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "blog-posts".
  */
@@ -1248,6 +1267,20 @@ export interface BlogPost {
   categories?: (number | Category)[] | null;
   publishedAt: string;
   relatedPosts?: (number | BlogPost)[] | null;
+  /**
+   * Settes av AI-vurderingen (0–100).
+   */
+  qualityScore?: number | null;
+  qualityReviewedAt?: string | null;
+  qualityReview?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   meta?: {
     title?: string | null;
     description?: string | null;
@@ -1302,6 +1335,112 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+}
+/**
+ * Tidløst salgsbevis om ÉN kunde: utfordringen → hva vi gjorde → resultatet. Vises på /kundehistorier og lenkes fra salgssidene. Fagstoff, tips og nyheter hører hjemme i Blogginnlegg.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "case-studies".
+ */
+export interface CaseStudy {
+  id: number;
+  /**
+   * Si resultatet, ikke bare navnet – f.eks. «Hageland Edens Have nådde målene sine».
+   */
+  title: string;
+  /**
+   * Genereres automatisk fra tittel
+   */
+  slug: string;
+  /**
+   * Navnet på bedriften historien handler om
+   */
+  customer: string;
+  /**
+   * Én til to setninger som selger historien i listevisning og SEO
+   */
+  excerpt?: string | null;
+  /**
+   * Helst et ekte bilde av kunden/bedriften
+   */
+  featuredImage?: (number | null) | Media;
+  /**
+   * Fortell i tre deler: utfordringen (hvor sto de?), hva vi gjorde (konkrete grep), og resultatet (hva endret seg?).
+   */
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * Valgfritt, men tall selger – f.eks. «+40 %» / «flere følgere på tre måneder»
+   */
+  results?:
+    | {
+        /**
+         * F.eks. «+40 %», «3×», «12 000»
+         */
+        value: string;
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  quote?: {
+    text?: string | null;
+    author?: string | null;
+    role?: string | null;
+  };
+  /**
+   * Styrer kun rekkefølgen i oversikten – vises ikke på siden
+   */
+  publishedAt: string;
+  /**
+   * Settes av AI-vurderingen (0–100).
+   */
+  qualityScore?: number | null;
+  qualityReviewedAt?: string | null;
+  qualityReview?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+    /**
+     * Aktivér for å hindre Google fra å indeksere denne siden
+     */
+    noIndex?: boolean | null;
+    /**
+     * Overstyr automatisk canonical URL hvis innholdet finnes på en annen URL
+     */
+    canonicalUrl?: string | null;
+    /**
+     * Brukes av sosiale medier ved deling
+     */
+    ogType?: ('website' | 'article' | 'product') | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * Skriv nyhetsbrevet her, send en test til deg selv, og send så til alle abonnenter.
@@ -1394,8 +1533,9 @@ export interface Guide {
    * Viser en seksjonsmeny (innholdsfortegnelse) ved siden av guiden når den har minst to H2-overskrifter. Skru av for å skjule den.
    */
   showToc?: boolean | null;
+  relatedGuides?: (number | Guide)[] | null;
   /**
-   * Settes av AI-vurderingen (0–100). Kjør den under «Kvalitet»-fanen.
+   * Settes av AI-vurderingen (0–100).
    */
   qualityScore?: number | null;
   qualityReviewedAt?: string | null;
@@ -1408,7 +1548,6 @@ export interface Guide {
     | number
     | boolean
     | null;
-  relatedGuides?: (number | Guide)[] | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -1885,6 +2024,10 @@ export interface Redirect {
       | ({
           relationTo: 'blog-posts';
           value: number | BlogPost;
+        } | null)
+      | ({
+          relationTo: 'case-studies';
+          value: number | CaseStudy;
         } | null);
     url?: string | null;
   };
@@ -1939,6 +2082,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'blog-posts';
         value: number | BlogPost;
+      } | null)
+    | ({
+        relationTo: 'case-studies';
+        value: number | CaseStudy;
       } | null)
     | ({
         relationTo: 'services';
@@ -2072,6 +2219,9 @@ export interface PagesSelect<T extends boolean = true> {
         answer?: T;
         id?: T;
       };
+  qualityScore?: T;
+  qualityReviewedAt?: T;
+  qualityReview?: T;
   publishedAt?: T;
   meta?:
     | T
@@ -2468,6 +2618,52 @@ export interface BlogPostsSelect<T extends boolean = true> {
   categories?: T;
   publishedAt?: T;
   relatedPosts?: T;
+  qualityScore?: T;
+  qualityReviewedAt?: T;
+  qualityReview?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+        noIndex?: T;
+        canonicalUrl?: T;
+        ogType?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "case-studies_select".
+ */
+export interface CaseStudiesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  customer?: T;
+  excerpt?: T;
+  featuredImage?: T;
+  content?: T;
+  results?:
+    | T
+    | {
+        value?: T;
+        label?: T;
+        id?: T;
+      };
+  quote?:
+    | T
+    | {
+        text?: T;
+        author?: T;
+        role?: T;
+      };
+  publishedAt?: T;
+  qualityScore?: T;
+  qualityReviewedAt?: T;
+  qualityReview?: T;
   meta?:
     | T
     | {
@@ -2538,6 +2734,7 @@ export interface CategoriesSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  blurDataURL?: T;
   isPrivate?: T;
   source?: T;
   creditLine?: T;
@@ -2642,10 +2839,10 @@ export interface GuidesSelect<T extends boolean = true> {
   order?: T;
   isFeatured?: T;
   showToc?: T;
+  relatedGuides?: T;
   qualityScore?: T;
   qualityReviewedAt?: T;
   qualityReview?: T;
-  relatedGuides?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

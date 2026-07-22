@@ -89,14 +89,21 @@ export function AddToCartButton({
 
   return (
     <Button size="lg" className="w-full" onClick={handleAddToCart}>
-      {added ? (
-        <>
-          <Check className="mr-2 h-5 w-5" />
-          Lagt til!
-        </>
-      ) : (
-        "Legg i handlekurv"
-      )}
+      {/* key-remount + swap-in gir en myk blur-fade mellom tilstandene i
+          stedet for at teksten snapper. */}
+      <span
+        key={added ? "added" : "idle"}
+        className="swap-in inline-flex items-center"
+      >
+        {added ? (
+          <>
+            <Check className="mr-2 h-5 w-5" />
+            Lagt til!
+          </>
+        ) : (
+          "Legg i handlekurv"
+        )}
+      </span>
     </Button>
   );
 }

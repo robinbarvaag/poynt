@@ -10,6 +10,7 @@ export {
   type Feature,
   FeatureGrid,
   type FeatureGridProps,
+  type FeatureLinkProps,
 } from "./feature-grid";
 export {
   Hero,
@@ -54,9 +55,17 @@ export {
 export { Pricing, type PricingProps, type PricingTier } from "./pricing";
 export { ServiceCard, type ServiceCardProps } from "./service-card";
 export {
+  ShowcaseModal,
+  type ShowcaseModalProps,
+} from "./showcase-modal";
+export {
   ServiceShowcase,
+  ServiceShowcaseGrid,
+  type ServiceShowcaseGridProps,
   type ServiceShowcaseItem,
   type ServiceShowcaseLinkProps,
+  ServiceShowcaseModal,
+  type ServiceShowcaseModalProps,
   type ServiceShowcaseProps,
 } from "./service-showcase";
 export { type Stat, StatsBand, type StatsBandProps } from "./stats-band";

@@ -4,15 +4,18 @@ import { useDocumentInfo, useField } from "@payloadcms/ui";
 import { useState } from "react";
 
 /**
- * «Vurder kvalitet»-panel på Guider-dokumentet (montert som et `ui`-felt).
- * Sender guidens id til `/api/ai/guide-review`, som leser innholdet og
- * returnerer en rubrikk-basert kvalitetsvurdering: totalscore, delscore per
- * dimensjon og de viktigste fiksene. KUN diagnose – partneren skriver om selv.
+ * «Vurder kvalitet»-panel, montert som `ui`-felt på Guider, Sider og
+ * Blogginnlegg. Leser hvilken collection den står i via `useDocumentInfo` og
+ * sender {collection, id} til `/api/ai/quality-review`, som vurderer med
+ * dimensjoner tilpasset innholdstypen (guide ≠ salgsside ≠ blogginnlegg) og
+ * måler tonen mot Poynts tone of voice. KUN diagnose – partneren skriver om
+ * selv.
  *
- * Resultatet PERSISTERES på guiden via skjult-/sidebar-feltene `qualityScore`,
- * `qualityReviewedAt` og `qualityReview` (setValue → autosave). Ved neste åpning
- * leses den lagrede vurderingen tilbake og vises uten å kjøre AI-en på nytt.
- * `qualityScore` driver dessuten et `low_quality`-signal i Innholdsradaren.
+ * Resultatet PERSISTERES på dokumentet via sidebar-/skjulte felt
+ * `qualityScore`, `qualityReviewedAt` og `qualityReview` (setValue →
+ * autosave). Ved neste åpning leses den lagrede vurderingen tilbake og vises
+ * uten å kjøre AI-en på nytt. `qualityScore` driver dessuten `low_quality`-
+ * signalet i Innholdsradaren.
  */
 
 interface Dimensjon {
@@ -49,8 +52,8 @@ function formatDate(iso: string | null): string | null {
   });
 }
 
-export const ReviewGuideButton = () => {
-  const { id } = useDocumentInfo();
+export const QualityReviewButton = () => {
+  const { id, collectionSlug } = useDocumentInfo();
   const { setValue: setScore } = useField<number>({ path: "qualityScore" });
   const { setValue: setReviewedAt, value: reviewedAt } = useField<string>({
     path: "qualityReviewedAt",
@@ -69,20 +72,22 @@ export const ReviewGuideButton = () => {
 
   const onClick = async () => {
     if (id === undefined || id === null) {
-      setError("Lagre guiden først, så kan vi lese innholdet og vurdere det.");
+      setError(
+        "Lagre dokumentet først, så kan vi lese innholdet og vurdere det."
+      );
       return;
     }
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/ai/guide-review", {
+      const res = await fetch("/api/ai/quality-review", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ guideId: id }),
+        body: JSON.stringify({ collection: collectionSlug, id }),
       });
       const data = (await res.json()) as Review & { error?: string };
       if (!res.ok || typeof data.totalScore !== "number") {
-        throw new Error(data.error || "Kunne ikke vurdere guiden.");
+        throw new Error(data.error || "Kunne ikke vurdere innholdet.");
       }
       setFresh(data);
       // Persistér på dokumentet (autosave plukker opp endringene).

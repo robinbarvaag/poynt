@@ -1,3 +1,4 @@
+import type * as React from "react";
 import { cn } from "../../lib/utils";
 import { Card } from "../card";
 import { Container, gridVariants } from "../container";
@@ -15,6 +16,12 @@ export interface Feature {
   stat?: { value: string; label: string };
 }
 
+export interface FeatureLinkProps {
+  href: string;
+  className?: string;
+  children: React.ReactNode;
+}
+
 export interface FeatureGridProps {
   eyebrow?: string;
   title?: string;
@@ -22,6 +29,12 @@ export interface FeatureGridProps {
   features: Feature[];
   /** Antall kolonner på desktop. Default 3. */
   columns?: 2 | 3 | 4;
+  /**
+   * Lenkekomponent for kort-lenkene (typisk next/link, så f.eks. /kontakt
+   * fanges av modal-interceptoren). Default er en vanlig <a> med full
+   * sidelast.
+   */
+  linkComponent?: React.ComponentType<FeatureLinkProps>;
 }
 
 // Modige fargeblokker — hvert kort er et `Card` med en mettet `surface`
@@ -67,6 +80,7 @@ export function FeatureGrid({
   intro,
   features,
   columns = 3,
+  linkComponent: LinkComp,
 }: FeatureGridProps) {
   return (
     <Container padding="none">
@@ -158,7 +172,11 @@ export function FeatureGrid({
             <StaggerItem key={feature.title} className="h-full">
               {feature.link ? (
                 <Card asChild surface={theme.surface} className={cardClassName}>
-                  <a href={feature.link.href}>{cardBody}</a>
+                  {LinkComp ? (
+                    <LinkComp href={feature.link.href}>{cardBody}</LinkComp>
+                  ) : (
+                    <a href={feature.link.href}>{cardBody}</a>
+                  )}
                 </Card>
               ) : (
                 <Card surface={theme.surface} className={cardClassName}>

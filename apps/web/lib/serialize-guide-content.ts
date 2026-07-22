@@ -15,6 +15,7 @@ interface LexicalNode {
   listType?: string;
   fields?: { url?: string; newTab?: boolean };
   url?: string;
+  value?: { alt?: string; filename?: string };
   children?: LexicalNode[];
 }
 
@@ -31,7 +32,7 @@ function inlineText(node: LexicalNode): string {
   return "";
 }
 
-function lexicalToMarkdown(content: unknown): string {
+export function lexicalToMarkdown(content: unknown): string {
   const root = (content as { root?: { children?: LexicalNode[] } })?.root;
   if (!root?.children) return "";
   const lines: string[] = [];
@@ -60,6 +61,13 @@ function lexicalToMarkdown(content: unknown): string {
             const text = (item.children ?? []).map(inlineText).join("");
             if (text.trim()) lines.push(`${bullet} ${text}`);
           });
+          break;
+        }
+        case "upload": {
+          // Innfelt bilde i richText — synlig for AI-vurderingen som bildebruk.
+          const media =
+            typeof node.value === "object" && node.value ? node.value : null;
+          lines.push(`[Bilde${media?.alt ? `: ${media.alt}` : ""}]`);
           break;
         }
         case "quote": {

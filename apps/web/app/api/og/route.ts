@@ -1,6 +1,6 @@
 import { fetchOgMeta } from "@/lib/og";
 import config from "@/payload.config";
-import { type NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse, connection } from "next/server";
 import { getPayload } from "payload";
 
 /**
@@ -12,6 +12,10 @@ import { getPayload } from "payload";
  * mot en vilkårlig URL). Samme henter som lagrings-hooken (lib/og.ts).
  */
 export async function GET(req: NextRequest) {
+  // Alltid per-forespørsel (auth via headers). Uten denne prøver Next å
+  // prerendre ruten under build, og bailout-feilen havner i catch-blokken.
+  await connection();
+
   try {
     const payload = await getPayload({ config });
     const { user } = await payload.auth({ headers: req.headers });

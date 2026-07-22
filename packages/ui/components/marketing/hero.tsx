@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ComponentType, ReactNode } from "react";
 import { Icon, type IconName } from "../../icons";
 import { cn } from "../../lib/utils";
 import { Badge } from "../badge";
@@ -43,6 +43,15 @@ export interface HeroProps {
   /** Nøkkeltall under CTA-ene — teller opp i viewport. */
   stats?: HeroStat[];
   className?: string;
+  /**
+   * Lenkekomponent for CTA-ene (typisk next/link, så f.eks. /kontakt fanges
+   * av modal-interceptoren). Default er en vanlig <a> med full sidelast.
+   */
+  linkComponent?: ComponentType<{
+    href: string;
+    className?: string;
+    children: ReactNode;
+  }>;
 }
 
 const PILL_POSITIONS = [
@@ -92,6 +101,7 @@ export function Hero({
   pills,
   stats,
   className,
+  linkComponent: LinkComp,
 }: HeroProps) {
   const split = Boolean(media);
 
@@ -166,10 +176,17 @@ export function Hero({
               >
                 {primaryCta && (
                   <Button asChild size="lg" className="rounded-full px-8">
-                    <a href={primaryCta.href}>
-                      {primaryCta.text}
-                      <Icon name="arrow-right" className="ml-2 size-4" />
-                    </a>
+                    {LinkComp ? (
+                      <LinkComp href={primaryCta.href}>
+                        {primaryCta.text}
+                        <Icon name="arrow-right" className="ml-2 size-4" />
+                      </LinkComp>
+                    ) : (
+                      <a href={primaryCta.href}>
+                        {primaryCta.text}
+                        <Icon name="arrow-right" className="ml-2 size-4" />
+                      </a>
+                    )}
                   </Button>
                 )}
                 {secondaryCta && (
@@ -179,7 +196,13 @@ export function Hero({
                     variant="ghost"
                     className="rounded-full px-6"
                   >
-                    <a href={secondaryCta.href}>{secondaryCta.text}</a>
+                    {LinkComp ? (
+                      <LinkComp href={secondaryCta.href}>
+                        {secondaryCta.text}
+                      </LinkComp>
+                    ) : (
+                      <a href={secondaryCta.href}>{secondaryCta.text}</a>
+                    )}
                   </Button>
                 )}
               </div>

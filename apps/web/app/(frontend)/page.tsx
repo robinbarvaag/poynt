@@ -3,11 +3,20 @@ import { RenderBlocks } from "@/components/render-blocks";
 import { buildMetadata } from "@/lib/seo";
 import config from "@/payload.config";
 import type { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import { getPayload } from "payload";
 
-export async function generateMetadata(): Promise<Metadata> {
+async function getHomepage() {
+  "use cache";
+  cacheTag("cms");
+  cacheLife("minutes");
+
   const payload = await getPayload({ config });
-  const homepage = await payload.findGlobal({ slug: "homepage", depth: 2 });
+  return payload.findGlobal({ slug: "homepage", depth: 2 });
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const homepage = await getHomepage();
 
   const meta = homepage?.meta || {};
   return buildMetadata({
@@ -20,8 +29,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
-  const payload = await getPayload({ config });
-  const homepage = await payload.findGlobal({ slug: "homepage", depth: 2 });
+  const homepage = await getHomepage();
 
   if (!homepage?.layout?.length) {
     return (

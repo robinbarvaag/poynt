@@ -31,3 +31,6 @@ const Layout = ({ children }: Args) => (
 );
 
 export default Layout;
+
+// Payload-admin er dynamisk per bruker — opt-out fra Instant Navigations-kravet.
+export const instant = false;

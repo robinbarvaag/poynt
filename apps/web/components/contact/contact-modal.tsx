@@ -1,6 +1,7 @@
 "use client";
 
-import { Dialog, DialogContent, DialogTitle } from "@poynt/ui";
+import { type MediaResource, PayloadImage } from "@/components/payload-image";
+import { ShowcaseModal } from "@poynt/ui";
 import { useRouter } from "next/navigation";
 import type { Form as PayloadForm } from "../../payload-types";
 import { FormBlockComponent } from "../blocks/form-block";
@@ -9,38 +10,56 @@ interface ContactModalProps {
   form: PayloadForm;
   /** Forhåndsvalgt emne (fra ?emne=) — styrer kontekstuell overskrift. */
   subject?: string;
+  /** Rene media-data (serialiserbart) — hero-bildet fra kontakt-siden. */
+  image?: MediaResource;
 }
 
 /**
- * Kontaktskjemaet vist som sentrert dialog. Renders kun via
- * @modal/(.)kontakt-interceptoren ved klient-navigasjon. Lukking
- * (Esc, X eller klikk utenfor) går ett steg tilbake i historikken, så
- * brukeren havner tilbake på siden modalet ble åpnet fra.
+ * Kontaktskjemaet i det felles `ShowcaseModal`-skallet (samme som
+ * tjenestemodalet): bilde øverst, eyebrow + heading i samme typografi og rund
+ * lukkeknapp. Renders kun via @modal/(.)kontakt-interceptoren ved
+ * klient-navigasjon; lukking animerer ut og går ett steg tilbake i
+ * historikken, så brukeren havner på siden modalet ble åpnet fra.
  */
-export function ContactModal({ form, subject }: ContactModalProps) {
+export function ContactModal({ form, subject, image }: ContactModalProps) {
   const router = useRouter();
 
   const heading = subject ? `Snakk med oss om ${subject}` : "Send en melding";
 
   return (
-    <Dialog
-      open
-      onOpenChange={(open) => {
-        if (!open) router.back();
-      }}
+    <ShowcaseModal
+      onClosed={() => router.back()}
+      ariaLabel={heading}
+      imageClassName="aspect-[21/9]"
+      image={
+        image?.url ? (
+          <PayloadImage
+            media={image}
+            alt={image.alt || ""}
+            fill
+            className="object-cover"
+          />
+        ) : undefined
+      }
     >
-      <DialogContent className="max-h-[88vh] max-w-xl overflow-y-auto p-6 sm:rounded-2xl md:p-8">
-        {/* Synlig overskrift kommer fra FormBlock — denne er for skjermlesere. */}
-        <DialogTitle className="sr-only">{heading}</DialogTitle>
+      <span className="font-heading font-semibold text-primary text-xs uppercase tracking-[0.18em]">
+        Kontakt
+      </span>
+      <h2 className="mt-2 font-bold font-heading text-3xl leading-tight tracking-tight md:text-4xl">
+        {heading}
+      </h2>
+      <p className="mt-5 text-base text-muted-foreground leading-relaxed">
+        Fyll ut skjemaet, så hører du fra meg – vanligvis innen et par dager.
+      </p>
+      <div className="mt-7">
         <FormBlockComponent
           form={form}
-          title={heading}
-          description="Fyll ut skjemaet, så hører du fra meg – vanligvis innen et par dager."
           variant="default"
           maxWidth="full"
           bare
+          hideHeader
         />
-      </DialogContent>
-    </Dialog>
+      </div>
+    </ShowcaseModal>
   );
 }

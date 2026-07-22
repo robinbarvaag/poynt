@@ -29,7 +29,9 @@ const SheetOverlay = React.forwardRef<
 SheetOverlay.displayName = SheetPrimitive.Overlay.displayName;
 
 const sheetVariants = cva(
-  "fixed z-50 gap-4 bg-background shadow-xl transition ease-in-out data-[state=closed]:duration-300 data-[state=open]:duration-500 data-[state=open]:animate-in data-[state=closed]:animate-out",
+  // iOS-aktig drawer-kurve (ease-drawer fra web.css): rask start, myk landing.
+  // Utgang raskere enn inngang — systemet svarer kjapt når brukeren lukker.
+  "fixed z-50 gap-4 bg-background shadow-xl transition ease-drawer data-[state=closed]:duration-250 data-[state=open]:duration-400 data-[state=open]:animate-in data-[state=closed]:animate-out",
   {
     variants: {
       side: {

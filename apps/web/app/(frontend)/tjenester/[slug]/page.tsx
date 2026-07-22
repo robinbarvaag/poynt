@@ -16,6 +16,7 @@ import config from "@/payload.config";
 import { RichText } from "@payloadcms/richtext-lexical/react";
 import { Breadcrumbs, Container, Heading, Text } from "@poynt/ui";
 import type { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import { notFound } from "next/navigation";
 import { getPayload } from "payload";
 
@@ -25,37 +26,11 @@ interface ServicePageProps {
   }>;
 }
 
-export async function generateMetadata({
-  params,
-}: ServicePageProps): Promise<Metadata> {
-  const { slug } = await params;
-  const payload = await getPayload({ config });
+async function getServicePageData(slug: string) {
+  "use cache";
+  cacheTag("cms");
+  cacheLife("minutes");
 
-  const services = await payload.find({
-    collection: "services",
-    where: {
-      slug: { equals: slug },
-      active: { equals: true },
-    },
-    limit: 1,
-  });
-
-  const service = services.docs[0];
-  if (!service) {
-    return notFoundMetadata("Tjeneste ikke funnet");
-  }
-
-  return buildMetadata({
-    title: service.meta?.title || `${service.name} | Tjenester`,
-    description: service.meta?.description || service.shortDescription || "",
-    path: `/tjenester/${slug}`,
-    image: service.meta?.image || service.image,
-    noIndex: service.meta?.noIndex ?? undefined,
-  });
-}
-
-export default async function ServiceDetailPage({ params }: ServicePageProps) {
-  const { slug } = await params;
   const payload = await getPayload({ config });
 
   const [services, servicesPage] = await Promise.all([
@@ -71,7 +46,30 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
     payload.findGlobal({ slug: "servicespage" }),
   ]);
 
-  const service = services.docs[0];
+  return { service: services.docs[0] || null, servicesPage };
+}
+
+export async function generateMetadata({
+  params,
+}: ServicePageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const { service } = await getServicePageData(slug);
+  if (!service) {
+    return notFoundMetadata("Tjeneste ikke funnet");
+  }
+
+  return buildMetadata({
+    title: service.meta?.title || `${service.name} | Tjenester`,
+    description: service.meta?.description || service.shortDescription || "",
+    path: `/tjenester/${slug}`,
+    image: service.meta?.image || service.image,
+    noIndex: service.meta?.noIndex ?? undefined,
+  });
+}
+
+export default async function ServiceDetailPage({ params }: ServicePageProps) {
+  const { slug } = await params;
+  const { service, servicesPage } = await getServicePageData(slug);
   if (!service) {
     notFound();
   }

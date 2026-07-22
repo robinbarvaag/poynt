@@ -1,4 +1,6 @@
+import { ContentGuidelines as ContentGuidelines_9ae5c77b7a1770263112618b25a6d9d5 } from '../../../admin/components/content-guidelines'
 import { CompositionCheck as CompositionCheck_14bb3c299dcfc9f12ef8a1fd0256d3ab } from '../../../admin/components/composition-check'
+import { QualityReviewButton as QualityReviewButton_88950925669ecc45494c6fe1275969d0 } from '../../../admin/components/quality-review-button'
 import { RscEntryLexicalCell as RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
 import { RscEntryLexicalField as RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
 import { LexicalDiffComponent as LexicalDiffComponent_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
@@ -34,7 +36,6 @@ import { FolderTableCell as FolderTableCell_ab83ff7e88da8d3530831f296ec4756a } f
 import { FolderField as FolderField_ab83ff7e88da8d3530831f296ec4756a } from '@payloadcms/ui/rsc'
 import { SendNewsletterPanel as SendNewsletterPanel_75d3fa918eb52ceef0f5f7d7e08ab991 } from '../../../admin/components/newsletters/send-newsletter-panel'
 import { BookmarkOgFetch as BookmarkOgFetch_62526a99516db3c8451d3b97a5d7d286 } from '../../../admin/components/guides/bookmark-og-fetch'
-import { ReviewGuideButton as ReviewGuideButton_fdcbc9c46343a42e1ea86e19afb2ba37 } from '../../../admin/components/guides/review-guide-button'
 import { LinkToDoc as LinkToDoc_2e9be70cd13299dd4a11a5bd739a5a3c } from '@payloadcms/plugin-stripe/client'
 import { FolderTypeField as FolderTypeField_3817bf644402e67bfe6577f60ef982de } from '@payloadcms/ui'
 import { LinkRowLabel as LinkRowLabel_f0fd4bee3885f2a3c8ca119ef52b5ffe } from '../../../admin/components/row-labels'
@@ -53,7 +54,9 @@ import { PromptsListView as PromptsListView_3426185fdff8e8163926076d35efaa6d } f
 import { CollectionCards as CollectionCards_ab83ff7e88da8d3530831f296ec4756a } from '@payloadcms/ui/rsc'
 
 export const importMap = {
+  "/admin/components/content-guidelines#ContentGuidelines": ContentGuidelines_9ae5c77b7a1770263112618b25a6d9d5,
   "/admin/components/composition-check#CompositionCheck": CompositionCheck_14bb3c299dcfc9f12ef8a1fd0256d3ab,
+  "/admin/components/quality-review-button#QualityReviewButton": QualityReviewButton_88950925669ecc45494c6fe1275969d0,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell": RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalField": RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e,
   "@payloadcms/richtext-lexical/rsc#LexicalDiffComponent": LexicalDiffComponent_44fe37237e0ebf4470c9990d8cb7b07e,
@@ -89,7 +92,6 @@ export const importMap = {
   "@payloadcms/ui/rsc#FolderField": FolderField_ab83ff7e88da8d3530831f296ec4756a,
   "/admin/components/newsletters/send-newsletter-panel#SendNewsletterPanel": SendNewsletterPanel_75d3fa918eb52ceef0f5f7d7e08ab991,
   "/admin/components/guides/bookmark-og-fetch#BookmarkOgFetch": BookmarkOgFetch_62526a99516db3c8451d3b97a5d7d286,
-  "/admin/components/guides/review-guide-button#ReviewGuideButton": ReviewGuideButton_fdcbc9c46343a42e1ea86e19afb2ba37,
   "@payloadcms/plugin-stripe/client#LinkToDoc": LinkToDoc_2e9be70cd13299dd4a11a5bd739a5a3c,
   "@payloadcms/ui#FolderTypeField": FolderTypeField_3817bf644402e67bfe6577f60ef982de,
   "/admin/components/row-labels#LinkRowLabel": LinkRowLabel_f0fd4bee3885f2a3c8ca119ef52b5ffe,

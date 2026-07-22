@@ -1,8 +1,26 @@
+import {
+  generateBlurDataURL,
+  supportsBlurPlaceholder,
+} from "@/lib/blur-data-url";
 import type { CollectionConfig } from "payload";
 
 export const Media: CollectionConfig = {
   slug: "media",
   folders: true,
+  hooks: {
+    beforeChange: [
+      // Lager en base64 blur-plassholder (LQIP) når en ny bildefil lastes opp.
+      // Rene metadata-endringer (req.file mangler) beholder eksisterende verdi.
+      async ({ data, req }) => {
+        const file = req.file;
+        if (!file?.data || !supportsBlurPlaceholder(file.mimetype)) {
+          return data;
+        }
+        const blurDataURL = await generateBlurDataURL(file.data);
+        return blurDataURL ? { ...data, blurDataURL } : data;
+      },
+    ],
+  },
   admin: {
     group: "Innhold",
     components: {
@@ -84,6 +102,15 @@ export const Media: CollectionConfig = {
             "/admin/components/media/generate-alt-button#GenerateAltButton",
           ],
         },
+      },
+    },
+    // Base64 LQIP generert av beforeChange-hooken over. Leses av
+    // `<PayloadImage>` (placeholder="blur"). Skjult i admin — ren base64-grøt.
+    {
+      name: "blurDataURL",
+      type: "text",
+      admin: {
+        hidden: true,
       },
     },
     {

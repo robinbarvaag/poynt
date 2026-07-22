@@ -46,3 +46,7 @@ export default function PlannerRootLayout({
     </html>
   );
 }
+
+// Hele On Poynt-området er auth-gated og per-bruker-dynamisk — behold
+// server-bundet navigasjon (opt-out fra Instant Navigations-kravet).
+export const instant = false;

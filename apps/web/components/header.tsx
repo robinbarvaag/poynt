@@ -9,6 +9,7 @@ import {
 } from "@poynt/ui";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Suspense } from "react";
 import { CartDrawer } from "./cart-drawer";
 import { ContactLink } from "./contact/contact-link";
 
@@ -89,8 +90,6 @@ export function Header({
   ctaButton,
   navItems = [],
 }: HeaderProps) {
-  const pathname = usePathname();
-
   const items: SiteHeaderNavItem[] = navItems.map((item) => ({
     label: item.label,
     href: getHref(item),
@@ -151,14 +150,27 @@ export function Header({
     </Button>
   ) : undefined;
 
+  const headerProps = {
+    logo: logoNode,
+    navItems: items,
+    actions,
+    mobileFooter,
+    linkComponent: NavLink,
+  };
+
+  // usePathname er runtime-data under prerendering (cacheComponents) og må leses
+  // bak en Suspense-grense. Fallbacket er samme header uten aktiv-lenke-markering,
+  // så skallet viser full navigasjon mens pathname streamer inn.
   return (
-    <SiteHeader
-      logo={logoNode}
-      navItems={items}
-      actions={actions}
-      mobileFooter={mobileFooter}
-      linkComponent={NavLink}
-      pathname={pathname}
-    />
+    <Suspense fallback={<SiteHeader {...headerProps} />}>
+      <PathAwareSiteHeader {...headerProps} />
+    </Suspense>
   );
+}
+
+function PathAwareSiteHeader(
+  props: Omit<Parameters<typeof SiteHeader>[0], "pathname">
+) {
+  const pathname = usePathname();
+  return <SiteHeader {...props} pathname={pathname} />;
 }

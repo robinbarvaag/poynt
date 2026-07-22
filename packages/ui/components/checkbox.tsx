@@ -2,7 +2,7 @@
 
 import * as CheckboxPrimitive from "@radix-ui/react-checkbox";
 import { type VariantProps, cva } from "class-variance-authority";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { CheckIcon } from "lucide-react";
 import type * as React from "react";
 
@@ -38,6 +38,7 @@ function Checkbox({
   ...props
 }: Omit<React.ComponentProps<typeof CheckboxPrimitive.Root>, "size"> &
   VariantProps<typeof checkboxVariants>) {
+  const reduce = useReducedMotion();
   return (
     <CheckboxPrimitive.Root
       data-slot="checkbox"
@@ -49,10 +50,15 @@ function Checkbox({
         className="grid place-content-center text-current"
         asChild
       >
+        {/* Fra 0.5 — aldri fra scale(0); ved redusert bevegelse kun fade. */}
         <motion.span
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: "spring", stiffness: 600, damping: 22 }}
+          initial={reduce ? { opacity: 0 } : { scale: 0.5, opacity: 0 }}
+          animate={reduce ? { opacity: 1 } : { scale: 1, opacity: 1 }}
+          transition={
+            reduce
+              ? { duration: 0.15 }
+              : { type: "spring", stiffness: 600, damping: 22 }
+          }
         >
           <CheckIcon className={cn(iconSize[size ?? "md"], "stroke-[3]")} />
         </motion.span>

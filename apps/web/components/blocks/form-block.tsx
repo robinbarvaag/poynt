@@ -26,6 +26,8 @@ interface FormBlockProps {
   maxWidth?: "sm" | "md" | "lg" | "full" | null;
   /** Dropp Container-wrapperen (brukes når skjemaet ligger i en dialog). */
   bare?: boolean;
+  /** Dropp intern tittel/beskrivelse — omgivelsen eier headingen selv. */
+  hideHeader?: boolean;
 }
 
 /** Sporings-/kontekstdata lest fra URL-en (?kilde=&emne=&fra=). */
@@ -35,6 +37,29 @@ interface SubmissionContext {
   emne?: string;
 }
 
+/**
+ * Prefyll for emne-selecten: eksakt (case-insensitiv) match mot verdi eller
+ * label; et emne som ikke matcher noen av valgene (f.eks. en kort-tittel fra
+ * en landingsside) faller tilbake til «Annet» — konteksten er uansett med i
+ * innsendingen via kilde-feltet.
+ */
+function resolveSelectDefault(
+  emne: string | undefined,
+  options: { label: string; value: string }[]
+): string | undefined {
+  if (!emne) return undefined;
+  const norm = emne.trim().toLowerCase();
+  const hit = options.find(
+    (o) => o.value.toLowerCase() === norm || o.label.toLowerCase() === norm
+  );
+  if (hit) return hit.value;
+  return options.find((o) => o.value.toLowerCase() === "annet")?.value;
+}
+
+/** Delt felt-styling så tekstfelt og select får identisk høyde. */
+const fieldControlClasses =
+  "h-12 w-full rounded-xl border border-input bg-background px-4 focus:outline-none focus:ring-2 focus:ring-ring";
+
 export function FormBlockComponent({
   form,
   title,
@@ -43,6 +68,7 @@ export function FormBlockComponent({
   alignment = "left",
   maxWidth = "md",
   bare = false,
+  hideHeader = false,
 }: FormBlockProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -184,7 +210,7 @@ export function FormBlockComponent({
         variantClasses[currentVariant]
       )}
     >
-      {(formTitle || description) && (
+      {!hideHeader && (formTitle || description) && (
         <div className="mb-7 space-y-2">
           {formTitle && <Heading variant="h3">{formTitle}</Heading>}
           {description && <Text variant="muted">{description}</Text>}
@@ -233,7 +259,7 @@ export function FormBlockComponent({
                       type="text"
                       name={fieldName}
                       required={isRequired}
-                      className="w-full px-4 py-3 rounded-xl border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+                      className={fieldControlClasses}
                     />
                   )}
 
@@ -242,7 +268,7 @@ export function FormBlockComponent({
                       type="email"
                       name={fieldName}
                       required={isRequired}
-                      className="w-full px-4 py-3 rounded-xl border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+                      className={fieldControlClasses}
                     />
                   )}
 
@@ -251,7 +277,7 @@ export function FormBlockComponent({
                       type="number"
                       name={fieldName}
                       required={isRequired}
-                      className="w-full px-4 py-3 rounded-xl border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+                      className={fieldControlClasses}
                     />
                   )}
 
@@ -268,9 +294,13 @@ export function FormBlockComponent({
                     <Select
                       name={fieldName}
                       required={isRequired}
-                      defaultValue={fieldName === "emne" ? ctx.emne : undefined}
+                      defaultValue={
+                        fieldName === "emne"
+                          ? resolveSelectDefault(ctx.emne, field.options ?? [])
+                          : undefined
+                      }
                     >
-                      <SelectTrigger className="h-auto! w-full rounded-xl border-input bg-background px-4 py-3 text-base">
+                      <SelectTrigger className="h-12! w-full rounded-xl border-input bg-background px-4 text-base shadow-none">
                         <SelectValue placeholder="Velg..." />
                       </SelectTrigger>
                       <SelectContent>

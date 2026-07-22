@@ -9,11 +9,29 @@ import { buildMetadata } from "@/lib/seo";
 import config from "@/payload.config";
 import { Container } from "@poynt/ui";
 import type { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import { getPayload } from "payload";
 
-export async function generateMetadata(): Promise<Metadata> {
+async function getPodcastPageData() {
+  "use cache";
+  cacheTag("cms");
+  cacheLife("minutes");
+
   const payload = await getPayload({ config });
-  const pageConfig = await payload.findGlobal({ slug: "podcastpage" });
+
+  // Episodene hentes fra podkastens RSS-feed (PODCAST_RSS_URL) — Spotify er
+  // sannhetskilden, ingenting vedlikeholdes manuelt i Payload.
+  const feedUrl = process.env.PODCAST_RSS_URL;
+  const [pageConfig, rss] = await Promise.all([
+    payload.findGlobal({ slug: "podcastpage" }),
+    feedUrl ? fetchPodcastEpisodes(feedUrl, { limit: 200 }) : [],
+  ]);
+
+  return { pageConfig, rss };
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { pageConfig } = await getPodcastPageData();
 
   const meta = pageConfig?.meta;
   return buildMetadata({
@@ -27,8 +45,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function PodcastPage() {
-  const payload = await getPayload({ config });
-  const pageConfig = await payload.findGlobal({ slug: "podcastpage" });
+  const { pageConfig, rss } = await getPodcastPageData();
 
   const heroEnabled = pageConfig?.hero?.enabled ?? true;
   const heroTitle = pageConfig?.hero?.title || "Podkast";
@@ -44,12 +61,6 @@ export default async function PodcastPage() {
       year: "numeric",
     });
 
-  // Episodene hentes fra podkastens RSS-feed (PODCAST_RSS_URL) — Spotify er
-  // sannhetskilden, ingenting vedlikeholdes manuelt i Payload.
-  const feedUrl = process.env.PODCAST_RSS_URL;
-  const rss = feedUrl
-    ? await fetchPodcastEpisodes(feedUrl, { limit: 200 })
-    : [];
   const episodes: PodcastExplorerEpisode[] = rss.map((episode, index) => ({
     id: episode.id,
     href: episode.link ?? "#",
