@@ -8,6 +8,28 @@ import {
   resolveRelations,
 } from "@/lib/payload";
 import type { BlogPost, Category, User } from "@/payload-types";
+import type { ContentFilterOption } from "@poynt/ui";
+
+/**
+ * Kategori-filtervalg utledet fra innleggene som faktisk vises — ikke hele
+ * Categories-collectionen, som deles med On Poynt-innholdet og derfor er full
+ * av kanaler/temaer ingen blogginnlegg bruker.
+ */
+export function collectBlogCategories(
+  posts: BlogPost[]
+): ContentFilterOption[] {
+  const seen = new Map<string, string>();
+  for (const post of posts) {
+    for (const cat of resolveRelations<Category>(post.categories)) {
+      if (cat.slug && !seen.has(cat.slug)) {
+        seen.set(cat.slug, cat.name);
+      }
+    }
+  }
+  return [...seen]
+    .map(([value, label]) => ({ value, label }))
+    .sort((a, b) => a.label.localeCompare(b.label, "nb"));
+}
 
 /**
  * Gjør et (depth ≥ 1) blogginnlegg om til kortdataene `BlogExplorer` trenger.

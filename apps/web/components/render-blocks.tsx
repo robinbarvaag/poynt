@@ -29,16 +29,15 @@ interface RenderBlocksProps {
 }
 
 // Full-bleed / self-styled blocks render as-is, never wrapped in BlockSection.
-// The data-driven archives wrap THEMSELVES in a BlockSection so that when they
-// have no content (return null) nothing renders at all — otherwise the central
-// wrapper would leave an empty, padded "ghost" section (e.g. an empty podcast
-// band when no episodes exist). They also don't advance the rhythm counter.
+// Hero/media er ekte full-bleed; de data-drevne arkivene pakker SEG SELV i en
+// BlockSection slik at når de ikke har innhold (returnerer null) rendres
+// ingenting — ellers ville den sentrale wrapperen etterlatt en tom, paddet
+// «spøkelses»-seksjon. Alt annet (også panelblokkene statsBand/ctaSection/
+// newsletter) går gjennom den sentrale BlockSection, så hele siden deler én
+// spacing og én innholdsbredde (`Container` default).
 const SPECIAL_BLOCK_TYPES = new Set([
   "hero",
-  "ctaSection",
   "media",
-  "statsBand",
-  "newsletter",
   "productArchive",
   "podcastArchive",
   "servicesArchive",
@@ -54,6 +53,8 @@ const SELF_REVEAL_BLOCK_TYPES = new Set([
   "faq",
   "logoCloud",
   "pathCards",
+  "statsBand",
+  "newsletter",
 ]);
 
 function renderBlock(block: Block): ReactNode {

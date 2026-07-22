@@ -7,7 +7,6 @@ import { useCallback } from "react";
 const OPTIONS = [
   { value: "alt", label: "Alt" },
   { value: "guide", label: "Guider", icon: "compass" as const },
-  { value: "artikkel", label: "Artikler", icon: "newspaper" as const },
   { value: "kurs", label: "Kurs", icon: "graduation-cap" as const },
 ];
 

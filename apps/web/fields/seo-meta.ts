@@ -44,6 +44,17 @@ export function seoMetaField(opts?: {
             "Bilde som vises ved deling på sosiale medier (1200x630px anbefalt)",
         },
       },
+      // Live forhåndsvisning av Google-treff + delingskort, nederst i gruppen
+      // (samme plassering som seoPlugin-collections har den).
+      {
+        name: "seoPreview",
+        type: "ui",
+        admin: {
+          components: {
+            Field: "/admin/components/seo/seo-preview#SeoPreview",
+          },
+        },
+      },
       {
         name: "noIndex",
         type: "checkbox",

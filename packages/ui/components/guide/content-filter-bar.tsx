@@ -2,6 +2,7 @@
 
 import { Icon, type IconName } from "../../icons";
 import { cn } from "../../lib/utils";
+import { Input } from "../form/input";
 
 export interface ContentFilterOption {
   value: string;
@@ -15,21 +16,36 @@ export interface ContentFilterBarProps {
   options: ContentFilterOption[];
   value: string;
   onChange: (value: string) => void;
+  /** Settes sammen med `onQueryChange` for å vise et søkefelt til høyre for pillene. */
+  query?: string;
+  onQueryChange?: (query: string) => void;
+  searchPlaceholder?: string;
+  searchLabel?: string;
   className?: string;
 }
 
 /**
- * Felles filter-rad (format/kategori) for innholds-lister. Pille-stil, én aktiv
- * om gangen. Holdes som egen komponent så hub og under-lister filtrerer likt.
+ * Felles filter-rad (format/kategori) for innholds-lister, med valgfritt
+ * søkefelt. Pille-stil, én aktiv om gangen. Kontrollert — eier ingen state
+ * selv; brukes typisk via `ContentExplorer` eller en URL-param-wrapper.
  */
 export function ContentFilterBar({
   options,
   value,
   onChange,
+  query,
+  onQueryChange,
+  searchPlaceholder = "Søk …",
+  searchLabel = "Søk i innhold",
   className,
 }: ContentFilterBarProps) {
-  return (
-    <div className={cn("flex flex-wrap gap-2", className)} role="tablist">
+  const hasSearch = onQueryChange !== undefined;
+  // En enslig «alle»-pille filtrerer ingenting — vis raden først når det
+  // finnes noe å velge mellom.
+  const hasPills = options.length > 1;
+
+  const pills = hasPills && (
+    <div className="flex flex-wrap gap-2" role="tablist">
       {options.map((option) => {
         const isActive = option.value === value;
         return (
@@ -62,6 +78,32 @@ export function ContentFilterBar({
           </button>
         );
       })}
+    </div>
+  );
+
+  if (!hasSearch) {
+    return pills ? <div className={className}>{pills}</div> : null;
+  }
+
+  // Søkefeltet ligger på egen rad — pillene kan bli mange og wrappe, og da
+  // blir et felt ved siden av bare rot.
+  return (
+    <div className={cn("flex flex-col gap-4", className)}>
+      <div className="relative w-full sm:max-w-sm">
+        <span className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-3.5 text-muted-foreground">
+          <Icon name="search" className="size-4" />
+        </span>
+        <Input
+          type="search"
+          value={query ?? ""}
+          onChange={(event) => onQueryChange(event.target.value)}
+          placeholder={searchPlaceholder}
+          className="rounded-full pl-10"
+          aria-label={searchLabel}
+        />
+      </div>
+
+      {pills}
     </div>
   );
 }

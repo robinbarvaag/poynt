@@ -84,17 +84,7 @@ const layout = [
     ],
   },
 
-  // 4 — Om Susanne (teaser → /om)
-  {
-    blockType: "ctaSection",
-    variant: "simple",
-    title: "19 år med markedsføring – og fortsatt like nysgjerrig",
-    description:
-      "Jeg er Susanne Todnem – markedsfører, journalist og foredragsholder, med bakgrunn fra bank, IT og fintech. Jeg jobber med alt fra børsnoterte selskaper til bedrifter med to ansatte.",
-    primaryCta: { text: "Bli kjent med meg", url: "/om" },
-  },
-
-  // 5 — Tjenester / slik kan jeg hjelpe
+  // 4 — Tjenester / slik kan jeg hjelpe
   {
     blockType: "featureGrid",
     eyebrow: "Tjenester",
@@ -116,18 +106,24 @@ const layout = [
       {
         title: "Medlemskap",
         text: "Bli med i On Poynt og få inspirasjon og kunnskap som letter arbeidshverdagen.",
-        linkLabel: "Bli medlem",
+        linkLabel: "Les mer",
         linkUrl: "/on-poynt",
       },
     ],
   },
 
-  // 6 — Tall / troverdighet
+  // 5 — Om Susanne + tall i ÉN delt seksjon (tekst venstre, tall som motvekt
+  // høyre, på vanlig bakgrunn). Erstatter den gamle kombinasjonen av en
+  // sentrert «19 år»-CTA + et eget grønt tallpanel, som sa det samme to
+  // ganger og brøt panel-rasjoneringen (maks to fargepaneler per side).
   {
     blockType: "statsBand",
+    layout: "split",
     eyebrow: "Om Susanne Todnem",
-    title: "Erfaring som teller",
-    variant: "primary",
+    title: "19 år med markedsføring – og fortsatt like nysgjerrig",
+    description:
+      "Jeg er Susanne Todnem – markedsfører, journalist og foredragsholder, med bakgrunn fra bank, IT og fintech. Jeg jobber med alt fra børsnoterte selskaper til bedrifter med to ansatte.",
+    cta: { text: "Bli kjent med meg", url: "/om" },
     stats: [
       { value: 19, suffix: "+ år", label: "med markedsføring" },
       { value: 5, label: "egne bedrifter startet" },
@@ -135,7 +131,7 @@ const layout = [
     ],
   },
 
-  // 7 — On Poynt-spotlight
+  // 6 — On Poynt-spotlight (sidens ENE grønne panel og ene medlemskaps-CTA)
   {
     blockType: "ctaSection",
     variant: "colored",
@@ -146,7 +142,7 @@ const layout = [
     secondaryCta: { text: "Se verktøyene", url: "/verktoy" },
   },
 
-  // 8 — Utvalgte produkter
+  // 7 — Utvalgte produkter
   {
     blockType: "productArchive",
     title: "Medlemskap, digitale produkter og bok",
@@ -157,7 +153,7 @@ const layout = [
     showMoreLink: true,
   },
 
-  // 9 — Kundehistorier (ekte sitater fra dagens poynt.no)
+  // 8 — Kundehistorier (ekte sitater fra dagens poynt.no)
   {
     blockType: "testimonials",
     eyebrow: "Kundehistorier",
@@ -189,7 +185,7 @@ const layout = [
     ],
   },
 
-  // 10 — Fra podkasten
+  // 9 — Fra podkasten
   {
     blockType: "podcastArchive",
     title: "Fra podkasten",
@@ -198,7 +194,7 @@ const layout = [
     showMoreLink: true,
   },
 
-  // 11 — Nyhetsbrev
+  // 10 — Nyhetsbrev (alltid sist)
   {
     blockType: "newsletter",
     eyebrow: "Hold deg oppdatert",

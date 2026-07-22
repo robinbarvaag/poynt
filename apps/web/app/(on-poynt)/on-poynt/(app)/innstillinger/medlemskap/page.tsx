@@ -132,7 +132,7 @@ export default async function MembershipSettingsPage() {
                 <li className="flex items-center gap-3">
                   <Icon name="check" className="size-5 text-green-600" />
                   <span className="text-sm text-muted-foreground">
-                    Tilgang til alle artikler og guider
+                    Tilgang til alle guider og kurs
                   </span>
                 </li>
                 <li className="flex items-center gap-3">

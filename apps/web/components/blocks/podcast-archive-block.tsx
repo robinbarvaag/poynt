@@ -1,5 +1,11 @@
 import { fetchPodcastEpisodes } from "@/lib/podcast-rss";
-import { BlockSection, Heading, Text } from "@poynt/ui";
+import {
+  BlockSection,
+  Container,
+  Heading,
+  SectionHeader,
+  Text,
+} from "@poynt/ui";
 import { ArrowRight, Play } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -74,21 +80,8 @@ export async function PodcastArchiveBlock({
 
   return (
     <BlockSection background="default" containerSize={false}>
-      <div className="container mx-auto px-4">
-        {(title || description) && (
-          <div className="mb-8 md:mb-12">
-            {title && (
-              <Heading size="h2" customStyles="mb-3">
-                {title}
-              </Heading>
-            )}
-            {description && (
-              <p className="text-lg text-muted-foreground max-w-2xl">
-                {description}
-              </p>
-            )}
-          </div>
-        )}
+      <Container padding="none">
+        <SectionHeader title={title} intro={description} reveal={false} />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {episodes.map((episode) => (
@@ -107,7 +100,7 @@ export async function PodcastArchiveBlock({
             </Link>
           </div>
         )}
-      </div>
+      </Container>
     </BlockSection>
   );
 }

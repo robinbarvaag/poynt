@@ -16,10 +16,6 @@ const links = [
     href: "/admin/collections/courses",
     label: "Kurs",
   },
-  {
-    href: "/admin/collections/articles",
-    label: "Artikler",
-  },
   // Egenbygde admin-views (leser fra planner-skjemaet).
   {
     href: "/admin/soknader",

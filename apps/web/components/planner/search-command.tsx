@@ -16,7 +16,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 /** Speiler responsen fra /api/on-poynt/search-index. */
 type SearchIndexItem = { title: string; href: string; format: ContentFormat };
-type ContentFormat = "guide" | "artikkel" | "kurs";
+type ContentFormat = "guide" | "kurs";
 
 type Hit = { title: string; href: string; icon: IconName; group: string };
 
@@ -35,7 +35,6 @@ const PAGE_HITS: Hit[] = [
 
 const FORMAT_ICON: Record<SearchIndexItem["format"], IconName> = {
   guide: "compass",
-  artikkel: "newspaper",
   kurs: "graduation-cap",
 };
 

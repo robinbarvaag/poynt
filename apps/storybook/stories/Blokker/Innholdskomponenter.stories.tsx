@@ -40,6 +40,8 @@ export const Alle: Story = {
   render: () => {
     const [filter, setFilter] = useState("alt");
     const [channel, setChannel] = useState("facebook");
+    const [category, setCategory] = useState("alle");
+    const [query, setQuery] = useState("");
     return (
       <div className="mx-auto flex max-w-5xl flex-col gap-14 py-6">
         <Block label="CourseHero">
@@ -97,6 +99,22 @@ export const Alle: Story = {
               />
             </div>
           </div>
+        </Block>
+
+        <Block label="Filter med søkefelt (bloggen)">
+          <ContentFilterBar
+            value={category}
+            onChange={setCategory}
+            query={query}
+            onQueryChange={setQuery}
+            searchPlaceholder="Søk i innlegg …"
+            options={[
+              { value: "alle", label: "Alle innlegg" },
+              { value: "markedsforing", label: "Markedsføring" },
+              { value: "kommunikasjon", label: "Kommunikasjon" },
+              { value: "tips", label: "Tips" },
+            ]}
+          />
         </Block>
 
         <Block label="AuthorByline">

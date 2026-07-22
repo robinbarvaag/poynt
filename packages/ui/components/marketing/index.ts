@@ -3,11 +3,6 @@ export {
   type BlogCardProps,
   type BlogSurface,
 } from "./blog-card";
-export {
-  type BlogCategoryOption,
-  BlogFilterBar,
-  type BlogFilterBarProps,
-} from "./blog-filter-bar";
 export { BlogGrid, type BlogGridItem, type BlogGridProps } from "./blog-grid";
 export { ContentMedia, type ContentMediaProps } from "./content-media";
 export { Faq, type FaqItem, type FaqProps } from "./faq";
@@ -64,11 +59,6 @@ export {
   type ServiceShowcaseLinkProps,
   type ServiceShowcaseProps,
 } from "./service-showcase";
-export {
-  ServiceGrid,
-  type ServiceGridItem,
-  type ServiceGridProps,
-} from "./service-grid";
 export { type Stat, StatsBand, type StatsBandProps } from "./stats-band";
 export { type Step, Steps, type StepsProps } from "./steps";
 export {

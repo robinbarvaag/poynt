@@ -1,10 +1,9 @@
 import { Meta, Canvas } from "@storybook/addon-docs/blocks";
 import * as BlogGridStories from "./BlogGrid.stories";
-import * as BlogFilterBarStories from "./BlogFilterBar.stories";
 
 <Meta of={BlogGridStories} />
 
-# BlogGrid, BlogCard & BlogFilterBar
+# BlogGrid & BlogCard
 
 Bloggen er der fargeblokk-kortene (PayPal/INSPO) endelig hører hjemme: redaksjonelt
 innhold i modige, mettede flater. Hvert innlegg er et `Card` med roterende tint,
@@ -20,8 +19,8 @@ kategori-eyebrow, fet tittel, utdrag og forfatter/dato.
 ## Når brukes den
 
 - Blogg-/artikkeloversikt med ett fremhevet innlegg (2 kolonner).
-- `BlogFilterBar` gir kategori-piller + søk; en klient-komponent (BlogExplorer)
-  holder state og filtrerer øyeblikkelig.
+- Filtrering og søk kommer fra den felles `ContentFilterBar` (se
+  Innholdskomponenter); `ContentExplorer` holder state og filtrerer øyeblikkelig.
 
 ## Rutenett
 
@@ -31,10 +30,10 @@ Legg merke til kort nr. 4 — uten bilde blir det et rent typografisk fargeblokk
 
 ## Filtrering + søk
 
-Kontrollert: `BlogFilterBar` eier ingen state selv. Appen (BlogExplorer) filtrerer
-innleggene på kategori + søketekst og sender de synlige videre til `BlogGrid`.
-
-<Canvas of={BlogFilterBarStories.Default} />
+Bloggen bruker det generiske `ContentExplorer`-mønsteret: den eier filter- og
+søke-state, rendrer `ContentFilterBar` (med søkefelt) og sender de synlige
+innleggene videre til `BlogGrid` via en render-funksjon. Se demo under
+Innholdskomponenter.
 
 ## Data-kobling
 

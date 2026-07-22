@@ -16,6 +16,15 @@ export const Homepage: GlobalConfig = {
           label: "Innhold",
           fields: [
             {
+              name: "komposisjonssjekk",
+              type: "ui",
+              admin: {
+                components: {
+                  Field: "/admin/components/composition-check#CompositionCheck",
+                },
+              },
+            },
+            {
               name: "layout",
               type: "blocks",
               label: "Innholdsblokker",

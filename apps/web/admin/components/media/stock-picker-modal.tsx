@@ -3,11 +3,11 @@
 import { Drawer, useModal } from "@payloadcms/ui";
 import { useCallback, useState } from "react";
 import {
+  type StockImage,
+  type StockSource,
   importStockImage,
   searchGiphy,
   searchPexels,
-  type StockImage,
-  type StockSource,
 } from "../../actions/stock-media";
 
 /**
@@ -167,7 +167,10 @@ export const StockPickerDrawer = ({
                     color: "var(--theme-text)",
                   }}
                 >
-                  <span style={{ fontSize: "1.5em", lineHeight: 1 }} aria-hidden>
+                  <span
+                    style={{ fontSize: "1.5em", lineHeight: 1 }}
+                    aria-hidden
+                  >
                     {t.icon}
                   </span>
                   <span
@@ -262,7 +265,13 @@ export const StockPickerDrawer = ({
 
         {/* Results */}
         {images.length === 0 && !loading && (
-          <p style={{ color: "var(--theme-elevation-500)", fontSize: "0.9em", margin: 0 }}>
+          <p
+            style={{
+              color: "var(--theme-elevation-500)",
+              fontSize: "0.9em",
+              margin: 0,
+            }}
+          >
             Søk etter et motiv for å se forslag.{" "}
             {tab === "pexels"
               ? "Gratis foto fra Pexels."
@@ -318,7 +327,8 @@ export const StockPickerDrawer = ({
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    background: busy || done ? "rgba(0,0,0,0.45)" : "transparent",
+                    background:
+                      busy || done ? "rgba(0,0,0,0.45)" : "transparent",
                     color: "#fff",
                     fontSize: "0.85em",
                     fontWeight: 600,
@@ -369,9 +379,9 @@ export const StockPickerDrawer = ({
             color: "var(--theme-elevation-400)",
           }}
         >
-          Klikk på et bilde for å {mode === "select" ? "velge" : "importere"} det.
-          Kreditering lagres automatisk. Foto fra Pexels og GIF-er fra Giphy er
-          gratis å bruke.
+          Klikk på et bilde for å {mode === "select" ? "velge" : "importere"}{" "}
+          det. Kreditering lagres automatisk. Foto fra Pexels og GIF-er fra
+          Giphy er gratis å bruke.
         </p>
       </div>
     </Drawer>

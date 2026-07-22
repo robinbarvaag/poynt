@@ -2,7 +2,7 @@ import { ArticleSearch } from "@/components/article-search";
 import { ChannelFilter } from "@/components/learning/channel-filter";
 import { LearningFilter } from "@/components/learning/learning-filter";
 import { PayloadImage } from "@/components/payload-image";
-import type { Article, Category, Course, Guide, Media } from "@/payload-types";
+import type { Category, Course, Guide, Media } from "@/payload-types";
 import config from "@/payload.config";
 import {
   ContentCard,
@@ -65,25 +65,6 @@ function mapGuide(g: Guide): LearningItem {
   };
 }
 
-function mapArticle(a: Article): LearningItem {
-  const cats = catObjects(a.categories);
-  return {
-    id: `artikkel-${a.id}`,
-    format: "artikkel",
-    href: `/on-poynt/artikler/${a.slug}`,
-    title: a.title,
-    lede: a.excerpt ?? undefined,
-    cover: coverNode(a.featuredImage, a.title),
-    category: cats[0]?.name,
-    categorySlugs: cats.map((c) => c.slug).filter(Boolean),
-    date: new Date(a.publishedAt).getTime(),
-    meta: a.readingTime
-      ? [{ icon: "clock", label: `${a.readingTime} min` }]
-      : undefined,
-    isFeatured: Boolean(a.isFeatured),
-  };
-}
-
 function mapCourse(c: Course): LearningItem {
   const cats = catObjects(c.categories);
   const lessonCount = (c.modules ?? []).reduce(
@@ -109,18 +90,11 @@ export default async function LearningPage({ searchParams }: PageProps) {
   const { type, kategori, sok } = await searchParams;
   const payload = await getPayload({ config });
 
-  const [guides, articles, courses, cats] = await Promise.all([
+  const [guides, courses, cats] = await Promise.all([
     payload.find({
       collection: "guides",
       where: { _status: { equals: "published" } },
       sort: "order",
-      depth: 2,
-      limit: 200,
-    }),
-    payload.find({
-      collection: "articles",
-      where: { _status: { equals: "published" } },
-      sort: "-publishedAt",
       depth: 2,
       limit: 200,
     }),
@@ -136,7 +110,6 @@ export default async function LearningPage({ searchParams }: PageProps) {
 
   const items: LearningItem[] = [
     ...guides.docs.map(mapGuide),
-    ...articles.docs.map(mapArticle),
     ...courses.docs.map(mapCourse),
   ];
 
@@ -180,7 +153,7 @@ export default async function LearningPage({ searchParams }: PageProps) {
     <div className="flex flex-col gap-10">
       <PageHeader
         title="Læring"
-        description="Guider, artikler og kurs for markedsføring og innholdsproduksjon — alt samlet på ett sted."
+        description="Guider og kurs for markedsføring og innholdsproduksjon — alt samlet på ett sted."
       />
 
       <div className="flex flex-col gap-5 rounded-3xl bg-card p-4 ring-1 ring-foreground/10 sm:p-5">

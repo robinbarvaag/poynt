@@ -53,8 +53,7 @@ const STEPS: DriveStep[] = [
     element: '[data-tour="nav-learn"]',
     popover: {
       title: "Læring",
-      description:
-        "Kurs, artikler og guider — samlet på ett sted når du vil lære mer.",
+      description: "Kurs og guider — samlet på ett sted når du vil lære mer.",
       side: "right",
       align: "start",
     },

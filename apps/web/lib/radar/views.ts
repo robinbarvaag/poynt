@@ -8,12 +8,7 @@ import { plannerContentView } from "@poynt/planner-db/schema";
  */
 
 /** Collections vi teller visninger for (speiler radarens innholdsscanning). */
-export const TRACKED_COLLECTIONS = [
-  "articles",
-  "courses",
-  "guides",
-  "blog-posts",
-] as const;
+export const TRACKED_COLLECTIONS = ["courses", "guides", "blog-posts"] as const;
 export type TrackedCollection = (typeof TRACKED_COLLECTIONS)[number];
 
 const today = () => new Date().toISOString().slice(0, 10);

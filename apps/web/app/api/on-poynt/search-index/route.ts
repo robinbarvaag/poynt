@@ -6,12 +6,12 @@ import { getPayload } from "payload";
 export type SearchIndexItem = {
   title: string;
   href: string;
-  format: "guide" | "artikkel" | "kurs";
+  format: "guide" | "kurs";
 };
 
 /**
  * Lett søkeindeks for det globale søket (⌘K): alt publisert Læring-innhold
- * (guider, artikler, kurs) som tittel + lenke. Hentes lazy første gang paletten
+ * (guider, kurs) som tittel + lenke. Hentes lazy første gang paletten
  * åpnes og caches på klienten. Auth-gated som resten av on-poynt.
  */
 export async function GET(req: NextRequest) {
@@ -23,16 +23,9 @@ export async function GET(req: NextRequest) {
   try {
     const payload = await getPayload({ config });
     const published = { _status: { equals: "published" } } as const;
-    const [guides, articles, courses] = await Promise.all([
+    const [guides, courses] = await Promise.all([
       payload.find({
         collection: "guides",
-        where: published,
-        depth: 0,
-        limit: 300,
-        select: { title: true, slug: true },
-      }),
-      payload.find({
-        collection: "articles",
         where: published,
         depth: 0,
         limit: 300,
@@ -52,11 +45,6 @@ export async function GET(req: NextRequest) {
         title: g.title,
         href: `/on-poynt/ressurser/${g.slug}`,
         format: "guide" as const,
-      })),
-      ...articles.docs.map((a) => ({
-        title: a.title,
-        href: `/on-poynt/artikler/${a.slug}`,
-        format: "artikkel" as const,
       })),
       ...courses.docs.map((c) => ({
         title: c.title,

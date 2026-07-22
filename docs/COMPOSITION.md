@@ -35,21 +35,20 @@ Vi lager én wrapper som `RenderBlocks` legger rundt hver blokk:
 
 Blokkene blir da «innholds-only»: de slutter å rendre egne `<section>`/`py-*`.
 
-## 2. Fargerytme — subtil, regelstyrt
+## 2. Fargerytme — panelene bærer fargen, bakgrunnen er jevn
 
-Mål: liv uten støy. **Mest lyst, lett veksling.** Ikke ny farge på hver seksjon.
+Mål: liv uten støy. Siden har **én jevn, lys bakgrunn** hele veien — ingen
+fullbredde-fargeseksjoner og ingen veksel-tint. Fargen kommer fra innholdet:
 
-Regler:
-- Standard bakgrunn er lys (`background`). De fleste blokker er lyse.
-- Annenhver «tunge» blokk kan få en dempet flate (`muted` eller `secondary`).
-- **Maks én** sterk farget seksjon (`primary`/`accent`) per side — typisk CTA.
-- Aldri to sterke farger rett etter hverandre.
+- **Fargede kort** (path-/produkt-/feature-kort) — de kan være mange.
+- **Flytende fargepaneler** (`Panel`-primitivet: avrundet, mettet flate med
+  skygge — Tall-bånd «bånd», CTA «farget», Nyhetsbrev) — de er rasjonert:
+  - **Maks to fargepaneler per side.**
+  - **Aldri to paneler rett etter hverandre** — legg en rolig seksjon mellom.
+- Trenger en side flere tall-/CTA-øyeblikk, bruk de panel-frie variantene
+  (Tall-bånd «delt», CTA «enkel») — de ligger på sidens vanlige bakgrunn.
 
-Dette beregnes ett sted (en liten funksjon i `RenderBlocks` som tar
-blokk-index + type → bakgrunn), så hele appen følger samme rytme.
-
-Senere kan partneren overstyre per blokk i Payload (et `background`-felt:
-auto / lys / dempet / farget), med «auto» som default.
+Komposisjonssjekken i admin (se §8) vokter disse reglene live mens en bygger.
 
 ## 3. Signatur og dekor — redaksjonelt, ikke former
 
@@ -79,12 +78,25 @@ fordi grepet er for lett å kjenne igjen fra andre prosjekter.
 - Parallax/`DriftingBlob` kun på dekor i hero/CTA.
 - Respekter alltid `prefers-reduced-motion` (primitivene gjør det allerede).
 
-## 5. Spacing — fast rytme overalt
+## 5. Spacing og bredde — fast rytme overalt
 
-- Seksjonsavstand kommer kun fra `Section spacing` (sm/md/lg/xl).
+- Seksjonsavstand kommer kun fra `BlockSection` (default `spacing="lg"`) —
+  **ikke** noe en blokk styrer selv. Én verdi, hele siden.
 - Avstand mellom elementer fra `Stack gap`.
-- Bredder fra `Container size`.
+- **Én innholdsbredde:** alle blokker bruker `Container` (default
+  `max-w-6xl`) — **aldri** Tailwinds `container`-klasse (den er bredere og var
+  årsaken til at seksjonene hadde ulik bredde). Smalere mål (`max-w-2xl`/`3xl`)
+  er kun lov for løpende tekst *inne i* containeren, venstrestilt.
 - Ingen vilkårlige `py-`/`gap-`-verdier i blokkene.
+
+## 5b. Justering — venstrekanten er limet
+
+- Seksjonshoder rendres av **`SectionHeader`**-primitivet (eyebrow + tittel +
+  ingress) og er **venstrestilte som default**. Da deler alle seksjoner samme
+  venstrekant, og siden leses som ÉN komposisjon.
+- Sentrering er unntaket og et bevisst valg: hero, innhold inni fargepaneler
+  (CTA/nyhetsbrev/tall-bånd «bånd») og stor-sitat-varianten av anmeldelser.
+- Ikke lag egne eyebrow/tittel/ingress-stabler i blokkene — bruk primitivet.
 
 ## 6. Faseplan for å rulle dette ut
 
@@ -98,7 +110,25 @@ fordi grepet er for lett å kjenne igjen fra andre prosjekter.
 - **Fase E — Payload-styring (valgfritt):** `background`-felt per blokk så
   partneren kan overstyre rytmen.
 
-## 7. Hva vi IKKE gjør
+## 7. CTA-rasjonering — ett mål per side
+
+En side selger ETT hovedmål (f.eks. On Poynt-medlemskap). Regler:
+
+- Maks én blokk med hovedknapp mot samme URL. Andre seksjoner kan omtale
+  tilbudet, men uten egen knapp — hierarkiet kollapser når fem seksjoner
+  roper det samme.
+- Hero øverst (én), nyhetsbrev nederst (ett).
+
+## 8. Komposisjonssjekken i admin
+
+Reglene i §2, §5 og §7 voktes av **Komposisjonssjekk**-panelet øverst i
+Sidelayout på Sider og Forside (`apps/web/admin/components/composition-check.tsx`).
+Den er regelbasert (ingen AI), kjører live mens en redigerer, og gir
+advarsler/tips — den blokkerer aldri lagring. Søsteren til
+AI-kvalitetsvurderingen på Guider. Nye komposisjonsregler legges til der,
+slik at retningslinje og vakt aldri glir fra hverandre.
+
+## 9. Hva vi IKKE gjør
 
 - Ikke formede seksjons-overganger (wave/curve-dividers).
 - Ikke ny bakgrunnsfarge på hver blokk.

@@ -72,8 +72,8 @@ export const toolboxNavItems: NavItem[] = [
 ];
 
 /**
- * Gruppe «Læring» — alt mykt innhold (guider, artikler, kurs) samlet i én hub.
- * Detalj-rutene (/ressurser, /artikler, /kurs) består; list-rutene redirecter hit.
+ * Gruppe «Læring» — alt mykt innhold (guider, kurs) samlet i én hub.
+ * Detalj-rutene (/ressurser, /kurs) består; list-rutene redirecter hit.
  */
 export const learnNavItems: NavItem[] = [
   {

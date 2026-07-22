@@ -63,12 +63,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.6,
     }));
 
-  const productRoutes: Entry[] = (products?.docs ?? []).map((p) => ({
-    url: `${SITE_URL}/produkter/${p.slug}`,
-    lastModified: p.updatedAt,
-    changeFrequency: "weekly",
-    priority: 0.7,
-  }));
+  const productRoutes: Entry[] = (products?.docs ?? [])
+    .filter((p) => !p.meta?.noIndex)
+    .map((p) => ({
+      url: `${SITE_URL}/produkter/${p.slug}`,
+      lastModified: p.updatedAt,
+      changeFrequency: "weekly",
+      priority: 0.7,
+    }));
 
   const postRoutes: Entry[] = (posts?.docs ?? [])
     .filter((p) => !p.meta?.noIndex)

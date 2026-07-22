@@ -6,11 +6,46 @@ export const StatsBand: Block = {
   labels: { singular: "Tall-bånd", plural: "Tall-bånd" },
   fields: [
     {
+      name: "layout",
+      type: "select",
+      label: "Utseende",
+      defaultValue: "band",
+      options: [
+        { label: "Bånd (fargepanel, sentrert)", value: "band" },
+        { label: "Delt (tekst venstre, tall høyre)", value: "split" },
+      ],
+      admin: {
+        description:
+          "«Delt» ligger på sidens vanlige bakgrunn og teller ikke som fargepanel — bruk den når siden allerede har to fargepaneler (se komposisjonssjekken).",
+      },
+    },
+    {
       name: "eyebrow",
       type: "text",
       label: "Etikett (liten tekst over tittel)",
     },
     { name: "title", type: "text", label: "Tittel" },
+    {
+      name: "description",
+      type: "textarea",
+      label: "Brødtekst",
+      admin: {
+        description: "Vises ved siden av tallene i «Delt»-utseendet.",
+        condition: (_data, siblingData) => siblingData?.layout === "split",
+      },
+    },
+    {
+      name: "cta",
+      type: "group",
+      label: "Knapp (valgfri)",
+      admin: {
+        condition: (_data, siblingData) => siblingData?.layout === "split",
+      },
+      fields: [
+        { name: "text", type: "text", label: "Knappetekst" },
+        { name: "url", type: "text", label: "Lenke" },
+      ],
+    },
     {
       name: "variant",
       type: "select",
@@ -21,6 +56,9 @@ export const StatsBand: Block = {
         { label: "Salmon", value: "salmon" },
         { label: "Saffron", value: "saffron" },
       ],
+      admin: {
+        condition: (_data, siblingData) => siblingData?.layout !== "split",
+      },
     },
     {
       name: "stats",

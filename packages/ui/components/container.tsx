@@ -163,6 +163,39 @@ function Grid({ className, cols, gap, ...props }: GridProps) {
   );
 }
 
+// Flytende, avrundet fargepanel («plakaten» på sidens jevne bakgrunn).
+// ÉN delt definisjon av form/padding/skygge, slik at Tall-bånd, CTA og
+// Nyhetsbrev får identisk geometri. Retningslinje: maks to slike per side.
+const panelVariants = cva(
+  "relative overflow-hidden rounded-3xl px-6 py-16 shadow-lg md:px-12 md:py-20",
+  {
+    variants: {
+      surface: {
+        primary: "bg-primary text-primary-foreground",
+        saffron: "bg-saffron text-foreground",
+        salmon: "bg-salmon text-foreground",
+        mint: "bg-mint text-foreground",
+      },
+    },
+    defaultVariants: {
+      surface: "primary",
+    },
+  }
+);
+
+export type PanelProps = React.ComponentProps<"div"> &
+  VariantProps<typeof panelVariants>;
+
+function Panel({ className, surface, ...props }: PanelProps) {
+  return (
+    <div
+      data-slot="panel"
+      className={cn(panelVariants({ surface, className }))}
+      {...props}
+    />
+  );
+}
+
 export {
   Container,
   containerVariants,
@@ -172,4 +205,6 @@ export {
   stackVariants,
   Grid,
   gridVariants,
+  Panel,
+  panelVariants,
 };

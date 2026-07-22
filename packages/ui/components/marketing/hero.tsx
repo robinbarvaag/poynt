@@ -101,7 +101,12 @@ export function Hero({
     >
       {/* Subtil rutenett-tekstur — roligere og mer «laget» enn myke
           gradient-blobber. Toner ut mot kantene. */}
-      <GridPattern variant="grid" size={40} fade className="text-foreground/6" />
+      <GridPattern
+        variant="grid"
+        size={40}
+        fade
+        className="text-foreground/6"
+      />
 
       <div
         className={cn(

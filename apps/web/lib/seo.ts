@@ -1,6 +1,5 @@
 import type { MediaResource } from "@/components/payload-image";
 import type { Metadata } from "next";
-import { resolveMediaUrl } from "./payload";
 
 /** Side-URL ett sted, med lokal fallback. */
 export const SITE_URL = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
@@ -21,6 +20,102 @@ export function stripSiteSuffix(title: string): string {
     .trim();
 }
 
+/** Plattform-standarden for delingsbilder: 1,91:1 (1200×630). */
+export const OG_IMAGE_WIDTH = 1200;
+export const OG_IMAGE_HEIGHT = 630;
+
+type OgImage = {
+  url: string;
+  width?: number;
+  height?: number;
+  alt?: string;
+};
+
+const OG_RATIO = OG_IMAGE_WIDTH / OG_IMAGE_HEIGHT;
+/** Hvor mye aspektet kan avvike fra 1,91:1 før vi lar være å beskjære. */
+const OG_RATIO_TOLERANCE = 0.1;
+
+/** Bygger URL til det dynamiske merkevare-kortet (`/api/og-image`). */
+export function brandCardUrl(opts: {
+  title: string;
+  /** Absolutt eller side-relativ URL til et bilde som skal inn i kortet. */
+  img?: string;
+  fit?: "cover" | "contain";
+}): string {
+  const params = new URLSearchParams({ title: opts.title });
+  if (opts.img) {
+    params.set(
+      "img",
+      opts.img.startsWith("http") ? opts.img : `${SITE_URL}${opts.img}`
+    );
+    params.set("fit", opts.fit ?? "contain");
+  }
+  return `${SITE_URL}/api/og-image?${params.toString()}`;
+}
+
+/**
+ * Velger riktig delingsbilde-variant:
+ * 1. Ferdig URL-streng → brukes som den er (antatt klargjort av kallstedet).
+ * 2. Media som allerede er ~1,91:1 → brukes direkte (og-beskjæringen når den
+ *    finnes — eksakt 1200×630 og jpeg-komprimert — ellers originalen).
+ * 3. Media med annet aspekt (logoer, portrett, skjermbilder) → det dynamiske
+ *    merkevare-kortet med bildet VIST I SIN HELHET + tittel og CTA — i stedet
+ *    for en dum sentrums-beskjæring som kutter motivet.
+ * 4. Ingen bilde → merkevare-kortet med kun tittel og CTA.
+ */
+function resolveOgImage(
+  image: MediaInput | string | undefined,
+  fallbackTitle: string
+): OgImage {
+  if (typeof image === "string" && image) {
+    return { url: image };
+  }
+
+  if (image && typeof image === "object" && image.url) {
+    const { width, height } = image;
+    const ratio = width && height ? width / height : null;
+    const nearOgRatio =
+      ratio !== null &&
+      Math.abs(ratio - OG_RATIO) / OG_RATIO <= OG_RATIO_TOLERANCE;
+
+    if (nearOgRatio) {
+      const og = image.sizes?.og;
+      if (og?.url) {
+        return {
+          url: og.url,
+          width: og.width ?? OG_IMAGE_WIDTH,
+          height: og.height ?? OG_IMAGE_HEIGHT,
+          ...(image.alt ? { alt: image.alt } : {}),
+        };
+      }
+      return {
+        url: image.url,
+        ...(width ? { width } : {}),
+        ...(height ? { height } : {}),
+        ...(image.alt ? { alt: image.alt } : {}),
+      };
+    }
+
+    // Foto-aktige aspekter tåler cover i bildepanelet; ekstreme (brede
+    // logoer, høye portretter) vises contain så ingenting kuttes.
+    const fit =
+      ratio !== null && ratio >= 0.75 && ratio <= 1.72 ? "cover" : "contain";
+    return {
+      url: brandCardUrl({ title: fallbackTitle, img: image.url, fit }),
+      width: OG_IMAGE_WIDTH,
+      height: OG_IMAGE_HEIGHT,
+      alt: image.alt || fallbackTitle,
+    };
+  }
+
+  return {
+    url: brandCardUrl({ title: fallbackTitle }),
+    width: OG_IMAGE_WIDTH,
+    height: OG_IMAGE_HEIGHT,
+    alt: fallbackTitle,
+  };
+}
+
 export type BuildMetadataOpts = {
   title: string;
   /**
@@ -37,6 +132,8 @@ export type BuildMetadataOpts = {
   /** ISO-dato for `article`-typer. */
   publishedTime?: string;
   noIndex?: boolean;
+  /** Overstyrer automatisk canonical (SEO-fanens «Canonical URL»-felt). */
+  canonicalUrl?: string | null;
   /** Ta med Twitter-kort (default `true`). */
   twitter?: boolean;
 };
@@ -54,13 +151,10 @@ export function buildMetadata({
   type = "website",
   publishedTime,
   noIndex,
+  canonicalUrl,
   twitter = true,
 }: BuildMetadataOpts): Metadata {
   const url = `${SITE_URL}${path}`;
-  const imageUrl = resolveMediaUrl(image);
-  const images = imageUrl
-    ? [{ url: imageUrl, width: 1200, height: 630 }]
-    : undefined;
 
   // Forhindre dobbelt suffiks: template («%s | Poynt») i layouten legger på
   // merkenavnet, så vi rydder bort et evt. eksisterende «| Poynt» her.
@@ -68,19 +162,28 @@ export function buildMetadata({
   // OG/Twitter bruker den fullstendige tittelen (ingen template der).
   const fullTitle = absoluteTitle ? cleanTitle : `${cleanTitle} | ${SITE_NAME}`;
 
+  const images = [resolveOgImage(image, cleanTitle)];
+
   return {
     title: absoluteTitle ? { absolute: cleanTitle } : cleanTitle,
     description,
-    alternates: { canonical: url },
+    alternates: { canonical: canonicalUrl?.trim() || url },
+    // NB: Next fletter IKKE `openGraph` fra layout og side — sidens objekt
+    // erstatter hele layout-objektet. Derfor må siteName/locale gjentas her,
+    // ellers mister alle undersider og:site_name og og:locale.
     openGraph: {
       title: fullTitle,
       description,
       url,
       type,
+      siteName: SITE_NAME,
+      locale: "nb_NO",
+      images,
       ...(publishedTime ? { publishedTime } : {}),
-      ...(images ? { images } : {}),
     },
     ...(twitter && {
+      // `images` utelates med vilje: Next speiler openGraph.images inn i
+      // twitter:image når feltet mangler her.
       twitter: { card: "summary_large_image", title: fullTitle, description },
     }),
     ...(noIndex && { robots: { index: false, follow: false } }),

@@ -1,12 +1,12 @@
 "use client";
 
 import {
-  type BlogCategoryOption,
-  BlogFilterBar,
   BlogGrid,
   type BlogGridItem,
+  ContentExplorer,
+  type ContentFilterOption,
 } from "@poynt/ui";
-import { useMemo, useState } from "react";
+import { useCallback } from "react";
 
 export interface BlogExplorerPost extends BlogGridItem {
   /** Slugs for alle kategorier innlegget har (for filtrering). */
@@ -17,49 +17,48 @@ export interface BlogExplorerPost extends BlogGridItem {
 
 interface BlogExplorerProps {
   posts: BlogExplorerPost[];
-  categories: BlogCategoryOption[];
+  categories: ContentFilterOption[];
   emptyStateText: string;
 }
 
+/**
+ * Tynn wrapper rundt det generiske `ContentExplorer`-mønsteret: leverer
+ * kategori-filter, søketekst og BlogGrid-kortene for blogg-oversikten.
+ */
 export function BlogExplorer({
   posts,
   categories,
   emptyStateText,
 }: BlogExplorerProps) {
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [query, setQuery] = useState("");
-
-  const visiblePosts = useMemo<BlogGridItem[]>(() => {
-    const q = query.trim().toLowerCase();
-    return posts
-      .filter(
-        (post) =>
-          (activeCategory === null ||
-            post.categorySlugs.includes(activeCategory)) &&
-          (q === "" || post.search.includes(q))
-      )
-      .map(({ categorySlugs: _c, search: _s, ...rest }) => rest);
-  }, [posts, activeCategory, query]);
-
-  const isDefaultView = activeCategory === null && query.trim() === "";
+  const matchesFilter = useCallback(
+    (post: BlogExplorerPost, value: string) =>
+      post.categorySlugs.includes(value),
+    []
+  );
+  const searchText = useCallback((post: BlogExplorerPost) => post.search, []);
 
   return (
-    <div className="space-y-10">
-      <BlogFilterBar
-        categories={categories}
-        activeCategory={activeCategory}
-        onCategoryChange={setActiveCategory}
-        query={query}
-        onQueryChange={setQuery}
-      />
-
-      {visiblePosts.length > 0 ? (
-        <BlogGrid posts={visiblePosts} featureFirst={isDefaultView} />
-      ) : (
+    <ContentExplorer
+      items={posts}
+      options={[{ value: "alle", label: "Alle innlegg" }, ...categories]}
+      matchesFilter={matchesFilter}
+      searchText={searchText}
+      searchPlaceholder="Søk i innlegg …"
+      searchLabel="Søk i innlegg"
+      emptyState={
         <p className="py-12 text-center text-muted-foreground">
           {emptyStateText}
         </p>
+      }
+    >
+      {(visible, { isDefaultView }) => (
+        <BlogGrid
+          posts={visible.map(
+            ({ categorySlugs: _c, search: _s, ...rest }) => rest
+          )}
+          featureFirst={isDefaultView}
+        />
       )}
-    </div>
+    </ContentExplorer>
   );
 }

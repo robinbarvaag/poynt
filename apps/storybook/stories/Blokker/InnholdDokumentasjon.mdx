@@ -88,7 +88,8 @@ Binder flatene sammen.
 | --- | --- | --- |
 | `CourseHero` | (se Kurs) | |
 | `EmptyState` | Tom-tilstand med retning. | `icon`, `title`, `description`, `action` |
-| `ContentFilterBar` | Felles format/kategori-filter. | `options`, `value`, `onChange` |
+| `ContentFilterBar` | Felles format/kategori-filter, valgfritt søkefelt. | `options`, `value`, `onChange`, `query`, `onQueryChange` |
+| `ContentExplorer` | Eier filter/søk-state og rendrer `ContentFilterBar`; kortene bestemmes av `children`. | `items`, `options`, `matchesFilter`, `searchText`, `children` |
 | `AuthorByline` | Forfatter m/ avatar (fallback til initialer). | `name`, `role`, `date`, `avatar`, `size` |
 | `ShareRow` | Lagre/del-handlinger. | `actions`, `iconOnly` |
 | `RelatedContent` | «Les videre» som gjenbruker `ContentCard`. | `title`, `columns`, `children` |

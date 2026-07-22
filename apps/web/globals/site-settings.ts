@@ -52,6 +52,49 @@ export const SiteSettings: GlobalConfig = {
           ],
         },
         {
+          label: "Delingsbilder",
+          description:
+            "Styrer de automatiske delingskortene (Open Graph-bilder) som lages når en side deles på sosiale medier og ikke har et delingsbilde i riktig format (1200×630).",
+          fields: [
+            {
+              name: "ogLogo",
+              type: "upload",
+              relationTo: "media",
+              label: "Logo på delingskort",
+              admin: {
+                description:
+                  "Logoen som vises på delingskortene. Tom = logoen fra «Generelt»-fanen brukes.",
+              },
+            },
+            {
+              name: "ogCtaText",
+              type: "text",
+              label: "Handlingsoppfordring (CTA)",
+              defaultValue: "Les mer på poynt.no",
+              admin: {
+                description: "Teksten i knappen på delingskortet.",
+              },
+            },
+            {
+              name: "ogStyle",
+              type: "select",
+              label: "Stil for kort med bilde",
+              defaultValue: "overlay",
+              options: [
+                {
+                  label: "Bilde i full bredde med tekst-overlay",
+                  value: "overlay",
+                },
+                { label: "Tekst til venstre, bilde til høyre", value: "panel" },
+              ],
+              admin: {
+                description:
+                  "Gjelder foto-aktige bilder. Logoer og andre uvanlige formater vises alltid i panel-stil, slik at ingenting av bildet kuttes.",
+              },
+            },
+          ],
+        },
+        {
           label: "Kontakt",
           fields: [
             {

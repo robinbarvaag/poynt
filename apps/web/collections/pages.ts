@@ -77,6 +77,15 @@ export const Pages: CollectionConfig = {
       },
     },
     {
+      name: "komposisjonssjekk",
+      type: "ui",
+      admin: {
+        components: {
+          Field: "/admin/components/composition-check#CompositionCheck",
+        },
+      },
+    },
+    {
       name: "layout",
       type: "blocks",
       label: "Sidelayout",

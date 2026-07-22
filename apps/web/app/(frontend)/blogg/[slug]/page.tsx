@@ -47,9 +47,12 @@ export async function generateMetadata({
     title: post.meta?.title || post.title,
     description: post.meta?.description || post.excerpt || "",
     path: `/blogg/${slug}`,
-    image: post.featuredImage,
+    // SEO-fanens delingsbilde vinner over hovedbildet når det er satt.
+    image: post.meta?.image || post.featuredImage,
     type: "article",
     publishedTime: post.publishedAt,
+    noIndex: post.meta?.noIndex ?? undefined,
+    canonicalUrl: post.meta?.canonicalUrl,
   });
 }
 

@@ -22,6 +22,10 @@ import * as migration_20260629_225839_guide_columns_width from './20260629_22583
 import * as migration_20260721_231410_drop_podcasts from './20260721_231410_drop_podcasts';
 import * as migration_20260721_232320_drop_header_search_login from './20260721_232320_drop_header_search_login';
 import * as migration_20260721_232429 from './20260721_232429';
+import * as migration_20260721_234521_seo_og_image_size from './20260721_234521_seo_og_image_size';
+import * as migration_20260722_000820_remove_articles from './20260722_000820_remove_articles';
+import * as migration_20260722_001638_og_share_card_settings from './20260722_001638_og_share_card_settings';
+import * as migration_20260722_003828 from './20260722_003828';
 
 export const migrations = [
   {
@@ -142,6 +146,26 @@ export const migrations = [
   {
     up: migration_20260721_232429.up,
     down: migration_20260721_232429.down,
-    name: '20260721_232429'
+    name: '20260721_232429',
+  },
+  {
+    up: migration_20260721_234521_seo_og_image_size.up,
+    down: migration_20260721_234521_seo_og_image_size.down,
+    name: '20260721_234521_seo_og_image_size',
+  },
+  {
+    up: migration_20260722_000820_remove_articles.up,
+    down: migration_20260722_000820_remove_articles.down,
+    name: '20260722_000820_remove_articles',
+  },
+  {
+    up: migration_20260722_001638_og_share_card_settings.up,
+    down: migration_20260722_001638_og_share_card_settings.down,
+    name: '20260722_001638_og_share_card_settings',
+  },
+  {
+    up: migration_20260722_003828.up,
+    down: migration_20260722_003828.down,
+    name: '20260722_003828'
   },
 ];

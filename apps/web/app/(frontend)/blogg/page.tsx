@@ -1,7 +1,7 @@
 import { AdminBar } from "@/components/admin-bar";
 import { BlogExplorer } from "@/components/blog-explorer";
 import { PageHero } from "@/components/page-hero";
-import { toBlogCard } from "@/lib/blog";
+import { collectBlogCategories, toBlogCard } from "@/lib/blog";
 import { buildMetadata } from "@/lib/seo";
 import config from "@/payload.config";
 import { Container } from "@poynt/ui";
@@ -40,7 +40,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function BlogPage() {
   const payload = await getPayload({ config });
 
-  const [blogPage, posts, categoriesResult] = await Promise.all([
+  const [blogPage, posts] = await Promise.all([
     payload.findGlobal({
       slug: "blogpage" as "homepage",
       depth: 1,
@@ -54,10 +54,6 @@ export default async function BlogPage() {
       depth: 1,
       limit: 200,
     }),
-    payload.find({
-      collection: "categories",
-      limit: 100,
-    }),
   ]);
 
   const title = blogPage?.title || "Blogg";
@@ -65,11 +61,7 @@ export default async function BlogPage() {
   const emptyStateText =
     blogPage?.emptyStateText || "Ingen publiserte innlegg ennå.";
 
-  const categories = categoriesResult.docs.map((cat) => ({
-    value: cat.slug,
-    label: cat.name,
-  }));
-
+  const categories = collectBlogCategories(posts.docs);
   const items = posts.docs.map(toBlogCard);
 
   return (

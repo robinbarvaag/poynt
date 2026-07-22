@@ -52,6 +52,11 @@ export {
   type ContentFilterBarProps,
   type ContentFilterOption,
 } from "./content-filter-bar";
+export {
+  ContentExplorer,
+  type ContentExplorerContext,
+  type ContentExplorerProps,
+} from "./content-explorer";
 export { AuthorByline, type AuthorBylineProps } from "./author-byline";
 export { ShareRow, type ShareAction, type ShareRowProps } from "./share-row";
 export {

@@ -25,6 +25,18 @@ export type MediaResource = {
   creditLine?: string | null;
   /** Lenke til kilden (fotografprofil / Giphy-side) for krediteringen. */
   sourceUrl?: string | null;
+  /**
+   * Genererte bildestørrelser fra Payload (`upload.imageSizes`). Kun `og`
+   * (1200×630-beskjæring for deling) leses her — nevnte nøkler holder typen
+   * strukturelt kompatibel med Payloads genererte `Media`-type.
+   */
+  sizes?: {
+    og?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+    } | null;
+  } | null;
 };
 
 type MediaInput = MediaResource | number | null | undefined;

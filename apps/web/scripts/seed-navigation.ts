@@ -76,12 +76,6 @@ const navItems = [
         linkType: "custom" as const,
         url: "/podkast",
       },
-      {
-        label: "Artikler",
-        description: "Lengre dypdykk",
-        linkType: "custom" as const,
-        url: "/artikler",
-      },
     ],
   },
   {

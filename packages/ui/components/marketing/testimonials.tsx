@@ -1,8 +1,7 @@
 import { cn } from "../../lib/utils";
 import { Container, gridVariants } from "../container";
-import { Eyebrow } from "../eyebrow";
 import { Reveal, Stagger, StaggerItem } from "../motion";
-import { Heading, Text } from "../typography";
+import { SectionHeader } from "../section-header";
 import { TestimonialCard, type TestimonialCardProps } from "./testimonial-card";
 
 export interface TestimonialItem extends TestimonialCardProps {
@@ -21,44 +20,6 @@ export interface TestimonialsProps {
   /** Antall kolonner på desktop i `cards`-layout. Default 3. */
   columns?: 2 | 3;
   testimonials: TestimonialItem[];
-}
-
-function SectionHeader({
-  eyebrow,
-  title,
-  intro,
-  align = "left",
-}: {
-  eyebrow?: string;
-  title?: string;
-  intro?: string;
-  align?: "left" | "center";
-}) {
-  if (!eyebrow && !title && !intro) {
-    return null;
-  }
-  return (
-    <Reveal>
-      <div
-        className={cn(
-          "mb-12 max-w-2xl",
-          align === "center" && "mx-auto text-center"
-        )}
-      >
-        {eyebrow && <Eyebrow className="text-primary">{eyebrow}</Eyebrow>}
-        {title && (
-          <Heading variant="h2" color="foreground" customStyles="mt-3">
-            {title}
-          </Heading>
-        )}
-        {intro && (
-          <Text variant="lead" customStyles="mt-4">
-            {intro}
-          </Text>
-        )}
-      </div>
-    </Reveal>
-  );
 }
 
 /**

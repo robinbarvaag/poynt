@@ -52,9 +52,17 @@ export {
   gridVariants,
   type GridProps,
   type ContainerProps,
+  Panel,
+  panelVariants,
+  type PanelProps,
 } from "./components/container";
 
 export { BlockSection } from "./components/block-section";
+
+export {
+  SectionHeader,
+  type SectionHeaderProps,
+} from "./components/section-header";
 
 export {
   CartDrawer,
@@ -290,9 +298,6 @@ export {
   BlogCard,
   type BlogCardProps,
   type BlogSurface,
-  BlogFilterBar,
-  type BlogCategoryOption,
-  type BlogFilterBarProps,
   BlogGrid,
   type BlogGridItem,
   type BlogGridProps,
@@ -337,9 +342,6 @@ export {
   type PricingTier,
   ServiceCard,
   type ServiceCardProps,
-  ServiceGrid,
-  type ServiceGridItem,
-  type ServiceGridProps,
   ServiceShowcase,
   type ServiceShowcaseItem,
   type ServiceShowcaseLinkProps,
@@ -408,6 +410,9 @@ export {
   ContentFilterBar,
   type ContentFilterBarProps,
   type ContentFilterOption,
+  ContentExplorer,
+  type ContentExplorerContext,
+  type ContentExplorerProps,
   AuthorByline,
   type AuthorBylineProps,
   ShareRow,

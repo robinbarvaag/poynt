@@ -45,6 +45,16 @@ export const Media: CollectionConfig = {
         height: undefined,
         position: "centre",
       },
+      // Delingsbilde for sosiale medier: plattformene forventer 1,91:1
+      // (1200×630). Beskjæringen respekterer fokuspunktet, og jpeg-komprimering
+      // holder filen langt under 1 MB-grensen previews liker.
+      {
+        name: "og",
+        width: 1200,
+        height: 630,
+        position: "centre",
+        formatOptions: { format: "jpeg", options: { quality: 80 } },
+      },
     ],
     adminThumbnail: "thumbnail",
     mimeTypes: ["image/*", "video/*", "application/pdf"],

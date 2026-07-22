@@ -11,7 +11,7 @@ const features = [
   {
     icon: "file-text" as const,
     title: "Innhold og tips",
-    description: "Artikler og markedsføringsguider for å lære best practice",
+    description: "Guider og kurs for å lære best practice",
   },
   {
     icon: "compass" as const,

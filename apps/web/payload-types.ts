@@ -73,7 +73,6 @@ export interface Config {
     categories: Category;
     media: Media;
     newsletters: Newsletter;
-    articles: Article;
     guides: Guide;
     courses: Course;
     products: Product;
@@ -100,7 +99,6 @@ export interface Config {
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     newsletters: NewslettersSelect<false> | NewslettersSelect<true>;
-    articles: ArticlesSelect<false> | ArticlesSelect<true>;
     guides: GuidesSelect<false> | GuidesSelect<true>;
     courses: CoursesSelect<false> | CoursesSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
@@ -345,6 +343,14 @@ export interface Media {
       filesize?: number | null;
       filename?: string | null;
     };
+    og?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
   };
 }
 /**
@@ -444,8 +450,20 @@ export interface ContentMediaBlock {
  * via the `definition` "StatsBandBlock".
  */
 export interface StatsBandBlock {
+  /**
+   * «Delt» ligger på sidens vanlige bakgrunn og teller ikke som fargepanel — bruk den når siden allerede har to fargepaneler (se komposisjonssjekken).
+   */
+  layout?: ('band' | 'split') | null;
   eyebrow?: string | null;
   title?: string | null;
+  /**
+   * Vises ved siden av tallene i «Delt»-utseendet.
+   */
+  description?: string | null;
+  cta?: {
+    text?: string | null;
+    url?: string | null;
+  };
   variant?: ('primary' | 'salmon' | 'saffron') | null;
   stats?:
     | {
@@ -1324,53 +1342,6 @@ export interface Newsletter {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "articles".
- */
-export interface Article {
-  id: number;
-  title: string;
-  /**
-   * Genereres automatisk fra tittel
-   */
-  slug: string;
-  /**
-   * Kort beskrivelse som vises i listeoversikter
-   */
-  excerpt?: string | null;
-  featuredImage?: (number | null) | Media;
-  content: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
-  author?: (number | null) | User;
-  categories?: (number | Category)[] | null;
-  publishedAt: string;
-  /**
-   * Vis som stor hero-artikkel øvst på listesida
-   */
-  isFeatured?: boolean | null;
-  /**
-   * Estimert lesetid i minutt
-   */
-  readingTime?: number | null;
-  relatedArticles?: (number | Article)[] | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "guides".
  */
 export interface Guide {
@@ -1986,10 +1957,6 @@ export interface PayloadLockedDocument {
         value: number | Newsletter;
       } | null)
     | ({
-        relationTo: 'articles';
-        value: number | Article;
-      } | null)
-    | ({
         relationTo: 'guides';
         value: number | Guide;
       } | null)
@@ -2219,8 +2186,16 @@ export interface ContentMediaBlockSelect<T extends boolean = true> {
  * via the `definition` "StatsBandBlock_select".
  */
 export interface StatsBandBlockSelect<T extends boolean = true> {
+  layout?: T;
   eyebrow?: T;
   title?: T;
+  description?: T;
+  cta?:
+    | T
+    | {
+        text?: T;
+        url?: T;
+      };
   variant?: T;
   stats?:
     | T
@@ -2612,6 +2587,16 @@ export interface MediaSelect<T extends boolean = true> {
               filesize?: T;
               filename?: T;
             };
+        og?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
       };
 }
 /**
@@ -2627,26 +2612,6 @@ export interface NewslettersSelect<T extends boolean = true> {
   broadcastId?: T;
   updatedAt?: T;
   createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "articles_select".
- */
-export interface ArticlesSelect<T extends boolean = true> {
-  title?: T;
-  slug?: T;
-  excerpt?: T;
-  featuredImage?: T;
-  content?: T;
-  author?: T;
-  categories?: T;
-  publishedAt?: T;
-  isFeatured?: T;
-  readingTime?: T;
-  relatedArticles?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3565,6 +3530,18 @@ export interface SiteSetting {
    */
   logoAlt?: (number | null) | Media;
   favicon?: (number | null) | Media;
+  /**
+   * Logoen som vises på delingskortene. Tom = logoen fra «Generelt»-fanen brukes.
+   */
+  ogLogo?: (number | null) | Media;
+  /**
+   * Teksten i knappen på delingskortet.
+   */
+  ogCtaText?: string | null;
+  /**
+   * Gjelder foto-aktige bilder. Logoer og andre uvanlige formater vises alltid i panel-stil, slik at ingenting av bildet kuttes.
+   */
+  ogStyle?: ('overlay' | 'panel') | null;
   email?: string | null;
   phone?: string | null;
   address?: string | null;
@@ -3809,6 +3786,9 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   logo?: T;
   logoAlt?: T;
   favicon?: T;
+  ogLogo?: T;
+  ogCtaText?: T;
+  ogStyle?: T;
   email?: T;
   phone?: T;
   address?: T;

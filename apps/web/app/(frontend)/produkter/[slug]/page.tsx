@@ -40,6 +40,8 @@ export async function generateMetadata({
     description: product.meta?.description || product.shortDescription || "",
     path: `/produkter/${slug}`,
     image: product.meta?.image || product.featuredImage,
+    noIndex: product.meta?.noIndex ?? undefined,
+    canonicalUrl: product.meta?.canonicalUrl,
   });
 }
 

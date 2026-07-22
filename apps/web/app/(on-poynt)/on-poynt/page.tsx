@@ -8,7 +8,7 @@ export default function PlannerLandingPage() {
         <Heading>On Poynt</Heading>
         <Text customStyles="mx-auto max-w-2xl text-center text-muted-foreground">
           Et medlemsområde for gründere og småbedrifter: AI-verktøy vi setter
-          opp for deg, kurs, artikler og tips — samlet på ett sted.
+          opp for deg, kurs, guider og tips — samlet på ett sted.
         </Text>
       </div>
 

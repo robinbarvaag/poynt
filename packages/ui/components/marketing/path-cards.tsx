@@ -1,8 +1,7 @@
 import { cn } from "../../lib/utils";
 import { Container, gridVariants } from "../container";
-import { Eyebrow } from "../eyebrow";
-import { Reveal, Stagger, StaggerItem } from "../motion";
-import { Heading, Text } from "../typography";
+import { Stagger, StaggerItem } from "../motion";
+import { SectionHeader } from "../section-header";
 import { PathCard, type PathCardProps, type PathSurface } from "./path-card";
 
 export interface PathCardItem extends PathCardProps {
@@ -41,23 +40,7 @@ export function PathCards({
 
   return (
     <Container padding="none">
-      {(eyebrow || title || intro) && (
-        <Reveal>
-          <div className="mb-12 max-w-2xl">
-            {eyebrow && <Eyebrow className="text-primary">{eyebrow}</Eyebrow>}
-            {title && (
-              <Heading variant="h2" color="foreground" customStyles="mt-3">
-                {title}
-              </Heading>
-            )}
-            {intro && (
-              <Text variant="lead" customStyles="mt-4">
-                {intro}
-              </Text>
-            )}
-          </div>
-        </Reveal>
-      )}
+      <SectionHeader eyebrow={eyebrow} title={title} intro={intro} />
 
       <Stagger className={cn(gridVariants({ cols: columns, gap: "md" }))}>
         {paths.map(({ id, surface, ...path }, index) => (

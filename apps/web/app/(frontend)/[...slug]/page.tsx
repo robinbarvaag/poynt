@@ -88,6 +88,11 @@ export async function generateMetadata({
     description: seo.description ?? undefined,
     path: page.slug === "forside" ? "" : `/${page.slug}`,
     image: seo.image,
+    // «Open Graph type»-feltet fra SEO-fanen (product mangler i Next-typen —
+    // faller tilbake til website, som er riktig oppførsel for delingskort).
+    type: seo.ogType === "article" ? "article" : "website",
+    noIndex: seo.noIndex ?? undefined,
+    canonicalUrl: seo.canonicalUrl,
   });
 }
 

@@ -1,7 +1,7 @@
 import { toProductGridItem } from "@/lib/product";
 import type { Product } from "@/payload-types";
 import config from "@/payload.config";
-import { BlockSection, Heading, ProductGrid } from "@poynt/ui";
+import { BlockSection, Container, ProductGrid, SectionHeader } from "@poynt/ui";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { type Where, getPayload } from "payload";
@@ -78,21 +78,8 @@ export async function ProductArchiveBlock({
 
   return (
     <BlockSection background="default" containerSize={false}>
-      <div className="container mx-auto px-4">
-        {(title || description) && (
-          <div className="mb-8 md:mb-12">
-            {title && (
-              <Heading size="h2" customStyles="mb-3">
-                {title}
-              </Heading>
-            )}
-            {description && (
-              <p className="max-w-2xl text-lg text-muted-foreground">
-                {description}
-              </p>
-            )}
-          </div>
-        )}
+      <Container padding="none">
+        <SectionHeader title={title} intro={description} reveal={false} />
 
         <ProductGrid
           products={products.map(toProductGridItem)}
@@ -110,7 +97,7 @@ export async function ProductArchiveBlock({
             </Link>
           </div>
         )}
-      </div>
+      </Container>
     </BlockSection>
   );
 }

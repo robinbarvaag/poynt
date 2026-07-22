@@ -14,7 +14,6 @@ import { seoPlugin } from "@payloadcms/plugin-seo";
 import { stripePlugin } from "@payloadcms/plugin-stripe";
 
 // Collections
-import { Articles } from "./collections/articles";
 import { BlogPosts } from "./collections/blog-posts";
 import { Categories } from "./collections/categories";
 import { Courses } from "./collections/courses";
@@ -72,7 +71,6 @@ export default buildConfig({
     Media,
     Newsletters,
     // On Poynt-innhold (vises i den egenbygde «On Poynt»-nav-gruppen)
-    Articles,
     Guides,
     Courses,
     // Nettbutikk
@@ -179,7 +177,22 @@ export default buildConfig({
       },
       tabbedUI: true,
       fields: ({ defaultFields }) => [
-        ...defaultFields,
+        // Pluginets egen «Preview» (kun URL/tekst, uten bilde) byttes ut med
+        // vår egen SeoPreview (Google-treff + delingskort med bilde) på samme
+        // plass i skjemaet.
+        ...defaultFields.map((field) =>
+          "name" in field && field.name === "preview"
+            ? ({
+                name: "seoPreview",
+                type: "ui",
+                admin: {
+                  components: {
+                    Field: "/admin/components/seo/seo-preview#SeoPreview",
+                  },
+                },
+              } as const)
+            : field
+        ),
         {
           name: "noIndex",
           type: "checkbox",

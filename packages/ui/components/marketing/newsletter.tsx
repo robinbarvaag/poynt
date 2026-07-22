@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { cn } from "../../lib/utils";
 import { Button } from "../button";
-import { Container, Section } from "../container";
+import { Container, Panel } from "../container";
 import { Eyebrow } from "../eyebrow";
 import { Input } from "../form/input";
 import { Reveal } from "../motion";
@@ -24,21 +24,21 @@ export interface NewsletterProps {
 
 const themes = {
   primary: {
-    panel: "bg-primary text-primary-foreground",
+    surface: "primary",
     eyebrow: "text-primary-foreground/70",
     heading: "white",
     description: "text-primary-foreground/80",
     button: "saffron",
   },
   saffron: {
-    panel: "bg-saffron text-foreground",
+    surface: "saffron",
     eyebrow: "text-foreground/60",
     heading: "foreground",
     description: "text-foreground/75",
     button: "ink",
   },
   salmon: {
-    panel: "bg-salmon text-foreground",
+    surface: "salmon",
     eyebrow: "text-foreground/60",
     heading: "foreground",
     description: "text-foreground/75",
@@ -47,7 +47,8 @@ const themes = {
 } as const;
 
 /**
- * Nyhetsbrev-bånd. Selv-styrt seksjon (som CTA). Standard-visningen er rein
+ * Nyhetsbrev-bånd. Innholds-only — BlockSection eier seksjon/spacing;
+ * komponenten rendrer kun Container + Panel. Standard-visningen er rein
  * presentasjon; appen sender inn et ekte skjema via `form`-slotten.
  */
 export function Newsletter({
@@ -62,56 +63,47 @@ export function Newsletter({
   const theme = themes[variant];
 
   return (
-    <Section spacing="lg">
-      <Container>
-        <Reveal>
-          <div
-            className={cn(
-              "rounded-3xl px-6 py-16 shadow-lg md:px-12 md:py-20",
-              theme.panel
-            )}
-          >
-            <div className="mx-auto max-w-xl text-center">
-              {eyebrow && (
-                <Eyebrow className={theme.eyebrow}>{eyebrow}</Eyebrow>
-              )}
-              <Heading
-                variant="h2"
-                color={theme.heading}
+    <Container padding="none">
+      <Reveal>
+        <Panel surface={theme.surface}>
+          <div className="mx-auto max-w-xl text-center">
+            {eyebrow && <Eyebrow className={theme.eyebrow}>{eyebrow}</Eyebrow>}
+            <Heading
+              variant="h2"
+              color={theme.heading}
+              align="center"
+              customStyles="mt-3"
+            >
+              {title}
+            </Heading>
+            {description && (
+              <Text
+                variant="lead"
                 align="center"
-                customStyles="mt-3"
+                customStyles={cn("mx-auto mt-4 max-w-xl", theme.description)}
               >
-                {title}
-              </Heading>
-              {description && (
-                <Text
-                  variant="lead"
-                  align="center"
-                  customStyles={cn("mx-auto mt-4 max-w-xl", theme.description)}
-                >
-                  {description}
-                </Text>
-              )}
+                {description}
+              </Text>
+            )}
 
-              <div className="mx-auto mt-8 max-w-md">
-                {form ?? (
-                  <div className="flex flex-col gap-3 sm:flex-row">
-                    <Input
-                      type="email"
-                      sizeVariant="lg"
-                      placeholder={placeholder}
-                      className="flex-1 rounded-2xl border-0 bg-background text-foreground shadow-none"
-                    />
-                    <Button type="button" size="lg" variant={theme.button}>
-                      {buttonText}
-                    </Button>
-                  </div>
-                )}
-              </div>
+            <div className="mx-auto mt-8 max-w-md">
+              {form ?? (
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <Input
+                    type="email"
+                    sizeVariant="lg"
+                    placeholder={placeholder}
+                    className="flex-1 rounded-2xl border-0 bg-background text-foreground shadow-none"
+                  />
+                  <Button type="button" size="lg" variant={theme.button}>
+                    {buttonText}
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
-        </Reveal>
-      </Container>
-    </Section>
+        </Panel>
+      </Reveal>
+    </Container>
   );
 }

@@ -1,6 +1,6 @@
 import { ContactLink } from "@/components/contact/contact-link";
 import { type MediaResource, PayloadImage } from "@/components/payload-image";
-import { Button, GridPattern, Heading, Section, cn } from "@poynt/ui";
+import { Button, Container, GridPattern, Heading, Panel, cn } from "@poynt/ui";
 import { DriftingBlob } from "@poynt/ui/motion";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -91,15 +91,25 @@ export function CtaSectionBlock({
     </div>
   );
 
+  // Innholds-only: BlockSection eier <section>/spacing; her rendres kun
+  // Container (felles maks-bredde med resten av siden) + innholdet.
   if (variant === "image" && backgroundImage) {
+    // Bilde-CTA som avrundet panel i samme geometri som de andre panelene —
+    // ikke fullbredde, så breddelinjen på siden holdes ubrutt.
     return (
-      <Section>
-        <div className="absolute inset-0 -z-10">
-          <PayloadImage media={backgroundImage} fill className="object-cover" />
-          <div className="absolute inset-0 bg-black/60" />
+      <Container padding="none">
+        <div className="relative overflow-hidden rounded-3xl px-6 py-16 text-white shadow-lg md:px-12 md:py-20">
+          <div className="absolute inset-0">
+            <PayloadImage
+              media={backgroundImage}
+              fill
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-black/60" />
+          </div>
+          <div className="relative z-10">{content}</div>
         </div>
-        <div className="container mx-auto px-4 text-white">{content}</div>
-      </Section>
+      </Container>
     );
   }
 
@@ -107,32 +117,26 @@ export function CtaSectionBlock({
     // Avrundet grønt PANEL som flyter på sidens jevne bakgrunn (ingen
     // fullbredde-søm). Blober/dot-tekstur klippes pent av panelets runding.
     return (
-      <Section>
-        <div className="container mx-auto px-4">
-          <div className="relative overflow-hidden rounded-3xl bg-primary px-6 py-16 text-primary-foreground shadow-lg md:px-12 md:py-20">
-            {/* Signaturflørt: organiske former bak innholdet — kun her, jf. docs/COMPOSITION.md §3 */}
-            <GridPattern
-              variant="dots"
-              fade
-              className="text-primary-foreground/15"
-            />
-            <DriftingBlob className="-left-16 -top-12 size-80 bg-mint/15" />
-            <DriftingBlob
-              className="-bottom-20 -right-12 size-96 bg-saffron/10"
-              duration={24}
-            />
-            <div className="relative z-10">{content}</div>
-          </div>
-        </div>
-      </Section>
+      <Container padding="none">
+        <Panel surface="primary">
+          {/* Signaturflørt: organiske former bak innholdet — kun her, jf. docs/COMPOSITION.md §3 */}
+          <GridPattern
+            variant="dots"
+            fade
+            className="text-primary-foreground/15"
+          />
+          <DriftingBlob className="-left-16 -top-12 size-80 bg-mint/15" />
+          <DriftingBlob
+            className="-bottom-20 -right-12 size-96 bg-saffron/10"
+            duration={24}
+          />
+          <div className="relative z-10">{content}</div>
+        </Panel>
+      </Container>
     );
   }
 
   // «simple»: ingen egen fargeflate — hviler rolig på sidens bakgrunn (unngår
   // enda en grå boks i seksjonsrytmen).
-  return (
-    <Section>
-      <div className="container mx-auto px-4">{content}</div>
-    </Section>
-  );
+  return <Container padding="none">{content}</Container>;
 }

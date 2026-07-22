@@ -1,4 +1,5 @@
 import { type Stat, StatsBand } from "@poynt/ui";
+import Link from "next/link";
 
 interface StatItem {
   value: number;
@@ -10,6 +11,9 @@ interface StatItem {
 interface StatsBandBlockProps {
   eyebrow?: string | null;
   title?: string | null;
+  description?: string | null;
+  cta?: { text?: string | null; url?: string | null } | null;
+  layout?: "band" | "split" | null;
   variant?: "primary" | "salmon" | "saffron" | null;
   stats?: StatItem[] | null;
 }
@@ -18,6 +22,9 @@ interface StatsBandBlockProps {
 export function StatsBandBlock({
   eyebrow,
   title,
+  description,
+  cta,
+  layout,
   variant,
   stats,
 }: StatsBandBlockProps) {
@@ -31,8 +38,14 @@ export function StatsBandBlock({
     <StatsBand
       eyebrow={eyebrow ?? undefined}
       title={title ?? undefined}
+      description={description ?? undefined}
+      cta={
+        cta?.text && cta?.url ? { text: cta.text, href: cta.url } : undefined
+      }
+      layout={layout ?? undefined}
       variant={variant ?? undefined}
       stats={mapped}
+      renderLink={(href, children) => <Link href={href}>{children}</Link>}
     />
   );
 }
