@@ -6,6 +6,7 @@ import {
   syncSubscriptionToDrizzle,
 } from "@/lib/membership/sync-subscription";
 import { buildOrderEmailExtras } from "@/lib/order-email";
+import { claimWebhookEvent, releaseWebhookEvent } from "@/lib/webhook-events";
 import config from "@/payload.config";
 import {
   sendMemberWelcomeEmail,
@@ -13,7 +14,7 @@ import {
   subscribeToNewsletter,
 } from "@poynt/email";
 import { db, eq } from "@poynt/planner-db";
-import { plannerUser, plannerWebhookEvent } from "@poynt/planner-db/schema";
+import { plannerUser } from "@poynt/planner-db/schema";
 import { stripe } from "@poynt/stripe";
 import { type NextRequest, NextResponse } from "next/server";
 import { getPayload } from "payload";
@@ -504,15 +505,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
-  // Check idempotency - has this event already been processed?
-  const existingEvent = await db
-    .select()
-    .from(plannerWebhookEvent)
-    .where(eq(plannerWebhookEvent.eventId, event.id))
-    .limit(1);
-
-  if (existingEvent.length > 0) {
-    console.log(`Webhook event ${event.id} already processed, skipping`);
+  // Kravsett eventet atomisk - hindrer samtidige leveranser i å behandles
+  // dobbelt, og lar mislykkede forsøk bli kravsatt på nytt via retry.
+  const claimed = await claimWebhookEvent(db, event.id, event.type);
+  if (!claimed) {
+    console.log(`Webhook event ${event.id} already claimed, skipping`);
     return NextResponse.json({ received: true });
   }
 
@@ -564,21 +561,19 @@ export async function POST(req: NextRequest) {
       default:
         console.log(`Unhandled event type: ${event.type}`);
     }
-
-    // Record successful processing
-    await db.insert(plannerWebhookEvent).values({
-      id: crypto.randomUUID(),
-      eventId: event.id,
-      type: event.type,
-    });
   } catch (error) {
     console.error("Feil ved behandling av webhook:", error);
-    // Still record the event as processed to prevent retries
-    await db.insert(plannerWebhookEvent).values({
-      id: crypto.randomUUID(),
-      eventId: event.id,
-      type: event.type,
-    });
+    // Frigi kravet slik at Stripe sin retry kan behandle eventet på nytt.
+    // Hvis frigivelsen selv feiler, blir eventet stående kravsatt - tryggere
+    // enn å risikere dobbel behandling.
+    try {
+      await releaseWebhookEvent(db, event.id);
+    } catch (releaseError) {
+      console.error(
+        `Klarte ikkje å frigi webhook-krav for ${event.id}:`,
+        releaseError
+      );
+    }
     return NextResponse.json(
       { error: "Feil ved behandling av webhook" },
       { status: 500 }
