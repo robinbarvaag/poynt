@@ -41,6 +41,7 @@ import { FolderTypeField as FolderTypeField_2b8867833a34864a02ddf429b0728a40 } f
 import { LinkRowLabel as LinkRowLabel_f0fd4bee3885f2a3c8ca119ef52b5ffe } from '../../../admin/components/row-labels'
 import { ColumnRowLabel as ColumnRowLabel_f0fd4bee3885f2a3c8ca119ef52b5ffe } from '../../../admin/components/row-labels'
 import { OnPoyntNavGroup as OnPoyntNavGroup_cbdd0274d832c585cca0ce893b25cc1e } from '../../../admin/components/on-poynt-nav-group'
+import { SetupNavGroup as SetupNavGroup_49db99829140aef9ec2dd6ea8d7e6d7f } from '../../../admin/components/setup-nav-group'
 import { RadarWidget as RadarWidget_5b7947cd224091d66f29a1ea95235d6d } from '../../../admin/components/dashboard/radar-widget'
 import { VercelBlobClientUploadHandler as VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e } from '@payloadcms/storage-vercel-blob/client'
 import { RadarListView as RadarListView_a4e67c284447336809eb8f88f0de25c0 } from '../../../admin/views/radar/list'
@@ -51,6 +52,7 @@ import { MembersListView as MembersListView_1c40f164a24fb9e841d3097dd58f8371 } f
 import { MemberDetailView as MemberDetailView_dd13572451bb48f4b5e68a05e41ae812 } from '../../../admin/views/members/detail'
 import { IndustriesListView as IndustriesListView_2ad79ff1a29ece0a9f161db8e2982cd0 } from '../../../admin/views/industries/list'
 import { PromptsListView as PromptsListView_3426185fdff8e8163926076d35efaa6d } from '../../../admin/views/prompts/list'
+import { SetupGuideView as SetupGuideView_96e0313c105e009331fa998e13292ea0 } from '../../../admin/views/setup-guide'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 /** @type import('payload').ImportMap */
@@ -98,6 +100,7 @@ export const importMap = {
   "/admin/components/row-labels#LinkRowLabel": LinkRowLabel_f0fd4bee3885f2a3c8ca119ef52b5ffe,
   "/admin/components/row-labels#ColumnRowLabel": ColumnRowLabel_f0fd4bee3885f2a3c8ca119ef52b5ffe,
   "/admin/components/on-poynt-nav-group#OnPoyntNavGroup": OnPoyntNavGroup_cbdd0274d832c585cca0ce893b25cc1e,
+  "/admin/components/setup-nav-group#SetupNavGroup": SetupNavGroup_49db99829140aef9ec2dd6ea8d7e6d7f,
   "/admin/components/dashboard/radar-widget#RadarWidget": RadarWidget_5b7947cd224091d66f29a1ea95235d6d,
   "@payloadcms/storage-vercel-blob/client#VercelBlobClientUploadHandler": VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e,
   "/admin/views/radar/list#RadarListView": RadarListView_a4e67c284447336809eb8f88f0de25c0,
@@ -108,5 +111,6 @@ export const importMap = {
   "/admin/views/members/detail#MemberDetailView": MemberDetailView_dd13572451bb48f4b5e68a05e41ae812,
   "/admin/views/industries/list#IndustriesListView": IndustriesListView_2ad79ff1a29ece0a9f161db8e2982cd0,
   "/admin/views/prompts/list#PromptsListView": PromptsListView_3426185fdff8e8163926076d35efaa6d,
+  "/admin/views/setup-guide#SetupGuideView": SetupGuideView_96e0313c105e009331fa998e13292ea0,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

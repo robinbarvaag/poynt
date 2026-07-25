@@ -1,4 +1,7 @@
-import type { MediaResource } from "@/components/payload-image";
+import {
+  type MediaResource,
+  toRelativeMediaUrl,
+} from "@/components/payload-image";
 import type { Metadata } from "next";
 
 /** Side-URL ett sted, med lokal fallback. */
@@ -67,8 +70,10 @@ function resolveOgImage(
   image: MediaInput | string | undefined,
   fallbackTitle: string
 ): OgImage {
+  // Media-URL-er normaliseres til host-relative stier; Next absolutter dem mot
+  // `metadataBase` i layouten. Da overlever de en feil-baket serverURL i cachen.
   if (typeof image === "string" && image) {
-    return { url: image };
+    return { url: toRelativeMediaUrl(image) };
   }
 
   if (image && typeof image === "object" && image.url) {
@@ -82,14 +87,14 @@ function resolveOgImage(
       const og = image.sizes?.og;
       if (og?.url) {
         return {
-          url: og.url,
+          url: toRelativeMediaUrl(og.url),
           width: og.width ?? OG_IMAGE_WIDTH,
           height: og.height ?? OG_IMAGE_HEIGHT,
           ...(image.alt ? { alt: image.alt } : {}),
         };
       }
       return {
-        url: image.url,
+        url: toRelativeMediaUrl(image.url),
         ...(width ? { width } : {}),
         ...(height ? { height } : {}),
         ...(image.alt ? { alt: image.alt } : {}),
@@ -101,7 +106,11 @@ function resolveOgImage(
     const fit =
       ratio !== null && ratio >= 0.75 && ratio <= 1.72 ? "cover" : "contain";
     return {
-      url: brandCardUrl({ title: fallbackTitle, img: image.url, fit }),
+      url: brandCardUrl({
+        title: fallbackTitle,
+        img: toRelativeMediaUrl(image.url),
+        fit,
+      }),
       width: OG_IMAGE_WIDTH,
       height: OG_IMAGE_HEIGHT,
       alt: image.alt || fallbackTitle,

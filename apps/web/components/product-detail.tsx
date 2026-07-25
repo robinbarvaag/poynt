@@ -6,8 +6,10 @@ import {
   resolveMediaUrl,
 } from "@/components/payload-image";
 import { ProductStorySections } from "@/components/product/product-story-sections";
+import { VippsButton } from "@/components/vipps-button";
 import { PRODUCT_TYPE_LABELS, getProductBadge } from "@/lib/product";
 import { detailBreadcrumbs } from "@/lib/ui-text";
+import { startVippsBuyNow } from "@/lib/vipps-checkout-client";
 import type { Product } from "@/payload-types";
 import { RichText } from "@payloadcms/richtext-lexical/react";
 import {
@@ -15,11 +17,13 @@ import {
   Breadcrumbs,
   Button,
   Container,
+  DecoBlob,
   Heading,
   Lightbox,
   ProductGrid,
   type ProductGridItem,
   Text,
+  hashSeed,
 } from "@poynt/ui";
 import { ArrowRight, Info, Minus, Plus } from "lucide-react";
 import Link from "next/link";
@@ -219,6 +223,24 @@ function ProductDetailClient({
   const [quantity, setQuantity] = useState(1);
   const maxQuantity = allowQuantity ? undefined : 1;
 
+  // Vipps-hurtigkasse rett fra produktsiden: hopper over handlekurven og
+  // sender kun dette produktet (medlemskap støttes ikke — API-et avviser).
+  const [vippsLoading, setVippsLoading] = useState(false);
+  const handleVippsBuyNow = async () => {
+    setVippsLoading(true);
+    try {
+      await startVippsBuyNow({
+        id: String(product.id),
+        quantity,
+        variant: selectedVariant,
+      });
+    } catch (error) {
+      console.error("Vipps checkout error:", error);
+      alert(error instanceof Error ? error.message : "Noe gikk galt");
+      setVippsLoading(false);
+    }
+  };
+
   const priceInKr = effectivePrice.toLocaleString("nb-NO");
   const compareAtPriceInKr = product.compareAtPrice
     ? product.compareAtPrice.toLocaleString("nb-NO")
@@ -262,10 +284,16 @@ function ProductDetailClient({
             uten å gjemme brødteksten bak tabs. */}
           <div className="space-y-4 lg:sticky lg:top-20 lg:self-start">
             <div className="relative">
-              {/* Lekent blob-pek bak bildet (INSPO/Steady-signaturen) */}
-              <span
-                aria-hidden="true"
-                className="-top-5 -left-5 absolute size-32 rounded-[58%_42%_55%_45%/55%_48%_52%_45%] bg-accent-1 opacity-70 blur-[2px]"
+              {/* Lekent blob-pek bak bildet (INSPO/Steady-signaturen) —
+                  form/hjørne varierer per produkt, samme seed som kortet */}
+              <DecoBlob
+                seed={`/produkter/${product.slug}`}
+                size={132}
+                className={`absolute bg-accent-1 opacity-70 blur-[2px] ${
+                  hashSeed(`/produkter/${product.slug}`) % 2 === 0
+                    ? "-top-5 -left-5"
+                    : "-top-4 -right-5"
+                }`}
               />
               <div className="relative z-10 aspect-square w-full overflow-hidden rounded-3xl bg-muted shadow-sm">
                 {currentImage ? (
@@ -506,6 +534,18 @@ function ProductDetailClient({
                   />
                 </div>
               )}
+
+              {/* Vipps-hurtigkasse under kjøpsknappen — offisiell knapp
+                (retningslinjene tillater ikke egen design). Deaktivert til
+                variant er valgt, samme regel som kjøpsknappen. */}
+              {product.type !== "membership" && !isSoldOut && (
+                <VippsButton
+                  stretched
+                  loading={vippsLoading}
+                  disabled={hasVariants && !selectedVariant}
+                  onClick={handleVippsBuyNow}
+                />
+              )}
             </div>
 
             {/* Salgspunkter – løftes frem rett under kjøpsknappen, ikke gjemt i
@@ -602,39 +642,50 @@ function ProductDetailClient({
             </Button>
           ) : (
             /* Samme samlede pill som i kjøpsboksen (kompakt stepper), så
-               antall kan justeres uten å scrolle tilbake opp. */
-            <div
-              className={
-                allowQuantity
-                  ? "flex items-stretch overflow-hidden rounded-2xl border border-border bg-card"
-                  : undefined
-              }
-            >
-              {allowQuantity && (
-                <QuantityStepper
-                  quantity={quantity}
-                  setQuantity={setQuantity}
-                  compact
-                />
-              )}
-              <AddToCartButton
-                product={{
-                  id: String(product.id),
-                  name: product.name,
-                  price: effectivePrice,
-                  slug: product.slug ?? undefined,
-                  image: images[0]
-                    ? resolveMediaUrl(images[0].media)
-                    : undefined,
-                }}
-                variantLabel={
-                  hasVariants ? (product.variantLabel ?? undefined) : undefined
+               antall kan justeres uten å scrolle tilbake opp — pluss kompakt
+               Vipps-hurtigkasse ved siden av. */
+            <div className="flex items-center gap-2">
+              <div
+                className={
+                  allowQuantity
+                    ? "flex min-w-0 flex-1 items-stretch overflow-hidden rounded-2xl border border-border bg-card sm:flex-none"
+                    : undefined
                 }
-                variantValue={selectedVariant}
-                quantity={quantity}
-                maxQuantity={maxQuantity}
-                allowQuantity={allowQuantity}
-                className={allowQuantity ? "min-w-0 rounded-none" : undefined}
+              >
+                {allowQuantity && (
+                  <QuantityStepper
+                    quantity={quantity}
+                    setQuantity={setQuantity}
+                    compact
+                  />
+                )}
+                <AddToCartButton
+                  product={{
+                    id: String(product.id),
+                    name: product.name,
+                    price: effectivePrice,
+                    slug: product.slug ?? undefined,
+                    image: images[0]
+                      ? resolveMediaUrl(images[0].media)
+                      : undefined,
+                  }}
+                  variantLabel={
+                    hasVariants
+                      ? (product.variantLabel ?? undefined)
+                      : undefined
+                  }
+                  variantValue={selectedVariant}
+                  quantity={quantity}
+                  maxQuantity={maxQuantity}
+                  allowQuantity={allowQuantity}
+                  className={allowQuantity ? "min-w-0 rounded-none" : undefined}
+                />
+              </div>
+              <VippsButton
+                compact
+                loading={vippsLoading}
+                onClick={handleVippsBuyNow}
+                className="shrink-0"
               />
             </div>
           )}

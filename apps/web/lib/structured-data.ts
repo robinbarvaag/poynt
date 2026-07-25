@@ -4,6 +4,18 @@ import { SITE_NAME, SITE_URL } from "./seo";
 
 type MediaInput = MediaResource | number | null | undefined;
 
+/**
+ * JSON-LD krever absolutte URL-er. `resolveMediaUrl` gir host-relative stier
+ * for app-servert media, så vi setter på `SITE_URL` her.
+ */
+function absoluteMediaUrl(media: MediaInput | string): string | undefined {
+  const url = resolveMediaUrl(media);
+  if (!url) {
+    return undefined;
+  }
+  return url.startsWith("http") ? url : `${SITE_URL}${url}`;
+}
+
 /** Stabil `@id` for organisasjonen, så andre noder kan referere til den. */
 const ORG_ID = `${SITE_URL}/#organization`;
 
@@ -23,7 +35,7 @@ export function organizationSchema(opts: {
   const sameAs = (opts.socialLinks ?? [])
     .map((s) => s.url)
     .filter((url): url is string => Boolean(url));
-  const logoUrl = resolveMediaUrl(opts.logo);
+  const logoUrl = absoluteMediaUrl(opts.logo);
 
   return {
     "@context": "https://schema.org",
@@ -79,7 +91,7 @@ export function articleSchema(opts: {
   dateModified?: string | null;
   authorName?: string | null;
 }) {
-  const imageUrl = resolveMediaUrl(opts.image);
+  const imageUrl = absoluteMediaUrl(opts.image);
 
   return {
     "@context": "https://schema.org",
@@ -108,7 +120,7 @@ export function serviceSchema(opts: {
   url: string;
   price?: number | null;
 }) {
-  const imageUrl = resolveMediaUrl(opts.image);
+  const imageUrl = absoluteMediaUrl(opts.image);
 
   return {
     "@context": "https://schema.org",
@@ -139,7 +151,7 @@ export function productSchema(opts: {
   url: string;
   price?: number | null;
 }) {
-  const imageUrl = resolveMediaUrl(opts.image);
+  const imageUrl = absoluteMediaUrl(opts.image);
 
   return {
     "@context": "https://schema.org",

@@ -13,6 +13,7 @@ import {
   Breadcrumbs,
   Button,
   Container,
+  DecoBlob,
   Heading,
   Text,
 } from "@poynt/ui";
@@ -133,9 +134,10 @@ export default async function CaseStudyPage({ params }: CaseStudyPageProps) {
         {featuredImage?.url && (
           <div className="relative mb-10">
             {/* Lekent blob-pek bak bildet – samme signatur som blogg/produkt */}
-            <span
-              aria-hidden="true"
-              className="-top-5 -left-5 absolute size-32 rounded-[58%_42%_55%_45%/55%_48%_52%_45%] bg-accent-3 opacity-70 blur-[2px]"
+            <DecoBlob
+              seed={`/kundehistorier/${story.slug}`}
+              size={132}
+              className="-top-5 -left-5 absolute bg-accent-3 opacity-70 blur-[2px]"
             />
             <div className="relative z-10 aspect-video w-full overflow-hidden rounded-3xl bg-muted shadow-sm">
               <PayloadImage

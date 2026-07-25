@@ -5,6 +5,7 @@ export {
 } from "./blog-card";
 export { BlogGrid, type BlogGridItem, type BlogGridProps } from "./blog-grid";
 export { ContentMedia, type ContentMediaProps } from "./content-media";
+export { DecoBlob, type DecoBlobProps, hashSeed } from "./deco-blob";
 export { Faq, type FaqItem, type FaqProps } from "./faq";
 export {
   type Feature,

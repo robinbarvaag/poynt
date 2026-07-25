@@ -98,7 +98,10 @@ export default buildConfig({
   admin: {
     user: "users",
     components: {
-      afterNavLinks: ["/admin/components/on-poynt-nav-group#OnPoyntNavGroup"],
+      afterNavLinks: [
+        "/admin/components/on-poynt-nav-group#OnPoyntNavGroup",
+        "/admin/components/setup-nav-group#SetupNavGroup",
+      ],
       beforeDashboard: ["/admin/components/dashboard/radar-widget#RadarWidget"],
       views: {
         radar: {
@@ -148,6 +151,12 @@ export default buildConfig({
           path: "/prompts",
           exact: true,
           meta: { title: "Prompt-maler" },
+        },
+        setupGuide: {
+          Component: "/admin/views/setup-guide#SetupGuideView",
+          path: "/oppsett",
+          exact: true,
+          meta: { title: "Betalingsoppsett" },
         },
       },
     },

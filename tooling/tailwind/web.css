@@ -222,6 +222,38 @@
   animation: blob 12s ease-in-out infinite;
 }
 
+/* Dekorativ blob bak produktbilder (<DecoBlob> i @poynt/ui): morpher sakte
+   mellom seeded former (--blob-a/b/c settes per instans) med en myk drift.
+   Tempo styres av --blob-dur; negativ animation-delay desynker instansene. */
+.deco-blob {
+  border-radius: var(--blob-a, 50%);
+  /* biome-ignore lint/correctness/noUnknownProperty: corner-shape (CSS Corners L4) er nyere enn Biome sin liste */
+  corner-shape: round; /* organiske kurver skal være ekte runde, ikke squircle */
+  animation: deco-blob var(--blob-dur, 12s) ease-in-out infinite;
+}
+
+@keyframes deco-blob {
+  0%,
+  100% {
+    border-radius: var(--blob-a, 50%);
+    transform: translate(0, 0) rotate(0deg) scale(1);
+  }
+  33% {
+    border-radius: var(--blob-b, 50%);
+    transform: translate(4px, -7px) rotate(4deg) scale(1.06);
+  }
+  66% {
+    border-radius: var(--blob-c, var(--blob-a, 50%));
+    transform: translate(-5px, 4px) rotate(-3deg) scale(0.95);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .deco-blob {
+    animation: none;
+  }
+}
+
 /* Engangs «pop» for kvitterings-/suksess-ikoner: zoomer inn med en liten
    rotasjon, skyter litt forbi og setter seg. Kjører ÉN gang (ingen loop). */
 .animate-success-pop {

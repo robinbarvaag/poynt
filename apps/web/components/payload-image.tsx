@@ -47,19 +47,44 @@ function asResource(media: MediaInput): MediaResource | null {
 }
 
 /**
- * Løser URL-en til et Payload-media direkte fra `.url`. Payload serverer media
- * fra `/api/media/file/...` lokalt og fra Vercel Blob-CDN i produksjon — begge
- * ligger ferdig i `.url`. Bruk denne der et råstreng-`src` trengs (f.eks. når
- * URL-en sendes videre til en `@poynt/ui`-komponent). En allerede-løst streng
- * sendes uendret videre.
+ * Payload bygger media-URL-er som ABSOLUTTE (`${serverURL}/api/media/file/...`)
+ * der serverURL er `NEXT_PUBLIC_URL` slik den var da siden ble (pre)rendret.
+ * Med `use cache`/cacheComponents skjer det på build-tidspunktet, så en feil
+ * eller manglende env-verdi (typisk `http://localhost:3000`) bakes inn i
+ * produksjons-HTML-en og gir døde bilder. Media serveres alltid av appen selv,
+ * så vi stripper verten og beholder stien — den virker på alle domener
+ * (localhost, preview, prod). Eksterne URL-er (Blob-CDN, Pexels o.l.) har andre
+ * stier og passerer uendret.
+ */
+export function toRelativeMediaUrl(url: string): string {
+  if (!url.includes("/api/media/")) {
+    return url;
+  }
+  try {
+    const parsed = new URL(url);
+    if (parsed.pathname.startsWith("/api/media/")) {
+      return `${parsed.pathname}${parsed.search}`;
+    }
+  } catch {
+    // Allerede relativ (`new URL` kaster) — riktig som den er.
+  }
+  return url;
+}
+
+/**
+ * Løser URL-en til et Payload-media direkte fra `.url`, normalisert til
+ * host-relativ sti for app-servert media (se `toRelativeMediaUrl`). Bruk denne
+ * der et råstreng-`src` trengs (f.eks. når URL-en sendes videre til en
+ * `@poynt/ui`-komponent). En allerede-løst streng normaliseres på samme måte.
  */
 export function resolveMediaUrl(
   media: MediaInput | string
 ): string | undefined {
-  if (typeof media === "string") {
-    return media || undefined;
-  }
-  return asResource(media)?.url ?? undefined;
+  const url =
+    typeof media === "string"
+      ? media || undefined
+      : (asResource(media)?.url ?? undefined);
+  return url ? toRelativeMediaUrl(url) : undefined;
 }
 
 export type PayloadImageProps = Omit<ImageProps, "src" | "alt"> & {
@@ -87,7 +112,7 @@ export function PayloadImage({
   ...rest
 }: PayloadImageProps) {
   const resource = asResource(media);
-  const src = resource?.url;
+  const src = resource?.url ? toRelativeMediaUrl(resource.url) : undefined;
   if (!(resource && src)) {
     return null;
   }

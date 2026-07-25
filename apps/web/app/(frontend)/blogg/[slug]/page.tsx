@@ -12,7 +12,14 @@ import { detailBreadcrumbs } from "@/lib/ui-text";
 import type { BlogPost } from "@/payload-types";
 import config from "@/payload.config";
 import { RichText } from "@payloadcms/richtext-lexical/react";
-import { Badge, Breadcrumbs, Container, Heading, Text } from "@poynt/ui";
+import {
+  Badge,
+  Breadcrumbs,
+  Container,
+  DecoBlob,
+  Heading,
+  Text,
+} from "@poynt/ui";
 import type { Metadata } from "next";
 import { cacheLife, cacheTag } from "next/cache";
 import { notFound } from "next/navigation";
@@ -149,9 +156,10 @@ export default async function PostPage({ params }: PostPageProps) {
         {featuredImage?.url && (
           <div className="relative mb-10">
             {/* Lekent blob-pek bak bildet – same signatur som produktsida */}
-            <span
-              aria-hidden="true"
-              className="-top-5 -left-5 absolute size-32 rounded-[58%_42%_55%_45%/55%_48%_52%_45%] bg-accent-1 opacity-70 blur-[2px]"
+            <DecoBlob
+              seed={`/blogg/${post.slug}`}
+              size={132}
+              className="-top-5 -left-5 absolute bg-accent-1 opacity-70 blur-[2px]"
             />
             <div className="relative z-10 aspect-video w-full overflow-hidden rounded-3xl bg-muted shadow-sm">
               <PayloadImage

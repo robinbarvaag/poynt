@@ -1,6 +1,7 @@
 import type * as React from "react";
 import { cn } from "../../lib/utils";
 import { Card } from "../card";
+import { DecoBlob, hashSeed } from "./deco-blob";
 
 export type ProductSurface = "default" | "saffron" | "salmon" | "mint";
 
@@ -58,8 +59,16 @@ const blobBySurface: Record<ProductSurface, string> = {
   mint: "bg-accent-2",
 };
 
-// Organisk blob-form (asymmetrisk border-radius) — INSPO/Steady-signaturen.
-const blobShape = "rounded-[58%_42%_55%_45%/55%_48%_52%_45%]";
+// Mulige hjørner for bloben — hvilket som brukes utledes av kortets seed,
+// så plasseringen varierer fra kort til kort uten å kollidere med badgen
+// (øverst til venstre) eller «Tilbud»-pillen (øverst til høyre) for ofte.
+const blobCorners = [
+  "-top-3 -right-3",
+  "-top-4 -left-2",
+  "-right-4 top-10",
+  "-bottom-4 -right-2",
+  "-bottom-3 -left-3",
+];
 
 function formatPrice(value: number) {
   return `${value.toLocaleString("nb-NO")} kr`;
@@ -71,21 +80,24 @@ function ImageFrame({
   featured,
   discount,
   badge,
+  seed,
 }: {
   image?: React.ReactNode;
   surface: ProductSurface;
   featured?: boolean;
   discount?: boolean;
   badge?: ProductBadge;
+  seed: string;
 }) {
   return (
     <div className={cn("relative p-3", featured && "md:h-full")}>
-      {/* Lekent blob-pek bak bildet */}
-      <span
-        aria-hidden="true"
+      {/* Lekent blob-pek bak bildet — form/plassering varierer per produkt */}
+      <DecoBlob
+        seed={seed}
+        size={featured ? 128 : 96}
         className={cn(
-          "-top-3 -right-3 absolute size-24 opacity-70 blur-[2px]",
-          blobShape,
+          "absolute opacity-70 blur-[2px]",
+          blobCorners[hashSeed(seed) % blobCorners.length],
           blobBySurface[surface]
         )}
       />
@@ -99,13 +111,10 @@ function ImageFrame({
       >
         {image ?? (
           <div className="flex size-full items-center justify-center bg-foreground/5">
-            <span
-              aria-hidden="true"
-              className={cn(
-                "size-16 opacity-40",
-                blobShape,
-                "bg-foreground/15"
-              )}
+            <DecoBlob
+              seed={`${seed}-plassholder`}
+              size={64}
+              className="bg-foreground/15 opacity-40"
             />
           </div>
         )}
@@ -171,6 +180,7 @@ export function ProductCard({
             featured={featured}
             discount={discount}
             badge={badge}
+            seed={href}
           />
 
           <div

@@ -1,5 +1,6 @@
 "use client";
 
+import { VippsButton } from "@/components/vipps-button";
 import { formatPrice } from "@/lib/format";
 import { useCartReady } from "@/lib/use-cart-ready";
 import { startVippsCheckout } from "@/lib/vipps-checkout-client";
@@ -338,14 +339,14 @@ export default function CartPage() {
                 {isLoading ? "Laster..." : "Gå til kassen"}
               </Button>
 
-              <Button
-                size="lg"
-                className="mt-3 w-full bg-[#ff5b24] text-white hover:bg-[#e04f1c]"
+              {/* Offisiell Vipps-knapp — retningslinjene tillater ikke egen design. */}
+              <VippsButton
+                stretched
+                className="mt-3"
+                loading={vippsLoading}
+                disabled={isLoading}
                 onClick={handleVippsCheckout}
-                disabled={isLoading || vippsLoading}
-              >
-                {vippsLoading ? "Laster..." : "Hurtigkasse med Vipps"}
-              </Button>
+              />
 
               <ul className="mt-5 space-y-2.5 text-muted-foreground text-sm">
                 <li className="flex items-center gap-2.5">
