@@ -2,25 +2,25 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 export interface CartItem {
-  /** Unik linje-nøkkel: produkt-id, ev. suffiks med variantvalg. */
+  /** Unik linje-nøkkel: produkt-id, ev. suffikset med variantvalg. */
   key: string;
-  /** Produkt-id (delt av variantar av same produkt). */
+  /** Produkt-id (delt av varianter av samme produkt). */
   id: string;
   name: string;
-  /** Einingspris i kr (inkl. ev. variant-differanse). */
+  /** Enhetspris i kr (inkl. ev. variant-differanse). */
   price: number;
   quantity: number;
   /** Valgfri miniatyr-url — vises som produktbilde i handlekurven. */
   image?: string;
-  /** Variant-spørsmål, t.d. «Signert?». */
+  /** Variant-spørsmål, f.eks. «Signert?». */
   variantLabel?: string;
-  /** Valgt variant, t.d. «Ja». */
+  /** Valgt variant, f.eks. «Ja». */
   variantValue?: string;
-  /** Maks antal per linje (t.d. 1 for digitale eingongsprodukt). */
+  /** Maks antall per linje (f.eks. 1 for digitale engangsprodukter). */
   maxQuantity?: number;
 }
 
-/** Det den som legg i kurven oppgir – `key`/`quantity` blir utleidd. */
+/** Det den som legger i kurven oppgir – `key`/`quantity` blir utledet. */
 export interface AddToCartInput {
   id: string;
   name: string;
@@ -42,15 +42,15 @@ function clampQuantity(quantity: number, max?: number): number {
 
 interface CartState {
   items: CartItem[];
-  /** Legg til (eller slå saman med eksisterande linje av same variant). */
+  /** Legg til (eller slå sammen med eksisterende linje av samme variant). */
   addItem: (input: AddToCartInput, quantity?: number) => void;
-  /** Sett eksakt antal på ei linje (klemt mot maxQuantity). */
+  /** Sett eksakt antall på en linje (klemt mot maxQuantity). */
   updateQuantity: (key: string, quantity: number) => void;
   removeItem: (key: string) => void;
   clearCart: () => void;
-  /** Sum (pris × antal) for heile kurven. */
+  /** Sum (pris × antall) for hele kurven. */
   total: () => number;
-  /** Totalt tal varer (sum av antal). */
+  /** Totalt antall varer (sum av antall). */
   count: () => number;
 }
 
@@ -118,10 +118,30 @@ export const useCart = create<CartState>()(
     }),
     {
       name: "poynt-cart",
-      // v2: linjer har no key/quantity/variant. Gamle (v1) kurver er
-      // inkompatible – tøm dei (trygt før lansering).
+      // v2: linjer har nå key/quantity/variant. Gamle (v1) kurver er
+      // inkompatible – tøm dem (trygt før lansering).
       version: 2,
       migrate: () => ({ items: [] }) as Partial<CartState>,
     }
   )
 );
+
+interface CartUiState {
+  /** Om handlekurv-draweren er åpen. */
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  /** Åpne draweren – kalles av «Legg i handlekurv» som kjøpsbekreftelse. */
+  openCart: () => void;
+}
+
+/**
+ * UI-tilstand for handlekurven (drawer åpen/lukket). Bevisst IKKE persistert –
+ * kurv-innholdet overlever refresh, men en åpen drawer skal ikke gjøre det.
+ * Deles mellom drawer-triggeren i headeren og «Legg i handlekurv»-knappene,
+ * slik at et kjøp kan åpne draweren som bekreftelse.
+ */
+export const useCartUi = create<CartUiState>()((set) => ({
+  open: false,
+  setOpen: (open) => set({ open }),
+  openCart: () => set({ open: true }),
+}));

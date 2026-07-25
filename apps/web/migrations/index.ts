@@ -33,6 +33,8 @@ import * as migration_20260725_105106_product_story_fields from './20260725_1051
 import * as migration_20260725_113903_product_notice_title from './20260725_113903_product_notice_title';
 import * as migration_20260725_115656 from './20260725_115656';
 import * as migration_20260725_120900_bokmal_pdf_title from './20260725_120900_bokmal_pdf_title';
+import * as migration_20260725_121855 from './20260725_121855';
+import * as migration_20260725_131054 from './20260725_131054';
 
 export const migrations = [
   {
@@ -203,11 +205,21 @@ export const migrations = [
   {
     up: migration_20260725_115656.up,
     down: migration_20260725_115656.down,
-    name: '20260725_115656'
+    name: '20260725_115656',
   },
   {
     up: migration_20260725_120900_bokmal_pdf_title.up,
     down: migration_20260725_120900_bokmal_pdf_title.down,
     name: '20260725_120900_bokmal_pdf_title',
+  },
+  {
+    up: migration_20260725_121855.up,
+    down: migration_20260725_121855.down,
+    name: '20260725_121855',
+  },
+  {
+    up: migration_20260725_131054.up,
+    down: migration_20260725_131054.down,
+    name: '20260725_131054'
   },
 ];

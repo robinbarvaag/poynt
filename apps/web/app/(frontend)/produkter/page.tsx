@@ -26,7 +26,9 @@ async function getProductsPageData() {
       where: {
         active: { equals: true },
       },
-      sort: "-createdAt",
+      // Manuell rekkefølge først (lavest displayOrder → først, tomme sist),
+      // deretter nyeste først som fallback.
+      sort: ["displayOrder", "-createdAt"],
       limit: 100,
     }),
   ]);

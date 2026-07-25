@@ -1,5 +1,5 @@
 import type { CollectionConfig } from "payload";
-import { uploadVideoFields } from "../blocks/guide-blocks/_shared";
+import { productStoryBlocks } from "../blocks/product-story";
 import { stockPickerAfterInput } from "../fields/stock-picker-after-input";
 import { generateSlug } from "../lib/generate-slug";
 
@@ -11,7 +11,14 @@ export const Products: CollectionConfig = {
   },
   admin: {
     useAsTitle: "name",
-    defaultColumns: ["name", "type", "price", "active", "updatedAt"],
+    defaultColumns: [
+      "name",
+      "type",
+      "price",
+      "displayOrder",
+      "active",
+      "updatedAt",
+    ],
     group: "Nettbutikk",
     // «Preview»-knapp i dokument-headeren → åpner produktet på nettsiden.
     preview: (doc) =>
@@ -97,15 +104,6 @@ export const Products: CollectionConfig = {
       },
     },
     {
-      name: "mediumDescription",
-      type: "textarea",
-      label: "Mellomlang beskrivelse",
-      admin: {
-        description:
-          "Et par setninger mer enn den korte – vises som ingress over «historie»-seksjonene (bakside, sitater, smakebit) på produktsiden",
-      },
-    },
-    {
       name: "description",
       type: "richText",
       label: "Detaljert beskrivelse",
@@ -114,184 +112,15 @@ export const Products: CollectionConfig = {
       },
     },
     {
-      type: "collapsible",
-      label: "Bakside",
-      admin: {
-        initCollapsed: true,
-        description:
-          "Last opp et ekte bilde av baksiden (f.eks. baksiden av boka), så legger vi teksten oppå som en lapp",
-      },
-      fields: [
-        {
-          name: "backCover",
-          type: "group",
-          label: false,
-          fields: [
-            {
-              name: "image",
-              type: "upload",
-              relationTo: "media",
-              label: "Bilde av baksiden",
-              admin: {
-                description:
-                  "Gjerne et helt vanlig foto – litt skjevt og ekte er hele poenget 📸",
-              },
-            },
-            {
-              name: "text",
-              type: "textarea",
-              label: "Baksidetekst",
-              admin: {
-                description:
-                  "Teksten som blir lagt oppå bildet som en håndskrevet lapp",
-              },
-            },
-            {
-              name: "note",
-              type: "text",
-              label: "Liten kommentar (valgfri)",
-              admin: {
-                description:
-                  "Morsom liten bildetekst under, f.eks. «Ja, dette er faktisk baksiden av boka»",
-              },
-            },
-          ],
-        },
-      ],
-    },
-    {
-      name: "readerQuotes",
-      type: "array",
-      label: "Sitater fra lesere",
+      name: "storySections",
+      type: "blocks",
+      label: "Innholdsseksjoner",
+      labels: { singular: "Seksjon", plural: "Seksjoner" },
+      blocks: productStoryBlocks,
       admin: {
         description:
-          "Korte sitater fra lesere/kunder som vises som lapper på produktsiden",
+          "Bygg produktsidens «historie» under kjøpsseksjonen – tekst, bakside, sitater, PDF-smakebit og video i den rekkefølgen du vil. Vises i full bredde.",
       },
-      fields: [
-        {
-          name: "quote",
-          type: "textarea",
-          required: true,
-          label: "Sitat",
-        },
-        {
-          name: "name",
-          type: "text",
-          label: "Navn",
-        },
-        {
-          name: "detail",
-          type: "text",
-          label: "Detalj",
-          admin: {
-            description: "F.eks. «mamma til to» eller «lærer i barneskolen»",
-          },
-        },
-      ],
-    },
-    {
-      type: "collapsible",
-      label: "Smakebit (PDF)",
-      admin: {
-        initCollapsed: true,
-        description:
-          "Last opp en PDF (f.eks. 12 sider fra boka) som kunden kan bla i direkte på produktsiden",
-      },
-      fields: [
-        {
-          name: "pdfPreview",
-          type: "group",
-          label: false,
-          fields: [
-            {
-              name: "file",
-              type: "upload",
-              relationTo: "media",
-              label: "PDF-fil",
-              filterOptions: {
-                mimeType: { contains: "pdf" },
-              },
-            },
-            {
-              name: "title",
-              type: "text",
-              label: "Overskrift",
-              defaultValue: "Ta en titt inni",
-            },
-            {
-              name: "description",
-              type: "textarea",
-              label: "Ingress",
-              admin: {
-                description:
-                  "Kort tekst over PDF-visningen, f.eks. «Bla gjennom innledningen, innholdslisten og et par sider»",
-              },
-            },
-          ],
-        },
-      ],
-    },
-    {
-      type: "collapsible",
-      label: "Videoer",
-      admin: {
-        initCollapsed: true,
-        description:
-          "Video som vises på produktsiden – f.eks. Susanne som forteller hva du lærer. Lim inn lenke (YouTube/Vimeo) eller last opp fil.",
-      },
-      fields: [
-        {
-          name: "videosTitle",
-          type: "text",
-          label: "Overskrift",
-          defaultValue: "Se og hør",
-          admin: {
-            description: "Overskriften over videoseksjonen på produktsiden",
-          },
-        },
-        {
-          name: "videosIntro",
-          type: "textarea",
-          label: "Ingress",
-          admin: {
-            description: "Valgfri kort tekst under overskriften",
-          },
-        },
-        {
-          name: "videos",
-          type: "array",
-          label: "Videoer",
-          fields: [
-            {
-              name: "title",
-              type: "text",
-              label: "Tittel (valgfri)",
-            },
-            {
-              name: "source",
-              type: "select",
-              label: "Kilde",
-              defaultValue: "embed",
-              options: [
-                { label: "Lenke (YouTube/Vimeo)", value: "embed" },
-                { label: "Opplastet fil", value: "upload" },
-              ],
-            },
-            {
-              name: "embedUrl",
-              type: "text",
-              label: "Videolenke",
-              admin: {
-                description: "YouTube-, Vimeo- eller Loom-lenke",
-                condition: (_data, sibling) => sibling?.source !== "upload",
-              },
-            },
-            ...uploadVideoFields(
-              (_data, sibling) => sibling?.source === "upload"
-            ),
-          ],
-        },
-      ],
     },
     {
       name: "featuredImage",
@@ -471,6 +300,17 @@ export const Products: CollectionConfig = {
         description:
           "Medlemskap kjøpes ikke direkte – knappen «Søk om medlemskap» lenker hit",
         condition: (data) => data?.type === "membership",
+      },
+    },
+    {
+      name: "displayOrder",
+      type: "number",
+      label: "Visningsrekkefølge",
+      index: true,
+      admin: {
+        position: "sidebar",
+        description:
+          "Styrer rekkefølgen i produktoversikten – lavest tall vises først (f.eks. 1 for boka). Produkter uten verdi havner bakerst, sortert på nyeste først.",
       },
     },
     {

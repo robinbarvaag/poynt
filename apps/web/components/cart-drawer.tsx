@@ -2,11 +2,11 @@
 
 import { formatPrice } from "@/lib/format";
 import { useCartReady } from "@/lib/use-cart-ready";
-import { useCart } from "@poynt/cart";
+import { useCart, useCartUi } from "@poynt/cart";
 import { Button, CartDrawer as CartDrawerShell, CartLineItem } from "@poynt/ui";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect } from "react";
 
 // usePathname er runtime-data under prerendering (cacheComponents) og leses
 // derfor i en egen usynlig komponent bak Suspense — den brukes bare som
@@ -21,7 +21,9 @@ function CloseOnNavigate({ onNavigate }: { onNavigate: () => void }) {
 }
 
 export function CartDrawer() {
-  const [open, setOpen] = useState(false);
+  // Delt UI-tilstand (ikke-persistert): «Legg i handlekurv»-knappene åpner
+  // draweren som kjøpsbekreftelse via samme store.
+  const { open, setOpen } = useCartUi();
   const ready = useCartReady();
   const { items, removeItem, updateQuantity, clearCart, total, count } =
     useCart();

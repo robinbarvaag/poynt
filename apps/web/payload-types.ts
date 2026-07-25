@@ -741,10 +741,6 @@ export interface Product {
    */
   shortDescription?: string | null;
   /**
-   * Et par setninger mer enn den korte – vises som ingress over «historie»-seksjonene (bakside, sitater, smakebit) på produktsiden
-   */
-  mediumDescription?: string | null;
-  /**
    * Full produktbeskrivelse som vises på produktsiden
    */
   description?: {
@@ -762,78 +758,17 @@ export interface Product {
     };
     [k: string]: unknown;
   } | null;
-  backCover?: {
-    /**
-     * Gjerne et helt vanlig foto – litt skjevt og ekte er hele poenget 📸
-     */
-    image?: (number | null) | Media;
-    /**
-     * Teksten som blir lagt oppå bildet som en håndskrevet lapp
-     */
-    text?: string | null;
-    /**
-     * Morsom liten bildetekst under, f.eks. «Ja, dette er faktisk baksiden av boka»
-     */
-    note?: string | null;
-  };
   /**
-   * Korte sitater fra lesere/kunder som vises som lapper på produktsiden
+   * Bygg produktsidens «historie» under kjøpsseksjonen – tekst, bakside, sitater, PDF-smakebit og video i den rekkefølgen du vil. Vises i full bredde.
    */
-  readerQuotes?:
-    | {
-        quote: string;
-        name?: string | null;
-        /**
-         * F.eks. «mamma til to» eller «lærer i barneskolen»
-         */
-        detail?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  pdfPreview?: {
-    file?: (number | null) | Media;
-    title?: string | null;
-    /**
-     * Kort tekst over PDF-visningen, f.eks. «Bla gjennom innledningen, innholdslisten og et par sider»
-     */
-    description?: string | null;
-  };
-  /**
-   * Overskriften over videoseksjonen på produktsiden
-   */
-  videosTitle?: string | null;
-  /**
-   * Valgfri kort tekst under overskriften
-   */
-  videosIntro?: string | null;
-  videos?:
-    | {
-        title?: string | null;
-        source?: ('embed' | 'upload') | null;
-        /**
-         * YouTube-, Vimeo- eller Loom-lenke
-         */
-        embedUrl?: string | null;
-        /**
-         * Last opp en MP4- eller WebM-fil.
-         */
-        videoFile?: (number | null) | Media;
-        /**
-         * Stillbilde som vises før avspilling starter (valgfri).
-         */
-        poster?: (number | null) | Media;
-        /**
-         * Starter når videoen kommer i visning. Krever «Uten lyd».
-         */
-        autoplay?: boolean | null;
-        muted?: boolean | null;
-        loop?: boolean | null;
-        /**
-         * Skru av for en stille bakgrunns-/loop-video uten avspillerknapper.
-         */
-        showControls?: boolean | null;
-        id?: string | null;
-      }[]
+  storySections?:
+    | (
+        | ProductStoryTextBlock
+        | ProductStoryBackCoverBlock
+        | ProductStoryQuotesBlock
+        | ProductStoryPdfBlock
+        | ProductStoryVideoBlock
+      )[]
     | null;
   /**
    * Hovedbilde som vises i oversikter og øverst på produktsiden
@@ -909,6 +844,10 @@ export interface Product {
    */
   applyUrl?: string | null;
   /**
+   * Styrer rekkefølgen i produktoversikten – lavest tall vises først (f.eks. 1 for boka). Produkter uten verdi havner bakerst, sortert på nyeste først.
+   */
+  displayOrder?: number | null;
+  /**
    * Deaktiver for å skjule produktet
    */
   active?: boolean | null;
@@ -937,6 +876,120 @@ export interface Product {
   skipSync?: boolean | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProductStoryTextBlock".
+ */
+export interface ProductStoryTextBlock {
+  heading?: string | null;
+  /**
+   * Vises som sentrert ingress mellom seksjonene
+   */
+  text: string;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'storyText';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProductStoryBackCoverBlock".
+ */
+export interface ProductStoryBackCoverBlock {
+  /**
+   * Gjerne et helt vanlig foto – litt skjevt og ekte er hele poenget 📸
+   */
+  image?: (number | null) | Media;
+  /**
+   * Teksten som blir lagt oppå bildet som en håndskrevet lapp
+   */
+  text?: string | null;
+  /**
+   * Morsom liten bildetekst under, f.eks. «Ja, dette er faktisk baksiden av boka»
+   */
+  note?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'storyBackCover';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProductStoryQuotesBlock".
+ */
+export interface ProductStoryQuotesBlock {
+  title?: string | null;
+  quotes?:
+    | {
+        quote: string;
+        name?: string | null;
+        /**
+         * F.eks. «mamma til to» eller «lærer i barneskolen»
+         */
+        detail?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'storyQuotes';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProductStoryPdfBlock".
+ */
+export interface ProductStoryPdfBlock {
+  title?: string | null;
+  /**
+   * Kort tekst over PDF-visningen, f.eks. «Bla gjennom innledningen, innholdslisten og et par sider»
+   */
+  intro?: string | null;
+  file?: (number | null) | Media;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'storyPdf';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProductStoryVideoBlock".
+ */
+export interface ProductStoryVideoBlock {
+  title?: string | null;
+  /**
+   * Valgfri kort tekst under overskriften
+   */
+  intro?: string | null;
+  videos?:
+    | {
+        title?: string | null;
+        source?: ('embed' | 'upload') | null;
+        /**
+         * YouTube-, Vimeo- eller Loom-lenke
+         */
+        embedUrl?: string | null;
+        /**
+         * Last opp en MP4- eller WebM-fil.
+         */
+        videoFile?: (number | null) | Media;
+        /**
+         * Stillbilde som vises før avspilling starter (valgfri).
+         */
+        poster?: (number | null) | Media;
+        /**
+         * Starter når videoen kommer i visning. Krever «Uten lyd».
+         */
+        autoplay?: boolean | null;
+        muted?: boolean | null;
+        loop?: boolean | null;
+        /**
+         * Skru av for en stille bakgrunns-/loop-video uten avspillerknapper.
+         */
+        showControls?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'storyVideo';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3149,45 +3202,15 @@ export interface ProductsSelect<T extends boolean = true> {
   recurringInterval?: T;
   membershipTier?: T;
   shortDescription?: T;
-  mediumDescription?: T;
   description?: T;
-  backCover?:
+  storySections?:
     | T
     | {
-        image?: T;
-        text?: T;
-        note?: T;
-      };
-  readerQuotes?:
-    | T
-    | {
-        quote?: T;
-        name?: T;
-        detail?: T;
-        id?: T;
-      };
-  pdfPreview?:
-    | T
-    | {
-        file?: T;
-        title?: T;
-        description?: T;
-      };
-  videosTitle?: T;
-  videosIntro?: T;
-  videos?:
-    | T
-    | {
-        title?: T;
-        source?: T;
-        embedUrl?: T;
-        videoFile?: T;
-        poster?: T;
-        autoplay?: T;
-        muted?: T;
-        loop?: T;
-        showControls?: T;
-        id?: T;
+        storyText?: T | ProductStoryTextBlockSelect<T>;
+        storyBackCover?: T | ProductStoryBackCoverBlockSelect<T>;
+        storyQuotes?: T | ProductStoryQuotesBlockSelect<T>;
+        storyPdf?: T | ProductStoryPdfBlockSelect<T>;
+        storyVideo?: T | ProductStoryVideoBlockSelect<T>;
       };
   featuredImage?: T;
   gallery?:
@@ -3220,6 +3243,7 @@ export interface ProductsSelect<T extends boolean = true> {
         id?: T;
       };
   applyUrl?: T;
+  displayOrder?: T;
   active?: T;
   categories?: T;
   meta?:
@@ -3236,6 +3260,79 @@ export interface ProductsSelect<T extends boolean = true> {
   skipSync?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProductStoryTextBlock_select".
+ */
+export interface ProductStoryTextBlockSelect<T extends boolean = true> {
+  heading?: T;
+  text?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProductStoryBackCoverBlock_select".
+ */
+export interface ProductStoryBackCoverBlockSelect<T extends boolean = true> {
+  image?: T;
+  text?: T;
+  note?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProductStoryQuotesBlock_select".
+ */
+export interface ProductStoryQuotesBlockSelect<T extends boolean = true> {
+  title?: T;
+  quotes?:
+    | T
+    | {
+        quote?: T;
+        name?: T;
+        detail?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProductStoryPdfBlock_select".
+ */
+export interface ProductStoryPdfBlockSelect<T extends boolean = true> {
+  title?: T;
+  intro?: T;
+  file?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProductStoryVideoBlock_select".
+ */
+export interface ProductStoryVideoBlockSelect<T extends boolean = true> {
+  title?: T;
+  intro?: T;
+  videos?:
+    | T
+    | {
+        title?: T;
+        source?: T;
+        embedUrl?: T;
+        videoFile?: T;
+        poster?: T;
+        autoplay?: T;
+        muted?: T;
+        loop?: T;
+        showControls?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

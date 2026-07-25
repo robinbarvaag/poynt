@@ -1,7 +1,7 @@
 "use client";
 
 import { useCartReady } from "@/lib/use-cart-ready";
-import { useCart } from "@poynt/cart";
+import { useCart, useCartUi } from "@poynt/cart";
 import { Button } from "@poynt/ui";
 import { Check } from "lucide-react";
 import { useState } from "react";
@@ -16,20 +16,23 @@ interface Product {
 
 interface AddToCartButtonProps {
   product: Product;
-  /** Variant-spørsmål, t.d. «Signert?». */
+  /** Variant-spørsmål, f.eks. «Signert?». */
   variantLabel?: string;
-  /** Valgt variant, t.d. «Ja». */
+  /** Valgt variant, f.eks. «Ja». */
   variantValue?: string;
-  /** Antal som legges til ved klikk (default 1). */
+  /** Antall som legges til ved klikk (default 1). */
   quantity?: number;
-  /** Maks antal per linje (digitale: 1). */
+  /** Maks antall per linje (digitale: 1). */
   maxQuantity?: number;
-  /** Når true kan ein leggje til fleire – knappen låser seg ikkje. */
+  /** Når true kan man legge til flere – knappen låser seg ikke. */
   allowQuantity?: boolean;
-  /** Deaktiver (t.d. variant ikkje valgt enno). */
+  /** Deaktiver (f.eks. variant ikke valgt ennå). */
   disabled?: boolean;
-  /** Tekst når knappen er deaktivert pga. manglande variantvalg. */
+  /** Tekst når knappen er deaktivert pga. manglende variantvalg. */
   disabledLabel?: string;
+  /** Ekstra klasser på knappen – brukes når den bygges inn i en samlet
+      kontroll (f.eks. antall-stepper + knapp i samme pill). */
+  className?: string;
 }
 
 export function AddToCartButton({
@@ -40,9 +43,11 @@ export function AddToCartButton({
   maxQuantity,
   allowQuantity = false,
   disabled = false,
-  disabledLabel = "Velg eit alternativ",
+  disabledLabel = "Velg et alternativ",
+  className,
 }: AddToCartButtonProps) {
   const { addItem, items } = useCart();
+  const openCart = useCartUi((state) => state.openCart);
   const ready = useCartReady();
   const [added, setAdded] = useState(false);
 
@@ -51,6 +56,8 @@ export function AddToCartButton({
   // Behandle som «ikke i kurv» til klienten har montert (unngår hydration-
   // mismatch på knapptilstanden — se useCartReady).
   const isInCart = ready && items.some((item) => item.key === key);
+
+  const buttonClasses = className ? `w-full ${className}` : "w-full";
 
   const handleAddToCart = () => {
     addItem(
@@ -67,28 +74,31 @@ export function AddToCartButton({
     );
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
+    // Drawer-en åpnes som kjøpsbekreftelse – med et lite beat først, så
+    // «Lagt til!»-swappen på knappen rekker å registreres før overlayet.
+    setTimeout(openCart, 450);
   };
 
   if (disabled) {
     return (
-      <Button size="lg" className="w-full" disabled>
+      <Button size="lg" className={buttonClasses} disabled>
         {disabledLabel}
       </Button>
     );
   }
 
-  // Digitale eingongsprodukt: éin av kvar – lås når den ligg i kurven.
+  // Digitale engangsprodukter: én av hver – lås når den ligger i kurven.
   if (!allowQuantity && isInCart) {
     return (
-      <Button size="lg" className="w-full" disabled>
+      <Button size="lg" className={buttonClasses} disabled>
         <Check className="mr-2 h-5 w-5" />
-        Allereie i handlekurv
+        Allerede i handlekurven
       </Button>
     );
   }
 
   return (
-    <Button size="lg" className="w-full" onClick={handleAddToCart}>
+    <Button size="lg" className={buttonClasses} onClick={handleAddToCart}>
       {/* key-remount + swap-in gir en myk blur-fade mellom tilstandene i
           stedet for at teksten snapper. */}
       <span

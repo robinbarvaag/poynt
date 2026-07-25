@@ -1,7 +1,14 @@
 "use client";
 
 import { PayloadImage, resolveMediaUrl } from "@/components/payload-image";
-import type { Product } from "@/payload-types";
+import type {
+  Product,
+  ProductStoryBackCoverBlock,
+  ProductStoryPdfBlock,
+  ProductStoryQuotesBlock,
+  ProductStoryTextBlock,
+  ProductStoryVideoBlock,
+} from "@/payload-types";
 import { Heading, Text, VideoEmbed, VideoPlayer } from "@poynt/ui";
 import dynamic from "next/dynamic";
 
@@ -19,24 +26,45 @@ function SectionShell({
   intro,
   children,
 }: {
-  title: string;
+  title?: string | null;
   intro?: string | null;
   children: React.ReactNode;
 }) {
   return (
     <section className="mt-12 border-t border-border pt-12">
-      <div className="mb-6 text-center">
-        <Heading size="h2" color="foreground">
-          {title}
-        </Heading>
-        {intro && (
-          <Text variant="muted" customStyles="mx-auto mt-3 max-w-2xl">
-            {intro}
-          </Text>
-        )}
-      </div>
+      {(title || intro) && (
+        <div className="mb-6 text-center">
+          {title && (
+            <Heading size="h2" color="foreground">
+              {title}
+            </Heading>
+          )}
+          {intro && (
+            <Text variant="muted" customStyles="mx-auto mt-3 max-w-2xl">
+              {intro}
+            </Text>
+          )}
+        </div>
+      )}
       {children}
     </section>
+  );
+}
+
+/** Fri tekst: sentrert ingress, med valgfri overskrift. */
+function TextSection({ block }: { block: ProductStoryTextBlock }) {
+  const text = block.text?.trim();
+  if (!text) return null;
+
+  return (
+    <SectionShell title={block.heading}>
+      <Text
+        variant="lead"
+        customStyles="mx-auto max-w-2xl whitespace-pre-line text-center"
+      >
+        {text}
+      </Text>
+    </SectionShell>
   );
 }
 
@@ -46,12 +74,10 @@ function SectionShell({
  * På mobil overlapper lappen nederst på bildet, på desktop henger den
  * over høyre kant.
  */
-function BackCoverSection({ backCover }: { backCover: Product["backCover"] }) {
+function BackCoverSection({ block }: { block: ProductStoryBackCoverBlock }) {
   const image =
-    backCover?.image && typeof backCover.image === "object"
-      ? backCover.image
-      : null;
-  const text = backCover?.text?.trim();
+    block.image && typeof block.image === "object" ? block.image : null;
+  const text = block.text?.trim();
   if (!(image || text)) return null;
 
   return (
@@ -91,12 +117,12 @@ function BackCoverSection({ backCover }: { backCover: Product["backCover"] }) {
           </figure>
         )}
 
-        {backCover?.note && (
+        {block.note && (
           <Text
             variant="muted"
             customStyles="mt-6 text-center text-sm italic lg:mt-10"
           >
-            {backCover.note}
+            {block.note}
           </Text>
         )}
       </div>
@@ -105,13 +131,12 @@ function BackCoverSection({ backCover }: { backCover: Product["backCover"] }) {
 }
 
 /** Lesersitater som fargeglade lapper med alternerende helning. */
-function ReaderQuotesSection({
-  quotes,
-}: {
-  quotes: NonNullable<Product["readerQuotes"]>;
-}) {
+function QuotesSection({ block }: { block: ProductStoryQuotesBlock }) {
+  const quotes = block.quotes ?? [];
+  if (quotes.length === 0) return null;
+
   return (
-    <SectionShell title="Fra leserne">
+    <SectionShell title={block.title?.trim() || "Fra leserne"}>
       <ul className="mx-auto grid max-w-5xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {quotes.map((quote, index) => (
           <li
@@ -147,16 +172,30 @@ function ReaderQuotesSection({
   );
 }
 
-/** Videoer: innebygd YouTube/Vimeo/Loom eller selv-hostet fil. */
-function VideosSection({
-  videos,
-  title,
-  intro,
+/** PDF-smakebit: bla i et utdrag direkte på siden. */
+function PdfSection({
+  block,
+  fileName,
 }: {
-  videos: NonNullable<Product["videos"]>;
-  title?: string | null;
-  intro?: string | null;
+  block: ProductStoryPdfBlock;
+  fileName: string;
 }) {
+  const url = resolveMediaUrl(block.file);
+  if (!url) return null;
+
+  return (
+    <SectionShell
+      title={block.title?.trim() || "Ta en titt inni"}
+      intro={block.intro}
+    >
+      <PdfPreview url={url} fileName={fileName} />
+    </SectionShell>
+  );
+}
+
+/** Videoer: innebygd YouTube/Vimeo/Loom eller selv-hostet fil. */
+function VideoSection({ block }: { block: ProductStoryVideoBlock }) {
+  const videos = block.videos ?? [];
   const renderable = videos.filter((video) =>
     video.source === "upload"
       ? Boolean(resolveMediaUrl(video.videoFile))
@@ -165,7 +204,10 @@ function VideosSection({
   if (renderable.length === 0) return null;
 
   return (
-    <SectionShell title={title?.trim() || "Se og hør"} intro={intro}>
+    <SectionShell
+      title={block.title?.trim() || "Se og hør"}
+      intro={block.intro}
+    >
       <div className="mx-auto max-w-4xl space-y-10">
         {renderable.map((video, index) => {
           const uploadedSrc = resolveMediaUrl(video.videoFile);
@@ -200,61 +242,38 @@ function VideosSection({
 }
 
 /**
- * «Historie»-seksjonene på produktsiden: mellomlang beskrivelse, bakside,
- * lesersitater, PDF-smakebit og video. Alle er valgfrie og datadrevne, så de
- * fungerer for alle produkttyper – ikke bare bøker.
+ * «Historie»-seksjonene på produktsiden, bygget som blokker i valgfri
+ * rekkefølge fra Payload (`storySections`). Vises i full bredde under den
+ * delte kjøpsseksjonen – felles for alle produkttyper.
  */
 export function ProductStorySections({ product }: { product: Product }) {
-  const pdfUrl = resolveMediaUrl(product.pdfPreview?.file);
-  const quotes = product.readerQuotes ?? [];
-  const videos = product.videos ?? [];
-
-  const hasBackCover = Boolean(
-    (product.backCover?.image && typeof product.backCover.image === "object") ||
-      product.backCover?.text?.trim()
-  );
-  const hasAnything =
-    Boolean(product.mediumDescription?.trim()) ||
-    hasBackCover ||
-    quotes.length > 0 ||
-    Boolean(pdfUrl) ||
-    videos.length > 0;
-
-  if (!hasAnything) return null;
+  const sections = product.storySections ?? [];
+  if (sections.length === 0) return null;
 
   return (
     <div>
-      {product.mediumDescription?.trim() && (
-        <div className="mt-12 border-t border-border pt-12">
-          <Text
-            variant="lead"
-            customStyles="mx-auto max-w-2xl whitespace-pre-line text-center"
-          >
-            {product.mediumDescription}
-          </Text>
-        </div>
-      )}
-
-      <BackCoverSection backCover={product.backCover} />
-
-      {quotes.length > 0 && <ReaderQuotesSection quotes={quotes} />}
-
-      {pdfUrl && (
-        <SectionShell
-          title={product.pdfPreview?.title || "Ta en titt inni"}
-          intro={product.pdfPreview?.description}
-        >
-          <PdfPreview url={pdfUrl} fileName={product.name} />
-        </SectionShell>
-      )}
-
-      {videos.length > 0 && (
-        <VideosSection
-          videos={videos}
-          title={product.videosTitle}
-          intro={product.videosIntro}
-        />
-      )}
+      {sections.map((block) => {
+        switch (block.blockType) {
+          case "storyText":
+            return <TextSection key={block.id} block={block} />;
+          case "storyBackCover":
+            return <BackCoverSection key={block.id} block={block} />;
+          case "storyQuotes":
+            return <QuotesSection key={block.id} block={block} />;
+          case "storyPdf":
+            return (
+              <PdfSection
+                key={block.id}
+                block={block}
+                fileName={product.name}
+              />
+            );
+          case "storyVideo":
+            return <VideoSection key={block.id} block={block} />;
+          default:
+            return null;
+        }
+      })}
     </div>
   );
 }

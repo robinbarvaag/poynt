@@ -4,15 +4,15 @@ import { Button } from "../button";
 
 export interface CartLineItemProps {
   name: string;
-  /** Ferdig formatert pris, f.eks. "kr 1 490" (samla for linja). */
+  /** Ferdig formatert pris, f.eks. "kr 1 490" (samlet for linja). */
   priceLabel: string;
   /** Liten produktbilde-slot. Uten bilde vises en dempet plassholder. */
   image?: React.ReactNode;
   /** Valgt variant vist under navnet, f.eks. "Signert: Ja". */
   variantLabel?: string;
-  /** Antal på linja. Vises som en stepper når onIncrement/onDecrement er satt. */
+  /** Antall på linja. Vises som en stepper når onIncrement/onDecrement er satt. */
   quantity?: number;
-  /** Deaktiver «+» (t.d. ved nådd maks antal). */
+  /** Deaktiver «+» (f.eks. ved nådd maks antall). */
   incrementDisabled?: boolean;
   onIncrement?: () => void;
   onDecrement?: () => void;
@@ -20,7 +20,7 @@ export interface CartLineItemProps {
   removeLabel?: string;
 }
 
-/** En rad i handlekurven: miniatyr, navn + variant + pris, antal-stepper og fjern-knapp. */
+/** En rad i handlekurven: miniatyr, navn + variant + pris, antall-stepper og fjern-knapp. */
 export function CartLineItem({
   name,
   priceLabel,
@@ -89,7 +89,7 @@ export function CartLineItem({
                 type="button"
                 variant="ghost"
                 size="icon"
-                aria-label="Fleire"
+                aria-label="Flere"
                 className="size-7 rounded-full"
                 onClick={onIncrement}
                 disabled={incrementDisabled}
