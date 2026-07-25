@@ -30,6 +30,7 @@ import { Users } from "./collections/users";
 // Globals
 import {
   BlogPage,
+  CheckoutSettings,
   Footer,
   Header,
   Homepage,
@@ -92,6 +93,7 @@ export default buildConfig({
     Header,
     Footer,
     SiteSettings,
+    CheckoutSettings,
   ],
   admin: {
     user: "users",

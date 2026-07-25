@@ -2,6 +2,7 @@
 
 import { formatPrice } from "@/lib/format";
 import { useCartReady } from "@/lib/use-cart-ready";
+import { startVippsCheckout } from "@/lib/vipps-checkout-client";
 import { useCart } from "@poynt/cart";
 import {
   Button,
@@ -39,6 +40,9 @@ export default function CartPage() {
   const { items, removeItem, updateQuantity, total, count } = useCart();
   const ready = useCartReady();
   const [isLoading, setIsLoading] = useState(false);
+  const [vippsLoading, setVippsLoading] = useState(false);
+  // Nyhetsbrev-samtykke: må starte uavkrysset (aktivt samtykke, mfl. § 15)
+  const [newsletterOptIn, setNewsletterOptIn] = useState(false);
 
   // Rabattkode
   const [couponInput, setCouponInput] = useState("");
@@ -104,6 +108,7 @@ export default function CartPage() {
             variant: item.variantValue,
           })),
           couponCode: coupon?.code,
+          newsletterOptIn,
         }),
       });
 
@@ -120,6 +125,17 @@ export default function CartPage() {
       console.error("Checkout error:", error);
       alert(error instanceof Error ? error.message : "Noe gikk galt");
       setIsLoading(false);
+    }
+  };
+
+  const handleVippsCheckout = async () => {
+    setVippsLoading(true);
+    try {
+      await startVippsCheckout(items, coupon?.code, newsletterOptIn);
+    } catch (error) {
+      console.error("Vipps checkout error:", error);
+      alert(error instanceof Error ? error.message : "Noe gikk galt");
+      setVippsLoading(false);
     }
   };
 
@@ -300,19 +316,41 @@ export default function CartPage() {
                 </span>
               </div>
 
+              <label className="mt-5 flex cursor-pointer items-start gap-2.5 text-muted-foreground text-sm">
+                <input
+                  type="checkbox"
+                  checked={newsletterOptIn}
+                  onChange={(e) => setNewsletterOptIn(e.target.checked)}
+                  className="mt-0.5 size-4 shrink-0 accent-primary"
+                />
+                <span>
+                  Ja takk, jeg vil motta nyhetsbrev med tips og tilbud fra
+                  Poynt. Du kan melde deg av når som helst.
+                </span>
+              </label>
+
               <Button
                 size="lg"
-                className="mt-5 w-full"
+                className="mt-4 w-full"
                 onClick={handleCheckout}
-                disabled={isLoading}
+                disabled={isLoading || vippsLoading}
               >
                 {isLoading ? "Laster..." : "Gå til kassen"}
+              </Button>
+
+              <Button
+                size="lg"
+                className="mt-3 w-full bg-[#ff5b24] text-white hover:bg-[#e04f1c]"
+                onClick={handleVippsCheckout}
+                disabled={isLoading || vippsLoading}
+              >
+                {vippsLoading ? "Laster..." : "Hurtigkasse med Vipps"}
               </Button>
 
               <ul className="mt-5 space-y-2.5 text-muted-foreground text-sm">
                 <li className="flex items-center gap-2.5">
                   <ShieldCheck className="size-4 shrink-0 text-primary" />
-                  Sikker betaling med Stripe
+                  Sikker betaling med Stripe eller Vipps
                 </li>
                 <li className="flex items-center gap-2.5">
                   <Zap className="size-4 shrink-0 text-primary" />

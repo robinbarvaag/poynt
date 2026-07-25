@@ -32,7 +32,7 @@ for (const product of docs) {
     payload.logger.info(`✅ ${product.name}: ${oldId} → ${updated.stripeID}`);
   } else {
     payload.logger.error(
-      `⚠️ ${product.name}: fikk ingen ny stripeID — sjekk STRIPE_SECRET_KEY og loggen over.`,
+      `⚠️ ${product.name}: fikk ingen ny stripeID — sjekk STRIPE_SECRET_KEY og loggen over.`
     );
   }
 }

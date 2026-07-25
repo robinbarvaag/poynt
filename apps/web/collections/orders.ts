@@ -20,8 +20,11 @@ export const Orders: CollectionConfig = {
     {
       name: "customerEmail",
       type: "email",
-      required: true,
       label: "Kunde e-post",
+      admin: {
+        description:
+          "Settes ved betaling — Vipps-ordrer får e-post først når kunden har godkjent i appen",
+      },
     },
     {
       name: "customerName",
@@ -81,6 +84,40 @@ export const Orders: CollectionConfig = {
         { label: "Avbrutt", value: "cancelled" },
       ],
       label: "Status",
+    },
+    {
+      name: "newsletterOptIn",
+      type: "checkbox",
+      defaultValue: false,
+      label: "Ønsker nyhetsbrev",
+      admin: {
+        position: "sidebar",
+        description:
+          "Kunden krysset aktivt av for nyhetsbrev i utsjekken (dokumentert samtykke)",
+      },
+    },
+    {
+      name: "paymentProvider",
+      type: "select",
+      required: true,
+      defaultValue: "stripe",
+      options: [
+        { label: "Stripe (kort)", value: "stripe" },
+        { label: "Vipps", value: "vipps" },
+      ],
+      label: "Betalingsleverandør",
+      admin: {
+        position: "sidebar",
+      },
+    },
+    {
+      name: "vippsReference",
+      type: "text",
+      label: "Vipps-referanse",
+      index: true,
+      admin: {
+        position: "sidebar",
+      },
     },
     {
       name: "stripeSessionId",

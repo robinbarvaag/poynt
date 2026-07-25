@@ -1,7 +1,16 @@
 import { Resend } from "resend";
-import type { OrderConfirmationItem } from "./templates/order-confirmation";
+import type {
+  OrderConfirmationContent,
+  OrderConfirmationItem,
+} from "./templates/order-confirmation";
 
-export type { OrderConfirmationItem };
+export type { OrderConfirmationContent, OrderConfirmationItem };
+
+export interface EmailAttachment {
+  filename: string;
+  /** Filinnhold, base64-kodet. */
+  content: string;
+}
 
 let _resend: Resend | null = null;
 
@@ -64,6 +73,22 @@ async function sendEmail(payload: SendPayload) {
   return data;
 }
 
+/**
+ * Vipps-testbrukere har fiktive adresser (@vippsmobilepay.com) som aldri kan
+ * motta e-post. Sett ORDER_TEST_EMAIL_RECIPIENTS (kommaseparert) for å få
+ * disse e-postene levert til dere selv under testing i stedet.
+ */
+function resolveRecipients(email: string): string | string[] {
+  const testRecipients = process.env.ORDER_TEST_EMAIL_RECIPIENTS;
+  if (testRecipients && email.toLowerCase().endsWith("@vippsmobilepay.com")) {
+    return testRecipients
+      .split(",")
+      .map((address) => address.trim())
+      .filter(Boolean);
+  }
+  return email;
+}
+
 export async function sendOrderConfirmation(params: {
   email: string;
   orderNumber: string;
@@ -71,6 +96,12 @@ export async function sendOrderConfirmation(params: {
   items: OrderConfirmationItem[];
   /** Totalsum i kr. */
   total: number;
+  /** Admin-redigerbart emnefelt – ordrenummer legges på automatisk. */
+  subject?: string;
+  /** Admin-redigerbare tekster i e-posten. */
+  content?: OrderConfirmationContent;
+  /** Vedlegg (f.eks. kjøpte PDF-er), base64-kodet. */
+  attachments?: EmailAttachment[];
 }) {
   if (!process.env.RESEND_API_KEY) return;
 
@@ -85,14 +116,17 @@ export async function sendOrderConfirmation(params: {
       customerName: params.customerName,
       items: params.items,
       total: params.total,
+      content: params.content,
+      hasAttachments: (params.attachments?.length ?? 0) > 0,
     })
   );
 
   await sendEmail({
     from: buildFrom("Poynt"),
-    to: params.email,
-    subject: `Ordrebekreftelse #${params.orderNumber}`,
+    to: resolveRecipients(params.email),
+    subject: `${params.subject || "Ordrebekreftelse"} #${params.orderNumber}`,
     html,
+    ...(params.attachments?.length && { attachments: params.attachments }),
   });
 }
 

@@ -128,6 +128,7 @@ export interface Config {
     header: Header;
     footer: Footer;
     'site-settings': SiteSetting;
+    'checkout-settings': CheckoutSetting;
   };
   globalsSelect: {
     homepage: HomepageSelect<false> | HomepageSelect<true>;
@@ -138,6 +139,7 @@ export interface Config {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+    'checkout-settings': CheckoutSettingsSelect<false> | CheckoutSettingsSelect<true>;
   };
   locale: null;
   widgets: {
@@ -784,6 +786,10 @@ export interface Product {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Selve PDF-en kunden kjøper. Legges automatisk ved ordrebekreftelses-eposten når produktet kjøpes.
+   */
+  pdfFile?: (number | null) | Media;
   /**
    * Pris i heile kroner
    */
@@ -2111,7 +2117,10 @@ export interface Course {
  */
 export interface Order {
   id: number;
-  customerEmail: string;
+  /**
+   * Settes ved betaling — Vipps-ordrer får e-post først når kunden har godkjent i appen
+   */
+  customerEmail?: string | null;
   customerName?: string | null;
   items: {
     product: number | Product;
@@ -2125,6 +2134,12 @@ export interface Order {
   }[];
   total: number;
   status: 'pending' | 'paid' | 'cancelled';
+  /**
+   * Kunden krysset aktivt av for nyhetsbrev i utsjekken (dokumentert samtykke)
+   */
+  newsletterOptIn?: boolean | null;
+  paymentProvider: 'stripe' | 'vipps';
+  vippsReference?: string | null;
   stripeSessionId?: string | null;
   stripePaymentIntentId?: string | null;
   updatedAt: string;
@@ -3220,6 +3235,7 @@ export interface ProductsSelect<T extends boolean = true> {
         caption?: T;
         id?: T;
       };
+  pdfFile?: T;
   price?: T;
   compareAtPrice?: T;
   statusBadge?: T;
@@ -3352,6 +3368,9 @@ export interface OrdersSelect<T extends boolean = true> {
       };
   total?: T;
   status?: T;
+  newsletterOptIn?: T;
+  paymentProvider?: T;
+  vippsReference?: T;
   stripeSessionId?: T;
   stripePaymentIntentId?: T;
   updatedAt?: T;
@@ -3965,6 +3984,40 @@ export interface SiteSetting {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "checkout-settings".
+ */
+export interface CheckoutSetting {
+  id: number;
+  successEyebrow?: string | null;
+  successTitle?: string | null;
+  successText?: string | null;
+  successPrimaryCtaLabel?: string | null;
+  successPrimaryCtaUrl?: string | null;
+  successSecondaryCtaLabel?: string | null;
+  successSecondaryCtaUrl?: string | null;
+  cancelledEyebrow?: string | null;
+  cancelledTitle?: string | null;
+  cancelledText?: string | null;
+  cancelledPrimaryCtaLabel?: string | null;
+  cancelledPrimaryCtaUrl?: string | null;
+  cancelledSecondaryCtaLabel?: string | null;
+  cancelledSecondaryCtaUrl?: string | null;
+  /**
+   * Ordrenummeret legges på automatisk: «… #42»
+   */
+  emailSubject?: string | null;
+  emailHeading?: string | null;
+  emailIntro?: string | null;
+  /**
+   * Vises bare når ordren inneholder PDF-produkter med vedlegg.
+   */
+  emailPdfNote?: string | null;
+  emailFooter?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "homepage_select".
  */
 export interface HomepageSelect<T extends boolean = true> {
@@ -4207,6 +4260,34 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         url?: T;
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "checkout-settings_select".
+ */
+export interface CheckoutSettingsSelect<T extends boolean = true> {
+  successEyebrow?: T;
+  successTitle?: T;
+  successText?: T;
+  successPrimaryCtaLabel?: T;
+  successPrimaryCtaUrl?: T;
+  successSecondaryCtaLabel?: T;
+  successSecondaryCtaUrl?: T;
+  cancelledEyebrow?: T;
+  cancelledTitle?: T;
+  cancelledText?: T;
+  cancelledPrimaryCtaLabel?: T;
+  cancelledPrimaryCtaUrl?: T;
+  cancelledSecondaryCtaLabel?: T;
+  cancelledSecondaryCtaUrl?: T;
+  emailSubject?: T;
+  emailHeading?: T;
+  emailIntro?: T;
+  emailPdfNote?: T;
+  emailFooter?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

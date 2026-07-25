@@ -11,12 +11,27 @@ export interface OrderConfirmationItem {
   variant?: string;
 }
 
+export interface OrderConfirmationContent {
+  /** Overskrift i e-posten. */
+  heading?: string;
+  /** Innledningstekst under overskriften. */
+  intro?: string;
+  /** Ekstra melding når ordren har PDF-vedlegg. */
+  pdfNote?: string;
+  /** Avslutningstekst nederst. */
+  footer?: string;
+}
+
 export interface OrderConfirmationProps {
   orderNumber: string;
   customerName?: string;
   items: OrderConfirmationItem[];
   /** Totalsum i kr. */
   total: number;
+  /** Admin-redigerbare tekster – faller tilbake på standardtekstene. */
+  content?: OrderConfirmationContent;
+  /** Om ordren har PDF-vedlegg (styrer visning av pdfNote). */
+  hasAttachments?: boolean;
 }
 
 const kr = (n: number) => `${new Intl.NumberFormat("nb-NO").format(n)} kr`;
@@ -27,70 +42,97 @@ export default function OrderConfirmationEmail({
   customerName,
   items,
   total,
+  content,
+  hasAttachments,
 }: OrderConfirmationProps) {
   return (
     <EmailShell
       preview={`Ordrebekreftelse #${orderNumber} – takk for handelen!`}
     >
-      <Text style={emailStyles.eyebrow}>Ordrebekreftelse</Text>
-      <Text style={emailStyles.heading}>Takk for bestillingen!</Text>
+      <Text style={emailStyles.eyebrow}>Ordrebekreftelse #{orderNumber}</Text>
+      <Text style={emailStyles.heading}>
+        {content?.heading || "Takk for bestillingen!"}
+      </Text>
       {customerName ? (
         <Text style={emailStyles.text}>Hei {customerName},</Text>
       ) : null}
       <Text style={emailStyles.text}>
-        Vi har mottatt bestillingen din. Her er en oppsummering av kjøpet.
+        {content?.intro ||
+          "Vi har mottatt bestillingen din. Her er en oppsummering av kjøpet."}
       </Text>
 
-      <Section style={summary}>
-        <Text style={emailStyles.label}>Ordrenummer</Text>
-        <Text style={{ ...emailStyles.value, margin: "0 0 4px" }}>
-          #{orderNumber}
-        </Text>
-      </Section>
+      {hasAttachments && content?.pdfNote ? (
+        <Section style={pdfCallout}>
+          <Text style={pdfCalloutText}>📎 {content.pdfNote}</Text>
+        </Section>
+      ) : null}
 
-      <Hr style={{ borderColor: brand.border, margin: "8px 0 16px" }} />
+      <Section style={itemsPanel}>
+        {items.map((item, index) => (
+          <React.Fragment key={`${item.name}-${item.variant ?? ""}`}>
+            {index > 0 ? (
+              <Hr style={{ borderColor: brand.border, margin: "12px 0" }} />
+            ) : null}
+            <Row>
+              <Column>
+                <Text style={lineName}>{item.name}</Text>
+                <Text style={lineMeta}>
+                  {item.variant ? `${item.variant} · ` : ""}
+                  Antall: {item.quantity}
+                </Text>
+              </Column>
+              <Column
+                style={{ textAlign: "right" as const, verticalAlign: "top" }}
+              >
+                <Text style={linePrice}>{kr(item.price * item.quantity)}</Text>
+              </Column>
+            </Row>
+          </React.Fragment>
+        ))}
 
-      {items.map((item) => (
-        <Row
-          key={`${item.name}-${item.variant ?? ""}`}
-          style={{ marginBottom: "10px" }}
-        >
+        <Hr style={totalRule} />
+
+        <Row>
           <Column>
-            <Text style={lineName}>
-              {item.name}
-              {item.variant ? ` – ${item.variant}` : ""}
-            </Text>
-            <Text style={lineMeta}>Antall: {item.quantity}</Text>
+            <Text style={totalLabel}>Totalt</Text>
           </Column>
-          <Column style={{ textAlign: "right" as const, verticalAlign: "top" }}>
-            <Text style={linePrice}>{kr(item.price * item.quantity)}</Text>
+          <Column style={{ textAlign: "right" as const }}>
+            <Text style={totalValue}>{kr(total)}</Text>
           </Column>
         </Row>
-      ))}
-
-      <Hr style={{ borderColor: brand.border, margin: "8px 0 12px" }} />
-
-      <Row>
-        <Column>
-          <Text style={{ ...emailStyles.value, fontWeight: "800", margin: 0 }}>
-            Totalt
-          </Text>
-        </Column>
-        <Column style={{ textAlign: "right" as const }}>
-          <Text style={{ ...emailStyles.value, fontWeight: "800", margin: 0 }}>
-            {kr(total)}
-          </Text>
-        </Column>
-      </Row>
+      </Section>
 
       <Text style={{ ...emailStyles.text, marginTop: "24px" }}>
-        Har du spørsmål om bestillingen, er det bare å svare på denne e-posten.
+        {content?.footer ||
+          "Har du spørsmål om bestillingen, er det bare å svare på denne e-posten."}
       </Text>
     </EmailShell>
   );
 }
 
-const summary = { margin: "0 0 4px" };
+const pdfCallout = {
+  backgroundColor: brand.panel,
+  borderRadius: "14px",
+  borderLeft: `3px solid ${brand.saffron}`,
+  padding: "14px 18px",
+  margin: "0 0 20px",
+};
+
+const pdfCalloutText = {
+  color: brand.ink,
+  fontSize: "15px",
+  lineHeight: "23px",
+  fontWeight: "600",
+  margin: 0,
+};
+
+const itemsPanel = {
+  backgroundColor: brand.bg,
+  borderRadius: "14px",
+  border: `1px solid ${brand.border}`,
+  padding: "18px 20px",
+  margin: "4px 0 0",
+};
 
 const lineName = {
   color: brand.ink,
@@ -112,5 +154,25 @@ const linePrice = {
   fontSize: "16px",
   lineHeight: "22px",
   fontWeight: "600",
+  margin: 0,
+};
+
+const totalRule = {
+  borderColor: brand.saffron,
+  borderTopWidth: "2px",
+  margin: "14px 0 12px",
+};
+
+const totalLabel = {
+  color: brand.ink,
+  fontSize: "17px",
+  fontWeight: "800",
+  margin: 0,
+};
+
+const totalValue = {
+  color: brand.ink,
+  fontSize: "20px",
+  fontWeight: "800",
   margin: 0,
 };

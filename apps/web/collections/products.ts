@@ -158,6 +158,17 @@ export const Products: CollectionConfig = {
       ],
     },
     {
+      name: "pdfFile",
+      type: "upload",
+      relationTo: "media",
+      label: "PDF-fil (leveres på e-post)",
+      admin: {
+        description:
+          "Selve PDF-en kunden kjøper. Legges automatisk ved ordrebekreftelses-eposten når produktet kjøpes.",
+        condition: (data) => data?.type === "pdf",
+      },
+    },
+    {
       name: "price",
       type: "number",
       required: true,

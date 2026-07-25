@@ -7,7 +7,7 @@ import type Stripe from "stripe";
 
 export async function POST(req: NextRequest) {
   try {
-    const { items, couponCode } = await req.json();
+    const { items, couponCode, newsletterOptIn } = await req.json();
 
     // Try to get logged-in user (optional — guests can buy products too)
     const authSession = await getSessionWithMembership(req);
@@ -153,6 +153,7 @@ export async function POST(req: NextRequest) {
       ...(authSession && { customer_email: authSession.user.email }),
       metadata: {
         ...(cartMeta.length <= 500 && { cart: cartMeta }),
+        ...(newsletterOptIn === true && { newsletter: "1" }),
       },
       success_url: `${process.env.NEXT_PUBLIC_URL}/kvittering?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_URL}/handlekurv`,

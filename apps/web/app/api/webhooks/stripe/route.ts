@@ -5,8 +5,13 @@ import {
   mapSubscriptionStatus,
   syncSubscriptionToDrizzle,
 } from "@/lib/membership/sync-subscription";
+import { buildOrderEmailExtras } from "@/lib/order-email";
 import config from "@/payload.config";
-import { sendMemberWelcomeEmail, sendOrderConfirmation } from "@poynt/email";
+import {
+  sendMemberWelcomeEmail,
+  sendOrderConfirmation,
+  subscribeToNewsletter,
+} from "@poynt/email";
 import { db, eq } from "@poynt/planner-db";
 import { plannerUser, plannerWebhookEvent } from "@poynt/planner-db/schema";
 import { stripe } from "@poynt/stripe";
@@ -231,10 +236,27 @@ async function handleProductPurchase(session: Stripe.Checkout.Session) {
       items: orderItems.map(({ name: _name, ...item }) => item),
       total,
       status: "paid",
+      paymentProvider: "stripe",
+      newsletterOptIn: session.metadata?.newsletter === "1",
       stripeSessionId: session.id,
       stripePaymentIntentId: session.payment_intent as string,
     },
   });
+
+  // Aktivt samtykke fra utsjekken → meld på nyhetsbrevet. Aldri la en feil
+  // her velte ordreflyten.
+  if (session.metadata?.newsletter === "1") {
+    const result = await subscribeToNewsletter(customerEmail);
+    if (!result.success) {
+      console.error("Nyhetsbrev-påmelding feilet:", result.error);
+    }
+  }
+
+  // Admin-redigerte e-posttekster + PDF-vedlegg for kjøpte PDF-produkter
+  const extras = await buildOrderEmailExtras(
+    payload,
+    orderItems.map((item) => item.product)
+  );
 
   // Send branded bekreftelsesmail
   await sendOrderConfirmation({
@@ -248,6 +270,9 @@ async function handleProductPurchase(session: Stripe.Checkout.Session) {
       variant: item.variant,
     })),
     total,
+    subject: extras.subject,
+    content: extras.content,
+    attachments: extras.attachments,
   });
 
   console.log("Ordre oppretta:", order.id);
