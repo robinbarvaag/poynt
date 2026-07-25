@@ -41,7 +41,7 @@ export interface CartDrawerProps {
 }
 
 /**
- * Handlekurv-drawer: en `Sheet` med en trigger som «popper» (saffron-fylt med
+ * Handlekurv-drawer: en `Sheet` med en trigger som «popper» (accent-5/saffron-fylt med
  * teller) når den har varer, og rolig ghost-ikon når den er tom. Presentasjons-
  * only — varer, totalsum og handlinger sendes inn. Appen kobler på cart-storen.
  */
@@ -69,7 +69,7 @@ export function CartDrawer({
         <Button
           type="button"
           aria-label="Handlekurv"
-          variant={hasItems ? "saffron" : "ghost"}
+          variant={hasItems ? "accent-5" : "ghost"}
           size="sm"
           className={cn(
             "h-9 gap-2 rounded-full px-3.5",

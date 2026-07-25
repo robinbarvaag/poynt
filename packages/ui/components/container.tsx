@@ -57,9 +57,9 @@ const sectionVariants = cva("w-full", {
       primary: "bg-primary text-primary-foreground",
       accent: "bg-accent text-accent-foreground",
       secondary: "bg-secondary",
-      mint: "bg-mint",
-      saffron: "bg-saffron",
-      salmon: "bg-salmon text-foreground",
+      mint: "bg-accent-3",
+      saffron: "bg-accent-1",
+      salmon: "bg-accent-2 text-foreground",
     },
     // Tillatte seksjons-avstander — hold deg til disse for konsistent rytme.
     spacing: {
@@ -172,9 +172,9 @@ const panelVariants = cva(
     variants: {
       surface: {
         primary: "bg-primary text-primary-foreground",
-        saffron: "bg-saffron text-foreground",
-        salmon: "bg-salmon text-foreground",
-        mint: "bg-mint text-foreground",
+        saffron: "bg-accent-1 text-foreground",
+        salmon: "bg-accent-2 text-foreground",
+        mint: "bg-accent-3 text-foreground",
       },
     },
     defaultVariants: {

@@ -9,17 +9,17 @@ export type GuideHeroAccent = "primary" | "saffron" | "salmon" | "mint";
 
 const blobByAccent: Record<GuideHeroAccent, string> = {
   primary: "bg-primary/30",
-  saffron: "bg-saffron/40",
-  salmon: "bg-salmon/40",
-  mint: "bg-mint/50",
+  saffron: "bg-accent-1/40",
+  salmon: "bg-accent-2/40",
+  mint: "bg-accent-3/50",
 };
 
 // Merkevare-tro bakgrunnsgradient når guiden ennå ikke har et cover-bilde.
 const backdropByAccent: Record<GuideHeroAccent, string> = {
-  primary: "bg-gradient-to-br from-primary/25 via-mint/30 to-background",
-  saffron: "bg-gradient-to-br from-saffron/40 via-background to-mint/30",
-  salmon: "bg-gradient-to-br from-salmon/40 via-background to-saffron/25",
-  mint: "bg-gradient-to-br from-mint/50 via-background to-salmon/20",
+  primary: "bg-gradient-to-br from-primary/25 via-accent-3/30 to-background",
+  saffron: "bg-gradient-to-br from-accent-1/40 via-background to-accent-3/30",
+  salmon: "bg-gradient-to-br from-accent-2/40 via-background to-accent-1/25",
+  mint: "bg-gradient-to-br from-accent-3/50 via-background to-accent-2/20",
 };
 
 export interface GuideHeroProps {

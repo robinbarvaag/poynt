@@ -4,7 +4,7 @@ import { cn } from "../lib/utils";
 interface EyebrowProps extends ComponentProps<"span"> {
   /** Vis en marker-strek foran teksten (Steps/ContentMedia-stil). */
   marker?: boolean;
-  /** Ekstra klasser på marker-streken, typisk farge (f.eks. "bg-saffron"). */
+  /** Ekstra klasser på marker-streken, typisk farge (f.eks. "bg-accent-1"). */
   markerClassName?: string;
 }
 

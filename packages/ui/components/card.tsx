@@ -16,9 +16,9 @@ const cardVariants = cva(
     variants: {
       surface: {
         default: "bg-card text-card-foreground ring-1 ring-foreground/10",
-        saffron: "bg-saffron text-foreground",
-        salmon: "bg-salmon text-foreground",
-        mint: "bg-mint text-foreground",
+        saffron: "bg-accent-1 text-foreground",
+        salmon: "bg-accent-2 text-foreground",
+        mint: "bg-accent-3 text-foreground",
         primary: "bg-primary text-primary-foreground",
         ink: "bg-foreground text-background",
       },

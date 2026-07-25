@@ -93,9 +93,9 @@ export const PathCards: Block = {
           },
           options: [
             { label: "Lys (default)", value: "default" },
-            { label: "Saffron (gul)", value: "saffron" },
-            { label: "Salmon (rosa)", value: "salmon" },
-            { label: "Mint (grønn)", value: "mint" },
+            { label: "Aksent 1 (cream)", value: "saffron" },
+            { label: "Aksent 2 (rosa)", value: "salmon" },
+            { label: "Aksent 3 (mint)", value: "mint" },
             { label: "Primær (mørk grønn)", value: "primary" },
           ],
         },

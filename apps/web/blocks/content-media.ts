@@ -38,10 +38,10 @@ export const ContentMedia: Block = {
       label: "Aksentfarge (marker + blokk bak bildet)",
       defaultValue: "saffron",
       options: [
-        { label: "Saffron", value: "saffron" },
-        { label: "Salmon", value: "salmon" },
+        { label: "Aksent 1 (cream)", value: "saffron" },
+        { label: "Aksent 2 (rosa)", value: "salmon" },
         { label: "Grønn", value: "primary" },
-        { label: "Mint", value: "mint" },
+        { label: "Aksent 3 (mint)", value: "mint" },
       ],
     },
   ],

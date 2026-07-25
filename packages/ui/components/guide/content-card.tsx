@@ -16,17 +16,20 @@ export const CONTENT_FORMATS: Record<ContentFormat, FormatConfig> = {
   guide: {
     label: "Guide",
     icon: "compass",
-    fallback: "bg-gradient-to-br from-mint/70 via-mint/30 to-background",
+    fallback:
+      "bg-gradient-to-br from-accent-3/70 via-accent-3/30 to-background",
   },
   artikkel: {
     label: "Artikkel",
     icon: "newspaper",
-    fallback: "bg-gradient-to-br from-saffron/60 via-saffron/25 to-background",
+    fallback:
+      "bg-gradient-to-br from-accent-1/60 via-accent-1/25 to-background",
   },
   kurs: {
     label: "Kurs",
     icon: "graduation-cap",
-    fallback: "bg-gradient-to-br from-salmon/60 via-salmon/25 to-background",
+    fallback:
+      "bg-gradient-to-br from-accent-2/60 via-accent-2/25 to-background",
   },
   podkast: {
     label: "Podkast",

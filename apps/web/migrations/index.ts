@@ -29,6 +29,10 @@ import * as migration_20260722_003828 from './20260722_003828';
 import * as migration_20260722_010839_media_blur_data_url from './20260722_010839_media_blur_data_url';
 import * as migration_20260722_095544 from './20260722_095544';
 import * as migration_20260722_102057 from './20260722_102057';
+import * as migration_20260725_105106_product_story_fields from './20260725_105106_product_story_fields';
+import * as migration_20260725_113903_product_notice_title from './20260725_113903_product_notice_title';
+import * as migration_20260725_115656 from './20260725_115656';
+import * as migration_20260725_120900_bokmal_pdf_title from './20260725_120900_bokmal_pdf_title';
 
 export const migrations = [
   {
@@ -184,6 +188,26 @@ export const migrations = [
   {
     up: migration_20260722_102057.up,
     down: migration_20260722_102057.down,
-    name: '20260722_102057'
+    name: '20260722_102057',
+  },
+  {
+    up: migration_20260725_105106_product_story_fields.up,
+    down: migration_20260725_105106_product_story_fields.down,
+    name: '20260725_105106_product_story_fields',
+  },
+  {
+    up: migration_20260725_113903_product_notice_title.up,
+    down: migration_20260725_113903_product_notice_title.down,
+    name: '20260725_113903_product_notice_title',
+  },
+  {
+    up: migration_20260725_115656.up,
+    down: migration_20260725_115656.down,
+    name: '20260725_115656'
+  },
+  {
+    up: migration_20260725_120900_bokmal_pdf_title.up,
+    down: migration_20260725_120900_bokmal_pdf_title.down,
+    name: '20260725_120900_bokmal_pdf_title',
   },
 ];

@@ -26,9 +26,9 @@ const accents = [
     grad: "from-primary/[0.12] to-primary/[0.02]",
   },
   {
-    text: "text-salmon",
-    bar: "bg-salmon",
-    grad: "from-salmon/[0.16] to-salmon/[0.03]",
+    text: "text-accent-2",
+    bar: "bg-accent-2",
+    grad: "from-accent-2/[0.16] to-accent-2/[0.03]",
   },
   {
     text: "text-foreground",

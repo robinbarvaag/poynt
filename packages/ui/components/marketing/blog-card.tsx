@@ -38,8 +38,8 @@ const accentBySurface: Record<BlogSurface, string> = {
   saffron: "text-primary",
   salmon: "text-primary",
   mint: "text-primary",
-  primary: "text-saffron",
-  ink: "text-saffron",
+  primary: "text-accent-1",
+  ink: "text-accent-1",
 };
 
 function Eyebrow({

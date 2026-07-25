@@ -44,7 +44,7 @@ export function DownloadCard({
     >
       <span
         aria-hidden="true"
-        className="inline-flex size-12 shrink-0 items-center justify-center rounded-xl bg-saffron/40 text-2xl"
+        className="inline-flex size-12 shrink-0 items-center justify-center rounded-xl bg-accent-1/40 text-2xl"
       >
         {meta.icon}
       </span>

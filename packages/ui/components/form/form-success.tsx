@@ -41,18 +41,18 @@ const toneClasses: Record<
     wash: "from-primary/10",
   },
   mint: {
-    ring: "ring-mint/50",
-    bubble: "bg-mint/50",
+    ring: "ring-accent-3/50",
+    bubble: "bg-accent-3/50",
     icon: "text-primary",
-    glow: "bg-mint/40",
-    wash: "from-mint/25",
+    glow: "bg-accent-3/40",
+    wash: "from-accent-3/25",
   },
   saffron: {
-    ring: "ring-saffron/50",
-    bubble: "bg-saffron/25",
+    ring: "ring-accent-1/50",
+    bubble: "bg-accent-1/25",
     icon: "text-foreground",
-    glow: "bg-saffron/30",
-    wash: "from-saffron/20",
+    glow: "bg-accent-1/30",
+    wash: "from-accent-1/20",
   },
 };
 

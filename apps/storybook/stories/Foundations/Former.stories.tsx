@@ -104,9 +104,9 @@ export const PlayfulPalett: Story = {
   name: "Utvidet palett",
   render: () => (
     <div className="flex flex-wrap gap-6">
-      <Swatch bg="bg-salmon" name="salmon" />
-      <Swatch bg="bg-saffron" name="saffron" />
-      <Swatch bg="bg-mint" name="mint" />
+      <Swatch bg="bg-accent-2" name="salmon" />
+      <Swatch bg="bg-accent-1" name="saffron" />
+      <Swatch bg="bg-accent-3" name="mint" />
     </div>
   ),
 };
@@ -155,7 +155,7 @@ export const GridTekstur: Story = {
           </div>
         </div>
         {/* Grid på saffron */}
-        <div className="relative h-48 overflow-hidden rounded-3xl bg-saffron">
+        <div className="relative h-48 overflow-hidden rounded-3xl bg-accent-1">
           <GridPattern variant="grid" className="text-foreground/12" />
           <div className="relative z-10 flex h-full items-end p-5">
             <code className="text-foreground/70 text-xs">grid · saffron</code>
@@ -243,7 +243,7 @@ export const DrivendeBlob: Story = {
     <div className="relative h-80 overflow-hidden rounded-2xl border border-border bg-background">
       <DriftingBlob className="-left-10 -top-10 size-72 bg-primary/30" />
       <DriftingBlob
-        className="-bottom-16 right-0 size-80 bg-salmon/40"
+        className="-bottom-16 right-0 size-80 bg-accent-2/40"
         duration={22}
       />
       <div className="relative z-10 flex h-full items-center justify-center">

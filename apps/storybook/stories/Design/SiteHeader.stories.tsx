@@ -78,7 +78,7 @@ const mobileFooter = (
 
 function PageBackdrop() {
   return (
-    <div className="min-h-[200vh] bg-linear-to-b from-mint/40 via-background to-saffron/20 px-6 pt-28">
+    <div className="min-h-[200vh] bg-linear-to-b from-accent-3/40 via-background to-accent-1/20 px-6 pt-28">
       <div className="mx-auto max-w-2xl space-y-4">
         <h1 className="font-bold font-heading text-4xl">
           Scroll for glass-effekt

@@ -18,13 +18,13 @@ const badgeVariants = cva(
         destructive: "bg-destructive text-destructive-foreground",
         outline: "border border-border text-foreground",
         // Merkevare-toner — lekne, mettede pills
-        saffron: "bg-saffron text-foreground",
-        salmon: "bg-salmon text-foreground",
-        mint: "bg-mint text-foreground",
+        saffron: "bg-accent-1 text-foreground",
+        salmon: "bg-accent-2 text-foreground",
+        mint: "bg-accent-3 text-foreground",
         // Myke/tonale varianter — dempet flate, farget tekst
         "soft-primary": "bg-primary/12 text-primary",
-        "soft-saffron": "bg-saffron/40 text-foreground",
-        "soft-salmon": "bg-salmon/40 text-foreground",
+        "soft-saffron": "bg-accent-1/40 text-foreground",
+        "soft-salmon": "bg-accent-2/40 text-foreground",
         "soft-destructive": "bg-destructive/12 text-destructive",
       },
       size: {

@@ -32,12 +32,12 @@ import { SeoPreview as SeoPreview_ed93029457eb2f3e08b012fe21d95953 } from '../..
 import { StockFieldButton as StockFieldButton_e1d51fcd745605f9c32df95d9becf02c } from '../../../admin/components/media/stock-field-button'
 import { StockMediaPicker as StockMediaPicker_7d8c930913c9c09e14d244ff8c96b4e3 } from '../../../admin/components/media/stock-picker'
 import { GenerateAltButton as GenerateAltButton_040810ca926965e5b8a67fcc6e0594ab } from '../../../admin/components/media/generate-alt-button'
-import { FolderTableCell as FolderTableCell_ab83ff7e88da8d3530831f296ec4756a } from '@payloadcms/ui/rsc'
-import { FolderField as FolderField_ab83ff7e88da8d3530831f296ec4756a } from '@payloadcms/ui/rsc'
+import { FolderTableCell as FolderTableCell_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
+import { FolderField as FolderField_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 import { SendNewsletterPanel as SendNewsletterPanel_75d3fa918eb52ceef0f5f7d7e08ab991 } from '../../../admin/components/newsletters/send-newsletter-panel'
 import { BookmarkOgFetch as BookmarkOgFetch_62526a99516db3c8451d3b97a5d7d286 } from '../../../admin/components/guides/bookmark-og-fetch'
 import { LinkToDoc as LinkToDoc_2e9be70cd13299dd4a11a5bd739a5a3c } from '@payloadcms/plugin-stripe/client'
-import { FolderTypeField as FolderTypeField_3817bf644402e67bfe6577f60ef982de } from '@payloadcms/ui'
+import { FolderTypeField as FolderTypeField_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
 import { LinkRowLabel as LinkRowLabel_f0fd4bee3885f2a3c8ca119ef52b5ffe } from '../../../admin/components/row-labels'
 import { ColumnRowLabel as ColumnRowLabel_f0fd4bee3885f2a3c8ca119ef52b5ffe } from '../../../admin/components/row-labels'
 import { OnPoyntNavGroup as OnPoyntNavGroup_cbdd0274d832c585cca0ce893b25cc1e } from '../../../admin/components/on-poynt-nav-group'
@@ -51,8 +51,9 @@ import { MembersListView as MembersListView_1c40f164a24fb9e841d3097dd58f8371 } f
 import { MemberDetailView as MemberDetailView_dd13572451bb48f4b5e68a05e41ae812 } from '../../../admin/views/members/detail'
 import { IndustriesListView as IndustriesListView_2ad79ff1a29ece0a9f161db8e2982cd0 } from '../../../admin/views/industries/list'
 import { PromptsListView as PromptsListView_3426185fdff8e8163926076d35efaa6d } from '../../../admin/views/prompts/list'
-import { CollectionCards as CollectionCards_ab83ff7e88da8d3530831f296ec4756a } from '@payloadcms/ui/rsc'
+import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
+/** @type import('payload').ImportMap */
 export const importMap = {
   "/admin/components/content-guidelines#ContentGuidelines": ContentGuidelines_9ae5c77b7a1770263112618b25a6d9d5,
   "/admin/components/composition-check#CompositionCheck": CompositionCheck_14bb3c299dcfc9f12ef8a1fd0256d3ab,
@@ -88,12 +89,12 @@ export const importMap = {
   "/admin/components/media/stock-field-button#StockFieldButton": StockFieldButton_e1d51fcd745605f9c32df95d9becf02c,
   "/admin/components/media/stock-picker#StockMediaPicker": StockMediaPicker_7d8c930913c9c09e14d244ff8c96b4e3,
   "/admin/components/media/generate-alt-button#GenerateAltButton": GenerateAltButton_040810ca926965e5b8a67fcc6e0594ab,
-  "@payloadcms/ui/rsc#FolderTableCell": FolderTableCell_ab83ff7e88da8d3530831f296ec4756a,
-  "@payloadcms/ui/rsc#FolderField": FolderField_ab83ff7e88da8d3530831f296ec4756a,
+  "@payloadcms/next/rsc#FolderTableCell": FolderTableCell_f9c02e79a4aed9a3924487c0cd4cafb1,
+  "@payloadcms/next/rsc#FolderField": FolderField_f9c02e79a4aed9a3924487c0cd4cafb1,
   "/admin/components/newsletters/send-newsletter-panel#SendNewsletterPanel": SendNewsletterPanel_75d3fa918eb52ceef0f5f7d7e08ab991,
   "/admin/components/guides/bookmark-og-fetch#BookmarkOgFetch": BookmarkOgFetch_62526a99516db3c8451d3b97a5d7d286,
   "@payloadcms/plugin-stripe/client#LinkToDoc": LinkToDoc_2e9be70cd13299dd4a11a5bd739a5a3c,
-  "@payloadcms/ui#FolderTypeField": FolderTypeField_3817bf644402e67bfe6577f60ef982de,
+  "@payloadcms/next/client#FolderTypeField": FolderTypeField_2b8867833a34864a02ddf429b0728a40,
   "/admin/components/row-labels#LinkRowLabel": LinkRowLabel_f0fd4bee3885f2a3c8ca119ef52b5ffe,
   "/admin/components/row-labels#ColumnRowLabel": ColumnRowLabel_f0fd4bee3885f2a3c8ca119ef52b5ffe,
   "/admin/components/on-poynt-nav-group#OnPoyntNavGroup": OnPoyntNavGroup_cbdd0274d832c585cca0ce893b25cc1e,
@@ -107,5 +108,5 @@ export const importMap = {
   "/admin/views/members/detail#MemberDetailView": MemberDetailView_dd13572451bb48f4b5e68a05e41ae812,
   "/admin/views/industries/list#IndustriesListView": IndustriesListView_2ad79ff1a29ece0a9f161db8e2982cd0,
   "/admin/views/prompts/list#PromptsListView": PromptsListView_3426185fdff8e8163926076d35efaa6d,
-  "@payloadcms/ui/rsc#CollectionCards": CollectionCards_ab83ff7e88da8d3530831f296ec4756a
+  "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

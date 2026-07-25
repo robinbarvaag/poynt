@@ -47,14 +47,16 @@
   /* Aksent-flater fra sekundærpaletten — hver med en lesbar tekstfarge.
      Gir par-tokens bg-accent-1 / text-accent-1-foreground osv. (de bare
      bg-saffron/-salmon-utilitiene mangler en definert tekstfarge). */
-  --accent-1: #eac435; /* Saffron */
+  --accent-1: #dee5b3; /* Cream */
   --accent-1-foreground: #004029; /* Forrest Green */
-  --accent-2: #ff99ad; /* Salmon Pink */
+  --accent-2: #ffd6de; /* Mimi Pink */
   --accent-2-foreground: #004029; /* Forrest Green */
   --accent-3: #abe3e3; /* Celeste */
   --accent-3-foreground: #004029; /* Forrest Green */
   --accent-4: #dee5b3; /* Cream */
   --accent-4-foreground: #004029; /* Forrest Green */
+  --accent-5: #eac435; /* Saffron — reservert for oppmerksomhets-CTA (handlekurv) */
+  --accent-5-foreground: #004029; /* Forrest Green */
 
   --chart-1: #29664f; /* Castelton */
   --chart-2: #eac435; /* Saffron */
@@ -118,6 +120,8 @@
   --color-accent-3-foreground: var(--accent-3-foreground);
   --color-accent-4: var(--accent-4);
   --color-accent-4-foreground: var(--accent-4-foreground);
+  --color-accent-5: var(--accent-5);
+  --color-accent-5-foreground: var(--accent-5-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);

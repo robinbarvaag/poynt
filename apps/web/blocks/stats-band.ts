@@ -53,8 +53,8 @@ export const StatsBand: Block = {
       defaultValue: "primary",
       options: [
         { label: "Grønn", value: "primary" },
-        { label: "Salmon", value: "salmon" },
-        { label: "Saffron", value: "saffron" },
+        { label: "Aksent 2 (rosa)", value: "salmon" },
+        { label: "Aksent 1 (cream)", value: "saffron" },
       ],
       admin: {
         condition: (_data, siblingData) => siblingData?.layout !== "split",

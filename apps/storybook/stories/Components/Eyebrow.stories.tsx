@@ -31,7 +31,7 @@ export const Farger: Story = {
     <div className="flex flex-col gap-4">
       <Eyebrow className="text-primary">Primary</Eyebrow>
       <Eyebrow>Dempet (default)</Eyebrow>
-      <Eyebrow className="text-salmon">Salmon</Eyebrow>
+      <Eyebrow className="text-accent-2">Salmon</Eyebrow>
     </div>
   ),
 };
@@ -43,7 +43,7 @@ export const MedMarker: Story = {
       <Eyebrow marker markerClassName="bg-primary">
         Steg 01
       </Eyebrow>
-      <Eyebrow marker markerClassName="bg-salmon">
+      <Eyebrow marker markerClassName="bg-accent-2">
         Steg 02
       </Eyebrow>
       <Eyebrow marker markerClassName="bg-foreground">

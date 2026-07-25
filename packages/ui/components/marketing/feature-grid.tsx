@@ -58,7 +58,7 @@ const themes = [
     surface: "primary",
     rule: "border-primary-foreground/25",
     muted: "text-primary-foreground/75",
-    accent: "text-saffron",
+    accent: "text-accent-1",
   },
 ] as const;
 

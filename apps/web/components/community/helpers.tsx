@@ -64,10 +64,10 @@ export function formatSize(bytes: number): string {
 
 // Faste, fargerike avatar-flater fra merkepaletten — deterministisk per id.
 const AVATAR_COLORS = [
-  "bg-saffron text-foreground",
-  "bg-salmon text-foreground",
-  "bg-mint text-foreground",
-  "bg-cream text-foreground",
+  "bg-accent-1 text-foreground",
+  "bg-accent-2 text-foreground",
+  "bg-accent-3 text-foreground",
+  "bg-accent-4 text-foreground",
   "bg-yellow-green text-foreground",
   "bg-bright-pink text-foreground",
 ];

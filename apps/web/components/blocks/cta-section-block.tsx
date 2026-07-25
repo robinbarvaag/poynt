@@ -125,9 +125,9 @@ export function CtaSectionBlock({
             fade
             className="text-primary-foreground/15"
           />
-          <DriftingBlob className="-left-16 -top-12 size-80 bg-mint/15" />
+          <DriftingBlob className="-left-16 -top-12 size-80 bg-accent-3/15" />
           <DriftingBlob
-            className="-bottom-20 -right-12 size-96 bg-saffron/10"
+            className="-bottom-20 -right-12 size-96 bg-accent-1/10"
             duration={24}
           />
           <div className="relative z-10">{content}</div>

@@ -37,21 +37,25 @@ const SURFACE: Record<
   StageSurface,
   { cap: string; node: string; ring: string }
 > = {
-  mint: { cap: "bg-mint", node: "bg-mint text-foreground", ring: "ring-mint" },
+  mint: {
+    cap: "bg-accent-3",
+    node: "bg-accent-3 text-foreground",
+    ring: "ring-accent-3",
+  },
   cream: {
-    cap: "bg-cream",
-    node: "bg-cream text-foreground",
-    ring: "ring-cream",
+    cap: "bg-accent-4",
+    node: "bg-accent-4 text-foreground",
+    ring: "ring-accent-4",
   },
   saffron: {
-    cap: "bg-saffron",
-    node: "bg-saffron text-foreground",
-    ring: "ring-saffron",
+    cap: "bg-accent-1",
+    node: "bg-accent-1 text-foreground",
+    ring: "ring-accent-1",
   },
   salmon: {
-    cap: "bg-salmon",
-    node: "bg-salmon text-foreground",
-    ring: "ring-salmon",
+    cap: "bg-accent-2",
+    node: "bg-accent-2 text-foreground",
+    ring: "ring-accent-2",
   },
   primary: {
     cap: "bg-primary",

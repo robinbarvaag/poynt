@@ -18,9 +18,12 @@ const buttonVariants = cva(
         default:
           "bg-primary text-primary-foreground shadow-sm hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-md",
         saffron:
-          "bg-saffron text-foreground shadow-sm hover:-translate-y-0.5 hover:shadow-md hover:brightness-[0.97]",
+          "bg-accent-1 text-foreground shadow-sm hover:-translate-y-0.5 hover:shadow-md hover:brightness-[0.97]",
         salmon:
-          "bg-salmon text-foreground shadow-sm hover:-translate-y-0.5 hover:shadow-md hover:brightness-[0.97]",
+          "bg-accent-2 text-foreground shadow-sm hover:-translate-y-0.5 hover:shadow-md hover:brightness-[0.97]",
+        // Saffron-gul oppmerksomhets-CTA — reservert for handlekurv-triggeren.
+        "accent-5":
+          "bg-accent-5 text-accent-5-foreground shadow-sm hover:-translate-y-0.5 hover:shadow-md hover:brightness-[0.97]",
         ink: "bg-foreground text-background shadow-sm hover:-translate-y-0.5 hover:bg-foreground/90 hover:shadow-md",
         // Nøytral emfase-stige: outline (medium) og ghost (lav).
         outline:

@@ -14,9 +14,9 @@ export interface PullQuoteProps {
 
 const barByAccent: Record<PullQuoteAccent, string> = {
   primary: "bg-primary",
-  saffron: "bg-saffron",
-  salmon: "bg-salmon",
-  mint: "bg-mint",
+  saffron: "bg-accent-1",
+  salmon: "bg-accent-2",
+  mint: "bg-accent-3",
 };
 
 /**

@@ -92,7 +92,7 @@ export function SectionRail({
                       isActive
                         ? "bg-primary"
                         : isDone
-                          ? "bg-mint"
+                          ? "bg-accent-3"
                           : "bg-foreground/25"
                     )}
                   />
@@ -103,7 +103,7 @@ export function SectionRail({
                       isActive
                         ? "bg-primary text-primary-foreground ring-primary"
                         : isDone
-                          ? "bg-mint text-foreground ring-transparent"
+                          ? "bg-accent-3 text-foreground ring-transparent"
                           : "bg-background text-muted-foreground ring-foreground/15"
                     )}
                   >

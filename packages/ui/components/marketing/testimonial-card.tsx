@@ -63,7 +63,7 @@ function StarRating({
           viewBox="0 0 24 24"
           className={cn(
             "size-4",
-            star <= rating ? "fill-saffron text-saffron" : emptyClassName
+            star <= rating ? "fill-accent-1 text-accent-1" : emptyClassName
           )}
           fill={star <= rating ? "currentColor" : "none"}
           stroke="currentColor"

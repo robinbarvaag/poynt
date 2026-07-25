@@ -140,9 +140,10 @@ export interface Config {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
   };
   locale: null;
-  user: User & {
-    collection: 'users';
+  widgets: {
+    collections: CollectionsWidget;
   };
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -731,7 +732,7 @@ export interface Product {
   slug: string;
   type: 'product' | 'course' | 'pdf' | 'bundle' | 'membership';
   /**
-   * Antal månader mellom kvar fakturering (t.d. 1, 3, 6, 12)
+   * Antall måneder mellom hver fakturering (f.eks. 1, 3, 6, 12)
    */
   recurringInterval?: number | null;
   membershipTier?: ('community' | 'community_ai') | null;
@@ -739,6 +740,10 @@ export interface Product {
    * Vises i produktoversikter og som meta-beskrivelse
    */
   shortDescription?: string | null;
+  /**
+   * Et par setninger mer enn den korte – vises som ingress over «historie»-seksjonene (bakside, sitater, smakebit) på produktsiden
+   */
+  mediumDescription?: string | null;
   /**
    * Full produktbeskrivelse som vises på produktsiden
    */
@@ -757,6 +762,79 @@ export interface Product {
     };
     [k: string]: unknown;
   } | null;
+  backCover?: {
+    /**
+     * Gjerne et helt vanlig foto – litt skjevt og ekte er hele poenget 📸
+     */
+    image?: (number | null) | Media;
+    /**
+     * Teksten som blir lagt oppå bildet som en håndskrevet lapp
+     */
+    text?: string | null;
+    /**
+     * Morsom liten bildetekst under, f.eks. «Ja, dette er faktisk baksiden av boka»
+     */
+    note?: string | null;
+  };
+  /**
+   * Korte sitater fra lesere/kunder som vises som lapper på produktsiden
+   */
+  readerQuotes?:
+    | {
+        quote: string;
+        name?: string | null;
+        /**
+         * F.eks. «mamma til to» eller «lærer i barneskolen»
+         */
+        detail?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  pdfPreview?: {
+    file?: (number | null) | Media;
+    title?: string | null;
+    /**
+     * Kort tekst over PDF-visningen, f.eks. «Bla gjennom innledningen, innholdslisten og et par sider»
+     */
+    description?: string | null;
+  };
+  /**
+   * Overskriften over videoseksjonen på produktsiden
+   */
+  videosTitle?: string | null;
+  /**
+   * Valgfri kort tekst under overskriften
+   */
+  videosIntro?: string | null;
+  videos?:
+    | {
+        title?: string | null;
+        source?: ('embed' | 'upload') | null;
+        /**
+         * YouTube-, Vimeo- eller Loom-lenke
+         */
+        embedUrl?: string | null;
+        /**
+         * Last opp en MP4- eller WebM-fil.
+         */
+        videoFile?: (number | null) | Media;
+        /**
+         * Stillbilde som vises før avspilling starter (valgfri).
+         */
+        poster?: (number | null) | Media;
+        /**
+         * Starter når videoen kommer i visning. Krever «Uten lyd».
+         */
+        autoplay?: boolean | null;
+        muted?: boolean | null;
+        loop?: boolean | null;
+        /**
+         * Skru av for en stille bakgrunns-/loop-video uten avspillerknapper.
+         */
+        showControls?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
   /**
    * Hovedbilde som vises i oversikter og øverst på produktsiden
    */
@@ -780,21 +858,25 @@ export interface Product {
    */
   compareAtPrice?: number | null;
   /**
-   * Liten merkelapp som vises på produktkort og produktsiden (t.d. «Forhåndssalg»)
+   * Liten merkelapp som vises på produktkort og produktsiden (f.eks. «Forhåndssalg»)
    */
   statusBadge?: ('none' | 'new' | 'presale' | 'soldout' | 'custom') | null;
   statusBadgeLabel?: string | null;
   /**
-   * Valgfri melding som vises tydeleg på produktsiden (t.d. «NB! Boka kjem i oktober 2026 – dette er forhåndssal»)
+   * Kort overskrift for merknaden, f.eks. «Forhåndssalg» eller «Godt å vite». Vises på linje med ikonet, med selve merknaden under.
+   */
+  noticeTitle?: string | null;
+  /**
+   * Valgfri melding som vises tydelig på produktsiden (f.eks. «NB! Boka kommer i oktober 2026 – dette er forhåndssalg»)
    */
   notice?: string | null;
   /**
-   * Korte salgbare punkt (t.d. «Gratis frakt», «Foredrag ved 10+ bøker») som poppast fram rett ved kjøpsknappen
+   * Korte salgbare punkter (f.eks. «Gratis frakt», «Foredrag ved 10+ bøker») som løftes frem rett ved kjøpsknappen
    */
   highlights?:
     | {
         /**
-         * Valgfri emoji, t.d. 🚚 eller 🎤
+         * Valgfri emoji, f.eks. 🚚 eller 🎤
          */
         icon?: string | null;
         text: string;
@@ -802,28 +884,28 @@ export interface Product {
       }[]
     | null;
   /**
-   * Vis ein antal-veljar på produktsiden. Lat stå av for digitale produkt der ein berre treng éin.
+   * Vis en antall-velger på produktsiden. La stå av for digitale produkter der man bare trenger én.
    */
   allowQuantity?: boolean | null;
   /**
-   * T.d. «Signert?». Lat stå tom om produktet ikkje har variantar.
+   * F.eks. «Signert?». La stå tom om produktet ikke har varianter.
    */
   variantLabel?: string | null;
   /**
-   * Vala kunden kan velje mellom (t.d. Ja / Nei).
+   * Valgene kunden kan velge mellom (f.eks. Ja / Nei).
    */
   variantOptions?:
     | {
         label: string;
         /**
-         * Valfritt – legg til (eller trekk frå, med minus) basisprisen for dette valet. Lat stå tom for same pris.
+         * Valgfritt – legg til (eller trekk fra, med minus) på basisprisen for dette valget. La stå tom for samme pris.
          */
         priceDelta?: number | null;
         id?: string | null;
       }[]
     | null;
   /**
-   * Medlemskap kjøpes ikkje direkte – knappen «Søk om medlemskap» lenkjer hit
+   * Medlemskap kjøpes ikke direkte – knappen «Søk om medlemskap» lenker hit
    */
   applyUrl?: string | null;
   /**
@@ -1153,9 +1235,6 @@ export interface Form {
       )[]
     | null;
   submitButtonLabel?: string | null;
-  /**
-   * Choose whether to display an on-page message or redirect to a different page after they submit the form.
-   */
   confirmationType?: ('message' | 'redirect') | null;
   confirmationMessage?: {
     root: {
@@ -1175,9 +1254,6 @@ export interface Form {
   redirect?: {
     url: string;
   };
-  /**
-   * Send custom emails when the form submits. Use comma separated lists to send the same email to multiple recipients. To reference a value from this form, wrap that field's name with double curly brackets, i.e. {{firstName}}. You can use a wildcard {{*}} to output all data and {{*:table}} to format it as an HTML table in the email.
-   */
   emails?:
     | {
         emailTo?: string | null;
@@ -1186,9 +1262,6 @@ export interface Form {
         replyTo?: string | null;
         emailFrom?: string | null;
         subject: string;
-        /**
-         * Enter the message that should be sent in this email.
-         */
         message?: {
           root: {
             type: string;
@@ -1335,6 +1408,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * Tidløst salgsbevis om ÉN kunde: utfordringen → hva vi gjorde → resultatet. Vises på /kundehistorier og lenkes fra salgssidene. Fagstoff, tips og nyheter hører hjemme i Blogginnlegg.
@@ -3075,7 +3149,46 @@ export interface ProductsSelect<T extends boolean = true> {
   recurringInterval?: T;
   membershipTier?: T;
   shortDescription?: T;
+  mediumDescription?: T;
   description?: T;
+  backCover?:
+    | T
+    | {
+        image?: T;
+        text?: T;
+        note?: T;
+      };
+  readerQuotes?:
+    | T
+    | {
+        quote?: T;
+        name?: T;
+        detail?: T;
+        id?: T;
+      };
+  pdfPreview?:
+    | T
+    | {
+        file?: T;
+        title?: T;
+        description?: T;
+      };
+  videosTitle?: T;
+  videosIntro?: T;
+  videos?:
+    | T
+    | {
+        title?: T;
+        source?: T;
+        embedUrl?: T;
+        videoFile?: T;
+        poster?: T;
+        autoplay?: T;
+        muted?: T;
+        loop?: T;
+        showControls?: T;
+        id?: T;
+      };
   featuredImage?: T;
   gallery?:
     | T
@@ -3088,6 +3201,7 @@ export interface ProductsSelect<T extends boolean = true> {
   compareAtPrice?: T;
   statusBadge?: T;
   statusBadgeLabel?: T;
+  noticeTitle?: T;
   notice?: T;
   highlights?:
     | T
@@ -3999,6 +4113,16 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

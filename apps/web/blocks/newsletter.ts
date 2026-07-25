@@ -21,8 +21,8 @@ export const Newsletter: Block = {
       defaultValue: "primary",
       options: [
         { label: "Grønn", value: "primary" },
-        { label: "Saffron", value: "saffron" },
-        { label: "Salmon", value: "salmon" },
+        { label: "Aksent 1 (cream)", value: "saffron" },
+        { label: "Aksent 2 (rosa)", value: "salmon" },
       ],
     },
   ],

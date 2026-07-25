@@ -12,9 +12,9 @@ export const GuideCallout: Block = {
       label: "Farge",
       defaultValue: "mint",
       options: [
-        { label: "Mint", value: "mint" },
-        { label: "Saffron", value: "saffron" },
-        { label: "Salmon", value: "salmon" },
+        { label: "Aksent 3 (mint)", value: "mint" },
+        { label: "Aksent 1 (cream)", value: "saffron" },
+        { label: "Aksent 2 (rosa)", value: "salmon" },
         { label: "Grønn", value: "primary" },
         { label: "Mørk", value: "ink" },
       ],

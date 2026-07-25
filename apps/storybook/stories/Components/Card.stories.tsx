@@ -69,7 +69,7 @@ const surfaceCards = [
   },
   {
     surface: "primary",
-    accent: "text-saffron",
+    accent: "text-accent-1",
     n: "04",
     title: "Et fellesskap",
     body: "Del, få tilbakemelding og voks sammen med andre på samme reise.",
@@ -77,7 +77,7 @@ const surfaceCards = [
   },
   {
     surface: "ink",
-    accent: "text-saffron",
+    accent: "text-accent-1",
     n: "05",
     title: "Maler i bøtter",
     body: "Kom i gang med fart fra dag én — ferdige oppsett du gjør til ditt.",

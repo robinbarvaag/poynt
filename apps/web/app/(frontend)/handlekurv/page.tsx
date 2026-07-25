@@ -129,7 +129,7 @@ export default function CartPage() {
         <div className="relative overflow-hidden rounded-3xl border border-border bg-card px-6 py-16 text-center">
           <FloatingShapes variant="subtle" />
           <div className="relative z-10 flex flex-col items-center">
-            <div className="mb-6 flex size-20 items-center justify-center rounded-full bg-mint/40">
+            <div className="mb-6 flex size-20 items-center justify-center rounded-full bg-accent-3/40">
               <ShoppingBag className="size-9 text-primary" />
             </div>
             <Heading
@@ -249,7 +249,7 @@ export default function CartPage() {
 
               {/* Rabattkode */}
               {coupon ? (
-                <div className="mt-4 flex items-center justify-between gap-2 rounded-xl bg-mint/30 px-3 py-2 text-sm">
+                <div className="mt-4 flex items-center justify-between gap-2 rounded-xl bg-accent-3/30 px-3 py-2 text-sm">
                   <span className="flex min-w-0 items-center gap-2 text-foreground">
                     <Tag className="size-4 shrink-0 text-primary" />
                     <span className="truncate font-medium">{coupon.code}</span>

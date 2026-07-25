@@ -127,7 +127,7 @@ export function ReadingNav({ items, partLabel, className }: ReadingNavProps) {
                             isActive
                               ? "bg-primary"
                               : isDone
-                                ? "bg-mint"
+                                ? "bg-accent-3"
                                 : "bg-foreground/25"
                           )}
                         />
@@ -138,7 +138,7 @@ export function ReadingNav({ items, partLabel, className }: ReadingNavProps) {
                             isActive
                               ? "bg-primary text-primary-foreground"
                               : isDone
-                                ? "bg-mint text-foreground"
+                                ? "bg-accent-3 text-foreground"
                                 : "bg-foreground/5 text-muted-foreground"
                           )}
                         >

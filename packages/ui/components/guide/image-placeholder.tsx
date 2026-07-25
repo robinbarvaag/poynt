@@ -22,7 +22,7 @@ export function ImagePlaceholder({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center gap-2 rounded-2xl border border-foreground/15 border-dashed bg-gradient-to-br from-mint/30 via-background to-saffron/20 p-6 text-center",
+        "flex flex-col items-center justify-center gap-2 rounded-2xl border border-foreground/15 border-dashed bg-gradient-to-br from-accent-3/30 via-background to-accent-1/20 p-6 text-center",
         fill ? "h-full w-full" : "aspect-[4/3] w-full",
         className
       )}

@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { uploadVideoFields } from "../blocks/guide-blocks/_shared";
 import { stockPickerAfterInput } from "../fields/stock-picker-after-input";
 import { generateSlug } from "../lib/generate-slug";
 
@@ -66,10 +67,11 @@ export const Products: CollectionConfig = {
     {
       name: "recurringInterval",
       type: "number",
-      label: "Faktureringsintervall (månader)",
+      label: "Faktureringsintervall (måneder)",
       admin: {
         position: "sidebar",
-        description: "Antal månader mellom kvar fakturering (t.d. 1, 3, 6, 12)",
+        description:
+          "Antall måneder mellom hver fakturering (f.eks. 1, 3, 6, 12)",
         condition: (data) => data?.type === "membership",
       },
     },
@@ -95,12 +97,201 @@ export const Products: CollectionConfig = {
       },
     },
     {
+      name: "mediumDescription",
+      type: "textarea",
+      label: "Mellomlang beskrivelse",
+      admin: {
+        description:
+          "Et par setninger mer enn den korte – vises som ingress over «historie»-seksjonene (bakside, sitater, smakebit) på produktsiden",
+      },
+    },
+    {
       name: "description",
       type: "richText",
       label: "Detaljert beskrivelse",
       admin: {
         description: "Full produktbeskrivelse som vises på produktsiden",
       },
+    },
+    {
+      type: "collapsible",
+      label: "Bakside",
+      admin: {
+        initCollapsed: true,
+        description:
+          "Last opp et ekte bilde av baksiden (f.eks. baksiden av boka), så legger vi teksten oppå som en lapp",
+      },
+      fields: [
+        {
+          name: "backCover",
+          type: "group",
+          label: false,
+          fields: [
+            {
+              name: "image",
+              type: "upload",
+              relationTo: "media",
+              label: "Bilde av baksiden",
+              admin: {
+                description:
+                  "Gjerne et helt vanlig foto – litt skjevt og ekte er hele poenget 📸",
+              },
+            },
+            {
+              name: "text",
+              type: "textarea",
+              label: "Baksidetekst",
+              admin: {
+                description:
+                  "Teksten som blir lagt oppå bildet som en håndskrevet lapp",
+              },
+            },
+            {
+              name: "note",
+              type: "text",
+              label: "Liten kommentar (valgfri)",
+              admin: {
+                description:
+                  "Morsom liten bildetekst under, f.eks. «Ja, dette er faktisk baksiden av boka»",
+              },
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: "readerQuotes",
+      type: "array",
+      label: "Sitater fra lesere",
+      admin: {
+        description:
+          "Korte sitater fra lesere/kunder som vises som lapper på produktsiden",
+      },
+      fields: [
+        {
+          name: "quote",
+          type: "textarea",
+          required: true,
+          label: "Sitat",
+        },
+        {
+          name: "name",
+          type: "text",
+          label: "Navn",
+        },
+        {
+          name: "detail",
+          type: "text",
+          label: "Detalj",
+          admin: {
+            description: "F.eks. «mamma til to» eller «lærer i barneskolen»",
+          },
+        },
+      ],
+    },
+    {
+      type: "collapsible",
+      label: "Smakebit (PDF)",
+      admin: {
+        initCollapsed: true,
+        description:
+          "Last opp en PDF (f.eks. 12 sider fra boka) som kunden kan bla i direkte på produktsiden",
+      },
+      fields: [
+        {
+          name: "pdfPreview",
+          type: "group",
+          label: false,
+          fields: [
+            {
+              name: "file",
+              type: "upload",
+              relationTo: "media",
+              label: "PDF-fil",
+              filterOptions: {
+                mimeType: { contains: "pdf" },
+              },
+            },
+            {
+              name: "title",
+              type: "text",
+              label: "Overskrift",
+              defaultValue: "Ta en titt inni",
+            },
+            {
+              name: "description",
+              type: "textarea",
+              label: "Ingress",
+              admin: {
+                description:
+                  "Kort tekst over PDF-visningen, f.eks. «Bla gjennom innledningen, innholdslisten og et par sider»",
+              },
+            },
+          ],
+        },
+      ],
+    },
+    {
+      type: "collapsible",
+      label: "Videoer",
+      admin: {
+        initCollapsed: true,
+        description:
+          "Video som vises på produktsiden – f.eks. Susanne som forteller hva du lærer. Lim inn lenke (YouTube/Vimeo) eller last opp fil.",
+      },
+      fields: [
+        {
+          name: "videosTitle",
+          type: "text",
+          label: "Overskrift",
+          defaultValue: "Se og hør",
+          admin: {
+            description: "Overskriften over videoseksjonen på produktsiden",
+          },
+        },
+        {
+          name: "videosIntro",
+          type: "textarea",
+          label: "Ingress",
+          admin: {
+            description: "Valgfri kort tekst under overskriften",
+          },
+        },
+        {
+          name: "videos",
+          type: "array",
+          label: "Videoer",
+          fields: [
+            {
+              name: "title",
+              type: "text",
+              label: "Tittel (valgfri)",
+            },
+            {
+              name: "source",
+              type: "select",
+              label: "Kilde",
+              defaultValue: "embed",
+              options: [
+                { label: "Lenke (YouTube/Vimeo)", value: "embed" },
+                { label: "Opplastet fil", value: "upload" },
+              ],
+            },
+            {
+              name: "embedUrl",
+              type: "text",
+              label: "Videolenke",
+              admin: {
+                description: "YouTube-, Vimeo- eller Loom-lenke",
+                condition: (_data, sibling) => sibling?.source !== "upload",
+              },
+            },
+            ...uploadVideoFields(
+              (_data, sibling) => sibling?.source === "upload"
+            ),
+          ],
+        },
+      ],
     },
     {
       name: "featuredImage",
@@ -170,7 +361,7 @@ export const Products: CollectionConfig = {
       ],
       admin: {
         description:
-          "Liten merkelapp som vises på produktkort og produktsiden (t.d. «Forhåndssalg»)",
+          "Liten merkelapp som vises på produktkort og produktsiden (f.eks. «Forhåndssalg»)",
       },
     },
     {
@@ -182,12 +373,21 @@ export const Products: CollectionConfig = {
       },
     },
     {
+      name: "noticeTitle",
+      type: "text",
+      label: "Merknad – tittel",
+      admin: {
+        description:
+          "Kort overskrift for merknaden, f.eks. «Forhåndssalg» eller «Godt å vite». Vises på linje med ikonet, med selve merknaden under.",
+      },
+    },
+    {
       name: "notice",
       type: "textarea",
       label: "Merknad / forhåndssalg-tekst",
       admin: {
         description:
-          "Valgfri melding som vises tydeleg på produktsiden (t.d. «NB! Boka kjem i oktober 2026 – dette er forhåndssal»)",
+          "Valgfri melding som vises tydelig på produktsiden (f.eks. «NB! Boka kommer i oktober 2026 – dette er forhåndssalg»)",
       },
     },
     {
@@ -196,7 +396,7 @@ export const Products: CollectionConfig = {
       label: "Salgspunkt",
       admin: {
         description:
-          "Korte salgbare punkt (t.d. «Gratis frakt», «Foredrag ved 10+ bøker») som poppast fram rett ved kjøpsknappen",
+          "Korte salgbare punkter (f.eks. «Gratis frakt», «Foredrag ved 10+ bøker») som løftes frem rett ved kjøpsknappen",
       },
       fields: [
         {
@@ -204,7 +404,7 @@ export const Products: CollectionConfig = {
           type: "text",
           label: "Ikon (emoji)",
           admin: {
-            description: "Valgfri emoji, t.d. 🚚 eller 🎤",
+            description: "Valgfri emoji, f.eks. 🚚 eller 🎤",
           },
         },
         {
@@ -219,11 +419,11 @@ export const Products: CollectionConfig = {
       name: "allowQuantity",
       type: "checkbox",
       defaultValue: false,
-      label: "Tillat fleire (antal-veljar)",
+      label: "Tillat flere (antall-velger)",
       admin: {
         position: "sidebar",
         description:
-          "Vis ein antal-veljar på produktsiden. Lat stå av for digitale produkt der ein berre treng éin.",
+          "Vis en antall-velger på produktsiden. La stå av for digitale produkter der man bare trenger én.",
       },
     },
     {
@@ -232,7 +432,7 @@ export const Products: CollectionConfig = {
       label: "Variant-spørsmål",
       admin: {
         description:
-          "T.d. «Signert?». Lat stå tom om produktet ikkje har variantar.",
+          "F.eks. «Signert?». La stå tom om produktet ikke har varianter.",
       },
     },
     {
@@ -240,7 +440,7 @@ export const Products: CollectionConfig = {
       type: "array",
       label: "Variant-valg",
       admin: {
-        description: "Vala kunden kan velje mellom (t.d. Ja / Nei).",
+        description: "Valgene kunden kan velge mellom (f.eks. Ja / Nei).",
         condition: (data) => Boolean(data?.variantLabel),
       },
       fields: [
@@ -256,7 +456,7 @@ export const Products: CollectionConfig = {
           label: "Prisdifferanse (kr)",
           admin: {
             description:
-              "Valfritt – legg til (eller trekk frå, med minus) basisprisen for dette valet. Lat stå tom for same pris.",
+              "Valgfritt – legg til (eller trekk fra, med minus) på basisprisen for dette valget. La stå tom for samme pris.",
           },
         },
       ],
@@ -269,7 +469,7 @@ export const Products: CollectionConfig = {
       admin: {
         position: "sidebar",
         description:
-          "Medlemskap kjøpes ikkje direkte – knappen «Søk om medlemskap» lenkjer hit",
+          "Medlemskap kjøpes ikke direkte – knappen «Søk om medlemskap» lenker hit",
         condition: (data) => data?.type === "membership",
       },
     },

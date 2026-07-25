@@ -9,6 +9,7 @@ import type { Metadata } from "next";
 import { cacheLife, cacheTag } from "next/cache";
 import { notFound } from "next/navigation";
 import { type Where, getPayload } from "payload";
+import { Suspense } from "react";
 
 interface ProductPageProps {
   params: Promise<{
@@ -93,7 +94,10 @@ export async function generateMetadata({
   });
 }
 
-export default async function ProductPage({ params }: ProductPageProps) {
+// Alt innholdet avheng av `slug`, så params leses her – bak Suspense-grensa i
+// default-exporten. Då kan Next servere eit umiddelbart skall (Instant
+// Navigations med cacheComponents) og strøyme inn produktet.
+async function ProductPageContent({ params }: ProductPageProps) {
   const { slug } = await params;
   const data = await getProductPageData(slug);
 
@@ -133,6 +137,30 @@ export default async function ProductPage({ params }: ProductPageProps) {
         relatedProducts={relatedProducts}
       />
     </>
+  );
+}
+
+export default function ProductPage(props: ProductPageProps) {
+  return (
+    <Suspense
+      fallback={
+        <div className="mx-auto w-full max-w-7xl animate-pulse px-4 py-8 sm:px-6 lg:px-8">
+          <div className="mb-8 h-5 w-56 rounded-full bg-muted" />
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-16">
+            <div className="aspect-square w-full rounded-3xl bg-muted" />
+            <div className="space-y-4">
+              <div className="h-6 w-24 rounded-full bg-muted" />
+              <div className="h-10 w-3/4 rounded-2xl bg-muted" />
+              <div className="h-5 w-full rounded-full bg-muted" />
+              <div className="h-5 w-2/3 rounded-full bg-muted" />
+              <div className="h-12 w-40 rounded-2xl bg-muted" />
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <ProductPageContent {...props} />
+    </Suspense>
   );
 }
 

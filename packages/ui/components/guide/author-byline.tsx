@@ -40,7 +40,7 @@ export function AuthorByline({
     <div className={cn("flex items-center gap-3", className)}>
       <Avatar className={isSm ? "size-8" : "size-10"}>
         {avatar}
-        <AvatarFallback className="bg-mint/60 font-heading font-semibold text-foreground text-xs">
+        <AvatarFallback className="bg-accent-3/60 font-heading font-semibold text-foreground text-xs">
           {initials(name)}
         </AvatarFallback>
       </Avatar>

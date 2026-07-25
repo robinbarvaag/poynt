@@ -151,7 +151,7 @@ export default async function PostPage({ params }: PostPageProps) {
             {/* Lekent blob-pek bak bildet – same signatur som produktsida */}
             <span
               aria-hidden="true"
-              className="-top-5 -left-5 absolute size-32 rounded-[58%_42%_55%_45%/55%_48%_52%_45%] bg-saffron opacity-70 blur-[2px]"
+              className="-top-5 -left-5 absolute size-32 rounded-[58%_42%_55%_45%/55%_48%_52%_45%] bg-accent-1 opacity-70 blur-[2px]"
             />
             <div className="relative z-10 aspect-video w-full overflow-hidden rounded-3xl bg-muted shadow-sm">
               <PayloadImage

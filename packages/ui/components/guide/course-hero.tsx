@@ -7,9 +7,9 @@ export type CourseHeroSurface = "mint" | "saffron" | "salmon" | "default";
 
 const surfaceClasses: Record<CourseHeroSurface, string> = {
   default: "bg-card",
-  mint: "bg-mint/40",
-  saffron: "bg-saffron/35",
-  salmon: "bg-salmon/35",
+  mint: "bg-accent-3/40",
+  saffron: "bg-accent-1/35",
+  salmon: "bg-accent-2/35",
 };
 
 export interface CourseHeroProps {
@@ -56,7 +56,7 @@ export function CourseHero({
             {cover}
           </div>
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-salmon/60 via-salmon/25 to-background">
+          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-accent-2/60 via-accent-2/25 to-background">
             <Icon
               name="graduation-cap"
               className="size-20 text-foreground/15"

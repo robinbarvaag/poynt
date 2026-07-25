@@ -21,10 +21,10 @@ export interface ContentMediaProps {
 }
 
 const accents = {
-  saffron: { bar: "bg-saffron", block: "bg-saffron", marker: "bg-saffron" },
-  salmon: { bar: "bg-salmon", block: "bg-salmon", marker: "bg-salmon" },
+  saffron: { bar: "bg-accent-1", block: "bg-accent-1", marker: "bg-accent-1" },
+  salmon: { bar: "bg-accent-2", block: "bg-accent-2", marker: "bg-accent-2" },
   primary: { bar: "bg-primary", block: "bg-primary/15", marker: "bg-primary" },
-  mint: { bar: "bg-mint", block: "bg-mint", marker: "bg-primary" },
+  mint: { bar: "bg-accent-3", block: "bg-accent-3", marker: "bg-primary" },
 } as const;
 
 /**

@@ -11,9 +11,9 @@ export type ContentFeatureSurface = "default" | "mint" | "saffron" | "salmon";
 
 const surfaceClasses: Record<ContentFeatureSurface, string> = {
   default: "bg-card",
-  mint: "bg-mint/40",
-  saffron: "bg-saffron/35",
-  salmon: "bg-salmon/35",
+  mint: "bg-accent-3/40",
+  saffron: "bg-accent-1/35",
+  salmon: "bg-accent-2/35",
 };
 
 export interface ContentFeatureProps {

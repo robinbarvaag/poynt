@@ -102,7 +102,7 @@ export const ParallaxDekor: Story = {
       <div className="relative flex h-96 items-center justify-center overflow-hidden rounded-3xl border border-border bg-secondary">
         {/* Bakerst — driver mest, mest blur (lengst unna) */}
         <Parallax amount={90} className="absolute -left-10 -top-10">
-          <div className="size-56 rounded-full bg-saffron/40 blur-3xl" />
+          <div className="size-56 rounded-full bg-accent-1/40 blur-3xl" />
         </Parallax>
         {/* Midtlag */}
         <Parallax amount={50} className="absolute right-4 top-8">
@@ -110,7 +110,7 @@ export const ParallaxDekor: Story = {
         </Parallax>
         {/* Fremst — driver minst, skarpest (nærmest) */}
         <Parallax amount={24} className="absolute bottom-6 left-10">
-          <div className="size-20 rounded-full bg-salmon/70 blur-md" />
+          <div className="size-20 rounded-full bg-accent-2/70 blur-md" />
         </Parallax>
 
         <p className="relative z-10 font-bold font-heading text-2xl text-foreground">

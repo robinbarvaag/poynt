@@ -38,9 +38,9 @@ export function ImageFrame({
     <div className={cn("relative overflow-hidden bg-muted", className)}>
       {image ?? (
         <div aria-hidden="true" className="size-full">
-          <span className="absolute -top-[35%] -right-[8%] aspect-square w-[45%] rounded-full bg-mint/60" />
-          <span className="absolute -bottom-[40%] right-[18%] aspect-square w-[32%] rounded-full bg-salmon/45" />
-          <span className="absolute right-[-5%] bottom-[12%] aspect-square w-[19%] rounded-full bg-saffron/55" />
+          <span className="absolute -top-[35%] -right-[8%] aspect-square w-[45%] rounded-full bg-accent-3/60" />
+          <span className="absolute -bottom-[40%] right-[18%] aspect-square w-[32%] rounded-full bg-accent-2/45" />
+          <span className="absolute right-[-5%] bottom-[12%] aspect-square w-[19%] rounded-full bg-accent-1/55" />
         </div>
       )}
     </div>

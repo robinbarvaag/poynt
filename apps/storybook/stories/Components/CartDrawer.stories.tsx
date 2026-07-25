@@ -22,7 +22,7 @@ type Story = StoryObj<typeof meta>;
 export const MedProdukter: Story = {
   name: "Med produkter",
   render: () => (
-    <div className="min-h-[460px] bg-mint/30 p-8">
+    <div className="min-h-[460px] bg-accent-3/30 p-8">
       <CartDrawer
         defaultOpen
         count={3}
@@ -73,7 +73,7 @@ export const MedProdukter: Story = {
 
 export const Tom: Story = {
   render: () => (
-    <div className="min-h-[460px] bg-mint/30 p-8">
+    <div className="min-h-[460px] bg-accent-3/30 p-8">
       <CartDrawer
         defaultOpen
         count={0}

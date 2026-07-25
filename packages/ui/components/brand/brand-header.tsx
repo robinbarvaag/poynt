@@ -10,10 +10,10 @@ export type BrandHeaderSurface =
   | "ink";
 
 const surfaceClasses: Record<BrandHeaderSurface, string> = {
-  cream: "bg-cream text-foreground ring-foreground/10",
-  mint: "bg-mint/60 text-foreground ring-foreground/10",
-  saffron: "bg-saffron/50 text-foreground ring-foreground/10",
-  salmon: "bg-salmon/50 text-foreground ring-foreground/10",
+  cream: "bg-accent-4 text-foreground ring-foreground/10",
+  mint: "bg-accent-3/60 text-foreground ring-foreground/10",
+  saffron: "bg-accent-1/50 text-foreground ring-foreground/10",
+  salmon: "bg-accent-2/50 text-foreground ring-foreground/10",
   primary: "bg-primary text-primary-foreground ring-white/10",
   ink: "bg-foreground text-background ring-white/10",
 };

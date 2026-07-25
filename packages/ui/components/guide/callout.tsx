@@ -7,9 +7,9 @@ import { Reveal } from "../motion/reveal";
 export type CalloutTone = "mint" | "saffron" | "salmon" | "primary" | "ink";
 
 const toneClasses: Record<CalloutTone, string> = {
-  mint: "bg-mint/60 text-foreground ring-foreground/10",
-  saffron: "bg-saffron/50 text-foreground ring-foreground/10",
-  salmon: "bg-salmon/50 text-foreground ring-foreground/10",
+  mint: "bg-accent-3/60 text-foreground ring-foreground/10",
+  saffron: "bg-accent-1/50 text-foreground ring-foreground/10",
+  salmon: "bg-accent-2/50 text-foreground ring-foreground/10",
   primary: "bg-primary text-primary-foreground ring-white/10",
   ink: "bg-foreground text-background ring-white/10",
 };

@@ -64,7 +64,7 @@ export function Pricing({ eyebrow, title, intro, tiers }: PricingProps) {
           const muted = featured
             ? "text-primary-foreground/75"
             : "text-muted-foreground";
-          const marker = featured ? "bg-saffron" : "bg-primary";
+          const marker = featured ? "bg-accent-1" : "bg-primary";
           return (
             <Reveal key={tier.name} className="h-full">
               <div
@@ -92,7 +92,7 @@ export function Pricing({ eyebrow, title, intro, tiers }: PricingProps) {
                         className={cn(
                           "rounded-full px-3 py-1 font-semibold text-xs",
                           featured
-                            ? "bg-saffron text-foreground"
+                            ? "bg-accent-1 text-foreground"
                             : "bg-accent text-accent-foreground"
                         )}
                       >

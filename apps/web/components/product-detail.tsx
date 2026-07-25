@@ -5,6 +5,7 @@ import {
   PayloadImage,
   resolveMediaUrl,
 } from "@/components/payload-image";
+import { ProductStorySections } from "@/components/product/product-story-sections";
 import { PRODUCT_TYPE_LABELS, getProductBadge } from "@/lib/product";
 import { detailBreadcrumbs } from "@/lib/ui-text";
 import type { Product } from "@/payload-types";
@@ -15,6 +16,7 @@ import {
   Button,
   Container,
   Heading,
+  Lightbox,
   ProductGrid,
   type ProductGridItem,
   Select,
@@ -33,7 +35,7 @@ interface ProductDetailClientProps {
   relatedProducts?: ProductGridItem[];
 }
 
-// Status-merkelappens fargetone → Badge-variant på produktsida.
+// Status-merkelappens fargetone → Badge-variant på produktsiden.
 const badgeToneToVariant = {
   new: "saffron",
   presale: "salmon",
@@ -41,8 +43,8 @@ const badgeToneToVariant = {
   neutral: "outline",
 } as const;
 
-// Medlemskap kjøpes ikkje direkte – det krev ein søknad. Knappen lenkjer til
-// søknads-/kontaktsida (styrt av `applyUrl` på produktet, default «/kontakt»).
+// Medlemskap kjøpes ikke direkte – det krever en søknad. Knappen lenker til
+// søknads-/kontaktsiden (styrt av `applyUrl` på produktet, default «/kontakt»).
 function MembershipApplyButton({ product }: { product: Product }) {
   const applyUrl = product.applyUrl?.trim() || "/kontakt";
 
@@ -67,7 +69,7 @@ function ProductDetailClient({
   const badge = getProductBadge(product);
   const isSoldOut = product.statusBadge === "soldout";
 
-  // Variant (t.d. signert/usignert) – éin dimensjon per produkt.
+  // Variant (f.eks. signert/usignert) – én dimensjon per produkt.
   const variantOptions = product.variantOptions ?? [];
   const hasVariants =
     Boolean(product.variantLabel) && variantOptions.length > 0;
@@ -80,7 +82,7 @@ function ProductDetailClient({
   const priceDelta = selectedOption?.priceDelta ?? 0;
   const effectivePrice = product.price + priceDelta;
 
-  // Antal – kun for produkt som tillèt det (digitale: alltid 1).
+  // Antall – kun for produkter som tillater det (digitale: alltid 1).
   const allowQuantity = Boolean(product.allowQuantity);
   const [quantity, setQuantity] = useState(1);
   const maxQuantity = allowQuantity ? undefined : 1;
@@ -123,24 +125,32 @@ function ProductDetailClient({
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:items-start lg:gap-16">
-        {/* Bildet pinnes mens teksten til høgre scroller forbi – fyller luft
-            utan å gøyme brødteksten bak tabs. */}
-        <div className="space-y-4 lg:sticky lg:top-8 lg:self-start">
+        {/* Bildet pinnes mens teksten til høyre scroller forbi – fyller luft
+            uten å gjemme brødteksten bak tabs. */}
+        <div className="space-y-4 lg:sticky lg:top-20 lg:self-start">
           <div className="relative">
             {/* Lekent blob-pek bak bildet (INSPO/Steady-signaturen) */}
             <span
               aria-hidden="true"
-              className="-top-5 -left-5 absolute size-32 rounded-[58%_42%_55%_45%/55%_48%_52%_45%] bg-saffron opacity-70 blur-[2px]"
+              className="-top-5 -left-5 absolute size-32 rounded-[58%_42%_55%_45%/55%_48%_52%_45%] bg-accent-1 opacity-70 blur-[2px]"
             />
             <div className="relative z-10 aspect-square w-full overflow-hidden rounded-3xl bg-muted shadow-sm">
               {currentImage ? (
-                <PayloadImage
-                  media={currentImage.media}
+                <Lightbox
+                  src={resolveMediaUrl(currentImage.media)}
                   alt={currentImage.media.alt || product.name}
-                  fill
-                  className="object-cover"
-                  priority
-                />
+                  caption={currentImage.caption}
+                  tone="salmon"
+                  className="h-full"
+                >
+                  <PayloadImage
+                    media={currentImage.media}
+                    alt={currentImage.media.alt || product.name}
+                    fill
+                    className="object-cover"
+                    priority
+                  />
+                </Lightbox>
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center bg-primary/5">
                   <span className="text-6xl">📦</span>
@@ -148,7 +158,7 @@ function ProductDetailClient({
               )}
 
               {hasDiscount && (
-                <span className="absolute top-4 right-4 rounded-full bg-saffron px-4 py-1.5 font-semibold text-foreground text-sm shadow-sm">
+                <span className="absolute top-4 right-4 rounded-full bg-accent-1 px-4 py-1.5 font-semibold text-foreground text-sm shadow-sm">
                   Tilbud
                 </span>
               )}
@@ -235,29 +245,35 @@ function ProductDetailClient({
             <Text variant="muted" customStyles="mt-1">
               {product.type === "membership" && product.recurringInterval
                 ? product.recurringInterval === 1
-                  ? "per månad"
-                  : `kvar ${product.recurringInterval}. månad`
+                  ? "per måned"
+                  : `hver ${product.recurringInterval}. måned`
                 : "Inkl. mva"}
             </Text>
           </div>
 
-          {/* Forhåndssalg / merknad – lekent callout rett over kjøpsknappen */}
+          {/* Forhåndssalg / merknad – oppmerksomhets-callout (accent-5/saffron)
+              rett over kjøpsknappen: ikon + tittel på én linje, teksten under. */}
           {product.notice && (
-            <div className="flex items-start gap-3 rounded-3xl bg-saffron/30 p-5">
-              <span
-                aria-hidden="true"
-                className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full bg-saffron text-foreground"
-              >
-                <Info className="size-4" />
-              </span>
-              <Text customStyles="text-sm leading-relaxed">
+            <div className="rounded-3xl bg-accent-5/20 p-5">
+              <div className="flex items-center gap-3">
+                <span
+                  aria-hidden="true"
+                  className="flex size-7 shrink-0 items-center justify-center rounded-full bg-accent-5 text-accent-5-foreground"
+                >
+                  <Info className="size-4" />
+                </span>
+                <Text weight="semibold" customStyles="text-sm">
+                  {product.noticeTitle || "Godt å vite"}
+                </Text>
+              </div>
+              <Text customStyles="mt-2 pl-10 text-sm leading-relaxed">
                 {product.notice}
               </Text>
             </div>
           )}
 
           <div className="space-y-4 pt-6">
-            {/* Variant + antal – kun for kjøpbare produkt som har det */}
+            {/* Variant + antall – kun for kjøpbare produkter som har det */}
             {product.type !== "membership" &&
               !isSoldOut &&
               (hasVariants || allowQuantity) && (
@@ -294,7 +310,7 @@ function ProductDetailClient({
                   {allowQuantity && (
                     <div>
                       <Text weight="medium" customStyles="mb-2 text-sm">
-                        Antal
+                        Antall
                       </Text>
                       <div className="inline-flex items-center gap-1 rounded-full border border-border p-1">
                         <Button
@@ -315,7 +331,7 @@ function ProductDetailClient({
                           type="button"
                           variant="ghost"
                           size="icon"
-                          aria-label="Fleire"
+                          aria-label="Flere"
                           className="size-9 rounded-full"
                           onClick={() => setQuantity((q) => q + 1)}
                         >
@@ -357,8 +373,8 @@ function ProductDetailClient({
             )}
           </div>
 
-          {/* Salgspunkt – poppast fram rett under kjøpsknappen, ikkje gøymt i
-              brødteksten. Dynamisk liste frå produktet (emoji + kort tekst). */}
+          {/* Salgspunkter – løftes frem rett under kjøpsknappen, ikke gjemt i
+              brødteksten. Dynamisk liste fra produktet (emoji + kort tekst). */}
           {product.highlights && product.highlights.length > 0 && (
             <ul className="mt-5 grid gap-2.5">
               {product.highlights.map((highlight) => (
@@ -369,7 +385,7 @@ function ProductDetailClient({
                   {highlight.icon && (
                     <span
                       aria-hidden="true"
-                      className="flex size-9 shrink-0 items-center justify-center rounded-full bg-saffron/40 text-lg leading-none"
+                      className="flex size-9 shrink-0 items-center justify-center rounded-full bg-accent-1/40 text-lg leading-none"
                     >
                       {highlight.icon}
                     </span>
@@ -382,8 +398,8 @@ function ProductDetailClient({
             </ul>
           )}
 
-          {/* Brødtekst flyttar inn i høgre kolonne så han fyller plassen ved
-              sida av det sticky bildet i staden for å liggje langt nede. */}
+          {/* Brødteksten ligger i høyre kolonne så den fyller plassen ved
+              siden av det sticky bildet i stedet for å ligge langt nede. */}
           {product.description && (
             <div className="mt-10 border-t border-border pt-10">
               <Heading variant="h4" color="foreground" customStyles="mb-5">
@@ -396,6 +412,11 @@ function ProductDetailClient({
           )}
         </div>
       </div>
+
+      {/* Datadrevne «historie»-seksjoner: mellomlang beskrivelse, bakside,
+          lesersitater, PDF-smakebit og video. Vises i full bredde under den
+          delte topp-seksjonen – felles for alle produkttyper. */}
+      <ProductStorySections product={product} />
 
       {relatedProducts.length > 0 && (
         <div className="mt-16 pt-16 border-t border-border">

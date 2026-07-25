@@ -59,7 +59,7 @@ export function StepPager({
           className={cn(
             "inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-2.5 font-medium text-sm transition-colors",
             completed
-              ? "bg-mint text-foreground"
+              ? "bg-accent-3 text-foreground"
               : "bg-primary text-primary-foreground hover:bg-primary/90"
           )}
         >

@@ -29,7 +29,7 @@ export function EmptyState({
         className
       )}
     >
-      <span className="flex size-14 items-center justify-center rounded-2xl bg-mint/50 text-primary">
+      <span className="flex size-14 items-center justify-center rounded-2xl bg-accent-3/50 text-primary">
         <Icon name={icon} className="size-7" strokeWidth={1.5} />
       </span>
       <div className="flex max-w-sm flex-col gap-1.5">

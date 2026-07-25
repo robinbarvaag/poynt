@@ -9,13 +9,13 @@ import { cn } from "../../lib/utils";
 export type LightboxTone = "mint" | "salmon";
 
 const toneVeil: Record<LightboxTone, string> = {
-  mint: "bg-mint/45",
-  salmon: "bg-salmon/45",
+  mint: "bg-accent-3/45",
+  salmon: "bg-accent-2/45",
 };
 
 const tonePill: Record<LightboxTone, string> = {
-  mint: "bg-mint text-foreground",
-  salmon: "bg-salmon text-foreground",
+  mint: "bg-accent-3 text-foreground",
+  salmon: "bg-accent-2 text-foreground",
 };
 
 export interface LightboxProps {

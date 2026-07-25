@@ -25,10 +25,10 @@ export interface NextStepHeroProps {
 // Bare en rolig fargetone — ingen medaljong/ikon, så toppen ikke konkurrerer
 // med veien under. Fargen knytter heroen til den aktive fasen.
 const ACCENT: Record<HeroAccent, string> = {
-  mint: "bg-mint/12",
-  cream: "bg-cream/12",
-  saffron: "bg-saffron/12",
-  salmon: "bg-salmon/12",
+  mint: "bg-accent-3/12",
+  cream: "bg-accent-4/12",
+  saffron: "bg-accent-1/12",
+  salmon: "bg-accent-2/12",
   primary: "bg-primary/8",
 };
 

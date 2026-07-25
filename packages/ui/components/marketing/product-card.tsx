@@ -42,8 +42,8 @@ export interface ProductCardProps {
 
 // Fargetone → pill-stil for status-merkelappen.
 const badgeToneClass: Record<ProductBadgeTone, string> = {
-  new: "bg-saffron text-foreground",
-  presale: "bg-salmon text-foreground",
+  new: "bg-accent-1 text-foreground",
+  presale: "bg-accent-2 text-foreground",
   soldout: "bg-foreground/80 text-background",
   neutral: "bg-background/90 text-foreground",
 };
@@ -52,10 +52,10 @@ const badgeToneClass: Record<ProductBadgeTone, string> = {
 const pricePill = "bg-primary text-primary-foreground";
 
 const blobBySurface: Record<ProductSurface, string> = {
-  default: "bg-saffron",
-  saffron: "bg-salmon",
-  salmon: "bg-saffron",
-  mint: "bg-salmon",
+  default: "bg-accent-1",
+  saffron: "bg-accent-2",
+  salmon: "bg-accent-1",
+  mint: "bg-accent-2",
 };
 
 // Organisk blob-form (asymmetrisk border-radius) — INSPO/Steady-signaturen.
@@ -120,7 +120,7 @@ function ImageFrame({
           </span>
         )}
         {discount && (
-          <span className="absolute top-3 right-3 z-20 rounded-full bg-saffron px-3 py-1 font-semibold text-foreground text-xs shadow-sm">
+          <span className="absolute top-3 right-3 z-20 rounded-full bg-accent-1 px-3 py-1 font-semibold text-foreground text-xs shadow-sm">
             Tilbud
           </span>
         )}

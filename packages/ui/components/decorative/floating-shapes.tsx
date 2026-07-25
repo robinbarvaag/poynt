@@ -35,21 +35,21 @@ export function FloatingShapes({
     >
       <div
         className={cn(
-          "-top-10 -right-8 absolute size-72 animate-float-slow rounded-full bg-salmon",
+          "-top-10 -right-8 absolute size-72 animate-float-slow rounded-full bg-accent-2",
           blur,
           opacity
         )}
       />
       <div
         className={cn(
-          "-bottom-16 -left-16 absolute size-96 animate-float-medium rounded-[60%_40%_55%_45%/50%_60%_40%_50%] bg-saffron",
+          "-bottom-16 -left-16 absolute size-96 animate-float-medium rounded-[60%_40%_55%_45%/50%_60%_40%_50%] bg-accent-1",
           blur,
           opacity
         )}
       />
       <div
         className={cn(
-          "-right-8 absolute top-1/2 size-64 animate-float-fast rounded-full bg-mint",
+          "-right-8 absolute top-1/2 size-64 animate-float-fast rounded-full bg-accent-3",
           blur,
           opacity
         )}

@@ -278,7 +278,7 @@ export default async function StrategiPage() {
                 {channels.map((c) => (
                   <span
                     key={c.channel}
-                    className="inline-flex items-center gap-1.5 rounded-full bg-mint/50 px-3 py-1.5 font-medium text-foreground text-sm ring-1 ring-foreground/10"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-accent-3/50 px-3 py-1.5 font-medium text-foreground text-sm ring-1 ring-foreground/10"
                   >
                     <Icon name="target" className="size-3.5 text-primary" />
                     {c.channel}

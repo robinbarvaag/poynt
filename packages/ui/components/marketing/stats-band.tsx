@@ -43,7 +43,7 @@ export interface StatsBandProps {
 const themes = {
   primary: {
     surface: "primary",
-    number: "text-saffron",
+    number: "text-accent-1",
     label: "text-primary-foreground/80",
     eyebrow: "text-primary-foreground/70",
     heading: "white",

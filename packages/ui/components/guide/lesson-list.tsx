@@ -81,7 +81,7 @@ export function LessonList({
                   className={cn(
                     "flex size-8 shrink-0 items-center justify-center rounded-full ring-1 transition-colors",
                     item.completed
-                      ? "bg-mint text-foreground ring-transparent"
+                      ? "bg-accent-3 text-foreground ring-transparent"
                       : isActive
                         ? "bg-primary text-primary-foreground ring-primary"
                         : "bg-background text-muted-foreground ring-foreground/15"

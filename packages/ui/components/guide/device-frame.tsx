@@ -77,9 +77,9 @@ export function DeviceFrame({
       >
         <div className="flex items-center gap-3 border-foreground/10 border-b bg-foreground/[0.03] px-4 py-3">
           <div className="flex gap-1.5">
-            <span className="size-3 rounded-full bg-salmon" />
-            <span className="size-3 rounded-full bg-saffron" />
-            <span className="size-3 rounded-full bg-mint" />
+            <span className="size-3 rounded-full bg-accent-2" />
+            <span className="size-3 rounded-full bg-accent-1" />
+            <span className="size-3 rounded-full bg-accent-3" />
           </div>
           {url && (
             <div className="ml-1 flex-1 truncate rounded-full bg-background px-3 py-1 text-center text-foreground/45 text-xs ring-1 ring-foreground/10">

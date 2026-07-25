@@ -135,7 +135,7 @@ export default async function CaseStudyPage({ params }: CaseStudyPageProps) {
             {/* Lekent blob-pek bak bildet – samme signatur som blogg/produkt */}
             <span
               aria-hidden="true"
-              className="-top-5 -left-5 absolute size-32 rounded-[58%_42%_55%_45%/55%_48%_52%_45%] bg-mint opacity-70 blur-[2px]"
+              className="-top-5 -left-5 absolute size-32 rounded-[58%_42%_55%_45%/55%_48%_52%_45%] bg-accent-3 opacity-70 blur-[2px]"
             />
             <div className="relative z-10 aspect-video w-full overflow-hidden rounded-3xl bg-muted shadow-sm">
               <PayloadImage
@@ -151,7 +151,7 @@ export default async function CaseStudyPage({ params }: CaseStudyPageProps) {
         )}
 
         {results.length > 0 && (
-          <div className="mb-10 grid grid-cols-2 gap-6 rounded-3xl bg-mint/40 p-8 sm:grid-cols-4">
+          <div className="mb-10 grid grid-cols-2 gap-6 rounded-3xl bg-accent-3/40 p-8 sm:grid-cols-4">
             {results.map((r) => (
               <div key={`${r.value}-${r.label}`}>
                 <span className="block whitespace-nowrap font-bold font-heading text-4xl text-primary leading-none tracking-tight">
