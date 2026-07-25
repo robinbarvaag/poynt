@@ -1,6 +1,10 @@
 import type { CollectionConfig } from "payload";
 import { stockPickerAfterInput } from "../fields/stock-picker-after-input";
 import { generateSlug } from "../lib/generate-slug";
+import {
+  revalidateCmsAfterChange,
+  revalidateCmsAfterDelete,
+} from "../lib/revalidate-cms";
 
 /**
  * Kurs for medlemsområdet (On Poynt). I motsetning til den gamle
@@ -41,6 +45,8 @@ export const Courses: CollectionConfig = {
         return data;
       },
     ],
+    afterChange: [revalidateCmsAfterChange],
+    afterDelete: [revalidateCmsAfterDelete],
   },
   fields: [
     {

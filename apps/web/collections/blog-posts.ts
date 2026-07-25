@@ -5,6 +5,10 @@ import {
 } from "../fields/quality-review";
 import { stockPickerAfterInput } from "../fields/stock-picker-after-input";
 import { generateSlug } from "../lib/generate-slug";
+import {
+  revalidateCmsAfterChange,
+  revalidateCmsAfterDelete,
+} from "../lib/revalidate-cms";
 
 export const BlogPosts: CollectionConfig = {
   slug: "blog-posts",
@@ -43,6 +47,8 @@ export const BlogPosts: CollectionConfig = {
         return data;
       },
     ],
+    afterChange: [revalidateCmsAfterChange],
+    afterDelete: [revalidateCmsAfterDelete],
   },
   fields: [
     {

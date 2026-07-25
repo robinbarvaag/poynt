@@ -1,10 +1,14 @@
 import type { GlobalConfig } from "payload";
+import { revalidateCmsAfterChange } from "../lib/revalidate-cms";
 
 export const SiteSettings: GlobalConfig = {
   slug: "site-settings",
   label: "Nettsted-innstillinger",
   admin: {
     group: "Innstillinger",
+  },
+  hooks: {
+    afterChange: [revalidateCmsAfterChange],
   },
   fields: [
     {

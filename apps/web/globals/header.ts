@@ -1,11 +1,15 @@
 import type { GlobalConfig } from "payload";
 import { navLinkFields } from "../fields/nav-link";
+import { revalidateCmsAfterChange } from "../lib/revalidate-cms";
 
 export const Header: GlobalConfig = {
   slug: "header",
   label: "Navigasjon",
   admin: {
     group: "Innstillinger",
+  },
+  hooks: {
+    afterChange: [revalidateCmsAfterChange],
   },
   fields: [
     {

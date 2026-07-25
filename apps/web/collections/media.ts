@@ -3,6 +3,10 @@ import {
   supportsBlurPlaceholder,
 } from "@/lib/blur-data-url";
 import type { CollectionConfig } from "payload";
+import {
+  revalidateCmsAfterChange,
+  revalidateCmsAfterDelete,
+} from "../lib/revalidate-cms";
 
 export const Media: CollectionConfig = {
   slug: "media",
@@ -20,6 +24,8 @@ export const Media: CollectionConfig = {
         return blurDataURL ? { ...data, blurDataURL } : data;
       },
     ],
+    afterChange: [revalidateCmsAfterChange],
+    afterDelete: [revalidateCmsAfterDelete],
   },
   admin: {
     group: "Innhold",

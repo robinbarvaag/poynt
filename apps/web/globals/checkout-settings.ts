@@ -1,4 +1,5 @@
 import type { GlobalConfig } from "payload";
+import { revalidateCmsAfterChange } from "../lib/revalidate-cms";
 
 /**
  * Alt redigerbart rundt kjøpsopplevelsen etter kassen: kvitteringssiden
@@ -10,6 +11,9 @@ export const CheckoutSettings: GlobalConfig = {
   label: "Kasse og kvittering",
   admin: {
     group: "Innstillinger",
+  },
+  hooks: {
+    afterChange: [revalidateCmsAfterChange],
   },
   fields: [
     {

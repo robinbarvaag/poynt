@@ -1,5 +1,9 @@
 import type { CollectionConfig } from "payload";
 import { generateSlug } from "../lib/generate-slug";
+import {
+  revalidateCmsAfterChange,
+  revalidateCmsAfterDelete,
+} from "../lib/revalidate-cms";
 
 export const Categories: CollectionConfig = {
   slug: "categories",
@@ -21,6 +25,8 @@ export const Categories: CollectionConfig = {
         return data;
       },
     ],
+    afterChange: [revalidateCmsAfterChange],
+    afterDelete: [revalidateCmsAfterDelete],
   },
   fields: [
     {

@@ -2,6 +2,10 @@ import type { CollectionConfig } from "payload";
 import { seoFaqField, seoMetaField } from "../fields/seo-meta";
 import { stockPickerAfterInput } from "../fields/stock-picker-after-input";
 import { generateSlug } from "../lib/generate-slug";
+import {
+  revalidateCmsAfterChange,
+  revalidateCmsAfterDelete,
+} from "../lib/revalidate-cms";
 
 export const Services: CollectionConfig = {
   slug: "services",
@@ -28,6 +32,8 @@ export const Services: CollectionConfig = {
         return data;
       },
     ],
+    afterChange: [revalidateCmsAfterChange],
+    afterDelete: [revalidateCmsAfterDelete],
   },
   fields: [
     {

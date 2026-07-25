@@ -5,6 +5,10 @@ import {
 } from "../fields/quality-review";
 import { stockPickerAfterInput } from "../fields/stock-picker-after-input";
 import { generateSlug } from "../lib/generate-slug";
+import {
+  revalidateCmsAfterChange,
+  revalidateCmsAfterDelete,
+} from "../lib/revalidate-cms";
 
 /**
  * Kundehistorier — EGEN innholdstype, ikke blogginnlegg. Historiene er
@@ -48,6 +52,8 @@ export const CaseStudies: CollectionConfig = {
         return data;
       },
     ],
+    afterChange: [revalidateCmsAfterChange],
+    afterDelete: [revalidateCmsAfterDelete],
   },
   fields: [
     {

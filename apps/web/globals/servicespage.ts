@@ -1,11 +1,15 @@
 import type { GlobalConfig } from "payload";
 import { seoMetaField } from "../fields/seo-meta";
+import { revalidateCmsAfterChange } from "../lib/revalidate-cms";
 
 export const ServicesPage: GlobalConfig = {
   slug: "servicespage",
   label: "Tjenesteoversikt",
   admin: {
     group: "Sideoppsett",
+  },
+  hooks: {
+    afterChange: [revalidateCmsAfterChange],
   },
   fields: [
     {
