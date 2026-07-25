@@ -1,4 +1,5 @@
 import { ClearCart } from "@/components/clear-cart";
+import { NewsletterOptIn } from "@/components/newsletter-opt-in";
 import { getVippsPayment } from "@/lib/vipps";
 import config from "@/payload.config";
 import {
@@ -25,6 +26,13 @@ interface Props {
 const STEP =
   "motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:animate-in motion-safe:fill-mode-both motion-safe:duration-500 motion-safe:ease-soft";
 
+/** «robinbarvaag@gmail.com» → «r•••g@gmail.com» — adressen skal ikke vises i klartekst. */
+function maskEmail(email: string): string {
+  const [local, domain] = email.split("@");
+  if (!domain || local.length <= 2) return `•••@${domain ?? ""}`;
+  return `${local[0]}•••${local[local.length - 1]}@${domain}`;
+}
+
 export default async function ReceiptPage({ searchParams }: Props) {
   // Stripe sender session_id (kun ved fullført betaling). Vipps sender ref
   // uansett utfall — så for Vipps må vi sjekke betalingsstatusen før vi
@@ -50,6 +58,28 @@ export default async function ReceiptPage({ searchParams }: Props) {
   const settings = await payload
     .findGlobal({ slug: "checkout-settings" })
     .catch(() => null);
+
+  // Vipps-hurtigkassen har ingen samtykke-checkbox i handlekurven — tilby
+  // nyhetsbrev-påmelding her i stedet, hvis ordren ikke allerede har samtykke.
+  let newsletterPrompt: { reference: string; maskedEmail: string } | null =
+    null;
+  if (ref && !aborted) {
+    const orders = await payload.find({
+      collection: "orders",
+      where: { vippsReference: { equals: ref } },
+      limit: 1,
+      depth: 0,
+    });
+    const order = orders.docs[0];
+    if (order && !order.newsletterOptIn) {
+      newsletterPrompt = {
+        reference: ref,
+        maskedEmail: order.customerEmail
+          ? maskEmail(order.customerEmail)
+          : "e-posten din fra Vipps",
+      };
+    }
+  }
 
   const content = aborted
     ? {
@@ -136,6 +166,15 @@ export default async function ReceiptPage({ searchParams }: Props) {
               </Button>
             </Link>
           </div>
+
+          {newsletterPrompt && (
+            <div className={`${STEP} motion-safe:delay-500`}>
+              <NewsletterOptIn
+                reference={newsletterPrompt.reference}
+                maskedEmail={newsletterPrompt.maskedEmail}
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>
