@@ -1,6 +1,7 @@
 import { BrandGlimpseCard } from "@/components/planner/dashboard/brand-glimpse-card";
 import { UpcomingPostsCard } from "@/components/planner/dashboard/upcoming-posts-card";
 import { TasksCard } from "@/components/planner/tasks/tasks-card";
+import { getFeatureFlags } from "@/lib/features/server";
 import { getDashboardState } from "@/lib/planner/dashboard-state";
 import {
   Card,
@@ -44,7 +45,10 @@ function RhythmCheck({
 }
 
 export default async function DashboardPage() {
-  const { hero, stages, brandIdentity } = await getDashboardState();
+  const [{ hero, stages, brandIdentity }, features] = await Promise.all([
+    getDashboardState(),
+    getFeatureFlags(),
+  ]);
 
   return (
     <PageShell>
@@ -95,26 +99,33 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      {/* Verktøykassa — nyttige verktøy utenom kjernereisen */}
-      <section className="space-y-5">
-        <SectionTitle>Verktøykassa</SectionTitle>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <ToolboxCard
-            name="Si nei med stil"
-            whatItDoes="Lag høflige, profesjonelle avslag på forespørsler du ikke rekker."
-            whenToUse="noen ber om noe du må takke nei til."
-            icon="message-square-off"
-            href="/on-poynt/verktoy/avslag-generator"
-          />
-          <ToolboxCard
-            name="Podcast til innhald"
-            whatItDoes="Gjør en podkast-episode om til blogginnlegg, sosiale poster og kapittelmerker."
-            whenToUse="du har en episode du vil få mer innhold ut av."
-            icon="mic"
-            href="/on-poynt/verktoy/podcast-til-innhald"
-          />
-        </div>
-      </section>
+      {/* Verktøykassa — nyttige verktøy utenom kjernereisen. Kortene følger
+          feature-flaggene fra admin («On Poynt-funksjoner»). */}
+      {(features.siNeiMedStil || features.podcastTilInnhold) && (
+        <section className="space-y-5">
+          <SectionTitle>Verktøykassa</SectionTitle>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {features.siNeiMedStil && (
+              <ToolboxCard
+                name="Si nei med stil"
+                whatItDoes="Lag høflige, profesjonelle avslag på forespørsler du ikke rekker."
+                whenToUse="noen ber om noe du må takke nei til."
+                icon="message-square-off"
+                href="/on-poynt/verktoy/avslag-generator"
+              />
+            )}
+            {features.podcastTilInnhold && (
+              <ToolboxCard
+                name="Podcast til innhald"
+                whatItDoes="Gjør en podkast-episode om til blogginnlegg, sosiale poster og kapittelmerker."
+                whenToUse="du har en episode du vil få mer innhold ut av."
+                icon="mic"
+                href="/on-poynt/verktoy/podcast-til-innhald"
+              />
+            )}
+          </div>
+        </section>
+      )}
     </PageShell>
   );
 }

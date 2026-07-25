@@ -1,4 +1,5 @@
 import { TierGate } from "@/components/planner/tier-gate";
+import { requireFeature } from "@/lib/features/server";
 import { createServerCaller } from "@/lib/planner/trpc-server";
 import type {
   ChannelGuideProfile,
@@ -8,6 +9,7 @@ import type {
 import { ChannelGuideClient } from "./channel-guide-client";
 
 export default async function ChannelGuidePage() {
+  await requireFeature("kanalveileder");
   const trpc = await createServerCaller();
   const [savedResults, industries, workspaceProfile] = await Promise.all([
     trpc.toolResult.list({ toolId: "channel-guide", limit: 1 }).catch(() => []),

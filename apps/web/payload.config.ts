@@ -34,6 +34,7 @@ import {
   Footer,
   Header,
   Homepage,
+  OnPoyntFeatures,
   PodcastPage,
   ProductsPage,
   ServicesPage,
@@ -94,6 +95,7 @@ export default buildConfig({
     Footer,
     SiteSettings,
     CheckoutSettings,
+    OnPoyntFeatures,
   ],
   admin: {
     user: "users",

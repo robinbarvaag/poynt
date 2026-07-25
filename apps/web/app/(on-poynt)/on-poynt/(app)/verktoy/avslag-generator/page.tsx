@@ -1,4 +1,5 @@
 import { TierGate } from "@/components/planner/tier-gate";
+import { requireFeature } from "@/lib/features/server";
 import { createServerCaller } from "@/lib/planner/trpc-server";
 import { DeclineGeneratorClient } from "./decline-generator-client";
 
@@ -10,6 +11,7 @@ interface SavedResult {
 }
 
 export default async function DeclineGeneratorPage() {
+  await requireFeature("siNeiMedStil");
   const trpc = await createServerCaller();
 
   // Server-side data fetching

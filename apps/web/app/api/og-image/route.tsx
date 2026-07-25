@@ -31,6 +31,26 @@ function absoluteUrl(url: string): string {
   return url.startsWith("http") ? url : `${SITE_URL}${url}`;
 }
 
+/**
+ * Henter et bilde og pakker det som data-URL. Satori (ImageResponse) fetcher
+ * ellers `<img src>` selv midt i renderingen, og én feilet fetch (død vert,
+ * SSO-beskyttet deploy-URL, timeout) velter hele responsen som 500. Ved å hente
+ * selv kan vi i stedet degradere pent: `null` → kortet rendres uten bildet.
+ */
+async function fetchImageAsDataUrl(url: string): Promise<string | null> {
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+    const type = res.headers.get("content-type") ?? "";
+    if (!(res.ok && type.startsWith("image/"))) {
+      return null;
+    }
+    const buf = Buffer.from(await res.arrayBuffer());
+    return `data:${type};base64,${buf.toString("base64")}`;
+  } catch {
+    return null;
+  }
+}
+
 function isAllowedImageSource(url: string): boolean {
   try {
     const parsed = new URL(url, SITE_URL);
@@ -119,7 +139,7 @@ function Brand({ logo, onDark }: { logo: LogoInfo | null; onDark: boolean }) {
         }}
       >
         <img
-          src={absoluteUrl(logo.url)}
+          src={logo.url}
           alt=""
           style={{
             width: logoWidth,
@@ -186,6 +206,15 @@ export async function GET(req: NextRequest) {
     img = undefined;
   }
 
+  // Hent bildene selv og legg dem inn som data-URL-er (se fetchImageAsDataUrl).
+  // Feiler en henting rendres kortet uten det bildet i stedet for å 500-e.
+  const [imgData, logoData] = await Promise.all([
+    img ? fetchImageAsDataUrl(img) : Promise.resolve(null),
+    logo ? fetchImageAsDataUrl(absoluteUrl(logo.url)) : Promise.resolve(null),
+  ]);
+  img = imgData ?? undefined;
+  const brandLogo = logo && logoData ? { ...logo, url: logoData } : null;
+
   // Foto i full bredde kun for cover-egnede bilder; contain (logoer m.m.)
   // bruker alltid panel så hele bildet vises.
   const layout = !img
@@ -248,7 +277,7 @@ export async function GET(req: NextRequest) {
           }}
         />
         <div style={{ display: "flex" }}>
-          <Brand logo={logo} onDark />
+          <Brand logo={brandLogo} onDark />
         </div>
         <div
           style={{
@@ -295,7 +324,7 @@ export async function GET(req: NextRequest) {
             padding: "64px 56px 64px 72px",
           }}
         >
-          <Brand logo={logo} onDark={false} />
+          <Brand logo={brandLogo} onDark={false} />
           <div
             style={{
               display: "flex",
@@ -382,7 +411,7 @@ export async function GET(req: NextRequest) {
             opacity: 0.55,
           }}
         />
-        <Brand logo={logo} onDark={false} />
+        <Brand logo={brandLogo} onDark={false} />
         <div
           style={{
             display: "flex",

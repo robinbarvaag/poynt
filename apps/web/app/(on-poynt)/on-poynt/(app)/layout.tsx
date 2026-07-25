@@ -2,6 +2,7 @@ import { AppHeader } from "@/components/planner/app-header";
 import { AppSidebar } from "@/components/planner/app-sidebar";
 import { PlannerProviders } from "@/components/planner/providers";
 import { ShellTour } from "@/components/planner/shell-tour";
+import { getFeatureFlags } from "@/lib/features/server";
 import { getSessionWithMembership } from "@/lib/membership";
 import { hasActiveAccess } from "@/lib/membership/has-active-access";
 import { db, eq } from "@poynt/planner-db";
@@ -41,10 +42,12 @@ export default async function PlannerAppLayout({
     redirect("/on-poynt/onboarding");
   }
 
+  const features = await getFeatureFlags();
+
   return (
     <PlannerProviders>
       <SidebarProvider>
-        <AppSidebar />
+        <AppSidebar features={features} />
         <SidebarInset>
           <AppHeader />
           <main className="flex-1 p-4 md:p-6">{children}</main>

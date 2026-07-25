@@ -1,3 +1,4 @@
+import { requireFeature } from "@/lib/features/server";
 import { createServerCaller } from "@/lib/planner/trpc-server";
 import type { BrandBrief, BrandIdentity } from "@poynt/planner-validators";
 import {
@@ -90,6 +91,7 @@ function EmptyHint({
 }
 
 export default async function StrategiPage() {
+  await requireFeature("minStrategi");
   const trpc = await createServerCaller();
 
   const [current, profile, planResults] = await Promise.all([

@@ -129,6 +129,7 @@ export interface Config {
     footer: Footer;
     'site-settings': SiteSetting;
     'checkout-settings': CheckoutSetting;
+    'on-poynt-features': OnPoyntFeature;
   };
   globalsSelect: {
     homepage: HomepageSelect<false> | HomepageSelect<true>;
@@ -140,6 +141,7 @@ export interface Config {
     footer: FooterSelect<false> | FooterSelect<true>;
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     'checkout-settings': CheckoutSettingsSelect<false> | CheckoutSettingsSelect<true>;
+    'on-poynt-features': OnPoyntFeaturesSelect<false> | OnPoyntFeaturesSelect<true>;
   };
   locale: null;
   widgets: {
@@ -4017,6 +4019,61 @@ export interface CheckoutSetting {
   createdAt?: string | null;
 }
 /**
+ * Skru funksjoner i medlemsområdet av og på. Avskrudde funksjoner forsvinner fra menyen, og sidene blir utilgjengelige for medlemmene.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "on-poynt-features".
+ */
+export interface OnPoyntFeature {
+  id: number;
+  /**
+   * Finn de beste markedsføringskanalene.
+   */
+  kanalveileder?: boolean | null;
+  /**
+   * Generer en komplett markedsplan.
+   */
+  markedsplan?: boolean | null;
+  /**
+   * Planlegg innholdet gjennom året.
+   */
+  arshjul?: boolean | null;
+  /**
+   * Høflige avslag på forespørsler.
+   */
+  siNeiMedStil?: boolean | null;
+  /**
+   * Ferdige svar på anmeldelser og kundehenvendelser.
+   */
+  svarPaHenvendelser?: boolean | null;
+  /**
+   * Gjør podkast-episoder om til blogginnlegg og sosiale poster.
+   */
+  podcastTilInnhold?: boolean | null;
+  /**
+   * Medlemschatten — kanaler, grupper og meldinger.
+   */
+  fellesskap?: boolean | null;
+  /**
+   * Guider og kurs (hele Læring-huben).
+   */
+  laering?: boolean | null;
+  /**
+   * Bedriftsprofil og merkevare.
+   */
+  minBedrift?: boolean | null;
+  /**
+   * Strategi-oversikten (merkevare-boka).
+   */
+  minStrategi?: boolean | null;
+  /**
+   * Skjemaet for tilbakemeldinger og ønsker.
+   */
+  tilbakemelding?: boolean | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "homepage_select".
  */
@@ -4288,6 +4345,26 @@ export interface CheckoutSettingsSelect<T extends boolean = true> {
   emailIntro?: T;
   emailPdfNote?: T;
   emailFooter?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "on-poynt-features_select".
+ */
+export interface OnPoyntFeaturesSelect<T extends boolean = true> {
+  kanalveileder?: T;
+  markedsplan?: T;
+  arshjul?: T;
+  siNeiMedStil?: T;
+  svarPaHenvendelser?: T;
+  podcastTilInnhold?: T;
+  fellesskap?: T;
+  laering?: T;
+  minBedrift?: T;
+  minStrategi?: T;
+  tilbakemelding?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

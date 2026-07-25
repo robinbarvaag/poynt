@@ -1,3 +1,4 @@
+import type { FeatureKey } from "@/lib/features/keys";
 import type { IconName } from "@poynt/ui/icons";
 
 export type NavItem = {
@@ -5,6 +6,8 @@ export type NavItem = {
   url: string;
   icon: IconName;
   requiresAi?: boolean;
+  /** Feature-flagg (globalen «On Poynt-funksjoner») som styrer synlighet. */
+  feature?: FeatureKey;
 };
 
 /** Øverst, alene (ikke et «verktøy»). */
@@ -19,6 +22,7 @@ export const communityNavItem: NavItem = {
   title: "Fellesskap",
   url: "/on-poynt/fellesskap",
   icon: "users",
+  feature: "fellesskap",
 };
 
 /**
@@ -31,18 +35,21 @@ export const toolNavItems: NavItem[] = [
     url: "/on-poynt/verktoy/kanalveileder",
     icon: "compass",
     requiresAi: true,
+    feature: "kanalveileder",
   },
   {
     title: "Markedsplan",
     url: "/on-poynt/verktoy/markedsplan",
     icon: "bar-chart",
     requiresAi: true,
+    feature: "markedsplan",
   },
   {
     title: "Årshjul",
     url: "/on-poynt/verktoy/arsplanlegger",
     icon: "calendar-days",
     requiresAi: true,
+    feature: "arshjul",
   },
 ];
 
@@ -56,18 +63,21 @@ export const toolboxNavItems: NavItem[] = [
     url: "/on-poynt/verktoy/avslag-generator",
     icon: "message-square-off",
     requiresAi: true,
+    feature: "siNeiMedStil",
   },
   {
     title: "Svar på henvendelser",
     url: "/on-poynt/verktoy/svar-pa-henvendelser",
     icon: "send",
     requiresAi: true,
+    feature: "svarPaHenvendelser",
   },
   {
     title: "Podcast til innhald",
     url: "/on-poynt/verktoy/podcast-til-innhald",
     icon: "mic",
     requiresAi: true,
+    feature: "podcastTilInnhold",
   },
 ];
 
@@ -80,6 +90,7 @@ export const learnNavItems: NavItem[] = [
     title: "Læring",
     url: "/on-poynt/laering",
     icon: "compass",
+    feature: "laering",
   },
 ];
 
@@ -92,11 +103,13 @@ export const businessNavItems: NavItem[] = [
     title: "Min bedrift",
     url: "/on-poynt/bedrifter",
     icon: "building-2",
+    feature: "minBedrift",
   },
   {
     title: "Min strategi",
     url: "/on-poynt/strategi",
     icon: "target",
+    feature: "minStrategi",
   },
 ];
 
@@ -105,6 +118,7 @@ export const feedbackNavItem: NavItem = {
   title: "Tilbakemelding",
   url: "/on-poynt/tilbakemelding",
   icon: "message-square",
+  feature: "tilbakemelding",
 };
 
 /** Abonnement/konto — lever i bruker-menyen (NavUser), ikke i hovedmenyen. */

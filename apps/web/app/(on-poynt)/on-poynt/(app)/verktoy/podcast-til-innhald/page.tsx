@@ -1,4 +1,5 @@
 import { TierGate } from "@/components/planner/tier-gate";
+import { requireFeature } from "@/lib/features/server";
 import { createServerCaller } from "@/lib/planner/trpc-server";
 import { PodcastClient } from "./podcast-client";
 
@@ -35,6 +36,7 @@ type StoredResult = {
 };
 
 export default async function PodcastPage() {
+  await requireFeature("podcastTilInnhold");
   const trpc = await createServerCaller();
 
   let savedResults: SavedPodcastResult[] = [];

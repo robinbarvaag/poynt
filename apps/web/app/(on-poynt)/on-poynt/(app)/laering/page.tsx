@@ -2,6 +2,7 @@ import { ArticleSearch } from "@/components/article-search";
 import { ChannelFilter } from "@/components/learning/channel-filter";
 import { LearningFilter } from "@/components/learning/learning-filter";
 import { PayloadImage } from "@/components/payload-image";
+import { requireFeature } from "@/lib/features/server";
 import type { Category, Course, Guide, Media } from "@/payload-types";
 import config from "@/payload.config";
 import {
@@ -87,6 +88,7 @@ function mapCourse(c: Course): LearningItem {
 }
 
 export default async function LearningPage({ searchParams }: PageProps) {
+  await requireFeature("laering");
   const { type, kategori, sok } = await searchParams;
   const payload = await getPayload({ config });
 

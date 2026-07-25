@@ -38,6 +38,7 @@ import * as migration_20260725_131054 from './20260725_131054';
 import * as migration_20260725_150105 from './20260725_150105';
 import * as migration_20260725_161825 from './20260725_161825';
 import * as migration_20260725_171250 from './20260725_171250';
+import * as migration_20260725_203027_on_poynt_features from './20260725_203027_on_poynt_features';
 
 export const migrations = [
   {
@@ -238,6 +239,11 @@ export const migrations = [
   {
     up: migration_20260725_171250.up,
     down: migration_20260725_171250.down,
-    name: '20260725_171250'
+    name: '20260725_171250',
+  },
+  {
+    up: migration_20260725_203027_on_poynt_features.up,
+    down: migration_20260725_203027_on_poynt_features.down,
+    name: '20260725_203027_on_poynt_features'
   },
 ];

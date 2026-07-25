@@ -1,4 +1,5 @@
 import { MyCompany } from "@/components/planner/crm/my-company";
+import { requireFeature } from "@/lib/features/server";
 import { createServerCaller } from "@/lib/planner/trpc-server";
 import { Card, CardDescription, CardHeader, CardTitle } from "@poynt/ui";
 import { Icon } from "@poynt/ui/icons";
@@ -8,6 +9,7 @@ export const metadata = {
 };
 
 export default async function MyCompanyPage() {
+  await requireFeature("minBedrift");
   const trpc = await createServerCaller();
   const current = await trpc.workspace.getCurrentWorkspace().catch(() => null);
   const workspace = current

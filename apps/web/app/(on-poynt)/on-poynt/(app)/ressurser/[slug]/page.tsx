@@ -4,6 +4,7 @@ import { MediaCredit } from "@/components/media-credit";
 import { PayloadImage } from "@/components/payload-image";
 import { ViewTracker } from "@/components/radar/view-tracker";
 import { extractGuideToc } from "@/lib/extract-guide-toc";
+import { requireFeature } from "@/lib/features/server";
 import type { Category, Guide, Media } from "@/payload-types";
 import config from "@/payload.config";
 import {
@@ -56,6 +57,7 @@ function thumbOf(guide: Guide) {
 }
 
 export default async function GuidePage({ params }: GuidePageProps) {
+  await requireFeature("laering");
   const { slug } = await params;
   const payload = await getPayload({ config });
 

@@ -1,4 +1,5 @@
 import { CommunityClient } from "@/components/community/community-client";
+import { requireFeature } from "@/lib/features/server";
 import { auth } from "@poynt/planner-auth/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -15,6 +16,7 @@ export const metadata = {
  * høyde basert på viewporten minus header/padding.
  */
 export default async function FellesskapPage() {
+  await requireFeature("fellesskap");
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) {
     redirect("/on-poynt/innlogging");

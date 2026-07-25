@@ -3,6 +3,7 @@ import { MediaCredit } from "@/components/media-credit";
 import { PayloadImage } from "@/components/payload-image";
 import { CoursePlayer } from "@/components/planner/courses/course-player";
 import { ViewTracker } from "@/components/radar/view-tracker";
+import { requireFeature } from "@/lib/features/server";
 import type { Category, Course, Media } from "@/payload-types";
 import config from "@/payload.config";
 import { type ContentMetaItem, CourseHero } from "@poynt/ui";
@@ -14,6 +15,7 @@ interface CoursePageProps {
 }
 
 export default async function KursDetailPage({ params }: CoursePageProps) {
+  await requireFeature("laering");
   const { slug } = await params;
   const payload = await getPayload({ config });
 

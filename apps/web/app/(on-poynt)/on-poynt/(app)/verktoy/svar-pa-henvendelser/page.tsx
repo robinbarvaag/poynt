@@ -1,9 +1,11 @@
 import { TierGate } from "@/components/planner/tier-gate";
+import { requireFeature } from "@/lib/features/server";
 import { createServerCaller } from "@/lib/planner/trpc-server";
 import type { InquiryReplyStream } from "@poynt/planner-validators";
 import { InquiryReplyClient } from "./inquiry-reply-client";
 
 export default async function InquiryReplyPage() {
+  await requireFeature("svarPaHenvendelser");
   const trpc = await createServerCaller();
 
   let initialSaved: InquiryReplyStream | null = null;

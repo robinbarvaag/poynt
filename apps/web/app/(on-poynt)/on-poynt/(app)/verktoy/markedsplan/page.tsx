@@ -1,4 +1,5 @@
 import { TierGate } from "@/components/planner/tier-gate";
+import { requireFeature } from "@/lib/features/server";
 import { createServerCaller } from "@/lib/planner/trpc-server";
 import type { MarketingPlan } from "@poynt/planner-validators";
 import { MarketingPlanClient } from "./marketing-plan-client";
@@ -20,6 +21,7 @@ interface Industry {
 type CompanySize = "solo" | "small" | "medium" | "large";
 
 export default async function MarketingPlanPage() {
+  await requireFeature("markedsplan");
   const trpc = await createServerCaller();
 
   // Server-side data fetching in parallel

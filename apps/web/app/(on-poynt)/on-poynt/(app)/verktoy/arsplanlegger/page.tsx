@@ -1,4 +1,5 @@
 import { TierGate } from "@/components/planner/tier-gate";
+import { requireFeature } from "@/lib/features/server";
 import { getCalendarFeedUrls } from "@/lib/planner/calendar-feed";
 import { faviconFor } from "@/lib/planner/scheduled-posts";
 import { createServerCaller } from "@/lib/planner/trpc-server";
@@ -19,6 +20,7 @@ interface Industry {
 }
 
 export default async function YearlyPlannerPage() {
+  await requireFeature("arshjul");
   const trpc = await createServerCaller();
 
   // Server-side data fetching in parallel

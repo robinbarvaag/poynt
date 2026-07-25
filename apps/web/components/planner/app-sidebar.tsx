@@ -10,6 +10,7 @@ import {
   toolNavItems,
   toolboxNavItems,
 } from "@/lib/constants";
+import type { FeatureFlags } from "@/lib/features/keys";
 import { hasAiTools } from "@/lib/membership/has-active-access";
 import { trpc } from "@/lib/planner/trpc";
 import {
@@ -65,7 +66,7 @@ function NavItemLink({
   );
 }
 
-export function AppSidebar() {
+export function AppSidebar({ features }: { features: FeatureFlags }) {
   const pathname = usePathname();
   const [isAdmin, setIsAdmin] = useState(false);
   const [isAiTier, setIsAiTier] = useState<boolean | null>(null);
@@ -93,6 +94,16 @@ export function AppSidebar() {
   const isItemActive = (url: string) =>
     pathname === url || pathname.startsWith(`${url}/`);
 
+  // Feature-flagg fra admin («On Poynt-funksjoner») — avskrudde punkter vises
+  // ikke i menyen. Sidene bak har samme vakt server-side (requireFeature).
+  const isEnabled = (item: NavItem) =>
+    !item.feature || features[item.feature] !== false;
+
+  const enabledTools = toolNavItems.filter(isEnabled);
+  const enabledToolbox = toolboxNavItems.filter(isEnabled);
+  const enabledLearn = learnNavItems.filter(isEnabled);
+  const enabledBusiness = businessNavItems.filter(isEnabled);
+
   const renderItem = (item: NavItem) => (
     <NavItemLink
       key={item.title}
@@ -114,59 +125,71 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {renderItem(homeNavItem)}
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={isItemActive(communityNavItem.url)}
-                >
-                  <Link href={communityNavItem.url}>
-                    <Icon name={communityNavItem.icon} />
-                    <span>{communityNavItem.title}</span>
-                  </Link>
-                </SidebarMenuButton>
-                {unread > 0 && (
-                  <SidebarMenuBadge>
-                    {unread > 99 ? "99+" : unread}
-                  </SidebarMenuBadge>
-                )}
-              </SidebarMenuItem>
+              {isEnabled(communityNavItem) && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isItemActive(communityNavItem.url)}
+                  >
+                    <Link href={communityNavItem.url}>
+                      <Icon name={communityNavItem.icon} />
+                      <span>{communityNavItem.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                  {unread > 0 && (
+                    <SidebarMenuBadge>
+                      {unread > 99 ? "99+" : unread}
+                    </SidebarMenuBadge>
+                  )}
+                </SidebarMenuItem>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup data-tour="nav-tools">
-          <SidebarGroupLabel>Verktøy</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>{toolNavItems.map(renderItem)}</SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {enabledTools.length > 0 && (
+          <SidebarGroup data-tour="nav-tools">
+            <SidebarGroupLabel>Verktøy</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>{enabledTools.map(renderItem)}</SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
 
-        <SidebarGroup>
-          <SidebarGroupLabel>Verktøykassa</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>{toolboxNavItems.map(renderItem)}</SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {enabledToolbox.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Verktøykassa</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>{enabledToolbox.map(renderItem)}</SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
 
-        <SidebarGroup data-tour="nav-learn">
-          <SidebarGroupLabel>Læring</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>{learnNavItems.map(renderItem)}</SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {enabledLearn.length > 0 && (
+          <SidebarGroup data-tour="nav-learn">
+            <SidebarGroupLabel>Læring</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>{enabledLearn.map(renderItem)}</SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
 
-        <SidebarGroup data-tour="nav-business">
-          <SidebarGroupLabel>Din bedrift</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>{businessNavItems.map(renderItem)}</SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {enabledBusiness.length > 0 && (
+          <SidebarGroup data-tour="nav-business">
+            <SidebarGroupLabel>Din bedrift</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>{enabledBusiness.map(renderItem)}</SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
 
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>{renderItem(feedbackNavItem)}</SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {isEnabled(feedbackNavItem) && (
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>{renderItem(feedbackNavItem)}</SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
 
         {isAdmin && (
           <>
