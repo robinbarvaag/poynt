@@ -44,6 +44,61 @@ export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
 });
 
 /**
+ * Member procedure - requires an active membership (paid subscription in good standing).
+ *
+ * De kanoniske reglene for tilgang bor i `apps/web/lib/membership/has-active-access.ts`
+ * (`hasActiveAccess`) og MÅ holdes i sync med implementasjonen her, siden
+ * `packages/planner-api` ikke kan importere fra `apps/web`:
+ * - ingen abonnement, eller tier "none" -> ingen tilgang
+ * - status "active" -> tilgang
+ * - status "canceled" og currentPeriodEnd i fremtiden -> tilgang (innenfor betalt periode)
+ * - status "past_due" -> tilgang (grace period)
+ * - alt annet -> ingen tilgang
+ */
+export const memberProcedure = t.procedure.use(async ({ ctx, next }) => {
+  if (!ctx.userId) {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "Du må være logget inn for å gjøre dette",
+    });
+  }
+
+  const [sub] = await db
+    .select()
+    .from(plannerSubscription)
+    .where(eq(plannerSubscription.userId, ctx.userId))
+    .limit(1);
+
+  if (!sub || sub.tier === "none") {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Krever aktivt medlemskap",
+    });
+  }
+
+  const hasActiveAccess =
+    sub.status === "active" ||
+    (sub.status === "canceled" &&
+      sub.currentPeriodEnd !== null &&
+      sub.currentPeriodEnd > new Date()) ||
+    sub.status === "past_due";
+
+  if (!hasActiveAccess) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Krever aktivt medlemskap",
+    });
+  }
+
+  return next({
+    ctx: {
+      ...ctx,
+      userId: ctx.userId,
+    },
+  });
+});
+
+/**
  * AI protected procedure - requires community_ai tier with active access.
  * Allows: active status, canceled-but-within-period, past_due (grace period).
  */
