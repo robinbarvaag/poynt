@@ -1,10 +1,17 @@
 import { canonicalizeEmail } from "@/lib/email-normalize";
 import { db, eq, sql } from "@poynt/planner-db";
 import { plannerSubscription, plannerUser } from "@poynt/planner-db/schema";
+import type { MembershipTier } from "@poynt/planner-validators";
 import type Stripe from "stripe";
 
-export type MembershipTier = "none" | "community" | "community_ai";
+export type { MembershipTier };
 export type MembershipStatus = "active" | "inactive" | "canceled" | "past_due";
+
+const PAID_TIERS = ["community", "community_ai", "agency"] as const;
+
+function isPaidTier(v: string | undefined): v is (typeof PAID_TIERS)[number] {
+  return !!v && (PAID_TIERS as readonly string[]).includes(v);
+}
 
 /**
  * Extract membership tier from Stripe subscription metadata.
@@ -14,15 +21,12 @@ export function getTierFromSubscription(
   subscription: Stripe.Subscription
 ): MembershipTier {
   const tierFromSubMeta = subscription.metadata?.tier;
-  if (tierFromSubMeta === "community" || tierFromSubMeta === "community_ai") {
+  if (isPaidTier(tierFromSubMeta)) {
     return tierFromSubMeta;
   }
 
   const tierFromPriceMeta = subscription.items.data[0]?.price.metadata?.tier;
-  if (
-    tierFromPriceMeta === "community" ||
-    tierFromPriceMeta === "community_ai"
-  ) {
+  if (isPaidTier(tierFromPriceMeta)) {
     return tierFromPriceMeta;
   }
 

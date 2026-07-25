@@ -1,5 +1,6 @@
 import { db } from "@poynt/planner-db";
 import { plannerSubscription } from "@poynt/planner-db/schema";
+import { hasAiTools } from "@poynt/planner-validators";
 import { TRPCError, initTRPC } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { getAdminInfo } from "./lib/admin-access";
@@ -116,7 +117,7 @@ export const aiProtectedProcedure = t.procedure.use(async ({ ctx, next }) => {
     .where(eq(plannerSubscription.userId, ctx.userId))
     .limit(1);
 
-  if (!sub || sub.tier !== "community_ai") {
+  if (!sub || !hasAiTools(sub.tier)) {
     throw new TRPCError({
       code: "FORBIDDEN",
       message: "community_ai",
