@@ -21,6 +21,7 @@
     "typecheck": {
       "dependsOn": ["^typecheck"]
     },
+    "test": {},
     "dev": {
       "cache": false,
       "persistent": true
