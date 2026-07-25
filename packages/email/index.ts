@@ -182,19 +182,17 @@ export async function subscribeToNewsletter(
   email: string
 ): Promise<{ success: boolean; error?: string }> {
   const apiKey = process.env.RESEND_API_KEY;
+  // Nyere Resend-kontoer har én innebygd audience — audienceId er da valgfri.
+  // Settes RESEND_AUDIENCE_ID, brukes den eksplisitt (eldre kontoer).
   const audienceId = process.env.RESEND_AUDIENCE_ID;
 
   if (!apiKey) {
     return { success: false, error: "RESEND_API_KEY is not configured" };
   }
 
-  if (!audienceId) {
-    return { success: false, error: "RESEND_AUDIENCE_ID is not configured" };
-  }
-
   try {
     const result = await getResend().contacts.create({
-      audienceId,
+      ...(audienceId && { audienceId }),
       email,
       unsubscribed: false,
     });
@@ -204,7 +202,7 @@ export async function subscribeToNewsletter(
       // (contacts.create setter aldri unsubscribed tilbake til false).
       if (result.error.message?.includes("already exists")) {
         const update = await getResend().contacts.update({
-          audienceId,
+          ...(audienceId && { audienceId }),
           email,
           unsubscribed: false,
         });
