@@ -6,6 +6,10 @@ import {
 } from "../fields/quality-review";
 import { seoFaqField } from "../fields/seo-meta";
 import { generateSlug } from "../lib/generate-slug";
+import {
+  revalidateCmsAfterChange,
+  revalidateCmsAfterDelete,
+} from "../lib/revalidate-cms";
 
 export const Pages: CollectionConfig = {
   slug: "pages",
@@ -51,6 +55,8 @@ export const Pages: CollectionConfig = {
         return data;
       },
     ],
+    afterChange: [revalidateCmsAfterChange],
+    afterDelete: [revalidateCmsAfterDelete],
   },
   fields: [
     {

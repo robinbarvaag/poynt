@@ -1,10 +1,14 @@
 import type { GlobalConfig } from "payload";
+import { revalidateCmsAfterChange } from "../lib/revalidate-cms";
 
 export const Footer: GlobalConfig = {
   slug: "footer",
   label: "Bunntekst",
   admin: {
     group: "Sideoppsett",
+  },
+  hooks: {
+    afterChange: [revalidateCmsAfterChange],
   },
   fields: [
     {

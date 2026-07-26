@@ -7,6 +7,10 @@ import {
 import { stockPickerAfterInput } from "../fields/stock-picker-after-input";
 import { enrichBookmarks } from "../lib/enrich-bookmarks";
 import { generateSlug } from "../lib/generate-slug";
+import {
+  revalidateCmsAfterChange,
+  revalidateCmsAfterDelete,
+} from "../lib/revalidate-cms";
 
 /**
  * Guider = On-Poynt sitt ressursbibliotek (tidligere i Notion). Blokk-basert
@@ -57,6 +61,8 @@ export const Guides: CollectionConfig = {
       },
       enrichBookmarks,
     ],
+    afterChange: [revalidateCmsAfterChange],
+    afterDelete: [revalidateCmsAfterDelete],
   },
   fields: [
     {

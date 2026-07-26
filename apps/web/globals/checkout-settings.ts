@@ -1,4 +1,5 @@
 import type { GlobalConfig } from "payload";
+import { revalidateCmsAfterChange } from "../lib/revalidate-cms";
 
 /**
  * Alt redigerbart rundt kjøpsopplevelsen etter kassen: kvitteringssiden
@@ -12,6 +13,9 @@ export const CheckoutSettings: GlobalConfig = {
     // Ligger i den egenbygde «Drift»-nav-gruppen (setup-nav-group.tsx),
     // ikke i Payloads standard-nav.
     group: false,
+  },
+  hooks: {
+    afterChange: [revalidateCmsAfterChange],
   },
   fields: [
     {

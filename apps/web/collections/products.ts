@@ -2,6 +2,10 @@ import type { CollectionConfig } from "payload";
 import { productStoryBlocks } from "../blocks/product-story";
 import { stockPickerAfterInput } from "../fields/stock-picker-after-input";
 import { generateSlug } from "../lib/generate-slug";
+import {
+  revalidateCmsAfterChange,
+  revalidateCmsAfterDelete,
+} from "../lib/revalidate-cms";
 
 export const Products: CollectionConfig = {
   slug: "products",
@@ -35,6 +39,8 @@ export const Products: CollectionConfig = {
         return data;
       },
     ],
+    afterChange: [revalidateCmsAfterChange],
+    afterDelete: [revalidateCmsAfterDelete],
   },
   fields: [
     {

@@ -1,12 +1,16 @@
 import type { GlobalConfig } from "payload";
 import { layoutBlocks } from "../blocks/layout-blocks";
 import { seoMetaField } from "../fields/seo-meta";
+import { revalidateCmsAfterChange } from "../lib/revalidate-cms";
 
 export const Homepage: GlobalConfig = {
   slug: "homepage",
   label: "Forside",
   admin: {
     group: "Sideoppsett",
+  },
+  hooks: {
+    afterChange: [revalidateCmsAfterChange],
   },
   fields: [
     {

@@ -1,4 +1,5 @@
 import type { GlobalConfig } from "payload";
+import { revalidateCmsAfterChange } from "../lib/revalidate-cms";
 
 export const SiteSettings: GlobalConfig = {
   slug: "site-settings",
@@ -7,6 +8,9 @@ export const SiteSettings: GlobalConfig = {
     // Ligger i den egenbygde «Drift»-nav-gruppen (setup-nav-group.tsx),
     // ikke i Payloads standard-nav.
     group: false,
+  },
+  hooks: {
+    afterChange: [revalidateCmsAfterChange],
   },
   fields: [
     {
