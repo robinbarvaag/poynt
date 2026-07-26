@@ -5,10 +5,10 @@ import {
   getVippsUserinfo,
   verifyVippsWebhookSignature,
 } from "@/lib/vipps";
+import { claimWebhookEvent, releaseWebhookEvent } from "@/lib/webhook-events";
 import config from "@/payload.config";
 import { sendOrderConfirmation, subscribeToNewsletter } from "@poynt/email";
-import { db, eq } from "@poynt/planner-db";
-import { plannerWebhookEvent } from "@poynt/planner-db/schema";
+import { db } from "@poynt/planner-db";
 import { type NextRequest, NextResponse } from "next/server";
 import { getPayload } from "payload";
 
@@ -80,14 +80,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ received: true });
   }
 
-  // Same idempotens-register som Stripe-webhooken.
+  // Same idempotens-register som Stripe-webhooken - kravsett atomisk slik at
+  // samtidige leveranser ikkje begge behandlar eventet.
   const eventId = `vipps:${reference}:${name}:${event.pspReference ?? ""}`;
-  const existing = await db
-    .select()
-    .from(plannerWebhookEvent)
-    .where(eq(plannerWebhookEvent.eventId, eventId))
-    .limit(1);
-  if (existing.length > 0) {
+  const claimed = await claimWebhookEvent(
+    db,
+    eventId,
+    `vipps.${name.toLowerCase()}`
+  );
+  if (!claimed) {
     return NextResponse.json({ received: true });
   }
 
@@ -205,15 +206,19 @@ export async function POST(req: NextRequest) {
       default:
         console.log(`Vipps webhook: uhandtert event ${name} (${reference})`);
     }
-
-    await db.insert(plannerWebhookEvent).values({
-      id: crypto.randomUUID(),
-      eventId,
-      type: `vipps.${name.toLowerCase()}`,
-    });
   } catch (error) {
     console.error("Feil ved behandling av Vipps-webhook:", error);
-    // Ikkje registrer eventen — då prøver Vipps igjen (retry med backoff).
+    // Frigi kravet slik at Vipps sin retry (med backoff) kan kravsette
+    // eventet på nytt. Hvis frigivelsen selv feiler, blir eventet stående
+    // kravsatt - tryggere enn å risikere dobbel behandling.
+    try {
+      await releaseWebhookEvent(db, eventId);
+    } catch (releaseError) {
+      console.error(
+        `Klarte ikkje å frigi webhook-krav for ${eventId}:`,
+        releaseError
+      );
+    }
     return NextResponse.json(
       { error: "Feil ved behandling av webhook" },
       { status: 500 }
