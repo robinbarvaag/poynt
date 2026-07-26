@@ -77,6 +77,20 @@ export const membershipTierLimits: Record<
   agency: { maxWorkspaces: -1, maxMembersPerWorkspace: -1 },
 };
 
+/**
+ * Nivåene som låser opp AI-verktøyene. «agency» (Byrå) arver alt fra
+ * Community AI — all AI-gating skal sjekke begge via hasAiTools, aldri
+ * `tier === "community_ai"` direkte.
+ */
+export const AI_TIERS = [
+  "community_ai",
+  "agency",
+] as const satisfies readonly MembershipTier[];
+
+export function hasAiTools(tier: MembershipTier): boolean {
+  return (AI_TIERS as readonly MembershipTier[]).includes(tier);
+}
+
 /** Kort verdiløfte per nivå — brukt i sammenlignings-/oppgraderingsvisningen. */
 export const membershipTierFeatures: Record<MembershipTier, string[]> = {
   none: [],

@@ -131,6 +131,8 @@ export {
   membershipTierTaglines,
   membershipTierLimits,
   membershipTierFeatures,
+  AI_TIERS,
+  hasAiTools,
   createWorkspaceSchema,
   updateWorkspaceSchema,
   inviteMemberSchema,

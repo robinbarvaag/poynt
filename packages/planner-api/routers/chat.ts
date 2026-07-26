@@ -47,7 +47,7 @@ import {
 } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { sendPushToUser } from "../lib/web-push";
-import { adminProcedure, protectedProcedure, router } from "../trpc";
+import { adminProcedure, memberProcedure, router } from "../trpc";
 
 type ConversationRow = typeof plannerConversation.$inferSelect;
 
@@ -298,7 +298,7 @@ export const chatRouter = router({
    * Alle samtaler brukeren ser: åpne kanaler + grupper/DM hen er medlem av.
    * Sortert med nyeste aktivitet øverst.
    */
-  listConversations: protectedProcedure.query(async ({ ctx }) => {
+  listConversations: memberProcedure.query(async ({ ctx }) => {
     const userId = ctx.userId;
 
     const channels = await db.query.plannerConversation.findMany({
@@ -333,7 +333,7 @@ export const chatRouter = router({
   /**
    * Metadata om én samtale (header). Tilgangssjekket.
    */
-  getConversation: protectedProcedure
+  getConversation: memberProcedure
     .input(markReadSchema)
     .query(async ({ ctx, input }) => {
       const conversation = await getAccessibleConversation(
@@ -347,7 +347,7 @@ export const chatRouter = router({
    * Meldinger i en samtale (nyeste 50, eldre via `before`-cursor). Returneres
    * stigende (eldst → nyest) for visning.
    */
-  getMessages: protectedProcedure
+  getMessages: memberProcedure
     .input(listMessagesSchema)
     .query(async ({ ctx, input }) => {
       await getAccessibleConversation(ctx.userId, input.conversationId);
@@ -423,7 +423,7 @@ export const chatRouter = router({
    * Send en melding (med valgfrie vedlegg). Markerer samtalen som lest for
    * avsenderen.
    */
-  sendMessage: protectedProcedure
+  sendMessage: memberProcedure
     .input(sendMessageSchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.userId;
@@ -521,7 +521,7 @@ export const chatRouter = router({
   /**
    * Rediger egen melding.
    */
-  editMessage: protectedProcedure
+  editMessage: memberProcedure
     .input(editMessageSchema)
     .mutation(async ({ ctx, input }) => {
       const message = await db.query.plannerMessage.findFirst({
@@ -550,7 +550,7 @@ export const chatRouter = router({
   /**
    * Slett egen melding (soft-delete — forsvinner fra tråden).
    */
-  deleteMessage: protectedProcedure
+  deleteMessage: memberProcedure
     .input(deleteMessageSchema)
     .mutation(async ({ ctx, input }) => {
       const message = await db.query.plannerMessage.findFirst({
@@ -579,7 +579,7 @@ export const chatRouter = router({
   /**
    * Slå en emoji-reaksjon på/av for en melding.
    */
-  toggleReaction: protectedProcedure
+  toggleReaction: memberProcedure
     .input(toggleReactionSchema)
     .mutation(async ({ ctx, input }) => {
       const message = await db.query.plannerMessage.findFirst({
@@ -621,7 +621,7 @@ export const chatRouter = router({
   /**
    * Marker en samtale som lest (nullstiller uleste-telleren).
    */
-  markRead: protectedProcedure
+  markRead: memberProcedure
     .input(markReadSchema)
     .mutation(async ({ ctx, input }) => {
       await getAccessibleConversation(ctx.userId, input.conversationId);
@@ -693,7 +693,7 @@ export const chatRouter = router({
   /**
    * Opprett en gruppechat med valgte medlemmer (avsender blir eier).
    */
-  createGroup: protectedProcedure
+  createGroup: memberProcedure
     .input(createGroupSchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.userId;
@@ -722,7 +722,7 @@ export const chatRouter = router({
   /**
    * Åpne (eller gjenbruk) en 1-til-1-DM med et annet medlem.
    */
-  createDm: protectedProcedure
+  createDm: memberProcedure
     .input(createDmSchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.userId;
@@ -769,7 +769,7 @@ export const chatRouter = router({
   /**
    * Medlemmene i en gruppe/DM (for «vis medlemmer»). Tilgangssjekket.
    */
-  getConversationMembers: protectedProcedure
+  getConversationMembers: memberProcedure
     .input(markReadSchema)
     .query(async ({ ctx, input }) => {
       await getAccessibleConversation(ctx.userId, input.conversationId);
@@ -791,7 +791,7 @@ export const chatRouter = router({
   /**
    * Legg til medlemmer i en gruppe (kun medlemmer av gruppa).
    */
-  addGroupMembers: protectedProcedure
+  addGroupMembers: memberProcedure
     .input(addGroupMembersSchema)
     .mutation(async ({ ctx, input }) => {
       const conversation = await getAccessibleConversation(
@@ -832,7 +832,7 @@ export const chatRouter = router({
   /**
    * Forlat en gruppe (DM-er kan ikke forlates).
    */
-  leaveConversation: protectedProcedure
+  leaveConversation: memberProcedure
     .input(markReadSchema)
     .mutation(async ({ ctx, input }) => {
       const conversation = await getAccessibleConversation(
@@ -859,7 +859,7 @@ export const chatRouter = router({
   /**
    * Gi en gruppe nytt navn (kun medlemmer).
    */
-  renameConversation: protectedProcedure
+  renameConversation: memberProcedure
     .input(renameConversationSchema)
     .mutation(async ({ ctx, input }) => {
       const conversation = await getAccessibleConversation(
@@ -883,7 +883,7 @@ export const chatRouter = router({
    * Medlemskatalog — andre medlemmer man kan starte en DM eller gruppe med.
    * Valgfritt fritekst-søk på navn/e-post.
    */
-  listMembers: protectedProcedure
+  listMembers: memberProcedure
     .input(listMembersSchema)
     .query(async ({ ctx, input }) => {
       const search = input?.search?.trim();
@@ -915,7 +915,7 @@ export const chatRouter = router({
    * Totalt antall uleste meldinger på tvers av alle samtaler brukeren ser —
    * driver uleste-merket i menyen.
    */
-  unreadCount: protectedProcedure.query(async ({ ctx }) => {
+  unreadCount: memberProcedure.query(async ({ ctx }) => {
     const userId = ctx.userId;
 
     const channels = await db.query.plannerConversation.findMany({
@@ -944,7 +944,7 @@ export const chatRouter = router({
   /**
    * Varsler for bjella — nyeste omtaler/DM-er med avsender + samtale.
    */
-  listNotifications: protectedProcedure
+  listNotifications: memberProcedure
     .input(listNotificationsSchema)
     .query(async ({ ctx, input }) => {
       const rows = await db.query.plannerNotification.findMany({
@@ -974,7 +974,7 @@ export const chatRouter = router({
   /**
    * Antall uleste varsler — driver tallet på bjella.
    */
-  unreadNotificationCount: protectedProcedure.query(async ({ ctx }) => {
+  unreadNotificationCount: memberProcedure.query(async ({ ctx }) => {
     const [row] = await db
       .select({ total: sql<number>`cast(count(*) as int)` })
       .from(plannerNotification)
@@ -990,7 +990,7 @@ export const chatRouter = router({
   /**
    * Marker alle varsler som lest.
    */
-  markNotificationsRead: protectedProcedure.mutation(async ({ ctx }) => {
+  markNotificationsRead: memberProcedure.mutation(async ({ ctx }) => {
     await db
       .update(plannerNotification)
       .set({ readAt: new Date() })
@@ -1008,7 +1008,7 @@ export const chatRouter = router({
    * (billig) og henter meldinger på nytt KUN når versjonen endrer seg.
    * Fanger nye/redigerte/slettede meldinger og reaksjoner (antall).
    */
-  getActivity: protectedProcedure
+  getActivity: memberProcedure
     .input(markReadSchema)
     .query(async ({ ctx, input }) => {
       await getAccessibleConversation(ctx.userId, input.conversationId);
@@ -1040,7 +1040,7 @@ export const chatRouter = router({
   /**
    * Fellesskapets «vegg» (feed-samtalen) — opprettes ved første kall.
    */
-  getFeed: protectedProcedure.query(async () => {
+  getFeed: memberProcedure.query(async () => {
     const feed = await ensureFeedConversation();
     return {
       id: feed.id,
@@ -1052,7 +1052,7 @@ export const chatRouter = router({
   /**
    * Innlegg på veggen: toppnivå-meldinger (nyeste først) med kommentar-antall.
    */
-  listPosts: protectedProcedure
+  listPosts: memberProcedure
     .input(listPostsSchema)
     .query(async ({ ctx, input }) => {
       const feed = await ensureFeedConversation();
@@ -1111,7 +1111,7 @@ export const chatRouter = router({
   /**
    * Kommentarene til et innlegg (eldste først).
    */
-  getComments: protectedProcedure
+  getComments: memberProcedure
     .input(getCommentsSchema)
     .query(async ({ ctx, input }) => {
       const post = await db.query.plannerMessage.findFirst({
@@ -1142,7 +1142,7 @@ export const chatRouter = router({
   /**
    * Lagre (eller oppdatere) et Web Push-abonnement for denne brukeren.
    */
-  savePushSubscription: protectedProcedure
+  savePushSubscription: memberProcedure
     .input(savePushSubscriptionSchema)
     .mutation(async ({ ctx, input }) => {
       const existing = await db.query.plannerPushSubscription.findFirst({
@@ -1172,7 +1172,7 @@ export const chatRouter = router({
   /**
    * Fjern et Web Push-abonnement (når brukeren skrur av push på enheten).
    */
-  deletePushSubscription: protectedProcedure
+  deletePushSubscription: memberProcedure
     .input(deletePushSubscriptionSchema)
     .mutation(async ({ ctx, input }) => {
       await db

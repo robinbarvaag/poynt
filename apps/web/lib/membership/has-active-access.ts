@@ -1,15 +1,15 @@
-import type { MembershipInfo, MembershipTier } from "../membership";
+import { hasAiTools } from "@poynt/planner-validators";
+import type { MembershipInfo } from "../membership";
 
 /**
  * Nivåene som låser opp AI-verktøyene. «agency» (Byrå) arver alt fra
  * Community AI, så all AI-gating skal sjekke begge — bruk denne i stedet for
  * `tier === "community_ai"` (som ville stengt byrå-kunder ute).
+ *
+ * Selve definisjonen bor nå i `@poynt/planner-validators` (delt med
+ * `packages/planner-api`); re-eksporteres her for eksisterende importerere.
  */
-const AI_TIERS: readonly MembershipTier[] = ["community_ai", "agency"];
-
-export function hasAiTools(tier: MembershipTier): boolean {
-  return AI_TIERS.includes(tier);
-}
+export { hasAiTools };
 
 /**
  * Determines if a user has active access to the On Poynt platform.

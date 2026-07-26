@@ -1,4 +1,5 @@
-import { auth } from "@poynt/planner-auth/server";
+import { getSessionWithMembership } from "@/lib/membership";
+import { hasActiveAccess } from "@/lib/membership/has-active-access";
 import { put } from "@vercel/blob";
 import { type NextRequest, NextResponse } from "next/server";
 
@@ -30,9 +31,15 @@ const MAX_BYTES = 5 * 1024 * 1024; // 5 MB
  * offentlig URL som lagres i brandIdentity på workspace-profilen.
  */
 export async function POST(req: NextRequest) {
-  const session = await auth.api.getSession({ headers: req.headers });
+  const session = await getSessionWithMembership(req);
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!hasActiveAccess(session.membership)) {
+    return NextResponse.json(
+      { error: "Krever aktivt medlemskap" },
+      { status: 403 }
+    );
   }
 
   if (!process.env.BLOB_READ_WRITE_TOKEN) {
