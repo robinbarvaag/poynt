@@ -1,8 +1,9 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { Icon, type IconName } from "../../icons";
 import { cn } from "../../lib/utils";
+import { duration, easeSoft } from "../motion/motion-tokens";
 
 interface FormHeaderProps {
   icon: IconName;
@@ -21,12 +22,13 @@ export function FormHeader({
   iconBgColor = "bg-primary/10",
   iconColor = "text-primary",
 }: FormHeaderProps) {
+  const reduce = useReducedMotion();
   return (
     <div className="flex flex-col items-center text-center space-y-6">
       <motion.div
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ type: "spring", stiffness: 200, damping: 15 }}
+        initial={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
+        animate={reduce ? { opacity: 1 } : { opacity: 1, scale: 1 }}
+        transition={{ duration: duration.fast, ease: easeSoft }}
         className={cn(
           "size-16 rounded-2xl flex items-center justify-center",
           iconBgColor,

@@ -1,8 +1,9 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { Icon, type IconName } from "../../icons";
 import { cn } from "../../lib/utils";
+import { duration, easeSoft } from "../motion/motion-tokens";
 import { Progress } from "../progress";
 
 interface StepContainerProps {
@@ -39,6 +40,7 @@ export function StepContainer({
   children,
   className,
 }: StepContainerProps) {
+  const reduce = useReducedMotion();
   const progressValue = ((currentStep + 1) / totalSteps) * 100;
 
   return (
@@ -59,9 +61,9 @@ export function StepContainer({
       {/* Step header with icon */}
       <div className="space-y-4">
         <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: "spring", stiffness: 200, damping: 15 }}
+          initial={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
+          animate={reduce ? { opacity: 1 } : { opacity: 1, scale: 1 }}
+          transition={{ duration: duration.fast, ease: easeSoft }}
           className="inline-flex items-center justify-center size-12 rounded-xl bg-primary/10 text-primary"
         >
           <Icon name={stepIcon} className="size-6" />
