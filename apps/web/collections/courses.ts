@@ -12,6 +12,10 @@ import {
  * tilgangen styres av medlemskap via `(app)`-layouten (getSessionWithMembership
  * + hasActiveAccess). Et kurs har moduler, og hver modul har leksjoner med
  * video og rik-tekst-innhold.
+ *
+ * Hovedkolonnen er delt i faner (samme mønster som Guider): «Innhold» er
+ * selve kurset, «Hjelp og kvalitet» samler skrivehjelpen utenfor
+ * skriveflyten. Kursene ligger bak innlogging, så det finnes ingen SEO-fane.
  */
 export const Courses: CollectionConfig = {
   slug: "courses",
@@ -50,10 +54,194 @@ export const Courses: CollectionConfig = {
   },
   fields: [
     {
-      name: "title",
-      type: "text",
-      required: true,
-      label: "Tittel",
+      type: "tabs",
+      tabs: [
+        {
+          label: "Innhold",
+          description: "Selve kurset — moduler med leksjoner.",
+          fields: [
+            {
+              name: "title",
+              type: "text",
+              required: true,
+              label: "Tittel",
+            },
+            {
+              name: "excerpt",
+              type: "textarea",
+              label: "Utdrag",
+              admin: {
+                description:
+                  "Én–to setninger om hvem kurset er for og hva de sitter igjen med. Vises i kursoversikten.",
+              },
+            },
+            {
+              name: "featuredImage",
+              type: "upload",
+              relationTo: "media",
+              label: "Hovedbilde",
+              admin: {
+                description: "Vises i kursoversikten og øverst på kurssiden",
+                components: {
+                  afterInput: stockPickerAfterInput,
+                },
+              },
+            },
+            {
+              name: "modules",
+              type: "array",
+              label: "Moduler",
+              labels: {
+                singular: "Modul",
+                plural: "Moduler",
+              },
+              admin: {
+                description:
+                  "Del kurset i moduler med et tydelig tema hver. Hver modul har sine egne leksjoner.",
+              },
+              fields: [
+                {
+                  name: "title",
+                  type: "text",
+                  required: true,
+                  label: "Modultittel",
+                },
+                {
+                  name: "lessons",
+                  type: "array",
+                  label: "Leksjoner",
+                  labels: {
+                    singular: "Leksjon",
+                    plural: "Leksjoner",
+                  },
+                  admin: {
+                    description:
+                      "Korte leksjoner slår lange — heller ti på fem minutter enn tre på tjue.",
+                  },
+                  fields: [
+                    {
+                      name: "title",
+                      type: "text",
+                      required: true,
+                      label: "Leksjonstittel",
+                    },
+                    {
+                      name: "videoUrl",
+                      type: "text",
+                      label: "Video-lenke",
+                      admin: {
+                        description:
+                          "Lim inn lenken til videoen (YouTube, Vimeo eller direkte lenke)",
+                      },
+                    },
+                    {
+                      name: "content",
+                      type: "richText",
+                      label: "Innhold",
+                      admin: {
+                        description:
+                          "Teksten som vises under videoen — eller hele leksjonen hvis den ikke har video",
+                      },
+                    },
+                    {
+                      name: "steps",
+                      type: "array",
+                      label: "Steg (steg-for-steg)",
+                      labels: {
+                        singular: "Steg",
+                        plural: "Steg",
+                      },
+                      admin: {
+                        initCollapsed: true,
+                        description:
+                          "Bruk steg med skjermbilder der medlemmet skal GJØRE noe selv. La stå tom for en vanlig video-/tekst-leksjon.",
+                      },
+                      fields: [
+                        {
+                          name: "title",
+                          type: "text",
+                          required: true,
+                          label: "Stegtittel",
+                        },
+                        {
+                          name: "image",
+                          type: "upload",
+                          relationTo: "media",
+                          label: "Bilde / skjermbilde",
+                        },
+                        {
+                          name: "body",
+                          type: "richText",
+                          label: "Forklaring",
+                        },
+                        {
+                          name: "substeps",
+                          type: "array",
+                          label: "Delsteg",
+                          labels: {
+                            singular: "Delsteg",
+                            plural: "Delsteg",
+                          },
+                          fields: [
+                            {
+                              name: "text",
+                              type: "text",
+                              required: true,
+                              label: "Delsteg",
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                    {
+                      name: "resources",
+                      type: "array",
+                      label: "Ressurser",
+                      admin: {
+                        initCollapsed: true,
+                        description:
+                          "Maler og filer medlemmet kan laste ned fra leksjonen",
+                      },
+                      fields: [
+                        {
+                          name: "title",
+                          type: "text",
+                          required: true,
+                          label: "Tittel",
+                        },
+                        {
+                          name: "file",
+                          type: "upload",
+                          relationTo: "media",
+                          label: "Fil",
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          label: "Hjelp og kvalitet",
+          description:
+            "Tips og sjekklister som hjelper deg mens du bygger kurset. Ingenting her vises for medlemmene.",
+          fields: [
+            {
+              // Visuell skrivehjelp: hvem/moduler/praktisk + live sjekkliste.
+              name: "retningslinjer",
+              type: "ui",
+              admin: {
+                components: {
+                  Field:
+                    "/admin/components/content-guidelines#ContentGuidelines",
+                },
+              },
+            },
+          ],
+        },
+      ],
     },
     {
       name: "slug",
@@ -65,25 +253,6 @@ export const Courses: CollectionConfig = {
       admin: {
         position: "sidebar",
         description: "Genereres automatisk fra tittel",
-      },
-    },
-    {
-      name: "excerpt",
-      type: "textarea",
-      label: "Utdrag",
-      admin: {
-        description: "Kort beskrivelse som vises i listeoversikter",
-      },
-    },
-    {
-      name: "featuredImage",
-      type: "upload",
-      relationTo: "media",
-      label: "Hovedbilde",
-      admin: {
-        components: {
-          afterInput: stockPickerAfterInput,
-        },
       },
     },
     {
@@ -115,123 +284,8 @@ export const Courses: CollectionConfig = {
       defaultValue: false,
       admin: {
         position: "sidebar",
-        description: "Vis som stort hero-kurs øverst på listesiden",
+        description: "Vis som stort hero-kurs øverst i kursoversikten",
       },
-    },
-    {
-      name: "modules",
-      type: "array",
-      label: "Moduler",
-      labels: {
-        singular: "Modul",
-        plural: "Moduler",
-      },
-      fields: [
-        {
-          name: "title",
-          type: "text",
-          required: true,
-          label: "Modultittel",
-        },
-        {
-          name: "lessons",
-          type: "array",
-          label: "Leksjoner",
-          labels: {
-            singular: "Leksjon",
-            plural: "Leksjoner",
-          },
-          fields: [
-            {
-              name: "title",
-              type: "text",
-              required: true,
-              label: "Leksjonstittel",
-            },
-            {
-              name: "videoUrl",
-              type: "text",
-              label: "Video-URL",
-              admin: {
-                description: "YouTube, Vimeo eller direkte lenke",
-              },
-            },
-            {
-              name: "content",
-              type: "richText",
-              label: "Innhold",
-            },
-            {
-              name: "steps",
-              type: "array",
-              label: "Steg (steg-for-steg)",
-              labels: {
-                singular: "Steg",
-                plural: "Steg",
-              },
-              admin: {
-                description:
-                  "For praktiske steg-for-steg-leksjoner med bilde per steg. La stå tom for en vanlig video-/tekst-leksjon.",
-              },
-              fields: [
-                {
-                  name: "title",
-                  type: "text",
-                  required: true,
-                  label: "Stegtittel",
-                },
-                {
-                  name: "image",
-                  type: "upload",
-                  relationTo: "media",
-                  label: "Bilde / skjermbilde",
-                },
-                {
-                  name: "body",
-                  type: "richText",
-                  label: "Forklaring",
-                },
-                {
-                  name: "substeps",
-                  type: "array",
-                  label: "Delsteg",
-                  labels: {
-                    singular: "Delsteg",
-                    plural: "Delsteg",
-                  },
-                  fields: [
-                    {
-                      name: "text",
-                      type: "text",
-                      required: true,
-                      label: "Delsteg",
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              name: "resources",
-              type: "array",
-              label: "Ressurser",
-              fields: [
-                {
-                  name: "title",
-                  type: "text",
-                  required: true,
-                  label: "Tittel",
-                },
-                {
-                  name: "file",
-                  type: "upload",
-                  relationTo: "media",
-                  label: "Fil",
-                },
-              ],
-            },
-          ],
-        },
-      ],
     },
   ],
 };

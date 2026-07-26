@@ -17,16 +17,18 @@ export const ProductsPage: GlobalConfig = {
       tabs: [
         {
           label: "Innhold",
+          description:
+            "Samlesiden /produkter. Produktene hentes automatisk fra Nettbutikk → Produkter — her styrer du bare toppen av siden.",
           fields: [
             {
               name: "hero",
               type: "group",
-              label: "Hero-seksjon",
+              label: "Toppen av siden",
               fields: [
                 {
                   name: "enabled",
                   type: "checkbox",
-                  label: "Vis Hero-seksjon",
+                  label: "Vis toppseksjon",
                   defaultValue: true,
                 },
                 {
@@ -35,15 +37,18 @@ export const ProductsPage: GlobalConfig = {
                   label: "Tittel",
                   defaultValue: "Produkter",
                   admin: {
+                    description: "Overskriften øverst på siden",
                     condition: (data) => data?.hero?.enabled,
                   },
                 },
                 {
                   name: "description",
                   type: "textarea",
-                  label: "Beskrivelse",
+                  label: "Ingress",
                   defaultValue: "Utforsk våre digitale produkter",
                   admin: {
+                    description:
+                      "Én–to setninger under tittelen — si hva kunden finner her",
                     condition: (data) => data?.hero?.enabled,
                   },
                 },
@@ -53,7 +58,7 @@ export const ProductsPage: GlobalConfig = {
                   relationTo: "media",
                   label: "Bakgrunnsbilde",
                   admin: {
-                    description: "Valgfritt bakgrunnsbilde for Hero-seksjonen",
+                    description: "Valgfritt bilde bak tittelen",
                     condition: (data) => data?.hero?.enabled,
                   },
                 },
@@ -62,11 +67,11 @@ export const ProductsPage: GlobalConfig = {
             {
               name: "emptyStateText",
               type: "text",
-              label: "Tekst ved ingen produkter",
+              label: "Tekst når lista er tom",
               defaultValue: "Ingen produkter tilgjengelig for øyeblikket.",
               admin: {
                 description:
-                  "Tekst som vises når det ikke finnes noen aktive produkter",
+                  "Vises bare hvis det ikke finnes noen aktive produkter",
               },
             },
           ],

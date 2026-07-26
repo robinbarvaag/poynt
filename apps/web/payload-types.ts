@@ -732,21 +732,15 @@ export interface Product {
   id: number;
   name: string;
   /**
-   * Genereres automatisk fra produktnavn
-   */
-  slug: string;
-  type: 'product' | 'course' | 'pdf' | 'bundle' | 'membership';
-  /**
-   * Antall måneder mellom hver fakturering (f.eks. 1, 3, 6, 12)
-   */
-  recurringInterval?: number | null;
-  membershipTier?: ('community' | 'community_ai') | null;
-  /**
-   * Vises i produktoversikter og som meta-beskrivelse
+   * Én–to setninger om hva produktet er og hvem det passer for. Vises i produktoversikten og i Google.
    */
   shortDescription?: string | null;
   /**
-   * Full produktbeskrivelse som vises på produktsiden
+   * Vises i produktoversikten og øverst på produktsiden
+   */
+  featuredImage?: (number | null) | Media;
+  /**
+   * Vises på produktsiden ved kjøpsknappen. Si hva kjøperen sitter igjen med — ikke bare hva produktet inneholder.
    */
   description?: {
     root: {
@@ -764,7 +758,7 @@ export interface Product {
     [k: string]: unknown;
   } | null;
   /**
-   * Bygg produktsidens «historie» under kjøpsseksjonen – tekst, bakside, sitater, PDF-smakebit og video i den rekkefølgen du vil. Vises i full bredde.
+   * Fortell mer om produktet under kjøpsseksjonen — tekst, bakside, sitater, PDF-smakebit og video i den rekkefølgen du vil.
    */
   storySections?:
     | (
@@ -776,11 +770,7 @@ export interface Product {
       )[]
     | null;
   /**
-   * Hovedbilde som vises i oversikter og øverst på produktsiden
-   */
-  featuredImage?: (number | null) | Media;
-  /**
-   * Ekstra bilder som vises på produktsiden
+   * Flere bilder som vises på produktsiden
    */
   gallery?:
     | {
@@ -790,32 +780,7 @@ export interface Product {
       }[]
     | null;
   /**
-   * Selve PDF-en kunden kjøper. Legges automatisk ved ordrebekreftelses-eposten når produktet kjøpes.
-   */
-  pdfFile?: (number | null) | Media;
-  /**
-   * Pris i heile kroner
-   */
-  price: number;
-  /**
-   * Valgfri førpris for å vise rabatt
-   */
-  compareAtPrice?: number | null;
-  /**
-   * Liten merkelapp som vises på produktkort og produktsiden (f.eks. «Forhåndssalg»)
-   */
-  statusBadge?: ('none' | 'new' | 'presale' | 'soldout' | 'custom') | null;
-  statusBadgeLabel?: string | null;
-  /**
-   * Kort overskrift for merknaden, f.eks. «Forhåndssalg» eller «Godt å vite». Vises på linje med ikonet, med selve merknaden under.
-   */
-  noticeTitle?: string | null;
-  /**
-   * Valgfri melding som vises tydelig på produktsiden (f.eks. «NB! Boka kommer i oktober 2026 – dette er forhåndssalg»)
-   */
-  notice?: string | null;
-  /**
-   * Korte salgbare punkter (f.eks. «Gratis frakt», «Foredrag ved 10+ bøker») som løftes frem rett ved kjøpsknappen
+   * Korte punkter som vises rett ved kjøpsknappen — det som gjør det lett å si ja (f.eks. «Gratis frakt», «Foredrag ved 10+ bøker»)
    */
   highlights?:
     | {
@@ -828,9 +793,22 @@ export interface Product {
       }[]
     | null;
   /**
-   * Vis en antall-velger på produktsiden. La stå av for digitale produkter der man bare trenger én.
+   * Selve PDF-en kunden kjøper. Sendes automatisk med ordrebekreftelsen på e-post.
    */
-  allowQuantity?: boolean | null;
+  pdfFile?: (number | null) | Media;
+  /**
+   * Vises på produktkortet og produktsiden (f.eks. «Forhåndssalg»)
+   */
+  statusBadge?: ('none' | 'new' | 'presale' | 'soldout' | 'custom') | null;
+  statusBadgeLabel?: string | null;
+  /**
+   * Kort overskrift for merknaden, f.eks. «Forhåndssalg» eller «Godt å vite»
+   */
+  noticeTitle?: string | null;
+  /**
+   * Beskjed som vises tydelig på produktsiden (f.eks. «NB! Boka kommer i oktober 2026 – dette er forhåndssalg»)
+   */
+  notice?: string | null;
   /**
    * F.eks. «Signert?». La stå tom om produktet ikke har varianter.
    */
@@ -842,25 +820,16 @@ export interface Product {
     | {
         label: string;
         /**
-         * Valgfritt – legg til (eller trekk fra, med minus) på basisprisen for dette valget. La stå tom for samme pris.
+         * Valgfritt – legg til (eller trekk fra, med minus) på prisen for dette valget. La stå tom for samme pris.
          */
         priceDelta?: number | null;
         id?: string | null;
       }[]
     | null;
   /**
-   * Medlemskap kjøpes ikke direkte – knappen «Søk om medlemskap» lenker hit
+   * Vis en antall-velger på produktsiden. La stå av for digitale produkter der én er nok.
    */
-  applyUrl?: string | null;
-  /**
-   * Styrer rekkefølgen i produktoversikten – lavest tall vises først (f.eks. 1 for boka). Produkter uten verdi havner bakerst, sortert på nyeste først.
-   */
-  displayOrder?: number | null;
-  /**
-   * Deaktiver for å skjule produktet
-   */
-  active?: boolean | null;
-  categories?: (number | Category)[] | null;
+  allowQuantity?: boolean | null;
   meta?: {
     /**
      * Kan stå tom — da bruker Google innholdets egen tittel. Fyll ut hvis søketreffet skal si noe annet enn overskriften på siden.
@@ -887,6 +856,51 @@ export interface Product {
      */
     ogType?: ('website' | 'article' | 'product') | null;
   };
+  /**
+   * Genereres automatisk fra produktnavn
+   */
+  slug: string;
+  type: 'product' | 'course' | 'pdf' | 'bundle' | 'membership';
+  /**
+   * Antall måneder mellom hver fakturering (f.eks. 1, 3, 6, 12)
+   */
+  recurringInterval?: number | null;
+  membershipTier?: ('community' | 'community_ai') | null;
+  /**
+   * Medlemskap kjøpes ikke direkte – knappen «Søk om medlemskap» lenker hit
+   */
+  applyUrl?: string | null;
+  /**
+   * Pris i hele kroner
+   */
+  price: number;
+  /**
+   * Valgfritt – vis en overstrøket førpris for å vise rabatt
+   */
+  compareAtPrice?: number | null;
+  /**
+   * Lavere tall vises først i produktoversikten (f.eks. 1 for boka). Produkter uten verdi havner bakerst, nyeste først.
+   */
+  displayOrder?: number | null;
+  /**
+   * Skru av for å skjule produktet fra nettsiden
+   */
+  active?: boolean | null;
+  categories?: (number | Category)[] | null;
+  /**
+   * Settes av AI-vurderingen (0–100).
+   */
+  qualityScore?: number | null;
+  qualityReviewedAt?: string | null;
+  qualityReview?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   stripeID?: string | null;
   skipSync?: boolean | null;
   updatedAt: string;
@@ -2067,30 +2081,32 @@ export interface Course {
   id: number;
   title: string;
   /**
-   * Genereres automatisk fra tittel
-   */
-  slug: string;
-  /**
-   * Kort beskrivelse som vises i listeoversikter
+   * Én–to setninger om hvem kurset er for og hva de sitter igjen med. Vises i kursoversikten.
    */
   excerpt?: string | null;
-  featuredImage?: (number | null) | Media;
-  categories?: (number | Category)[] | null;
-  publishedAt: string;
   /**
-   * Vis som stort hero-kurs øverst på listesiden
+   * Vises i kursoversikten og øverst på kurssiden
    */
-  isFeatured?: boolean | null;
+  featuredImage?: (number | null) | Media;
+  /**
+   * Del kurset i moduler med et tydelig tema hver. Hver modul har sine egne leksjoner.
+   */
   modules?:
     | {
         title: string;
+        /**
+         * Korte leksjoner slår lange — heller ti på fem minutter enn tre på tjue.
+         */
         lessons?:
           | {
               title: string;
               /**
-               * YouTube, Vimeo eller direkte lenke
+               * Lim inn lenken til videoen (YouTube, Vimeo eller direkte lenke)
                */
               videoUrl?: string | null;
+              /**
+               * Teksten som vises under videoen — eller hele leksjonen hvis den ikke har video
+               */
               content?: {
                 root: {
                   type: string;
@@ -2107,7 +2123,7 @@ export interface Course {
                 [k: string]: unknown;
               } | null;
               /**
-               * For praktiske steg-for-steg-leksjoner med bilde per steg. La stå tom for en vanlig video-/tekst-leksjon.
+               * Bruk steg med skjermbilder der medlemmet skal GJØRE noe selv. La stå tom for en vanlig video-/tekst-leksjon.
                */
               steps?:
                 | {
@@ -2137,6 +2153,9 @@ export interface Course {
                     id?: string | null;
                   }[]
                 | null;
+              /**
+               * Maler og filer medlemmet kan laste ned fra leksjonen
+               */
               resources?:
                 | {
                     title: string;
@@ -2150,6 +2169,16 @@ export interface Course {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Genereres automatisk fra tittel
+   */
+  slug: string;
+  categories?: (number | Category)[] | null;
+  publishedAt: string;
+  /**
+   * Vis som stort hero-kurs øverst i kursoversikten
+   */
+  isFeatured?: boolean | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -2230,6 +2259,9 @@ export interface Redirect {
 export interface FormSubmission {
   id: number;
   form: number | Form;
+  /**
+   * Rådataene fra skjemaet — samme svar som i oversikten over.
+   */
   submissionData?:
     | {
         field: string;
@@ -3211,12 +3243,8 @@ export interface GuideDividerBlockSelect<T extends boolean = true> {
  */
 export interface CoursesSelect<T extends boolean = true> {
   title?: T;
-  slug?: T;
   excerpt?: T;
   featuredImage?: T;
-  categories?: T;
-  publishedAt?: T;
-  isFeatured?: T;
   modules?:
     | T
     | {
@@ -3252,6 +3280,10 @@ export interface CoursesSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  slug?: T;
+  categories?: T;
+  publishedAt?: T;
+  isFeatured?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -3262,11 +3294,8 @@ export interface CoursesSelect<T extends boolean = true> {
  */
 export interface ProductsSelect<T extends boolean = true> {
   name?: T;
-  slug?: T;
-  type?: T;
-  recurringInterval?: T;
-  membershipTier?: T;
   shortDescription?: T;
+  featuredImage?: T;
   description?: T;
   storySections?:
     | T
@@ -3277,7 +3306,6 @@ export interface ProductsSelect<T extends boolean = true> {
         storyPdf?: T | ProductStoryPdfBlockSelect<T>;
         storyVideo?: T | ProductStoryVideoBlockSelect<T>;
       };
-  featuredImage?: T;
   gallery?:
     | T
     | {
@@ -3285,13 +3313,6 @@ export interface ProductsSelect<T extends boolean = true> {
         caption?: T;
         id?: T;
       };
-  pdfFile?: T;
-  price?: T;
-  compareAtPrice?: T;
-  statusBadge?: T;
-  statusBadgeLabel?: T;
-  noticeTitle?: T;
-  notice?: T;
   highlights?:
     | T
     | {
@@ -3299,7 +3320,11 @@ export interface ProductsSelect<T extends boolean = true> {
         text?: T;
         id?: T;
       };
-  allowQuantity?: T;
+  pdfFile?: T;
+  statusBadge?: T;
+  statusBadgeLabel?: T;
+  noticeTitle?: T;
+  notice?: T;
   variantLabel?: T;
   variantOptions?:
     | T
@@ -3308,10 +3333,7 @@ export interface ProductsSelect<T extends boolean = true> {
         priceDelta?: T;
         id?: T;
       };
-  applyUrl?: T;
-  displayOrder?: T;
-  active?: T;
-  categories?: T;
+  allowQuantity?: T;
   meta?:
     | T
     | {
@@ -3322,6 +3344,19 @@ export interface ProductsSelect<T extends boolean = true> {
         canonicalUrl?: T;
         ogType?: T;
       };
+  slug?: T;
+  type?: T;
+  recurringInterval?: T;
+  membershipTier?: T;
+  applyUrl?: T;
+  price?: T;
+  compareAtPrice?: T;
+  displayOrder?: T;
+  active?: T;
+  categories?: T;
+  qualityScore?: T;
+  qualityReviewedAt?: T;
+  qualityReview?: T;
   stripeID?: T;
   skipSync?: T;
   updatedAt?: T;
@@ -3676,7 +3711,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 export interface Homepage {
   id: number;
   /**
-   * Bygg forsiden med blokker. Hero = stor intro, Innhold = tekst, Media = bilde/video, Skjema = kontaktskjema, Produkter/Tjenester/Podcast = automatiske lister, Anmeldelser = kundeomtaler, CTA = handlingsoppfordring.
+   * Bygg forsiden med blokker. Hero = stor intro, Innholdsblokk = tekst, Mediablokk = bilde/video, Skjema = kontaktskjema, Produkter/Tjenester/Podcast = automatiske lister, Anmeldelser = kundeomtaler, CTA = handlingsoppfordring.
    */
   layout?:
     | (
@@ -3729,15 +3764,15 @@ export interface Homepage {
 export interface Blogpage {
   id: number;
   /**
-   * Hovedoverskrift på bloggsiden
+   * Overskriften øverst på siden
    */
   title: string;
   /**
-   * Kort beskrivelse som vises under tittelen
+   * Én–to setninger under tittelen — si hva leseren finner her
    */
   description?: string | null;
   /**
-   * Tekst som vises når det ikke finnes noen publiserte innlegg
+   * Vises bare hvis det ikke finnes noen publiserte innlegg
    */
   emptyStateText?: string | null;
   meta?: {
@@ -3769,15 +3804,21 @@ export interface Podcastpage {
   id: number;
   hero?: {
     enabled?: boolean | null;
+    /**
+     * Overskriften øverst på siden
+     */
     title?: string | null;
+    /**
+     * Én–to setninger under tittelen — si hva lytteren finner her
+     */
     description?: string | null;
     /**
-     * Valgfritt bakgrunnsbilde for Hero-seksjonen
+     * Valgfritt bilde bak tittelen
      */
     image?: (number | null) | Media;
   };
   /**
-   * Tekst som vises når det ikke finnes noen publiserte episoder
+   * Vises bare hvis det ikke finnes noen episoder i feeden
    */
   emptyStateText?: string | null;
   meta?: {
@@ -3809,15 +3850,21 @@ export interface Productspage {
   id: number;
   hero?: {
     enabled?: boolean | null;
+    /**
+     * Overskriften øverst på siden
+     */
     title?: string | null;
+    /**
+     * Én–to setninger under tittelen — si hva kunden finner her
+     */
     description?: string | null;
     /**
-     * Valgfritt bakgrunnsbilde for Hero-seksjonen
+     * Valgfritt bilde bak tittelen
      */
     image?: (number | null) | Media;
   };
   /**
-   * Tekst som vises når det ikke finnes noen aktive produkter
+   * Vises bare hvis det ikke finnes noen aktive produkter
    */
   emptyStateText?: string | null;
   meta?: {
@@ -3849,19 +3896,25 @@ export interface Servicespage {
   id: number;
   hero?: {
     enabled?: boolean | null;
+    /**
+     * Overskriften øverst på siden
+     */
     title?: string | null;
+    /**
+     * Én–to setninger under tittelen — si hva kunden finner her
+     */
     description?: string | null;
     /**
-     * Valgfritt bakgrunnsbilde for Hero-seksjonen
+     * Valgfritt bilde bak tittelen
      */
     image?: (number | null) | Media;
   };
   /**
-   * Tekst som vises når det ikke finnes noen aktive tjenester
+   * Vises bare hvis det ikke finnes noen aktive tjenester
    */
   emptyStateText?: string | null;
   /**
-   * Felles oppfordring som vises nederst på hver enkelt tjenesteside
+   * Den samme «ta kontakt»-seksjonen vises nederst på hver enkelt tjenesteside — du slipper å skrive den per tjeneste.
    */
   detailCta?: {
     variant?: ('simple' | 'colored') | null;

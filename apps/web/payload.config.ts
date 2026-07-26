@@ -323,11 +323,39 @@ export default buildConfig({
       formSubmissionOverrides: {
         admin: {
           group: "Kommunikasjon",
+          defaultColumns: ["form", "createdAt"],
         },
         labels: {
           singular: "Innsending",
           plural: "Innsendinger",
         },
+        // Pen visning øverst (submission-view.tsx) — pluginens rå
+        // felt/verdi-liste beholdes under, men låses for redigering
+        // (innsendt data skal ikke endres i etterkant).
+        fields: ({ defaultFields }) => [
+          {
+            name: "innsendingsvisning",
+            type: "ui",
+            admin: {
+              components: {
+                Field: "/admin/components/submission-view#SubmissionView",
+              },
+            },
+          },
+          ...defaultFields.map((field) =>
+            "name" in field && field.name === "submissionData"
+              ? ({
+                  ...field,
+                  admin: {
+                    ...field.admin,
+                    readOnly: true,
+                    description:
+                      "Rådataene fra skjemaet — samme svar som i oversikten over.",
+                  },
+                } as typeof field)
+              : field
+          ),
+        ],
         hooks: {
           afterChange: [
             async ({ doc, operation, req }) => {

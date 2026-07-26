@@ -17,16 +17,18 @@ export const ServicesPage: GlobalConfig = {
       tabs: [
         {
           label: "Innhold",
+          description:
+            "Samlesiden /tjenester. Tjenestene hentes automatisk fra Innhold → Tjenester — her styrer du toppen av siden og den felles oppfordringen nederst på hver tjenesteside.",
           fields: [
             {
               name: "hero",
               type: "group",
-              label: "Hero-seksjon",
+              label: "Toppen av siden",
               fields: [
                 {
                   name: "enabled",
                   type: "checkbox",
-                  label: "Vis Hero-seksjon",
+                  label: "Vis toppseksjon",
                   defaultValue: true,
                 },
                 {
@@ -35,15 +37,18 @@ export const ServicesPage: GlobalConfig = {
                   label: "Tittel",
                   defaultValue: "Tjenester",
                   admin: {
+                    description: "Overskriften øverst på siden",
                     condition: (data) => data?.hero?.enabled,
                   },
                 },
                 {
                   name: "description",
                   type: "textarea",
-                  label: "Beskrivelse",
+                  label: "Ingress",
                   defaultValue: "Se hva vi kan hjelpe deg med",
                   admin: {
+                    description:
+                      "Én–to setninger under tittelen — si hva kunden finner her",
                     condition: (data) => data?.hero?.enabled,
                   },
                 },
@@ -53,7 +58,7 @@ export const ServicesPage: GlobalConfig = {
                   relationTo: "media",
                   label: "Bakgrunnsbilde",
                   admin: {
-                    description: "Valgfritt bakgrunnsbilde for Hero-seksjonen",
+                    description: "Valgfritt bilde bak tittelen",
                     condition: (data) => data?.hero?.enabled,
                   },
                 },
@@ -62,20 +67,20 @@ export const ServicesPage: GlobalConfig = {
             {
               name: "emptyStateText",
               type: "text",
-              label: "Tekst ved ingen tjenester",
+              label: "Tekst når lista er tom",
               defaultValue: "Ingen tjenester tilgjengelig for øyeblikket.",
               admin: {
                 description:
-                  "Tekst som vises når det ikke finnes noen aktive tjenester",
+                  "Vises bare hvis det ikke finnes noen aktive tjenester",
               },
             },
             {
               name: "detailCta",
               type: "group",
-              label: "CTA på tjeneste-detaljsider",
+              label: "Oppfordring nederst på tjenestesidene",
               admin: {
                 description:
-                  "Felles oppfordring som vises nederst på hver enkelt tjenesteside",
+                  "Den samme «ta kontakt»-seksjonen vises nederst på hver enkelt tjenesteside — du slipper å skrive den per tjeneste.",
               },
               fields: [
                 {
@@ -97,7 +102,7 @@ export const ServicesPage: GlobalConfig = {
                 {
                   name: "description",
                   type: "textarea",
-                  label: "Beskrivelse",
+                  label: "Tekst",
                   defaultValue:
                     "Ta kontakt for en uforpliktende prat om hvordan vi kan hjelpe deg.",
                 },

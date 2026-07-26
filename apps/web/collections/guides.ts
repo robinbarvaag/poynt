@@ -17,8 +17,9 @@ import {
  * innhold som rendres med leken motion på `/on-poynt/ressurser`. `section`
  * styrer grupperingen på hub-en (speiler Notion-forsidens seksjoner).
  *
- * Hovedkolonnen er delt i faner: «Innhold» (selve guiden) og «Kvalitet»
- * (AI-vurderingen), så kvalitetsverktøyet ikke ligger midt i skriveflyten.
+ * Hovedkolonnen er delt i faner: «Innhold» (selve guiden) og «Hjelp og
+ * kvalitet» (skrivehjelp + AI-vurdering), så hjelpeverktøyene ikke ligger
+ * midt i skriveflyten.
  */
 export const Guides: CollectionConfig = {
   slug: "guides",
@@ -73,17 +74,6 @@ export const Guides: CollectionConfig = {
           description: "Selve guiden.",
           fields: [
             {
-              // Visuell skrivehjelp øverst: hvem/steg/neste + live sjekkliste.
-              name: "retningslinjer",
-              type: "ui",
-              admin: {
-                components: {
-                  Field:
-                    "/admin/components/content-guidelines#ContentGuidelines",
-                },
-              },
-            },
-            {
               name: "title",
               type: "text",
               required: true,
@@ -119,10 +109,23 @@ export const Guides: CollectionConfig = {
           ],
         },
         {
-          label: "Kvalitet",
+          label: "Hjelp og kvalitet",
           description:
-            "AI-vurdering av nytteverdi. Påvirker ikke det publiserte innholdet — kun et redaksjonelt hjelpemiddel.",
-          fields: [qualityReviewPanel()],
+            "Tips og sjekklister som hjelper deg mens du skriver. Ingenting her vises for medlemmene.",
+          fields: [
+            {
+              // Visuell skrivehjelp: hvem/steg/neste + live sjekkliste.
+              name: "retningslinjer",
+              type: "ui",
+              admin: {
+                components: {
+                  Field:
+                    "/admin/components/content-guidelines#ContentGuidelines",
+                },
+              },
+            },
+            qualityReviewPanel(),
+          ],
         },
       ],
     },

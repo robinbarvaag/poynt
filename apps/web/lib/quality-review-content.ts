@@ -1,4 +1,10 @@
-import type { BlogPost, CaseStudy, Page, Service } from "@/payload-types";
+import type {
+  BlogPost,
+  CaseStudy,
+  Page,
+  Product,
+  Service,
+} from "@/payload-types";
 import { lexicalToMarkdown } from "./serialize-guide-content";
 
 /**
@@ -222,6 +228,72 @@ export function serializeServiceContent(service: Service): string {
         .join("\n")}`
     );
   }
+
+  return parts.filter(Boolean).join("\n\n");
+}
+
+const PRODUCT_TYPE_LABELS: Record<string, string> = {
+  product: "produkt",
+  course: "kurs",
+  pdf: "PDF",
+  bundle: "bundle",
+  membership: "medlemskap",
+};
+
+/** Serialiserer et produkt (products) til lesbar markdown. */
+export function serializeProductContent(product: Product): string {
+  const parts: string[] = [
+    `# ${product.name}`,
+    `[Type: ${PRODUCT_TYPE_LABELS[product.type] ?? product.type}]`,
+  ];
+  if (product.shortDescription)
+    parts.push(`_Kort beskrivelse:_ ${product.shortDescription}`);
+
+  parts.push(
+    product.compareAtPrice
+      ? `[Pris: ${product.price} kr (førpris ${product.compareAtPrice} kr)]`
+      : `[Pris: ${product.price} kr]`
+  );
+
+  const image = product.featuredImage;
+  parts.push(
+    isMediaObject(image)
+      ? `[Hovedbilde${image.alt ? `: ${image.alt}` : " – mangler alt-tekst"}]`
+      : "[Mangler hovedbilde]"
+  );
+
+  const highlights = product.highlights ?? [];
+  parts.push(
+    highlights.length
+      ? `[Salgspunkt ved kjøpsknappen]\n${highlights
+          .map((h) => `- ${h.text}`)
+          .join("\n")}`
+      : "[Ingen salgspunkt ved kjøpsknappen]"
+  );
+
+  if (product.notice || product.noticeTitle) {
+    parts.push(
+      `[Merknad: ${[product.noticeTitle, product.notice].filter(Boolean).join(" — ")}]`
+    );
+  }
+
+  if (product.description) {
+    parts.push(lexicalToMarkdown(product.description));
+  } else {
+    parts.push("[Ingen detaljert beskrivelse]");
+  }
+
+  // Innholdsseksjonene under kjøpsseksjonen — samme struktur-synliggjøring
+  // som blokk-sidene (blokktype + tekst + bildebruk).
+  const sections = product.storySections ?? [];
+  sections.forEach((block, i) => {
+    const lines: string[] = [];
+    serializeObject(block as unknown as Record<string, unknown>, lines);
+    parts.push(
+      `## [Innholdsseksjon ${i + 1}: ${block.blockType}]\n${lines.join("\n")}`
+    );
+  });
+  if (!sections.length) parts.push("[Ingen innholdsseksjoner]");
 
   return parts.filter(Boolean).join("\n\n");
 }

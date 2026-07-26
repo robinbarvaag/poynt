@@ -17,16 +17,18 @@ export const PodcastPage: GlobalConfig = {
       tabs: [
         {
           label: "Innhold",
+          description:
+            "Samlesiden /podkast. Episodene hentes automatisk fra podkast-feeden — her styrer du bare toppen av siden.",
           fields: [
             {
               name: "hero",
               type: "group",
-              label: "Hero-seksjon",
+              label: "Toppen av siden",
               fields: [
                 {
                   name: "enabled",
                   type: "checkbox",
-                  label: "Vis Hero-seksjon",
+                  label: "Vis toppseksjon",
                   defaultValue: true,
                 },
                 {
@@ -35,15 +37,18 @@ export const PodcastPage: GlobalConfig = {
                   label: "Tittel",
                   defaultValue: "Podkast",
                   admin: {
+                    description: "Overskriften øverst på siden",
                     condition: (data) => data?.hero?.enabled,
                   },
                 },
                 {
                   name: "description",
                   type: "textarea",
-                  label: "Beskrivelse",
+                  label: "Ingress",
                   defaultValue: "Lytt til alle episoder",
                   admin: {
+                    description:
+                      "Én–to setninger under tittelen — si hva lytteren finner her",
                     condition: (data) => data?.hero?.enabled,
                   },
                 },
@@ -53,7 +58,7 @@ export const PodcastPage: GlobalConfig = {
                   relationTo: "media",
                   label: "Bakgrunnsbilde",
                   admin: {
-                    description: "Valgfritt bakgrunnsbilde for Hero-seksjonen",
+                    description: "Valgfritt bilde bak tittelen",
                     condition: (data) => data?.hero?.enabled,
                   },
                 },
@@ -62,11 +67,11 @@ export const PodcastPage: GlobalConfig = {
             {
               name: "emptyStateText",
               type: "text",
-              label: "Tekst ved ingen episoder",
+              label: "Tekst når lista er tom",
               defaultValue: "Ingen episoder publisert ennå. Kom tilbake snart!",
               admin: {
                 description:
-                  "Tekst som vises når det ikke finnes noen publiserte episoder",
+                  "Vises bare hvis det ikke finnes noen episoder i feeden",
               },
             },
           ],

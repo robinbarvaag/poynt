@@ -225,6 +225,8 @@ interface TextCheckConfig {
   /** Feltnavn for tittel/utdrag når typen ikke bruker `title`/`excerpt`. */
   titlePath?: string;
   excerptPath?: string;
+  /** Feltnavn for richText-innholdet når typen ikke bruker `content`. */
+  contentPath?: string;
   /** Regler som bare gjelder denne innholdstypen. */
   extraChecks?: (fields: Fields, stats: ContentStats | null) => Finding[];
   extraGuidelines: string[];
@@ -277,6 +279,18 @@ const CONFIGS: Record<string, TextCheckConfig> = {
       "Avslutt med neste steg: hva skjer når kunden tar kontakt?",
     ],
   },
+  products: {
+    title: "Produktsjekk",
+    intro:
+      "Ser over produktteksten mens du skriver, og sier ifra hvis noe gjør produktet tyngre å forstå — eller vanskeligere å kjøpe.",
+    titlePath: "name",
+    excerptPath: "shortDescription",
+    contentPath: "description",
+    extraGuidelines: [
+      "Si hva kjøperen sitter igjen med — ikke bare hva produktet inneholder.",
+      "Svar på det folk lurer på før de kjøper: format, levering, hvem det passer for.",
+    ],
+  },
 };
 
 export const TextCheck = () => {
@@ -286,7 +300,9 @@ export const TextCheck = () => {
   if (!config) return null;
 
   const typedFields = fields as unknown as Fields;
-  const stats = readContent(typedFields.content?.value);
+  const stats = readContent(
+    typedFields[config.contentPath ?? "content"]?.value
+  );
   const findings = [
     ...analyseText(typedFields, stats, config),
     ...(config.extraChecks?.(typedFields, stats) ?? []),

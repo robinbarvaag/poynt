@@ -2,6 +2,7 @@ import {
   serializeBlogPostContent,
   serializeCaseStudyContent,
   serializePageContent,
+  serializeProductContent,
   serializeServiceContent,
 } from "@/lib/quality-review-content";
 import {
@@ -14,6 +15,7 @@ import type {
   CaseStudy,
   Guide,
   Page,
+  Product,
   Service,
 } from "@/payload-types";
 import config from "@/payload.config";
@@ -196,6 +198,35 @@ const SERVICE_DIMENSIONS: Dimension[] = [
   TONE_DIMENSION,
 ];
 
+const PRODUCT_DIMENSIONS: Dimension[] = [
+  {
+    key: "verdiloefte",
+    label: "Verdiløfte",
+    spm: "Forstår en kjøper raskt hva produktet er, hvem det passer for og hva de sitter igjen med? Generiske formuleringer trekker ned, konkrete utbytter trekker opp.",
+  },
+  {
+    key: "kjoepstrygghet",
+    label: "Kjøpstrygghet",
+    spm: "Svarer siden på det folk lurer på før de trykker kjøp — format, levering, hva som er inkludert? Salgspunkt ved kjøpsknappen og en tydelig merknad (ved f.eks. forhåndssalg) trekker opp.",
+  },
+  {
+    key: "fortelling",
+    label: "Fortelling og bevis",
+    spm: "Bygger innholdsseksjonene lyst og tillit — smakebiter, sitater, konkret innhold — eller er siden bare en kjøpsknapp med tynn tekst? [Ingen innholdsseksjoner] og [Ingen detaljert beskrivelse] trekker ned.",
+  },
+  {
+    key: "pris",
+    label: "Pris og forventninger",
+    spm: "Henger prisen sammen med det siden beskriver — skjønner kjøperen hva de betaler for?",
+  },
+  {
+    key: "bilder",
+    label: "Bildebruk",
+    spm: "Har produktet et hovedbilde med alt-tekst, og støtter bildebruken salget? [Mangler hovedbilde] trekker ned.",
+  },
+  TONE_DIMENSION,
+];
+
 const CONFIGS: Record<string, CollectionReviewConfig> = {
   guides: {
     label: "ressurs/guide",
@@ -236,6 +267,13 @@ const CONFIGS: Record<string, CollectionReviewConfig> = {
       "Du vurderer en tjenesteside på poynt.no — en salgsside for én konkret tjeneste. Leseren er en småbedriftseier som lurer på om dette er verdt pengene: siden skal gjøre det lett å forstå hva en får, hva det koster og hva neste steg er.",
     dimensions: SERVICE_DIMENSIONS,
     serialize: (doc) => serializeServiceContent(doc as Service),
+  },
+  products: {
+    label: "produktside",
+    rolle:
+      "Du vurderer en produktside i nettbutikken på poynt.no (bok, kurs, PDF eller medlemskap). Leseren er en småbedriftseier som vurderer å kjøpe: siden skal gjøre det lett å forstå hva produktet er, hva de får og hvorfor det er verdt pengene.",
+    dimensions: PRODUCT_DIMENSIONS,
+    serialize: (doc) => serializeProductContent(doc as Product),
   },
 };
 
@@ -314,7 +352,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           error:
-            "Mangler collection/id (guides, pages, blog-posts, case-studies eller services).",
+            "Mangler collection/id (guides, pages, blog-posts, case-studies, services eller products).",
         },
         { status: 400 }
       );
@@ -327,7 +365,8 @@ export async function POST(req: NextRequest) {
           | "pages"
           | "blog-posts"
           | "case-studies"
-          | "services",
+          | "services"
+          | "products",
         id: body.id,
         depth: 1,
         draft: true,

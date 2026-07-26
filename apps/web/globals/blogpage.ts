@@ -17,6 +17,8 @@ export const BlogPage: GlobalConfig = {
       tabs: [
         {
           label: "Innhold",
+          description:
+            "Samlesiden /blogg. Innleggene hentes automatisk fra Blogginnlegg — her styrer du bare toppen av siden.",
           fields: [
             {
               name: "title",
@@ -25,7 +27,7 @@ export const BlogPage: GlobalConfig = {
               label: "Tittel",
               defaultValue: "Blogg",
               admin: {
-                description: "Hovedoverskrift på bloggsiden",
+                description: "Overskriften øverst på siden",
               },
             },
             {
@@ -33,17 +35,18 @@ export const BlogPage: GlobalConfig = {
               type: "textarea",
               label: "Ingress",
               admin: {
-                description: "Kort beskrivelse som vises under tittelen",
+                description:
+                  "Én–to setninger under tittelen — si hva leseren finner her",
               },
             },
             {
               name: "emptyStateText",
               type: "text",
-              label: "Tekst ved ingen innlegg",
+              label: "Tekst når lista er tom",
               defaultValue: "Ingen publiserte innlegg ennå. Kom tilbake snart!",
               admin: {
                 description:
-                  "Tekst som vises når det ikke finnes noen publiserte innlegg",
+                  "Vises bare hvis det ikke finnes noen publiserte innlegg",
               },
             },
           ],

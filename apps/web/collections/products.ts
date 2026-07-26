@@ -1,5 +1,9 @@
 import type { CollectionConfig } from "payload";
 import { productStoryBlocks } from "../blocks/product-story";
+import {
+  qualityDataFields,
+  qualityReviewPanel,
+} from "../fields/quality-review";
 import { stockPickerAfterInput } from "../fields/stock-picker-after-input";
 import { generateSlug } from "../lib/generate-slug";
 import {
@@ -19,7 +23,7 @@ export const Products: CollectionConfig = {
       "name",
       "type",
       "price",
-      "displayOrder",
+      "qualityScore",
       "active",
       "updatedAt",
     ],
@@ -44,10 +48,272 @@ export const Products: CollectionConfig = {
   },
   fields: [
     {
-      name: "name",
-      type: "text",
-      required: true,
-      label: "Produktnavn",
+      // Hovedkolonnen i faner (samme mønster som Guider/Sider/Tjenester):
+      // «Innhold» er selve produktet, «Hjelp og kvalitet» samler skrivehjelp
+      // og AI-vurdering utenfor skriveflyten. seoPlugin (tabbedUI) legger
+      // «SEO»-fanen til på slutten fordi tabs-feltet står først i fields.
+      type: "tabs",
+      tabs: [
+        {
+          label: "Innhold",
+          description: "Selve produktet.",
+          fields: [
+            {
+              name: "name",
+              type: "text",
+              required: true,
+              label: "Produktnavn",
+            },
+            {
+              name: "shortDescription",
+              type: "textarea",
+              label: "Kort beskrivelse",
+              admin: {
+                description:
+                  "Én–to setninger om hva produktet er og hvem det passer for. Vises i produktoversikten og i Google.",
+              },
+            },
+            {
+              name: "featuredImage",
+              type: "upload",
+              relationTo: "media",
+              label: "Hovedbilde",
+              admin: {
+                description:
+                  "Vises i produktoversikten og øverst på produktsiden",
+                components: {
+                  afterInput: stockPickerAfterInput,
+                },
+              },
+            },
+            {
+              name: "description",
+              type: "richText",
+              label: "Detaljert beskrivelse",
+              admin: {
+                description:
+                  "Vises på produktsiden ved kjøpsknappen. Si hva kjøperen sitter igjen med — ikke bare hva produktet inneholder.",
+              },
+            },
+            {
+              name: "storySections",
+              type: "blocks",
+              label: "Innholdsseksjoner",
+              labels: { singular: "Seksjon", plural: "Seksjoner" },
+              blocks: productStoryBlocks,
+              admin: {
+                initCollapsed: true,
+                description:
+                  "Fortell mer om produktet under kjøpsseksjonen — tekst, bakside, sitater, PDF-smakebit og video i den rekkefølgen du vil.",
+              },
+            },
+            {
+              name: "gallery",
+              type: "array",
+              label: "Bildegalleri",
+              admin: {
+                initCollapsed: true,
+                description: "Flere bilder som vises på produktsiden",
+              },
+              fields: [
+                {
+                  name: "image",
+                  type: "upload",
+                  relationTo: "media",
+                  required: true,
+                  label: "Bilde",
+                },
+                {
+                  name: "caption",
+                  type: "text",
+                  label: "Bildetekst",
+                },
+              ],
+            },
+            {
+              name: "highlights",
+              type: "array",
+              label: "Salgspunkt",
+              admin: {
+                initCollapsed: true,
+                description:
+                  "Korte punkter som vises rett ved kjøpsknappen — det som gjør det lett å si ja (f.eks. «Gratis frakt», «Foredrag ved 10+ bøker»)",
+              },
+              fields: [
+                {
+                  name: "icon",
+                  type: "text",
+                  label: "Ikon (emoji)",
+                  admin: {
+                    description: "Valgfri emoji, f.eks. 🚚 eller 🎤",
+                  },
+                },
+                {
+                  name: "text",
+                  type: "text",
+                  required: true,
+                  label: "Tekst",
+                },
+              ],
+            },
+            {
+              name: "pdfFile",
+              type: "upload",
+              relationTo: "media",
+              label: "PDF-fil (leveres på e-post)",
+              admin: {
+                description:
+                  "Selve PDF-en kunden kjøper. Sendes automatisk med ordrebekreftelsen på e-post.",
+                condition: (data) => data?.type === "pdf",
+              },
+            },
+            {
+              // Småting som endrer hvordan produktet presenteres — samlet
+              // nederst så selve innholdet står øverst (kun presentasjon,
+              // feltnavn og DB-skjema er uendret).
+              type: "collapsible",
+              label: "Merkelapp og merknad",
+              admin: {
+                initCollapsed: true,
+                description:
+                  "Liten merkelapp på produktkortet og en valgfri beskjed på produktsiden — nyttig ved forhåndssalg og utsolgt.",
+              },
+              fields: [
+                {
+                  name: "statusBadge",
+                  type: "select",
+                  label: "Merkelapp",
+                  defaultValue: "none",
+                  options: [
+                    { label: "Ingen", value: "none" },
+                    { label: "Nyhet", value: "new" },
+                    { label: "Forhåndssalg", value: "presale" },
+                    { label: "Utsolgt", value: "soldout" },
+                    { label: "Egendefinert", value: "custom" },
+                  ],
+                  admin: {
+                    description:
+                      "Vises på produktkortet og produktsiden (f.eks. «Forhåndssalg»)",
+                  },
+                },
+                {
+                  name: "statusBadgeLabel",
+                  type: "text",
+                  label: "Egendefinert merkelapp-tekst",
+                  admin: {
+                    condition: (data) => data?.statusBadge === "custom",
+                  },
+                },
+                {
+                  name: "noticeTitle",
+                  type: "text",
+                  label: "Merknad – tittel",
+                  admin: {
+                    description:
+                      "Kort overskrift for merknaden, f.eks. «Forhåndssalg» eller «Godt å vite»",
+                  },
+                },
+                {
+                  name: "notice",
+                  type: "textarea",
+                  label: "Merknad",
+                  admin: {
+                    description:
+                      "Beskjed som vises tydelig på produktsiden (f.eks. «NB! Boka kommer i oktober 2026 – dette er forhåndssalg»)",
+                  },
+                },
+              ],
+            },
+            {
+              type: "collapsible",
+              label: "Varianter og antall",
+              admin: {
+                initCollapsed: true,
+                description:
+                  "La stå urørt for et vanlig digitalt produkt — da kjøper kunden én, uten valg.",
+              },
+              fields: [
+                {
+                  name: "variantLabel",
+                  type: "text",
+                  label: "Variant-spørsmål",
+                  admin: {
+                    description:
+                      "F.eks. «Signert?». La stå tom om produktet ikke har varianter.",
+                  },
+                },
+                {
+                  name: "variantOptions",
+                  type: "array",
+                  label: "Variant-valg",
+                  admin: {
+                    description:
+                      "Valgene kunden kan velge mellom (f.eks. Ja / Nei).",
+                    condition: (data) => Boolean(data?.variantLabel),
+                  },
+                  fields: [
+                    {
+                      name: "label",
+                      type: "text",
+                      required: true,
+                      label: "Tekst",
+                    },
+                    {
+                      name: "priceDelta",
+                      type: "number",
+                      label: "Prisdifferanse (kr)",
+                      admin: {
+                        description:
+                          "Valgfritt – legg til (eller trekk fra, med minus) på prisen for dette valget. La stå tom for samme pris.",
+                      },
+                    },
+                  ],
+                },
+                {
+                  name: "allowQuantity",
+                  type: "checkbox",
+                  defaultValue: false,
+                  label: "Tillat flere (antall-velger)",
+                  admin: {
+                    description:
+                      "Vis en antall-velger på produktsiden. La stå av for digitale produkter der én er nok.",
+                  },
+                },
+              ],
+            },
+          ],
+        },
+        {
+          label: "Hjelp og kvalitet",
+          description:
+            "Tips og sjekklister som hjelper deg mens du skriver. Ingenting her vises på nettsiden.",
+          fields: [
+            {
+              // Visuell skrivehjelp: hva/hvorfor/praktisk + live sjekkliste.
+              // Produktsjekken under tar seg av de deterministiske
+              // tekst-reglene.
+              name: "retningslinjer",
+              type: "ui",
+              admin: {
+                components: {
+                  Field:
+                    "/admin/components/content-guidelines#ContentGuidelines",
+                },
+              },
+            },
+            {
+              name: "produktsjekk",
+              type: "ui",
+              admin: {
+                components: {
+                  Field: "/admin/components/text-check#TextCheck",
+                },
+              },
+            },
+            qualityReviewPanel(),
+          ],
+        },
+      ],
     },
     {
       name: "slug",
@@ -102,212 +368,6 @@ export const Products: CollectionConfig = {
       },
     },
     {
-      name: "shortDescription",
-      type: "textarea",
-      label: "Kort beskrivelse",
-      admin: {
-        description: "Vises i produktoversikter og som meta-beskrivelse",
-      },
-    },
-    {
-      name: "description",
-      type: "richText",
-      label: "Detaljert beskrivelse",
-      admin: {
-        description: "Full produktbeskrivelse som vises på produktsiden",
-      },
-    },
-    {
-      name: "storySections",
-      type: "blocks",
-      label: "Innholdsseksjoner",
-      labels: { singular: "Seksjon", plural: "Seksjoner" },
-      blocks: productStoryBlocks,
-      admin: {
-        description:
-          "Bygg produktsidens «historie» under kjøpsseksjonen – tekst, bakside, sitater, PDF-smakebit og video i den rekkefølgen du vil. Vises i full bredde.",
-      },
-    },
-    {
-      name: "featuredImage",
-      type: "upload",
-      relationTo: "media",
-      label: "Hovedbilde",
-      admin: {
-        description:
-          "Hovedbilde som vises i oversikter og øverst på produktsiden",
-        components: {
-          afterInput: stockPickerAfterInput,
-        },
-      },
-    },
-    {
-      name: "gallery",
-      type: "array",
-      label: "Bildegalleri",
-      admin: {
-        description: "Ekstra bilder som vises på produktsiden",
-      },
-      fields: [
-        {
-          name: "image",
-          type: "upload",
-          relationTo: "media",
-          required: true,
-          label: "Bilde",
-        },
-        {
-          name: "caption",
-          type: "text",
-          label: "Bildetekst",
-        },
-      ],
-    },
-    {
-      name: "pdfFile",
-      type: "upload",
-      relationTo: "media",
-      label: "PDF-fil (leveres på e-post)",
-      admin: {
-        description:
-          "Selve PDF-en kunden kjøper. Legges automatisk ved ordrebekreftelses-eposten når produktet kjøpes.",
-        condition: (data) => data?.type === "pdf",
-      },
-    },
-    {
-      name: "price",
-      type: "number",
-      required: true,
-      label: "Pris (kr)",
-      admin: {
-        description: "Pris i heile kroner",
-        position: "sidebar",
-      },
-    },
-    {
-      name: "compareAtPrice",
-      type: "number",
-      label: "Samanlikningspris (kr)",
-      admin: {
-        description: "Valgfri førpris for å vise rabatt",
-        position: "sidebar",
-      },
-    },
-    {
-      name: "statusBadge",
-      type: "select",
-      label: "Merkelapp",
-      defaultValue: "none",
-      options: [
-        { label: "Ingen", value: "none" },
-        { label: "Nyhet", value: "new" },
-        { label: "Forhåndssalg", value: "presale" },
-        { label: "Utsolgt", value: "soldout" },
-        { label: "Egendefinert", value: "custom" },
-      ],
-      admin: {
-        description:
-          "Liten merkelapp som vises på produktkort og produktsiden (f.eks. «Forhåndssalg»)",
-      },
-    },
-    {
-      name: "statusBadgeLabel",
-      type: "text",
-      label: "Egendefinert merkelapp-tekst",
-      admin: {
-        condition: (data) => data?.statusBadge === "custom",
-      },
-    },
-    {
-      name: "noticeTitle",
-      type: "text",
-      label: "Merknad – tittel",
-      admin: {
-        description:
-          "Kort overskrift for merknaden, f.eks. «Forhåndssalg» eller «Godt å vite». Vises på linje med ikonet, med selve merknaden under.",
-      },
-    },
-    {
-      name: "notice",
-      type: "textarea",
-      label: "Merknad / forhåndssalg-tekst",
-      admin: {
-        description:
-          "Valgfri melding som vises tydelig på produktsiden (f.eks. «NB! Boka kommer i oktober 2026 – dette er forhåndssalg»)",
-      },
-    },
-    {
-      name: "highlights",
-      type: "array",
-      label: "Salgspunkt",
-      admin: {
-        description:
-          "Korte salgbare punkter (f.eks. «Gratis frakt», «Foredrag ved 10+ bøker») som løftes frem rett ved kjøpsknappen",
-      },
-      fields: [
-        {
-          name: "icon",
-          type: "text",
-          label: "Ikon (emoji)",
-          admin: {
-            description: "Valgfri emoji, f.eks. 🚚 eller 🎤",
-          },
-        },
-        {
-          name: "text",
-          type: "text",
-          required: true,
-          label: "Tekst",
-        },
-      ],
-    },
-    {
-      name: "allowQuantity",
-      type: "checkbox",
-      defaultValue: false,
-      label: "Tillat flere (antall-velger)",
-      admin: {
-        position: "sidebar",
-        description:
-          "Vis en antall-velger på produktsiden. La stå av for digitale produkter der man bare trenger én.",
-      },
-    },
-    {
-      name: "variantLabel",
-      type: "text",
-      label: "Variant-spørsmål",
-      admin: {
-        description:
-          "F.eks. «Signert?». La stå tom om produktet ikke har varianter.",
-      },
-    },
-    {
-      name: "variantOptions",
-      type: "array",
-      label: "Variant-valg",
-      admin: {
-        description: "Valgene kunden kan velge mellom (f.eks. Ja / Nei).",
-        condition: (data) => Boolean(data?.variantLabel),
-      },
-      fields: [
-        {
-          name: "label",
-          type: "text",
-          required: true,
-          label: "Tekst",
-        },
-        {
-          name: "priceDelta",
-          type: "number",
-          label: "Prisdifferanse (kr)",
-          admin: {
-            description:
-              "Valgfritt – legg til (eller trekk fra, med minus) på basisprisen for dette valget. La stå tom for samme pris.",
-          },
-        },
-      ],
-    },
-    {
       name: "applyUrl",
       type: "text",
       label: "Søknadslenke",
@@ -320,6 +380,25 @@ export const Products: CollectionConfig = {
       },
     },
     {
+      name: "price",
+      type: "number",
+      required: true,
+      label: "Pris (kr)",
+      admin: {
+        description: "Pris i hele kroner",
+        position: "sidebar",
+      },
+    },
+    {
+      name: "compareAtPrice",
+      type: "number",
+      label: "Førpris (kr)",
+      admin: {
+        description: "Valgfritt – vis en overstrøket førpris for å vise rabatt",
+        position: "sidebar",
+      },
+    },
+    {
       name: "displayOrder",
       type: "number",
       label: "Visningsrekkefølge",
@@ -327,7 +406,7 @@ export const Products: CollectionConfig = {
       admin: {
         position: "sidebar",
         description:
-          "Styrer rekkefølgen i produktoversikten – lavest tall vises først (f.eks. 1 for boka). Produkter uten verdi havner bakerst, sortert på nyeste først.",
+          "Lavere tall vises først i produktoversikten (f.eks. 1 for boka). Produkter uten verdi havner bakerst, nyeste først.",
       },
     },
     {
@@ -337,7 +416,7 @@ export const Products: CollectionConfig = {
       label: "Aktiv",
       admin: {
         position: "sidebar",
-        description: "Deaktiver for å skjule produktet",
+        description: "Skru av for å skjule produktet fra nettsiden",
       },
     },
     {
@@ -350,5 +429,6 @@ export const Products: CollectionConfig = {
         position: "sidebar",
       },
     },
+    ...qualityDataFields({ sidebarSection: true }),
   ],
 };

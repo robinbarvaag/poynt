@@ -389,6 +389,115 @@ const GUIDELINES: Record<string, GuidelineConfig> = {
       ...seoChecks,
     ],
   },
+  homepage: {
+    title: "Slik bygger du en forside som selger",
+    intro:
+      "Forsiden er det første de fleste ser. Tenk på den som en liten fortelling: først et løfte, så bevis, til slutt én tydelig ting leseren kan gjøre. Sidesjekken under sier ifra hvis oppbyggingen bør justeres.",
+    arc: [
+      {
+        title: "Løftet",
+        text: "Hero-en svarer på fem sekunder: hva er dette, hvem er det for, hvorfor bry seg? Konkret løfte slår smart formulering.",
+      },
+      {
+        title: "Beviset",
+        text: "Vis, ikke påstå: tall, kundeomtaler, logoer, kundehistorier. Veksle mellom tekst og visuelle seksjoner så siden får rytme.",
+      },
+      {
+        title: "Handlingen",
+        text: "ETT tydelig hovedmål, med muntlig knappetekst («Ta en prat», ikke «Les mer»). Avslutt med en CTA-seksjon.",
+      },
+    ],
+    checks: [
+      {
+        label: "Forsiden starter med en Hero",
+        test: (f) => f["layout.0.blockType"]?.value === "hero",
+      },
+      {
+        label: "Minst tre seksjoner (løfte → bevis → handling)",
+        test: (f) => arrayRows(f, "layout") >= 3,
+      },
+      ...seoChecks,
+    ],
+  },
+  products: {
+    title: "Slik beskriver du et produkt som selger",
+    intro:
+      "Kjøperen lurer på tre ting: hva er dette, passer det for meg, og hva får jeg for pengene? Svar på alle tre — konkret og uten fagord.",
+    arc: [
+      {
+        title: "Hva det er",
+        text: "Den korte beskrivelsen sier på én–to setninger hva produktet er og hvem det er for. Den vises i oversikter og i Google.",
+      },
+      {
+        title: "Hvorfor kjøpe",
+        text: "Den detaljerte beskrivelsen og innholdsseksjonene viser hva kjøperen sitter igjen med — smakebiter, sitater og salgspunkt bygger lyst og trygghet.",
+      },
+      {
+        title: "Praktisk info",
+        text: "Svar på det folk lurer på før de trykker kjøp: format, levering, varianter. Bruk merknaden til viktige beskjeder (f.eks. forhåndssalg).",
+      },
+    ],
+    checks: [
+      {
+        label: "Kort beskrivelse er fylt ut (vises i oversikter og Google)",
+        test: (f) => has(f, "shortDescription"),
+      },
+      {
+        label: "Hovedbilde er valgt",
+        test: (f) => has(f, "featuredImage"),
+      },
+      {
+        label: "Produktsiden har innhold (beskrivelse eller seksjoner)",
+        test: (f) => has(f, "description") || arrayRows(f, "storySections") > 0,
+      },
+      {
+        label: "Minst ett salgspunkt ved kjøpsknappen",
+        test: (f) => arrayRows(f, "highlights") > 0,
+      },
+      {
+        label: "Pris er satt",
+        test: (f) => has(f, "price"),
+      },
+      ...seoChecks,
+    ],
+  },
+  courses: {
+    title: "Slik bygger du et godt kurs",
+    intro:
+      "Kursene er for medlemmene i On Poynt. Et godt kurs tar dem fra «hvor begynner jeg?» til noe de faktisk får til — én modul og én leksjon om gangen.",
+    arc: [
+      {
+        title: "Hvem og hvorfor",
+        text: "Utdraget sier hvem kurset er for og hva de sitter igjen med. Da vet medlemmet om det er verdt tiden før de starter.",
+      },
+      {
+        title: "Moduler og leksjoner",
+        text: "Del kurset i moduler med et tydelig tema hver. Korte leksjoner slår lange — heller ti på fem minutter enn tre på tjue.",
+      },
+      {
+        title: "Gjør det praktisk",
+        text: "Bruk steg-for-steg med skjermbilder der medlemmet skal GJØRE noe, og legg ved maler og filer under Ressurser.",
+      },
+    ],
+    checks: [
+      {
+        label: "Utdrag er fylt ut (hvem + hva de sitter igjen med)",
+        test: (f) => has(f, "excerpt"),
+      },
+      {
+        label: "Hovedbilde er valgt",
+        test: (f) => has(f, "featuredImage"),
+      },
+      {
+        label: "Kurset har minst én modul",
+        test: (f) => arrayRows(f, "modules") > 0,
+      },
+      {
+        label: "Minst én kategori er satt",
+        test: (f) => hasAny(f, "categories"),
+      },
+    ],
+  },
   guides: {
     title: "Slik skriver du en god guide",
     intro:
@@ -442,9 +551,12 @@ const sectionLabel: CSSProperties = {
 };
 
 export const ContentGuidelines = () => {
-  const { collectionSlug } = useDocumentInfo();
+  // Globaler (Forside) har globalSlug i stedet for collectionSlug — samme
+  // config-oppslag for begge.
+  const { collectionSlug, globalSlug } = useDocumentInfo();
   const [fields] = useAllFormFields();
-  const config = collectionSlug ? GUIDELINES[collectionSlug] : undefined;
+  const slug = collectionSlug ?? globalSlug;
+  const config = slug ? GUIDELINES[slug] : undefined;
   if (!config) return null;
 
   const results = config.checks.map((check) => ({

@@ -20,4 +20,7 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun run check:ci
       - run: bun run typecheck
+        env:
+          # tsc for web (Payload-typene) sprenger Nodes standard-heap på ~4 GB
+          NODE_OPTIONS: --max-old-space-size=8192
       - run: bun run test
