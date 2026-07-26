@@ -110,8 +110,8 @@ export const toolResultSchema = z.object({
   workspaceId: z.string(),
   toolId: z.string(),
   title: z.string().nullable(),
-  inputs: z.record(z.unknown()).nullable(),
-  result: z.record(z.unknown()).nullable(),
+  inputs: z.record(z.string(), z.unknown()).nullable(),
+  result: z.record(z.string(), z.unknown()).nullable(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
@@ -121,8 +121,8 @@ export type ToolResultType = z.infer<typeof toolResultSchema>;
 export const createToolResultSchema = z.object({
   toolId: z.string(),
   title: z.string().optional(),
-  inputs: z.record(z.unknown()).optional(),
-  result: z.record(z.unknown()).optional(),
+  inputs: z.record(z.string(), z.unknown()).optional(),
+  result: z.record(z.string(), z.unknown()).optional(),
 });
 
 export type CreateToolResultInput = z.infer<typeof createToolResultSchema>;
@@ -130,7 +130,7 @@ export type CreateToolResultInput = z.infer<typeof createToolResultSchema>;
 export const updateToolResultSchema = z.object({
   id: z.string(),
   title: z.string().optional(),
-  result: z.record(z.unknown()).optional(),
+  result: z.record(z.string(), z.unknown()).optional(),
 });
 
 export type UpdateToolResultInput = z.infer<typeof updateToolResultSchema>;

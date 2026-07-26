@@ -55,7 +55,7 @@ export const inquiryReplyRequestSchema = z.object({
     .min(5, "Lim inn meldingen du vil svare på")
     .max(2000, "Maks 2000 tegn"),
   source: z.enum(inquirySources, {
-    required_error: "Velg hvor meldingen kom fra",
+    error: "Velg hvor meldingen kom fra",
   }),
   sentiment: z.enum(replySentiments).optional(),
   goal: z.enum(inquiryGoals).optional(),

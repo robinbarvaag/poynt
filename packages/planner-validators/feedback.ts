@@ -40,7 +40,7 @@ export const feedbackStatusLabels: Record<FeedbackStatus, string> = {
 };
 
 export const createFeedbackSchema = z.object({
-  category: z.enum(feedbackCategories, { required_error: "Velg en kategori" }),
+  category: z.enum(feedbackCategories, { error: "Velg en kategori" }),
   title: z.string().min(3, "Gi en kort tittel").max(140, "Maks 140 tegn"),
   description: z
     .string()

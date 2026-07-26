@@ -90,10 +90,10 @@ export const yearlyPlannerRequestSchema = z.object({
     .max(200, "Maks 200 tegn"),
   channels: z.array(z.enum(publishChannelTypes)).min(1, "Velg minst én kanal"),
   frequency: z.enum(frequencyTypes, {
-    required_error: "Velg publiseringsfrekvens",
+    error: "Velg publiseringsfrekvens",
   }),
   audience: z.enum(audienceTypes, {
-    required_error: "Velg målgruppe",
+    error: "Velg målgruppe",
   }),
 
   // Valgfritt

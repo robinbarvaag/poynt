@@ -16,12 +16,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: "1.2.0" # hold i takt med packageManager i package.json
+          bun-version: "1.3.3" # hold i takt med packageManager i package.json
       - run: bun install --frozen-lockfile
       - run: bun run check:ci
-      # Sekvensielt + stor heap: tsc for web (Payload-typene) trenger >4 GB,
-      # og parallelle tsc-prosesser med stor heap OOM-dreper runneren (16 GB)
-      - run: bun run typecheck --concurrency=1
+      - run: bun run typecheck
         env:
-          NODE_OPTIONS: --max-old-space-size=12288
+          NODE_OPTIONS: --max-old-space-size=8192
       - run: bun run test

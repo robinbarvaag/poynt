@@ -61,14 +61,14 @@ export const toneTypeLabels: Record<(typeof toneTypes)[number], string> = {
 export const declineRequestSchema = z.object({
   situationType: z
     .enum(situationTypes, {
-      required_error: "Velg hva du vil si nei til",
+      error: "Velg hva du vil si nei til",
     })
     .optional(),
   relationship: z.enum(relationshipTypes, {
-    required_error: "Velg din relasjon til personen",
+    error: "Velg din relasjon til personen",
   }),
   tone: z.enum(toneTypes, {
-    required_error: "Velg ønsket tone",
+    error: "Velg ønsket tone",
   }),
   keepDoorOpen: z.boolean(),
   additionalContext: z

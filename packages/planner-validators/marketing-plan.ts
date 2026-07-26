@@ -103,13 +103,13 @@ export const marketingPlanRequestSchema = z.object({
     .min(1, "Beskriv hvilken bransje du jobber i")
     .max(200, "Maks 200 tegn"),
   companySize: z.enum(companySizeTypes, {
-    required_error: "Velg bedriftsstørrelse",
+    error: "Velg bedriftsstørrelse",
   }),
   mainGoal: z.enum(marketingGoalTypes, {
-    required_error: "Velg ditt hovedmål",
+    error: "Velg ditt hovedmål",
   }),
   timeframe: z.enum(timeframeTypes, {
-    required_error: "Velg tidsramme for planen",
+    error: "Velg tidsramme for planen",
   }),
 
   // Valgfritt

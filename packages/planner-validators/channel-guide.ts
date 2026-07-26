@@ -104,16 +104,16 @@ export const previousChannelLabels: Record<
 export const channelGuideRequestSchema = z.object({
   industryId: z.string().min(1, "Velg hvilken bransje du jobber i"),
   targetAudience: z.enum(targetAudienceTypes, {
-    required_error: "Velg din målgruppe",
+    error: "Velg din målgruppe",
   }),
   mainGoal: z.enum(mainGoalTypes, {
-    required_error: "Velg ditt hovedmål",
+    error: "Velg ditt hovedmål",
   }),
   weeklyTime: z.enum(weeklyTimeTypes, {
-    required_error: "Velg hvor mye tid du har tilgjengelig",
+    error: "Velg hvor mye tid du har tilgjengelig",
   }),
   strengths: z.enum(strengthTypes, {
-    required_error: "Velg dine styrker",
+    error: "Velg dine styrker",
   }),
   previousChannels: z.array(z.enum(previousChannelTypes)).optional(),
   previousExperience: z
