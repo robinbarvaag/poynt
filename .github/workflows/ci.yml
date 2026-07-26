@@ -19,8 +19,9 @@ jobs:
           bun-version: "1.2.0" # hold i takt med packageManager i package.json
       - run: bun install --frozen-lockfile
       - run: bun run check:ci
-      - run: bun run typecheck
+      # Sekvensielt + stor heap: tsc for web (Payload-typene) trenger >4 GB,
+      # og parallelle tsc-prosesser med stor heap OOM-dreper runneren (16 GB)
+      - run: bun run typecheck --concurrency=1
         env:
-          # tsc for web (Payload-typene) sprenger Nodes standard-heap på ~4 GB
-          NODE_OPTIONS: --max-old-space-size=8192
+          NODE_OPTIONS: --max-old-space-size=12288
       - run: bun run test
