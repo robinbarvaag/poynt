@@ -1,6 +1,6 @@
 "use client";
 
-import { Drawer, useModal } from "@payloadcms/ui";
+import { Button, Drawer, useModal } from "@payloadcms/ui";
 import { useCallback, useState } from "react";
 import {
   type StockImage,
@@ -27,23 +27,17 @@ import {
 
 const tabs: {
   value: StockSource;
-  icon: string;
   title: string;
-  subtitle: string;
   placeholder: string;
 }[] = [
   {
     value: "pexels",
-    icon: "📷",
-    title: "Pexels",
-    subtitle: "Gratis foto",
+    title: "Foto (Pexels)",
     placeholder: "F.eks. «kontor», «natur», «team»…",
   },
   {
     value: "giphy",
-    icon: "🎞️",
-    title: "Giphy",
-    subtitle: "Animerte GIF-er",
+    title: "GIF-er (Giphy)",
     placeholder: "F.eks. «celebration», «thumbs up»…",
   },
 ];
@@ -125,75 +119,25 @@ export const StockPickerDrawer = ({
   };
 
   return (
-    <Drawer slug={drawerSlug} title="Finn gratis bilde">
+    <Drawer slug={drawerSlug} title="Finn gratisbilde">
       <div style={{ display: "flex", flexDirection: "column", gap: "1.1rem" }}>
-        {/* Kilde-valg — tydelig segmentert kontroll */}
-        <div>
-          <span
-            style={{
-              display: "block",
-              marginBottom: "0.45rem",
-              fontSize: "0.8em",
-              fontWeight: 600,
-              color: "var(--theme-elevation-500)",
-            }}
-          >
-            Velg kilde
-          </span>
-          <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap" }}>
-            {tabs.map((t) => {
-              const active = tab === t.value;
-              return (
-                <button
-                  key={t.value}
-                  type="button"
-                  onClick={() => switchTab(t.value)}
-                  aria-pressed={active}
-                  style={{
-                    flex: "1 1 180px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.65rem",
-                    textAlign: "left",
-                    padding: "0.7rem 0.9rem",
-                    cursor: "pointer",
-                    borderRadius: "var(--style-radius-m, 6px)",
-                    border: active
-                      ? "2px solid var(--theme-success-500)"
-                      : "1px solid var(--theme-elevation-150)",
-                    background: active
-                      ? "var(--theme-success-50, var(--theme-elevation-100))"
-                      : "var(--theme-elevation-50)",
-                    color: "var(--theme-text)",
-                  }}
-                >
-                  <span
-                    style={{ fontSize: "1.5em", lineHeight: 1 }}
-                    aria-hidden
-                  >
-                    {t.icon}
-                  </span>
-                  <span
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "0.1rem",
-                    }}
-                  >
-                    <strong style={{ fontSize: "0.95em" }}>{t.title}</strong>
-                    <span
-                      style={{
-                        fontSize: "0.78em",
-                        color: "var(--theme-elevation-500)",
-                      }}
-                    >
-                      {t.subtitle}
-                    </span>
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+        {/* Kilde-valg — pill-knapper i Payload-stil, aktiv kilde er primær */}
+        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+          {tabs.map((t) => {
+            const active = tab === t.value;
+            return (
+              <Button
+                key={t.value}
+                buttonStyle={active ? "primary" : "pill"}
+                size="small"
+                margin={false}
+                aria-label={`Vis ${t.title}`}
+                onClick={() => switchTab(t.value)}
+              >
+                {t.title}
+              </Button>
+            );
+          })}
         </div>
 
         {/* Søk — bevisst en <div>, ikke <form>, for å aldri havne i <form>-i-<form> */}
@@ -219,15 +163,15 @@ export const StockPickerDrawer = ({
               color: "var(--theme-text)",
             }}
           />
-          <button
-            type="button"
-            onClick={() => runSearch(1, false)}
+          <Button
+            buttonStyle="primary"
+            size="medium"
+            margin={false}
             disabled={loading || !query.trim()}
-            className="btn btn--style-primary btn--size-medium"
-            style={{ margin: 0 }}
+            onClick={() => runSearch(1, false)}
           >
             {loading ? "Søker…" : "Søk"}
-          </button>
+          </Button>
         </div>
 
         {/* Notices */}
@@ -361,14 +305,15 @@ export const StockPickerDrawer = ({
 
         {hasMore && (
           <div style={{ textAlign: "center" }}>
-            <button
-              type="button"
-              onClick={() => runSearch(page + 1, true)}
+            <Button
+              buttonStyle="secondary"
+              size="medium"
+              margin={false}
               disabled={loading}
-              className="btn btn--style-secondary btn--size-medium"
+              onClick={() => runSearch(page + 1, true)}
             >
               {loading ? "Laster…" : "Vis flere"}
-            </button>
+            </Button>
           </div>
         )}
 

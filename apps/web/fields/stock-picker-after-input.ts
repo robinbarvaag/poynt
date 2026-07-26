@@ -1,5 +1,5 @@
 /**
- * Monterer «Finn gratis bilde (Pexels/Giphy)»-knappen rett under et upload-felt.
+ * Monterer «Finn gratisbilde»-knappen (Pexels/Giphy) rett under et upload-felt.
  * Spre inn i feltets `admin.components`:
  *
  *   admin: { components: { afterInput: stockPickerAfterInput } }

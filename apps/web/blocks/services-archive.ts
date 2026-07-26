@@ -50,20 +50,28 @@ export const ServicesArchive: Block = {
       },
     },
     {
-      name: "layout",
-      type: "select",
-      label: "Layout",
-      defaultValue: "grid",
-      options: [
-        { label: "Grid (3 kolonner)", value: "grid" },
-        { label: "Liste", value: "list" },
+      // Presentasjonsvalg samlet nederst (kun visning — samme feltnavn/skjema).
+      type: "collapsible",
+      label: "Utseende",
+      admin: { initCollapsed: true },
+      fields: [
+        {
+          name: "layout",
+          type: "select",
+          label: "Layout",
+          defaultValue: "grid",
+          options: [
+            { label: "Grid (3 kolonner)", value: "grid" },
+            { label: "Liste", value: "list" },
+          ],
+        },
+        {
+          name: "showMoreLink",
+          type: "checkbox",
+          label: "Vis 'Se alle'-lenke",
+          defaultValue: false,
+        },
       ],
-    },
-    {
-      name: "showMoreLink",
-      type: "checkbox",
-      label: "Vis 'Se alle'-lenke",
-      defaultValue: false,
     },
   ],
 };

@@ -23,25 +23,33 @@ export const ContentMedia: Block = {
     { name: "ctaUrl", type: "text", label: "Knappe-URL" },
     { name: "image", type: "upload", relationTo: "media", label: "Bilde" },
     {
-      name: "mediaSide",
-      type: "select",
-      label: "Hvilken side bildet ligger på",
-      defaultValue: "right",
-      options: [
-        { label: "Høyre", value: "right" },
-        { label: "Venstre", value: "left" },
-      ],
-    },
-    {
-      name: "accent",
-      type: "select",
-      label: "Aksentfarge (marker + blokk bak bildet)",
-      defaultValue: "saffron",
-      options: [
-        { label: "Aksent 1 (cream)", value: "saffron" },
-        { label: "Aksent 2 (rosa)", value: "salmon" },
-        { label: "Grønn", value: "primary" },
-        { label: "Aksent 3 (mint)", value: "mint" },
+      // Presentasjonsvalg samlet nederst (kun visning — samme feltnavn/skjema).
+      type: "collapsible",
+      label: "Utseende",
+      admin: { initCollapsed: true },
+      fields: [
+        {
+          name: "mediaSide",
+          type: "select",
+          label: "Hvilken side bildet ligger på",
+          defaultValue: "right",
+          options: [
+            { label: "Høyre", value: "right" },
+            { label: "Venstre", value: "left" },
+          ],
+        },
+        {
+          name: "accent",
+          type: "select",
+          label: "Aksentfarge (marker + blokk bak bildet)",
+          defaultValue: "saffron",
+          options: [
+            { label: "Aksent 1 (cream)", value: "saffron" },
+            { label: "Aksent 2 (rosa)", value: "salmon" },
+            { label: "Grønn", value: "primary" },
+            { label: "Aksent 3 (mint)", value: "mint" },
+          ],
+        },
       ],
     },
   ],

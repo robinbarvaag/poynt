@@ -7,6 +7,7 @@ import {
   type ReadinessField,
   ToolReadiness,
 } from "@/components/planner/tool-readiness";
+import { stepFade } from "@/lib/motion-variants";
 import { channelGuideStreamAction } from "@/lib/planner/actions/channel-guide";
 import { useToolStream } from "@/lib/planner/use-tool-stream";
 import type {
@@ -29,12 +30,6 @@ import { Icon } from "@poynt/ui/icons";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useState } from "react";
-
-const fadeIn = {
-  hidden: { opacity: 0, y: 10 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
-  exit: { opacity: 0, y: -10, transition: { duration: 0.2 } },
-};
 
 const CHANNEL_STEPS: ToolIntroStep[] = [
   {
@@ -184,7 +179,7 @@ export function ChannelGuideClient({
         {view === "ready" && (
           <motion.div
             key="ready"
-            variants={fadeIn}
+            variants={stepFade}
             initial="hidden"
             animate="visible"
             exit="exit"
@@ -244,7 +239,7 @@ export function ChannelGuideClient({
         {view === "saved" && initialSavedResult && (
           <motion.div
             key="saved"
-            variants={fadeIn}
+            variants={stepFade}
             initial="hidden"
             animate="visible"
             exit="exit"
@@ -261,7 +256,7 @@ export function ChannelGuideClient({
         {view === "quiz" && (
           <motion.div
             key="quiz"
-            variants={fadeIn}
+            variants={stepFade}
             initial="hidden"
             animate="visible"
             exit="exit"
@@ -279,7 +274,7 @@ export function ChannelGuideClient({
         {view === "result" && (
           <motion.div
             key="result"
-            variants={fadeIn}
+            variants={stepFade}
             initial="hidden"
             animate="visible"
             exit="exit"

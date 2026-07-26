@@ -38,7 +38,7 @@ export function DownloadCard({
         ? { download: true }
         : { target: "_blank", rel: "noopener noreferrer" })}
       className={cn(
-        "group/dl flex items-center gap-4 rounded-2xl bg-card p-4 ring-1 ring-foreground/10 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md",
+        "group/dl flex items-center gap-4 rounded-2xl bg-card p-4 ring-1 ring-foreground/10 transition-[transform,box-shadow] duration-300 motion-safe:hover:-translate-y-0.5 hover:shadow-md",
         className
       )}
     >

@@ -9,17 +9,6 @@ export const CtaSection: Block = {
   },
   fields: [
     {
-      name: "variant",
-      type: "select",
-      defaultValue: "simple",
-      options: [
-        { label: "Enkel", value: "simple" },
-        { label: "Med bakgrunnsfarge", value: "colored" },
-        { label: "Med bakgrunnsbilde", value: "image" },
-      ],
-      label: "Variant",
-    },
-    {
       name: "title",
       type: "text",
       required: true,
@@ -29,15 +18,6 @@ export const CtaSection: Block = {
       name: "description",
       type: "textarea",
       label: "Beskrivelse",
-    },
-    {
-      name: "backgroundImage",
-      type: "upload",
-      relationTo: "media",
-      label: "Bakgrunnsbilde",
-      admin: {
-        condition: (data, siblingData) => siblingData?.variant === "image",
-      },
     },
     {
       name: "primaryCta",
@@ -72,6 +52,34 @@ export const CtaSection: Block = {
           name: "url",
           type: "text",
           label: "Lenke",
+        },
+      ],
+    },
+    {
+      // Presentasjonsvalg samlet nederst (kun visning — samme feltnavn/skjema).
+      type: "collapsible",
+      label: "Utseende",
+      admin: { initCollapsed: true },
+      fields: [
+        {
+          name: "variant",
+          type: "select",
+          defaultValue: "simple",
+          options: [
+            { label: "Enkel", value: "simple" },
+            { label: "Med bakgrunnsfarge", value: "colored" },
+            { label: "Med bakgrunnsbilde", value: "image" },
+          ],
+          label: "Variant",
+        },
+        {
+          name: "backgroundImage",
+          type: "upload",
+          relationTo: "media",
+          label: "Bakgrunnsbilde",
+          admin: {
+            condition: (data, siblingData) => siblingData?.variant === "image",
+          },
         },
       ],
     },

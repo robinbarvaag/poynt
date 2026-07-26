@@ -15,14 +15,22 @@ export const Newsletter: Block = {
     { name: "buttonText", type: "text", label: "Knappetekst" },
     { name: "placeholder", type: "text", label: "Plassholder i e-postfeltet" },
     {
-      name: "variant",
-      type: "select",
-      label: "Bånd-farge",
-      defaultValue: "primary",
-      options: [
-        { label: "Grønn", value: "primary" },
-        { label: "Aksent 1 (cream)", value: "saffron" },
-        { label: "Aksent 2 (rosa)", value: "salmon" },
+      // Presentasjonsvalg samlet nederst (kun visning — samme feltnavn/skjema).
+      type: "collapsible",
+      label: "Utseende",
+      admin: { initCollapsed: true },
+      fields: [
+        {
+          name: "variant",
+          type: "select",
+          label: "Bånd-farge",
+          defaultValue: "primary",
+          options: [
+            { label: "Grønn", value: "primary" },
+            { label: "Aksent 1 (cream)", value: "saffron" },
+            { label: "Aksent 2 (rosa)", value: "salmon" },
+          ],
+        },
       ],
     },
   ],

@@ -374,7 +374,7 @@ export function GuideQuiz({
                             aria-pressed={isChecked}
                             className={cn(
                               "ring-foreground/10 bg-card text-card-foreground w-full rounded-xl py-4 text-left text-sm ring-1",
-                              "cursor-pointer transition-all duration-200 hover:scale-[1.02]",
+                              "cursor-pointer transition-[border-color,background-color,box-shadow] duration-200",
                               isChecked
                                 ? "ring-2 ring-primary bg-primary/5 border-primary"
                                 : "hover:border-primary/50"

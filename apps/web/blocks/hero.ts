@@ -54,17 +54,6 @@ export const Hero: Block = {
       },
     },
     {
-      name: "imageDuotone",
-      type: "checkbox",
-      defaultValue: false,
-      label: "Fargefilter på bildet",
-      admin: {
-        description:
-          "Legg et mykt merkefarge-filter (duotone) over bildet. Egner seg for illustrasjoner/grafikk — skru av for ekte foto av personer.",
-        condition: (_, siblingData) => Boolean(siblingData?.image),
-      },
-    },
-    {
       name: "primaryCta",
       type: "group",
       label: "Primær CTA",
@@ -95,6 +84,25 @@ export const Hero: Block = {
           name: "url",
           type: "text",
           label: "Lenke",
+        },
+      ],
+    },
+    {
+      // Presentasjonsvalg samlet nederst (kun visning — samme feltnavn/skjema).
+      type: "collapsible",
+      label: "Utseende",
+      admin: { initCollapsed: true },
+      fields: [
+        {
+          name: "imageDuotone",
+          type: "checkbox",
+          defaultValue: false,
+          label: "Fargefilter på bildet",
+          admin: {
+            description:
+              "Legg et mykt merkefarge-filter (duotone) over bildet. Egner seg for illustrasjoner/grafikk — skru av for ekte foto av personer.",
+            condition: (_, siblingData) => Boolean(siblingData?.image),
+          },
         },
       ],
     },

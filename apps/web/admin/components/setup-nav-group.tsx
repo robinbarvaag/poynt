@@ -5,10 +5,24 @@ import { usePathname } from "next/navigation";
 
 const baseClass = "nav";
 
+// Driftsting partneren sjelden trenger: teknisk oppsett og innstillinger.
+// Globals/collections her er skjult fra standard-nav via `group: false`.
 const links = [
   {
     href: "/admin/oppsett",
     label: "Betalingsoppsett",
+  },
+  {
+    href: "/admin/globals/site-settings",
+    label: "Nettsted-innstillinger",
+  },
+  {
+    href: "/admin/globals/checkout-settings",
+    label: "Kasse og kvittering",
+  },
+  {
+    href: "/admin/collections/redirects",
+    label: "Omdirigeringer",
   },
 ];
 

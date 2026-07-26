@@ -25,9 +25,10 @@ import {
 } from "@poynt/ui";
 import { Icon } from "@poynt/ui/icons";
 import { cn } from "@poynt/ui/lib/utils";
+import { duration, easeSoft, staggerStep } from "@poynt/ui/motion";
 import type { DeepPartial } from "ai";
 import type { DriveStep } from "driver.js";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { TourButton } from "../planner/tour";
 import { PlannerCalendar } from "./planner-calendar";
@@ -130,6 +131,7 @@ export function PlannerResult({
   calendarFeed,
   business,
 }: PlannerResultProps) {
+  const reduce = useReducedMotion();
   // Standard = kalender (arbeidsflaten). «Oversikt» = hjulet (zoom ut).
   const [view, setView] = useState<"calendar" | "wheel">("calendar");
   // Lander på inneværende måned hvis den finnes i planen (et lagret årshjul har
@@ -333,9 +335,13 @@ export function PlannerResult({
               return (
                 <motion.div
                   key={`slot-${monthNumber}`}
-                  initial={{ opacity: 0, scale: 0 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.3 }}
+                  initial={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.9 }}
+                  animate={reduce ? { opacity: 1 } : { opacity: 1, scale: 1 }}
+                  transition={{
+                    duration: duration.fast,
+                    ease: easeSoft,
+                    delay: reduce ? 0 : (monthNumber - 1) * (staggerStep / 2),
+                  }}
                   className="-translate-x-1/2 -translate-y-1/2 absolute transform cursor-default"
                   style={{ left: `${x}%`, top: `${y}%` }}
                   title="Ikke planlagt"
@@ -362,16 +368,20 @@ export function PlannerResult({
             return (
               <motion.div
                 key={`slot-${monthNumber}`}
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3 }}
+                initial={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.9 }}
+                animate={reduce ? { opacity: 1 } : { opacity: 1, scale: 1 }}
+                transition={{
+                  duration: duration.fast,
+                  ease: easeSoft,
+                  delay: reduce ? 0 : (monthNumber - 1) * (staggerStep / 2),
+                }}
                 className="-translate-x-1/2 -translate-y-1/2 absolute transform cursor-pointer"
                 style={{ left: `${x}%`, top: `${y}%` }}
                 onClick={() => goToMonth(planIndex)}
               >
                 <div
                   className={cn(
-                    "relative flex size-20 flex-col items-center justify-center rounded-full border-2 text-foreground transition-all duration-300 hover:scale-110 hover:border-primary hover:shadow-lg sm:size-24",
+                    "relative flex size-20 flex-col items-center justify-center rounded-full border-2 text-foreground transition-[transform,border-color,box-shadow,background-color] duration-300 motion-safe:hover:scale-105 hover:border-primary hover:shadow-lg sm:size-24",
                     monthIndex === planIndex
                       ? "border-primary bg-primary/15 text-primary ring-2 ring-primary/30"
                       : heat

@@ -24,16 +24,6 @@ export const PathCards: Block = {
       label: "Ingress",
     },
     {
-      name: "columns",
-      type: "select",
-      label: "Antall kolonner",
-      defaultValue: "2",
-      options: [
-        { label: "2 (to dører)", value: "2" },
-        { label: "3 (tre veier)", value: "3" },
-      ],
-    },
-    {
       name: "paths",
       type: "array",
       label: "Kort",
@@ -97,6 +87,24 @@ export const PathCards: Block = {
             { label: "Aksent 2 (rosa)", value: "salmon" },
             { label: "Aksent 3 (mint)", value: "mint" },
             { label: "Primær (mørk grønn)", value: "primary" },
+          ],
+        },
+      ],
+    },
+    {
+      // Presentasjonsvalg samlet nederst (kun visning — samme feltnavn/skjema).
+      type: "collapsible",
+      label: "Utseende",
+      admin: { initCollapsed: true },
+      fields: [
+        {
+          name: "columns",
+          type: "select",
+          label: "Antall kolonner",
+          defaultValue: "2",
+          options: [
+            { label: "2 (to dører)", value: "2" },
+            { label: "3 (tre veier)", value: "3" },
           ],
         },
       ],

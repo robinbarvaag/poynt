@@ -18,9 +18,9 @@ export interface Stat {
 export interface StatsBandProps {
   eyebrow?: string;
   title?: string;
-  /** Brødtekst — brukes primært i `split`-layouten. */
+  /** Brødtekst — sentrert under tittelen i `band`, venstrestilt i `split`. */
   description?: string;
-  /** Valgfri CTA under teksten i `split`-layouten. */
+  /** Valgfri CTA — sentrert under tallene i `band`, under teksten i `split`. */
   cta?: { text: string; href: string };
   stats: Stat[];
   /**
@@ -39,7 +39,8 @@ export interface StatsBandProps {
 }
 
 // `panel` = farge + tekstfarge på det flytende panelet. Tall-/etikett-/grid-
-// farger har god kontrast på hver paneltone (`grid` = svak dot-tekstur).
+// farger har god kontrast på hver paneltone (`grid` = svak dot-tekstur,
+// `button` = knappevariant med kontrast mot panelet — jf. Newsletter).
 const themes = {
   primary: {
     surface: "primary",
@@ -47,7 +48,9 @@ const themes = {
     label: "text-primary-foreground/80",
     eyebrow: "text-primary-foreground/70",
     heading: "white",
+    description: "text-primary-foreground/80",
     grid: "text-primary-foreground/20",
+    button: "saffron",
   },
   salmon: {
     surface: "salmon",
@@ -55,7 +58,9 @@ const themes = {
     label: "text-foreground/70",
     eyebrow: "text-foreground/60",
     heading: "foreground",
+    description: "text-foreground/75",
     grid: "text-foreground/10",
+    button: "ink",
   },
   saffron: {
     surface: "saffron",
@@ -63,15 +68,18 @@ const themes = {
     label: "text-foreground/70",
     eyebrow: "text-foreground/60",
     heading: "foreground",
+    description: "text-foreground/75",
     grid: "text-foreground/10",
+    button: "ink",
   },
 } as const;
 
 /**
- * Tall-/bevis-seksjon i to utgaver: `band` (mettet fargepanel, sentrert) og
- * `split` (venstrestilt tekst + tall som motvekt, ingen fargeflate). Store
- * tall teller opp i viewport. Innholds-only — BlockSection/siden eier
- * seksjon og spacing; komponenten rendrer kun sin `Container`.
+ * Tall-/bevis-seksjon i to utgaver: `band` (mettet fargepanel, sentrert, med
+ * valgfri brødtekst og CTA) og `split` (venstrestilt tekst + tall som
+ * motvekt, ingen fargeflate). Store tall teller opp i viewport. Innholds-only
+ * — BlockSection/siden eier seksjon og spacing; komponenten rendrer kun sin
+ * `Container`.
  */
 export function StatsBand({
   eyebrow,
@@ -140,7 +148,7 @@ export function StatsBand({
         <Panel surface={theme.surface}>
           <GridPattern variant="dots" fade className={theme.grid} />
           <div className="relative z-10">
-            {(eyebrow || title) && (
+            {(eyebrow || title || description) && (
               <div className="mb-12 text-center">
                 {eyebrow && (
                   <Eyebrow className={theme.eyebrow}>{eyebrow}</Eyebrow>
@@ -154,6 +162,16 @@ export function StatsBand({
                   >
                     {title}
                   </Heading>
+                )}
+                {description && (
+                  <Text
+                    customStyles={cn(
+                      "mx-auto mt-4 max-w-2xl text-balance",
+                      theme.description
+                    )}
+                  >
+                    {description}
+                  </Text>
                 )}
               </div>
             )}
@@ -176,6 +194,17 @@ export function StatsBand({
                 </div>
               ))}
             </div>
+
+            {cta && (
+              <div className="mt-12 text-center">
+                {link(
+                  cta.href,
+                  <Button size="lg" variant={theme.button}>
+                    {cta.text}
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
         </Panel>
       </Reveal>

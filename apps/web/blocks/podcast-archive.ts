@@ -28,10 +28,18 @@ export const PodcastArchive: Block = {
       },
     },
     {
-      name: "showMoreLink",
-      type: "checkbox",
-      label: "Vis 'Se alle'-lenke",
-      defaultValue: true,
+      // Presentasjonsvalg samlet nederst (kun visning — samme feltnavn/skjema).
+      type: "collapsible",
+      label: "Utseende",
+      admin: { initCollapsed: true },
+      fields: [
+        {
+          name: "showMoreLink",
+          type: "checkbox",
+          label: "Vis 'Se alle'-lenke",
+          defaultValue: true,
+        },
+      ],
     },
   ],
 };

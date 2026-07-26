@@ -250,7 +250,9 @@ export default buildConfig({
       collections: ["pages", "products", "blog-posts", "case-studies"],
       overrides: {
         admin: {
-          group: "Innstillinger",
+          // Ligger i den egenbygde «Drift»-nav-gruppen (setup-nav-group.tsx),
+          // ikke i Payloads standard-nav.
+          group: false,
         },
         labels: {
           singular: "Omdirigering",
@@ -261,7 +263,7 @@ export default buildConfig({
     formBuilderPlugin({
       formOverrides: {
         admin: {
-          group: "Skjemaer",
+          group: "Kommunikasjon",
         },
         labels: {
           singular: "Skjema",
@@ -270,7 +272,7 @@ export default buildConfig({
       },
       formSubmissionOverrides: {
         admin: {
-          group: "Skjemaer",
+          group: "Kommunikasjon",
         },
         labels: {
           singular: "Innsending",

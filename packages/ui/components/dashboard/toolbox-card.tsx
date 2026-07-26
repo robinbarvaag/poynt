@@ -30,7 +30,7 @@ export function ToolboxCard({
   return (
     <Card
       asChild
-      className="group h-full p-0 transition-all hover:-translate-y-0.5"
+      className="group h-full p-0 transition-[transform,box-shadow,border-color] motion-safe:hover:-translate-y-0.5"
     >
       <a href={href}>
         <div className="flex h-full flex-col gap-3 p-5">

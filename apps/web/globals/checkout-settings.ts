@@ -9,7 +9,9 @@ export const CheckoutSettings: GlobalConfig = {
   slug: "checkout-settings",
   label: "Kasse og kvittering",
   admin: {
-    group: "Innstillinger",
+    // Ligger i den egenbygde «Drift»-nav-gruppen (setup-nav-group.tsx),
+    // ikke i Payloads standard-nav.
+    group: false,
   },
   fields: [
     {

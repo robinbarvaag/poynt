@@ -24,29 +24,6 @@ export const Testimonials: Block = {
       label: "Ingress",
     },
     {
-      name: "layout",
-      type: "select",
-      defaultValue: "cards",
-      options: [
-        { label: "Kort", value: "cards" },
-        { label: "Stor sitat", value: "quote" },
-      ],
-      label: "Layout",
-    },
-    {
-      name: "columns",
-      type: "select",
-      label: "Antall kolonner",
-      defaultValue: "3",
-      admin: {
-        condition: (_, siblingData) => siblingData?.layout !== "quote",
-      },
-      options: [
-        { label: "2", value: "2" },
-        { label: "3", value: "3" },
-      ],
-    },
-    {
       name: "testimonials",
       type: "array",
       label: "Anmeldelser",
@@ -96,6 +73,37 @@ export const Testimonials: Block = {
           min: 1,
           max: 5,
           label: "Vurdering (1-5)",
+        },
+      ],
+    },
+    {
+      // Presentasjonsvalg samlet nederst (kun visning — samme feltnavn/skjema).
+      type: "collapsible",
+      label: "Utseende",
+      admin: { initCollapsed: true },
+      fields: [
+        {
+          name: "layout",
+          type: "select",
+          defaultValue: "cards",
+          options: [
+            { label: "Kort", value: "cards" },
+            { label: "Stor sitat", value: "quote" },
+          ],
+          label: "Layout",
+        },
+        {
+          name: "columns",
+          type: "select",
+          label: "Antall kolonner",
+          defaultValue: "3",
+          admin: {
+            condition: (_, siblingData) => siblingData?.layout !== "quote",
+          },
+          options: [
+            { label: "2", value: "2" },
+            { label: "3", value: "3" },
+          ],
         },
       ],
     },

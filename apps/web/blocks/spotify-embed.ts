@@ -39,25 +39,33 @@ export const SpotifyEmbed: Block = {
       },
     },
     {
-      name: "height",
-      type: "select",
-      defaultValue: "compact",
-      label: "Størrelse",
-      options: [
-        { label: "Kompakt (152px)", value: "compact" },
-        { label: "Standard (352px)", value: "standard" },
-        { label: "Stor (500px)", value: "large" },
-      ],
-    },
-    {
-      name: "theme",
-      type: "select",
-      defaultValue: "auto",
-      label: "Tema",
-      options: [
-        { label: "Automatisk", value: "auto" },
-        { label: "Lyst", value: "light" },
-        { label: "Mørkt", value: "dark" },
+      // Presentasjonsvalg samlet nederst (kun visning — samme feltnavn/skjema).
+      type: "collapsible",
+      label: "Utseende",
+      admin: { initCollapsed: true },
+      fields: [
+        {
+          name: "height",
+          type: "select",
+          defaultValue: "compact",
+          label: "Størrelse",
+          options: [
+            { label: "Kompakt (152px)", value: "compact" },
+            { label: "Standard (352px)", value: "standard" },
+            { label: "Stor (500px)", value: "large" },
+          ],
+        },
+        {
+          name: "theme",
+          type: "select",
+          defaultValue: "auto",
+          label: "Tema",
+          options: [
+            { label: "Automatisk", value: "auto" },
+            { label: "Lyst", value: "light" },
+            { label: "Mørkt", value: "dark" },
+          ],
+        },
       ],
     },
   ],

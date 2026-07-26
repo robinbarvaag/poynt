@@ -179,14 +179,6 @@ export interface Page {
   id: number;
   title: string;
   /**
-   * Genereres automatisk fra tittel. Bruk 'forside' for forsida.
-   */
-  slug: string;
-  /**
-   * Kort beskrivelse som brukes til SEO og deling
-   */
-  excerpt?: string | null;
-  /**
    * Bygg siden med blokker. Hero = stor intro-seksjon, Innholdsblokk = rik tekst, Mediablokk = bilde/video, Skjema = kontaktskjema, Produkter/Tjenester/Podcast = lister fra databasen, Anmeldelser = kundeomtaler, CTA = handlingsoppfordring, Spotify = podcast-spiller.
    */
   layout?:
@@ -222,21 +214,6 @@ export interface Page {
         id?: string | null;
       }[]
     | null;
-  /**
-   * Settes av AI-vurderingen (0–100).
-   */
-  qualityScore?: number | null;
-  qualityReviewedAt?: string | null;
-  qualityReview?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  publishedAt?: string | null;
   meta?: {
     title?: string | null;
     description?: string | null;
@@ -257,6 +234,29 @@ export interface Page {
      */
     ogType?: ('website' | 'article' | 'product') | null;
   };
+  /**
+   * Genereres automatisk fra tittel. Bruk 'forside' for forsida.
+   */
+  slug: string;
+  /**
+   * Kort beskrivelse som brukes til SEO og deling
+   */
+  excerpt?: string | null;
+  publishedAt?: string | null;
+  /**
+   * Settes av AI-vurderingen (0–100).
+   */
+  qualityScore?: number | null;
+  qualityReviewedAt?: string | null;
+  qualityReview?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -285,10 +285,6 @@ export interface HeroBlock {
    * Vises ved siden av teksten (klippet i organisk form). Uten bilde blir heroen sentrert.
    */
   image?: (number | null) | Media;
-  /**
-   * Legg et mykt merkefarge-filter (duotone) over bildet. Egner seg for illustrasjoner/grafikk — skru av for ekte foto av personer.
-   */
-  imageDuotone?: boolean | null;
   primaryCta?: {
     text?: string | null;
     url?: string | null;
@@ -297,6 +293,10 @@ export interface HeroBlock {
     text?: string | null;
     url?: string | null;
   };
+  /**
+   * Legg et mykt merkefarge-filter (duotone) over bildet. Egner seg for illustrasjoner/grafikk — skru av for ekte foto av personer.
+   */
+  imageDuotone?: boolean | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'hero';
@@ -409,7 +409,6 @@ export interface FeatureGridBlock {
   eyebrow?: string | null;
   title?: string | null;
   intro?: string | null;
-  columns?: ('2' | '3' | '4') | null;
   features?:
     | {
         title: string;
@@ -421,6 +420,7 @@ export interface FeatureGridBlock {
         id?: string | null;
       }[]
     | null;
+  columns?: ('2' | '3' | '4') | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'featureGrid';
@@ -472,21 +472,12 @@ export interface ContentMediaBlock {
  * via the `definition` "StatsBandBlock".
  */
 export interface StatsBandBlock {
-  /**
-   * «Delt» ligger på sidens vanlige bakgrunn og teller ikke som fargepanel — bruk den når siden allerede har to fargepaneler (se komposisjonssjekken).
-   */
-  layout?: ('band' | 'split') | null;
   eyebrow?: string | null;
   title?: string | null;
   /**
-   * Vises ved siden av tallene i «Delt»-utseendet.
+   * I «Bånd» vises den sentrert under tittelen, i «Delt» ved siden av tallene.
    */
   description?: string | null;
-  cta?: {
-    text?: string | null;
-    url?: string | null;
-  };
-  variant?: ('primary' | 'salmon' | 'saffron') | null;
   stats?:
     | {
         value: number;
@@ -496,6 +487,15 @@ export interface StatsBandBlock {
         id?: string | null;
       }[]
     | null;
+  cta?: {
+    text?: string | null;
+    url?: string | null;
+  };
+  /**
+   * «Delt» ligger på sidens vanlige bakgrunn og teller ikke som fargepanel — bruk den når siden allerede har to fargepaneler (se komposisjonssjekken).
+   */
+  layout?: ('band' | 'split') | null;
+  variant?: ('primary' | 'salmon' | 'saffron') | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'statsBand';
@@ -625,7 +625,6 @@ export interface PathCardsBlock {
   eyebrow?: string | null;
   title?: string | null;
   intro?: string | null;
-  columns?: ('2' | '3') | null;
   paths?:
     | {
         eyebrow?: string | null;
@@ -646,6 +645,7 @@ export interface PathCardsBlock {
         id?: string | null;
       }[]
     | null;
+  columns?: ('2' | '3') | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'pathCards';
@@ -658,8 +658,6 @@ export interface TestimonialsBlock {
   eyebrow?: string | null;
   title?: string | null;
   intro?: string | null;
-  layout?: ('cards' | 'quote') | null;
-  columns?: ('2' | '3') | null;
   testimonials?:
     | {
         quote: string;
@@ -675,6 +673,8 @@ export interface TestimonialsBlock {
         id?: string | null;
       }[]
     | null;
+  layout?: ('cards' | 'quote') | null;
+  columns?: ('2' | '3') | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'testimonials';
@@ -684,10 +684,8 @@ export interface TestimonialsBlock {
  * via the `definition` "CtaSectionBlock".
  */
 export interface CtaSectionBlock {
-  variant?: ('simple' | 'colored' | 'image') | null;
   title: string;
   description?: string | null;
-  backgroundImage?: (number | null) | Media;
   primaryCta: {
     text: string;
     url: string;
@@ -696,6 +694,8 @@ export interface CtaSectionBlock {
     text?: string | null;
     url?: string | null;
   };
+  variant?: ('simple' | 'colored' | 'image') | null;
+  backgroundImage?: (number | null) | Media;
   id?: string | null;
   blockName?: string | null;
   blockType: 'ctaSection';
@@ -1373,15 +1373,11 @@ export interface SpotifyEmbedBlock {
 export interface BlogPost {
   id: number;
   title: string;
-  /**
-   * Genereres automatisk fra tittel
-   */
-  slug: string;
+  featuredImage?: (number | null) | Media;
   /**
    * Kort beskrivelse som vises i listeoversikter og SEO
    */
   excerpt?: string | null;
-  featuredImage?: (number | null) | Media;
   content: {
     root: {
       type: string;
@@ -1397,24 +1393,6 @@ export interface BlogPost {
     };
     [k: string]: unknown;
   };
-  author?: (number | null) | User;
-  categories?: (number | Category)[] | null;
-  publishedAt: string;
-  relatedPosts?: (number | BlogPost)[] | null;
-  /**
-   * Settes av AI-vurderingen (0–100).
-   */
-  qualityScore?: number | null;
-  qualityReviewedAt?: string | null;
-  qualityReview?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
   meta?: {
     title?: string | null;
     description?: string | null;
@@ -1435,6 +1413,28 @@ export interface BlogPost {
      */
     ogType?: ('website' | 'article' | 'product') | null;
   };
+  /**
+   * Genereres automatisk fra tittel
+   */
+  slug: string;
+  author?: (number | null) | User;
+  categories?: (number | Category)[] | null;
+  publishedAt: string;
+  relatedPosts?: (number | BlogPost)[] | null;
+  /**
+   * Settes av AI-vurderingen (0–100).
+   */
+  qualityScore?: number | null;
+  qualityReviewedAt?: string | null;
+  qualityReview?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -1484,10 +1484,6 @@ export interface CaseStudy {
    */
   title: string;
   /**
-   * Genereres automatisk fra tittel
-   */
-  slug: string;
-  /**
    * Navnet på bedriften historien handler om
    */
   customer: string;
@@ -1530,6 +1526,30 @@ export interface CaseStudy {
         id?: string | null;
       }[]
     | null;
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+    /**
+     * Aktivér for å hindre Google fra å indeksere denne siden
+     */
+    noIndex?: boolean | null;
+    /**
+     * Overstyr automatisk canonical URL hvis innholdet finnes på en annen URL
+     */
+    canonicalUrl?: string | null;
+    /**
+     * Brukes av sosiale medier ved deling
+     */
+    ogType?: ('website' | 'article' | 'product') | null;
+  };
+  /**
+   * Genereres automatisk fra tittel
+   */
+  slug: string;
   quote?: {
     text?: string | null;
     author?: string | null;
@@ -1553,26 +1573,6 @@ export interface CaseStudy {
     | number
     | boolean
     | null;
-  meta?: {
-    title?: string | null;
-    description?: string | null;
-    /**
-     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
-     */
-    image?: (number | null) | Media;
-    /**
-     * Aktivér for å hindre Google fra å indeksere denne siden
-     */
-    noIndex?: boolean | null;
-    /**
-     * Overstyr automatisk canonical URL hvis innholdet finnes på en annen URL
-     */
-    canonicalUrl?: string | null;
-    /**
-     * Brukes av sosiale medier ved deling
-     */
-    ogType?: ('website' | 'article' | 'product') | null;
-  };
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -2331,8 +2331,6 @@ export interface PayloadMigration {
  */
 export interface PagesSelect<T extends boolean = true> {
   title?: T;
-  slug?: T;
-  excerpt?: T;
   layout?:
     | T
     | {
@@ -2363,10 +2361,6 @@ export interface PagesSelect<T extends boolean = true> {
         answer?: T;
         id?: T;
       };
-  qualityScore?: T;
-  qualityReviewedAt?: T;
-  qualityReview?: T;
-  publishedAt?: T;
   meta?:
     | T
     | {
@@ -2377,6 +2371,12 @@ export interface PagesSelect<T extends boolean = true> {
         canonicalUrl?: T;
         ogType?: T;
       };
+  slug?: T;
+  excerpt?: T;
+  publishedAt?: T;
+  qualityScore?: T;
+  qualityReviewedAt?: T;
+  qualityReview?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -2396,7 +2396,6 @@ export interface HeroBlockSelect<T extends boolean = true> {
         id?: T;
       };
   image?: T;
-  imageDuotone?: T;
   primaryCta?:
     | T
     | {
@@ -2409,6 +2408,7 @@ export interface HeroBlockSelect<T extends boolean = true> {
         text?: T;
         url?: T;
       };
+  imageDuotone?: T;
   id?: T;
   blockName?: T;
 }
@@ -2420,7 +2420,6 @@ export interface FeatureGridBlockSelect<T extends boolean = true> {
   eyebrow?: T;
   title?: T;
   intro?: T;
-  columns?: T;
   features?:
     | T
     | {
@@ -2432,6 +2431,7 @@ export interface FeatureGridBlockSelect<T extends boolean = true> {
         statLabel?: T;
         id?: T;
       };
+  columns?: T;
   id?: T;
   blockName?: T;
 }
@@ -2480,17 +2480,9 @@ export interface ContentMediaBlockSelect<T extends boolean = true> {
  * via the `definition` "StatsBandBlock_select".
  */
 export interface StatsBandBlockSelect<T extends boolean = true> {
-  layout?: T;
   eyebrow?: T;
   title?: T;
   description?: T;
-  cta?:
-    | T
-    | {
-        text?: T;
-        url?: T;
-      };
-  variant?: T;
   stats?:
     | T
     | {
@@ -2500,6 +2492,14 @@ export interface StatsBandBlockSelect<T extends boolean = true> {
         label?: T;
         id?: T;
       };
+  cta?:
+    | T
+    | {
+        text?: T;
+        url?: T;
+      };
+  layout?: T;
+  variant?: T;
   id?: T;
   blockName?: T;
 }
@@ -2608,7 +2608,6 @@ export interface PathCardsBlockSelect<T extends boolean = true> {
   eyebrow?: T;
   title?: T;
   intro?: T;
-  columns?: T;
   paths?:
     | T
     | {
@@ -2626,6 +2625,7 @@ export interface PathCardsBlockSelect<T extends boolean = true> {
         surface?: T;
         id?: T;
       };
+  columns?: T;
   id?: T;
   blockName?: T;
 }
@@ -2637,8 +2637,6 @@ export interface TestimonialsBlockSelect<T extends boolean = true> {
   eyebrow?: T;
   title?: T;
   intro?: T;
-  layout?: T;
-  columns?: T;
   testimonials?:
     | T
     | {
@@ -2651,6 +2649,8 @@ export interface TestimonialsBlockSelect<T extends boolean = true> {
         rating?: T;
         id?: T;
       };
+  layout?: T;
+  columns?: T;
   id?: T;
   blockName?: T;
 }
@@ -2659,10 +2659,8 @@ export interface TestimonialsBlockSelect<T extends boolean = true> {
  * via the `definition` "CtaSectionBlock_select".
  */
 export interface CtaSectionBlockSelect<T extends boolean = true> {
-  variant?: T;
   title?: T;
   description?: T;
-  backgroundImage?: T;
   primaryCta?:
     | T
     | {
@@ -2675,6 +2673,8 @@ export interface CtaSectionBlockSelect<T extends boolean = true> {
         text?: T;
         url?: T;
       };
+  variant?: T;
+  backgroundImage?: T;
   id?: T;
   blockName?: T;
 }
@@ -2754,17 +2754,9 @@ export interface SpotifyEmbedBlockSelect<T extends boolean = true> {
  */
 export interface BlogPostsSelect<T extends boolean = true> {
   title?: T;
-  slug?: T;
-  excerpt?: T;
   featuredImage?: T;
+  excerpt?: T;
   content?: T;
-  author?: T;
-  categories?: T;
-  publishedAt?: T;
-  relatedPosts?: T;
-  qualityScore?: T;
-  qualityReviewedAt?: T;
-  qualityReview?: T;
   meta?:
     | T
     | {
@@ -2775,6 +2767,14 @@ export interface BlogPostsSelect<T extends boolean = true> {
         canonicalUrl?: T;
         ogType?: T;
       };
+  slug?: T;
+  author?: T;
+  categories?: T;
+  publishedAt?: T;
+  relatedPosts?: T;
+  qualityScore?: T;
+  qualityReviewedAt?: T;
+  qualityReview?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -2785,7 +2785,6 @@ export interface BlogPostsSelect<T extends boolean = true> {
  */
 export interface CaseStudiesSelect<T extends boolean = true> {
   title?: T;
-  slug?: T;
   customer?: T;
   excerpt?: T;
   featuredImage?: T;
@@ -2797,6 +2796,17 @@ export interface CaseStudiesSelect<T extends boolean = true> {
         label?: T;
         id?: T;
       };
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+        noIndex?: T;
+        canonicalUrl?: T;
+        ogType?: T;
+      };
+  slug?: T;
   quote?:
     | T
     | {
@@ -2808,16 +2818,6 @@ export interface CaseStudiesSelect<T extends boolean = true> {
   qualityScore?: T;
   qualityReviewedAt?: T;
   qualityReview?: T;
-  meta?:
-    | T
-    | {
-        title?: T;
-        description?: T;
-        image?: T;
-        noIndex?: T;
-        canonicalUrl?: T;
-        ogType?: T;
-      };
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

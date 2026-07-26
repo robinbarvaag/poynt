@@ -41,6 +41,11 @@ const links = [
     href: "/admin/inspirasjon",
     label: "Inspirasjonskilder",
   },
+  // Feature-flaggene for medlemsområdet (global, skjult fra standard-nav).
+  {
+    href: "/admin/globals/on-poynt-features",
+    label: "Funksjoner",
+  },
 ];
 
 export const OnPoyntNavGroup = () => {

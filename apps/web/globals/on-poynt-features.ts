@@ -25,7 +25,9 @@ export const OnPoyntFeatures: GlobalConfig = {
   slug: "on-poynt-features",
   label: "On Poynt-funksjoner",
   admin: {
-    group: "Innstillinger",
+    // Ligger i den egenbygde «On Poynt»-nav-gruppen (on-poynt-nav-group.tsx),
+    // ikke i Payloads standard-nav.
+    group: false,
     description:
       "Skru funksjoner i medlemsområdet av og på. Avskrudde funksjoner forsvinner fra menyen, og sidene blir utilgjengelige for medlemmene.",
   },

@@ -15,7 +15,7 @@ export const Newsletters: CollectionConfig = {
   admin: {
     useAsTitle: "subject",
     defaultColumns: ["subject", "status", "sentAt"],
-    group: "Innhold",
+    group: "Kommunikasjon",
     description:
       "Skriv nyhetsbrevet her, send en test til deg selv, og send så til alle abonnenter.",
   },

@@ -46,20 +46,70 @@ export const BlogPosts: CollectionConfig = {
   },
   fields: [
     {
-      // Visuell skrivehjelp øverst: krok/kjøtt/landing + live sjekkliste.
-      name: "retningslinjer",
-      type: "ui",
-      admin: {
-        components: {
-          Field: "/admin/components/content-guidelines#ContentGuidelines",
+      // Hovedkolonnen i faner (samme mønster som Guider): «Innhold» er selve
+      // innlegget, «Hjelp og kvalitet» samler skrivehjelp og AI-vurdering
+      // utenfor skriveflyten. seoPlugin (tabbedUI) legger «SEO»-fanen til på
+      // slutten fordi tabs-feltet står først i fields.
+      type: "tabs",
+      tabs: [
+        {
+          label: "Innhold",
+          description: "Selve innlegget.",
+          fields: [
+            {
+              name: "title",
+              type: "text",
+              required: true,
+              label: "Tittel",
+            },
+            {
+              name: "featuredImage",
+              type: "upload",
+              relationTo: "media",
+              label: "Hovedbilde",
+              admin: {
+                components: {
+                  afterInput: stockPickerAfterInput,
+                },
+              },
+            },
+            {
+              name: "excerpt",
+              type: "textarea",
+              label: "Utdrag",
+              admin: {
+                description:
+                  "Kort beskrivelse som vises i listeoversikter og SEO",
+              },
+            },
+            {
+              name: "content",
+              type: "richText",
+              required: true,
+              label: "Innhold",
+            },
+          ],
         },
-      },
-    },
-    {
-      name: "title",
-      type: "text",
-      required: true,
-      label: "Tittel",
+        {
+          label: "Hjelp og kvalitet",
+          description:
+            "Skrivehjelp og AI-vurdering. Påvirker ikke det publiserte innholdet — kun et redaksjonelt hjelpemiddel.",
+          fields: [
+            {
+              // Visuell skrivehjelp: krok/kjøtt/landing + live sjekkliste.
+              name: "retningslinjer",
+              type: "ui",
+              admin: {
+                components: {
+                  Field:
+                    "/admin/components/content-guidelines#ContentGuidelines",
+                },
+              },
+            },
+            qualityReviewPanel(),
+          ],
+        },
+      ],
     },
     {
       name: "slug",
@@ -72,32 +122,6 @@ export const BlogPosts: CollectionConfig = {
         position: "sidebar",
         description: "Genereres automatisk fra tittel",
       },
-    },
-    {
-      name: "excerpt",
-      type: "textarea",
-      label: "Utdrag",
-      admin: {
-        description: "Kort beskrivelse som vises i listeoversikter og SEO",
-      },
-    },
-    {
-      name: "featuredImage",
-      type: "upload",
-      relationTo: "media",
-      label: "Hovedbilde",
-      admin: {
-        components: {
-          afterInput: stockPickerAfterInput,
-        },
-      },
-    },
-    qualityReviewPanel(),
-    {
-      name: "content",
-      type: "richText",
-      required: true,
-      label: "Innhold",
     },
     {
       // Sidebar-ro: publiseringsvalgene samlet i én sammenleggbar seksjon

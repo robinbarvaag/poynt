@@ -144,7 +144,7 @@ export async function Footer({
                       href={social.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-2 rounded-md text-muted-foreground hover:text-primary hover:bg-accent transition-all duration-300 hover:scale-110"
+                      className="p-2 rounded-md text-muted-foreground hover:text-primary hover:bg-accent transition-[transform,color,background-color] duration-300 motion-safe:hover:scale-105"
                     >
                       <Icon className="h-5 w-5" />
                     </a>

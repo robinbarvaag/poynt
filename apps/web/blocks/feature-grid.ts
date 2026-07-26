@@ -24,17 +24,6 @@ export const FeatureGrid: Block = {
       label: "Ingress",
     },
     {
-      name: "columns",
-      type: "select",
-      label: "Antall kolonner",
-      defaultValue: "3",
-      options: [
-        { label: "2", value: "2" },
-        { label: "3", value: "3" },
-        { label: "4", value: "4" },
-      ],
-    },
-    {
       name: "features",
       type: "array",
       label: "Kort",
@@ -72,6 +61,25 @@ export const FeatureGrid: Block = {
           name: "statLabel",
           type: "text",
           label: "Tall-etikett (f.eks. «verktøy klare»)",
+        },
+      ],
+    },
+    {
+      // Presentasjonsvalg samlet nederst (kun visning — samme feltnavn/skjema).
+      type: "collapsible",
+      label: "Utseende",
+      admin: { initCollapsed: true },
+      fields: [
+        {
+          name: "columns",
+          type: "select",
+          label: "Antall kolonner",
+          defaultValue: "3",
+          options: [
+            { label: "2", value: "2" },
+            { label: "3", value: "3" },
+            { label: "4", value: "4" },
+          ],
         },
       ],
     },

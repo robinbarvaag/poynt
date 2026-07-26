@@ -55,11 +55,11 @@ export interface ServiceShowcaseProps {
   ctaLinkComponent?: React.ComponentType<ServiceShowcaseLinkProps>;
 }
 
-function ArrowRight() {
+function ArrowRight({ className }: { className?: string }) {
   return (
     <svg
       viewBox="0 0 24 24"
-      className="size-4"
+      className={cn("size-4", className)}
       fill="none"
       stroke="currentColor"
       strokeWidth="2.25"
@@ -117,9 +117,9 @@ function CardBody({
         >
           {service.description}
         </p>
-        <span className="mt-4 inline-flex items-center gap-1.5 font-semibold text-foreground text-sm transition-all group-hover:gap-2.5">
+        <span className="mt-4 inline-flex items-center gap-1.5 font-semibold text-foreground text-sm transition-colors">
           Les mer
-          <ArrowRight />
+          <ArrowRight className="transition-transform duration-200 motion-safe:group-hover:translate-x-0.5" />
         </span>
       </div>
     </>
@@ -160,18 +160,18 @@ function PanelBody({
         (CtaLink ? (
           <CtaLink
             href={service.ctaHref}
-            className="mt-8 inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3 font-semibold text-primary-foreground text-sm transition-all hover:gap-3"
+            className="group mt-8 inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3 font-semibold text-primary-foreground text-sm transition-colors"
           >
             {service.ctaLabel ?? "Ta kontakt"}
-            <ArrowRight />
+            <ArrowRight className="transition-transform duration-200 motion-safe:group-hover:translate-x-0.5" />
           </CtaLink>
         ) : (
           <a
             href={service.ctaHref}
-            className="mt-8 inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3 font-semibold text-primary-foreground text-sm transition-all hover:gap-3"
+            className="group mt-8 inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3 font-semibold text-primary-foreground text-sm transition-colors"
           >
             {service.ctaLabel ?? "Ta kontakt"}
-            <ArrowRight />
+            <ArrowRight className="transition-transform duration-200 motion-safe:group-hover:translate-x-0.5" />
           </a>
         ))}
     </>

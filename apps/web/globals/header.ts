@@ -5,7 +5,7 @@ export const Header: GlobalConfig = {
   slug: "header",
   label: "Navigasjon",
   admin: {
-    group: "Innstillinger",
+    group: "Sideoppsett",
   },
   fields: [
     {

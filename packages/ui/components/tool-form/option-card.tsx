@@ -34,7 +34,7 @@ export function OptionCard({
     <Card
       asChild
       className={cn(
-        "w-full text-left transition-all duration-200 hover:scale-[1.02] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+        "w-full text-left transition-[border-color,background-color,box-shadow] duration-200 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
         isSelected
           ? "ring-2 ring-primary bg-primary/5 border-primary"
           : "hover:border-primary/50",

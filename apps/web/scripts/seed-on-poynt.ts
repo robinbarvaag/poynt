@@ -83,9 +83,12 @@ const page = {
         },
       ],
     },
+    // Fargepanel nr. 2 er den grønne CTA-en nederst — derfor salmon her, så
+    // siden ikke får to like grønne paneler (og budsjettet på to holder).
     {
       blockType: "statsBand",
-      layout: "split",
+      layout: "band",
+      variant: "salmon",
       eyebrow: "Hvem står bak",
       title: "Laget av én som har gjort det før",
       description:

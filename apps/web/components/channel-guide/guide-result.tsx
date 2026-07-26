@@ -1,6 +1,7 @@
 "use client";
 
 import { channelLinks } from "@/lib/constants";
+import { sectionReveal } from "@/lib/motion-variants";
 import type { ChannelRecommendation, GuideResultProps } from "@/lib/types";
 import {
   channelMatchLevelLabels,
@@ -22,6 +23,7 @@ import {
   Skeleton,
 } from "@poynt/ui";
 import { Icon } from "@poynt/ui/icons";
+import { easeSoft } from "@poynt/ui/motion";
 import type { DriveStep } from "driver.js";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
@@ -199,20 +201,11 @@ export function GuideResult({
   // Ingenting å vise enda, og vi streamer ikke → ikke render noe.
   if (!top && !isStreaming) return null;
 
-  // Hver seksjon animerer seg selv på egen mount — slik at deler som dukker opp
-  // senere (vurdering, andre kanaler) også fader inn, uten stagger-orkestrering
-  // som etterlater sent-tillagte barn hengende på opacity 0 (og uten remount-blink).
-  const sectionMotion = {
-    initial: { opacity: 0, y: 16 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.35, ease: "easeOut" as const },
-  };
-
   return (
     <div className="space-y-6">
       {/* Header / status */}
       <motion.div
-        {...sectionMotion}
+        {...sectionReveal}
         className="flex items-center justify-between"
       >
         <Heading size="h2">Din anbefaling</Heading>
@@ -225,7 +218,7 @@ export function GuideResult({
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -4 }}
-                transition={{ duration: 0.25 }}
+                transition={{ duration: 0.25, ease: easeSoft }}
               >
                 {streamingLabel}
               </motion.span>
@@ -241,7 +234,7 @@ export function GuideResult({
       </motion.div>
 
       {/* HERO — det ene svaret */}
-      <motion.div {...sectionMotion} data-tour="guide-hero">
+      <motion.div {...sectionReveal} data-tour="guide-hero">
         {top?.name ? (
           <Card className="border-primary/20 bg-primary/5">
             <CardHeader>
@@ -334,7 +327,7 @@ export function GuideResult({
 
       {/* Poynts vurdering — sekundært, under svaret */}
       {reasoning && (
-        <motion.div {...sectionMotion}>
+        <motion.div {...sectionReveal}>
           <div className="flex gap-3 rounded-lg border bg-card p-4">
             <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
               <Icon name="lightbulb" className="size-4" />
@@ -351,7 +344,7 @@ export function GuideResult({
 
       {/* Andre kanaler — kollapset */}
       {others.length > 0 && (
-        <motion.div {...sectionMotion} data-tour="guide-others">
+        <motion.div {...sectionReveal} data-tour="guide-others">
           <Accordion type="multiple" className="rounded-lg border bg-card px-4">
             {others.map((channel) => (
               <AccordionItem key={channel.name} value={channel.name}>
@@ -378,7 +371,7 @@ export function GuideResult({
       {/* Neste steg i trakten → hele markedsplanen. Kanalveilederen svarer på
           «hvilke kanaler»; markedsplanen setter dem inn i en full strategi. */}
       {!isStreaming && top?.name && (
-        <motion.div {...sectionMotion}>
+        <motion.div {...sectionReveal}>
           <Card className="border-primary/20 bg-primary/5">
             <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-start gap-3">
@@ -407,7 +400,7 @@ export function GuideResult({
 
       {/* Handlinger */}
       {!isStreaming && onReset && (
-        <motion.div {...sectionMotion} className="flex justify-center pt-2">
+        <motion.div {...sectionReveal} className="flex justify-center pt-2">
           <Button variant="outline" onClick={onReset} className="gap-2">
             <Icon name="refresh" className="size-4" />
             Ta quizen på nytt

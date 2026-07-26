@@ -20,11 +20,11 @@ export interface ServiceCardProps {
   className?: string;
 }
 
-function ArrowRight() {
+function ArrowRight({ className }: { className?: string }) {
   return (
     <svg
       viewBox="0 0 24 24"
-      className="size-4"
+      className={cn("size-4", className)}
       fill="none"
       stroke="currentColor"
       strokeWidth="2.25"
@@ -87,9 +87,9 @@ export function ServiceCard({
           </p>
         )}
 
-        <span className="mt-4 inline-flex items-center gap-1.5 font-semibold text-foreground text-sm transition-all group-hover/service:gap-2.5">
+        <span className="mt-4 inline-flex items-center gap-1.5 font-semibold text-foreground text-sm transition-colors">
           {ctaLabel}
-          <ArrowRight />
+          <ArrowRight className="transition-transform duration-200 motion-safe:group-hover/service:translate-x-0.5" />
         </span>
       </div>
     </a>

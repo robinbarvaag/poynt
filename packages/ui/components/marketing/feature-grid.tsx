@@ -146,7 +146,7 @@ export function FeatureGrid({
                   {feature.link.label}
                   <span
                     aria-hidden="true"
-                    className="h-0.75 w-9 rounded-full bg-current transition-all duration-300 ease-out group-hover/card:w-full"
+                    className="h-0.75 w-full origin-left scale-x-25 rounded-full bg-current transition-transform duration-300 ease-out motion-safe:group-hover/card:scale-x-100"
                   />
                 </span>
               )}

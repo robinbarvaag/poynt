@@ -1,6 +1,7 @@
 "use client";
 
 import { priorityConfig } from "@/lib/constants";
+import { sectionReveal } from "@/lib/motion-variants";
 import type { MarketingPlanStream } from "@poynt/planner-validators";
 import {
   Badge,
@@ -14,6 +15,7 @@ import {
   Text,
 } from "@poynt/ui";
 import { Icon, type IconName } from "@poynt/ui/icons";
+import { easeSoft } from "@poynt/ui/motion";
 import type { DeepPartial } from "ai";
 import type { DriveStep } from "driver.js";
 import { AnimatePresence, motion } from "framer-motion";
@@ -36,14 +38,6 @@ interface PlanResultProps {
   /** Hent inn én utrullingsfase som oppgaver (progressivt). */
   onPullPhase?: (phase: { label: string; tasks: string[] }) => void;
 }
-
-// Hver seksjon animerer seg selv på egen mount (samme rolige, streaming-klare
-// mønster som kanalveilederen) — ingen stagger-orkestrering, ingen spring-bounce.
-const sectionMotion = {
-  initial: { opacity: 0, y: 16 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.35, ease: "easeOut" as const },
-};
 
 // Roterende «jobber»-meldinger mens vi venter på de første tokenene.
 const STREAM_MESSAGES = [
@@ -186,7 +180,7 @@ export function PlanResult({
     <div className="space-y-10">
       {/* Header / status */}
       <motion.div
-        {...sectionMotion}
+        {...sectionReveal}
         className="flex items-center justify-between gap-3"
         data-tour="plan-header"
       >
@@ -200,7 +194,7 @@ export function PlanResult({
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -4 }}
-                transition={{ duration: 0.25 }}
+                transition={{ duration: 0.25, ease: easeSoft }}
               >
                 {streamingLabel}
               </motion.span>
@@ -212,7 +206,7 @@ export function PlanResult({
       </motion.div>
 
       {plan?.summary ? (
-        <motion.div {...sectionMotion}>
+        <motion.div {...sectionReveal}>
           <Text>{plan.summary}</Text>
         </motion.div>
       ) : (
@@ -226,7 +220,7 @@ export function PlanResult({
 
       {/* Poynts vurdering — sekundært, dempet */}
       {plan?.reasoning && (
-        <motion.div {...sectionMotion}>
+        <motion.div {...sectionReveal}>
           <div className="flex gap-3 rounded-lg border bg-card p-4">
             <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
               <Icon name="lightbulb" className="size-4" />
@@ -245,7 +239,7 @@ export function PlanResult({
 
       {/* Kanaler */}
       {channels.length > 0 && (
-        <motion.section {...sectionMotion}>
+        <motion.section {...sectionReveal}>
           <SectionHeading
             icon="target"
             title="Kanaler å satse på"
@@ -356,7 +350,7 @@ export function PlanResult({
 
       {/* Utrullingsplan (tidslinje, read-only roadmap) */}
       {timeline.length > 0 && (
-        <motion.section {...sectionMotion} data-tour="plan-timeline">
+        <motion.section {...sectionReveal} data-tour="plan-timeline">
           <SectionHeading
             icon="calendar"
             title="Slik ruller du det ut"
@@ -427,7 +421,7 @@ export function PlanResult({
 
       {/* Ukentlig rutine (read-only referanse) */}
       {weeklyRoutine.length > 0 && (
-        <motion.section {...sectionMotion}>
+        <motion.section {...sectionReveal}>
           <SectionHeading
             icon="clock"
             title="Ukentlig rutine"
@@ -462,7 +456,7 @@ export function PlanResult({
 
       {/* Oppgave-handoff → dashboardet */}
       {!isStreaming && quickWins.length > 0 && (
-        <motion.section {...sectionMotion} data-tour="plan-tasks">
+        <motion.section {...sectionReveal} data-tour="plan-tasks">
           <Card className="border-primary/20 bg-primary/5">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-xl">
@@ -512,7 +506,7 @@ export function PlanResult({
 
       {/* Tips for suksess */}
       {tips.length > 0 && (
-        <motion.section {...sectionMotion}>
+        <motion.section {...sectionReveal}>
           <SectionHeading icon="lightbulb" title="Tips for suksess" />
           <ul className="grid gap-2 sm:grid-cols-2">
             {tips.map((tip) => (
@@ -529,7 +523,7 @@ export function PlanResult({
       )}
 
       {!isStreaming && onReset && (
-        <motion.div {...sectionMotion} className="flex justify-center pt-2">
+        <motion.div {...sectionReveal} className="flex justify-center pt-2">
           <Button variant="outline" onClick={onReset} className="gap-2">
             <Icon name="refresh" className="size-4" />
             Lag ny plan

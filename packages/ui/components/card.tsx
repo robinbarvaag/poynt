@@ -11,7 +11,7 @@ import { cn } from "@poynt/ui";
 // looken. Når du bruker en farget surface, sett selv kontrastfarger på
 // beskrivelse/aksenter via className (text-muted-foreground passer ikke der).
 const cardVariants = cva(
-  "group/card flex flex-col gap-5 overflow-hidden rounded-3xl py-6 text-sm shadow-sm transition-all duration-300 hover:shadow-md has-[>img:first-child]:pt-0 data-[size=sm]:gap-4 data-[size=sm]:rounded-2xl data-[size=sm]:py-4 *:[img:first-child]:rounded-t-3xl *:[img:last-child]:rounded-b-3xl",
+  "group/card flex flex-col gap-5 overflow-hidden rounded-3xl py-6 text-sm shadow-sm transition-[box-shadow,border-color,background-color] duration-300 hover:shadow-md has-[>img:first-child]:pt-0 data-[size=sm]:gap-4 data-[size=sm]:rounded-2xl data-[size=sm]:py-4 *:[img:first-child]:rounded-t-3xl *:[img:last-child]:rounded-b-3xl",
   {
     variants: {
       surface: {

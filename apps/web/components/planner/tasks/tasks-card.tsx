@@ -161,8 +161,10 @@ export function TasksCard() {
         {total > 0 && (
           <div className="mt-1 h-2 overflow-hidden rounded-full bg-muted">
             <div
-              className="h-full bg-primary transition-all duration-500"
-              style={{ width: `${total ? (doneCount / total) * 100 : 0}%` }}
+              className="h-full w-full bg-primary transition-transform duration-200 ease-soft"
+              style={{
+                transform: `translateX(-${100 - (total ? (doneCount / total) * 100 : 0)}%)`,
+              }}
             />
           </div>
         )}

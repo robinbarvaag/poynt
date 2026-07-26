@@ -36,8 +36,10 @@ export const FormBlock: Block = {
       },
     },
     {
+      // Presentasjonsvalg samlet nederst — samme «Utseende»-mønster som de
+      // andre blokkene.
       type: "collapsible",
-      label: "Design",
+      label: "Utseende",
       admin: {
         initCollapsed: true,
       },

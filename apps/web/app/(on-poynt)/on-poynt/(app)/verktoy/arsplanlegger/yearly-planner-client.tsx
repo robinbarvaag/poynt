@@ -7,6 +7,7 @@ import {
 } from "@/components/planner/tool-readiness";
 import { PlannerForm } from "@/components/yearly-planner/planner-form";
 import { PlannerResult } from "@/components/yearly-planner/planner-result";
+import { stepFade } from "@/lib/motion-variants";
 import { yearlyPlannerStreamAction } from "@/lib/planner/actions/yearly-planner";
 import { useToolStream } from "@/lib/planner/use-tool-stream";
 import {
@@ -129,12 +130,6 @@ export function YearlyPlannerClient({
     setView("form");
   }
 
-  const fadeIn = {
-    hidden: { opacity: 0, y: 10 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
-    exit: { opacity: 0, y: -10, transition: { duration: 0.2 } },
-  };
-
   // Profil-først: bransje + målgruppe kommer fra bedriftsprofilen. Mangler de,
   // steres brukeren til å fullføre profilen først — lik logikk som de andre.
   const readinessFields: ReadinessField[] = [
@@ -155,7 +150,7 @@ export function YearlyPlannerClient({
         {view === "intro" && (
           <motion.div
             key="intro"
-            variants={fadeIn}
+            variants={stepFade}
             initial="hidden"
             animate="visible"
             exit="exit"
@@ -205,7 +200,7 @@ export function YearlyPlannerClient({
         {view === "form" && (
           <motion.div
             key="form"
-            variants={fadeIn}
+            variants={stepFade}
             initial="hidden"
             animate="visible"
             exit="exit"
@@ -223,7 +218,7 @@ export function YearlyPlannerClient({
         {view === "result" && (
           <motion.div
             key="result"
-            variants={fadeIn}
+            variants={stepFade}
             initial="hidden"
             animate="visible"
             exit="exit"

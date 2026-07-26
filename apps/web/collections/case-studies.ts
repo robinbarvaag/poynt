@@ -51,24 +51,114 @@ export const CaseStudies: CollectionConfig = {
   },
   fields: [
     {
-      // Visuell skrivehjelp øverst: buen, live sjekkliste og Hageland-eksempel.
-      name: "retningslinjer",
-      type: "ui",
-      admin: {
-        components: {
-          Field: "/admin/components/content-guidelines#ContentGuidelines",
+      // Hovedkolonnen i faner (samme mønster som Guider): «Innhold» er selve
+      // historien, «Hjelp og kvalitet» samler skrivehjelp og AI-vurdering
+      // utenfor skriveflyten. seoPlugin (tabbedUI) legger «SEO»-fanen til på
+      // slutten fordi tabs-feltet står først i fields.
+      type: "tabs",
+      tabs: [
+        {
+          label: "Innhold",
+          description: "Selve historien.",
+          fields: [
+            {
+              name: "title",
+              type: "text",
+              required: true,
+              label: "Tittel",
+              admin: {
+                description:
+                  "Si resultatet, ikke bare navnet – f.eks. «Hageland Edens Have nådde målene sine».",
+              },
+            },
+            {
+              name: "customer",
+              type: "text",
+              required: true,
+              label: "Kunde",
+              admin: {
+                description: "Navnet på bedriften historien handler om",
+              },
+            },
+            {
+              name: "excerpt",
+              type: "textarea",
+              label: "Kort oppsummering",
+              admin: {
+                description:
+                  "Én til to setninger som selger historien i listevisning og SEO",
+              },
+            },
+            {
+              name: "featuredImage",
+              type: "upload",
+              relationTo: "media",
+              label: "Hovedbilde",
+              admin: {
+                description: "Helst et ekte bilde av kunden/bedriften",
+                components: {
+                  afterInput: stockPickerAfterInput,
+                },
+              },
+            },
+            {
+              name: "content",
+              type: "richText",
+              required: true,
+              label: "Historien",
+              admin: {
+                description:
+                  "Fortell i tre deler: utfordringen (hvor sto de?), hva vi gjorde (konkrete grep), og resultatet (hva endret seg?).",
+              },
+            },
+            {
+              name: "results",
+              type: "array",
+              label: "Resultater i tall",
+              maxRows: 4,
+              admin: {
+                description:
+                  "Valgfritt, men tall selger – f.eks. «+40 %» / «flere følgere på tre måneder»",
+              },
+              fields: [
+                {
+                  name: "value",
+                  type: "text",
+                  required: true,
+                  label: "Tall/verdi",
+                  admin: { description: "F.eks. «+40 %», «3×», «12 000»" },
+                },
+                {
+                  name: "label",
+                  type: "text",
+                  required: true,
+                  label: "Hva tallet beskriver",
+                },
+              ],
+            },
+          ],
         },
-      },
-    },
-    {
-      name: "title",
-      type: "text",
-      required: true,
-      label: "Tittel",
-      admin: {
-        description:
-          "Si resultatet, ikke bare navnet – f.eks. «Hageland Edens Have nådde målene sine».",
-      },
+        {
+          label: "Hjelp og kvalitet",
+          description:
+            "Skrivehjelp og AI-vurdering. Påvirker ikke det publiserte innholdet — kun et redaksjonelt hjelpemiddel.",
+          fields: [
+            {
+              // Visuell skrivehjelp: buen, live sjekkliste og
+              // Hageland-eksempel.
+              name: "retningslinjer",
+              type: "ui",
+              admin: {
+                components: {
+                  Field:
+                    "/admin/components/content-guidelines#ContentGuidelines",
+                },
+              },
+            },
+            qualityReviewPanel(),
+          ],
+        },
+      ],
     },
     {
       name: "slug",
@@ -81,72 +171,6 @@ export const CaseStudies: CollectionConfig = {
         position: "sidebar",
         description: "Genereres automatisk fra tittel",
       },
-    },
-    {
-      name: "customer",
-      type: "text",
-      required: true,
-      label: "Kunde",
-      admin: {
-        description: "Navnet på bedriften historien handler om",
-      },
-    },
-    {
-      name: "excerpt",
-      type: "textarea",
-      label: "Kort oppsummering",
-      admin: {
-        description:
-          "Én til to setninger som selger historien i listevisning og SEO",
-      },
-    },
-    {
-      name: "featuredImage",
-      type: "upload",
-      relationTo: "media",
-      label: "Hovedbilde",
-      admin: {
-        description: "Helst et ekte bilde av kunden/bedriften",
-        components: {
-          afterInput: stockPickerAfterInput,
-        },
-      },
-    },
-    qualityReviewPanel(),
-    {
-      name: "content",
-      type: "richText",
-      required: true,
-      label: "Historien",
-      admin: {
-        description:
-          "Fortell i tre deler: utfordringen (hvor sto de?), hva vi gjorde (konkrete grep), og resultatet (hva endret seg?).",
-      },
-    },
-    {
-      name: "results",
-      type: "array",
-      label: "Resultater i tall",
-      maxRows: 4,
-      admin: {
-        description:
-          "Valgfritt, men tall selger – f.eks. «+40 %» / «flere følgere på tre måneder»",
-      },
-      fields: [
-        {
-          name: "value",
-          type: "text",
-          required: true,
-          label: "Tall/verdi",
-          admin: { description: "F.eks. «+40 %», «3×», «12 000»" },
-        },
-        {
-          name: "label",
-          type: "text",
-          required: true,
-          label: "Hva tallet beskriver",
-        },
-      ],
     },
     {
       name: "quote",

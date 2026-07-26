@@ -112,13 +112,13 @@ const layout = [
     ],
   },
 
-  // 5 — Om Susanne + tall i ÉN delt seksjon (tekst venstre, tall som motvekt
-  // høyre, på vanlig bakgrunn). Erstatter den gamle kombinasjonen av en
-  // sentrert «19 år»-CTA + et eget grønt tallpanel, som sa det samme to
-  // ganger og brøt panel-rasjoneringen (maks to fargepaneler per side).
+  // 5 — Om Susanne + tall i det grønne båndet (sentrert, med brødtekst og
+  // CTA). Panel-rasjoneringen holder fordi On Poynt-CTA-en under er «Enkel»:
+  // sidens to fargepaneler er dette båndet + Nyhetsbrev (saffron).
   {
     blockType: "statsBand",
-    layout: "split",
+    layout: "band",
+    variant: "primary",
     eyebrow: "Om Susanne Todnem",
     title: "19 år med markedsføring – og fortsatt like nysgjerrig",
     description:
@@ -131,10 +131,12 @@ const layout = [
     ],
   },
 
-  // 6 — On Poynt-spotlight (sidens ENE grønne panel og ene medlemskaps-CTA)
+  // 6 — On Poynt-spotlight (sidens ene medlemskaps-CTA). «Enkel» — det grønne
+  // tallbåndet rett over er allerede et fargepanel, og to paneler inntil
+  // hverandre bryter komposisjonsreglene.
   {
     blockType: "ctaSection",
-    variant: "colored",
+    variant: "simple",
     title: "Bli medlem i On Poynt",
     description:
       "Det kan være ensomt å sitte alene med markedsføringsansvaret. I On Poynt får du fellesskap, ressurser og oppdatert kunnskap – så du kan jobbe smartere med markedsføring og AI.",

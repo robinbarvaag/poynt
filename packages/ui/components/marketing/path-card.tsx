@@ -22,11 +22,11 @@ export interface PathCardProps {
   className?: string;
 }
 
-function ArrowRight() {
+function ArrowRight({ className }: { className?: string }) {
   return (
     <svg
       viewBox="0 0 24 24"
-      className="size-4"
+      className={cn("size-4", className)}
       fill="none"
       stroke="currentColor"
       strokeWidth="2.25"
@@ -136,12 +136,12 @@ export function PathCard({
 
         <span
           className={cn(
-            "mt-8 inline-flex items-center gap-2 pt-2 font-bold text-sm transition-all group-hover/path:gap-3.5",
+            "mt-8 inline-flex items-center gap-2 pt-2 font-bold text-sm transition-colors",
             accentClass
           )}
         >
           {ctaLabel}
-          <ArrowRight />
+          <ArrowRight className="transition-transform duration-200 motion-safe:group-hover/path:translate-x-0.5" />
         </span>
       </a>
     </Card>

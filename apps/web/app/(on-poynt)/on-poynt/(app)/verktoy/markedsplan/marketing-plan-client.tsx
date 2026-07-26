@@ -7,6 +7,7 @@ import {
   type ReadinessField,
   ToolReadiness,
 } from "@/components/planner/tool-readiness";
+import { stepFade } from "@/lib/motion-variants";
 import { marketingPlanStreamAction } from "@/lib/planner/actions/marketing-plan";
 import { trpc } from "@/lib/planner/trpc";
 import { useToolStream } from "@/lib/planner/use-tool-stream";
@@ -64,12 +65,6 @@ interface MarketingPlanClientProps {
   initialCompanySize: CompanySize | null;
   initialTargetAudience: string | null;
 }
-
-const fadeIn = {
-  hidden: { opacity: 0, y: 10 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
-  exit: { opacity: 0, y: -10, transition: { duration: 0.2 } },
-};
 
 /** Plan-form med feltene vi trenger for å materialisere oppgaver. */
 type AnyPlan =
@@ -238,7 +233,7 @@ export function MarketingPlanClient({
         {view === "intro" && (
           <motion.div
             key="intro"
-            variants={fadeIn}
+            variants={stepFade}
             initial="hidden"
             animate="visible"
             exit="exit"
@@ -288,7 +283,7 @@ export function MarketingPlanClient({
         {view === "form" && (
           <motion.div
             key="form"
-            variants={fadeIn}
+            variants={stepFade}
             initial="hidden"
             animate="visible"
             exit="exit"
@@ -306,7 +301,7 @@ export function MarketingPlanClient({
         {view === "result" && (
           <motion.div
             key="result"
-            variants={fadeIn}
+            variants={stepFade}
             initial="hidden"
             animate="visible"
             exit="exit"
