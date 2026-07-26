@@ -1,4 +1,4 @@
-import type { BlogPost, CaseStudy, Page } from "@/payload-types";
+import type { BlogPost, CaseStudy, Page, Service } from "@/payload-types";
 import { lexicalToMarkdown } from "./serialize-guide-content";
 
 /**
@@ -125,7 +125,8 @@ function serializeObject(obj: Record<string, unknown>, lines: string[]): void {
 /** Serialiserer en blokk-bygget side (Sider/Forside) til lesbar tekst. */
 export function serializePageContent(page: Page): string {
   const parts: string[] = [`# ${page.title}`];
-  if (page.excerpt) parts.push(`_Utdrag:_ ${page.excerpt}`);
+  if (page.meta?.description)
+    parts.push(`_Meta-beskrivelse:_ ${page.meta.description}`);
 
   (page.layout ?? []).forEach((block, i) => {
     const label = BLOCK_LABELS[block.blockType] ?? block.blockType;
@@ -175,6 +176,51 @@ export function serializeCaseStudyContent(story: CaseStudy): string {
     );
   } else {
     parts.push("[Ingen kundesitat]");
+  }
+
+  return parts.filter(Boolean).join("\n\n");
+}
+
+const PRICE_TYPE_LABELS: Record<string, string> = {
+  fixed: "fast pris",
+  from: "fra-pris",
+  monthly: "per måned",
+  contact: "ta kontakt for pris",
+};
+
+/** Serialiserer en tjeneste (services) til lesbar markdown. */
+export function serializeServiceContent(service: Service): string {
+  const parts: string[] = [`# ${service.name}`];
+  if (service.shortDescription)
+    parts.push(`_Kort beskrivelse:_ ${service.shortDescription}`);
+
+  const priceLabel = PRICE_TYPE_LABELS[service.priceType] ?? service.priceType;
+  parts.push(
+    service.priceType === "contact" || service.price == null
+      ? `[Pris: ${priceLabel}]`
+      : `[Pris: ${service.price} kr (${priceLabel})${service.includesVat ? " + mva" : ""}]`
+  );
+
+  const image = service.image;
+  parts.push(
+    isMediaObject(image)
+      ? `[Bilde${image.alt ? `: ${image.alt}` : " – mangler alt-tekst"}]`
+      : "[Mangler bilde]"
+  );
+
+  if (service.content) {
+    parts.push(lexicalToMarkdown(service.content));
+  } else {
+    parts.push("[Ingen detaljert beskrivelse]");
+  }
+
+  const faq = service.faq ?? [];
+  if (faq.length) {
+    parts.push(
+      `## [FAQ (strukturert data)]\n${faq
+        .map((f) => `Sp: ${f.question}\nSv: ${f.answer}`)
+        .join("\n")}`
+    );
   }
 
   return parts.filter(Boolean).join("\n\n");

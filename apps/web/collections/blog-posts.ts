@@ -99,16 +99,27 @@ export const BlogPosts: CollectionConfig = {
         {
           label: "Hjelp og kvalitet",
           description:
-            "Skrivehjelp og AI-vurdering. Påvirker ikke det publiserte innholdet — kun et redaksjonelt hjelpemiddel.",
+            "Tips og sjekklister som hjelper deg mens du skriver. Ingenting her vises på nettsiden.",
           fields: [
             {
               // Visuell skrivehjelp: krok/kjøtt/landing + live sjekkliste.
+              // Innleggssjekken under tar seg av de deterministiske
+              // tekst-reglene (Sidesjekkens søster for richText).
               name: "retningslinjer",
               type: "ui",
               admin: {
                 components: {
                   Field:
                     "/admin/components/content-guidelines#ContentGuidelines",
+                },
+              },
+            },
+            {
+              name: "innleggssjekk",
+              type: "ui",
+              admin: {
+                components: {
+                  Field: "/admin/components/text-check#TextCheck",
                 },
               },
             },

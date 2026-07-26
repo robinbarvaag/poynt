@@ -62,8 +62,10 @@ export async function generateMetadata({
     title: service.meta?.title || `${service.name} | Tjenester`,
     description: service.meta?.description || service.shortDescription || "",
     path: `/tjenester/${slug}`,
+    // SEO-fanens delingsbilde vinner over hovedbildet når det er satt.
     image: service.meta?.image || service.image,
     noIndex: service.meta?.noIndex ?? undefined,
+    canonicalUrl: service.meta?.canonicalUrl,
   });
 }
 

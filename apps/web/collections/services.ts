@@ -1,5 +1,9 @@
 import type { CollectionConfig } from "payload";
-import { seoFaqField, seoMetaField } from "../fields/seo-meta";
+import {
+  qualityDataFields,
+  qualityReviewPanel,
+} from "../fields/quality-review";
+import { seoFaqField } from "../fields/seo-meta";
 import { stockPickerAfterInput } from "../fields/stock-picker-after-input";
 import { generateSlug } from "../lib/generate-slug";
 import {
@@ -15,8 +19,12 @@ export const Services: CollectionConfig = {
   },
   admin: {
     useAsTitle: "name",
-    defaultColumns: ["name", "priceType", "sortOrder", "updatedAt"],
+    defaultColumns: ["name", "priceType", "qualityScore", "updatedAt"],
     group: "Innhold",
+    livePreview: {
+      url: ({ data }) =>
+        `${process.env.NEXT_PUBLIC_URL || "http://localhost:3000"}/tjenester/${data?.slug}`,
+    },
     // «Preview»-knapp i dokument-headeren → åpner tjenesten på nettsiden.
     preview: (doc) =>
       doc?.slug
@@ -37,10 +45,120 @@ export const Services: CollectionConfig = {
   },
   fields: [
     {
-      name: "name",
-      type: "text",
-      required: true,
-      label: "Tjenestenavn",
+      // Hovedkolonnen i faner (samme mønster som Guider): «Innhold» er selve
+      // tjenesten, «Hjelp og kvalitet» samler skrivehjelp og AI-vurdering
+      // utenfor skriveflyten. seoPlugin (tabbedUI) legger «SEO»-fanen til på
+      // slutten fordi tabs-feltet står først i fields.
+      type: "tabs",
+      tabs: [
+        {
+          label: "Innhold",
+          description: "Selve tjenesten.",
+          fields: [
+            {
+              name: "name",
+              type: "text",
+              required: true,
+              label: "Tjenestenavn",
+            },
+            {
+              name: "shortDescription",
+              type: "textarea",
+              required: true,
+              label: "Kort beskrivelse",
+              admin: {
+                description:
+                  "Vises i oversikten på forsiden — si hva kunden får, ikke hva vi gjør",
+              },
+            },
+            {
+              name: "image",
+              type: "upload",
+              relationTo: "media",
+              label: "Bilde",
+              admin: {
+                description: "Vises i tjenesteoversikten",
+                components: {
+                  afterInput: stockPickerAfterInput,
+                },
+              },
+            },
+            {
+              name: "content",
+              type: "richText",
+              label: "Detaljert beskrivelse",
+              admin: {
+                description:
+                  "Valgfritt - vises på tjenestesiden. Fortell hva som er inkludert, hvordan det foregår og hva kunden sitter igjen med.",
+              },
+            },
+            {
+              name: "priceType",
+              type: "select",
+              required: true,
+              defaultValue: "fixed",
+              label: "Pristype",
+              options: [
+                { label: "Fast pris", value: "fixed" },
+                { label: "Fra-pris", value: "from" },
+                { label: "Per måned", value: "monthly" },
+                { label: "Ta kontakt for pris", value: "contact" },
+              ],
+            },
+            {
+              name: "price",
+              type: "number",
+              label: "Pris (kr)",
+              admin: {
+                description: "Pris i hele kroner (eks. mva)",
+                condition: (data) => data.priceType !== "contact",
+              },
+            },
+            {
+              name: "includesVat",
+              type: "checkbox",
+              label: "Vis '+ mva' etter pris",
+              defaultValue: true,
+              admin: {
+                condition: (data) => data.priceType !== "contact",
+              },
+            },
+            // FAQ hører innholdsmessig til SEO, men SEO-fanen eies av
+            // pluginen — så den ligger nederst her.
+            seoFaqField(),
+          ],
+        },
+        {
+          label: "Hjelp og kvalitet",
+          description:
+            "Tips og sjekklister som hjelper deg mens du skriver. Ingenting her vises på nettsiden.",
+          fields: [
+            {
+              // Visuell skrivehjelp: hva/pris/neste steg + live sjekkliste.
+              // Tjenestesjekken under tar seg av de deterministiske
+              // tekst-reglene.
+              name: "retningslinjer",
+              type: "ui",
+              admin: {
+                components: {
+                  Field:
+                    "/admin/components/content-guidelines#ContentGuidelines",
+                },
+              },
+            },
+            {
+              name: "tjenestesjekk",
+              type: "ui",
+              admin: {
+                components: {
+                  Field: "/admin/components/text-check#TextCheck",
+                },
+              },
+            },
+            qualityReviewPanel(),
+          ],
+        },
+      ],
     },
     {
       name: "slug",
@@ -52,66 +170,6 @@ export const Services: CollectionConfig = {
       admin: {
         position: "sidebar",
         description: "Genereres automatisk fra navn",
-      },
-    },
-    {
-      name: "image",
-      type: "upload",
-      relationTo: "media",
-      label: "Bilde",
-      admin: {
-        description: "Vises i tjenesteoversikten",
-        components: {
-          afterInput: stockPickerAfterInput,
-        },
-      },
-    },
-    {
-      name: "shortDescription",
-      type: "textarea",
-      required: true,
-      label: "Kort beskrivelse",
-      admin: {
-        description: "Vises i oversikten på forsiden",
-      },
-    },
-    {
-      name: "content",
-      type: "richText",
-      label: "Detaljert beskrivelse",
-      admin: {
-        description: "Valgfritt - vises på tjenestesiden",
-      },
-    },
-    {
-      name: "priceType",
-      type: "select",
-      required: true,
-      defaultValue: "fixed",
-      label: "Pristype",
-      options: [
-        { label: "Fast pris", value: "fixed" },
-        { label: "Fra-pris", value: "from" },
-        { label: "Per måned", value: "monthly" },
-        { label: "Ta kontakt for pris", value: "contact" },
-      ],
-    },
-    {
-      name: "price",
-      type: "number",
-      label: "Pris (kr)",
-      admin: {
-        description: "Pris i hele kroner (eks. mva)",
-        condition: (data) => data.priceType !== "contact",
-      },
-    },
-    {
-      name: "includesVat",
-      type: "checkbox",
-      label: "Vis '+ mva' etter pris",
-      defaultValue: true,
-      admin: {
-        condition: (data) => data.priceType !== "contact",
       },
     },
     {
@@ -173,10 +231,6 @@ export const Services: CollectionConfig = {
         position: "sidebar",
       },
     },
-    seoMetaField({
-      noIndexDescription:
-        "Aktivér for å hindre Google fra å indeksere denne tjenestesiden",
-    }),
-    seoFaqField(),
+    ...qualityDataFields({ sidebarSection: true }),
   ],
 };

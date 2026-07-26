@@ -101,8 +101,10 @@ if (existingForm.docs.length > 0) {
 const page = {
   title: "Kontakt",
   slug: "kontakt",
-  excerpt:
-    "Ta kontakt med Susanne Todnem i Poynt for rådgivning, foredrag, styrearbeid eller medlemskap.",
+  meta: {
+    description:
+      "Ta kontakt med Susanne Todnem i Poynt for rådgivning, foredrag, styrearbeid eller medlemskap.",
+  },
   layout: [
     {
       blockType: "hero",

@@ -215,10 +215,16 @@ export interface Page {
       }[]
     | null;
   meta?: {
+    /**
+     * Kan stå tom — da bruker Google innholdets egen tittel. Fyll ut hvis søketreffet skal si noe annet enn overskriften på siden.
+     */
     title?: string | null;
+    /**
+     * Kan stå tom — da brukes utdraget/den korte oppsummeringen fra innholdet. (Sider har ikke utdrag, så der bør denne fylles ut.)
+     */
     description?: string | null;
     /**
-     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     * Kan stå tom — da brukes hovedbildet (eller hero-bildet på Sider), og uten det lages et automatisk Poynt-kort med tittelen.
      */
     image?: (number | null) | Media;
     /**
@@ -238,11 +244,6 @@ export interface Page {
    * Genereres automatisk fra tittel. Bruk 'forside' for forsida.
    */
   slug: string;
-  /**
-   * Kort beskrivelse som brukes til SEO og deling
-   */
-  excerpt?: string | null;
-  publishedAt?: string | null;
   /**
    * Settes av AI-vurderingen (0–100).
    */
@@ -492,7 +493,7 @@ export interface StatsBandBlock {
     url?: string | null;
   };
   /**
-   * «Delt» ligger på sidens vanlige bakgrunn og teller ikke som fargepanel — bruk den når siden allerede har to fargepaneler (se komposisjonssjekken).
+   * «Delt» ligger på sidens vanlige bakgrunn og teller ikke som farget seksjon — bruk den når siden allerede har to seksjoner med farget bakgrunn (se Sidesjekk).
    */
   layout?: ('band' | 'split') | null;
   variant?: ('primary' | 'salmon' | 'saffron') | null;
@@ -861,10 +862,16 @@ export interface Product {
   active?: boolean | null;
   categories?: (number | Category)[] | null;
   meta?: {
+    /**
+     * Kan stå tom — da bruker Google innholdets egen tittel. Fyll ut hvis søketreffet skal si noe annet enn overskriften på siden.
+     */
     title?: string | null;
+    /**
+     * Kan stå tom — da brukes utdraget/den korte oppsummeringen fra innholdet. (Sider har ikke utdrag, så der bør denne fylles ut.)
+     */
     description?: string | null;
     /**
-     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     * Kan stå tom — da brukes hovedbildet (eller hero-bildet på Sider), og uten det lages et automatisk Poynt-kort med tittelen.
      */
     image?: (number | null) | Media;
     /**
@@ -1071,19 +1078,15 @@ export interface Service {
   id: number;
   name: string;
   /**
-   * Genereres automatisk fra navn
+   * Vises i oversikten på forsiden — si hva kunden får, ikke hva vi gjør
    */
-  slug: string;
+  shortDescription: string;
   /**
    * Vises i tjenesteoversikten
    */
   image?: (number | null) | Media;
   /**
-   * Vises i oversikten på forsiden
-   */
-  shortDescription: string;
-  /**
-   * Valgfritt - vises på tjenestesiden
+   * Valgfritt - vises på tjenestesiden. Fortell hva som er inkludert, hvordan det foregår og hva kunden sitter igjen med.
    */
   content?: {
     root: {
@@ -1106,6 +1109,46 @@ export interface Service {
    */
   price?: number | null;
   includesVat?: boolean | null;
+  /**
+   * Spørsmål og svar som publiseres som strukturert data for søkemotorer og AI-svar. La stå tom for å hoppe over.
+   */
+  faq?:
+    | {
+        question: string;
+        answer: string;
+        id?: string | null;
+      }[]
+    | null;
+  meta?: {
+    /**
+     * Kan stå tom — da bruker Google innholdets egen tittel. Fyll ut hvis søketreffet skal si noe annet enn overskriften på siden.
+     */
+    title?: string | null;
+    /**
+     * Kan stå tom — da brukes utdraget/den korte oppsummeringen fra innholdet. (Sider har ikke utdrag, så der bør denne fylles ut.)
+     */
+    description?: string | null;
+    /**
+     * Kan stå tom — da brukes hovedbildet (eller hero-bildet på Sider), og uten det lages et automatisk Poynt-kort med tittelen.
+     */
+    image?: (number | null) | Media;
+    /**
+     * Aktivér for å hindre Google fra å indeksere denne siden
+     */
+    noIndex?: boolean | null;
+    /**
+     * Overstyr automatisk canonical URL hvis innholdet finnes på en annen URL
+     */
+    canonicalUrl?: string | null;
+    /**
+     * Brukes av sosiale medier ved deling
+     */
+    ogType?: ('website' | 'article' | 'product') | null;
+  };
+  /**
+   * Genereres automatisk fra navn
+   */
+  slug: string;
   ctaText?: string | null;
   /**
    * Valgfritt - overstyr standard lenke til tjenestesiden
@@ -1124,33 +1167,19 @@ export interface Service {
    */
   active?: boolean | null;
   categories?: (number | Category)[] | null;
-  meta?: {
-    /**
-     * Vises i nettleser-fanen og i søkeresultater. «| Poynt» legges på automatisk – skriv uten.
-     */
-    title?: string | null;
-    /**
-     * Kort beskrivelse som vises i søkeresultater (maks 160 tegn)
-     */
-    description?: string | null;
-    /**
-     * Bilde som vises ved deling på sosiale medier (1200x630px anbefalt)
-     */
-    image?: (number | null) | Media;
-    /**
-     * Aktivér for å hindre Google fra å indeksere denne tjenestesiden
-     */
-    noIndex?: boolean | null;
-  };
   /**
-   * Spørsmål og svar som publiseres som strukturert data for søkemotorer og AI-svar. La stå tom for å hoppe over.
+   * Settes av AI-vurderingen (0–100).
    */
-  faq?:
+  qualityScore?: number | null;
+  qualityReviewedAt?: string | null;
+  qualityReview?:
     | {
-        question: string;
-        answer: string;
-        id?: string | null;
-      }[]
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
     | null;
   updatedAt: string;
   createdAt: string;
@@ -1394,10 +1423,16 @@ export interface BlogPost {
     [k: string]: unknown;
   };
   meta?: {
+    /**
+     * Kan stå tom — da bruker Google innholdets egen tittel. Fyll ut hvis søketreffet skal si noe annet enn overskriften på siden.
+     */
     title?: string | null;
+    /**
+     * Kan stå tom — da brukes utdraget/den korte oppsummeringen fra innholdet. (Sider har ikke utdrag, så der bør denne fylles ut.)
+     */
     description?: string | null;
     /**
-     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     * Kan stå tom — da brukes hovedbildet (eller hero-bildet på Sider), og uten det lages et automatisk Poynt-kort med tittelen.
      */
     image?: (number | null) | Media;
     /**
@@ -1527,10 +1562,16 @@ export interface CaseStudy {
       }[]
     | null;
   meta?: {
+    /**
+     * Kan stå tom — da bruker Google innholdets egen tittel. Fyll ut hvis søketreffet skal si noe annet enn overskriften på siden.
+     */
     title?: string | null;
+    /**
+     * Kan stå tom — da brukes utdraget/den korte oppsummeringen fra innholdet. (Sider har ikke utdrag, så der bør denne fylles ut.)
+     */
     description?: string | null;
     /**
-     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     * Kan stå tom — da brukes hovedbildet (eller hero-bildet på Sider), og uten det lages et automatisk Poynt-kort med tittelen.
      */
     image?: (number | null) | Media;
     /**
@@ -2172,6 +2213,10 @@ export interface Redirect {
       | ({
           relationTo: 'case-studies';
           value: number | CaseStudy;
+        } | null)
+      | ({
+          relationTo: 'services';
+          value: number | Service;
         } | null);
     url?: string | null;
   };
@@ -2372,8 +2417,6 @@ export interface PagesSelect<T extends boolean = true> {
         ogType?: T;
       };
   slug?: T;
-  excerpt?: T;
-  publishedAt?: T;
   qualityScore?: T;
   qualityReviewedAt?: T;
   qualityReview?: T;
@@ -2828,27 +2871,12 @@ export interface CaseStudiesSelect<T extends boolean = true> {
  */
 export interface ServicesSelect<T extends boolean = true> {
   name?: T;
-  slug?: T;
-  image?: T;
   shortDescription?: T;
+  image?: T;
   content?: T;
   priceType?: T;
   price?: T;
   includesVat?: T;
-  ctaText?: T;
-  ctaLink?: T;
-  sortOrder?: T;
-  featured?: T;
-  active?: T;
-  categories?: T;
-  meta?:
-    | T
-    | {
-        title?: T;
-        description?: T;
-        image?: T;
-        noIndex?: T;
-      };
   faq?:
     | T
     | {
@@ -2856,6 +2884,26 @@ export interface ServicesSelect<T extends boolean = true> {
         answer?: T;
         id?: T;
       };
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+        noIndex?: T;
+        canonicalUrl?: T;
+        ogType?: T;
+      };
+  slug?: T;
+  ctaText?: T;
+  ctaLink?: T;
+  sortOrder?: T;
+  featured?: T;
+  active?: T;
+  categories?: T;
+  qualityScore?: T;
+  qualityReviewedAt?: T;
+  qualityReview?: T;
   updatedAt?: T;
   createdAt?: T;
 }

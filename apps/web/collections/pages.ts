@@ -61,7 +61,7 @@ export const Pages: CollectionConfig = {
   fields: [
     {
       // Hovedkolonnen i faner (samme mønster som Guider): «Innhold» er selve
-      // siden, «Hjelp og kvalitet» samler skrivehjelp, komposisjonssjekk og
+      // siden, «Hjelp og kvalitet» samler skrivehjelp, sidesjekk og
       // AI-vurdering utenfor skriveflyten. seoPlugin (tabbedUI) legger
       // «SEO»-fanen til på slutten fordi tabs-feltet står først i fields.
       type: "tabs",
@@ -81,6 +81,7 @@ export const Pages: CollectionConfig = {
               type: "blocks",
               label: "Sidelayout",
               admin: {
+                initCollapsed: true,
                 description:
                   "Bygg siden med blokker. Hero = stor intro-seksjon, Innholdsblokk = rik tekst, Mediablokk = bilde/video, Skjema = kontaktskjema, Produkter/Tjenester/Podcast = lister fra databasen, Anmeldelser = kundeomtaler, CTA = handlingsoppfordring, Spotify = podcast-spiller.",
               },
@@ -94,11 +95,11 @@ export const Pages: CollectionConfig = {
         {
           label: "Hjelp og kvalitet",
           description:
-            "Skrivehjelp, komposisjonssjekk og AI-vurdering. Påvirker ikke det publiserte innholdet — kun et redaksjonelt hjelpemiddel.",
+            "Tips og sjekklister som hjelper deg mens du skriver. Ingenting her vises på nettsiden.",
           fields: [
             {
               // Visuell skrivehjelp: løfte/bevis/handling + live sjekkliste.
-              // Komposisjonssjekken under tar seg av de deterministiske
+              // Sidesjekken under tar seg av de deterministiske
               // blokk-reglene.
               name: "retningslinjer",
               type: "ui",
@@ -134,26 +135,6 @@ export const Pages: CollectionConfig = {
         position: "sidebar",
         description:
           "Genereres automatisk fra tittel. Bruk 'forside' for forsida.",
-      },
-    },
-    {
-      name: "excerpt",
-      type: "textarea",
-      label: "Utdrag",
-      admin: {
-        position: "sidebar",
-        description: "Kort beskrivelse som brukes til SEO og deling",
-      },
-    },
-    {
-      name: "publishedAt",
-      type: "date",
-      label: "Publiseringsdato",
-      admin: {
-        position: "sidebar",
-        date: {
-          pickerAppearance: "dayAndTime",
-        },
       },
     },
     ...qualityDataFields({ sidebarSection: true }),

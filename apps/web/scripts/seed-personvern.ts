@@ -135,8 +135,10 @@ const body: DocBlock[] = [
 const page = {
   title: "Personvernerklæring",
   slug: "personvern",
-  excerpt:
-    "Slik behandler Poynt AS dine personopplysninger – innsamling, formål, lagring og dine rettigheter.",
+  meta: {
+    description:
+      "Slik behandler Poynt AS dine personopplysninger – innsamling, formål, lagring og dine rettigheter.",
+  },
   layout: [
     {
       blockType: "hero",

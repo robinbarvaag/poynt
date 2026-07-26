@@ -10,8 +10,10 @@ import { getPayload } from "payload";
 const page = {
   title: "Verktøy",
   slug: "verktoy",
-  excerpt:
-    "Smarte AI-verktøy for markedsføring, planlegging og innhold – inkludert i On Poynt.",
+  meta: {
+    description:
+      "Smarte AI-verktøy for markedsføring, planlegging og innhold – inkludert i On Poynt.",
+  },
   layout: [
     {
       blockType: "hero",

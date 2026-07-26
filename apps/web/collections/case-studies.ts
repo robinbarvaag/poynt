@@ -147,17 +147,28 @@ export const CaseStudies: CollectionConfig = {
         {
           label: "Hjelp og kvalitet",
           description:
-            "Skrivehjelp og AI-vurdering. Påvirker ikke det publiserte innholdet — kun et redaksjonelt hjelpemiddel.",
+            "Tips og sjekklister som hjelper deg mens du skriver. Ingenting her vises på nettsiden.",
           fields: [
             {
               // Visuell skrivehjelp: buen, live sjekkliste og
-              // Hageland-eksempel.
+              // Hageland-eksempel. Historiesjekken under tar seg av de
+              // deterministiske tekst-reglene (Sidesjekkens søster for
+              // richText).
               name: "retningslinjer",
               type: "ui",
               admin: {
                 components: {
                   Field:
                     "/admin/components/content-guidelines#ContentGuidelines",
+                },
+              },
+            },
+            {
+              name: "historiesjekk",
+              type: "ui",
+              admin: {
+                components: {
+                  Field: "/admin/components/text-check#TextCheck",
                 },
               },
             },

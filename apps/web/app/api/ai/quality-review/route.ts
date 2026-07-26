@@ -2,13 +2,20 @@ import {
   serializeBlogPostContent,
   serializeCaseStudyContent,
   serializePageContent,
+  serializeServiceContent,
 } from "@/lib/quality-review-content";
 import {
   hashGuideContent,
   serializeGuideContent,
 } from "@/lib/serialize-guide-content";
 import { TONE_OF_VOICE } from "@/lib/tone-of-voice";
-import type { BlogPost, CaseStudy, Guide, Page } from "@/payload-types";
+import type {
+  BlogPost,
+  CaseStudy,
+  Guide,
+  Page,
+  Service,
+} from "@/payload-types";
 import config from "@/payload.config";
 import { Output, gateway, streamText } from "ai";
 import { type NextRequest, NextResponse } from "next/server";
@@ -160,6 +167,35 @@ const CASE_STUDY_DIMENSIONS: Dimension[] = [
   TONE_DIMENSION,
 ];
 
+const SERVICE_DIMENSIONS: Dimension[] = [
+  {
+    key: "verdiloefte",
+    label: "Verdiløfte",
+    spm: "Forstår en potensiell kunde raskt hva de får, hvem tjenesten er for og hva som er utfallet? «Vi hjelper med synlighet»-formuleringer trekker ned, konkrete leveranser trekker opp.",
+  },
+  {
+    key: "innhold",
+    label: "Hva er inkludert",
+    spm: "Sier den detaljerte beskrivelsen konkret hva som inngår, hvordan det foregår og hva kunden sitter igjen med — eller er den tynn/tom? [Ingen detaljert beskrivelse] trekker tydelig ned.",
+  },
+  {
+    key: "pris",
+    label: "Pris og forventninger",
+    spm: "Henger prisen og beskrivelsen sammen — skjønner kunden hva prisen dekker? Ved «ta kontakt for pris»: er det tydelig hva en prat innebærer?",
+  },
+  {
+    key: "tillit",
+    label: "Tillit og bevis",
+    spm: "Er det noe som bygger tillit — konkrete eksempler, resultater, FAQ som svarer på reelle innvendinger? Generiske påstander uten belegg trekker ned.",
+  },
+  {
+    key: "bilder",
+    label: "Bildebruk",
+    spm: "Har tjenesten et bilde med alt-tekst som støtter innholdet? [Mangler bilde] trekker ned.",
+  },
+  TONE_DIMENSION,
+];
+
 const CONFIGS: Record<string, CollectionReviewConfig> = {
   guides: {
     label: "ressurs/guide",
@@ -193,6 +229,13 @@ const CONFIGS: Record<string, CollectionReviewConfig> = {
       "Du vurderer et offentlig blogginnlegg på poynt.no. Leseren er en travel småbedriftseier som skummer – og innlegget skal også kunne bli funnet og sitert av søkemotorer og AI-assistenter.",
     dimensions: BLOG_DIMENSIONS,
     serialize: (doc) => serializeBlogPostContent(doc as BlogPost),
+  },
+  services: {
+    label: "tjenesteside",
+    rolle:
+      "Du vurderer en tjenesteside på poynt.no — en salgsside for én konkret tjeneste. Leseren er en småbedriftseier som lurer på om dette er verdt pengene: siden skal gjøre det lett å forstå hva en får, hva det koster og hva neste steg er.",
+    dimensions: SERVICE_DIMENSIONS,
+    serialize: (doc) => serializeServiceContent(doc as Service),
   },
 };
 
@@ -271,7 +314,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           error:
-            "Mangler collection/id (guides, pages, blog-posts eller case-studies).",
+            "Mangler collection/id (guides, pages, blog-posts, case-studies eller services).",
         },
         { status: 400 }
       );
@@ -283,7 +326,8 @@ export async function POST(req: NextRequest) {
           | "guides"
           | "pages"
           | "blog-posts"
-          | "case-studies",
+          | "case-studies"
+          | "services",
         id: body.id,
         depth: 1,
         draft: true,

@@ -2,20 +2,20 @@ import { AdminBar } from "@/components/admin-bar";
 import { JsonLd } from "@/components/json-ld";
 import { PageHero } from "@/components/page-hero";
 import { RenderBlocks } from "@/components/render-blocks";
-import { buildMetadata, notFoundMetadata } from "@/lib/seo";
+import { buildMetadata, firstHeroImage, notFoundMetadata } from "@/lib/seo";
 import { faqSchema } from "@/lib/structured-data";
 import config from "@/payload.config";
 import type { Metadata } from "next";
 import { cacheLife, cacheTag } from "next/cache";
 import { notFound, redirect } from "next/navigation";
 import { getPayload } from "payload";
+import { Suspense } from "react";
 
 interface PageProps {
   params: Promise<{
     slug?: string[];
   }>;
 }
-1;
 
 async function getPage(slug: string) {
   "use cache";
@@ -96,7 +96,7 @@ export async function generateMetadata({
     title: seo.title || page.title,
     description: seo.description ?? undefined,
     path: page.slug === "forside" ? "" : `/${page.slug}`,
-    image: seo.image,
+    image: seo.image || firstHeroImage(page.layout),
     // «Open Graph type»-feltet fra SEO-fanen (product mangler i Next-typen —
     // faller tilbake til website, som er riktig oppførsel for delingskort).
     type: seo.ogType === "article" ? "article" : "website",
@@ -105,7 +105,18 @@ export async function generateMetadata({
   });
 }
 
-export default async function Page({ params }: PageProps) {
+// Ukjente stier (f.eks. /sw.js → 404) finst ikkje i generateStaticParams, så
+// `params` blir runtime-data under prerender — må lesast bak ei Suspense-grense
+// for at cacheComponents/instant-validering ikkje skal klage.
+export default function Page({ params }: PageProps) {
+  return (
+    <Suspense>
+      <PageContent params={params} />
+    </Suspense>
+  );
+}
+
+async function PageContent({ params }: PageProps) {
   const { slug: slugArray } = await params;
   const slug = slugArray ? slugArray.join("/") : "forside";
   const pathname = `/${slug}`;

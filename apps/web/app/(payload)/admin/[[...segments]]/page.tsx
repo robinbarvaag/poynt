@@ -32,4 +32,9 @@ const Page = ({ params, searchParams }: Args) => (
   </Suspense>
 );
 
+// instant=false i (payload)/layout.tsx dekkjer ikkje side-segmentet — 16.3
+// validerer «dropped segments» per side, og Payloads generatePageMetadata les
+// params/searchParams (upstream). Admin treng uansett ikkje instant navigation.
+export const instant = false;
+
 export default Page;

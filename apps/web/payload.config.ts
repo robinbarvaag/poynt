@@ -175,12 +175,20 @@ export default buildConfig({
         ]
       : []),
     seoPlugin({
-      collections: ["pages", "products", "blog-posts", "case-studies"],
+      collections: [
+        "pages",
+        "products",
+        "blog-posts",
+        "case-studies",
+        "services",
+      ],
       uploadsCollection: "media",
       // «| Poynt»-suffikset legges på automatisk i frontend (title.template),
       // så meta-tittelen lagres uten suffiks for å unngå dobbel «| Poynt».
-      generateTitle: ({ doc }) => doc.title,
-      generateDescription: ({ doc }) => doc.excerpt || "",
+      // Tjenester har `name`/`shortDescription` i stedet for tittel/utdrag.
+      generateTitle: ({ doc }) => doc.title || doc.name,
+      generateDescription: ({ doc }) =>
+        doc.excerpt || doc.shortDescription || "",
       generateURL: ({ doc, collectionSlug }) => {
         if (collectionSlug === "pages") {
           return doc.slug === "forside" ? siteUrl : `${siteUrl}/${doc.slug}`;
@@ -191,26 +199,62 @@ export default buildConfig({
         if (collectionSlug === "case-studies") {
           return `${siteUrl}/kundehistorier/${doc.slug}`;
         }
+        if (collectionSlug === "services") {
+          return `${siteUrl}/tjenester/${doc.slug}`;
+        }
         return `${siteUrl}/${collectionSlug}/${doc.slug}`;
       },
       tabbedUI: true,
       fields: ({ defaultFields }) => [
         // Pluginets egen «Preview» (kun URL/tekst, uten bilde) byttes ut med
         // vår egen SeoPreview (Google-treff + delingskort med bilde) på samme
-        // plass i skjemaet.
-        ...defaultFields.map((field) =>
-          "name" in field && field.name === "preview"
-            ? ({
-                name: "seoPreview",
-                type: "ui",
-                admin: {
-                  components: {
-                    Field: "/admin/components/seo/seo-preview#SeoPreview",
-                  },
+        // plass i skjemaet. Tittel/beskrivelse får hjelpetekst om fallbacken:
+        // frontend bruker innholdets tittel og utdrag når feltene står tomme.
+        ...defaultFields.map((field) => {
+          if (!("name" in field)) return field;
+          if (field.name === "preview") {
+            return {
+              name: "seoPreview",
+              type: "ui",
+              admin: {
+                components: {
+                  Field: "/admin/components/seo/seo-preview#SeoPreview",
                 },
-              } as const)
-            : field
-        ),
+              },
+            } as const;
+          }
+          if (field.name === "title") {
+            return {
+              ...field,
+              admin: {
+                ...field.admin,
+                description:
+                  "Kan stå tom — da bruker Google innholdets egen tittel. Fyll ut hvis søketreffet skal si noe annet enn overskriften på siden.",
+              },
+            } as typeof field;
+          }
+          if (field.name === "description") {
+            return {
+              ...field,
+              admin: {
+                ...field.admin,
+                description:
+                  "Kan stå tom — da brukes utdraget/den korte oppsummeringen fra innholdet. (Sider har ikke utdrag, så der bør denne fylles ut.)",
+              },
+            } as typeof field;
+          }
+          if (field.name === "image") {
+            return {
+              ...field,
+              admin: {
+                ...field.admin,
+                description:
+                  "Kan stå tom — da brukes hovedbildet (eller hero-bildet på Sider), og uten det lages et automatisk Poynt-kort med tittelen.",
+              },
+            } as typeof field;
+          }
+          return field;
+        }),
         {
           name: "noIndex",
           type: "checkbox",
@@ -247,7 +291,13 @@ export default buildConfig({
       ],
     }),
     redirectsPlugin({
-      collections: ["pages", "products", "blog-posts", "case-studies"],
+      collections: [
+        "pages",
+        "products",
+        "blog-posts",
+        "case-studies",
+        "services",
+      ],
       overrides: {
         admin: {
           // Ligger i den egenbygde «Drift»-nav-gruppen (setup-nav-group.tsx),

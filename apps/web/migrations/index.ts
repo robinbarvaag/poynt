@@ -39,6 +39,8 @@ import * as migration_20260725_150105 from './20260725_150105';
 import * as migration_20260725_161825 from './20260725_161825';
 import * as migration_20260725_171250 from './20260725_171250';
 import * as migration_20260725_203027_on_poynt_features from './20260725_203027_on_poynt_features';
+import * as migration_20260726_101651_remove_pages_excerpt_published_at from './20260726_101651_remove_pages_excerpt_published_at';
+import * as migration_20260726_112513 from './20260726_112513';
 
 export const migrations = [
   {
@@ -244,6 +246,16 @@ export const migrations = [
   {
     up: migration_20260725_203027_on_poynt_features.up,
     down: migration_20260725_203027_on_poynt_features.down,
-    name: '20260725_203027_on_poynt_features'
+    name: '20260725_203027_on_poynt_features',
+  },
+  {
+    up: migration_20260726_101651_remove_pages_excerpt_published_at.up,
+    down: migration_20260726_101651_remove_pages_excerpt_published_at.down,
+    name: '20260726_101651_remove_pages_excerpt_published_at',
+  },
+  {
+    up: migration_20260726_112513.up,
+    down: migration_20260726_112513.down,
+    name: '20260726_112513'
   },
 ];

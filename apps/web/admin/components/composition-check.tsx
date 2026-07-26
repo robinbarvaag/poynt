@@ -1,15 +1,17 @@
 "use client";
 
 import { useAllFormFields } from "@payloadcms/ui";
+import { CheckPanel, type Finding } from "./check-panel";
 
 /**
- * «Komposisjonssjekk» — regelbasert vakt for sideoppbygging, montert som
+ * «Sidesjekk» — regelbasert vakt for sideoppbygging, montert som
  * `ui`-felt over Sidelayout på Sider og Forside. Leser blokk-lista live fra
  * skjema-tilstanden og varsler når siden bryter retningslinjene i
  * docs/COMPOSITION.md (for mange fargepaneler, to paneler inntil hverandre,
  * dobbel hero, samme CTA flere ganger, osv.). KUN veiledning — blokkerer
- * aldri lagring. Søsteren til AI-kvalitetsvurderingen på Guider, men uten AI:
- * reglene er deterministiske og kjører i nettleseren mens en redigerer.
+ * aldri lagring. Søsteren til TextCheck på richText-innhold og
+ * AI-kvalitetsvurderingen på Guider, men uten AI: reglene er deterministiske
+ * og kjører i nettleseren mens en redigerer.
  */
 
 interface BlockInfo {
@@ -18,11 +20,6 @@ interface BlockInfo {
   /** Teller blokka som mettet fargepanel i panel-rasjoneringen? */
   isPanel: boolean;
   primaryCtaUrl?: string;
-}
-
-interface Finding {
-  level: "advarsel" | "tips";
-  text: string;
 }
 
 const BLOCK_LABELS: Record<string, string> = {
@@ -85,11 +82,11 @@ function analyse(blocks: BlockInfo[]): Finding[] {
   if (panels.length > 2) {
     findings.push({
       level: "advarsel",
-      text: `Siden har ${panels.length} fargepaneler (${panels
-        .map((p) => label(p.blockType))
+      text: `Siden har ${panels.length} seksjoner med farget bakgrunn (${panels
+        .map((p) => `${label(p.blockType)} i seksjon ${p.index + 1}`)
         .join(
           ", "
-        )}). Maks to per side — gjør et Tall-bånd om til «Delt»-utseende, eller bruk CTA-varianten «Enkel».`,
+        )}). To holder — endre f.eks. et Tall-bånd til «Delt», eller en CTA til «Enkel».`,
     });
   }
 
@@ -98,9 +95,11 @@ function analyse(blocks: BlockInfo[]): Finding[] {
     if (blocks[i].isPanel && blocks[i - 1].isPanel) {
       findings.push({
         level: "advarsel",
-        text: `${label(blocks[i - 1].blockType)} og ${label(
-          blocks[i].blockType
-        )} er begge fargepaneler og ligger rett etter hverandre — legg en rolig seksjon mellom, eller endre den ene.`,
+        text: `${label(blocks[i - 1].blockType)} (seksjon ${
+          blocks[i - 1].index + 1
+        }) og ${label(blocks[i].blockType)} (seksjon ${
+          blocks[i].index + 1
+        }) har begge farget bakgrunn og ligger rett etter hverandre — legg en rolig seksjon mellom, eller endre den ene.`,
       });
     }
   }
@@ -115,7 +114,7 @@ function analyse(blocks: BlockInfo[]): Finding[] {
   } else if (heroes.length === 1 && blocks[0].blockType !== "hero") {
     findings.push({
       level: "tips",
-      text: "Hero-blokka ligger ikke øverst — den er laget for å være sidens første seksjon.",
+      text: "Hero-blokka ligger ikke øverst — den fungerer best som sidens første seksjon.",
     });
   }
 
@@ -137,17 +136,23 @@ function analyse(blocks: BlockInfo[]): Finding[] {
   }
 
   // 5. Samme CTA-mål flere ganger (hero + CTA-seksjoner).
-  const urls = new Map<string, number>();
+  const urls = new Map<string, BlockInfo[]>();
   for (const b of blocks) {
     if (b.primaryCtaUrl) {
-      urls.set(b.primaryCtaUrl, (urls.get(b.primaryCtaUrl) ?? 0) + 1);
+      const list = urls.get(b.primaryCtaUrl) ?? [];
+      list.push(b);
+      urls.set(b.primaryCtaUrl, list);
     }
   }
-  for (const [url, count] of urls) {
-    if (count > 1) {
+  for (const [url, sameUrl] of urls) {
+    if (sameUrl.length > 1) {
+      const navn = sameUrl.map(
+        (b) => `${label(b.blockType)} (seksjon ${b.index + 1})`
+      );
+      const hvor = `${navn.slice(0, -1).join(", ")} og ${navn[navn.length - 1]}`;
       findings.push({
         level: "tips",
-        text: `${count} blokker har hovedknapp mot «${url}». Ett tydelig CTA-mål per side selger bedre enn mange like — la de andre seksjonene omtale det uten egen knapp.`,
+        text: `${hvor} har ${sameUrl.length === 2 ? "begge" : "alle"} knapp som peker til «${url}». Én hovedknapp per side er tydeligere — de andre seksjonene kan godt stå uten knapp.`,
       });
     }
   }
@@ -156,7 +161,7 @@ function analyse(blocks: BlockInfo[]): Finding[] {
   if (blocks.length > 12) {
     findings.push({
       level: "tips",
-      text: `Siden har ${blocks.length} blokker — vurder å slå sammen eller flytte innhold til undersider.`,
+      text: `Siden har ${blocks.length} seksjoner — det kan bli mye å scrolle gjennom. Vurder å slå sammen noen, eller flytte innhold til en egen side.`,
     });
   }
 
@@ -164,11 +169,11 @@ function analyse(blocks: BlockInfo[]): Finding[] {
 }
 
 const GUIDELINES: string[] = [
-  "Alt innhold deler ÉN bredde og én venstrekant — blokkene ordner dette selv, ikke prøv å «brede ut» enkeltseksjoner.",
-  "Seksjonstitler er venstrestilte. Sentrering er unntaket: hero og avsluttende CTA.",
-  "Maks to mettede fargepaneler per side (grønt/gult/rosa panel: Tall-bånd «Bånd», CTA «Farget», Nyhetsbrev) — og aldri to inntil hverandre.",
-  "Ett tydelig CTA-mål per side. Andre seksjoner kan omtale tilbudet uten egen knapp.",
-  "Hero øverst, Nyhetsbrev nederst. Avstanden mellom seksjoner er fast — ikke noe du styrer per blokk.",
+  "Alle seksjoner har samme bredde og starter på samme venstrekant — det ordner blokkene selv.",
+  "Overskrifter står til venstre. Bare hero og siste CTA er midtstilt.",
+  "Maks to seksjoner med farget bakgrunn per side — og aldri to rett etter hverandre.",
+  "Velg én ting du vil at leseren skal gjøre. Ikke alle seksjoner trenger en knapp.",
+  "Hero øverst, nyhetsbrev nederst. Avstanden mellom seksjoner er alltid den samme.",
 ];
 
 export const CompositionCheck = () => {
@@ -177,97 +182,15 @@ export const CompositionCheck = () => {
     fields as unknown as Record<string, { value?: unknown }>
   );
   const findings = analyse(blocks);
-  const warnings = findings.filter((f) => f.level === "advarsel");
-  const tips = findings.filter((f) => f.level === "tips");
 
   return (
-    <div
-      style={{
-        marginBottom: "1.5rem",
-        padding: "0.9rem 1rem",
-        border: "1px solid var(--theme-elevation-150)",
-        borderRadius: "var(--style-radius-m, 8px)",
-        background: "var(--theme-elevation-50)",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "0.5rem",
-          fontWeight: 600,
-          fontSize: "0.9rem",
-        }}
-      >
-        <span aria-hidden>📐</span> Komposisjonssjekk
-        {blocks.length > 0 && (
-          <span
-            style={{
-              marginLeft: "auto",
-              fontSize: "0.78rem",
-              fontWeight: 500,
-              color:
-                warnings.length > 0
-                  ? "var(--theme-warning-600, #b45309)"
-                  : "var(--theme-success-500, #22c55e)",
-            }}
-          >
-            {warnings.length > 0
-              ? `${warnings.length} å se på`
-              : "Følger retningslinjene"}
-          </span>
-        )}
-      </div>
-
-      {findings.length > 0 && (
-        <ul
-          style={{
-            margin: "0.6rem 0 0",
-            paddingLeft: "1.1rem",
-            display: "grid",
-            gap: "0.35rem",
-          }}
-        >
-          {[...warnings, ...tips].map((f) => (
-            <li key={f.text} style={{ fontSize: "0.82rem" }}>
-              <span aria-hidden>{f.level === "advarsel" ? "⚠️" : "💡"}</span>{" "}
-              {f.text}
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <details style={{ marginTop: "0.6rem" }}>
-        <summary
-          style={{
-            cursor: "pointer",
-            fontSize: "0.78rem",
-            color: "var(--theme-elevation-500)",
-          }}
-        >
-          Retningslinjer for sideoppbygging
-        </summary>
-        <ul
-          style={{
-            margin: "0.5rem 0 0",
-            paddingLeft: "1.1rem",
-            display: "grid",
-            gap: "0.3rem",
-          }}
-        >
-          {GUIDELINES.map((g) => (
-            <li
-              key={g}
-              style={{
-                fontSize: "0.78rem",
-                color: "var(--theme-elevation-600)",
-              }}
-            >
-              {g}
-            </li>
-          ))}
-        </ul>
-      </details>
-    </div>
+    <CheckPanel
+      title="Sidesjekk"
+      intro="Ser over oppbyggingen av siden mens du jobber, og sier ifra hvis noe bør flyttes eller endres."
+      findings={findings}
+      showStatus={blocks.length > 0}
+      guidelinesLabel="Huskeregler for en ryddig side"
+      guidelines={GUIDELINES}
+    />
   );
 };

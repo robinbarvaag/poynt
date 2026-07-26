@@ -59,20 +59,57 @@ function lengthHint(
 export const SeoPreview = () => {
   const title = (useMetaValue("meta.title") as string) || "";
   const description = (useMetaValue("meta.description") as string) || "";
+  // Frontend faller tilbake til innholdets egne felt når SEO-fanen står tom
+  // (meta.title || tittel, meta.description || utdrag/kort beskrivelse) —
+  // speil det her så forhåndsvisningen viser det Google faktisk får. På
+  // globals uten disse feltene blir fallbacken bare tom streng.
+  const docTitle =
+    (useMetaValue("title") as string) || (useMetaValue("name") as string) || "";
+  const docSummary =
+    (useMetaValue("excerpt") as string) ||
+    (useMetaValue("shortDescription") as string) ||
+    "";
+  const effectiveTitle = title || docTitle;
+  const effectiveDescription = description || docSummary;
   const imageId = useMetaValue("meta.image") as
     | number
     | string
     | { id?: number | string }
     | null
     | undefined;
+  // Bilde-fallbacken frontend bruker når SEO-fanens delingsbilde står tomt:
+  // hovedbildet (blogg/kundehistorier/produkter) eller første hero-blokks
+  // bilde (Sider/Forside). Selektoren returnerer en primitiv (id), så
+  // re-render skjer bare når resultatet faktisk endrer seg.
+  const fallbackImageId = useFormFields(([fields]) => {
+    const direct =
+      fields.featuredImage?.value ?? (fields.image?.value as unknown);
+    if (direct) return direct;
+    const heroIndexes = Object.keys(fields)
+      .map((key) => /^layout\.(\d+)\.blockType$/.exec(key))
+      .filter((m): m is RegExpExecArray => m !== null)
+      .filter((m) => fields[m[0]]?.value === "hero")
+      .map((m) => Number(m[1]))
+      .sort((a, b) => a - b);
+    for (const index of heroIndexes) {
+      const img = fields[`layout.${index}.image`]?.value;
+      if (img) return img;
+    }
+    return undefined;
+  }) as number | string | { id?: number | string } | null | undefined;
 
   const [media, setMedia] = useState<MediaDoc | null>(null);
   // Cache-buster: nytt tidsstempel per åpning (og per «Oppdater»-klikk) så
   // nettleseren ikke viser et gammelt cachet delingskort.
   const [refreshKey, setRefreshKey] = useState(() => Date.now());
 
-  const resolvedImageId =
+  const metaImageId =
     imageId && typeof imageId === "object" ? imageId.id : imageId;
+  const resolvedImageId =
+    metaImageId ??
+    (fallbackImageId && typeof fallbackImageId === "object"
+      ? fallbackImageId.id
+      : fallbackImageId);
 
   useEffect(() => {
     if (!resolvedImageId) {
@@ -98,14 +135,19 @@ export const SeoPreview = () => {
 
   // Titler som selv starter med merkenavnet (f.eks. forsiden, som bruker
   // absolutt tittel) får ikke «| Poynt»-suffikset i frontend — speil det her.
-  const startsWithBrand = title.toLowerCase().startsWith("poynt");
-  const fullTitle = title
+  const startsWithBrand = effectiveTitle.toLowerCase().startsWith("poynt");
+  const fullTitle = effectiveTitle
     ? startsWithBrand
-      ? title
-      : `${title} | ${SITE_NAME}`
+      ? effectiveTitle
+      : `${effectiveTitle} | ${SITE_NAME}`
     : "";
   const titleHint = lengthHint(fullTitle.length, 40, 60, "Tittel");
-  const descHint = lengthHint(description.length, 120, 160, "Beskrivelse");
+  const descHint = lengthHint(
+    effectiveDescription.length,
+    120,
+    160,
+    "Beskrivelse"
+  );
 
   // Speiler frontend-logikken i lib/seo.ts (resolveOgImage): bilder som
   // allerede er ~1,91:1 brukes direkte; alt annet vises i merkevare-kortet
@@ -124,9 +166,9 @@ export const SeoPreview = () => {
     composited = true;
     const fit =
       ratio !== null && ratio >= 0.75 && ratio <= 1.72 ? "cover" : "contain";
-    cardImage = `/api/og-image?title=${encodeURIComponent(title || SITE_NAME)}&img=${encodeURIComponent(media.url)}&fit=${fit}&_=${refreshKey}`;
+    cardImage = `/api/og-image?title=${encodeURIComponent(effectiveTitle || SITE_NAME)}&img=${encodeURIComponent(media.url)}&fit=${fit}&_=${refreshKey}`;
   } else {
-    cardImage = `/api/og-image?title=${encodeURIComponent(title || SITE_NAME)}&_=${refreshKey}`;
+    cardImage = `/api/og-image?title=${encodeURIComponent(effectiveTitle || SITE_NAME)}&_=${refreshKey}`;
   }
 
   const mutedStyle: CSSProperties = {
@@ -188,10 +230,24 @@ export const SeoPreview = () => {
               lineHeight: 1.45,
             }}
           >
-            {description ||
-              "Ingen meta-beskrivelse — Google velger selv tekst fra siden."}
+            {effectiveDescription ||
+              "Ingen meta-beskrivelse er satt — Google velger selv tekst fra siden."}
           </p>
         </div>
+        {!title && effectiveTitle && (
+          <p style={mutedStyle}>
+            Meta-tittelen står tom, så innholdets egen tittel brukes — det er
+            helt greit. Fyll ut feltet over hvis Google-treffet skal si noe
+            annet.
+          </p>
+        )}
+        {!description && effectiveDescription && (
+          <p style={mutedStyle}>
+            Meta-beskrivelsen står tom, så den korte oppsummeringen brukes — det
+            er helt greit. Fyll ut feltet over hvis Google-treffet skal si noe
+            annet.
+          </p>
+        )}
         <p
           style={{
             ...mutedStyle,
@@ -265,8 +321,10 @@ export const SeoPreview = () => {
             >
               {fullTitle || SITE_NAME}
             </p>
-            {description && (
-              <p style={{ ...mutedStyle, fontSize: "0.8rem" }}>{description}</p>
+            {effectiveDescription && (
+              <p style={{ ...mutedStyle, fontSize: "0.8rem" }}>
+                {effectiveDescription}
+              </p>
             )}
           </div>
         </div>
@@ -274,6 +332,13 @@ export const SeoPreview = () => {
           <p style={mutedStyle}>
             Ingen delingsbilde valgt — det automatiske Poynt-kortet over brukes
             i stedet. Det er helt fint, men et eget bilde kan gi flere klikk.
+          </p>
+        )}
+        {!metaImageId && resolvedImageId && (
+          <p style={mutedStyle}>
+            Delingsbildet står tomt i SEO-fanen, så innholdets eget bilde
+            (hovedbildet eller hero-bildet) brukes — det er helt greit. Velg et
+            bilde over hvis delingskortet skal vise noe annet.
           </p>
         )}
         {composited && (

@@ -1,7 +1,7 @@
 "use client";
 
-import { useDocumentInfo, useField } from "@payloadcms/ui";
-import { useState } from "react";
+import { Button, useDocumentInfo, useField } from "@payloadcms/ui";
+import { useEffect, useState } from "react";
 
 /**
  * «Vurder kvalitet»-panel, montert som `ui`-felt på Guider, Sider og
@@ -39,6 +39,22 @@ function scoreColor(score: number): string {
   return "var(--theme-error-500, #ef4444)";
 }
 
+/** Skjelett-linje med shimmer — brukes i ventetilstanden. */
+function ShimmerLine({
+  width,
+  height = 12,
+}: {
+  width: string;
+  height?: number;
+}) {
+  return (
+    <div
+      className="quality-shimmer"
+      style={{ width, height, borderRadius: 4 }}
+    />
+  );
+}
+
 function formatDate(iso: string | null): string | null {
   if (!iso) return null;
   const d = new Date(iso);
@@ -63,7 +79,16 @@ export const QualityReviewButton = () => {
   });
 
   const [loading, setLoading] = useState(false);
+  const [elapsed, setElapsed] = useState(0);
   const [error, setError] = useState<string | null>(null);
+
+  // Sekundteller mens vurderingen kjører — viser at det fortsatt skjer noe.
+  useEffect(() => {
+    if (!loading) return;
+    setElapsed(0);
+    const timer = setInterval(() => setElapsed((s) => s + 1), 1000);
+    return () => clearInterval(timer);
+  }, [loading]);
 
   // Vis lagret vurdering ved åpning; lokal state overstyrer etter ny kjøring.
   const [fresh, setFresh] = useState<Review | null>(null);
@@ -103,27 +128,48 @@ export const QualityReviewButton = () => {
 
   return (
     <div style={{ marginBottom: "1.5rem" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-        <button
-          type="button"
+      <style>{`
+        .quality-shimmer {
+          background: linear-gradient(
+            90deg,
+            var(--theme-elevation-100) 25%,
+            var(--theme-elevation-150) 50%,
+            var(--theme-elevation-100) 75%
+          );
+          background-size: 200% 100%;
+          animation: quality-shimmer 1.4s ease-in-out infinite;
+        }
+        @keyframes quality-shimmer {
+          0% { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .quality-shimmer { animation: none; }
+        }
+      `}</style>
+
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "0.75rem",
+          flexWrap: "wrap",
+        }}
+      >
+        <Button
+          buttonStyle="pill"
+          size="small"
           onClick={onClick}
           disabled={loading}
-          className="btn btn--style-secondary btn--size-small"
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "0.4rem",
-            margin: 0,
-          }}
+          margin={false}
         >
-          <span aria-hidden>🧭</span>{" "}
           {loading
             ? "Vurderer …"
             : review
               ? "Vurder på nytt"
               : "Vurder kvalitet"}
-        </button>
-        {reviewedLabel && !fresh && (
+        </Button>
+        {reviewedLabel && !fresh && !loading && (
           <span
             style={{
               fontSize: "0.78rem",
@@ -134,6 +180,61 @@ export const QualityReviewButton = () => {
           </span>
         )}
       </div>
+
+      {!loading && (
+        <p
+          style={{
+            margin: "0.4rem 0 0",
+            fontSize: "0.78rem",
+            color: "var(--theme-elevation-500)",
+          }}
+        >
+          AI-en leser gjennom innholdet og gir en score med konkrete forslag.
+          Tar vanligvis under ett minutt — hold denne fanen åpen mens den
+          jobber.
+        </p>
+      )}
+
+      {loading && (
+        <div
+          style={{
+            marginTop: "1rem",
+            padding: "1rem",
+            border: "1px solid var(--theme-elevation-150)",
+            borderRadius: "var(--style-radius-m, 8px)",
+            background: "var(--theme-elevation-50)",
+            display: "grid",
+            gap: "0.75rem",
+          }}
+          aria-live="polite"
+        >
+          <p
+            style={{
+              margin: 0,
+              fontSize: "0.82rem",
+              color: "var(--theme-elevation-600)",
+            }}
+          >
+            Leser gjennom innholdet og vurderer det … Dette tar vanligvis 20–60
+            sekunder ({elapsed} s). Hold fanen åpen — resultatet dukker opp her.
+          </p>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+            <ShimmerLine width="56px" height={32} />
+            <ShimmerLine width="36px" height={14} />
+          </div>
+          <ShimmerLine width="90%" />
+          <ShimmerLine width="75%" />
+          {[0, 1, 2].map((i) => (
+            <div key={i} style={{ display: "grid", gap: 6 }}>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <ShimmerLine width="30%" height={10} />
+                <ShimmerLine width="24px" height={10} />
+              </div>
+              <ShimmerLine width="100%" height={4} />
+            </div>
+          ))}
+        </div>
+      )}
 
       {error && (
         <p

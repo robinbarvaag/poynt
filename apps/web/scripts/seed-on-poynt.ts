@@ -44,8 +44,6 @@ const faqItems = [
 const page = {
   title: "On Poynt",
   slug: "on-poynt",
-  excerpt:
-    "Medlemskapet for deg som gjør markedsføringen selv: AI-verktøy, guider, kurs og et fellesskap av folk i samme båt.",
   layout: [
     {
       blockType: "hero",

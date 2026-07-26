@@ -70,8 +70,10 @@ const body: DocBlock[] = [
 const page = {
   title: "Kjøpsbetingelser",
   slug: "kjopsbetingelser",
-  excerpt:
-    "Vilkår for bestilling og bruk av Poynt AS sine gratis og betalte tjenester – pris, levering, angrerett og mer.",
+  meta: {
+    description:
+      "Vilkår for bestilling og bruk av Poynt AS sine gratis og betalte tjenester – pris, levering, angrerett og mer.",
+  },
   layout: [
     {
       blockType: "hero",

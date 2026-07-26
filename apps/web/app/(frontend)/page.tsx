@@ -1,6 +1,6 @@
 import { AdminBar } from "@/components/admin-bar";
 import { RenderBlocks } from "@/components/render-blocks";
-import { buildMetadata } from "@/lib/seo";
+import { buildMetadata, firstHeroImage } from "@/lib/seo";
 import config from "@/payload.config";
 import type { Metadata } from "next";
 import { cacheLife, cacheTag } from "next/cache";
@@ -23,7 +23,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: meta.title || "Poynt – Din læringsplattform for kurs og opplæring",
     absoluteTitle: true,
     description: meta.description ?? undefined,
-    image: meta.image,
+    image: meta.image || firstHeroImage(homepage?.layout),
     noIndex: meta.noIndex ?? undefined,
   });
 }

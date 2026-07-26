@@ -11,8 +11,10 @@ import { richText } from "./_lexical";
 const page = {
   title: "Om",
   slug: "om",
-  excerpt:
-    "Poynt drives av Susanne Todnem – markedsfører, rådgiver og foredragsholder som hjelper bedrifter å vokse.",
+  meta: {
+    description:
+      "Poynt drives av Susanne Todnem – markedsfører, rådgiver og foredragsholder som hjelper bedrifter å vokse.",
+  },
   layout: [
     {
       blockType: "hero",

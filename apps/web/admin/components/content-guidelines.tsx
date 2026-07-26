@@ -10,7 +10,7 @@ import type { CSSProperties, ReactNode } from "react";
  * eksempel-kort. Config-drevet på collectionSlug (useDocumentInfo), så nye
  * innholdstyper (blogg, sider) legges til i GUIDELINES uten ny komponent.
  * Montert som `ui`-felt øverst i skjemaet. Søsteren til den regelbaserte
- * Komposisjonssjekken og AI-kvalitetsvurderingen — men denne veileder FØR
+ * Sidesjekken og AI-kvalitetsvurderingen — men denne veileder FØR
  * en skriver, ikke etter.
  */
 
@@ -52,6 +52,22 @@ const hasAny = (fields: Fields, path: string): boolean => {
   const value = fields[path]?.value;
   return Array.isArray(value) ? value.length > 0 : has(fields, path);
 };
+
+/**
+ * Felles SEO-punkter — gjelder ALLE innholdstyper som har SEO-fanen fra
+ * seoPlugin (Sider, Blogginnlegg, Kundehistorier). Spres inn sist i hver
+ * types `checks`, så nye punkter havner overalt automatisk.
+ */
+const seoChecks: Check[] = [
+  {
+    label: "Meta-tittel er satt i SEO-fanen",
+    test: (f) => has(f, "meta.title"),
+  },
+  {
+    label: "Meta-beskrivelse er satt i SEO-fanen (teksten Google viser)",
+    test: (f) => has(f, "meta.description"),
+  },
+];
 
 /* ---------- Eksempel-kort: Hageland ---------- */
 
@@ -219,7 +235,7 @@ const GUIDELINES: Record<string, GuidelineConfig> = {
   "case-studies": {
     title: "Slik skriver du en god kundehistorie",
     intro:
-      "En kundehistorie er salgsbevis, ikke omtale. Leseren skal kjenne seg igjen i utfordringen — og tro på resultatet.",
+      "En god kundehistorie viser at det du gjør, faktisk virker. Leseren skal kjenne seg igjen i utfordringen — og tro på resultatet.",
     arc: [
       {
         title: "Utfordringen",
@@ -262,13 +278,14 @@ const GUIDELINES: Record<string, GuidelineConfig> = {
         label: "Sitat fra kunden — med navn",
         test: (f) => has(f, "quote.text") && has(f, "quote.author"),
       },
+      ...seoChecks,
     ],
     example: <CaseStudyExample />,
   },
   "blog-posts": {
     title: "Slik skriver du et godt blogginnlegg",
     intro:
-      "Bloggen er fag og aktualitet. Leseren er en travel småbedriftseier som skummer — og innlegget skal kunne bli funnet av søk og AI-assistenter.",
+      "Leseren er en travel bedriftseier som skumleser. Skriv så innlegget er lett å skumme — og lett å finne i Google.",
     arc: [
       {
         title: "Kroken",
@@ -300,13 +317,14 @@ const GUIDELINES: Record<string, GuidelineConfig> = {
         label: "Minst én kategori er satt",
         test: (f) => hasAny(f, "categories"),
       },
+      ...seoChecks,
     ],
     example: <BlogExample />,
   },
   pages: {
     title: "Slik bygger du en side som selger",
     intro:
-      "En side er en fortelling i seksjoner. Komposisjonssjekken under passer på blokk-reglene — dette er dramaturgien.",
+      "Tenk på siden som en liten fortelling: først et løfte, så bevis, til slutt én tydelig ting leseren kan gjøre. Sidesjekken under sier ifra hvis oppbyggingen bør justeres.",
     arc: [
       {
         title: "Løftet",
@@ -330,14 +348,45 @@ const GUIDELINES: Record<string, GuidelineConfig> = {
         label: "Minst tre seksjoner (løfte → bevis → handling)",
         test: (f) => arrayRows(f, "layout") >= 3,
       },
+      ...seoChecks,
+    ],
+  },
+  services: {
+    title: "Slik beskriver du en tjeneste som selger",
+    intro:
+      "Leseren lurer på tre ting: hva får jeg, hva koster det, og hva gjør jeg nå? Svar på alle tre — konkret og uten fagord.",
+    arc: [
       {
-        label: "Utdrag er fylt ut (brukes til SEO og deling)",
-        test: (f) => has(f, "excerpt"),
+        title: "Hva du får",
+        text: "Si hva kunden sitter igjen med, ikke hva vi gjør. «En ferdig innholdsplan for tre måneder» slår «vi hjelper med innhold».",
       },
       {
-        label: "Meta-tittel er satt i SEO-fanen",
-        test: (f) => has(f, "meta.title"),
+        title: "Hva det koster",
+        text: "Prisen skal henge sammen med beskrivelsen — det skal være tydelig hva den dekker. Ved «ta kontakt»: si hva en prat innebærer.",
       },
+      {
+        title: "Neste steg",
+        text: "Ett tydelig neste steg med muntlig knappetekst. Svar gjerne på vanlige innvendinger i FAQ-en nederst i Innhold-fanen.",
+      },
+    ],
+    checks: [
+      {
+        label: "Kort beskrivelse sier hva kunden får",
+        test: (f) => has(f, "shortDescription"),
+      },
+      {
+        label: "Detaljert beskrivelse er skrevet (selve tjenestesiden)",
+        test: (f) => has(f, "content"),
+      },
+      {
+        label: "Bilde er valgt",
+        test: (f) => has(f, "image"),
+      },
+      {
+        label: "Pris er satt (eller «ta kontakt for pris» er valgt)",
+        test: (f) => f.priceType?.value === "contact" || has(f, "price"),
+      },
+      ...seoChecks,
     ],
   },
   guides: {

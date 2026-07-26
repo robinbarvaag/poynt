@@ -23,6 +23,23 @@ export function stripSiteSuffix(title: string): string {
     .trim();
 }
 
+/**
+ * Første hero-blokks bilde fra en blokk-layout — delingsbilde-fallback for
+ * blokk-sider (Sider/Forside), som ikke har noe eget «Hovedbilde»-felt slik
+ * blogg og kundehistorier har. Tomt resultat er greit: `resolveOgImage`
+ * faller da videre til det automatiske merkevare-kortet.
+ */
+export function firstHeroImage(layout: unknown): MediaInput | undefined {
+  if (!Array.isArray(layout)) return undefined;
+  const hero = layout.find(
+    (block) =>
+      block &&
+      typeof block === "object" &&
+      (block as { blockType?: string }).blockType === "hero"
+  ) as { image?: MediaResource | number | null } | undefined;
+  return hero?.image ?? undefined;
+}
+
 /** Plattform-standarden for delingsbilder: 1,91:1 (1200×630). */
 export const OG_IMAGE_WIDTH = 1200;
 export const OG_IMAGE_HEIGHT = 630;

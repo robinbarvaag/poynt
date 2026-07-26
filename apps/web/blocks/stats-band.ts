@@ -59,12 +59,12 @@ export const StatsBand: Block = {
           label: "Layout",
           defaultValue: "band",
           options: [
-            { label: "Bånd (fargepanel, sentrert)", value: "band" },
+            { label: "Bånd (farget bakgrunn, sentrert)", value: "band" },
             { label: "Delt (tekst venstre, tall høyre)", value: "split" },
           ],
           admin: {
             description:
-              "«Delt» ligger på sidens vanlige bakgrunn og teller ikke som fargepanel — bruk den når siden allerede har to fargepaneler (se komposisjonssjekken).",
+              "«Delt» ligger på sidens vanlige bakgrunn og teller ikke som farget seksjon — bruk den når siden allerede har to seksjoner med farget bakgrunn (se Sidesjekk).",
           },
         },
         {

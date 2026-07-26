@@ -225,8 +225,10 @@ if (existingForm.docs.length > 0) {
 const page = {
   title: "Bli medlem",
   slug: PAGE_SLUG,
-  excerpt:
-    "Søk om å bli medlem i On Poynt – tilgang til fellesskap, ressurser og KI-verktøy.",
+  meta: {
+    description:
+      "Søk om å bli medlem i On Poynt – tilgang til fellesskap, ressurser og KI-verktøy.",
+  },
   layout: [
     {
       blockType: "hero",

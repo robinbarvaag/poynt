@@ -26,8 +26,10 @@ const pages = [
   {
     title: "For gründere",
     slug: "for-grundere",
-    excerpt:
-      "Verktøy, kurs og fellesskap som hjelper deg å bygge og vokse — i ditt eget tempo.",
+    meta: {
+      description:
+        "Verktøy, kurs og fellesskap som hjelper deg å bygge og vokse — i ditt eget tempo.",
+    },
     layout: [
       {
         blockType: "hero",
@@ -92,8 +94,10 @@ const pages = [
   {
     title: "For bedrifter",
     slug: "for-bedrifter",
-    excerpt:
-      "Hent inn kompetanse til styret, strategisk rådgivning eller foredrag — skreddersydd for dere.",
+    meta: {
+      description:
+        "Hent inn kompetanse til styret, strategisk rådgivning eller foredrag — skreddersydd for dere.",
+    },
     layout: [
       {
         blockType: "hero",
