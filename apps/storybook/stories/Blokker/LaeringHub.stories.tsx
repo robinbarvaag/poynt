@@ -65,7 +65,7 @@ export const Hub: Story = {
         </div>
 
         <ContentFeature
-          href="#"
+          href="/test"
           format="guide"
           eyebrow="Redaksjonens valg"
           surface="mint"
@@ -86,7 +86,7 @@ export const Hub: Story = {
           description="Start her hvis du er ny – i rekkefølge."
           action={
             <a
-              href="#"
+              href="/test"
               className="inline-flex items-center gap-1 font-medium text-primary text-sm"
             >
               Se alle <Icon name="arrow-right" className="size-4" />
@@ -94,7 +94,7 @@ export const Hub: Story = {
           }
         >
           <ContentCard
-            href="#"
+            href="/test"
             format="guide"
             category="Grunnmur"
             title="Sett opp merkevaren din på 20 minutter"
@@ -106,7 +106,7 @@ export const Hub: Story = {
             )}
           />
           <ContentCard
-            href="#"
+            href="/test"
             format="guide"
             category="Kanaler"
             title="Velg de kanalene som faktisk passer deg"
@@ -114,7 +114,7 @@ export const Hub: Story = {
             meta={[{ icon: "clock", label: "8 min" }]}
           />
           <ContentCard
-            href="#"
+            href="/test"
             format="kurs"
             category="Innhold"
             title="Innholdsproduksjon for travle folk"
@@ -129,7 +129,7 @@ export const Hub: Story = {
             )}
           />
           <ContentCard
-            href="#"
+            href="/test"
             format="artikkel"
             category="Tankegods"
             title="Hvorfor «bra nok og publisert» slår «perfekt og usendt»"
@@ -141,7 +141,7 @@ export const Hub: Story = {
           title="Mest populært nå"
           action={
             <a
-              href="#"
+              href="/test"
               className="inline-flex items-center gap-1 font-medium text-primary text-sm"
             >
               Se alle <Icon name="arrow-right" className="size-4" />
@@ -149,7 +149,7 @@ export const Hub: Story = {
           }
         >
           <ContentCard
-            href="#"
+            href="/test"
             format="guide"
             category="Maler"
             title="Canva – tips & triks"
@@ -161,14 +161,14 @@ export const Hub: Story = {
             )}
           />
           <ContentCard
-            href="#"
+            href="/test"
             format="podkast"
             category="Avdelingsmøtet"
             title="Slik fikk Solstua 300 nye kunder på ett år"
             meta={[{ icon: "mic", label: "38 min" }]}
           />
           <ContentCard
-            href="#"
+            href="/test"
             format="artikkel"
             category="SEO"
             title="Bli funnet på Google uten å være ekspert"
@@ -180,7 +180,7 @@ export const Hub: Story = {
             )}
           />
           <ContentCard
-            href="#"
+            href="/test"
             format="kurs"
             category="Annonsering"
             title="Din første Facebook-annonse"
@@ -194,7 +194,7 @@ export const Hub: Story = {
           </h2>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             <ContentCard
-              href="#"
+              href="/test"
               format="guide"
               category="Instagram"
               title="Reels som folk faktisk ser ferdig"
@@ -206,7 +206,7 @@ export const Hub: Story = {
               )}
             />
             <ContentCard
-              href="#"
+              href="/test"
               format="artikkel"
               category="E-post"
               title="Nyhetsbrev som ikke havner i søpla"
@@ -214,7 +214,7 @@ export const Hub: Story = {
               meta={[{ icon: "clock", label: "5 min" }]}
             />
             <ContentCard
-              href="#"
+              href="/test"
               format="kurs"
               category="Merkevare"
               title="Finn din egen stemme"
@@ -226,14 +226,14 @@ export const Hub: Story = {
               )}
             />
             <ContentCard
-              href="#"
+              href="/test"
               format="podkast"
               category="Avdelingsmøtet"
               title="Når bør du si nei til en kunde?"
               meta={[{ icon: "mic", label: "31 min" }]}
             />
             <ContentCard
-              href="#"
+              href="/test"
               format="guide"
               category="LinkedIn"
               title="LinkedIn for deg som synes det er kleint"
@@ -241,7 +241,7 @@ export const Hub: Story = {
               meta={[{ icon: "clock", label: "7 min" }]}
             />
             <ContentCard
-              href="#"
+              href="/test"
               format="artikkel"
               category="Inspirasjon"
               title="Fem små bedrifter som gjør innhold riktig"

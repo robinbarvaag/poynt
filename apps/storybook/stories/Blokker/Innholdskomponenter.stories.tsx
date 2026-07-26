@@ -121,7 +121,7 @@ export const Alle: Story = {
           <div className="flex flex-wrap gap-8">
             <AuthorByline
               name="Kari Nordmann"
-              role="Innholdsansvarlig"
+              jobTitle="Innholdsansvarlig"
               date="12. juni 2026"
             />
             <AuthorByline name="Ola Hansen" size="sm" date="3 min lesing" />

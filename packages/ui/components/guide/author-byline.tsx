@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback } from "../avatar";
 
 export interface AuthorBylineProps {
   name: string;
-  role?: string;
+  jobTitle?: string;
   /** Datotekst, ferdig formatert (f.eks. «12. juni 2026»). */
   date?: string;
   /** Avatar-bilde. Faller tilbake til initialer. */
@@ -29,7 +29,7 @@ function initials(name: string) {
  */
 export function AuthorByline({
   name,
-  role,
+  jobTitle,
   date,
   avatar,
   size = "default",
@@ -53,9 +53,9 @@ export function AuthorByline({
         >
           {name}
         </span>
-        {(role || date) && (
+        {(jobTitle || date) && (
           <span className="text-muted-foreground text-xs">
-            {[role, date].filter(Boolean).join(" · ")}
+            {[jobTitle, date].filter(Boolean).join(" · ")}
           </span>
         )}
       </div>
