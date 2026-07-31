@@ -164,8 +164,12 @@ export const Carousel: Block = {
             { label: "Panorama (21:9)", value: "wide" },
             { label: "Kvadratisk (1:1)", value: "square" },
             { label: "Stående (3:4)", value: "portrait" },
-            { label: "Følger innholdet", value: "auto" },
+            { label: "Følger bildet", value: "auto" },
           ],
+          admin: {
+            description:
+              "Alle elementene beskjæres til samme format. «Følger bildet» lar hvert bilde beholde sitt eget format — bruk den når bildene er skjermbilder eller står på høykant, så slipper du at toppen og bunnen klippes vekk.",
+          },
         },
         {
           name: "autoScroll",
@@ -194,7 +198,11 @@ export const Carousel: Block = {
           type: "checkbox",
           label: "Gå i ring",
           defaultValue: true,
-          admin: { condition: (_data, sibling) => !sibling?.autoScroll },
+          admin: {
+            description:
+              "Etter siste element begynner den på nytt. Krever et par elementer mer enn du viser samtidig — ellers stopper karusellen i endene i stedet for å vise de samme bildene om igjen.",
+            condition: (_data, sibling) => !sibling?.autoScroll,
+          },
         },
         {
           name: "showArrows",

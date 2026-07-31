@@ -4,6 +4,10 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 const photo = (id: string) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=1200&q=70`;
 
+/** Samme kilde, men i et gitt format — for eksempler som viser bildeformat. */
+const sizedPhoto = (id: string, w: number, h: number) =>
+  `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&h=${h}&q=70`;
+
 const BILDER: CarouselItem[] = [
   {
     id: "1",
@@ -263,6 +267,91 @@ export const EnOmGangen: Story = {
     effect: "parallax",
     slidesPerView: 1,
     aspect: "wide",
+  },
+};
+
+export const ToElementer: Story = {
+  name: "Bare to elementer",
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Med for få elementer kan ikke Embla gå i ring: den måtte lånt de " +
+          "samme bildene inn på begge sider, og leseren ville sett samme " +
+          "bilde to ganger side om side. Karusellen slår derfor av `loop` av " +
+          "seg selv og stopper i endene i stedet. Naboen tones ned så det er " +
+          "tydelig hvilken som er den aktive.",
+      },
+    },
+  },
+  args: {
+    eyebrow: "To bilder",
+    title: "Stopper i endene",
+    items: BILDER.slice(0, 2),
+    slidesPerView: 1,
+    loop: true,
+  },
+};
+
+export const FolgerBildet: Story = {
+  name: "Følger bildet (eget format)",
+  parameters: {
+    docs: {
+      description: {
+        story:
+          '`aspect: "auto"` lar hvert bilde beholde sitt eget format i ' +
+          "stedet for å beskjæres til en felles ramme. Riktig valg for " +
+          "skjermbilder og stående bilder, der en 16:9-ramme klipper vekk " +
+          "toppen og bunnen. Krever at bildets mål er kjent (`aspectRatio`) " +
+          "— appen sender dem med fra Payload.",
+      },
+    },
+  },
+  args: {
+    eyebrow: "Skjermbilder",
+    title: "Beholder sitt eget format",
+    // Bildene hentes i SAMME format som `aspectRatio` sier, ellers ville
+    // eksempelet vist en beskjæring det påstår ikke skjer.
+    items: [
+      {
+        id: "p1",
+        src: sizedPhoto("photo-1512941937669-90a1b58e7e9c", 900, 1200),
+        alt: "Stående bilde",
+        aspectRatio: 3 / 4,
+      },
+      {
+        id: "p2",
+        src: sizedPhoto("photo-1522071820081-009f0129c71c", 1200, 675),
+        alt: "Liggende bilde",
+        aspectRatio: 16 / 9,
+      },
+      {
+        id: "p3",
+        src: sizedPhoto("photo-1531482615713-2afd69097998", 900, 900),
+        alt: "Kvadratisk bilde",
+        aspectRatio: 1,
+      },
+    ],
+    slidesPerView: 1,
+    aspect: "auto",
+  },
+};
+
+export const UtenOverskrift: Story = {
+  name: "Uten overskrift (piler til høyre)",
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Uten eyebrow/tittel/ingress returnerer SectionHeader null. Da må " +
+          "pilene høyrestilles eksplisitt — ellers ble de stående alene til " +
+          "venstre over karusellen.",
+      },
+    },
+  },
+  args: {
+    items: BILDER,
+    slidesPerView: 3,
   },
 };
 

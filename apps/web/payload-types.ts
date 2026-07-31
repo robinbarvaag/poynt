@@ -697,7 +697,7 @@ export interface CarouselBlock {
    */
   effect?: ('none' | 'parallax' | 'scale' | 'opacity' | 'depth') | null;
   /**
-   * Gjelder på store skjermer. På mobil vises alltid én om gangen.
+   * Gjelder på store skjermer. På mobil vises alltid én om gangen. Velger du 1, sentreres elementet og naboene stikker fram i kantene — det viser leseren at det er mer å bla i.
    */
   slidesPerView?: ('1' | '2' | '3' | '4' | '5') | null;
   aspect?: ('video' | 'wide' | 'square' | 'portrait' | 'auto') | null;

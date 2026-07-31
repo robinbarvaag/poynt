@@ -5,11 +5,13 @@ import type {
   EmblaEventType,
   EmblaOptionsType,
 } from "embla-carousel";
+import AutoHeight from "embla-carousel-auto-height";
 import AutoScroll from "embla-carousel-auto-scroll";
 import Autoplay from "embla-carousel-autoplay";
 import useEmblaCarousel from "embla-carousel-react";
 import { useReducedMotion } from "framer-motion";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import type React from "react";
 import {
   type ComponentType,
   type ReactNode,
@@ -175,22 +177,35 @@ export function Carousel({
   // med resten av sida.
   const activeAlign = align ?? (slidesPerView === 1 ? "center" : "start");
 
+  // Embla låner slides fra motsatt ende for å lage ringen. Har karusellen bare
+  // så vidt nok slides til å fylle ramma, blir de samme bildene lånt inn på
+  // begge sider — og leseren ser samme bilde to ganger side om side. Krev minst
+  // én slide utover de synlige før vi går i ring; ellers stopper vi i endene.
+  // (Auto-scroll bygger sin egen strøm i `renderItems` og er unntatt.)
+  const canLoop = items.length > slidesPerView + 1;
+  const activeLoop = autoScroll ? true : loop && canLoop;
+
   const options = useMemo<EmblaOptionsType>(
     () => ({
-      loop: autoScroll ? true : loop,
+      loop: activeLoop,
       align: activeAlign,
       // Auto-scroll er en jevn strøm, ikke snapping — dragFree gjør at et
       // manuelt sveip glir videre i samme ånd i stedet for å låse seg.
       dragFree: autoScroll,
-      containScroll: loop || autoScroll ? undefined : "trimSnaps",
+      containScroll: activeLoop ? undefined : "trimSnaps",
     }),
-    [activeAlign, autoScroll, loop]
+    [activeAlign, activeLoop, autoScroll]
   );
 
   const plugins = useMemo(() => {
-    if (reduceMotion) return [];
+    // «Følger bildet» gir slides med ulik høyde. Uten dette blir ramma like
+    // høy som det høyeste bildet, og de lave etterlater et stort tomrom under
+    // seg. AutoHeight lar viewporten følge det som faktisk er i visning.
+    const autoHeight = aspect === "auto" ? [AutoHeight()] : [];
+    if (reduceMotion) return autoHeight;
     if (autoScroll) {
       return [
+        ...autoHeight,
         AutoScroll({
           // Rolig tempo: en logo-stripe er et troverdighets-element, ikke en
           // ticker. Går den fort leses den som støy, og navnene rekker ikke
@@ -203,6 +218,7 @@ export function Carousel({
     }
     if (autoplay > 0) {
       return [
+        ...autoHeight,
         Autoplay({
           delay: autoplay * 1000,
           stopOnInteraction: true,
@@ -210,8 +226,8 @@ export function Carousel({
         }),
       ];
     }
-    return [];
-  }, [autoScroll, autoplay, reduceMotion]);
+    return autoHeight;
+  }, [aspect, autoScroll, autoplay, reduceMotion]);
 
   const [emblaRef, emblaApi] = useEmblaCarousel(options, plugins);
 
@@ -267,6 +283,22 @@ export function Carousel({
     [emblaApi]
   );
 
+  // Pil venstre/høyre når fokus er i karusellen. Embla har ingen innebygd
+  // tastaturstyring, og med piler skjult på mobil/`showArrows: false` er dette
+  // eneste vei fram uten mus.
+  const onKeyDown = useCallback(
+    (event: React.KeyboardEvent) => {
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        scrollPrev();
+      } else if (event.key === "ArrowRight") {
+        event.preventDefault();
+        scrollNext();
+      }
+    },
+    [scrollNext, scrollPrev]
+  );
+
   // Auto-scroll er en sammenhengende strøm: Embla kan bare gå i ring når
   // slidene til sammen er bredere enn viewporten, og en logo-stripe med sju
   // logoer er akkurat på grensa — da rykker loopen ved skjøten. I stedet for
@@ -289,6 +321,16 @@ export function Carousel({
   const basis = BASIS[slidesPerView] ?? BASIS[3];
   const withArrows = showArrows && !autoScroll;
   const withDots = showDots && !autoScroll && snapCount > 1;
+  const hasHeader = Boolean(eyebrow || title || intro);
+
+  // Når slide-en er sentrert med naboene stikkende fram, må det være tydelig
+  // hvilken som er «den aktive» — ellers konkurrerer de tre flatene om blikket.
+  // `opacity`/`depth` gjør allerede dette via tween-en; da lar vi den styre.
+  const dimNeighbours =
+    slidesPerView === 1 &&
+    !isLogoRail &&
+    activeEffect !== "opacity" &&
+    activeEffect !== "depth";
 
   return (
     <Container padding="none" className={className}>
@@ -301,8 +343,15 @@ export function Carousel({
             withArrows && (eyebrow || title || intro) && "md:gap-8"
           )}
         >
-          {(eyebrow || title || intro || withArrows) && (
-            <div className="flex items-end justify-between gap-6">
+          {(hasHeader || withArrows) && (
+            <div
+              className={cn(
+                "flex items-end gap-6",
+                // Uten overskrift returnerer SectionHeader null, og da ville
+                // `justify-between` etterlatt pilene alene til VENSTRE.
+                hasHeader ? "justify-between" : "justify-end"
+              )}
+            >
               <SectionHeader
                 eyebrow={eyebrow}
                 title={title}
@@ -337,12 +386,31 @@ export function Carousel({
             </div>
           )}
 
-          {/* Viewport. Negativ margin + padding på slidene gir mellomrommet. */}
-          <div className="overflow-hidden" ref={emblaRef}>
+          {/*
+            Viewport. Negativ margin + padding på slidene gir mellomrommet.
+            `section` + navn gir en landemerke-region, og `aria-roledescription`
+            får skjermleseren til å si «karusell» i stedet for «region» — WAI-
+            ARIA-mønsteret for karuseller.
+          */}
+          <section
+            className="overflow-hidden"
+            ref={emblaRef}
+            aria-roledescription="karusell"
+            aria-label={title ?? eyebrow ?? "Karusell"}
+            onKeyDown={onKeyDown}
+          >
             <div
               className={cn(
                 "flex touch-pan-y",
-                isLogoRail ? "-ml-8 items-center" : "-ml-4 md:-ml-6"
+                isLogoRail ? "-ml-8 items-center" : "-ml-4 md:-ml-6",
+                // AutoHeight setter høyden på denne containeren inline —
+                // overgangen gjør at den glir i stedet for å hoppe. Selve
+                // høydejusteringen beholdes ved redusert bevegelse (den er
+                // layout, ikke pynt); det er glidningen vi dropper.
+                aspect === "auto" && "items-start",
+                aspect === "auto" &&
+                  !reduceMotion &&
+                  "transition-[height] duration-300 ease-out"
               )}
             >
               {renderItems.map(({ item, duplicate }, index) => (
@@ -350,6 +418,7 @@ export function Carousel({
                   key={`${item.id ?? item.title ?? item.src ?? "slide"}-${index}`}
                   item={item}
                   index={index}
+                  total={items.length}
                   aspect={aspect}
                   presentation={presentation}
                   parallax={isParallax}
@@ -358,13 +427,15 @@ export function Carousel({
                     "min-w-0 flex-none",
                     isLogoRail
                       ? "basis-1/2 pl-8 sm:basis-1/3 lg:basis-1/5"
-                      : cn(basis, "pl-4 md:pl-6")
+                      : cn(basis, "pl-4 md:pl-6"),
+                    dimNeighbours && "transition-opacity duration-500 ease-out",
+                    dimNeighbours && index !== selectedIndex && "opacity-40"
                   )}
                   linkComponent={LinkComp}
                 />
               ))}
             </div>
-          </div>
+          </section>
 
           {withDots && (
             <div className="flex items-center justify-center gap-2">
@@ -395,6 +466,8 @@ export function Carousel({
 interface CarouselSlideProps {
   item: CarouselItem;
   index: number;
+  /** Antall EKTE slides (uten auto-scroll-dublettene) — for «3 av 7». */
+  total: number;
   aspect: NonNullable<CarouselProps["aspect"]>;
   presentation: CarouselPresentation;
   parallax: boolean;
@@ -407,6 +480,7 @@ interface CarouselSlideProps {
 function CarouselSlide({
   item,
   index,
+  total,
   aspect,
   presentation,
   parallax,
@@ -443,6 +517,11 @@ function CarouselSlide({
   return (
     <div
       className={className}
+      // «gruppe, slide, 3 av 7» — WAI-ARIA-mønsteret, så skjermleseren sier
+      // hvor i rekka man er. Dublettene fra auto-scroll holdes utenfor.
+      role={duplicate ? undefined : "group"}
+      aria-roledescription={duplicate ? undefined : "slide"}
+      aria-label={duplicate ? undefined : `${(index % total) + 1} av ${total}`}
       aria-hidden={duplicate || undefined}
       // Dublettene skal ikke kunne tabbes inn i — de er samme innhold to ganger.
       inert={duplicate || undefined}
@@ -514,13 +593,20 @@ function MediaFrame({
       )
     ) : null);
 
+  // «Følger innholdet»: ramma tar bildets EGET format. Media ligger absolutt
+  // posisjonert (appen sender `<PayloadImage fill />`), så uten en høydekilde
+  // ville ramma kollapset til null piksler — derfor settes aspect-ratio fra
+  // bildets faktiske mål. Mangler målene faller vi tilbake på 16:9.
+  const naturalRatio = aspect === "auto" ? item.aspectRatio : undefined;
+
   return (
     <div
       className={cn(
         "relative overflow-hidden bg-muted",
-        ASPECT[aspect],
+        aspect === "auto" && !naturalRatio ? ASPECT.video : ASPECT[aspect],
         className
       )}
+      style={naturalRatio ? { aspectRatio: naturalRatio } : undefined}
     >
       {media && (
         <div
@@ -548,7 +634,13 @@ function MediaSlide(props: {
   aspect: NonNullable<CarouselProps["aspect"]>;
   parallax: boolean;
 }) {
-  return <MediaFrame {...props} className="h-full rounded-3xl" />;
+  // `h-full` ville overstyrt aspect-ratioen når formatet skal følge innholdet.
+  return (
+    <MediaFrame
+      {...props}
+      className={cn("rounded-3xl", props.aspect !== "auto" && "h-full")}
+    />
+  );
 }
 
 /**
@@ -569,13 +661,13 @@ function OverlaySlide({
   parallax: boolean;
 }) {
   return (
-    <div className="group relative h-full">
+    <div className={cn("group relative", aspect !== "auto" && "h-full")}>
       <MediaFrame
         item={item}
         kind={kind}
         aspect={aspect}
         parallax={parallax}
-        className="h-full rounded-3xl"
+        className={cn("rounded-3xl", aspect !== "auto" && "h-full")}
       />
       {(item.eyebrow || item.title) && (
         <div className="absolute inset-x-0 bottom-0 rounded-b-3xl bg-gradient-to-t from-foreground/90 via-foreground/50 to-transparent p-5 pt-16 text-background">
