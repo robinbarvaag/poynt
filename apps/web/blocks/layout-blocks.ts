@@ -1,4 +1,5 @@
 import type { Block } from "payload";
+import { Carousel } from "./carousel";
 import { Content } from "./content";
 import { ContentMedia } from "./content-media";
 import { CtaSection } from "./cta-section";
@@ -36,6 +37,7 @@ export const layoutBlocks: Block[] = [
   Content,
   MediaBlock,
   PathCards,
+  Carousel,
   Testimonials,
   CtaSection,
   ProductArchive,

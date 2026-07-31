@@ -195,6 +195,7 @@ export interface Page {
         | ContentBlock
         | MediaBlock
         | PathCardsBlock
+        | CarouselBlock
         | TestimonialsBlock
         | CtaSectionBlock
         | ProductArchiveBlock
@@ -650,6 +651,70 @@ export interface PathCardsBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'pathCards';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CarouselBlock".
+ */
+export interface CarouselBlock {
+  eyebrow?: string | null;
+  title?: string | null;
+  intro?: string | null;
+  /**
+   * Hvert element kan være et bilde, en video, en logo eller et tekstkort. Bruk samme type gjennom hele karusellen — blander du typer blir den rotete.
+   */
+  slides?:
+    | {
+        kind: 'image' | 'video' | 'logo' | 'content';
+        image?: (number | null) | Media;
+        /**
+         * MP4 eller WebM. Videoen spilles stille i loop — trenger du lyd og kontroller, bruk en videoblokk i stedet.
+         */
+        videoFile?: (number | null) | Media;
+        /**
+         * Vises mens videoen laster.
+         */
+        poster?: (number | null) | Media;
+        eyebrow?: string | null;
+        /**
+         * På logo brukes dette som navn — og som tekst hvis du ikke laster opp et bilde.
+         */
+        title?: string | null;
+        text?: string | null;
+        /**
+         * Gjør hele elementet klikkbart.
+         */
+        href?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * «Bare bilde/video» viser ingen tekst — bildene er hele poenget. «Tittel oppå bildet» tar med etikett og tittel (maks to linjer, ingen ingress). Skal elementene presentere noe med både tittel og ingress, velg kortet. Gjelder ikke logo og tekstkort.
+   */
+  presentation?: ('media' | 'overlay' | 'card') | null;
+  /**
+   * Bevegelsen følger fingeren når du drar. «Parallax» krever bilde eller video. Alle effektene skrus automatisk av for folk som har bedt om mindre bevegelse i systeminnstillingene.
+   */
+  effect?: ('none' | 'parallax' | 'scale' | 'opacity' | 'depth') | null;
+  /**
+   * Gjelder på store skjermer. På mobil vises alltid én om gangen.
+   */
+  slidesPerView?: ('1' | '2' | '3' | '4' | '5') | null;
+  aspect?: ('video' | 'wide' | 'square' | 'portrait' | 'auto') | null;
+  /**
+   * Elementene glir jevnt forbi og stopper når musa er over. Passer logoer. Skrur av piler, prikker og automatisk bytte.
+   */
+  autoScroll?: boolean | null;
+  /**
+   * 0 = av. Stopper når noen tar i karusellen.
+   */
+  autoplaySeconds?: number | null;
+  loop?: boolean | null;
+  showArrows?: boolean | null;
+  showDots?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'carousel';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2423,6 +2488,7 @@ export interface PagesSelect<T extends boolean = true> {
         content?: T | ContentBlockSelect<T>;
         media?: T | MediaBlockSelect<T>;
         pathCards?: T | PathCardsBlockSelect<T>;
+        carousel?: T | CarouselBlockSelect<T>;
         testimonials?: T | TestimonialsBlockSelect<T>;
         ctaSection?: T | CtaSectionBlockSelect<T>;
         productArchive?: T | ProductArchiveBlockSelect<T>;
@@ -2701,6 +2767,39 @@ export interface PathCardsBlockSelect<T extends boolean = true> {
         id?: T;
       };
   columns?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CarouselBlock_select".
+ */
+export interface CarouselBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  title?: T;
+  intro?: T;
+  slides?:
+    | T
+    | {
+        kind?: T;
+        image?: T;
+        videoFile?: T;
+        poster?: T;
+        eyebrow?: T;
+        title?: T;
+        text?: T;
+        href?: T;
+        id?: T;
+      };
+  presentation?: T;
+  effect?: T;
+  slidesPerView?: T;
+  aspect?: T;
+  autoScroll?: T;
+  autoplaySeconds?: T;
+  loop?: T;
+  showArrows?: T;
+  showDots?: T;
   id?: T;
   blockName?: T;
 }
@@ -3727,6 +3826,7 @@ export interface Homepage {
         | ContentBlock
         | MediaBlock
         | PathCardsBlock
+        | CarouselBlock
         | TestimonialsBlock
         | CtaSectionBlock
         | ProductArchiveBlock
@@ -4194,6 +4294,7 @@ export interface HomepageSelect<T extends boolean = true> {
         content?: T | ContentBlockSelect<T>;
         media?: T | MediaBlockSelect<T>;
         pathCards?: T | PathCardsBlockSelect<T>;
+        carousel?: T | CarouselBlockSelect<T>;
         testimonials?: T | TestimonialsBlockSelect<T>;
         ctaSection?: T | CtaSectionBlockSelect<T>;
         productArchive?: T | ProductArchiveBlockSelect<T>;

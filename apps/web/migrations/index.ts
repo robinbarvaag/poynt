@@ -42,6 +42,8 @@ import * as migration_20260725_203027_on_poynt_features from './20260725_203027_
 import * as migration_20260726_101651_remove_pages_excerpt_published_at from './20260726_101651_remove_pages_excerpt_published_at';
 import * as migration_20260726_112513 from './20260726_112513';
 import * as migration_20260726_115311_product_quality_fields from './20260726_115311_product_quality_fields';
+import * as migration_20260731_111600 from './20260731_111600';
+import * as migration_20260731_113830 from './20260731_113830';
 
 export const migrations = [
   {
@@ -262,6 +264,16 @@ export const migrations = [
   {
     up: migration_20260726_115311_product_quality_fields.up,
     down: migration_20260726_115311_product_quality_fields.down,
-    name: '20260726_115311_product_quality_fields'
+    name: '20260726_115311_product_quality_fields',
+  },
+  {
+    up: migration_20260731_111600.up,
+    down: migration_20260731_111600.down,
+    name: '20260731_111600',
+  },
+  {
+    up: migration_20260731_113830.up,
+    down: migration_20260731_113830.down,
+    name: '20260731_113830'
   },
 ];

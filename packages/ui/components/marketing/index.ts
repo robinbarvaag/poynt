@@ -4,6 +4,15 @@ export {
   type BlogSurface,
 } from "./blog-card";
 export { BlogGrid, type BlogGridItem, type BlogGridProps } from "./blog-grid";
+export {
+  Carousel,
+  type CarouselEffect,
+  type CarouselItem,
+  type CarouselItemKind,
+  type CarouselLinkProps,
+  type CarouselPresentation,
+  type CarouselProps,
+} from "./carousel";
 export { ContentMedia, type ContentMediaProps } from "./content-media";
 export { DecoBlob, type DecoBlobProps, hashSeed } from "./deco-blob";
 export { Faq, type FaqItem, type FaqProps } from "./faq";

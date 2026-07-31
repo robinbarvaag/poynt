@@ -2,6 +2,7 @@ import { slugifyAnchor } from "@/lib/format";
 import type { Page } from "@/payload-types";
 import { BlockSection } from "@poynt/ui";
 import { type ComponentProps, Fragment, type ReactNode } from "react";
+import { CarouselBlock } from "./blocks/carousel-block";
 import { ContentBlock } from "./blocks/content-block";
 import { ContentMediaBlock } from "./blocks/content-media-block";
 import { CtaSectionBlock } from "./blocks/cta-section-block";
@@ -55,6 +56,7 @@ const SELF_REVEAL_BLOCK_TYPES = new Set([
   "pathCards",
   "statsBand",
   "newsletter",
+  "carousel",
 ]);
 
 function renderBlock(block: Block): ReactNode {
@@ -145,6 +147,12 @@ function renderBlock(block: Block): ReactNode {
       return (
         <PathCardsBlock
           {...(block as unknown as ComponentProps<typeof PathCardsBlock>)}
+        />
+      );
+    case "carousel":
+      return (
+        <CarouselBlock
+          {...(block as unknown as ComponentProps<typeof CarouselBlock>)}
         />
       );
     case "testimonials":

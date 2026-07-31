@@ -1,0 +1,87 @@
+import { Meta, Canvas, Controls } from "@storybook/addon-docs/blocks";
+import * as KarusellStories from "./Karusell.stories";
+
+<Meta of={KarusellStories} />
+
+# Karusell
+
+Sveipbar rail bygget på [Embla](https://www.embla-carousel.com/). Én komponent
+for fire slags innhold — **bilde**, **video**, **logo** og **tekstkort** — styrt
+av `kind` på hvert element. I Payload heter blokka «Karusell» og finnes på alle
+sider og på forsida.
+
+## Visning
+
+`presentation` styrer hvordan bilde-/video-slides settes sammen med tekst.
+Standard er `media` — media er hovedsaken, og en karusell uten tekst er den
+reneste presentasjonen.
+
+| `presentation` | Hva vises                                                       |
+| -------------- | --------------------------------------------------------------- |
+| `media`        | Bare bildet/videoen. Ingen tekst.                                |
+| `overlay`      | Etikett + tittel oppå media. Maks to linjer, **ingen** ingress.  |
+| `card`         | Bilde øverst, tekst under. Tåler både tittel og ingress.         |
+
+Regelen bak `overlay`: teksten ligger i en boks med fast høyde oppå media, så
+alt som ikke får plass klippes vekk øverst. Derfor er den bevisst streng.
+Trenger slide-en en ingress, hører den hjemme i `card`, hvor teksten flyter
+naturlig og ingenting kan klippes.
+
+`logo` og `content` har sin egen faste form og påvirkes ikke.
+
+## Bevegelse
+
+Effektene er ikke avspilte animasjoner: de leser dra-posisjonen og skriver
+resultatet rett på DOM-nodene hver frame, så bevegelsen følger fingeren og
+stopper når du stopper.
+
+| `effect`   | Hva skjer                                                  |
+| ---------- | ---------------------------------------------------------- |
+| `none`     | Rein sveip.                                                 |
+| `parallax` | Bildet inne i ramma glir saktere enn ramma selv.            |
+| `scale`    | Naboene krymper, den aktive står størst.                    |
+| `opacity`  | Naboene tones ned. Roligst — tåler mye tekst.               |
+| `depth`    | `scale` + `opacity`. Én i fokus, resten trekker seg tilbake.|
+
+Embla sine egne eksempler lar utslaget vokse med antall slides, noe som blir
+altfor voldsomt på en rail med 3–4 synlige. Her normaliseres avstanden til
+snap-enheter og klemmes til `[-1, 1]`, så et naboelement ser likt ut uansett
+hvor mange elementer karusellen har.
+
+Alle effektene — og auto-scroll — skrus av når nettleseren melder
+`prefers-reduced-motion`.
+
+## Når brukes den
+
+- Mange likeverdige elementer som ikke fortjener hver sin rad på sida.
+- Logostriper («brukt av», «som omtalt i») med `autoScroll`. Embla kan bare gå
+  sømløst i ring når slidene er bredere enn viewporten, så med få logoer
+  gjentar komponenten lista selv til den er lang nok — dublettene er `inert`
+  og skjult for skjermlesere.
+- Én stor flate om gangen (`slidesPerView: 1`, `aspect: "wide"`) som et rolig
+  alternativ til en hero med bilde.
+
+## Når IKKE
+
+- Innhold brukeren må se **alt** av — det som ligger utenfor kanten blir ofte
+  aldri sett. Bruk `Grid` + `Card` eller `FeatureGrid`.
+- Som erstatning for en hero med budskap. En roterende hero skjuler budskapet.
+- Blandede typer i samme karusell. Hold deg til én `kind` per blokk.
+- Statiske logoer uten bevegelsesbehov — da er `LogoCloud` enklere og bedre.
+
+## Eksempler
+
+<Canvas of={KarusellStories.Standard} />
+<Canvas of={KarusellStories.TittelOppaaBildet} />
+<Canvas of={KarusellStories.KortMedTekst} />
+<Canvas of={KarusellStories.Parallax} />
+<Canvas of={KarusellStories.Skalering} />
+<Canvas of={KarusellStories.Gjennomsiktighet} />
+<Canvas of={KarusellStories.Dybde} />
+<Canvas of={KarusellStories.Logostripe} />
+<Canvas of={KarusellStories.Tekstkort} />
+<Canvas of={KarusellStories.Video} />
+
+## Props
+
+<Controls of={KarusellStories.Standard} />
