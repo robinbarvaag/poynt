@@ -94,6 +94,10 @@ export interface CarouselProps {
   aspect?: "wide" | "video" | "square" | "portrait" | "auto";
   /** Hopp fra siste til første. Default true. */
   loop?: boolean;
+  /**
+   * Hvor slide-en låser seg. Default `start`, men `center` når `slidesPerView`
+   * er 1 — da stikker naboen fram på BEGGE sider i stedet for bare til høyre.
+   */
   align?: "start" | "center";
   /** Sekunder mellom automatiske bytter. 0 = av (default). */
   autoplay?: number;
@@ -111,7 +115,11 @@ export interface CarouselProps {
 }
 
 const BASIS: Record<number, string> = {
-  1: "basis-full",
+  // Én om gangen er ALDRI full bredde: da leses karusellen som et stillbilde,
+  // og nabo-effektene (scale/opacity/depth) er usynlige fordi naboene ligger
+  // utenfor viewporten. Slide-en holdes smalere enn ramma så naboene stikker
+  // fram i begge kanter — hintet om at det finnes mer.
+  1: "basis-[86%] sm:basis-[78%] lg:basis-[70%]",
   2: "basis-[85%] sm:basis-1/2",
   3: "basis-[85%] sm:basis-1/2 lg:basis-1/3",
   4: "basis-[85%] sm:basis-1/2 lg:basis-1/4",
@@ -151,7 +159,7 @@ export function Carousel({
   slidesPerView = 3,
   aspect = "video",
   loop = true,
-  align = "start",
+  align,
   autoplay = 0,
   autoScroll = false,
   showArrows = true,
@@ -162,16 +170,21 @@ export function Carousel({
   const reduceMotion = useReducedMotion();
   const activeEffect: CarouselEffect = reduceMotion ? "none" : effect;
 
+  // Én om gangen sentreres, så naboene stikker fram i begge kanter. Flere
+  // synlige låses til venstre som før — der gir starten en rolig venstrelinje
+  // med resten av sida.
+  const activeAlign = align ?? (slidesPerView === 1 ? "center" : "start");
+
   const options = useMemo<EmblaOptionsType>(
     () => ({
       loop: autoScroll ? true : loop,
-      align,
+      align: activeAlign,
       // Auto-scroll er en jevn strøm, ikke snapping — dragFree gjør at et
       // manuelt sveip glir videre i samme ånd i stedet for å låse seg.
       dragFree: autoScroll,
       containScroll: loop || autoScroll ? undefined : "trimSnaps",
     }),
-    [align, autoScroll, loop]
+    [activeAlign, autoScroll, loop]
   );
 
   const plugins = useMemo(() => {

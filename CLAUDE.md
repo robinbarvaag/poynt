@@ -29,6 +29,9 @@ bun run lint             # Biome lint (whole repo, single pass)
 bun run typecheck        # TypeScript validation
 bun run format           # Format with Biome
 
+# Block previews (run from repo root)
+bun run block-previews  # Bygg Storybook + skyt skjermbilder til blokkvelgeren i Payload
+
 # Payload CMS (run from apps/web)
 bun run generate:types   # Regenerate Payload TypeScript types
 bun run payload          # Payload CLI
@@ -83,6 +86,8 @@ Linting and formatting are handled entirely by **Biome** (`biome.json` at root) 
 ### Key Patterns
 
 **Block-based pages**: `apps/web/blocks/` contains reusable page builder blocks (Hero, Content, Media, Features, etc.). New blocks must be registered in `payload.config.ts`.
+
+**Block previews**: blokkvelgeren («Legg til blokk») viser et Storybook-skjermbilde per blokk. Mappingen blokk-slug → story ligger i `apps/web/blocks/block-previews.ts`; bildene genereres av `bun run block-previews` og committes til `apps/web/public/block-previews/`. Ny blokk med story → legg til i mappingen og kjør kommandoen.
 
 **Cart constraint**: Digital products limited to 1 per item in cart. Cart state persists to localStorage as "poynt-cart".
 

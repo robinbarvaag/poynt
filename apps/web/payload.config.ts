@@ -4,6 +4,7 @@ import { postgresAdapter } from "@payloadcms/db-postgres";
 import { resendAdapter } from "@payloadcms/email-resend";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
 import { vercelBlobStorage } from "@payloadcms/storage-vercel-blob";
+import { nb } from "@payloadcms/translations/languages/nb";
 import { buildConfig } from "payload";
 import sharp from "sharp";
 
@@ -65,6 +66,29 @@ export default buildConfig({
     ),
   }),
   sharp,
+  // Admin-grensesnittet er norsk (bokmål) — uten dette faller Payload tilbake
+  // på engelsk, og innebygde strenger blir «Add Layout» i stedet for
+  // «Legg til blokk». Kun nb er støttet, så språkvelgeren i profilen forsvinner.
+  i18n: {
+    supportedLanguages: { nb },
+    fallbackLanguage: "nb",
+    // seo- og form-builder-pluginene har egne nb-filer, men redirects-pluginen
+    // har bare en håndfull språk (en/es/fr/ja/pt/sv). Uten disse logger Payload
+    // «key not found: plugin-redirects:…» og viser nøkkelnavnet som felt-label.
+    translations: {
+      nb: {
+        "plugin-redirects": {
+          customUrl: "Egen URL",
+          documentToRedirect: "Dokument det skal omdirigeres til",
+          fromUrl: "Fra URL",
+          internalLink: "Intern lenke",
+          redirectType: "Type omdirigering",
+          toUrlType: "Type mål",
+        },
+      },
+      // biome-ignore lint/suspicious/noExplicitAny: plugin-nøkkelrom er ikke typet i Payload
+    } as any,
+  },
   collections: [
     // Innhold
     Pages,

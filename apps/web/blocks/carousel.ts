@@ -151,7 +151,7 @@ export const Carousel: Block = {
           ],
           admin: {
             description:
-              "Gjelder på store skjermer. På mobil vises alltid én om gangen.",
+              "Gjelder på store skjermer. På mobil vises alltid én om gangen. Velger du 1, sentreres elementet og naboene stikker fram i kantene — det viser leseren at det er mer å bla i.",
           },
         },
         {

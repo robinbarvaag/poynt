@@ -28,6 +28,7 @@ export const Homepage: GlobalConfig = {
               name: "layout",
               type: "blocks",
               label: "Innholdsblokker",
+              labels: { singular: "blokk", plural: "blokker" },
               admin: {
                 initCollapsed: true,
                 description:

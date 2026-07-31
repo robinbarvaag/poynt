@@ -20,7 +20,8 @@
     "payload:types": "bun run --cwd apps/web generate:types",
     "planner:generate": "bun run --cwd packages/planner-db db:generate",
     "planner:migrate": "bun run --cwd packages/planner-db db:migrate",
-    "planner:studio": "bun run --cwd packages/planner-db db:studio"
+    "planner:studio": "bun run --cwd packages/planner-db db:studio",
+    "block-previews": "bun run --cwd apps/storybook block-previews"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",

@@ -80,6 +80,9 @@ export const Pages: CollectionConfig = {
               name: "layout",
               type: "blocks",
               label: "Sidelayout",
+              // Uten labels bruker Payload feltnavnet i knappen («Legg til
+              // layout»). Singular styrer «Legg til …»-teksten i blokkvelgeren.
+              labels: { singular: "blokk", plural: "blokker" },
               admin: {
                 initCollapsed: true,
                 description:

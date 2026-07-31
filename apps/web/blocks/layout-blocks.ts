@@ -1,4 +1,5 @@
 import type { Block } from "payload";
+import { blockPreviewUrl, blockPreviews } from "./block-previews";
 import { Carousel } from "./carousel";
 import { Content } from "./content";
 import { ContentMedia } from "./content-media";
@@ -19,6 +20,16 @@ import { SpotifyEmbed } from "./spotify-embed";
 import { StatsBand } from "./stats-band";
 import { Steps } from "./steps";
 import { Testimonials } from "./testimonials";
+
+/**
+ * Fester Storybook-skjermbildet på blokken når den har ett (se
+ * `block-previews.ts`). Blokk-definisjonene holdes rene for admin-pynt.
+ */
+function withPreview(block: Block): Block {
+  const imageURL = blockPreviewUrl(block.slug);
+  if (!imageURL) return block;
+  return { ...block, imageURL, imageAltText: blockPreviews[block.slug].alt };
+}
 
 /**
  * Den ene, delte lista over sidelayout-blokker. Brukes av både Sider-
@@ -45,4 +56,4 @@ export const layoutBlocks: Block[] = [
   ServicesArchive,
   FormBlock,
   SpotifyEmbed,
-];
+].map(withPreview);

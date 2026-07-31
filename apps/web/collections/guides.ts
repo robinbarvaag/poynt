@@ -104,6 +104,7 @@ export const Guides: CollectionConfig = {
               name: "content",
               type: "blocks",
               label: "Innhold",
+              labels: { singular: "blokk", plural: "blokker" },
               blocks: guideBlocks,
             },
           ],

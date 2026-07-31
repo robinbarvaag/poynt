@@ -244,11 +244,44 @@ export const Dybde: Story = {
 
 export const EnOmGangen: Story = {
   name: "Én om gangen",
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Én slide om gangen er aldri full bredde: den sentreres og holdes " +
+          "smalere enn ramma, så naboene stikker fram i begge kanter. Uten " +
+          "det leses karusellen som et stillbilde — og nabo-effektene " +
+          "(skalering/gjennomsiktighet/dybde) er usynlige, siden de bare " +
+          "påvirker slidene rundt den aktive.",
+      },
+    },
+  },
   args: {
     eyebrow: "Kundehistorier",
     title: "Én stor flate",
     items: BILDER,
     effect: "parallax",
+    slidesPerView: 1,
+    aspect: "wide",
+  },
+};
+
+export const EnOmGangenDybde: Story = {
+  name: "Én om gangen + dybde",
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Samme oppsett med `depth`. Nå har effekten noe å virke på: naboene " +
+          "i kantene krymper og tones ned mens den aktive står full styrke.",
+      },
+    },
+  },
+  args: {
+    eyebrow: "Kundehistorier",
+    title: "Naboene trekker seg tilbake",
+    items: BILDER,
+    effect: "depth",
     slidesPerView: 1,
     aspect: "wide",
   },

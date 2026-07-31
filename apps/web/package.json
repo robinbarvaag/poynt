@@ -30,6 +30,7 @@
     "@payloadcms/plugin-stripe": "3.86.0",
     "@payloadcms/richtext-lexical": "3.86.0",
     "@payloadcms/storage-vercel-blob": "3.86.0",
+    "@payloadcms/translations": "3.86.0",
     "@payloadcms/ui": "3.86.0",
     "@poynt/cart": "workspace:*",
     "@poynt/email": "workspace:*",
