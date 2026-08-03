@@ -378,6 +378,50 @@
   }
 }
 
+/* Bok-svev: en langsom, nesten umerkelig heving/senking av bokomslaget på
+   landingssider. Mindre utslag enn float-* (som er for bakgrunnsflekker) —
+   objektet skal virke levende, ikke sveve bort. */
+.animate-book-float {
+  animation: book-float 7s ease-in-out infinite;
+}
+
+@keyframes book-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+/* Uendelig tekstbånd (<Marquee>): sporet duplisereres, så en forskyvning på
+   -50 % lander eksakt der løkka startet. Lineær — konstant fart, ingen easing. */
+.animate-marquee {
+  animation: marquee var(--marquee-duration, 30s) linear infinite;
+}
+
+.animate-marquee-reverse {
+  animation: marquee var(--marquee-duration, 30s) linear infinite reverse;
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-book-float,
+  .animate-marquee,
+  .animate-marquee-reverse {
+    animation: none;
+  }
+}
+
 /* Squircle-form (Apple-aktige «continuous corners») på alt med avrunding.
    Progressive enhancement: corner-shape ignoreres i nettlesere uten støtte
    (Safari/Firefox per nå) og faller tilbake til vanlig avrunding.

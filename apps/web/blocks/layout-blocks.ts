@@ -1,14 +1,17 @@
 import type { Block } from "payload";
 import { blockPreviewUrl, blockPreviews } from "./block-previews";
+import { BookHero } from "./book-hero";
 import { Carousel } from "./carousel";
 import { Content } from "./content";
 import { ContentMedia } from "./content-media";
+import { CountdownBlock } from "./countdown";
 import { CtaSection } from "./cta-section";
 import { Faq } from "./faq";
 import { FeatureGrid } from "./feature-grid";
 import { FormBlock } from "./form";
 import { Hero } from "./hero";
 import { LogoCloud } from "./logo-cloud";
+import { MarqueeBlock } from "./marquee";
 import { MediaBlock } from "./media";
 import { Newsletter } from "./newsletter";
 import { PathCards } from "./path-cards";
@@ -37,6 +40,10 @@ function withPreview(block: Block): Block {
  */
 export const layoutBlocks: Block[] = [
   Hero,
+  // Lanserings-/landingsblokker: bok-hero med påmelding, nedtelling, tekstbånd.
+  BookHero,
+  CountdownBlock,
+  MarqueeBlock,
   FeatureGrid,
   Steps,
   ContentMedia,

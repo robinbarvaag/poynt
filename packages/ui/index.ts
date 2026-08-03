@@ -295,10 +295,27 @@ export {
 } from "./components/decorative";
 
 export {
+  LandingCanvas,
+  type LandingCanvasProps,
+} from "./components/landing-canvas";
+
+export {
   BlogCard,
   type BlogCardProps,
   type BlogSurface,
   BlogGrid,
+  BookCover,
+  type BookCoverProps,
+  BookHero,
+  type BookHeroProps,
+  type Chapter,
+  type ChapterPalette,
+  ChapterRotator,
+  type ChapterRotatorProps,
+  Countdown,
+  type CountdownProps,
+  Marquee,
+  type MarqueeProps,
   type BlogGridItem,
   type BlogGridProps,
   Carousel,

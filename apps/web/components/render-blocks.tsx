@@ -2,15 +2,18 @@ import { slugifyAnchor } from "@/lib/format";
 import type { Page } from "@/payload-types";
 import { BlockSection } from "@poynt/ui";
 import { type ComponentProps, Fragment, type ReactNode } from "react";
+import { BookHeroBlock } from "./blocks/book-hero-block";
 import { CarouselBlock } from "./blocks/carousel-block";
 import { ContentBlock } from "./blocks/content-block";
 import { ContentMediaBlock } from "./blocks/content-media-block";
+import { CountdownBlockComponent } from "./blocks/countdown-block";
 import { CtaSectionBlock } from "./blocks/cta-section-block";
 import { FaqBlock } from "./blocks/faq-block";
 import { FeatureGridBlock } from "./blocks/feature-grid-block";
 import { FormBlockComponent } from "./blocks/form-block";
 import { HeroBlock } from "./blocks/hero-block";
 import { LogoCloudBlock } from "./blocks/logo-cloud-block";
+import { MarqueeBlockComponent } from "./blocks/marquee-block";
 import { MediaBlockComponent } from "./blocks/media-block";
 import { NewsletterBlock } from "./blocks/newsletter-block";
 import { PathCardsBlock } from "./blocks/path-cards-block";
@@ -38,6 +41,8 @@ interface RenderBlocksProps {
 // spacing og én innholdsbredde (`Container` default).
 const SPECIAL_BLOCK_TYPES = new Set([
   "hero",
+  "bookHero",
+  "marquee",
   "media",
   "productArchive",
   "podcastArchive",
@@ -57,6 +62,7 @@ const SELF_REVEAL_BLOCK_TYPES = new Set([
   "statsBand",
   "newsletter",
   "carousel",
+  "countdown",
 ]);
 
 function renderBlock(block: Block): ReactNode {
@@ -65,6 +71,28 @@ function renderBlock(block: Block): ReactNode {
       return (
         <HeroBlock
           {...(block as unknown as ComponentProps<typeof HeroBlock>)}
+        />
+      );
+    case "bookHero":
+      return (
+        <BookHeroBlock
+          {...(block as unknown as ComponentProps<typeof BookHeroBlock>)}
+        />
+      );
+    case "countdown":
+      return (
+        <CountdownBlockComponent
+          {...(block as unknown as ComponentProps<
+            typeof CountdownBlockComponent
+          >)}
+        />
+      );
+    case "marquee":
+      return (
+        <MarqueeBlockComponent
+          {...(block as unknown as ComponentProps<
+            typeof MarqueeBlockComponent
+          >)}
         />
       );
     case "content":

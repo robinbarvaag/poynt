@@ -2,6 +2,7 @@
 
 import {
   Button,
+  Checkbox,
   Container,
   FormSuccess,
   Heading,
@@ -54,6 +55,27 @@ function resolveSelectDefault(
   );
   if (hit) return hit.value;
   return options.find((o) => o.value.toLowerCase() === "annet")?.value;
+}
+
+/**
+ * Henter ren tekst ut av et Lexical-dokument (kvitteringsmeldinga lagres som
+ * richText i skjema-builderen). Uten dette faller alle skjemaer tilbake på den
+ * generiske «Takk for din henvendelse!» — også der redaktøren har skrevet en
+ * egen tekst.
+ */
+function lexicalToPlainText(value: unknown): string | null {
+  const root = (value as { root?: { children?: unknown[] } })?.root;
+  if (!root?.children) return null;
+
+  const collect = (nodes: unknown[]): string[] =>
+    nodes.flatMap((node) => {
+      const n = node as { text?: string; children?: unknown[] };
+      if (typeof n.text === "string") return [n.text];
+      return n.children ? collect(n.children) : [];
+    });
+
+  const text = collect(root.children).join(" ").replace(/\s+/g, " ").trim();
+  return text || null;
 }
 
 /** Delt felt-styling så tekstfelt og select får identisk høyde. */
@@ -111,9 +133,9 @@ export function FormBlockComponent({
   const formData = form as PayloadForm;
   const formTitle = title || formData.title;
   const confirmationMessage =
-    typeof formData.confirmationMessage === "object"
-      ? "Takk for din henvendelse!"
-      : formData.confirmationMessage || "Takk for din henvendelse!";
+    (typeof formData.confirmationMessage === "object"
+      ? lexicalToPlainText(formData.confirmationMessage)
+      : formData.confirmationMessage) || "Takk for din henvendelse!";
 
   const maxWidthClasses = {
     sm: "max-w-sm",
@@ -314,20 +336,38 @@ export function FormBlockComponent({
                   )}
 
                   {field.blockType === "checkbox" && (
-                    <label className="flex cursor-pointer items-start gap-3">
-                      <input
-                        type="checkbox"
+                    // Design-systemets Checkbox (Radix + fjær-pop), ikke
+                    // nettleserens standardboks. Radix rendrer selv en skjult
+                    // input med `name`, så vanlig FormData-innsending virker.
+                    <div className="flex items-start gap-3">
+                      <Checkbox
+                        id={`${fieldName}-${field.id}`}
                         name={fieldName}
                         required={isRequired}
-                        className="mt-0.5 size-4 shrink-0 rounded border-input"
+                        size="sm"
+                        // Samtykke skal ALDRI være forhåndsavhaket (GDPR):
+                        // `defaultValue` fra skjema-builderen styrer bare
+                        // ikke-samtykke-bokser.
+                        defaultChecked={
+                          "defaultValue" in field
+                            ? Boolean(field.defaultValue)
+                            : false
+                        }
+                        className="mt-0.5"
                       />
-                      <Text type="span" variant="muted">
+                      <Label
+                        htmlFor={`${fieldName}-${field.id}`}
+                        // `block` overstyrer Label sin flex — ellers blir
+                        // stjerna for påkrevd et eget flex-barn og havner
+                        // alene ute til høyre i stedet for etter siste ord.
+                        className="block cursor-pointer font-normal text-muted-foreground text-sm leading-snug"
+                      >
                         {fieldLabel}
                         {isRequired && (
                           <span className="text-destructive">&nbsp;*</span>
                         )}
-                      </Text>
-                    </label>
+                      </Label>
+                    </div>
                   )}
                 </div>
               );

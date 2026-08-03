@@ -13,7 +13,17 @@ export {
   type CarouselPresentation,
   type CarouselProps,
 } from "./carousel";
+export { BookCover, type BookCoverProps } from "./book-cover";
+export { BookHero, type BookHeroProps } from "./book-hero";
+export {
+  type Chapter,
+  type ChapterPalette,
+  ChapterRotator,
+  type ChapterRotatorProps,
+} from "./chapter-rotator";
 export { ContentMedia, type ContentMediaProps } from "./content-media";
+export { Countdown, type CountdownProps } from "./countdown";
+export { Marquee, type MarqueeProps } from "./marquee";
 export { DecoBlob, type DecoBlobProps, hashSeed } from "./deco-blob";
 export { Faq, type FaqItem, type FaqProps } from "./faq";
 export {

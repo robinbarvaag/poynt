@@ -5,6 +5,7 @@ import { RenderBlocks } from "@/components/render-blocks";
 import { buildMetadata, firstHeroImage, notFoundMetadata } from "@/lib/seo";
 import { faqSchema } from "@/lib/structured-data";
 import config from "@/payload.config";
+import { LandingCanvas } from "@poynt/ui";
 import type { Metadata } from "next";
 import { cacheLife, cacheTag } from "next/cache";
 import { notFound, redirect } from "next/navigation";
@@ -135,16 +136,27 @@ async function PageContent({ params }: PageProps) {
 
   // Sjekk om første blokk er en hero - da viser vi ikke egen page hero
   const firstBlock = page.layout?.[0];
-  const hasHeroBlock = firstBlock?.blockType === "hero";
+  const hasHeroBlock =
+    firstBlock?.blockType === "hero" || firstBlock?.blockType === "bookHero";
 
   const faqLd = faqSchema(page.faq);
+
+  const body = (
+    <>
+      {!hasHeroBlock && <PageHero title={page.title} size="large" />}
+      {page.layout && <RenderBlocks blocks={page.layout} />}
+    </>
+  );
 
   return (
     <>
       <AdminBar collection="pages" id={String(page.id)} singular="side" />
       {faqLd && <JsonLd data={faqLd} />}
-      {!hasHeroBlock && <PageHero title={page.title} size="large" />}
-      {page.layout && <RenderBlocks blocks={page.layout} />}
+      {page.pageType === "landing" ? (
+        <LandingCanvas>{body}</LandingCanvas>
+      ) : (
+        body
+      )}
     </>
   );
 }

@@ -184,6 +184,9 @@ export interface Page {
   layout?:
     | (
         | HeroBlock
+        | BookHeroBlock
+        | CountdownBlock
+        | MarqueeBlock
         | FeatureGridBlock
         | StepsBlock
         | ContentMediaBlock
@@ -245,6 +248,10 @@ export interface Page {
    * Genereres automatisk fra tittel. Bruk 'forside' for forsida.
    */
   slug: string;
+  /**
+   * Landingsside gir siden en mykere fargevask i bakgrunnen og en tynn fremdriftsbar i toppen. Bruk den til kampanjer og lanseringer – ikke til vanlige innholdssider.
+   */
+  pageType?: ('standard' | 'landing') | null;
   /**
    * Settes av AI-vurderingen (0–100).
    */
@@ -402,6 +409,269 @@ export interface FolderInterface {
   folderType?: 'media'[] | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BookHeroBlock".
+ */
+export interface BookHeroBlock {
+  /**
+   * Kort statuslinje øverst med en liten blinkende prikk, f.eks. «Kommer våren 2027».
+   */
+  badge?: string | null;
+  eyebrow?: string | null;
+  title: string;
+  subtitle?: string | null;
+  /**
+   * Korte punkter om hva leseren sitter igjen med. Hold dem på én linje hver.
+   */
+  bullets?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Stående bilde av omslaget (2:3). Så lenge dette står tomt, vises kapittel-kortet under i stedet – last opp omslaget når det finnes, så tar det over plassen automatisk.
+   */
+  cover?: (number | null) | Media;
+  /**
+   * Vises som et kort der kapitlene byttes ett om gangen. Forbokstavene i kapittelnavnene lyser opp under kortet – velger du navn som staver ut boktittelen (V-E-K-S-T), blir det synlig for leseren. Brukes kun når det ikke er lastet opp et bokomslag.
+   */
+  chapters?:
+    | {
+        /**
+         * Ett ord fungerer best – første bokstav blir den store bokstaven på kortet.
+         */
+        title: string;
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Skjemaet vises rett i heroen, så leseren kan melde seg på uten å scrolle.
+   */
+  form?: (number | null) | Form;
+  /**
+   * F.eks. hva som skjer videre, eller at man kan melde seg av når som helst.
+   */
+  note?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'bookHero';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "forms".
+ */
+export interface Form {
+  id: number;
+  title: string;
+  fields?:
+    | (
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            required?: boolean | null;
+            defaultValue?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'checkbox';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            required?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'country';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            required?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'email';
+          }
+        | {
+            message?: {
+              root: {
+                type: string;
+                children: {
+                  type: any;
+                  version: number;
+                  [k: string]: unknown;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            } | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'message';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            defaultValue?: number | null;
+            required?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'number';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            defaultValue?: string | null;
+            placeholder?: string | null;
+            options?:
+              | {
+                  label: string;
+                  value: string;
+                  id?: string | null;
+                }[]
+              | null;
+            required?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'select';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            required?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'state';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            defaultValue?: string | null;
+            required?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'text';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            defaultValue?: string | null;
+            required?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'textarea';
+          }
+      )[]
+    | null;
+  submitButtonLabel?: string | null;
+  confirmationType?: ('message' | 'redirect') | null;
+  confirmationMessage?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  redirect?: {
+    url: string;
+  };
+  emails?:
+    | {
+        emailTo?: string | null;
+        cc?: string | null;
+        bcc?: string | null;
+        replyTo?: string | null;
+        emailFrom?: string | null;
+        subject: string;
+        message?: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        } | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CountdownBlock".
+ */
+export interface CountdownBlock {
+  eyebrow?: string | null;
+  title?: string | null;
+  description?: string | null;
+  /**
+   * Datoen og klokkeslettet nedtellingen skal treffe.
+   */
+  targetDate: string;
+  /**
+   * Vises i stedet for tallene, f.eks. «Boka er her!». Da kan seksjonen stå til du rekker å bytte den ut.
+   */
+  doneLabel?: string | null;
+  cta?: {
+    text?: string | null;
+    url?: string | null;
+  };
+  variant?: ('primary' | 'saffron' | 'salmon') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'countdown';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MarqueeBlock".
+ */
+export interface MarqueeBlock {
+  /**
+   * Korte ord eller uttrykk. De gjentas i en uendelig løkke, så 3–6 stykker holder.
+   */
+  items: {
+    text: string;
+    id?: string | null;
+  }[];
+  surface?: ('primary' | 'saffron' | 'salmon' | 'mint' | 'outline') | null;
+  speed?: ('slow' | 'base' | 'fast') | null;
+  reverse?: boolean | null;
+  /**
+   * Litt på skrå, som en plakat-stripe.
+   */
+  tilt?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'marquee';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -700,6 +970,9 @@ export interface CarouselBlock {
    * Gjelder på store skjermer. På mobil vises alltid én om gangen. Velger du 1, sentreres elementet og naboene stikker fram i kantene — det viser leseren at det er mer å bla i.
    */
   slidesPerView?: ('1' | '2' | '3' | '4' | '5') | null;
+  /**
+   * Alle elementene beskjæres til samme format. «Følger bildet» lar hvert bilde beholde sitt eget format — bruk den når bildene er skjermbilder eller står på høykant, så slipper du at toppen og bunnen klippes vekk.
+   */
   aspect?: ('video' | 'wide' | 'square' | 'portrait' | 'auto') | null;
   /**
    * Elementene glir jevnt forbi og stopper når musa er over. Passer logoer. Skrur av piler, prikker og automatisk bytte.
@@ -709,6 +982,9 @@ export interface CarouselBlock {
    * 0 = av. Stopper når noen tar i karusellen.
    */
   autoplaySeconds?: number | null;
+  /**
+   * Etter siste element begynner den på nytt. Krever et par elementer mer enn du viser samtidig — ellers stopper karusellen i endene i stedet for å vise de samme bildene om igjen.
+   */
   loop?: boolean | null;
   showArrows?: boolean | null;
   showDots?: boolean | null;
@@ -1286,171 +1562,6 @@ export interface FormBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'formBlock';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "forms".
- */
-export interface Form {
-  id: number;
-  title: string;
-  fields?:
-    | (
-        | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            required?: boolean | null;
-            defaultValue?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'checkbox';
-          }
-        | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'country';
-          }
-        | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'email';
-          }
-        | {
-            message?: {
-              root: {
-                type: string;
-                children: {
-                  type: any;
-                  version: number;
-                  [k: string]: unknown;
-                }[];
-                direction: ('ltr' | 'rtl') | null;
-                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                indent: number;
-                version: number;
-              };
-              [k: string]: unknown;
-            } | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'message';
-          }
-        | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            defaultValue?: number | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'number';
-          }
-        | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            defaultValue?: string | null;
-            placeholder?: string | null;
-            options?:
-              | {
-                  label: string;
-                  value: string;
-                  id?: string | null;
-                }[]
-              | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'select';
-          }
-        | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'state';
-          }
-        | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            defaultValue?: string | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'text';
-          }
-        | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            defaultValue?: string | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'textarea';
-          }
-      )[]
-    | null;
-  submitButtonLabel?: string | null;
-  confirmationType?: ('message' | 'redirect') | null;
-  confirmationMessage?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  redirect?: {
-    url: string;
-  };
-  emails?:
-    | {
-        emailTo?: string | null;
-        cc?: string | null;
-        bcc?: string | null;
-        replyTo?: string | null;
-        emailFrom?: string | null;
-        subject: string;
-        message?: {
-          root: {
-            type: string;
-            children: {
-              type: any;
-              version: number;
-              [k: string]: unknown;
-            }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
-          [k: string]: unknown;
-        } | null;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2477,6 +2588,9 @@ export interface PagesSelect<T extends boolean = true> {
     | T
     | {
         hero?: T | HeroBlockSelect<T>;
+        bookHero?: T | BookHeroBlockSelect<T>;
+        countdown?: T | CountdownBlockSelect<T>;
+        marquee?: T | MarqueeBlockSelect<T>;
         featureGrid?: T | FeatureGridBlockSelect<T>;
         steps?: T | StepsBlockSelect<T>;
         contentMedia?: T | ContentMediaBlockSelect<T>;
@@ -2515,6 +2629,7 @@ export interface PagesSelect<T extends boolean = true> {
         ogType?: T;
       };
   slug?: T;
+  pageType?: T;
   qualityScore?: T;
   qualityReviewedAt?: T;
   qualityReview?: T;
@@ -2550,6 +2665,72 @@ export interface HeroBlockSelect<T extends boolean = true> {
         url?: T;
       };
   imageDuotone?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BookHeroBlock_select".
+ */
+export interface BookHeroBlockSelect<T extends boolean = true> {
+  badge?: T;
+  eyebrow?: T;
+  title?: T;
+  subtitle?: T;
+  bullets?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  cover?: T;
+  chapters?:
+    | T
+    | {
+        title?: T;
+        text?: T;
+        id?: T;
+      };
+  form?: T;
+  note?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CountdownBlock_select".
+ */
+export interface CountdownBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  title?: T;
+  description?: T;
+  targetDate?: T;
+  doneLabel?: T;
+  cta?:
+    | T
+    | {
+        text?: T;
+        url?: T;
+      };
+  variant?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MarqueeBlock_select".
+ */
+export interface MarqueeBlockSelect<T extends boolean = true> {
+  items?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  surface?: T;
+  speed?: T;
+  reverse?: T;
+  tilt?: T;
   id?: T;
   blockName?: T;
 }
@@ -3815,6 +3996,9 @@ export interface Homepage {
   layout?:
     | (
         | HeroBlock
+        | BookHeroBlock
+        | CountdownBlock
+        | MarqueeBlock
         | FeatureGridBlock
         | StepsBlock
         | ContentMediaBlock
@@ -4283,6 +4467,9 @@ export interface HomepageSelect<T extends boolean = true> {
     | T
     | {
         hero?: T | HeroBlockSelect<T>;
+        bookHero?: T | BookHeroBlockSelect<T>;
+        countdown?: T | CountdownBlockSelect<T>;
+        marquee?: T | MarqueeBlockSelect<T>;
         featureGrid?: T | FeatureGridBlockSelect<T>;
         steps?: T | StepsBlockSelect<T>;
         contentMedia?: T | ContentMediaBlockSelect<T>;

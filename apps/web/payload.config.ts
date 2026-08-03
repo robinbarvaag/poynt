@@ -396,6 +396,30 @@ export default buildConfig({
 
                 const { sendContactEmails } = await import("@poynt/email");
 
+                // Venteliste-skjemaer kjennes igjen på tittelen («Venteliste
+                // – …»), ikke på feltnavn: de har bare navn/e-post, som er for
+                // generisk til å skille dem fra andre skjemaer.
+                const formId =
+                  typeof doc.form === "object" ? doc.form?.id : doc.form;
+                if (formId) {
+                  const { handleWaitlistSubmission, isWaitlistFormTitle } =
+                    await import("./lib/waitlist");
+                  const formDoc = await req.payload.findByID({
+                    collection: "forms",
+                    id: formId,
+                    depth: 0,
+                  });
+                  if (isWaitlistFormTitle(formDoc?.title)) {
+                    await handleWaitlistSubmission({
+                      req,
+                      formTitle: formDoc.title,
+                      formId,
+                      get,
+                    });
+                    return doc;
+                  }
+                }
+
                 // Medlemskapssøknad har eget felt-sett (bedrift/faktura) – ingen
                 // "melding"/"epost". Gjenkjenn det og sett sammen et sammendrag.
                 const isMembership =

@@ -140,6 +140,21 @@ export const Pages: CollectionConfig = {
           "Genereres automatisk fra tittel. Bruk 'forside' for forsida.",
       },
     },
+    {
+      name: "pageType",
+      type: "select",
+      label: "Sidetype",
+      defaultValue: "standard",
+      options: [
+        { label: "Vanlig side", value: "standard" },
+        { label: "Landingsside", value: "landing" },
+      ],
+      admin: {
+        position: "sidebar",
+        description:
+          "Landingsside gir siden en mykere fargevask i bakgrunnen og en tynn fremdriftsbar i toppen. Bruk den til kampanjer og lanseringer – ikke til vanlige innholdssider.",
+      },
+    },
     ...qualityDataFields({ sidebarSection: true }),
   ],
 };

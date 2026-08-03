@@ -357,6 +357,75 @@ export async function sendContactEmails(params: {
 }
 
 /**
+ * Send e-postene som hører til en venteliste-påmelding: en branded bekreftelse
+ * til den som meldte seg på, og et kort varsel til Poynt (CONTACT_EMAIL).
+ * No-op hvis RESEND_API_KEY mangler.
+ */
+export async function sendWaitlistEmails(params: {
+  email: string;
+  name?: string;
+  /** Boka/produktet det ventes på — brukes i emne og brødtekst. */
+  title: string;
+  /** Om personen samtidig meldte seg på nyhetsbrevet. */
+  newsletter?: boolean;
+  /** Antall påmeldte totalt — tas med i varselet til Poynt. */
+  totalSignups?: number;
+}): Promise<void> {
+  if (!process.env.RESEND_API_KEY) return;
+
+  const { render } = await import("@react-email/render");
+  const { default: WaitlistConfirmationEmail } = await import(
+    "./templates/waitlist-confirmation"
+  );
+
+  const from = buildFrom("Poynt");
+
+  const confirmationHtml = await render(
+    WaitlistConfirmationEmail({
+      name: params.name,
+      title: params.title,
+      newsletter: params.newsletter,
+    })
+  );
+  await sendEmail({
+    from,
+    to: params.email,
+    subject: `Du står på ventelista for «${params.title}»`,
+    html: confirmationHtml,
+  });
+
+  const notifyTo = process.env.CONTACT_EMAIL;
+  if (notifyTo) {
+    const { default: ContactNotificationEmail } = await import(
+      "./templates/contact-notification"
+    );
+    const details = [
+      `Venteliste: ${params.title}`,
+      `Nyhetsbrev: ${params.newsletter ? "ja" : "nei"}`,
+      params.totalSignups ? `Antall påmeldte nå: ${params.totalSignups}` : null,
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    const notificationHtml = await render(
+      ContactNotificationEmail({
+        name: params.name || params.email,
+        email: params.email,
+        subject: "Venteliste",
+        message: details,
+      })
+    );
+    await sendEmail({
+      from,
+      to: notifyTo,
+      replyTo: params.email,
+      subject: `Ny på ventelista: ${params.name || params.email}`,
+      html: notificationHtml,
+    });
+  }
+}
+
+/**
  * Send welcome email to new member with magic link login.
  * @deprecated Use sendMemberWelcomeEmail for membership subscriptions
  */
