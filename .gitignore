@@ -117,3 +117,8 @@ on-poynt-screenshots/
 # Storybook
 storybook-static
 .claude/worktrees/
+
+# Upublisert kildemateriale (bokmanus o.l.) — skal aldri havne i repoet.
+# Teksten på /verdifull-vekst hentes herfra, men selve manuset holdes utenfor.
+Verdifull vekst.txt
+*.manus.txt

@@ -15,7 +15,11 @@ import { getPayload } from "payload";
 import { WAITLIST_FORM_TITLE } from "../lib/waitlist";
 import { richText } from "./_lexical";
 
+/** Kortformen — brukes i skjemanavn og e-postemne. */
 const BOOK_TITLE = "Verdifull vekst";
+
+/** Bokas fulle tittel slik den står i manuset. Manuset er alltid fasit. */
+const BOOK_FULL_TITLE = "Verdifull vekst – i små bedrifter";
 
 const formFields = [
   {
@@ -51,22 +55,32 @@ const faqItems = [
   {
     question: "Når kommer boka?",
     answer:
-      "Den er under arbeid, og vi styrer mot 2027. Datoen er ikke spikret ennå – står du på ventelista, får du beskjed så snart den er det, og igjen når boka faktisk kan bestilles.",
+      "Boka kommer i høst. Står du på ventelista, hører du fra meg så snart den kan bestilles – før det går ut til alle andre.",
   },
   {
-    question: "Koster det noe å stå på ventelista?",
+    question: "Hva handler boka om?",
     answer:
-      "Nei. Ventelista er gratis og uforpliktende. Du forhåndsbestiller ingenting ved å melde deg på.",
-  },
-  {
-    question: "Hva bruker dere e-postadressen min til?",
-    answer:
-      "Til å si fra om boka. Krysser du av for nyhetsbrevet, får du i tillegg noen e-poster om vekst og markedsføring. Du kan melde deg av når som helst, og adressen din deles aldri med andre.",
+      "VEKST-modellen, som har gitt navn til kapitlene: V for visjon – hvor er du på vei? E for endring – hva bør endres for å komme deg dit? K for kunder og KI – hvor godt kjenner du kundene dine, og hvordan kan du bruke kunstig intelligens i bedriften din? S for salg – hvordan skaper du omsetning? T for tall – teller du de riktige tingene? Til slutt kommer et bonuskapittel om tankesett. Rekkefølgen er ikke tilfeldig – du må begynne i riktig ende av vekst.",
   },
   {
     question: "Hvem er boka for?",
     answer:
-      "Deg som driver noe selv, eller som har ansvar for at en bedrift skal vokse – og som er lei av vekstråd som bare fungerer for selskaper med et helt markedsteam i ryggen.",
+      "Til deg som er uredd nok til å starte eller drive en bedrift. Til deg som drømmer stort og driver lite. Til deg som tenker at du ikke kan jobbe flere timer i døgnet, men som vet at bedriften har større potensial – og til deg som har hundre gode ideer, men ikke vet hvor du skal starte.",
+  },
+  {
+    question: "Hvem har skrevet den?",
+    answer:
+      "Susanne Todnem, gründer gjennom ti år. Hun har drevet markedsføringsbyrå med ansatte og kunder i fem land, vært investor og styremedlem, ni-doblet omsetningen sin – og hatt fri hver eneste fredag i ti år. Boka er alt hun skulle ønske hun selv visste da hun startet.",
+  },
+  {
+    question: "Koster det noe å stå på ventelista?",
+    answer:
+      "Nei. Ventelista er gratis og uforpliktende. Du forhåndsbestiller ingenting ved å melde deg på, og du bestemmer selv om du vil kjøpe når boka kommer.",
+  },
+  {
+    question: "Hva bruker dere e-postadressen min til?",
+    answer:
+      "Til å si fra når boka kan bestilles, og til å sende deg en smakebit eller annet påfyll om vekst innimellom. Du kan melde deg av når som helst, og adressen din deles aldri med andre.",
   },
 ];
 
@@ -86,7 +100,7 @@ const formData = {
   submitButtonLabel: "Sett meg på ventelista",
   confirmationType: "message",
   confirmationMessage: richText(
-    "Du står på lista! Jeg sender deg en e-post så snart boka er klar – ikke oftere."
+    "Du står på lista! Du hører fra meg så snart boka kan bestilles."
   ),
 };
 
@@ -112,29 +126,31 @@ if (existingForm.docs.length > 0) {
 
 // 2) Landingssida (upsert på slug)
 const page = {
-  title: BOOK_TITLE,
+  title: BOOK_FULL_TITLE,
   slug: "verdifull-vekst",
   pageType: "landing",
   meta: {
-    title: `${BOOK_TITLE} – ny bok`,
+    title: BOOK_FULL_TITLE,
     description:
-      "Meld deg på ventelista for «Verdifull vekst» – boka om å vokse på en måte som faktisk er verdt noe. Du får beskjed først når den kommer.",
+      "Endring, KI, salg og markedsføring gjort enkelt. Ny bok av Susanne Todnem, ute i høst. Meld deg på ventelista, så får du beskjed først.",
   },
   layout: [
     {
       blockType: "bookHero",
       // Blokk-navnet blir #anker, så CTA-en nederst kan hoppe hit.
       blockName: "Venteliste",
-      badge: "Kommer i 2027",
-      eyebrow: "Ny bok",
-      title: BOOK_TITLE,
+      badge: "Kommer i høst",
+      eyebrow: "Ny bok av Susanne Todnem",
+      title: BOOK_FULL_TITLE,
+      // Bokas egen undertittel og Susannes egne ord fra manuset – ikke
+      // markedsføringsspråk skrevet utenfra.
       subtitle:
-        "En bok om å bygge noe som vokser – uten at det koster deg helga, marginene og gnisten. Meld deg på ventelista, så er du blant de første som får vite når den er klar.",
+        "Endring, KI, salg og markedsføring gjort enkelt. Alt jeg skulle ønske at jeg selv visste da jeg startet bedrift for ti år siden. Meld deg på ventelista, så hører du fra meg når boka kommer.",
       bullets: [
-        { text: "Vekst som holder, ikke bare vokser" },
-        { text: "Konkrete grep, ikke luftige modeller" },
-        { text: "Skrevet for små og mellomstore bedrifter" },
-        { text: "Norske eksempler du kjenner igjen" },
+        { text: "Til deg som drømmer stort og driver lite" },
+        { text: "Ti år som gründer – oppturer, nedturer og stjernesmeller" },
+        { text: "VEKST-modellen: visjon, endring, kunder og KI, salg og tall" },
+        { text: "Skrevet for små bedrifter, ikke for Silicon Valley" },
       ],
       // Bokas ekte kapitler – de staver ut VEKST. Kortet leser forbokstaven fra
       // kapittelnavnet, så akrostikonet kan ikke komme ut av synk om navnene
@@ -164,31 +180,60 @@ const page = {
       ],
       form: formId,
       // Gjentar bevisst ikke «meld deg av når du vil» – det står i samtykket.
-      note: "Gratis, og ingen kjøpeplikt når boka kommer.",
+      note: "Gratis. Du forplikter deg ikke til å kjøpe noe.",
     },
     // Bevisst tynn side: heroen er handlinga, featureGrid forteller hva boka
-    // ER, FAQ tar innvendingene, og CTA-en nederst er ÉN påminnelse. Nedtelling
-    // og tekstbånd ble kuttet — de gjentok heroen. Blokkene finnes fortsatt i
-    // blokkvelgeren: sett inn nedtellinga når lanseringsdatoen er ekte og nær.
+    // GIR (kortet i heroen stiller spørsmålene – denne seksjonen svarer på hva
+    // du sitter igjen med, så de utfyller hverandre i stedet for å gjenta),
+    // FAQ tar innvendingene, og CTA-en nederst er ÉN påminnelse. Nedtelling og
+    // tekstbånd ble kuttet — de gjentok heroen. Blokkene finnes fortsatt i
+    // blokkvelgeren: nedtellinga er verdt å sette inn tett på lansering.
+    // Sida sier bevisst «i høst», ikke en eksakt dato — datoen er ikke
+    // kommunisert utad ennå.
     {
       blockType: "featureGrid",
       eyebrow: "Om boka",
-      title: "Tre spørsmål boka svarer på",
+      title: "Det er forskjell på vekst og verdifull vekst",
       intro:
-        "Ikke vekst for vekstens skyld – men vekst som gjør bedriften bedre å eie, jobbe i og kjøpe fra.",
+        "Verdifull vekst er den du opplever når du selv har bestemt hvor du vil, og du klarer å skape endring som betyr noe for deg eller for andre.",
       columns: "3",
       features: [
         {
-          title: "Hva er egentlig verdifull vekst?",
-          text: "Forskjellen på omsetning som ser fin ut i regnskapet og vekst som faktisk gjør bedriften sterkere.",
+          title: "Vekst kan være så mangt",
+          text: "Økt omsetning. Personlig utvikling. Et nytt produkt, en ny by – eller flere uker fri i året. Det finnes tusen måter å vokse på.",
         },
         {
-          title: "Hvor kommer den neste kunden fra?",
-          text: "Hvordan du finner kanalene som virker for akkurat din bedrift, i stedet for å gjøre litt av alt.",
+          title: "Omsetning er ikke hele bedriften",
+          text: "Omsetningen er hovedpulsåren. Men hva med hjertet, hjernen og lungene til bedriften?",
         },
         {
-          title: "Hva sier du nei til?",
-          text: "Vekst handler like mye om hva du lar være. Boka gir deg et språk for å velge bort.",
+          title: "Små justeringer, stor endring",
+          text: "Tenk om det bare er små justeringer som skal til for å skape radikal endring i bedriften din? Tenk om du er et tastetrykk unna gjennombruddet?",
+        },
+      ],
+    },
+    {
+      // Historien bak boka, med Susannes egne tall fra manuset. `split` er
+      // valgt bevisst: da står tallene på sidas vanlige bakgrunn i stedet for
+      // enda et farget panel (retningslinja er maks to per side, og CTA-en
+      // nederst bruker det ene).
+      blockType: "statsBand",
+      layout: "split",
+      eyebrow: "Historien bak boka",
+      title: "Jeg reddet en bedrift jeg ikke ville ha",
+      description:
+        "Jeg drev markedsføringsbyrået på åttende året. Fire ansatte, og pilene hadde pekt oppover i alle år. Så mistet vi de to største kundene på likt – og kort etter forsvant den tredje. Vi solgte oss ut av krisen på fire måneder. Men da støvet la seg, gikk det opp for meg at bedriften hadde vokst helt uten retning. Det er den erkjennelsen boka er bygget på.",
+      stats: [
+        {
+          value: 75,
+          suffix: " %",
+          label: "av den faste omsetningen forsvant",
+        },
+        { value: 3, label: "kunder tapt på to måneder" },
+        {
+          value: 68,
+          suffix: " %",
+          label: "omsetningsvekst de neste tre månedene",
         },
       ],
     },
@@ -203,7 +248,7 @@ const page = {
       variant: "colored",
       title: "Vil du vite når boka kommer?",
       description:
-        "Sett deg på ventelista, så sier jeg fra. Ingen forpliktelser, ingen kjøpepress.",
+        "Sett deg på ventelista, så sier jeg fra i høst – før det går ut til alle andre. Ingen forpliktelser, ingen kjøpepress.",
       primaryCta: { text: "Meld deg på ventelista", url: "#venteliste" },
     },
   ],
