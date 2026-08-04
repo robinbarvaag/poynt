@@ -15,6 +15,7 @@ import type { Payload } from "payload";
 
 export const COLLECTION_LABELS: Record<QualityCollectionSlug, string> = {
   guides: "Guide",
+  courses: "Kurs",
   pages: "Side",
   "blog-posts": "Blogginnlegg",
   "case-studies": "Kundehistorie",
@@ -22,9 +23,23 @@ export const COLLECTION_LABELS: Record<QualityCollectionSlug, string> = {
   products: "Produkt",
 };
 
+/** Hvor innholdet bor: den offentlige nettsiden eller On Poynt-medlemsområdet. */
+export type QualityArea = "site" | "on-poynt";
+
+export const COLLECTION_AREAS: Record<QualityCollectionSlug, QualityArea> = {
+  guides: "on-poynt",
+  courses: "on-poynt",
+  pages: "site",
+  "blog-posts": "site",
+  "case-studies": "site",
+  services: "site",
+  products: "site",
+};
+
 export interface QualityOverviewRow {
   collection: QualityCollectionSlug;
   collectionLabel: string;
+  area: QualityArea;
   id: string | number;
   title: string;
   status: "unreviewed" | "stale" | "fresh";
@@ -50,6 +65,7 @@ export function toQualityRow(
   return {
     collection: slug,
     collectionLabel: COLLECTION_LABELS[slug],
+    area: COLLECTION_AREAS[slug],
     id: doc.id,
     title: doc.title ?? doc.name ?? `${COLLECTION_LABELS[slug]} #${doc.id}`,
     status: info.status,

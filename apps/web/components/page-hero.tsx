@@ -1,3 +1,4 @@
+import { type MediaResource, PayloadImage } from "@/components/payload-image";
 import {
   Container,
   Eyebrow,
@@ -13,8 +14,8 @@ interface PageHeroProps {
   eyebrow?: string;
   title: string;
   description?: string;
-  /** Akseptert for bakoverkompatibilitet (vises ikke i dette hodet). */
-  image?: { url: string; alt?: string } | null;
+  /** Valgfritt bilde fra admin — vises som et rolig panel til høyre på store skjermer. */
+  image?: MediaResource | null;
   children?: ReactNode;
   size?: "default" | "large";
 }
@@ -28,9 +29,12 @@ export function PageHero({
   eyebrow,
   title,
   description,
+  image,
   children,
   size = "default",
 }: PageHeroProps) {
+  const hasImage = Boolean(image?.url);
+
   return (
     <section
       className={cn(
@@ -40,24 +44,42 @@ export function PageHero({
     >
       <FloatingShapes variant="subtle" />
       <Container className="relative z-10">
-        <Reveal>
-          <div className="max-w-3xl">
-            {eyebrow && <Eyebrow className="text-primary">{eyebrow}</Eyebrow>}
-            <Heading
-              variant={size === "large" ? "h1" : "h2"}
-              color="foreground"
-              customStyles={eyebrow ? "mt-3" : undefined}
-            >
-              {title}
-            </Heading>
-            {description && (
-              <Text variant="lead" customStyles="mt-4 max-w-2xl">
-                {description}
-              </Text>
-            )}
-            {children && <div className="mt-8">{children}</div>}
-          </div>
-        </Reveal>
+        <div
+          className={cn(
+            hasImage && "grid items-center gap-10 lg:grid-cols-[3fr_2fr]"
+          )}
+        >
+          <Reveal>
+            <div className="max-w-3xl">
+              {eyebrow && <Eyebrow className="text-primary">{eyebrow}</Eyebrow>}
+              <Heading
+                variant={size === "large" ? "h1" : "h2"}
+                color="foreground"
+                customStyles={eyebrow ? "mt-3" : undefined}
+              >
+                {title}
+              </Heading>
+              {description && (
+                <Text variant="lead" customStyles="mt-4 max-w-2xl">
+                  {description}
+                </Text>
+              )}
+              {children && <div className="mt-8">{children}</div>}
+            </div>
+          </Reveal>
+          {hasImage && image && (
+            <Reveal>
+              <div className="relative hidden aspect-4/3 overflow-hidden rounded-3xl border border-border/60 lg:block">
+                <PayloadImage
+                  media={image}
+                  fill
+                  sizes="(min-width: 1024px) 40vw, 0px"
+                  className="object-cover"
+                />
+              </div>
+            </Reveal>
+          )}
+        </div>
       </Container>
     </section>
   );

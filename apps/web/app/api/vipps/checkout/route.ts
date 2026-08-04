@@ -1,7 +1,8 @@
+import { resolveCheckoutItems } from "@/lib/checkout-items";
+import { discountedTotal, resolveCoupon } from "@/lib/coupon";
 import { getSessionWithMembership } from "@/lib/membership";
 import { createVippsPayment } from "@/lib/vipps";
 import config from "@/payload.config";
-import { stripe } from "@poynt/stripe";
 import { type NextRequest, NextResponse } from "next/server";
 import { getPayload } from "payload";
 
@@ -12,49 +13,32 @@ import { getPayload } from "payload";
  * webhooken (/api/webhooks/vipps): capture, ordre → betalt, kvitterings-epost.
  */
 export async function POST(req: NextRequest) {
+  const { getClientIp, rateLimit } = await import("@/lib/rate-limit");
+  const ip = getClientIp(req.headers);
+  if (!rateLimit("vipps-checkout", ip, { limit: 10, windowMs: 10 * 60_000 })) {
+    return NextResponse.json(
+      { error: "For mange forsøk. Vent litt og prøv igjen." },
+      { status: 429 }
+    );
+  }
+
   try {
     const { items, couponCode, newsletterOptIn } = await req.json();
 
     const authSession = await getSessionWithMembership(req);
 
-    if (!items || items.length === 0) {
+    const payload = await getPayload({ config });
+
+    // Delt servervalidering (samme som Stripe-kassen): produktet må finnes,
+    // være aktivt og ikke utsolgt; antall håndheves; klientpris ignoreres.
+    const resolved = await resolveCheckoutItems(payload, items);
+    if (!resolved.ok) {
       return NextResponse.json(
-        { error: "Handlekurven er tom" },
+        { error: resolved.error, unavailableIds: resolved.unavailableIds },
         { status: 400 }
       );
     }
-
-    const payload = await getPayload({ config });
-
-    // Same servervalidering som i Stripe-checkouten: aldri stol på klientpris.
-    const products = await Promise.all(
-      items.map(
-        async (item: { id: string; quantity: number; variant?: string }) => {
-          const product = await payload.findByID({
-            collection: "products",
-            id: item.id,
-          });
-
-          if (!product || !product.active) {
-            throw new Error(`Produkt ${item.id} er ikkje tilgjengeleg`);
-          }
-
-          const variantOption = item.variant
-            ? (product.variantOptions ?? []).find(
-                (o) => o.label === item.variant
-              )
-            : undefined;
-          const unitPrice = product.price + (variantOption?.priceDelta ?? 0);
-
-          return {
-            product,
-            quantity: Math.max(1, Math.floor(item.quantity || 1)),
-            variant: item.variant,
-            unitPrice,
-          };
-        }
-      )
-    );
+    const products = resolved.lines;
 
     // Vipps-flyten støttar ikkje gjentakande betaling — medlemskap må via kort.
     if (products.some((p) => p.product.type === "membership")) {
@@ -66,26 +50,18 @@ export async function POST(req: NextRequest) {
 
     let total = products.reduce((sum, p) => sum + p.unitPrice * p.quantity, 0);
 
-    // Rabattkodane bur i Stripe — vi løyser koden der og reknar rabatten
-    // sjølv, så same kode verkar uavhengig av betalingsmåte.
+    // Rabattkodane bur i Stripe — delt kupongmodul (samme vakter som
+    // Stripe-kassen), men her reknar vi rabatten sjølv sidan Vipps ikkje
+    // kjenner Stripe-promotion-codes.
     if (typeof couponCode === "string" && couponCode.trim()) {
-      const promos = await stripe.promotionCodes.list({
-        code: couponCode.trim(),
-        active: true,
-        limit: 1,
-      });
-      const promo = promos.data[0];
-      if (!promo || !promo.coupon.valid) {
+      const couponResult = await resolveCoupon(couponCode, total);
+      if (!couponResult.ok) {
         return NextResponse.json(
-          { error: "Rabattkoden er ugyldig eller utløpt" },
+          { error: couponResult.error },
           { status: 400 }
         );
       }
-      if (promo.coupon.percent_off) {
-        total = total * (1 - promo.coupon.percent_off / 100);
-      } else if (promo.coupon.amount_off) {
-        total = Math.max(0, total - promo.coupon.amount_off / 100);
-      }
+      total = discountedTotal(total, couponResult.coupon);
     }
 
     const amountValue = Math.round(total * 100); // øre
@@ -113,7 +89,10 @@ export async function POST(req: NextRequest) {
               : (p.variant ?? undefined),
           priceAtPurchase: p.unitPrice,
         })),
-        total: Math.round(total),
+        // Eksakt beløp i kr (kan ha øredesimaler ved rabatt). MÅ samsvare med
+        // amountValue: webhooken capturer Math.round(total * 100), og et avvik
+        // gir delvis capture hos Vipps.
+        total: amountValue / 100,
         status: "pending",
         paymentProvider: "vipps",
         newsletterOptIn: newsletterOptIn === true,
@@ -144,9 +123,10 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ url: payment.redirectUrl });
   } catch (error) {
+    // Interne feilmeldinger (Vipps/Payload) skal ikke ut til klienten.
     console.error("Vipps checkout error:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Noko gjekk gale" },
+      { error: "Noe gikk galt i kassen. Prøv igjen om et øyeblikk." },
       { status: 500 }
     );
   }

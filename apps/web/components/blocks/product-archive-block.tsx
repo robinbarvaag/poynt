@@ -14,33 +14,27 @@ interface ProductArchiveBlockProps {
   selectedProducts?: (string | Product)[];
   filterByType?: "all" | "course" | "pdf" | "bundle";
   limit?: number;
-  layout?: "grid" | "grid-4" | "carousel";
   showMoreLink?: boolean;
 }
 
-export async function ProductArchiveBlock({
-  title,
-  description,
-  selectionMode = "auto",
-  selectedProducts,
-  filterByType = "all",
-  limit = 8,
-  showMoreLink = false,
-}: ProductArchiveBlockProps) {
+/**
+ * Cachet datahenting med KUN skalarer som argumenter. `selectedProducts` fra
+ * Payload er hele dokumenter — brukes de som cache-nøkkel blir hver felt-
+ * endring en ny nøkkel (null treff, ubegrenset vekst). Derfor mappes de til
+ * id-er FØR den cachede grensen.
+ */
+async function fetchArchiveProducts(
+  productIds: (string | number)[],
+  filterByType: "all" | "course" | "pdf" | "bundle",
+  limit: number
+): Promise<Product[]> {
   "use cache";
   cacheTag("cms");
   cacheLife("minutes");
 
   const payload = await getPayload({ config });
 
-  let products: Product[] = [];
-
-  if (selectionMode === "manual" && selectedProducts?.length) {
-    // For manual selection, fetch the selected products by ID
-    const productIds = selectedProducts.map((p) =>
-      typeof p === "string" ? p : p.id
-    );
-
+  if (productIds.length > 0) {
     const result = await payload.find({
       collection: "products",
       where: {
@@ -52,30 +46,46 @@ export async function ProductArchiveBlock({
     });
 
     // Preserve the order of selectedProducts
-    products = productIds
+    return productIds
       .map((id) => result.docs.find((doc) => doc.id === id))
       .filter((doc): doc is Product => !!doc);
-  } else {
-    // Auto mode - fetch based on filters
-    const whereClause: Where = {
-      active: {
-        equals: true,
-      },
-    };
-
-    if (filterByType !== "all") {
-      whereClause.type = { equals: filterByType };
-    }
-
-    const result = await payload.find({
-      collection: "products",
-      where: whereClause,
-      sort: "-createdAt",
-      limit: limit || 100,
-    });
-
-    products = result.docs;
   }
+
+  const whereClause: Where = {
+    active: {
+      equals: true,
+    },
+  };
+
+  if (filterByType !== "all") {
+    whereClause.type = { equals: filterByType };
+  }
+
+  const result = await payload.find({
+    collection: "products",
+    where: whereClause,
+    sort: "-createdAt",
+    limit: limit || 100,
+  });
+
+  return result.docs;
+}
+
+export async function ProductArchiveBlock({
+  title,
+  description,
+  selectionMode = "auto",
+  selectedProducts,
+  filterByType = "all",
+  limit = 8,
+  showMoreLink = false,
+}: ProductArchiveBlockProps) {
+  const productIds =
+    selectionMode === "manual" && selectedProducts?.length
+      ? selectedProducts.map((p) => (typeof p === "string" ? p : p.id))
+      : [];
+
+  const products = await fetchArchiveProducts(productIds, filterByType, limit);
 
   if (!products.length) {
     return null;

@@ -5,8 +5,9 @@
  *
  * Innsendinger havner i admin under «Skjemaer → Innsendinger». Hook-en i
  * payload.config kjenner igjen skjemaet på tittelen («Venteliste – …»), melder
- * på nyhetsbrevet når avkryssingsboksen er huket av, og sender bekreftelse via
- * Resend (se lib/waitlist.ts).
+ * på nyhetsbrevet når avkryssingsboksen er huket av og varsler Poynt (se
+ * lib/waitlist.ts). Bekreftelsen til den påmeldte ligger redigerbar på selve
+ * skjemaet («E-poster ved innsending») og sendes av form-builder-pluginen.
  *
  *   bun run --cwd apps/web payload run scripts/seed-book-waitlist.ts
  */
@@ -102,6 +103,23 @@ const formData = {
   confirmationMessage: richText(
     "Du står på lista! Du hører fra meg så snart boka kan bestilles."
   ),
+  // Bekreftelsen til den påmeldte — redigerbar i admin under Skjemaer →
+  // «E-poster ved innsending». Form-builder-pluginen sender den (i Poynt-ramma
+  // via beforeEmail i payload.config); hook-en i lib/waitlist.ts ser at
+  // skjemaet har egen e-post og hopper over den kodede standardbekreftelsen.
+  emails: [
+    {
+      emailTo: "{{epost}}",
+      subject: `Du står på ventelista for «${BOOK_TITLE}»`,
+      message: richText([
+        "Hei {{navn}},",
+        `Takk for at du meldte deg på ventelista for «${BOOK_TITLE}». Du er blant de første som får beskjed når boka er klar – både når den kan forhåndsbestilles og når den faktisk ligger i posten.`,
+        "Du trenger ikke gjøre noe nå. Jeg sender deg en e-post så snart det er nytt å melde – ikke oftere. Innimellom får du også en smakebit fra boka eller annet som er verdt å vite om vekst, og du kan melde deg av når som helst.",
+        "Vennlig hilsen,",
+        "Susanne Todnem · Poynt",
+      ]),
+    },
+  ],
 };
 
 let formId: string | number;

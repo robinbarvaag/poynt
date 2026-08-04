@@ -11,8 +11,8 @@ const OPTIONS = [
 ];
 
 /**
- * Format-filter for Læring-huben. Speiler URL-param-mønsteret i `CategoryFilter`
- * (`?type=`) så server-siden kan filtrere den sammenslåtte lista.
+ * Format-filter for Læring-huben. Bruker URL-param (`?type=`) så server-siden
+ * kan filtrere den sammenslåtte lista.
  */
 export function LearningFilter() {
   const router = useRouter();

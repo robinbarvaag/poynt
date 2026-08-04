@@ -18,28 +18,22 @@ interface ServicesArchiveBlockProps {
   showMoreLink?: boolean;
 }
 
-export async function ServicesArchiveBlock({
-  title,
-  description,
-  selectionMode = "auto",
-  selectedServices,
-  limit,
-  layout = "grid",
-  showMoreLink = false,
-}: ServicesArchiveBlockProps) {
+/**
+ * Cachet datahenting med KUN skalarer som argumenter — hele Service-dokumenter
+ * som cache-nøkkel gir null treff og ubegrenset vekst (samme mønster som
+ * product-archive-block).
+ */
+async function fetchArchiveServices(
+  serviceIds: (string | number)[],
+  limit: number | undefined
+): Promise<Service[]> {
   "use cache";
   cacheTag("cms");
   cacheLife("minutes");
 
   const payload = await getPayload({ config });
 
-  let docs: Service[] = [];
-
-  if (selectionMode === "manual" && selectedServices?.length) {
-    const serviceIds = selectedServices.map((s) =>
-      typeof s === "object" ? s.id : s
-    );
-
+  if (serviceIds.length > 0) {
     const result = await payload.find({
       collection: "services",
       where: {
@@ -51,23 +45,40 @@ export async function ServicesArchiveBlock({
     });
 
     // Behold rekkefølgen partneren valgte.
-    docs = serviceIds
+    return serviceIds
       .map((id) => result.docs.find((doc) => doc.id === id))
       .filter((doc): doc is Service => !!doc);
-  } else {
-    const result = await payload.find({
-      collection: "services",
-      where: {
-        active: {
-          equals: true,
-        },
-      },
-      sort: "sortOrder",
-      limit: limit || 100,
-    });
-
-    docs = result.docs;
   }
+
+  const result = await payload.find({
+    collection: "services",
+    where: {
+      active: {
+        equals: true,
+      },
+    },
+    sort: "sortOrder",
+    limit: limit || 100,
+  });
+
+  return result.docs;
+}
+
+export async function ServicesArchiveBlock({
+  title,
+  description,
+  selectionMode = "auto",
+  selectedServices,
+  limit,
+  layout = "grid",
+  showMoreLink = false,
+}: ServicesArchiveBlockProps) {
+  const serviceIds =
+    selectionMode === "manual" && selectedServices?.length
+      ? selectedServices.map((s) => (typeof s === "object" ? s.id : s))
+      : [];
+
+  const docs = await fetchArchiveServices(serviceIds, limit);
 
   if (!docs.length) {
     return null;

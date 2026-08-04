@@ -22,15 +22,18 @@ export const BlogPosts: CollectionConfig = {
     group: "Innhold",
     description:
       "Fag og aktualitet med dato: tips, innsikt, meninger og nyheter. Handler teksten om én kundes reise og resultat, skriv den som Kundehistorie i stedet.",
+    // Begge går via /api/preview som slår på draft mode (krever innlogget
+    // admin) — ellers viser «Preview» bare den publiserte versjonen.
     livePreview: {
       url: ({ data }) => {
-        return `${process.env.NEXT_PUBLIC_URL || "http://localhost:3000"}/blogg/${data?.slug}`;
+        const base = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
+        return `${base}/api/preview?path=${encodeURIComponent(`/blogg/${data?.slug}`)}`;
       },
     },
-    // «Preview»-knapp i dokument-headeren → åpner innlegget på nettsiden.
+    // «Preview»-knapp i dokument-headeren → åpner utkastet på nettsiden.
     preview: (doc) =>
       doc?.slug
-        ? `${process.env.NEXT_PUBLIC_URL || "http://localhost:3000"}/blogg/${doc.slug}`
+        ? `${process.env.NEXT_PUBLIC_URL || "http://localhost:3000"}/api/preview?path=${encodeURIComponent(`/blogg/${doc.slug}`)}`
         : null,
   },
   versions: {

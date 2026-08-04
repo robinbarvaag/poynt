@@ -9,6 +9,10 @@ import { revalidateTag } from "next/cache";
 function revalidateCms(): void {
   try {
     revalidateTag("cms", "max");
+    // Rot-layouten (header/footer/nettsted-innstillinger) cacher under egen
+    // «globals»-tag. Vi tømmer den sammen med «cms» — å skille dem sparer
+    // lite, og en glemt tag betyr at nav/logo-endringer aldri slår gjennom.
+    revalidateTag("globals", "max");
   } catch {
     // Utenfor Next-kontekst (f.eks. seed-script) — cachen utløper selv.
   }

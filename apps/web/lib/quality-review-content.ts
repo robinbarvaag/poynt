@@ -1,6 +1,7 @@
 import type {
   BlogPost,
   CaseStudy,
+  Course,
   Page,
   Product,
   Service,
@@ -294,6 +295,75 @@ export function serializeProductContent(product: Product): string {
     );
   });
   if (!sections.length) parts.push("[Ingen innholdsseksjoner]");
+
+  return parts.filter(Boolean).join("\n\n");
+}
+
+/**
+ * Serialiserer et kurs (courses) til lesbar tekst. Gjør kursets STRUKTUR
+ * synlig for modellen: moduler → leksjoner, om leksjonen har video, tekst,
+ * gjør-selv-steg og nedlastbare ressurser — slik at vurderingen kan si noe om
+ * progresjon, leksjonsstørrelse og praksis, ikke bare prosaen.
+ */
+export function serializeCourseContent(course: Course): string {
+  const parts: string[] = [`# ${course.title}`];
+  if (course.excerpt)
+    parts.push(`_Utdrag (kursoversikten):_ ${course.excerpt}`);
+
+  const image = course.featuredImage;
+  parts.push(
+    isMediaObject(image)
+      ? `[Hovedbilde${image.alt ? `: ${image.alt}` : " – mangler alt-tekst"}]`
+      : "[Mangler hovedbilde]"
+  );
+
+  const modules = course.modules ?? [];
+  if (!modules.length) parts.push("[Ingen moduler]");
+
+  modules.forEach((mod, mi) => {
+    const lines: string[] = [];
+    const lessons = mod.lessons ?? [];
+    if (!lessons.length) lines.push("[Ingen leksjoner i modulen]");
+
+    lessons.forEach((lesson, li) => {
+      lines.push(`### [Leksjon ${mi + 1}.${li + 1}: ${lesson.title}]`);
+      lines.push(lesson.videoUrl ? "[Har video]" : "[Ingen video]");
+      if (lesson.content) {
+        const md = lexicalToMarkdown(lesson.content);
+        lines.push(md.trim() ? md : "[Tomt tekstinnhold]");
+      } else {
+        lines.push("[Ingen tekst under videoen]");
+      }
+
+      const steps = lesson.steps ?? [];
+      steps.forEach((step, si) => {
+        lines.push(`[Steg ${si + 1}: ${step.title}]`);
+        if (isMediaObject(step.image)) {
+          lines.push(
+            `[Skjermbilde${step.image.alt ? `: ${step.image.alt}` : " – mangler alt-tekst"}]`
+          );
+        }
+        if (step.body) {
+          const md = lexicalToMarkdown(step.body);
+          if (md.trim()) lines.push(md);
+        }
+        const substeps = step.substeps ?? [];
+        if (substeps.length) {
+          lines.push(substeps.map((s) => `- ${s.text}`).join("\n"));
+        }
+      });
+      if (!steps.length) lines.push("[Ingen gjør-selv-steg]");
+
+      const resources = lesson.resources ?? [];
+      lines.push(
+        resources.length
+          ? `[Ressurser: ${resources.map((r) => r.title).join(", ")}]`
+          : "[Ingen nedlastbare ressurser]"
+      );
+    });
+
+    parts.push(`## [Modul ${mi + 1}: ${mod.title}]\n${lines.join("\n\n")}`);
+  });
 
   return parts.filter(Boolean).join("\n\n");
 }

@@ -35,10 +35,11 @@ export const QualityListView = async (props: AdminViewServerProps) => {
             }}
           >
             AI-en leser gjennom innholdet og gir hver side en score med konkrete
-            forslag. Her ser du alt samlet: hva som aldri er vurdert, hva som er
-            endret siden forrige vurdering, og hva som er oppdatert. «Vurder
-            alle»-knappen hopper over det som allerede er ferskt — den bruker
-            litt tid per side, så la fanen stå åpen mens den jobber.
+            forslag. Bruk fanene til å se hva som trenger vurdering og hva som
+            allerede er vurdert, og filtrer mellom nettsiden og On Poynt.
+            «Vurder alle»-knappen hopper over det som allerede er ferskt — hver
+            vurdering tar vanligvis 20–60 sekunder, og fremdriftslinja viser
+            hvor langt den har kommet og omtrent hvor lang tid som gjenstår.
           </p>
           <QualityBoard rows={rows} />
         </Gutter>

@@ -1,4 +1,8 @@
 import type { CollectionConfig } from "payload";
+import {
+  qualityDataFields,
+  qualityReviewPanel,
+} from "../fields/quality-review";
 import { stockPickerAfterInput } from "../fields/stock-picker-after-input";
 import { generateSlug } from "../lib/generate-slug";
 import {
@@ -96,6 +100,7 @@ export const Courses: CollectionConfig = {
                 plural: "Moduler",
               },
               admin: {
+                initCollapsed: true,
                 description:
                   "Del kurset i moduler med et tydelig tema hver. Hver modul har sine egne leksjoner.",
               },
@@ -115,6 +120,7 @@ export const Courses: CollectionConfig = {
                     plural: "Leksjoner",
                   },
                   admin: {
+                    initCollapsed: true,
                     description:
                       "Korte leksjoner slår lange — heller ti på fem minutter enn tre på tjue.",
                   },
@@ -239,6 +245,7 @@ export const Courses: CollectionConfig = {
                 },
               },
             },
+            qualityReviewPanel(),
           ],
         },
       ],
@@ -287,5 +294,6 @@ export const Courses: CollectionConfig = {
         description: "Vis som stort hero-kurs øverst i kursoversikten",
       },
     },
+    ...qualityDataFields({ sidebarSection: true }),
   ],
 };

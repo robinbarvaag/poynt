@@ -56,14 +56,10 @@ export default async function ProductsPage() {
   const heroTitle = pageConfig?.hero?.title || "Produkter";
   const heroDescription =
     pageConfig?.hero?.description || "Utforsk våre digitale produkter";
+  // Hele media-objektet sendes videre — PayloadImage håndterer url/alt/fokus.
   const heroImage =
-    pageConfig?.hero?.image &&
-    typeof pageConfig.hero.image === "object" &&
-    pageConfig.hero.image.url
-      ? {
-          url: pageConfig.hero.image.url,
-          alt: pageConfig.hero.image.alt ?? undefined,
-        }
+    pageConfig?.hero?.image && typeof pageConfig.hero.image === "object"
+      ? pageConfig.hero.image
       : null;
   const emptyStateText =
     pageConfig?.emptyStateText || "Ingen produkter tilgjengelig.";
@@ -91,6 +87,7 @@ export default async function ProductsPage() {
           eyebrow="Nettbutikk"
           title={heroTitle}
           description={heroDescription}
+          image={heroImage}
           size="large"
         />
       )}

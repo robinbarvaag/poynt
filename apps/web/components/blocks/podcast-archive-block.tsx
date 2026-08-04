@@ -1,3 +1,7 @@
+import {
+  type PodcastEpisodeCard,
+  toPodcastEpisodeCard,
+} from "@/lib/podcast-cards";
 import { fetchPodcastEpisodes } from "@/lib/podcast-rss";
 import {
   BlockSection,
@@ -8,31 +12,12 @@ import {
 } from "@poynt/ui";
 import { ArrowRight, Play } from "lucide-react";
 import Link from "next/link";
-import type { ReactNode } from "react";
 
 interface PodcastArchiveBlockProps {
   title?: string;
   description?: string;
   limit?: number;
   showMoreLink?: boolean;
-}
-
-interface EpisodeCard {
-  id: string;
-  href: string;
-  title: string;
-  description?: string;
-  episodeNumber?: number;
-  duration?: string;
-  date?: string;
-  cover?: ReactNode;
-}
-
-function formatDate(value: string): string {
-  return new Date(value).toLocaleDateString("nb-NO", {
-    day: "numeric",
-    month: "short",
-  });
 }
 
 /**
@@ -54,23 +39,13 @@ export async function PodcastArchiveBlock({
 
   const all = await fetchPodcastEpisodes(feedUrl);
   const total = all.length;
-  const episodes: EpisodeCard[] = (limit ? all.slice(0, limit) : all).map(
-    (episode) => ({
-      id: episode.id,
-      href: episode.link ?? "#",
-      title: episode.title,
-      description: episode.description,
-      episodeNumber: episode.episodeNumber,
-      duration: episode.durationLabel,
-      date: episode.publishedAt ? formatDate(episode.publishedAt) : undefined,
-      // RSS-cover kommer fra ukjente domener → vanlig <img> (ikke next/image).
-      cover: episode.coverUrl ? (
-        <img
-          src={episode.coverUrl}
-          alt={episode.title}
-          className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-        />
-      ) : undefined,
+  const episodes: PodcastEpisodeCard[] = (
+    limit ? all.slice(0, limit) : all
+  ).map((episode) =>
+    toPodcastEpisodeCard(episode, {
+      withYear: false,
+      coverClassName:
+        "size-full object-cover transition-transform duration-500 group-hover:scale-[1.02]",
     })
   );
 
@@ -106,7 +81,7 @@ export async function PodcastArchiveBlock({
 }
 
 /** Ett episode-kort — lenker ut til episoden hos Spotify. */
-function EpisodeTile({ episode }: { episode: EpisodeCard }) {
+function EpisodeTile({ episode }: { episode: PodcastEpisodeCard }) {
   const body = (
     <>
       <div className="relative mb-3 aspect-square overflow-hidden rounded-2xl bg-muted">

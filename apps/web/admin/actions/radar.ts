@@ -1,6 +1,7 @@
 "use server";
 
 import { inngest } from "@/lib/inngest/client";
+import { requireAdmin } from "@/lib/require-admin";
 import { db, eq } from "@poynt/planner-db";
 import {
   type ContentSuggestionStatus,
@@ -15,6 +16,7 @@ export async function setSuggestionStatus(
   id: string,
   status: ContentSuggestionStatus
 ) {
+  await requireAdmin();
   const [updated] = await db
     .update(plannerContentSuggestion)
     .set({ status })
@@ -28,6 +30,7 @@ export async function setSuggestionStatus(
  * kjører som bakgrunnsjobb; UI-et oppdaterer seg når den er ferdig (refresh).
  */
 export async function runRadarNow() {
+  await requireAdmin();
   try {
     await inngest.send({
       name: "radar/analyze.requested",

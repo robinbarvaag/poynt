@@ -24,6 +24,12 @@ const links = [
     href: "/admin/epost",
     label: "E-post",
   },
+  // Dekker alt innhold (både nettsiden og On Poynt) — tverrgående verktøy,
+  // derfor her og ikke i On Poynt-gruppa.
+  {
+    href: "/admin/kvalitet",
+    label: "Kvalitetsoversikt",
+  },
   {
     href: "/admin/collections/redirects",
     label: "Omdirigeringer",

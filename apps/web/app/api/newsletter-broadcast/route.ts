@@ -1,5 +1,5 @@
+import { lexicalToEmailHtml } from "@/lib/newsletter-html";
 import config from "@/payload.config";
-import { convertLexicalToHTML } from "@payloadcms/richtext-lexical/html";
 import type { SerializedEditorState } from "@payloadcms/richtext-lexical/lexical";
 import { sendNewsletterBroadcast, sendNewsletterTest } from "@poynt/email";
 import { type NextRequest, NextResponse } from "next/server";
@@ -12,13 +12,6 @@ import { getPayload } from "payload";
  *   markerer deretter dokumentet som sendt (status/sentAt/broadcastId)
  * Brukes av send-panelet på Nyhetsbrev-dokumentet i admin (Payload-auth).
  */
-
-const siteUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
-
-/** E-poster trenger absolutte URL-er — gjør relative src/href absolutte. */
-function absolutizeUrls(html: string): string {
-  return html.replace(/(src|href)="\/(?!\/)/g, `$1="${siteUrl}/`);
-}
 
 export async function POST(req: NextRequest) {
   try {
@@ -50,10 +43,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const contentHtml = absolutizeUrls(
-      convertLexicalToHTML({
-        data: newsletter.content as SerializedEditorState,
-      })
+    const contentHtml = lexicalToEmailHtml(
+      newsletter.content as SerializedEditorState
     );
     const preview = newsletter.previewText || newsletter.subject;
 

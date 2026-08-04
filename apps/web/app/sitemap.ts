@@ -1,6 +1,7 @@
 import { SITE_URL } from "@/lib/seo";
 import config from "@/payload.config";
 import type { MetadataRoute } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import { getPayload } from "payload";
 
 /** Felles type for én sitemap-oppføring. */
@@ -9,13 +10,24 @@ type Entry = MetadataRoute.Sitemap[number];
 /**
  * Dynamisk sitemap. Henter publiserte/aktive dokumenter fra Payload og
  * kombinerer med de statiske oversiktssidene. `noIndex`-merkede sider utelates.
+ * Cachet under «cms»-taggen — ellers kjører hvert crawler-treff fem
+ * databasespørringer.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  "use cache";
+  cacheTag("cms");
+  cacheLife("hours");
+
   const payload = await getPayload({ config });
 
   const [pages, products, posts, services, caseStudies] = await Promise.all([
     payload
-      .find({ collection: "pages", limit: 1000, depth: 0 })
+      .find({
+        collection: "pages",
+        where: { _status: { equals: "published" } },
+        limit: 1000,
+        depth: 0,
+      })
       .catch(() => null),
     payload
       .find({

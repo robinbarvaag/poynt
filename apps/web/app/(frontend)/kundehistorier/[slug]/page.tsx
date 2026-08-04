@@ -2,6 +2,8 @@ import { AdminBar } from "@/components/admin-bar";
 import { JsonLd } from "@/components/json-ld";
 import { MediaCredit } from "@/components/media-credit";
 import { PayloadImage } from "@/components/payload-image";
+import { PreviewBanner } from "@/components/preview-banner";
+import { getDraftBySlug, isDraftModeEnabled } from "@/lib/draft";
 import { resolveMedia } from "@/lib/payload";
 import { SITE_URL, buildMetadata, notFoundMetadata } from "@/lib/seo";
 import { articleSchema, breadcrumbSchema } from "@/lib/structured-data";
@@ -75,7 +77,11 @@ export async function generateMetadata({
 
 export default async function CaseStudyPage({ params }: CaseStudyPageProps) {
   const { slug } = await params;
-  const story = await getCaseStudy(slug);
+  // Forhåndsvisning (via /api/preview): les siste utkast i stedet for publisert.
+  const isDraft = await isDraftModeEnabled();
+  const story = isDraft
+    ? await getDraftBySlug("case-studies", slug)
+    : await getCaseStudy(slug);
   if (!story) {
     notFound();
   }
@@ -103,6 +109,7 @@ export default async function CaseStudyPage({ params }: CaseStudyPageProps) {
 
   return (
     <Container size="sm" padding="default">
+      {isDraft && <PreviewBanner path={`/kundehistorier/${slug}`} />}
       <AdminBar
         collection="case-studies"
         id={String(story.id)}

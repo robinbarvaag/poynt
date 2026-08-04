@@ -33,6 +33,9 @@ export const enrichBookmarks: CollectionBeforeChangeHook = async ({ data }) => {
   const blocks = (data as { content?: unknown })?.content;
   if (!Array.isArray(blocks)) return data;
 
+  // Hent alle lenkene parallelt — sekvensielt kunne ti bokmerker à 6 s
+  // timeout legge ~60 s på en autosave (guides autosaver).
+  const pending: Promise<void>[] = [];
   for (const block of blocks) {
     if (block?.blockType !== "guideBookmark" || !Array.isArray(block.items)) {
       continue;
@@ -41,19 +44,23 @@ export const enrichBookmarks: CollectionBeforeChangeHook = async ({ data }) => {
       const url = typeof item?.url === "string" ? item.url.trim() : "";
       if (!url || item.imageUrl) continue;
 
-      const og = await fetchOgMeta(url);
-      if (og.title && !item.title) item.title = og.title;
-      if (og.description && !item.description)
-        item.description = og.description;
-      if (og.image) item.imageUrl = og.image;
+      pending.push(
+        fetchOgMeta(url).then((og) => {
+          if (og.title && !item.title) item.title = og.title;
+          if (og.description && !item.description)
+            item.description = og.description;
+          if (og.image) item.imageUrl = og.image;
 
-      item.ogStatus = ogStatusText(og, {
-        title: Boolean(item.title),
-        description: Boolean(item.description),
-        image: Boolean(item.imageUrl) || hasManualImage(item),
-      });
+          item.ogStatus = ogStatusText(og, {
+            title: Boolean(item.title),
+            description: Boolean(item.description),
+            image: Boolean(item.imageUrl) || hasManualImage(item),
+          });
+        })
+      );
     }
   }
+  await Promise.all(pending);
 
   return data;
 };

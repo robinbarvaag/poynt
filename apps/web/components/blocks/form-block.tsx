@@ -257,6 +257,10 @@ export function FormBlockComponent({
                 "required" in field ? (field.required ?? false) : false;
               const fieldWidth = "width" in field ? (field.width ?? 100) : 100;
 
+              // Kobler <Label htmlFor> til feltet — uten dette leser
+              // skjermlesere feltene som «uten navn».
+              const inputId = `form-${fieldName}-${field.id}`;
+
               return (
                 <div
                   key={`${fieldName}-${field.id}`}
@@ -266,7 +270,10 @@ export function FormBlockComponent({
                 >
                   {/* Checkbox har egen inline-label under – unngå dobbel tekst. */}
                   {field.blockType !== "checkbox" && (
-                    <Label className="mb-2 flex items-start font-heading font-semibold text-foreground leading-snug md:min-h-[2lh]">
+                    <Label
+                      htmlFor={inputId}
+                      className="mb-2 flex items-start font-heading font-semibold text-foreground leading-snug md:min-h-[2lh]"
+                    >
                       <span>
                         {fieldLabel}
                         {isRequired && (
@@ -279,6 +286,7 @@ export function FormBlockComponent({
                   {field.blockType === "text" && (
                     <input
                       type="text"
+                      id={inputId}
                       name={fieldName}
                       required={isRequired}
                       className={fieldControlClasses}
@@ -288,6 +296,7 @@ export function FormBlockComponent({
                   {field.blockType === "email" && (
                     <input
                       type="email"
+                      id={inputId}
                       name={fieldName}
                       required={isRequired}
                       className={fieldControlClasses}
@@ -297,6 +306,7 @@ export function FormBlockComponent({
                   {field.blockType === "number" && (
                     <input
                       type="number"
+                      id={inputId}
                       name={fieldName}
                       required={isRequired}
                       className={fieldControlClasses}
@@ -305,6 +315,7 @@ export function FormBlockComponent({
 
                   {field.blockType === "textarea" && (
                     <textarea
+                      id={inputId}
                       name={fieldName}
                       required={isRequired}
                       rows={4}
@@ -322,7 +333,10 @@ export function FormBlockComponent({
                           : undefined
                       }
                     >
-                      <SelectTrigger className="h-12! w-full rounded-xl border-input bg-background px-4 text-base shadow-none">
+                      <SelectTrigger
+                        id={inputId}
+                        className="h-12! w-full rounded-xl border-input bg-background px-4 text-base shadow-none"
+                      >
                         <SelectValue placeholder="Velg..." />
                       </SelectTrigger>
                       <SelectContent>
@@ -375,7 +389,10 @@ export function FormBlockComponent({
         </div>
 
         {error && (
-          <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
+          <div
+            role="alert"
+            className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm"
+          >
             {error}
           </div>
         )}

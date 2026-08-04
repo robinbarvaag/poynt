@@ -91,6 +91,14 @@ async function handleMembershipPurchase(session: Stripe.Checkout.Session) {
     stripeCustomerId,
     stripeSubscriptionId,
   });
+
+  // Aktivt samtykke fra utsjekken → meld på nyhetsbrevet. Svelg feil.
+  if (session.metadata?.newsletter === "1") {
+    const result = await subscribeToNewsletter(email);
+    if (!result.success) {
+      console.error("Nyhetsbrev-påmelding feilet:", result.error);
+    }
+  }
 }
 
 /** Convert a Stripe Unix timestamp to Date, or undefined if invalid. */
@@ -130,6 +138,22 @@ async function handleProductPurchase(session: Stripe.Checkout.Session) {
     session.customer_details?.email || session.customer_email;
   if (!customerEmail) {
     throw new Error("Ingen kunde-epost i checkout session");
+  }
+
+  // Idempotens: én ordre per Stripe-session. Claim-registeret frigis ved feil
+  // (for retry), så uten denne sjekken ville en feilet e-post etter
+  // payload.create gitt duplikatordre ved neste leveranse.
+  const existing = await payload.find({
+    collection: "orders",
+    where: { stripeSessionId: { equals: session.id } },
+    limit: 1,
+    depth: 0,
+  });
+  if (existing.docs.length > 0) {
+    console.log(
+      `Ordre finnes allerede for session ${session.id} (ordre ${existing.docs[0].id}), hopper over`
+    );
+    return;
   }
 
   type OrderItem = {
@@ -255,28 +279,37 @@ async function handleProductPurchase(session: Stripe.Checkout.Session) {
     }
   }
 
-  // Admin-redigerte e-posttekster + PDF-vedlegg for kjøpte PDF-produkter
-  const extras = await buildOrderEmailExtras(
-    payload,
-    orderItems.map((item) => item.product)
-  );
+  // Kvitteringsmail til kunden. Svelg feil: ordren ER opprettet, og en
+  // webhook-retry ville uansett stoppe i idempotens-sjekken over uten å sende
+  // e-posten på nytt — bedre å logge høyt og la salgsvarselet under gå ut.
+  try {
+    // Admin-redigerte e-posttekster + PDF-vedlegg for kjøpte PDF-produkter
+    const extras = await buildOrderEmailExtras(
+      payload,
+      orderItems.map((item) => item.product)
+    );
 
-  // Send branded bekreftelsesmail
-  await sendOrderConfirmation({
-    email: customerEmail,
-    orderNumber: String(order.id),
-    customerName: session.customer_details?.name || undefined,
-    items: orderItems.map((item) => ({
-      name: item.name,
-      quantity: item.quantity,
-      price: item.priceAtPurchase,
-      variant: item.variant,
-    })),
-    total,
-    subject: extras.subject,
-    content: extras.content,
-    attachments: extras.attachments,
-  });
+    await sendOrderConfirmation({
+      email: customerEmail,
+      orderNumber: String(order.id),
+      customerName: session.customer_details?.name || undefined,
+      items: orderItems.map((item) => ({
+        name: item.name,
+        quantity: item.quantity,
+        price: item.priceAtPurchase,
+        variant: item.variant,
+      })),
+      total,
+      subject: extras.subject,
+      content: extras.content,
+      attachments: extras.attachments,
+    });
+  } catch (error) {
+    console.error(
+      `KVITTERING IKKE SENDT for ordre ${order.id} (${customerEmail}) — send manuelt:`,
+      error
+    );
+  }
 
   // Internt salgsvarsel til oss. Svelg feil — hvis dette kaster etter at
   // ordren er opprettet, ville en webhook-retry laget en duplikatordre.
@@ -562,11 +595,34 @@ export async function POST(req: NextRequest) {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
+        // Kortbetalinger er alltid «paid» her, men utsettes betalingsmetoder
+        // (Klarna, bankoverføring) fyres eventet FØR pengene er trukket —
+        // da kommer et eget async_payment_succeeded senere.
+        if (
+          session.payment_status !== "paid" &&
+          session.payment_status !== "no_payment_required"
+        ) {
+          console.log(
+            `Session ${session.id} completed men ikke betalt ennå (${session.payment_status}) — venter på async betaling`
+          );
+          break;
+        }
         // Route based on product type
         if (session.metadata?.productType === "membership") {
           await handleMembershipPurchase(session);
         } else {
           // Default to product purchase
+          await handleProductPurchase(session);
+        }
+        break;
+      }
+
+      case "checkout.session.async_payment_succeeded": {
+        // Utsatte betalingsmetoder: samme håndtering når pengene faktisk kom.
+        const session = event.data.object as Stripe.Checkout.Session;
+        if (session.metadata?.productType === "membership") {
+          await handleMembershipPurchase(session);
+        } else {
           await handleProductPurchase(session);
         }
         break;

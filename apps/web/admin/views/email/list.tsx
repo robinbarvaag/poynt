@@ -1,14 +1,17 @@
 import { DefaultTemplate } from "@payloadcms/next/templates";
 import { Gutter, SetStepNav } from "@payloadcms/ui";
 import { getVisibleEntities } from "@payloadcms/ui/shared";
-import { renderEmailPreviews } from "@poynt/email";
+import { renderEmailPreviews, resolveBroadcastTarget } from "@poynt/email";
 import type { AdminViewServerProps } from "payload";
+import { buildFormEmailPreviews } from "../../../lib/form-email-previews";
+import { NotificationEmailsField } from "../../components/email/notification-emails-field";
 import { EmailPreviewPanel } from "../../components/email/preview-panel";
 
 /**
  * E-postoversikt (/admin/epost): alle e-postene nettsiden sender, med
- * forhåndsvisning slik de ser ut hos mottakeren. Ordrebekreftelsen vises med
- * de faktiske tekstene fra «Kasse og kvittering».
+ * forhåndsvisning slik de ser ut hos mottakeren, og redigering av hvem som
+ * får de interne varslene. Ordrebekreftelsen vises med de faktiske tekstene
+ * fra «Kasse og kvittering».
  */
 
 export const EmailOverviewView = async (props: AdminViewServerProps) => {
@@ -18,6 +21,12 @@ export const EmailOverviewView = async (props: AdminViewServerProps) => {
   const siteSettings = await props.payload
     .findGlobal({ slug: "site-settings" })
     .catch(() => null);
+
+  // Nyere Resend-kontoer har innebygde segmenter — sjekk om utsending faktisk
+  // har en mottakerliste, i stedet for å kreve en env-variabel blindt.
+  const broadcastTarget = process.env.RESEND_API_KEY
+    ? await resolveBroadcastTarget()
+    : null;
 
   // Kun tilstedeværelse (satt/ikke satt) vises — aldri verdiene.
   const checks = [
@@ -36,16 +45,16 @@ export const EmailOverviewView = async (props: AdminViewServerProps) => {
       ok: Boolean(
         siteSettings?.notificationEmails || process.env.CONTACT_EMAIL
       ),
-      hint: "Hvem som får de interne varslene. Settes under Nettsted-innstillinger → Kontakt.",
+      hint: "Hvem som får de interne varslene — redigeres i feltet under.",
     },
     {
-      name: "Nyhetsbrev-audience",
-      ok: Boolean(process.env.RESEND_AUDIENCE_ID),
-      hint: "RESEND_AUDIENCE_ID: trengs for å sende nyhetsbrev til hele lista.",
+      name: "Nyhetsbrev-utsending",
+      ok: broadcastTarget !== null,
+      hint: "Mottakerlista i Resend. Finnes automatisk på nyere kontoer; eldre kontoer kan sette RESEND_AUDIENCE_ID.",
     },
   ];
 
-  const previews = await renderEmailPreviews({
+  const templatePreviews = await renderEmailPreviews({
     orderSubject: settings?.emailSubject ?? undefined,
     orderContent: settings
       ? {
@@ -56,6 +65,20 @@ export const EmailOverviewView = async (props: AdminViewServerProps) => {
         }
       : undefined,
   });
+
+  // E-postene partneren har satt opp selv på skjemaene («E-poster ved
+  // innsending») — vist med faktisk innhold og lenke til der de redigeres,
+  // rett etter «Til kunden»-gruppa.
+  const formEmailPreviews = await buildFormEmailPreviews(props.payload);
+  const lastCustomerIndex = templatePreviews.reduce(
+    (last, preview, index) => (preview.group === "Til kunden" ? index : last),
+    -1
+  );
+  const previews = [
+    ...templatePreviews.slice(0, lastCustomerIndex + 1),
+    ...formEmailPreviews,
+    ...templatePreviews.slice(lastCustomerIndex + 1),
+  ];
 
   const visibleEntities = getVisibleEntities({ req: props.initPageResult.req });
 
@@ -80,8 +103,10 @@ export const EmailOverviewView = async (props: AdminViewServerProps) => {
             }}
           >
             Her ser du alle e-postene nettsiden sender — til kundene og til
-            dere. Forhåndsvisningene bruker eksempeldata, men tekstene i
-            ordrebekreftelsen er de du selv har skrevet i «Kasse og kvittering».
+            dere. Forhåndsvisningene bruker eksempeldata, men der teksten kan
+            redigeres (ordrebekreftelsen, skjema-bekreftelsene, nyhetsbrevet)
+            vises det du selv har skrevet, med lenke til der du endrer det.
+            E-poster uten lenke har fast tekst.
           </p>
           <div
             style={{
@@ -120,6 +145,10 @@ export const EmailOverviewView = async (props: AdminViewServerProps) => {
               </span>
             ))}
           </div>
+          <NotificationEmailsField
+            initialValue={siteSettings?.notificationEmails ?? ""}
+            envFallback={Boolean(process.env.CONTACT_EMAIL)}
+          />
           <EmailPreviewPanel previews={previews} />
         </Gutter>
       </div>

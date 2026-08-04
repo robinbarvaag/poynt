@@ -86,8 +86,19 @@ export async function POST(req: NextRequest) {
   }
 
   // Same idempotens-register som Stripe-webhooken - kravsett atomisk slik at
-  // samtidige leveranser ikkje begge behandlar eventet.
-  const eventId = `vipps:${reference}:${name}:${event.pspReference ?? ""}`;
+  // samtidige leveranser ikkje begge behandlar eventet. Manglar pspReference,
+  // brukast ein hash av rå-bodyen som suffiks — elles kunne to ULIKE events
+  // med same namn for same referanse kollidere (retries har identisk body,
+  // så idempotensen held).
+  let eventSuffix = event.pspReference;
+  if (!eventSuffix) {
+    const digest = await crypto.subtle.digest(
+      "SHA-256",
+      new TextEncoder().encode(rawBody)
+    );
+    eventSuffix = Buffer.from(digest).toString("hex").slice(0, 16);
+  }
+  const eventId = `vipps:${reference}:${name}:${eventSuffix}`;
   const claimed = await claimWebhookEvent(
     db,
     eventId,
@@ -97,21 +108,29 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ received: true });
   }
 
-  const payload = await getPayload({ config });
-  const orders = await payload.find({
-    collection: "orders",
-    where: { vippsReference: { equals: reference } },
-    limit: 1,
-    depth: 1,
-  });
-  const order = orders.docs[0];
-
-  if (!order) {
-    console.warn(`Vipps webhook: fann ingen ordre for referanse ${reference}`);
-    return NextResponse.json({ received: true });
-  }
-
+  // ALT etter claim må ligge i try/catch: kaster noe her uten at claimet
+  // frigis, vil alle Vipps-retries treffe «already claimed» og eventet er
+  // tapt for alltid — betalingen blir aldri captura.
   try {
+    const payload = await getPayload({ config });
+    const orders = await payload.find({
+      collection: "orders",
+      where: { vippsReference: { equals: reference } },
+      limit: 1,
+      depth: 1,
+    });
+    const order = orders.docs[0];
+
+    if (!order) {
+      // Ordren kan mangle fordi checkout-ruten ikke har committet ennå —
+      // frigi claimet så Vipps-retry (med backoff) kan prøve igjen.
+      console.warn(
+        `Vipps webhook: fann ingen ordre for referanse ${reference} — frigir for retry`
+      );
+      await releaseWebhookEvent(db, eventId);
+      return NextResponse.json({ received: true });
+    }
+
     switch (name) {
       case "AUTHORIZED": {
         if (order.status !== "pending") break;

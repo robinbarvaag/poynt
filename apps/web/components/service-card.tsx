@@ -1,4 +1,5 @@
 import { type MediaResource, PayloadImage } from "@/components/payload-image";
+import { formatServicePrice } from "@/lib/service";
 import { Heading, Text } from "@poynt/ui";
 import Link from "next/link";
 
@@ -17,26 +18,6 @@ interface Service {
 
 interface ServiceCardProps {
   service: Service;
-}
-
-function formatPrice(service: Service): string {
-  if (service.priceType === "contact") {
-    return "Ta kontakt for pris";
-  }
-
-  if (!service.price) return "";
-
-  const priceStr = service.price.toLocaleString("nb-NO");
-  const vatSuffix = service.includesVat ? " + mva" : "";
-
-  switch (service.priceType) {
-    case "from":
-      return `Fra ${priceStr} kr${vatSuffix}`;
-    case "monthly":
-      return `${priceStr} kr${vatSuffix} / mnd`;
-    default:
-      return `${priceStr} kr${vatSuffix}`;
-  }
 }
 
 export function ServiceCard({ service }: ServiceCardProps) {
@@ -68,7 +49,7 @@ export function ServiceCard({ service }: ServiceCardProps) {
           {service.name}
         </Heading>
         <Text type="p" color="primary" weight="medium" customStyles="mb-3">
-          {formatPrice(service)}
+          {formatServicePrice(service)}
         </Text>
         <Text variant="muted" customStyles="line-clamp-3">
           {service.shortDescription}

@@ -1,8 +1,19 @@
 import type { CartItem } from "@poynt/cart";
 
+/** Kassefeil med nok kontekst til at klienten kan rydde kurven. */
+export class CheckoutRequestError extends Error {
+  /** Produkt-id-er serveren avviste (slettet/utsolgt) — fjernes fra kurven. */
+  unavailableIds: string[];
+
+  constructor(message: string, unavailableIds: string[] = []) {
+    super(message);
+    this.unavailableIds = unavailableIds;
+  }
+}
+
 /**
  * Start Vipps-hurtigkasse frå klienten: POST kurven til API-et og redirect
- * til Vipps-landingssida. Kastar Error med norsk melding ved feil.
+ * til Vipps-landingssida. Kastar CheckoutRequestError med norsk melding ved feil.
  */
 export async function startVippsCheckout(
   items: CartItem[],
@@ -49,9 +60,13 @@ async function postVippsCheckout(
 
   const data = await response.json();
   if (!response.ok) {
-    throw new Error(data.error || "Noe gikk galt");
+    throw new CheckoutRequestError(
+      data.error || "Noe gikk galt",
+      Array.isArray(data.unavailableIds) ? data.unavailableIds : []
+    );
   }
-  if (data.url) {
-    window.location.href = data.url;
+  if (!data.url) {
+    throw new CheckoutRequestError("Kassen svarte uten betalingslenke");
   }
+  window.location.href = data.url;
 }

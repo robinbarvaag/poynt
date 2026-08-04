@@ -125,7 +125,10 @@ export const Media: CollectionConfig = {
       label: "Privat bilde",
       defaultValue: false,
       admin: {
-        description: "Kun synlig for innloggede brukere",
+        // Ærlig beskrivelse: fila ligger på offentlig blob-lagring, så vi kan
+        // bare skjule den i lister/API — ikke gjøre selve fila hemmelig.
+        description:
+          "Skjules i offentlige lister og søk. NB: selve bildefila kan fortsatt åpnes av alle som har direktelenken — ikke last opp noe konfidensielt.",
         position: "sidebar",
       },
     },

@@ -2,8 +2,10 @@ import { AdminBar } from "@/components/admin-bar";
 import { JsonLd } from "@/components/json-ld";
 import { MediaCredit } from "@/components/media-credit";
 import { PayloadImage } from "@/components/payload-image";
+import { PreviewBanner } from "@/components/preview-banner";
 import { ViewTracker } from "@/components/radar/view-tracker";
 import { RelatedPosts } from "@/components/related-posts";
+import { getDraftBySlug, isDraftModeEnabled } from "@/lib/draft";
 import { formatLongDate } from "@/lib/format";
 import { resolveMedia, resolveRelations } from "@/lib/payload";
 import { SITE_URL, buildMetadata, notFoundMetadata } from "@/lib/seo";
@@ -75,7 +77,11 @@ export async function generateMetadata({
 
 export default async function PostPage({ params }: PostPageProps) {
   const { slug } = await params;
-  const post = await getPost(slug);
+  // Forhåndsvisning (via /api/preview): les siste utkast i stedet for publisert.
+  const isDraft = await isDraftModeEnabled();
+  const post = isDraft
+    ? await getDraftBySlug("blog-posts", slug)
+    : await getPost(slug);
   if (!post) {
     notFound();
   }
@@ -107,6 +113,7 @@ export default async function PostPage({ params }: PostPageProps) {
         id={String(post.id)}
         singular="innlegg"
       />
+      {isDraft && <PreviewBanner path={`/blogg/${slug}`} />}
       <ViewTracker
         collection="blog-posts"
         contentId={String(post.id)}

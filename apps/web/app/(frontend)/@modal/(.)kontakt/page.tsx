@@ -1,9 +1,7 @@
 import { ContactModal } from "@/components/contact/contact-modal";
 import { getContactForm } from "@/lib/contact";
+import { getKontaktPage } from "@/lib/kontakt-page";
 import { resolveMedia } from "@/lib/payload";
-import config from "@/payload.config";
-import { cacheLife, cacheTag } from "next/cache";
-import { getPayload } from "payload";
 import { Suspense } from "react";
 
 interface ModalPageProps {
@@ -12,21 +10,11 @@ interface ModalPageProps {
 
 /**
  * Bildet i modal-headeren: hero-bildet fra kontakt-siden (partneren styrer det
- * i admin), med meta-bildet som fallback.
+ * i admin), med meta-bildet som fallback. Selve siden hentes via den delte
+ * (cachede) kontakt-henteren.
  */
 async function getContactImage() {
-  "use cache";
-  cacheTag("cms");
-  cacheLife("minutes");
-
-  const payload = await getPayload({ config });
-  const pages = await payload.find({
-    collection: "pages",
-    where: { slug: { equals: "kontakt" } },
-    limit: 1,
-    depth: 2,
-  });
-  const page = pages.docs[0];
+  const page = await getKontaktPage();
   if (!page) return null;
 
   const heroBlock = page.layout?.find((block) => block.blockType === "hero");

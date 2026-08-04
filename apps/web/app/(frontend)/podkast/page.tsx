@@ -4,6 +4,7 @@ import {
   PodcastExplorer,
   type PodcastExplorerEpisode,
 } from "@/components/podcast-explorer";
+import { toPodcastEpisodeCard } from "@/lib/podcast-cards";
 import { fetchPodcastEpisodes } from "@/lib/podcast-rss";
 import { buildMetadata } from "@/lib/seo";
 import config from "@/payload.config";
@@ -54,29 +55,8 @@ export default async function PodcastPage() {
   const emptyStateText =
     pageConfig?.emptyStateText || "Ingen episoder publisert ennå.";
 
-  const formatDate = (value: string) =>
-    new Date(value).toLocaleDateString("nb-NO", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
-
   const episodes: PodcastExplorerEpisode[] = rss.map((episode, index) => ({
-    id: episode.id,
-    href: episode.link ?? "#",
-    title: episode.title,
-    description: episode.description,
-    episodeNumber: episode.episodeNumber,
-    duration: episode.durationLabel,
-    date: episode.publishedAt ? formatDate(episode.publishedAt) : undefined,
-    cover: episode.coverUrl ? (
-      // RSS-cover kommer fra ukjente domener → vanlig <img> (ikke next/image)
-      <img
-        src={episode.coverUrl}
-        alt={episode.title}
-        className="size-full object-cover"
-      />
-    ) : undefined,
+    ...toPodcastEpisodeCard(episode),
     badge: index === 0 ? "Siste episode" : undefined,
     search: `${episode.title} ${episode.description ?? ""}`.toLowerCase(),
   }));

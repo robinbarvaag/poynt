@@ -14,6 +14,12 @@ import { redirectsPlugin } from "@payloadcms/plugin-redirects";
 import { seoPlugin } from "@payloadcms/plugin-seo";
 import { stripePlugin } from "@payloadcms/plugin-stripe";
 
+import { rateLimit } from "./lib/rate-limit";
+import {
+  revalidateCmsAfterChange,
+  revalidateCmsAfterDelete,
+} from "./lib/revalidate-cms";
+
 // Collections
 import { BlogPosts } from "./collections/blog-posts";
 import { CaseStudies } from "./collections/case-studies";
@@ -44,15 +50,89 @@ import {
 
 const siteUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
 
+// Uten secret ville Payload ellers falt tilbake på en kjent verdi — som gjør
+// admin-sesjoner forfalskbare i produksjon. Da er det bedre å stoppe bygget.
+const payloadSecret = process.env.PAYLOAD_SECRET;
+if (!payloadSecret) {
+  throw new Error("PAYLOAD_SECRET er ikke satt — sett den i miljøet");
+}
+
+/**
+ * EMAIL_FROM kan være en bar adresse («no-reply@poynt.no») eller hele strengen
+ * «Poynt <no-reply@poynt.no>» — samme regel som buildFrom i @poynt/email.
+ */
+function parseEmailFrom(): { name: string; address: string } {
+  const configured = (process.env.EMAIL_FROM || "").trim();
+  const match = configured.match(/^"?([^"<]*?)"?\s*<([^>]+)>$/);
+  if (match) {
+    return { name: match[1].trim() || "Poynt", address: match[2].trim() };
+  }
+  return { name: "Poynt", address: configured || "onboarding@resend.dev" };
+}
+const emailFromParts = parseEmailFrom();
+
+/**
+ * Norske etiketter på form-builder-pluginens «emails»-felt (Skjemaer). Pluginen
+ * bruker engelske i18n-nøkler; her får partneren hverdagsspråk i stedet.
+ */
+const FORM_EMAIL_FIELD_LABELS: Record<
+  string,
+  { label: string; description?: string }
+> = {
+  emailTo: {
+    label: "Send til",
+    description:
+      "Skriv {{epost}} for å sende til adressen fra skjemaet, eller en fast adresse.",
+  },
+  cc: { label: "Kopi (CC)" },
+  bcc: { label: "Blindkopi (BCC)" },
+  replyTo: { label: "Svar til" },
+  emailFrom: {
+    label: "Avsender (valgfritt)",
+    description: "La stå tom for å bruke standardavsenderen.",
+  },
+  subject: { label: "Emne" },
+  message: {
+    label: "Melding",
+    description:
+      "Selve e-posten. Skriv {{navn}} eller andre feltnavn i doble klammer for å flette inn svar fra skjemaet. Poynt-ramma (logo og farger) legges på automatisk.",
+  },
+};
+
+// biome-ignore lint/suspicious/noExplicitAny: felt-typene fra pluginen er for løse til å bevare her
+function relabelFormEmailFields(fields: any[]): any[] {
+  return fields.map((field) => {
+    if (field.type === "row" && Array.isArray(field.fields)) {
+      return { ...field, fields: relabelFormEmailFields(field.fields) };
+    }
+    const override = field.name
+      ? FORM_EMAIL_FIELD_LABELS[field.name as string]
+      : undefined;
+    if (!override) return field;
+    return {
+      ...field,
+      label: override.label,
+      admin: {
+        ...field.admin,
+        ...(override.description
+          ? { description: override.description }
+          : undefined),
+      },
+    };
+  });
+}
+
 export default buildConfig({
   editor: lexicalEditor({}),
-  secret: process.env.PAYLOAD_SECRET || "development-secret",
+  secret: payloadSecret,
   serverURL: siteUrl,
+  // Avsender for e-poster Payload selv sender (i praksis skjema-e-postene fra
+  // form-builder-pluginen). Bruker samme EMAIL_FROM som @poynt/email, slik at
+  // alt går fra samme verifiserte adresse. Uten EMAIL_FROM: Resend-sandboxen,
+  // som bare leverer til kontoens egen adresse.
   email: resendAdapter({
-    // TODO: bytt til verifisert domene (t.d. noreply@dittdomene.no) når domenet er
-    // verifisert i Resend. onboarding@resend.dev kan berre sende til eiga konto-adresse.
-    defaultFromName: "On Poynt",
-    defaultFromAddress: "onboarding@resend.dev",
+    defaultFromName: emailFromParts.name,
+    defaultFromAddress: emailFromParts.address,
     apiKey: process.env.RESEND_API_KEY || "",
   }),
   db: postgresAdapter({
@@ -126,6 +206,7 @@ export default buildConfig({
     components: {
       afterNavLinks: [
         "/admin/components/on-poynt-nav-group#OnPoyntNavGroup",
+        "/admin/components/contacts-nav-group#ContactsNavGroup",
         "/admin/components/setup-nav-group#SetupNavGroup",
       ],
       beforeDashboard: ["/admin/components/dashboard/radar-widget#RadarWidget"],
@@ -189,6 +270,12 @@ export default buildConfig({
           path: "/epost",
           exact: true,
           meta: { title: "E-post" },
+        },
+        contacts: {
+          Component: "/admin/views/contacts/list#ContactsListView",
+          path: "/kontakter",
+          exact: true,
+          meta: { title: "Kontakter" },
         },
         quality: {
           Component: "/admin/views/quality/list#QualityListView",
@@ -344,9 +431,30 @@ export default buildConfig({
           singular: "Omdirigering",
           plural: "Omdirigeringer",
         },
+        // checkRedirect leses bak cacheTag("cms") — uten disse slår en ny
+        // omdirigering først gjennom når cachen utløper.
+        hooks: {
+          afterChange: [revalidateCmsAfterChange],
+          afterDelete: [revalidateCmsAfterDelete],
+        },
       },
     }),
     formBuilderPlugin({
+      // Skjema-e-postene («E-poster ved innsending») skrives i admin, men
+      // pluginen sender dem som naken HTML fra standardavsenderen. Legg på
+      // Poynt-ramma her, slik at de ser ut som resten av e-postene våre.
+      beforeEmail: async (emails) => {
+        const { renderFormEmailHtml } = await import("@poynt/email");
+        return Promise.all(
+          emails.map(async (email) => ({
+            ...email,
+            html: await renderFormEmailHtml({
+              preview: email.subject,
+              contentHtml: email.html,
+            }),
+          }))
+        );
+      },
       formOverrides: {
         admin: {
           group: "Kommunikasjon",
@@ -355,8 +463,45 @@ export default buildConfig({
           singular: "Skjema",
           plural: "Skjemaer",
         },
+        fields: ({ defaultFields }) =>
+          defaultFields.map((field) =>
+            "name" in field && field.name === "emails" && "fields" in field
+              ? ({
+                  ...field,
+                  label: "E-poster ved innsending",
+                  labels: { singular: "E-post", plural: "E-poster" },
+                  admin: {
+                    ...field.admin,
+                    description:
+                      "E-poster som sendes automatisk når noen sender inn skjemaet — f.eks. en bekreftelse til innsenderen. Forhåndsvisning finner du under Drift → E-post.",
+                  },
+                  fields: relabelFormEmailFields(field.fields),
+                } as typeof field)
+              : field
+          ),
+        // Skjemafeltene leses bak cacheTag("cms") (lib/contact.ts) — uten
+        // dette slår skjemaendringer først gjennom når cachen utløper.
+        hooks: {
+          afterChange: [revalidateCmsAfterChange],
+          afterDelete: [revalidateCmsAfterDelete],
+        },
       },
       formSubmissionOverrides: {
+        // Pluginens standard er create: () => true (nødvendig — skjemaene er
+        // offentlige), men helt uten brems kan endepunktet spammes: hver
+        // innsending sender e-post via Resend og kan speiles til medlemssøknad.
+        access: {
+          create: ({ req }) => {
+            const ip =
+              req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+              req.headers.get("x-real-ip") ??
+              "ukjent";
+            return rateLimit("form-submission", ip, {
+              limit: 5,
+              windowMs: 10 * 60_000,
+            });
+          },
+        },
         admin: {
           group: "Kommunikasjon",
           defaultColumns: ["form", "createdAt"],
@@ -427,6 +572,12 @@ export default buildConfig({
                       formTitle: formDoc.title,
                       formId,
                       get,
+                      // Har skjemaet en egen bekreftelse under «E-poster ved
+                      // innsending», sender pluginen den — da skal ikke
+                      // standardbekreftelsen i koden også sendes.
+                      hasOwnConfirmation:
+                        Array.isArray(formDoc.emails) &&
+                        formDoc.emails.length > 0,
                     });
                     return doc;
                   }
@@ -495,9 +646,28 @@ export default buildConfig({
                       formSubmissionId: String(doc.id),
                     });
                   } catch (dbErr) {
+                    // Søknaden dukker da ALDRI opp i Søknader-innboksen — si
+                    // fra til oss på e-post i tillegg til loggen, med peker til
+                    // innsendingen så den kan legges inn manuelt.
                     req.payload.logger.error(
                       `Lagring av medlemskapssøknad feilet: ${dbErr instanceof Error ? dbErr.message : dbErr}`
                     );
+                    try {
+                      const { getNotificationEmails } = await import(
+                        "./lib/notification-emails"
+                      );
+                      await sendContactEmails({
+                        to: await getNotificationEmails(),
+                        name: "Systemvarsel",
+                        email: applicantEmail,
+                        subject: "FEIL: medlemssøknad ikke lagret",
+                        message: `Medlemskapssøknaden fra ${applicantEmail} ble IKKE lagret i Søknader-innboksen (databasefeil). Selve innsendingen ligger under Innsendinger (id ${doc.id}) — legg den inn manuelt eller be om ny søknad.\n\nFeil: ${dbErr instanceof Error ? dbErr.message : dbErr}`,
+                      });
+                    } catch (notifyErr) {
+                      req.payload.logger.error(
+                        `Varsel om feilet medlemssøknad feilet også: ${notifyErr instanceof Error ? notifyErr.message : notifyErr}`
+                      );
+                    }
                   }
 
                   const line = (label: string, names: string[]) => {

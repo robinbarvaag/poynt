@@ -3,8 +3,11 @@
 import { VippsButton } from "@/components/vipps-button";
 import { formatPrice } from "@/lib/format";
 import { useCartReady } from "@/lib/use-cart-ready";
-import { startVippsCheckout } from "@/lib/vipps-checkout-client";
-import { useCart } from "@poynt/cart";
+import {
+  CheckoutRequestError,
+  startVippsCheckout,
+} from "@/lib/vipps-checkout-client";
+import { type AppliedCoupon, useCart } from "@poynt/cart";
 import {
   Button,
   CartLineItem,
@@ -19,13 +22,6 @@ import { ArrowLeft, ShieldCheck, ShoppingBag, Tag, X, Zap } from "lucide-react";
 import Link from "next/link";
 import { type FormEvent, useState } from "react";
 
-type AppliedCoupon = {
-  code: string;
-  percentOff: number | null;
-  amountOffKr: number | null;
-  label: string;
-};
-
 /** Rabatt i kr ut fra dagens delsum — så den følger antalsendringer. */
 function couponDiscount(
   coupon: AppliedCoupon | null,
@@ -38,16 +34,25 @@ function couponDiscount(
 }
 
 export default function CartPage() {
-  const { items, removeItem, updateQuantity, total, count } = useCart();
+  const {
+    items,
+    removeItem,
+    removeProducts,
+    updateQuantity,
+    total,
+    count,
+    coupon,
+    setCoupon,
+  } = useCart();
   const ready = useCartReady();
   const [isLoading, setIsLoading] = useState(false);
   const [vippsLoading, setVippsLoading] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
   // Nyhetsbrev-samtykke: må starte uavkrysset (aktivt samtykke, mfl. § 15)
   const [newsletterOptIn, setNewsletterOptIn] = useState(false);
 
-  // Rabattkode
+  // Rabattkode (selve koden bor i cart-storen så alle kasser ser den)
   const [couponInput, setCouponInput] = useState("");
-  const [coupon, setCoupon] = useState<AppliedCoupon | null>(null);
   const [couponError, setCouponError] = useState<string | null>(null);
   const [couponLoading, setCouponLoading] = useState(false);
 
@@ -96,6 +101,7 @@ export default function CartPage() {
 
   const handleCheckout = async () => {
     setIsLoading(true);
+    setCheckoutError(null);
     try {
       const response = await fetch("/api/checkout", {
         method: "POST",
@@ -116,26 +122,42 @@ export default function CartPage() {
       const data = await response.json();
 
       if (!response.ok) {
+        // Slettede/utsolgte produkter ryddes ut av kurven, så neste forsøk går.
+        if (Array.isArray(data.unavailableIds) && data.unavailableIds.length) {
+          removeProducts(data.unavailableIds);
+        }
         throw new Error(data.error || "Noe gikk galt");
       }
 
-      if (data.url) {
-        window.location.href = data.url;
+      if (!data.url) {
+        throw new Error("Kassen svarte uten betalingslenke");
       }
+      window.location.href = data.url;
     } catch (error) {
       console.error("Checkout error:", error);
-      alert(error instanceof Error ? error.message : "Noe gikk galt");
+      setCheckoutError(
+        error instanceof Error ? error.message : "Noe gikk galt"
+      );
       setIsLoading(false);
     }
   };
 
   const handleVippsCheckout = async () => {
     setVippsLoading(true);
+    setCheckoutError(null);
     try {
       await startVippsCheckout(items, coupon?.code, newsletterOptIn);
     } catch (error) {
       console.error("Vipps checkout error:", error);
-      alert(error instanceof Error ? error.message : "Noe gikk galt");
+      if (
+        error instanceof CheckoutRequestError &&
+        error.unavailableIds.length
+      ) {
+        removeProducts(error.unavailableIds);
+      }
+      setCheckoutError(
+        error instanceof Error ? error.message : "Noe gikk galt"
+      );
       setVippsLoading(false);
     }
   };
@@ -330,11 +352,20 @@ export default function CartPage() {
                 </span>
               </label>
 
+              {checkoutError && (
+                <p
+                  role="alert"
+                  className="mt-4 rounded-xl bg-destructive/10 px-3 py-2 text-destructive text-sm"
+                >
+                  {checkoutError}
+                </p>
+              )}
+
               <Button
                 size="lg"
                 className="mt-4 w-full"
                 onClick={handleCheckout}
-                disabled={isLoading || vippsLoading}
+                disabled={isLoading || vippsLoading || !ready}
               >
                 {isLoading ? "Laster..." : "Gå til kassen"}
               </Button>
@@ -344,7 +375,7 @@ export default function CartPage() {
                 stretched
                 className="mt-3"
                 loading={vippsLoading}
-                disabled={isLoading}
+                disabled={isLoading || !ready}
                 onClick={handleVippsCheckout}
               />
 

@@ -1,5 +1,6 @@
 "use server";
 
+import { requireAdmin } from "@/lib/require-admin";
 import { db, eq, sql } from "@poynt/planner-db";
 import { plannerSubscription } from "@poynt/planner-db/schema";
 import { getStripe } from "@poynt/stripe";
@@ -10,6 +11,7 @@ export async function changeMemberTier(
   userId: string,
   newTier: MembershipTier
 ) {
+  await requireAdmin();
   await db
     .update(plannerSubscription)
     .set({ tier: newTier, updatedAt: sql`now()` })
@@ -33,6 +35,7 @@ export async function changeMemberTier(
 }
 
 export async function deactivateMember(userId: string) {
+  await requireAdmin();
   const [sub] = await db
     .select()
     .from(plannerSubscription)

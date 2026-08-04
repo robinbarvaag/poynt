@@ -27,8 +27,10 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ ok: true });
-  } catch {
-    // Stille feil — en mislykket teller skal aldri påvirke brukeropplevelsen.
+  } catch (error) {
+    // Stille mot brukeren — en mislykket teller skal aldri påvirke
+    // opplevelsen — men logg serverside, ellers er feilene usynlige.
+    console.error("Radar-visningsteller feilet:", error);
     return NextResponse.json({ ok: false }, { status: 200 });
   }
 }

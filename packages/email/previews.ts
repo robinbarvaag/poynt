@@ -111,12 +111,16 @@ export async function renderEmailPreviews(options?: {
     },
     {
       key: "waitlist-confirmation",
-      label: "Venteliste-bekreftelse",
+      label: "Venteliste-bekreftelse (reserve)",
       group: "Til kunden",
       description:
-        "Sendes til den som setter seg på ventelista for boka (skjemaet på landingssiden).",
+        "Reserveteksten som brukes hvis et ventelisteskjema IKKE har en egen e-post under «E-poster ved innsending». Har skjemaet en egen (se «Skjema-bekreftelser»), er det den som sendes — og den redigerer du på skjemaet.",
       subject: "Du står på ventelista for «Verdifull vekst»",
       to: "Den påmeldte",
+      editHint: {
+        label: "Sett opp egen e-post på skjemaet under Skjemaer",
+        href: "/admin/collections/forms",
+      },
       html: await render(
         WaitlistConfirmationEmail({
           name: "Kari",
@@ -130,7 +134,7 @@ export async function renderEmailPreviews(options?: {
       label: "Nyhetsbrev",
       group: "Til kunden",
       description:
-        "Ramma rundt nyhetsbrevet. Selve innholdet skriver du i admin under Nyhetsbrev — dette er bare et eksempel.",
+        "Ramma rundt nyhetsbrevet — dette er bare et eksempel. Selve innholdet skriver du under Nyhetsbrev, der «Forhåndsvisning»-fanen viser akkurat ditt nyhetsbrev mens du skriver.",
       subject: "Tre ting vi har lært om synlighet",
       to: "Alle på nyhetsbrevlista",
       editHint: {

@@ -42,6 +42,12 @@ interface HandleWaitlistParams {
   formId: string | number;
   /** Rådataene fra innsendingen. */
   get: (names: string[]) => string | undefined;
+  /**
+   * Om skjemaet har en egen bekreftelse under «E-poster ved innsending» —
+   * da sender form-builder-pluginen den (i Poynt-ramma via beforeEmail), og
+   * standardbekreftelsen i koden hoppes over. Varselet til Poynt sendes uansett.
+   */
+  hasOwnConfirmation?: boolean;
 }
 
 /**
@@ -55,6 +61,7 @@ export async function handleWaitlistSubmission({
   formTitle,
   formId,
   get,
+  hasOwnConfirmation,
 }: HandleWaitlistParams): Promise<void> {
   const email = get(["epost", "email", "e-post"]);
   if (!email) return;
@@ -94,6 +101,7 @@ export async function handleWaitlistSubmission({
     title: subject,
     newsletter: wantsNewsletter,
     totalSignups,
+    skipConfirmation: hasOwnConfirmation,
   });
 
   try {

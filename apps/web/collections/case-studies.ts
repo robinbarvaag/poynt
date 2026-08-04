@@ -29,13 +29,15 @@ export const CaseStudies: CollectionConfig = {
     group: "Innhold",
     description:
       "Tidløst salgsbevis om ÉN kunde: utfordringen → hva vi gjorde → resultatet. Vises på /kundehistorier og lenkes fra salgssidene. Fagstoff, tips og nyheter hører hjemme i Blogginnlegg.",
+    // Begge går via /api/preview som slår på draft mode (krever innlogget
+    // admin) — ellers viser «Preview» bare den publiserte versjonen.
     livePreview: {
       url: ({ data }) =>
-        `${process.env.NEXT_PUBLIC_URL || "http://localhost:3000"}/kundehistorier/${data?.slug}`,
+        `${process.env.NEXT_PUBLIC_URL || "http://localhost:3000"}/api/preview?path=${encodeURIComponent(`/kundehistorier/${data?.slug}`)}`,
     },
     preview: (doc) =>
       doc?.slug
-        ? `${process.env.NEXT_PUBLIC_URL || "http://localhost:3000"}/kundehistorier/${doc.slug}`
+        ? `${process.env.NEXT_PUBLIC_URL || "http://localhost:3000"}/api/preview?path=${encodeURIComponent(`/kundehistorier/${doc.slug}`)}`
         : null,
   },
   versions: {

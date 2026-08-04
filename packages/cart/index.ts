@@ -20,6 +20,14 @@ export interface CartItem {
   maxQuantity?: number;
 }
 
+/** Rabattkode validert av serveren (/api/coupon) — følger kurven i alle kasser. */
+export interface AppliedCoupon {
+  code: string;
+  percentOff: number | null;
+  amountOffKr: number | null;
+  label: string;
+}
+
 /** Det den som legger i kurven oppgir – `key`/`quantity` blir utledet. */
 export interface AddToCartInput {
   id: string;
@@ -42,11 +50,16 @@ function clampQuantity(quantity: number, max?: number): number {
 
 interface CartState {
   items: CartItem[];
+  /** Aktiv rabattkode — settes fra handlekurv-siden, leses av alle kasser. */
+  coupon: AppliedCoupon | null;
   /** Legg til (eller slå sammen med eksisterende linje av samme variant). */
   addItem: (input: AddToCartInput, quantity?: number) => void;
   /** Sett eksakt antall på en linje (klemt mot maxQuantity). */
   updateQuantity: (key: string, quantity: number) => void;
   removeItem: (key: string) => void;
+  setCoupon: (coupon: AppliedCoupon | null) => void;
+  /** Fjern linjer for gitte produkt-id-er (f.eks. produkter som er borte). */
+  removeProducts: (ids: string[]) => void;
   clearCart: () => void;
   /** Sum (pris × antall) for hele kurven. */
   total: () => number;
@@ -58,6 +71,7 @@ export const useCart = create<CartState>()(
   persist(
     (set, get) => ({
       items: [],
+      coupon: null,
       addItem: (input, quantity = 1) => {
         set((state) => {
           const key = lineKey(input.id, input.variantValue);
@@ -111,7 +125,13 @@ export const useCart = create<CartState>()(
           items: state.items.filter((i) => i.key !== key),
         }));
       },
-      clearCart: () => set({ items: [] }),
+      setCoupon: (coupon) => set({ coupon }),
+      removeProducts: (ids) => {
+        set((state) => ({
+          items: state.items.filter((i) => !ids.includes(i.id)),
+        }));
+      },
+      clearCart: () => set({ items: [], coupon: null }),
       total: () =>
         get().items.reduce((sum, item) => sum + item.price * item.quantity, 0),
       count: () => get().items.reduce((sum, item) => sum + item.quantity, 0),

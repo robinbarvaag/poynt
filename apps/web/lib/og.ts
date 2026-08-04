@@ -95,7 +95,38 @@ export function ogStatusText(
   return `${hentet} Mangler: ${missing.join(", ")} – fyll inn manuelt for et rikere kort.`;
 }
 
+/**
+ * Enkel SSRF-vakt: kun http(s), og aldri mot localhost/interne nett. Hindrer
+ * at en URL i admin (eller /api/og) brukes til å lese interne tjenester.
+ * Hostnavn som DNS-peker internt fanges ikke — dette er en rimelig brems,
+ * ikke en vanntett garanti.
+ */
+export function isFetchableUrl(url: string): boolean {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return false;
+  }
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return false;
+
+  const host = parsed.hostname.toLowerCase();
+  if (host === "localhost" || host.endsWith(".localhost") || host === "[::1]") {
+    return false;
+  }
+  // Interne IPv4-områder: 127/8, 10/8, 192.168/16, 172.16–31/12, 169.254/16, 0.0.0.0
+  if (
+    /^(127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|169\.254\.|0\.0\.0\.0)/.test(
+      host
+    )
+  ) {
+    return false;
+  }
+  return true;
+}
+
 export async function fetchOgMeta(url: string): Promise<OgMeta> {
+  if (!isFetchableUrl(url)) return {};
   try {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);

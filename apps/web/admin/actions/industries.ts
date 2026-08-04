@@ -1,5 +1,6 @@
 "use server";
 
+import { requireAdmin } from "@/lib/require-admin";
 import { db, eq, sql } from "@poynt/planner-db";
 import { plannerIndustry } from "@poynt/planner-db/schema";
 import { defaultIndustries } from "@poynt/planner-validators";
@@ -12,6 +13,7 @@ export async function createIndustry(data: {
   sortOrder?: number;
   promptHints?: string;
 }) {
+  await requireAdmin();
   const [created] = await db
     .insert(plannerIndustry)
     .values({
@@ -37,6 +39,7 @@ export async function updateIndustry(
     promptHints?: string;
   }
 ) {
+  await requireAdmin();
   const [updated] = await db
     .update(plannerIndustry)
     .set({ ...data, updatedAt: sql`now()` })
@@ -46,11 +49,13 @@ export async function updateIndustry(
 }
 
 export async function deleteIndustry(id: string) {
+  await requireAdmin();
   await db.delete(plannerIndustry).where(eq(plannerIndustry.id, id));
   return { success: true };
 }
 
 export async function toggleIndustryActive(id: string) {
+  await requireAdmin();
   const [current] = await db
     .select({ isActive: plannerIndustry.isActive })
     .from(plannerIndustry)
@@ -69,6 +74,7 @@ export async function toggleIndustryActive(id: string) {
 }
 
 export async function seedIndustries() {
+  await requireAdmin();
   const existing = await db
     .select({ id: plannerIndustry.id })
     .from(plannerIndustry)

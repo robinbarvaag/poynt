@@ -74,6 +74,35 @@ const GUIDE_DIMENSIONS: Dimension[] = [
   TONE_DIMENSION,
 ];
 
+const COURSE_DIMENSIONS: Dimension[] = [
+  {
+    key: "laeringsutbytte",
+    label: "Læringsutbytte",
+    spm: "Er det tydelig hvem kurset er for og hva medlemmet KAN etter å ha fullført — ikke bare hva det handler om? Vagt utbytte («lær mer om …») trekker ned.",
+  },
+  {
+    key: "progresjon",
+    label: "Progresjon og oppbygging",
+    spm: "Bygger modulene logisk på hverandre fra enkelt til vanskeligere, med et tydelig tema per modul? Kan medlemmet se en rød tråd fra første til siste leksjon?",
+  },
+  {
+    key: "leksjonsstoerrelse",
+    label: "Leksjonsstørrelse",
+    spm: "Er leksjonene korte og fokusert på én ting hver — heller ti på fem minutter enn tre på tjue? Leksjoner som prøver å dekke alt på en gang trekker ned.",
+  },
+  {
+    key: "praksis",
+    label: "Gjør-selv og praksis",
+    spm: "Får medlemmet faktisk GJØRE noe — gjør-selv-steg, oppgaver, ting å prøve i egen bedrift — eller er kurset bare passiv video/tekst? [Ingen gjør-selv-steg] gjennom hele kurset trekker tydelig ned.",
+  },
+  {
+    key: "ressurser",
+    label: "Ressurser og gjenbruk",
+    spm: "Finnes det maler, sjekklister eller filer medlemmet kan laste ned og bruke etterpå? Sitter de igjen med noe konkret utover selve leksjonene?",
+  },
+  TONE_DIMENSION,
+];
+
 const PAGE_DIMENSIONS: Dimension[] = [
   {
     key: "budskap",
@@ -221,6 +250,12 @@ const CONFIGS: Record<string, CollectionReviewConfig> = {
       "Du vurderer en medlems-guide i On Poynt. Vær konkret og litt streng – en flat lenke-liste uten egen innsikt skal IKKE score høyt selv om lenkene er nyttige.",
     dimensions: GUIDE_DIMENSIONS,
     kontekst: (doc) => `Seksjon: ${(doc as Guide).section}`,
+  },
+  courses: {
+    label: "kurs",
+    rolle:
+      "Du vurderer et medlemskurs i On Poynt, bygget av moduler med leksjoner. [Modul/Leksjon]-merkene viser strukturen, [Har video]/[Ingen video] viser videobruk, [Steg]-merkene viser gjør-selv-innhold og [Ressurser]-merkene viser nedlastbart materiell. Medlemmet er en travel småbedriftseier som tar kurset for å få til noe konkret — vurder om kurset faktisk leder dem dit, ikke bare om teksten er fin.",
+    dimensions: COURSE_DIMENSIONS,
   },
   pages: {
     label: "nettside (blokk-bygget)",
@@ -383,7 +418,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           error:
-            "Mangler collection/id (guides, pages, blog-posts, case-studies, services eller products).",
+            "Mangler collection/id (guides, courses, pages, blog-posts, case-studies, services eller products).",
         },
         { status: 400 }
       );

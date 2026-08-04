@@ -1,6 +1,9 @@
 import type { Database } from "@poynt/planner-db";
-import { eq } from "@poynt/planner-db";
+import { eq, lt } from "@poynt/planner-db";
 import { plannerWebhookEvent } from "@poynt/planner-db/schema";
+
+/** Behandlede events eldre enn dette trengs ikke lenger for idempotens. */
+const RETENTION_DAYS = 60;
 
 /**
  * Prøver å kravsette (claime) et webhook-event atomisk. Returnerer true hvis
@@ -18,6 +21,17 @@ export async function claimWebhookEvent(
     .values({ id: crypto.randomUUID(), eventId, type })
     .onConflictDoNothing({ target: plannerWebhookEvent.eventId })
     .returning({ eventId: plannerWebhookEvent.eventId });
+
+  // Opportunistisk opprydding: uten dette vokser tabellen for alltid.
+  // Leverandørene retryer i dager, ikke måneder, så 60 dager er rikelig.
+  // Fire-and-forget med svelget feil — oppryddingen skal aldri velte eventet.
+  const cutoff = new Date(Date.now() - RETENTION_DAYS * 24 * 60 * 60 * 1000);
+  db.delete(plannerWebhookEvent)
+    .where(lt(plannerWebhookEvent.processedAt, cutoff))
+    .catch((error: unknown) => {
+      console.error("Opprydding av webhook-events feilet:", error);
+    });
+
   return inserted.length > 0;
 }
 

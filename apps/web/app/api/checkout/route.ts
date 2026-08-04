@@ -1,3 +1,5 @@
+import { resolveCheckoutItems } from "@/lib/checkout-items";
+import { resolveCoupon } from "@/lib/coupon";
 import { getSessionWithMembership } from "@/lib/membership";
 import config from "@/payload.config";
 import { stripe } from "@poynt/stripe";
@@ -6,6 +8,15 @@ import { getPayload } from "payload";
 import type Stripe from "stripe";
 
 export async function POST(req: NextRequest) {
+  const { getClientIp, rateLimit } = await import("@/lib/rate-limit");
+  const ip = getClientIp(req.headers);
+  if (!rateLimit("checkout", ip, { limit: 10, windowMs: 10 * 60_000 })) {
+    return NextResponse.json(
+      { error: "For mange forsøk. Vent litt og prøv igjen." },
+      { status: 429 }
+    );
+  }
+
   try {
     const { items, couponCode, newsletterOptIn } = await req.json();
 
@@ -19,61 +30,46 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Rabattkode → Stripe-promotion-code. Vi løyser den på serveren (aldri
-    // stol på klienten) og lar Stripe rekne ut sjølve rabatten i kassen.
-    let discounts: Stripe.Checkout.SessionCreateParams.Discount[] | undefined;
-    if (typeof couponCode === "string" && couponCode.trim()) {
-      const promos = await stripe.promotionCodes.list({
-        code: couponCode.trim(),
-        active: true,
-        limit: 1,
-      });
-      const promo = promos.data[0];
-      if (!promo || !promo.coupon.valid) {
+    const payload = await getPayload({ config });
+
+    // Delt servervalidering (samme som Vipps-kassen): produktet må finnes,
+    // være aktivt og ikke utsolgt; antall håndheves; klientpris ignoreres.
+    const resolved = await resolveCheckoutItems(payload, items);
+    if (!resolved.ok) {
+      return NextResponse.json(
+        { error: resolved.error, unavailableIds: resolved.unavailableIds },
+        { status: 400 }
+      );
+    }
+    const products = resolved.lines;
+
+    for (const p of products) {
+      if (!p.product.stripeID) {
+        console.error(`Produkt ${p.product.id} mangler Stripe-kopling`);
         return NextResponse.json(
-          { error: "Rabattkoden er ugyldig eller utløpt" },
+          { error: `«${p.product.name}» kan ikke kjøpes akkurat nå` },
           { status: 400 }
         );
       }
-      discounts = [{ promotion_code: promo.id }];
     }
 
-    const payload = await getPayload({ config });
-
-    // Valider produkt og prisar mot databasen. Variant-prisen reknast ut frå
-    // produktets variantOptions på serveren – vi stolar aldri på klientprisen.
-    const products = await Promise.all(
-      items.map(
-        async (item: { id: string; quantity: number; variant?: string }) => {
-          const product = await payload.findByID({
-            collection: "products",
-            id: item.id,
-          });
-
-          if (!product || !product.active) {
-            throw new Error(`Produkt ${item.id} er ikkje tilgjengeleg`);
-          }
-
-          if (!product.stripeID) {
-            throw new Error(`Produkt ${item.id} manglar Stripe-kopling`);
-          }
-
-          const variantOption = item.variant
-            ? (product.variantOptions ?? []).find(
-                (o) => o.label === item.variant
-              )
-            : undefined;
-          const unitPrice = product.price + (variantOption?.priceDelta ?? 0);
-
-          return {
-            product,
-            quantity: Math.max(1, Math.floor(item.quantity || 1)),
-            variant: item.variant,
-            unitPrice,
-          };
-        }
-      )
-    );
+    // Rabattkode → delt kupongmodul (samme vakter som Vipps-kassen); Stripe
+    // regner selv ut rabatten i kassen via promotion code-id-en.
+    let discounts: Stripe.Checkout.SessionCreateParams.Discount[] | undefined;
+    if (typeof couponCode === "string" && couponCode.trim()) {
+      const subtotal = products.reduce(
+        (sum, p) => sum + p.unitPrice * p.quantity,
+        0
+      );
+      const couponResult = await resolveCoupon(couponCode, subtotal);
+      if (!couponResult.ok) {
+        return NextResponse.json(
+          { error: couponResult.error },
+          { status: 400 }
+        );
+      }
+      discounts = [{ promotion_code: couponResult.coupon.promoId }];
+    }
 
     const isMembership = products.some((p) => p.product.type === "membership");
 
@@ -94,7 +90,7 @@ export async function POST(req: NextRequest) {
           price_data: {
             currency: "nok",
             product: p.product.stripeID as string,
-            unit_amount: p.product.price * 100,
+            unit_amount: Math.round(p.product.price * 100),
             recurring: {
               interval: "month" as const,
               interval_count: p.product.recurringInterval || 1,
@@ -113,6 +109,9 @@ export async function POST(req: NextRequest) {
           productType: "membership",
           tier,
           ...(authSession && { userId: authSession.user.id }),
+          // Samtykke fra handlekurven fulgte tidligere bare produktkjøp —
+          // medlemskapsveien mistet det stille.
+          ...(newsletterOptIn === true && { newsletter: "1" }),
         },
         subscription_data: {
           metadata: { tier },
@@ -161,9 +160,10 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ url: session.url });
   } catch (error) {
+    // Interne feilmeldinger (Stripe/Payload) skal ikke ut til klienten.
     console.error("Checkout error:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Noko gjekk gale" },
+      { error: "Noe gikk galt i kassen. Prøv igjen om et øyeblikk." },
       { status: 500 }
     );
   }

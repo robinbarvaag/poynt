@@ -7,7 +7,9 @@ import type { Service } from "@/payload-types";
  * tjeneste-oversikten og tjeneste-detaljsida, så «Fra … kr», «… kr / mnd» og
  * «Ta kontakt for pris» ser likt ut begge steder.
  */
-export function formatServicePrice(service: Service): string | undefined {
+export function formatServicePrice(
+  service: Pick<Service, "priceType" | "price" | "includesVat">
+): string | undefined {
   if (service.priceType === "contact") {
     return "Ta kontakt for pris";
   }

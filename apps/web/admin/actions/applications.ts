@@ -1,6 +1,7 @@
 "use server";
 
 import { canonicalizeEmail } from "@/lib/email-normalize";
+import { requireAdmin } from "@/lib/require-admin";
 import { sendMemberWelcomeEmail } from "@poynt/email";
 import { db, eq, sql } from "@poynt/planner-db";
 import {
@@ -28,6 +29,7 @@ export async function approveMembershipApplication(
   applicationId: string,
   tier: MembershipTier
 ) {
+  await requireAdmin();
   const [application] = await db
     .select()
     .from(plannerMembershipApplication)
@@ -110,6 +112,7 @@ export async function approveMembershipApplication(
  * Avslå en medlemskapssøknad.
  */
 export async function rejectMembershipApplication(applicationId: string) {
+  await requireAdmin();
   await db
     .update(plannerMembershipApplication)
     .set({ status: "rejected", reviewedAt: sql`now()`, updatedAt: sql`now()` })

@@ -1,5 +1,6 @@
 "use server";
 
+import { requireAdmin } from "@/lib/require-admin";
 import { defaultPromptTemplates } from "@poynt/planner-api";
 import { db, eq, inArray, sql } from "@poynt/planner-db";
 import { plannerPromptTemplate } from "@poynt/planner-db/schema";
@@ -13,6 +14,7 @@ export async function upsertPromptTemplate(data: {
   variables?: string[];
   isActive?: boolean;
 }) {
+  await requireAdmin();
   const [existing] = await db
     .select({ id: plannerPromptTemplate.id })
     .from(plannerPromptTemplate)
@@ -58,6 +60,7 @@ export async function upsertPromptTemplate(data: {
  * er uendret — men nå kan partner redigere dem i admin.
  */
 export async function seedPromptTemplates() {
+  await requireAdmin();
   const ids = defaultPromptTemplates.map((t) => t.id);
   const existing = await db
     .select({ id: plannerPromptTemplate.id })
@@ -96,6 +99,7 @@ export async function seedPromptTemplates() {
  * Overskriver kun den valgte malen — andre (ev. redigerte) maler røres ikke.
  */
 export async function resyncPromptTemplate(id: string) {
+  await requireAdmin();
   const def = defaultPromptTemplates.find((t) => t.id === id);
   if (!def) {
     return { success: false, notFound: true };
@@ -114,6 +118,7 @@ export async function resyncPromptTemplate(id: string) {
 }
 
 export async function togglePromptActive(id: string) {
+  await requireAdmin();
   const [current] = await db
     .select({ isActive: plannerPromptTemplate.isActive })
     .from(plannerPromptTemplate)

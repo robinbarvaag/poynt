@@ -72,17 +72,6 @@ export const ProductArchive: Block = {
       admin: { initCollapsed: true },
       fields: [
         {
-          name: "layout",
-          type: "select",
-          label: "Layout",
-          defaultValue: "grid",
-          options: [
-            { label: "Grid (3 kolonner)", value: "grid" },
-            { label: "Grid (4 kolonner)", value: "grid-4" },
-            { label: "Carousel", value: "carousel" },
-          ],
-        },
-        {
           name: "showMoreLink",
           type: "checkbox",
           label: "Vis 'Se alle produkter'-lenke",

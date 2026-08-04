@@ -1,7 +1,10 @@
 import { AdminBar } from "@/components/admin-bar";
 import { JsonLd } from "@/components/json-ld";
 import { PageHero } from "@/components/page-hero";
+import { PreviewBanner } from "@/components/preview-banner";
 import { RenderBlocks } from "@/components/render-blocks";
+import { getDraftBySlug, isDraftModeEnabled } from "@/lib/draft";
+import { isHeroBlockType } from "@/lib/kontakt-page";
 import { buildMetadata, firstHeroImage, notFoundMetadata } from "@/lib/seo";
 import { faqSchema } from "@/lib/structured-data";
 import config from "@/payload.config";
@@ -28,9 +31,8 @@ async function getPage(slug: string) {
   const pages = await payload.find({
     collection: "pages",
     where: {
-      slug: {
-        equals: slug,
-      },
+      slug: { equals: slug },
+      _status: { equals: "published" },
     },
     limit: 1,
     depth: 2,
@@ -128,7 +130,12 @@ async function PageContent({ params }: PageProps) {
     redirect(redirectInfo.destination);
   }
 
-  const page = await getPage(slug);
+  // Forhåndsvisning (via /api/preview): les siste utkast i stedet for
+  // publisert versjon. Vi er allerede bak Suspense, så runtime-lesing er ok.
+  const isDraft = await isDraftModeEnabled();
+  const page = isDraft
+    ? await getDraftBySlug("pages", slug)
+    : await getPage(slug);
 
   if (!page) {
     notFound();
@@ -136,8 +143,7 @@ async function PageContent({ params }: PageProps) {
 
   // Sjekk om første blokk er en hero - da viser vi ikke egen page hero
   const firstBlock = page.layout?.[0];
-  const hasHeroBlock =
-    firstBlock?.blockType === "hero" || firstBlock?.blockType === "bookHero";
+  const hasHeroBlock = isHeroBlockType(firstBlock?.blockType);
 
   const faqLd = faqSchema(page.faq);
 
@@ -151,6 +157,7 @@ async function PageContent({ params }: PageProps) {
   return (
     <>
       <AdminBar collection="pages" id={String(page.id)} singular="side" />
+      {isDraft && <PreviewBanner path={pathname} />}
       {faqLd && <JsonLd data={faqLd} />}
       {page.pageType === "landing" ? (
         <LandingCanvas>{body}</LandingCanvas>
@@ -166,6 +173,7 @@ export async function generateStaticParams() {
 
   const pages = await payload.find({
     collection: "pages",
+    where: { _status: { equals: "published" } },
     limit: 1000,
   });
 

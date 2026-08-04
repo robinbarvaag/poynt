@@ -47,6 +47,8 @@ import * as migration_20260731_113830 from './20260731_113830';
 import * as migration_20260803_154145 from './20260803_154145';
 import * as migration_20260803_162537 from './20260803_162537';
 import * as migration_20260804_130110 from './20260804_130110';
+import * as migration_20260804_154129 from './20260804_154129';
+import * as migration_20260804_170251_courses_quality_fields from './20260804_170251_courses_quality_fields';
 
 export const migrations = [
   {
@@ -292,6 +294,16 @@ export const migrations = [
   {
     up: migration_20260804_130110.up,
     down: migration_20260804_130110.down,
-    name: '20260804_130110'
+    name: '20260804_130110',
+  },
+  {
+    up: migration_20260804_154129.up,
+    down: migration_20260804_154129.down,
+    name: '20260804_154129',
+  },
+  {
+    up: migration_20260804_170251_courses_quality_fields.up,
+    down: migration_20260804_170251_courses_quality_fields.down,
+    name: '20260804_170251_courses_quality_fields'
   },
 ];

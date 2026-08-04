@@ -21,19 +21,21 @@ export const Pages: CollectionConfig = {
     useAsTitle: "title",
     defaultColumns: ["title", "slug", "updatedAt"],
     group: "Innhold",
+    // Begge går via /api/preview som slår på draft mode (krever innlogget
+    // admin) — ellers viser «Preview» bare den publiserte versjonen.
     livePreview: {
       url: ({ data }) => {
-        const slug = data?.slug;
-        if (slug === "forside")
-          return process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
-        return `${process.env.NEXT_PUBLIC_URL || "http://localhost:3000"}/${slug}`;
+        const base = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
+        const path = data?.slug === "forside" ? "/" : `/${data?.slug}`;
+        return `${base}/api/preview?path=${encodeURIComponent(path)}`;
       },
     },
-    // «Preview»-knapp i dokument-headeren → åpner siden på nettsiden.
+    // «Preview»-knapp i dokument-headeren → åpner utkastet på nettsiden.
     preview: (doc) => {
       const base = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
       if (!doc?.slug) return null;
-      return doc.slug === "forside" ? base : `${base}/${doc.slug}`;
+      const path = doc.slug === "forside" ? "/" : `/${doc.slug}`;
+      return `${base}/api/preview?path=${encodeURIComponent(path)}`;
     },
   },
   versions: {

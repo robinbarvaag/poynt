@@ -19,7 +19,9 @@ const ALLOWED_TYPES = new Set([
   "application/font-woff",
   "application/x-font-woff",
   "application/font-sfnt",
-  "application/octet-stream",
+  // NB: application/octet-stream er bevisst IKKE med — det ville sluppet
+  // gjennom hvilken som helst fil. Fonter uten MIME fanges av
+  // filendelse-fallbacken under i stedet.
 ]);
 // Fallback når nettleseren ikke setter en font-MIME (vanlig for .woff2/.otf).
 const ALLOWED_FONT_EXT = /\.(woff2?|ttf|otf)$/i;

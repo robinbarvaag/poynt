@@ -53,14 +53,10 @@ export default async function ServicesPage() {
   const heroTitle = pageConfig?.hero?.title || "Tjenester";
   const heroDescription =
     pageConfig?.hero?.description || "Se hva vi kan hjelpe deg med";
+  // Hele media-objektet sendes videre — PayloadImage håndterer url/alt/fokus.
   const heroImage =
-    pageConfig?.hero?.image &&
-    typeof pageConfig.hero.image === "object" &&
-    pageConfig.hero.image.url
-      ? {
-          url: pageConfig.hero.image.url,
-          alt: pageConfig.hero.image.alt ?? undefined,
-        }
+    pageConfig?.hero?.image && typeof pageConfig.hero.image === "object"
+      ? pageConfig.hero.image
       : null;
   const emptyStateText =
     pageConfig?.emptyStateText || "Ingen tjenester tilgjengelig.";

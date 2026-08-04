@@ -21,28 +21,56 @@ export const Newsletters: CollectionConfig = {
   },
   fields: [
     {
-      name: "subject",
-      type: "text",
-      required: true,
-      label: "Emne",
-      admin: {
-        description: "Emnefeltet mottakerne ser i innboksen",
-      },
-    },
-    {
-      name: "previewText",
-      type: "text",
-      label: "Forhåndsvisningstekst",
-      admin: {
-        description:
-          "Kort tekst som vises etter emnet i innboksen (valgfritt — emnet brukes hvis tomt)",
-      },
-    },
-    {
-      name: "content",
-      type: "richText",
-      required: true,
-      label: "Innhold",
+      // Fanene er kun visuelle (uten navn) — ingen endring i databasen.
+      type: "tabs",
+      tabs: [
+        {
+          label: "Innhold",
+          fields: [
+            {
+              name: "subject",
+              type: "text",
+              required: true,
+              label: "Emne",
+              admin: {
+                description: "Emnefeltet mottakerne ser i innboksen",
+              },
+            },
+            {
+              name: "previewText",
+              type: "text",
+              label: "Forhåndsvisningstekst",
+              admin: {
+                description:
+                  "Kort tekst som vises etter emnet i innboksen (valgfritt — emnet brukes hvis tomt)",
+              },
+            },
+            {
+              name: "content",
+              type: "richText",
+              required: true,
+              label: "Innhold",
+            },
+          ],
+        },
+        {
+          label: "Forhåndsvisning",
+          description:
+            "E-posten slik den ser ut for mottakerne — oppdateres mens du skriver.",
+          fields: [
+            {
+              name: "previewPanel",
+              type: "ui",
+              admin: {
+                components: {
+                  Field:
+                    "/admin/components/newsletters/newsletter-preview#NewsletterPreview",
+                },
+              },
+            },
+          ],
+        },
+      ],
     },
     {
       name: "sendPanel",

@@ -9,6 +9,15 @@ import { getPayload } from "payload";
  * eksponeres for klienten. Samtykket dokumenteres med newsletterOptIn på ordren.
  */
 export async function POST(req: NextRequest) {
+  const { getClientIp, rateLimit } = await import("@/lib/rate-limit");
+  const ip = getClientIp(req.headers);
+  if (!rateLimit("order-opt-in", ip, { limit: 10, windowMs: 10 * 60_000 })) {
+    return NextResponse.json(
+      { error: "For mange forsøk. Vent litt og prøv igjen." },
+      { status: 429 }
+    );
+  }
+
   try {
     const { reference } = await req.json();
     if (typeof reference !== "string" || !reference.startsWith("poynt-")) {

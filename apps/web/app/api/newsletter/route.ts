@@ -5,6 +5,15 @@ import {
 import { type NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
+  const { getClientIp, rateLimit } = await import("@/lib/rate-limit");
+  const ip = getClientIp(request.headers);
+  if (!rateLimit("newsletter", ip, { limit: 5, windowMs: 10 * 60_000 })) {
+    return NextResponse.json(
+      { error: "For mange forsøk. Prøv igjen om noen minutter." },
+      { status: 429 }
+    );
+  }
+
   try {
     const body = await request.json();
     const { email } = body;

@@ -2,6 +2,7 @@ import { ClearCart } from "@/components/clear-cart";
 import { NewsletterOptIn } from "@/components/newsletter-opt-in";
 import { getVippsPayment } from "@/lib/vipps";
 import config from "@/payload.config";
+import { stripe } from "@poynt/stripe";
 import {
   Button,
   Eyebrow,
@@ -10,14 +11,20 @@ import {
   Heading,
   Text,
 } from "@poynt/ui";
-import { Check, X } from "lucide-react";
+import { Check, Clock, X } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { getPayload } from "payload";
 
 interface Props {
   searchParams: Promise<{ session_id?: string; ref?: string }>;
 }
+
+export const metadata = {
+  title: "Kvittering",
+  robots: { index: false, follow: false },
+};
 
 // Kvitteringen er toppunktet av kjøpsreisen — her brukes delight-budsjettet:
 // ikonet popper inn (animate-success-pop), og tekstlinjene følger i en rolig
@@ -33,28 +40,77 @@ function maskEmail(email: string): string {
   return `${local[0]}•••${local[local.length - 1]}@${domain}`;
 }
 
+type ReceiptState = "paid" | "aborted" | "pending";
+
 export default async function ReceiptPage({ searchParams }: Props) {
-  // Stripe sender session_id (kun ved fullført betaling). Vipps sender ref
-  // uansett utfall — så for Vipps må vi sjekke betalingsstatusen før vi
-  // feirer. Innholdet på siden redigeres i admin («Kasse og kvittering»).
+  // Stripe sender session_id, Vipps sender ref. Begge VERIFISERES før vi
+  // feirer — uten gyldig referanse finnes det ingen kvittering å vise, og da
+  // omdirigeres det til forsiden (en blind /kvittering-visning skal aldri vise
+  // suksess eller tømme handlekurven). Innholdet redigeres i admin.
   const { session_id: sessionId, ref } = await searchParams;
   const reference = sessionId ?? ref;
 
   await connection();
 
-  let aborted = false;
-  if (ref && !sessionId) {
-    try {
-      const payment = await getVippsPayment(ref);
-      aborted = payment.state !== "AUTHORIZED";
-    } catch (error) {
-      // Klarer vi ikke slå opp betalingen, viser vi suksess — webhooken er
-      // uansett kilden til sannhet for ordren.
-      console.error("Kvittering: klarte ikke hente Vipps-betaling", error);
-    }
+  if (!reference) {
+    redirect("/");
   }
 
   const payload = await getPayload({ config });
+
+  let state: ReceiptState = "pending";
+  if (sessionId) {
+    // Stripe: slå opp sesjonen og sjekk at den faktisk er betalt. En ugyldig
+    // eller påfunnet session_id skal ikke gi en suksess-side.
+    try {
+      const session = await stripe.checkout.sessions.retrieve(sessionId);
+      state =
+        session.payment_status === "paid" ||
+        session.payment_status === "no_payment_required"
+          ? "paid"
+          : "pending";
+    } catch (error) {
+      console.error("Kvittering: ugyldig Stripe-session", error);
+      redirect("/");
+    }
+  } else if (ref) {
+    // Vipps: ordren i Payload er kilden til sannhet (webhooken setter status).
+    // Er webhooken ikke ferdig ennå, spør vi Vipps direkte — og feiler vi der,
+    // viser vi «behandles» i stedet for å feire i blinde.
+    const orders = await payload.find({
+      collection: "orders",
+      where: { vippsReference: { equals: ref } },
+      limit: 1,
+      depth: 0,
+    });
+    const order = orders.docs[0];
+    if (!order) {
+      redirect("/");
+    }
+
+    if (order.status === "paid") {
+      state = "paid";
+    } else if (order.status === "cancelled") {
+      state = "aborted";
+    } else {
+      try {
+        const payment = await getVippsPayment(ref);
+        if (payment.state === "AUTHORIZED") {
+          state = "paid";
+        } else if (
+          payment.state === "ABORTED" ||
+          payment.state === "EXPIRED" ||
+          payment.state === "TERMINATED"
+        ) {
+          state = "aborted";
+        }
+      } catch (error) {
+        console.error("Kvittering: klarte ikke hente Vipps-betaling", error);
+      }
+    }
+  }
+
+  const aborted = state === "aborted";
   const settings = await payload
     .findGlobal({ slug: "checkout-settings" })
     .catch(() => null);
@@ -63,7 +119,7 @@ export default async function ReceiptPage({ searchParams }: Props) {
   // nyhetsbrev-påmelding her i stedet, hvis ordren ikke allerede har samtykke.
   let newsletterPrompt: { reference: string; maskedEmail: string } | null =
     null;
-  if (ref && !aborted) {
+  if (ref && state === "paid") {
     const orders = await payload.find({
       collection: "orders",
       where: { vippsReference: { equals: ref } },
@@ -81,34 +137,47 @@ export default async function ReceiptPage({ searchParams }: Props) {
     }
   }
 
-  const content = aborted
-    ? {
-        eyebrow: settings?.cancelledEyebrow || "Ikke fullført",
-        title: settings?.cancelledTitle || "Betalingen ble avbrutt",
-        text:
-          settings?.cancelledText ||
-          "Ingen penger er trukket, og handlekurven din er urørt. Du kan prøve igjen når du vil.",
-        primaryLabel:
-          settings?.cancelledPrimaryCtaLabel || "Tilbake til handlekurven",
-        primaryUrl: settings?.cancelledPrimaryCtaUrl || "/handlekurv",
-        secondaryLabel: settings?.cancelledSecondaryCtaLabel || "Kontakt oss",
-        secondaryUrl: settings?.cancelledSecondaryCtaUrl || "/kontakt",
-      }
-    : {
-        eyebrow: settings?.successEyebrow || "Bekreftet",
-        title: settings?.successTitle || "Takk for kjøpet!",
-        text:
-          settings?.successText ||
-          "Ordren din er bekreftet, og en ordrebekreftelse er på vei til innboksen din.",
-        primaryLabel: settings?.successPrimaryCtaLabel || "Se flere produkter",
-        primaryUrl: settings?.successPrimaryCtaUrl || "/produkter",
-        secondaryLabel: settings?.successSecondaryCtaLabel || "Til forsiden",
-        secondaryUrl: settings?.successSecondaryCtaUrl || "/",
-      };
+  const content =
+    state === "aborted"
+      ? {
+          eyebrow: settings?.cancelledEyebrow || "Ikke fullført",
+          title: settings?.cancelledTitle || "Betalingen ble avbrutt",
+          text:
+            settings?.cancelledText ||
+            "Ingen penger er trukket, og handlekurven din er urørt. Du kan prøve igjen når du vil.",
+          primaryLabel:
+            settings?.cancelledPrimaryCtaLabel || "Tilbake til handlekurven",
+          primaryUrl: settings?.cancelledPrimaryCtaUrl || "/handlekurv",
+          secondaryLabel: settings?.cancelledSecondaryCtaLabel || "Kontakt oss",
+          secondaryUrl: settings?.cancelledSecondaryCtaUrl || "/kontakt",
+        }
+      : state === "pending"
+        ? {
+            eyebrow: "Behandles",
+            title: "Betalingen bekreftes",
+            text: "Vi venter på endelig bekreftelse fra betalingsleverandøren. Du får ordrebekreftelsen på e-post straks alt er i boks — det tar vanligvis under et minutt.",
+            primaryLabel: "Til forsiden",
+            primaryUrl: "/",
+            secondaryLabel: "Kontakt oss",
+            secondaryUrl: "/kontakt",
+          }
+        : {
+            eyebrow: settings?.successEyebrow || "Bekreftet",
+            title: settings?.successTitle || "Takk for kjøpet!",
+            text:
+              settings?.successText ||
+              "Ordren din er bekreftet, og en ordrebekreftelse er på vei til innboksen din.",
+            primaryLabel:
+              settings?.successPrimaryCtaLabel || "Se flere produkter",
+            primaryUrl: settings?.successPrimaryCtaUrl || "/produkter",
+            secondaryLabel:
+              settings?.successSecondaryCtaLabel || "Til forsiden",
+            secondaryUrl: settings?.successSecondaryCtaUrl || "/",
+          };
 
   return (
     <div className="flex min-h-[75vh] items-center justify-center px-4 py-16">
-      {!aborted && <ClearCart />}
+      {state === "paid" && <ClearCart />}
       <div className="relative w-full max-w-2xl overflow-hidden rounded-3xl border border-border bg-card px-6 py-16 text-center shadow-sm sm:px-12">
         <FloatingShapes variant={aborted ? "subtle" : "default"} />
         <GridPattern fade className="text-primary/10" />
@@ -124,6 +193,8 @@ export default async function ReceiptPage({ searchParams }: Props) {
             >
               {aborted ? (
                 <X className="size-9" strokeWidth={2.5} />
+              ) : state === "pending" ? (
+                <Clock className="size-9" strokeWidth={2.5} />
               ) : (
                 <Check className="size-9" strokeWidth={2.5} />
               )}

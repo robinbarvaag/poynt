@@ -1,6 +1,6 @@
 import { AdminBar } from "@/components/admin-bar";
 import { JsonLd } from "@/components/json-ld";
-import { ProductDetailClient } from "@/components/product-detail";
+import { ProductDetail } from "@/components/product-detail";
 import { toProductGridItem } from "@/lib/product";
 import { SITE_URL, buildMetadata, notFoundMetadata } from "@/lib/seo";
 import { breadcrumbSchema, productSchema } from "@/lib/structured-data";
@@ -132,10 +132,7 @@ async function ProductPageContent({ params }: ProductPageProps) {
         singular="produkt"
       />
       <JsonLd data={jsonLd} />
-      <ProductDetailClient
-        product={product}
-        relatedProducts={relatedProducts}
-      />
+      <ProductDetail product={product} relatedProducts={relatedProducts} />
     </>
   );
 }

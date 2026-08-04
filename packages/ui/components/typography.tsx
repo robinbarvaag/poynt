@@ -108,7 +108,13 @@ function Heading({
   customStyles,
   ...props
 }: HeadingProps) {
-  const Comp = asChild ? Slot : variant || "h1";
+  // `size` uten `variant` må også styre selve taggen — ellers rendrer
+  // <Heading size="h2"> en <h1>, og sider får flere h1-er.
+  const sizeTag =
+    typeof size === "string" && /^h[1-4]/.test(size)
+      ? (`h${size[1]}` as "h1" | "h2" | "h3" | "h4")
+      : null;
+  const Comp = asChild ? Slot : variant || sizeTag || "h1";
 
   return (
     <Comp

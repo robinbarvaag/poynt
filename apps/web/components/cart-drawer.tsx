@@ -3,7 +3,10 @@
 import { VippsButton } from "@/components/vipps-button";
 import { formatPrice } from "@/lib/format";
 import { useCartReady } from "@/lib/use-cart-ready";
-import { startVippsCheckout } from "@/lib/vipps-checkout-client";
+import {
+  CheckoutRequestError,
+  startVippsCheckout,
+} from "@/lib/vipps-checkout-client";
 import { useCart, useCartUi } from "@poynt/cart";
 import { Button, CartDrawer as CartDrawerShell, CartLineItem } from "@poynt/ui";
 import Link from "next/link";
@@ -27,20 +30,39 @@ export function CartDrawer() {
   // draweren som kjøpsbekreftelse via samme store.
   const { open, setOpen } = useCartUi();
   const ready = useCartReady();
-  const { items, removeItem, updateQuantity, clearCart, total, count } =
-    useCart();
+  const {
+    items,
+    removeItem,
+    removeProducts,
+    updateQuantity,
+    clearCart,
+    total,
+    count,
+    coupon,
+  } = useCart();
   const [vippsLoading, setVippsLoading] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   // Inntil klienten har montert behandler vi kurven som tom (se useCartReady).
   const cartItems = ready ? items : [];
 
   const handleVippsCheckout = async () => {
     setVippsLoading(true);
+    setCheckoutError(null);
     try {
-      await startVippsCheckout(items);
+      // Rabattkoden fra handlekurv-siden følger med (bor i cart-storen).
+      await startVippsCheckout(items, coupon?.code);
     } catch (error) {
       console.error("Vipps checkout error:", error);
-      alert(error instanceof Error ? error.message : "Noe gikk galt");
+      if (
+        error instanceof CheckoutRequestError &&
+        error.unavailableIds.length
+      ) {
+        removeProducts(error.unavailableIds);
+      }
+      setCheckoutError(
+        error instanceof Error ? error.message : "Noe gikk galt"
+      );
       setVippsLoading(false);
     }
   };
@@ -58,6 +80,14 @@ export function CartDrawer() {
         onClear={clearCart}
         checkout={
           <div className="space-y-2">
+            {checkoutError && (
+              <p
+                role="alert"
+                className="rounded-xl bg-destructive/10 px-3 py-2 text-destructive text-sm"
+              >
+                {checkoutError}
+              </p>
+            )}
             <Button className="w-full" size="lg" asChild>
               <Link href="/handlekurv" onClick={() => setOpen(false)}>
                 Gå til kassen

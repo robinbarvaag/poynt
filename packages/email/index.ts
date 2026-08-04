@@ -311,7 +311,11 @@ export async function subscribeToNewsletter(
   }
 }
 
-async function renderNewsletterHtml(params: {
+/**
+ * Render nyhetsbrevet (Poynt-ramma rundt ferdig richtext-HTML). Brukes både ved
+ * utsending og av «Forhåndsvisning»-fanen på Nyhetsbrev-dokumentet i admin.
+ */
+export async function renderNewsletterHtml(params: {
   preview: string;
   contentHtml: string;
   unsubscribeUrl: string;
@@ -319,6 +323,20 @@ async function renderNewsletterHtml(params: {
   const { render } = await import("@react-email/render");
   const { default: NewsletterEmail } = await import("./templates/newsletter");
   return render(NewsletterEmail(params));
+}
+
+/**
+ * Render en skjema-e-post (Skjemaer → «E-poster ved innsending») i Poynt-ramma.
+ * Brukes av beforeEmail-kroken i payload.config og av forhåndsvisningen i
+ * admin, slik at det partneren setter opp selv ser ut som resten av e-postene.
+ */
+export async function renderFormEmailHtml(params: {
+  preview: string;
+  contentHtml: string;
+}): Promise<string> {
+  const { render } = await import("@react-email/render");
+  const { default: FormEmail } = await import("./templates/form-email");
+  return render(FormEmail(params));
 }
 
 /**
@@ -347,19 +365,43 @@ export async function sendNewsletterTest(params: {
 }
 
 /**
- * Opprett og send nyhetsbrevet som en Resend Broadcast til hele audiencen
- * (RESEND_AUDIENCE_ID). Resend håndterer avmelding per mottaker via
- * `{{{RESEND_UNSUBSCRIBE_URL}}}`-plassholderen i malen.
+ * Målet for nyhetsbrev-broadcasts. Nyere Resend-kontoer har innebygde
+ * segmenter — da slår vi opp standard-segmentet automatisk, og ingen env
+ * trengs. RESEND_AUDIENCE_ID beholdes som overstyring for eldre kontoer
+ * (audienceId er deprecated hos Resend til fordel for segmentId).
+ * Returnerer null hvis ingen målgruppe finnes (eller API-et feiler).
+ */
+export async function resolveBroadcastTarget(): Promise<
+  { audienceId: string } | { segmentId: string } | null
+> {
+  const configured = process.env.RESEND_AUDIENCE_ID;
+  if (configured) return { audienceId: configured };
+
+  try {
+    const segments = await getResend().segments.list();
+    const first = segments.data?.data?.[0];
+    return first ? { segmentId: first.id } : null;
+  } catch (error) {
+    console.error("Klarte ikke hente Resend-segmenter:", error);
+    return null;
+  }
+}
+
+/**
+ * Opprett og send nyhetsbrevet som en Resend Broadcast til hele lista
+ * (standard-segmentet, ev. RESEND_AUDIENCE_ID for eldre kontoer). Resend
+ * håndterer avmelding per mottaker via `{{{RESEND_UNSUBSCRIBE_URL}}}`-
+ * plassholderen i malen.
  */
 export async function sendNewsletterBroadcast(params: {
   subject: string;
   preview: string;
   contentHtml: string;
 }): Promise<{ broadcastId: string }> {
-  const audienceId = process.env.RESEND_AUDIENCE_ID;
-  if (!audienceId) {
+  const target = await resolveBroadcastTarget();
+  if (!target) {
     throw new Error(
-      "RESEND_AUDIENCE_ID er ikke satt — opprett en Audience i Resend-dashboardet først"
+      "Fant ingen mottakerliste i Resend — sjekk at kontoen har et segment (eller sett RESEND_AUDIENCE_ID)"
     );
   }
 
@@ -370,7 +412,7 @@ export async function sendNewsletterBroadcast(params: {
   });
 
   const created = await getResend().broadcasts.create({
-    audienceId,
+    ...target,
     from: buildFrom("Poynt"),
     subject: params.subject,
     html,
@@ -448,7 +490,9 @@ export async function sendContactEmails(params: {
 /**
  * Send e-postene som hører til en venteliste-påmelding: en branded bekreftelse
  * til den som meldte seg på, og et kort varsel til Poynt (CONTACT_EMAIL).
- * No-op hvis RESEND_API_KEY mangler.
+ * Har skjemaet en egen bekreftelse under «E-poster ved innsending», sender
+ * form-builder-pluginen den i stedet — sett da `skipConfirmation` slik at den
+ * påmeldte ikke får to bekreftelser. No-op hvis RESEND_API_KEY mangler.
  */
 export async function sendWaitlistEmails(params: {
   /** Varsel-mottakere — overstyrer CONTACT_EMAIL (fra admin-innstillingen). */
@@ -461,29 +505,33 @@ export async function sendWaitlistEmails(params: {
   newsletter?: boolean;
   /** Antall påmeldte totalt — tas med i varselet til Poynt. */
   totalSignups?: number;
+  /** Hopp over bekreftelsen til den påmeldte (skjemaet har sin egen). */
+  skipConfirmation?: boolean;
 }): Promise<void> {
   if (!process.env.RESEND_API_KEY) return;
 
   const { render } = await import("@react-email/render");
-  const { default: WaitlistConfirmationEmail } = await import(
-    "./templates/waitlist-confirmation"
-  );
 
   const from = buildFrom("Poynt");
 
-  const confirmationHtml = await render(
-    WaitlistConfirmationEmail({
-      name: params.name,
-      title: params.title,
-      newsletter: params.newsletter,
-    })
-  );
-  await sendEmail({
-    from,
-    to: params.email,
-    subject: `Du står på ventelista for «${params.title}»`,
-    html: confirmationHtml,
-  });
+  if (!params.skipConfirmation) {
+    const { default: WaitlistConfirmationEmail } = await import(
+      "./templates/waitlist-confirmation"
+    );
+    const confirmationHtml = await render(
+      WaitlistConfirmationEmail({
+        name: params.name,
+        title: params.title,
+        newsletter: params.newsletter,
+      })
+    );
+    await sendEmail({
+      from,
+      to: params.email,
+      subject: `Du står på ventelista for «${params.title}»`,
+      html: confirmationHtml,
+    });
+  }
 
   const notifyTo = resolveNotifyTo(params.to);
   if (notifyTo) {
@@ -514,27 +562,6 @@ export async function sendWaitlistEmails(params: {
       html: notificationHtml,
     });
   }
-}
-
-/**
- * Send welcome email to new member with magic link login.
- * @deprecated Use sendMemberWelcomeEmail for membership subscriptions
- */
-export async function sendWelcomeEmail(email: string, magicLinkUrl: string) {
-  if (!process.env.RESEND_API_KEY) return;
-
-  await sendEmail({
-    from: buildFrom("On Poynt"),
-    to: email,
-    subject: "Velkommen til On Poynt!",
-    html: `
-      <h1>Velkommen til On Poynt!</h1>
-      <p>Takk for at du ble medlem. Du har nå tilgang til On Poynt-plattformen.</p>
-      <p>Klikk på lenken under for å komme i gang:</p>
-      <p><a href="${magicLinkUrl}" style="display:inline-block;padding:12px 24px;background:#2563eb;color:#fff;text-decoration:none;border-radius:6px;">Gå til On Poynt</a></p>
-      <p style="color:#666;font-size:12px;">Denne lenken utløper om 10 minutter.</p>
-    `,
-  });
 }
 
 /**

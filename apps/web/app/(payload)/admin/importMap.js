@@ -35,6 +35,7 @@ import { StockMediaPicker as StockMediaPicker_7d8c930913c9c09e14d244ff8c96b4e3 }
 import { GenerateAltButton as GenerateAltButton_040810ca926965e5b8a67fcc6e0594ab } from '../../../admin/components/media/generate-alt-button'
 import { FolderTableCell as FolderTableCell_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 import { FolderField as FolderField_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
+import { NewsletterPreview as NewsletterPreview_34919c8e80fce11b54833d79b19e2329 } from '../../../admin/components/newsletters/newsletter-preview'
 import { SendNewsletterPanel as SendNewsletterPanel_75d3fa918eb52ceef0f5f7d7e08ab991 } from '../../../admin/components/newsletters/send-newsletter-panel'
 import { BookmarkOgFetch as BookmarkOgFetch_62526a99516db3c8451d3b97a5d7d286 } from '../../../admin/components/guides/bookmark-og-fetch'
 import { LinkToDoc as LinkToDoc_2e9be70cd13299dd4a11a5bd739a5a3c } from '@payloadcms/plugin-stripe/client'
@@ -43,6 +44,7 @@ import { FolderTypeField as FolderTypeField_2b8867833a34864a02ddf429b0728a40 } f
 import { LinkRowLabel as LinkRowLabel_f0fd4bee3885f2a3c8ca119ef52b5ffe } from '../../../admin/components/row-labels'
 import { ColumnRowLabel as ColumnRowLabel_f0fd4bee3885f2a3c8ca119ef52b5ffe } from '../../../admin/components/row-labels'
 import { OnPoyntNavGroup as OnPoyntNavGroup_cbdd0274d832c585cca0ce893b25cc1e } from '../../../admin/components/on-poynt-nav-group'
+import { ContactsNavGroup as ContactsNavGroup_eaa602077b61895f57de2f69a860ec84 } from '../../../admin/components/contacts-nav-group'
 import { SetupNavGroup as SetupNavGroup_49db99829140aef9ec2dd6ea8d7e6d7f } from '../../../admin/components/setup-nav-group'
 import { RadarWidget as RadarWidget_5b7947cd224091d66f29a1ea95235d6d } from '../../../admin/components/dashboard/radar-widget'
 import { VercelBlobClientUploadHandler as VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e } from '@payloadcms/storage-vercel-blob/client'
@@ -56,6 +58,7 @@ import { IndustriesListView as IndustriesListView_2ad79ff1a29ece0a9f161db8e2982c
 import { PromptsListView as PromptsListView_3426185fdff8e8163926076d35efaa6d } from '../../../admin/views/prompts/list'
 import { SetupGuideView as SetupGuideView_96e0313c105e009331fa998e13292ea0 } from '../../../admin/views/setup-guide'
 import { EmailOverviewView as EmailOverviewView_0216373ba096c29ed484db9830ad258d } from '../../../admin/views/email/list'
+import { ContactsListView as ContactsListView_a34bc1ca742cd359ae5f7a2c8c485a86 } from '../../../admin/views/contacts/list'
 import { QualityListView as QualityListView_832dd1e739525ad72161e259683fb8d9 } from '../../../admin/views/quality/list'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
@@ -98,6 +101,7 @@ export const importMap = {
   "/admin/components/media/generate-alt-button#GenerateAltButton": GenerateAltButton_040810ca926965e5b8a67fcc6e0594ab,
   "@payloadcms/next/rsc#FolderTableCell": FolderTableCell_f9c02e79a4aed9a3924487c0cd4cafb1,
   "@payloadcms/next/rsc#FolderField": FolderField_f9c02e79a4aed9a3924487c0cd4cafb1,
+  "/admin/components/newsletters/newsletter-preview#NewsletterPreview": NewsletterPreview_34919c8e80fce11b54833d79b19e2329,
   "/admin/components/newsletters/send-newsletter-panel#SendNewsletterPanel": SendNewsletterPanel_75d3fa918eb52ceef0f5f7d7e08ab991,
   "/admin/components/guides/bookmark-og-fetch#BookmarkOgFetch": BookmarkOgFetch_62526a99516db3c8451d3b97a5d7d286,
   "@payloadcms/plugin-stripe/client#LinkToDoc": LinkToDoc_2e9be70cd13299dd4a11a5bd739a5a3c,
@@ -106,6 +110,7 @@ export const importMap = {
   "/admin/components/row-labels#LinkRowLabel": LinkRowLabel_f0fd4bee3885f2a3c8ca119ef52b5ffe,
   "/admin/components/row-labels#ColumnRowLabel": ColumnRowLabel_f0fd4bee3885f2a3c8ca119ef52b5ffe,
   "/admin/components/on-poynt-nav-group#OnPoyntNavGroup": OnPoyntNavGroup_cbdd0274d832c585cca0ce893b25cc1e,
+  "/admin/components/contacts-nav-group#ContactsNavGroup": ContactsNavGroup_eaa602077b61895f57de2f69a860ec84,
   "/admin/components/setup-nav-group#SetupNavGroup": SetupNavGroup_49db99829140aef9ec2dd6ea8d7e6d7f,
   "/admin/components/dashboard/radar-widget#RadarWidget": RadarWidget_5b7947cd224091d66f29a1ea95235d6d,
   "@payloadcms/storage-vercel-blob/client#VercelBlobClientUploadHandler": VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e,
@@ -119,6 +124,7 @@ export const importMap = {
   "/admin/views/prompts/list#PromptsListView": PromptsListView_3426185fdff8e8163926076d35efaa6d,
   "/admin/views/setup-guide#SetupGuideView": SetupGuideView_96e0313c105e009331fa998e13292ea0,
   "/admin/views/email/list#EmailOverviewView": EmailOverviewView_0216373ba096c29ed484db9830ad258d,
+  "/admin/views/contacts/list#ContactsListView": ContactsListView_a34bc1ca742cd359ae5f7a2c8c485a86,
   "/admin/views/quality/list#QualityListView": QualityListView_832dd1e739525ad72161e259683fb8d9,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

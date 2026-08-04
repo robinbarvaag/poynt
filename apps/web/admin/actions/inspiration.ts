@@ -1,6 +1,7 @@
 "use server";
 
 import { inngest } from "@/lib/inngest/client";
+import { requireAdmin } from "@/lib/require-admin";
 import { db, eq, sql } from "@poynt/planner-db";
 import {
   plannerInspirationItem,
@@ -20,6 +21,7 @@ export async function createInspirationSource(data: {
   type: InspirationSourceTypeValue;
   personName?: string;
 }) {
+  await requireAdmin();
   const [created] = await db
     .insert(plannerInspirationSource)
     .values({
@@ -42,6 +44,7 @@ export async function updateInspirationSource(
     personName?: string | null;
   }
 ) {
+  await requireAdmin();
   const [updated] = await db
     .update(plannerInspirationSource)
     .set({ ...data, updatedAt: sql`now()` })
@@ -51,6 +54,7 @@ export async function updateInspirationSource(
 }
 
 export async function deleteInspirationSource(id: string) {
+  await requireAdmin();
   // Rydd opp i destillerte items først (ingen FK-cascade i schemaet).
   await db
     .delete(plannerInspirationItem)
@@ -62,6 +66,7 @@ export async function deleteInspirationSource(id: string) {
 }
 
 export async function toggleInspirationSourceActive(id: string) {
+  await requireAdmin();
   const [current] = await db
     .select({ isActive: plannerInspirationSource.isActive })
     .from(plannerInspirationSource)
@@ -82,6 +87,7 @@ export async function toggleInspirationSourceActive(id: string) {
  * Kjører som Inngest-bakgrunnsjobb; UI oppdaterer seg ved refresh.
  */
 export async function fetchInspirationNow(sourceId?: string) {
+  await requireAdmin();
   try {
     await inngest.send({
       name: "inspiration/fetch.requested",

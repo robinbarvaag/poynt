@@ -31,13 +31,22 @@ export function stripSiteSuffix(title: string): string {
  */
 export function firstHeroImage(layout: unknown): MediaInput | undefined {
   if (!Array.isArray(layout)) return undefined;
+  // bookHero teller også som hero (bildefeltet heter `cover` der).
   const hero = layout.find(
     (block) =>
       block &&
       typeof block === "object" &&
-      (block as { blockType?: string }).blockType === "hero"
-  ) as { image?: MediaResource | number | null } | undefined;
-  return hero?.image ?? undefined;
+      ["hero", "bookHero"].includes(
+        (block as { blockType?: string }).blockType ?? ""
+      )
+  ) as
+    | {
+        blockType?: string;
+        image?: MediaResource | number | null;
+        cover?: MediaResource | number | null;
+      }
+    | undefined;
+  return (hero?.image ?? hero?.cover) || undefined;
 }
 
 /** Plattform-standarden for delingsbilder: 1,91:1 (1200×630). */

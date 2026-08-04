@@ -1,6 +1,7 @@
 import {
   serializeBlogPostContent,
   serializeCaseStudyContent,
+  serializeCourseContent,
   serializePageContent,
   serializeProductContent,
   serializeServiceContent,
@@ -12,6 +13,7 @@ import {
 import type {
   BlogPost,
   CaseStudy,
+  Course,
   Guide,
   Page,
   Product,
@@ -31,6 +33,7 @@ import type {
 
 export const QUALITY_COLLECTIONS = [
   "guides",
+  "courses",
   "pages",
   "blog-posts",
   "case-studies",
@@ -48,6 +51,7 @@ export function isQualityCollection(
 
 const SERIALIZERS: Record<QualityCollectionSlug, (doc: unknown) => string> = {
   guides: (doc) => serializeGuideContent(doc as Guide),
+  courses: (doc) => serializeCourseContent(doc as Course),
   pages: (doc) => serializePageContent(doc as Page),
   "blog-posts": (doc) => serializeBlogPostContent(doc as BlogPost),
   "case-studies": (doc) => serializeCaseStudyContent(doc as CaseStudy),

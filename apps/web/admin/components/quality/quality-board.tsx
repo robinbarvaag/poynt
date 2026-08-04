@@ -1,9 +1,15 @@
 "use client";
 
-import type { QualityOverviewRow } from "@/lib/quality-overview";
+import type { QualityArea, QualityOverviewRow } from "@/lib/quality-overview";
 import { Button } from "@payloadcms/ui";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import {
+  type CSSProperties,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 /**
  * Kvalitetsoversikten (admin-view /admin/kvalitet): alle sider, blogginnlegg,
@@ -11,10 +17,15 @@ import { useMemo, useState } from "react";
  * sist ble vurdert, og om innholdet er endret siden (hash-sammenligning —
  * samme logikk som stripa inne på hvert dokument).
  *
+ * To fanenivåer: status («Trenger vurdering» / «Vurdert og oppdatert») og
+ * område (nettsiden vs. On Poynt-medlemsområdet).
+ *
  * «Vurder alle som trenger det» kjører KUN dokumentene som mangler vurdering
  * eller er endret siden sist — aldri de som allerede er ferske. Kjøres én og
  * én (hver vurdering er et AI-kall på 20–60 s); ruta lagrer resultatet på
  * dokumentet server-side (persist: true), så ingenting må åpnes og lagres.
+ * Fremdriftslinja viser brukt tid og et anslag basert på snittet av
+ * vurderingene som allerede er ferdige i denne runden.
  */
 
 type RunState = "idle" | "running" | "done" | "error";
@@ -22,6 +33,8 @@ type RunState = "idle" | "running" | "done" | "error";
 interface RowState extends QualityOverviewRow {
   runState: RunState;
   runError?: string;
+  /** epoch ms da denne raden startet å kjøre (for «Vurderer … 23 s»). */
+  startedAt?: number;
 }
 
 const STATUS_META: Record<
@@ -35,6 +48,14 @@ const STATUS_META: Record<
   },
   fresh: { label: "Oppdatert", color: "var(--theme-success-500, #22c55e)" },
 };
+
+const AREA_LABELS: Record<QualityArea, string> = {
+  site: "Nettsiden",
+  "on-poynt": "On Poynt",
+};
+
+// Startanslag per vurdering før vi har målt noe selv denne runden.
+const DEFAULT_SECONDS_PER_REVIEW = 40;
 
 function scoreColor(score: number): string {
   if (score >= 70) return "var(--theme-success-500, #22c55e)";
@@ -53,8 +74,31 @@ function formatDate(iso: string | null): string {
   });
 }
 
+function formatDuration(totalSeconds: number): string {
+  const s = Math.max(0, Math.round(totalSeconds));
+  if (s < 60) return `${s} s`;
+  const min = Math.floor(s / 60);
+  const rest = s % 60;
+  return rest ? `${min} min ${rest} s` : `${min} min`;
+}
+
 const rowKey = (r: { collection: string; id: string | number }) =>
   `${r.collection}:${r.id}`;
+
+const tabStyle = (active: boolean): CSSProperties => ({
+  appearance: "none",
+  background: "none",
+  border: "none",
+  borderBottom: active
+    ? "2px solid var(--theme-text)"
+    : "2px solid transparent",
+  padding: "0.5rem 0.25rem",
+  marginBottom: -1,
+  cursor: "pointer",
+  fontSize: "0.9rem",
+  fontWeight: active ? 600 : 400,
+  color: active ? "var(--theme-text)" : "var(--theme-elevation-600)",
+});
 
 export const QualityBoard = ({
   rows: initial,
@@ -62,20 +106,56 @@ export const QualityBoard = ({
   const [rows, setRows] = useState<RowState[]>(
     initial.map((r) => ({ ...r, runState: "idle" }))
   );
-  const [filter, setFilter] = useState<"needs" | "all">("needs");
+  const [statusTab, setStatusTab] = useState<"needs" | "reviewed">("needs");
+  const [areaFilter, setAreaFilter] = useState<"all" | QualityArea>("all");
   const [batchRunning, setBatchRunning] = useState(false);
-  const [batchProgress, setBatchProgress] = useState<string | null>(null);
+  const [batch, setBatch] = useState<{
+    done: number;
+    total: number;
+    currentTitle: string | null;
+    startedAt: number;
+    finishedMessage: string | null;
+  } | null>(null);
+  // Varighet (sekunder) per fullført vurdering i denne økta — grunnlag for
+  // anslaget på gjenstående tid.
+  const durationsRef = useRef<number[]>([]);
+  // Tikker hvert sekund mens noe kjører, så tidtellerne oppdaterer seg.
+  const [now, setNow] = useState(() => Date.now());
+
+  const anythingRunning =
+    batchRunning || rows.some((r) => r.runState === "running");
+
+  useEffect(() => {
+    if (!anythingRunning) return;
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, [anythingRunning]);
+
+  const areaRows =
+    areaFilter === "all" ? rows : rows.filter((r) => r.area === areaFilter);
+  const needsRows = areaRows.filter((r) => r.status !== "fresh");
+  const reviewedRows = areaRows.filter((r) => r.status === "fresh");
+  const visible = statusTab === "needs" ? needsRows : reviewedRows;
 
   const counts = useMemo(
     () => ({
-      unreviewed: rows.filter((r) => r.status === "unreviewed").length,
-      stale: rows.filter((r) => r.status === "stale").length,
-      fresh: rows.filter((r) => r.status === "fresh").length,
+      unreviewed: areaRows.filter((r) => r.status === "unreviewed").length,
+      stale: areaRows.filter((r) => r.status === "stale").length,
     }),
-    [rows]
+    [areaRows]
   );
-  const needsReview = rows.filter((r) => r.status !== "fresh");
-  const visible = filter === "needs" ? needsReview : rows;
+
+  const areaCounts = useMemo(() => {
+    const count = (area: "all" | QualityArea) => {
+      const list = area === "all" ? rows : rows.filter((r) => r.area === area);
+      return list.filter((r) => r.status !== "fresh").length;
+    };
+    return {
+      all: count("all"),
+      site: count("site"),
+      "on-poynt": count("on-poynt"),
+    };
+  }, [rows]);
 
   const patchRow = (key: string, patch: Partial<RowState>) => {
     setRows((prev) =>
@@ -85,7 +165,8 @@ export const QualityBoard = ({
 
   const runOne = async (row: RowState): Promise<boolean> => {
     const key = rowKey(row);
-    patchRow(key, { runState: "running", runError: undefined });
+    const startedAt = Date.now();
+    patchRow(key, { runState: "running", runError: undefined, startedAt });
     try {
       const res = await fetch("/api/ai/quality-review", {
         method: "POST",
@@ -104,17 +185,20 @@ export const QualityBoard = ({
       if (!res.ok || typeof data.totalScore !== "number") {
         throw new Error(data.error || "Kunne ikke vurdere innholdet.");
       }
+      durationsRef.current.push((Date.now() - startedAt) / 1000);
       patchRow(key, {
         runState: "done",
         status: "fresh",
         score: data.totalScore,
         reviewedAt: data.reviewedAt ?? new Date().toISOString(),
+        startedAt: undefined,
       });
       return true;
     } catch (e) {
       patchRow(key, {
         runState: "error",
         runError: e instanceof Error ? e.message : "Noe gikk galt.",
+        startedAt: undefined,
       });
       return false;
     }
@@ -122,25 +206,119 @@ export const QualityBoard = ({
 
   const runAll = async () => {
     setBatchRunning(true);
+    durationsRef.current = [];
     // Les lista én gang ved start — radene som blir ferske underveis skal
-    // uansett ikke kjøres på nytt.
-    const queue = rows.filter((r) => r.status !== "fresh");
+    // uansett ikke kjøres på nytt. Kjører bare det som er synlig i valgt
+    // område, så «Vurder alle» gjør det fanen viser.
+    const queue = areaRows.filter((r) => r.status !== "fresh");
+    const startedAt = Date.now();
+    setBatch({
+      done: 0,
+      total: queue.length,
+      currentTitle: null,
+      startedAt,
+      finishedMessage: null,
+    });
     let done = 0;
     for (const row of queue) {
-      done += 1;
-      setBatchProgress(`Vurderer ${done} av ${queue.length}: «${row.title}» …`);
+      setBatch((b) => (b ? { ...b, done, currentTitle: row.title } : b));
       await runOne(row);
+      done += 1;
+      setBatch((b) => (b ? { ...b, done } : b));
     }
-    setBatchProgress(
-      queue.length
-        ? `Ferdig — ${queue.length} ${queue.length === 1 ? "vurdering" : "vurderinger"} kjørt.`
-        : null
+    setBatch((b) =>
+      b
+        ? {
+            ...b,
+            currentTitle: null,
+            finishedMessage: queue.length
+              ? `Ferdig — ${queue.length} ${
+                  queue.length === 1 ? "vurdering" : "vurderinger"
+                } på ${formatDuration((Date.now() - startedAt) / 1000)}.`
+              : null,
+          }
+        : b
     );
     setBatchRunning(false);
   };
 
+  // Anslag: snittet av fullførte vurderinger denne runden, ellers 40 s.
+  const avgSeconds = durationsRef.current.length
+    ? durationsRef.current.reduce((a, b) => a + b, 0) /
+      durationsRef.current.length
+    : DEFAULT_SECONDS_PER_REVIEW;
+
+  const batchElapsed = batch ? (now - batch.startedAt) / 1000 : 0;
+  const batchRemaining = batch
+    ? Math.max(0, batch.total - batch.done) * avgSeconds
+    : 0;
+
   return (
     <div>
+      {/* Områdefilter: nettsiden vs. On Poynt-medlemsområdet. */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "0.5rem",
+          flexWrap: "wrap",
+          marginBottom: "0.75rem",
+        }}
+      >
+        {(
+          [
+            ["all", "Alt innhold"],
+            ["site", "Nettsiden"],
+            ["on-poynt", "On Poynt"],
+          ] as const
+        ).map(([value, label]) => {
+          const active = areaFilter === value;
+          const needs = areaCounts[value];
+          return (
+            <Button
+              key={value}
+              buttonStyle={active ? "primary" : "pill"}
+              size="small"
+              margin={false}
+              onClick={() => setAreaFilter(value)}
+              disabled={batchRunning}
+            >
+              {needs > 0 ? `${label} (${needs})` : label}
+            </Button>
+          );
+        })}
+        <span
+          style={{ fontSize: "0.8rem", color: "var(--theme-elevation-500)" }}
+        >
+          Tallet viser hvor mye som trenger vurdering.
+        </span>
+      </div>
+
+      {/* Statusfaner: trenger vurdering vs. vurdert og oppdatert. */}
+      <div
+        style={{
+          display: "flex",
+          gap: "1.25rem",
+          borderBottom: "1px solid var(--theme-elevation-150)",
+          marginBottom: "1rem",
+        }}
+      >
+        <button
+          type="button"
+          style={tabStyle(statusTab === "needs")}
+          onClick={() => setStatusTab("needs")}
+        >
+          Trenger vurdering ({needsRows.length})
+        </button>
+        <button
+          type="button"
+          style={tabStyle(statusTab === "reviewed")}
+          onClick={() => setStatusTab("reviewed")}
+        >
+          Vurdert og oppdatert ({reviewedRows.length})
+        </button>
+      </div>
+
       <div
         style={{
           display: "flex",
@@ -155,44 +333,91 @@ export const QualityBoard = ({
           size="small"
           margin={false}
           onClick={runAll}
-          disabled={batchRunning || needsReview.length === 0}
+          disabled={batchRunning || needsRows.length === 0}
         >
           {batchRunning
             ? "Vurderer …"
-            : needsReview.length === 0
+            : needsRows.length === 0
               ? "Alt er vurdert og oppdatert"
-              : `Vurder alle som trenger det (${needsReview.length})`}
-        </Button>
-        <Button
-          buttonStyle="pill"
-          size="small"
-          margin={false}
-          onClick={() => setFilter(filter === "needs" ? "all" : "needs")}
-          disabled={batchRunning}
-        >
-          {filter === "needs"
-            ? `Vis alle (${rows.length})`
-            : "Vis bare de som trenger vurdering"}
+              : `Vurder alle som trenger det (${needsRows.length})`}
         </Button>
         <span
           style={{ fontSize: "0.8rem", color: "var(--theme-elevation-500)" }}
         >
-          {counts.unreviewed} ikke vurdert · {counts.stale} endret siden sist ·{" "}
-          {counts.fresh} oppdatert
+          {counts.unreviewed} ikke vurdert · {counts.stale} endret siden sist ·
+          hver vurdering tar vanligvis 20–60 sekunder
         </span>
       </div>
 
-      {batchProgress && (
-        <p
+      {batch && (batchRunning || batch.finishedMessage) && (
+        <div
           style={{
-            margin: "0 0 0.75rem",
-            fontSize: "0.82rem",
-            color: "var(--theme-elevation-600)",
+            margin: "0 0 1rem",
+            padding: "0.75rem 1rem",
+            border: "1px solid var(--theme-elevation-150)",
+            borderRadius: "0.5rem",
+            background: "var(--theme-elevation-50)",
           }}
           aria-live="polite"
         >
-          {batchProgress}
-        </p>
+          {batchRunning ? (
+            <>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  gap: "1rem",
+                  flexWrap: "wrap",
+                  fontSize: "0.85rem",
+                  marginBottom: "0.5rem",
+                }}
+              >
+                <span>
+                  Vurderer {Math.min(batch.done + 1, batch.total)} av{" "}
+                  {batch.total}
+                  {batch.currentTitle ? `: «${batch.currentTitle}»` : ""} …
+                </span>
+                <span style={{ color: "var(--theme-elevation-600)" }}>
+                  Brukt {formatDuration(batchElapsed)} · anslått ca.{" "}
+                  {formatDuration(batchRemaining)} igjen
+                </span>
+              </div>
+              <div
+                style={{
+                  height: 6,
+                  borderRadius: 3,
+                  background: "var(--theme-elevation-150)",
+                  overflow: "hidden",
+                }}
+              >
+                <div
+                  style={{
+                    height: "100%",
+                    width: `${
+                      batch.total
+                        ? Math.round((batch.done / batch.total) * 100)
+                        : 0
+                    }%`,
+                    background: "var(--theme-success-500, #22c55e)",
+                    transition: "width 0.4s ease",
+                  }}
+                />
+              </div>
+              <p
+                style={{
+                  margin: "0.5rem 0 0",
+                  fontSize: "0.78rem",
+                  color: "var(--theme-elevation-500)",
+                }}
+              >
+                La fanen stå åpen — vurderingene kjører én og én, og resultatet
+                lagres automatisk på hvert dokument.
+              </p>
+            </>
+          ) : (
+            <span style={{ fontSize: "0.85rem" }}>{batch.finishedMessage}</span>
+          )}
+        </div>
       )}
 
       <div style={{ overflowX: "auto" }}>
@@ -222,6 +447,10 @@ export const QualityBoard = ({
           <tbody>
             {visible.map((row) => {
               const meta = STATUS_META[row.status];
+              const rowElapsed =
+                row.runState === "running" && row.startedAt
+                  ? (now - row.startedAt) / 1000
+                  : null;
               return (
                 <tr key={rowKey(row)}>
                   <td
@@ -269,6 +498,17 @@ export const QualityBoard = ({
                     }}
                   >
                     {row.collectionLabel}
+                    {areaFilter === "all" && (
+                      <span
+                        style={{
+                          display: "block",
+                          fontSize: "0.72rem",
+                          color: "var(--theme-elevation-400)",
+                        }}
+                      >
+                        {AREA_LABELS[row.area]}
+                      </span>
+                    )}
                   </td>
                   <td
                     style={{
@@ -289,11 +529,20 @@ export const QualityBoard = ({
                           width: 8,
                           height: 8,
                           borderRadius: "50%",
-                          background: meta.color,
+                          background:
+                            row.runState === "running"
+                              ? "var(--theme-warning-500, #eab308)"
+                              : meta.color,
                           flexShrink: 0,
                         }}
                       />
-                      {row.runState === "running" ? "Vurderer …" : meta.label}
+                      {row.runState === "running"
+                        ? `Vurderer … ${
+                            rowElapsed !== null
+                              ? formatDuration(rowElapsed)
+                              : ""
+                          }`
+                        : meta.label}
                     </span>
                   </td>
                   <td
@@ -356,9 +605,9 @@ export const QualityBoard = ({
                     fontSize: "0.85rem",
                   }}
                 >
-                  {filter === "needs"
-                    ? "Ingenting trenger vurdering akkurat nå — alt innhold er vurdert og uendret siden sist."
-                    : "Fant ikke noe innhold."}
+                  {statusTab === "needs"
+                    ? "Ingenting trenger vurdering akkurat nå — alt innhold her er vurdert og uendret siden sist."
+                    : "Ingenting er vurdert her ennå."}
                 </td>
               </tr>
             )}

@@ -123,9 +123,9 @@ export const SiteSettings: GlobalConfig = {
               type: "text",
               label: "Varslings-e-poster",
               admin: {
-                description:
-                  "Hvem som får beskjed når det skjer noe: salg, nye påmeldinger til nyhetsbrevet, henvendelser fra kontaktskjemaet og ventelista. Flere adresser? Skill dem med komma.",
-                placeholder: "robin@poynt.no, partner@poynt.no",
+                // Redigeres på E-post-siden (Drift → E-post) — skjult her så
+                // det bare finnes ETT sted å lete.
+                hidden: true,
               },
             },
           ],

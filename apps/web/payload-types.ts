@@ -322,7 +322,7 @@ export interface Media {
   alt?: string | null;
   blurDataURL?: string | null;
   /**
-   * Kun synlig for innloggede brukere
+   * Skjules i offentlige lister og søk. NB: selve bildefila kan fortsatt åpnes av alle som har direktelenken — ikke last opp noe konfidensielt.
    */
   isPrivate?: boolean | null;
   /**
@@ -596,14 +596,26 @@ export interface Form {
   redirect?: {
     url: string;
   };
+  /**
+   * E-poster som sendes automatisk når noen sender inn skjemaet — f.eks. en bekreftelse til innsenderen. Forhåndsvisning finner du under Drift → E-post.
+   */
   emails?:
     | {
+        /**
+         * Skriv {{epost}} for å sende til adressen fra skjemaet, eller en fast adresse.
+         */
         emailTo?: string | null;
         cc?: string | null;
         bcc?: string | null;
         replyTo?: string | null;
+        /**
+         * La stå tom for å bruke standardavsenderen.
+         */
         emailFrom?: string | null;
         subject: string;
+        /**
+         * Selve e-posten. Skriv {{navn}} eller andre feltnavn i doble klammer for å flette inn svar fra skjemaet. Poynt-ramma (logo og farger) legges på automatisk.
+         */
         message?: {
           root: {
             type: string;
@@ -1059,7 +1071,6 @@ export interface ProductArchiveBlock {
    * La stå tom for å vise alle
    */
   limit?: number | null;
-  layout?: ('grid' | 'grid-4' | 'carousel') | null;
   showMoreLink?: boolean | null;
   id?: string | null;
   blockName?: string | null;
@@ -2355,6 +2366,20 @@ export interface Course {
    * Vis som stort hero-kurs øverst i kursoversikten
    */
   isFeatured?: boolean | null;
+  /**
+   * Settes av AI-vurderingen (0–100).
+   */
+  qualityScore?: number | null;
+  qualityReviewedAt?: string | null;
+  qualityReview?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -3044,7 +3069,6 @@ export interface ProductArchiveBlockSelect<T extends boolean = true> {
   selectedProducts?: T;
   filterByType?: T;
   limit?: T;
-  layout?: T;
   showMoreLink?: T;
   id?: T;
   blockName?: T;
@@ -3564,6 +3588,9 @@ export interface CoursesSelect<T extends boolean = true> {
   categories?: T;
   publishedAt?: T;
   isFeatured?: T;
+  qualityScore?: T;
+  qualityReviewedAt?: T;
+  qualityReview?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -4359,9 +4386,6 @@ export interface SiteSetting {
   email?: string | null;
   phone?: string | null;
   address?: string | null;
-  /**
-   * Hvem som får beskjed når det skjer noe: salg, nye påmeldinger til nyhetsbrevet, henvendelser fra kontaktskjemaet og ventelista. Flere adresser? Skill dem med komma.
-   */
   notificationEmails?: string | null;
   socialLinks?:
     | {

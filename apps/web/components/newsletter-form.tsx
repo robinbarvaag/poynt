@@ -71,6 +71,7 @@ export function NewsletterForm({
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder="Din e-postadresse"
+        aria-label="E-postadresse for nyhetsbrev"
         required
         disabled={status === "loading"}
         className="flex-1 rounded-2xl border-0 bg-background px-5 py-3 text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50"
@@ -83,7 +84,10 @@ export function NewsletterForm({
         )}
       </Button>
       {status === "error" && (
-        <p className="swap-in absolute -bottom-6 left-0 text-sm text-destructive">
+        <p
+          role="alert"
+          className="swap-in absolute -bottom-6 left-0 text-sm text-destructive"
+        >
           {errorMessage}
         </p>
       )}
