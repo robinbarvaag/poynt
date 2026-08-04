@@ -55,6 +55,8 @@ import { MemberDetailView as MemberDetailView_dd13572451bb48f4b5e68a05e41ae812 }
 import { IndustriesListView as IndustriesListView_2ad79ff1a29ece0a9f161db8e2982cd0 } from '../../../admin/views/industries/list'
 import { PromptsListView as PromptsListView_3426185fdff8e8163926076d35efaa6d } from '../../../admin/views/prompts/list'
 import { SetupGuideView as SetupGuideView_96e0313c105e009331fa998e13292ea0 } from '../../../admin/views/setup-guide'
+import { EmailOverviewView as EmailOverviewView_0216373ba096c29ed484db9830ad258d } from '../../../admin/views/email/list'
+import { QualityListView as QualityListView_832dd1e739525ad72161e259683fb8d9 } from '../../../admin/views/quality/list'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 /** @type import('payload').ImportMap */
@@ -116,5 +118,7 @@ export const importMap = {
   "/admin/views/industries/list#IndustriesListView": IndustriesListView_2ad79ff1a29ece0a9f161db8e2982cd0,
   "/admin/views/prompts/list#PromptsListView": PromptsListView_3426185fdff8e8163926076d35efaa6d,
   "/admin/views/setup-guide#SetupGuideView": SetupGuideView_96e0313c105e009331fa998e13292ea0,
+  "/admin/views/email/list#EmailOverviewView": EmailOverviewView_0216373ba096c29ed484db9830ad258d,
+  "/admin/views/quality/list#QualityListView": QualityListView_832dd1e739525ad72161e259683fb8d9,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

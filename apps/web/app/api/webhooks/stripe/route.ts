@@ -5,12 +5,14 @@ import {
   mapSubscriptionStatus,
   syncSubscriptionToDrizzle,
 } from "@/lib/membership/sync-subscription";
+import { getNotificationEmails } from "@/lib/notification-emails";
 import { buildOrderEmailExtras } from "@/lib/order-email";
 import { claimWebhookEvent, releaseWebhookEvent } from "@/lib/webhook-events";
 import config from "@/payload.config";
 import {
   sendMemberWelcomeEmail,
   sendOrderConfirmation,
+  sendSaleNotification,
   subscribeToNewsletter,
 } from "@poynt/email";
 import { db, eq } from "@poynt/planner-db";
@@ -276,6 +278,28 @@ async function handleProductPurchase(session: Stripe.Checkout.Session) {
     attachments: extras.attachments,
   });
 
+  // Internt salgsvarsel til oss. Svelg feil — hvis dette kaster etter at
+  // ordren er opprettet, ville en webhook-retry laget en duplikatordre.
+  try {
+    await sendSaleNotification({
+      to: await getNotificationEmails(),
+      kind: "Produktsalg",
+      orderNumber: String(order.id),
+      customerName: session.customer_details?.name || undefined,
+      customerEmail,
+      items: orderItems.map((item) => ({
+        name: item.name,
+        quantity: item.quantity,
+        price: item.priceAtPurchase,
+      })),
+      total,
+      paymentProvider: "Stripe",
+      adminUrl: `${process.env.NEXT_PUBLIC_URL}/admin/collections/orders/${order.id}`,
+    });
+  } catch (error) {
+    console.error("Salgsvarsel feilet:", error);
+  }
+
   console.log("Ordre oppretta:", order.id);
 }
 
@@ -309,6 +333,26 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
       memberName: email.split("@")[0], // Use email prefix as fallback for name
       tier: tier === "community_ai" ? "Community + AI" : "Community",
     });
+
+    // Internt salgsvarsel til oss — aldri la det velte medlemskapsflyten.
+    try {
+      await sendSaleNotification({
+        to: await getNotificationEmails(),
+        kind: "Nytt medlemskap",
+        customerEmail: email,
+        items: [
+          {
+            name:
+              tier === "community_ai"
+                ? "On Poynt – Community + AI"
+                : "On Poynt – Community",
+          },
+        ],
+        paymentProvider: "Stripe",
+      });
+    } catch (notifyError) {
+      console.error("Salgsvarsel feilet:", notifyError);
+    }
 
     console.log(
       `Subscription created for ${email}: ${tier} (${status}), subscription ${subscription.id}`

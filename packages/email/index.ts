@@ -5,6 +5,7 @@ import type {
 } from "./templates/order-confirmation";
 
 export type { OrderConfirmationContent, OrderConfirmationItem };
+export { renderEmailPreviews, type EmailPreview } from "./previews";
 
 export interface EmailAttachment {
   filename: string;
@@ -127,6 +128,92 @@ export async function sendOrderConfirmation(params: {
     subject: `${params.subject || "Ordrebekreftelse"} #${params.orderNumber}`,
     html,
     ...(params.attachments?.length && { attachments: params.attachments }),
+  });
+}
+
+/**
+ * Mottakere for interne varsler: eksplisitt `to` fra kalleren (typisk
+ * admin-innstillingen via getNotificationEmails) vinner, ellers CONTACT_EMAIL.
+ * undefined → varselet droppes stille.
+ */
+function resolveNotifyTo(
+  override?: string | string[]
+): string | string[] | undefined {
+  if (Array.isArray(override)) {
+    return override.length > 0 ? override : undefined;
+  }
+  return override || process.env.CONTACT_EMAIL || undefined;
+}
+
+/**
+ * Internt varsel til Poynt når det kommer et salg — produktkjøp eller nytt
+ * medlemskap. Skal ALDRI velte ordreflyten: no-op hvis mottaker eller
+ * RESEND_API_KEY mangler, og kallere bør svelge feil.
+ */
+export async function sendSaleNotification(params: {
+  /** Mottakere — overstyrer CONTACT_EMAIL (fra admin-innstillingen). */
+  to?: string | string[];
+  /** «Produktsalg» eller «Nytt medlemskap». */
+  kind: string;
+  orderNumber?: string;
+  customerName?: string;
+  customerEmail: string;
+  items: { name: string; quantity?: number; price?: number }[];
+  /** Totalsum i kr. */
+  total?: number;
+  paymentProvider?: string;
+  /** Lenke til ordren i admin. */
+  adminUrl?: string;
+}) {
+  if (!process.env.RESEND_API_KEY) return;
+  const notifyTo = resolveNotifyTo(params.to);
+  if (!notifyTo) return;
+
+  const { render } = await import("@react-email/render");
+  const { default: SaleNotificationEmail } = await import(
+    "./templates/sale-notification"
+  );
+
+  const html = await render(SaleNotificationEmail(params));
+
+  await sendEmail({
+    from: buildFrom("Poynt"),
+    to: notifyTo,
+    subject: params.total
+      ? `${params.kind}: ${params.total} kr${params.orderNumber ? ` (#${params.orderNumber})` : ""}`
+      : `${params.kind}: ${params.customerEmail}`,
+    html,
+  });
+}
+
+/**
+ * Internt varsel til Poynt (CONTACT_EMAIL) når noen melder seg på nyhetsbrevet.
+ * No-op hvis CONTACT_EMAIL eller RESEND_API_KEY mangler; kallere bør svelge feil
+ * slik at selve påmeldingen aldri feiler på grunn av varselet.
+ */
+export async function sendNewsletterSignupNotification(params: {
+  /** Mottakere — overstyrer CONTACT_EMAIL (fra admin-innstillingen). */
+  to?: string | string[];
+  email: string;
+  /** Hvor påmeldingen kom fra, f.eks. «nyhetsbrev-skjema» eller «utsjekk». */
+  source?: string;
+}) {
+  if (!process.env.RESEND_API_KEY) return;
+  const notifyTo = resolveNotifyTo(params.to);
+  if (!notifyTo) return;
+
+  const { render } = await import("@react-email/render");
+  const { default: NewsletterSignupNotificationEmail } = await import(
+    "./templates/newsletter-signup-notification"
+  );
+
+  const html = await render(NewsletterSignupNotificationEmail(params));
+
+  await sendEmail({
+    from: buildFrom("Poynt"),
+    to: notifyTo,
+    subject: `Ny på nyhetsbrevet: ${params.email}`,
+    html,
   });
 }
 
@@ -311,6 +398,8 @@ export async function sendNewsletterBroadcast(params: {
  * RESEND_API_KEY is missing. Uses React Email templates for proper design.
  */
 export async function sendContactEmails(params: {
+  /** Varsel-mottakere — overstyrer CONTACT_EMAIL (fra admin-innstillingen). */
+  to?: string | string[];
   name: string;
   email: string;
   phone?: string;
@@ -333,7 +422,7 @@ export async function sendContactEmails(params: {
 
   const from = buildFrom("Poynt");
 
-  const notifyTo = process.env.CONTACT_EMAIL;
+  const notifyTo = resolveNotifyTo(params.to);
   if (notifyTo) {
     const html = await render(ContactNotificationEmail(params));
     await sendEmail({
@@ -362,6 +451,8 @@ export async function sendContactEmails(params: {
  * No-op hvis RESEND_API_KEY mangler.
  */
 export async function sendWaitlistEmails(params: {
+  /** Varsel-mottakere — overstyrer CONTACT_EMAIL (fra admin-innstillingen). */
+  to?: string | string[];
   email: string;
   name?: string;
   /** Boka/produktet det ventes på — brukes i emne og brødtekst. */
@@ -394,7 +485,7 @@ export async function sendWaitlistEmails(params: {
     html: confirmationHtml,
   });
 
-  const notifyTo = process.env.CONTACT_EMAIL;
+  const notifyTo = resolveNotifyTo(params.to);
   if (notifyTo) {
     const { default: ContactNotificationEmail } = await import(
       "./templates/contact-notification"

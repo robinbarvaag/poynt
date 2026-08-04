@@ -1,3 +1,4 @@
+import { getNotificationEmails } from "@/lib/notification-emails";
 import { buildOrderEmailExtras } from "@/lib/order-email";
 import {
   captureVippsPayment,
@@ -7,7 +8,11 @@ import {
 } from "@/lib/vipps";
 import { claimWebhookEvent, releaseWebhookEvent } from "@/lib/webhook-events";
 import config from "@/payload.config";
-import { sendOrderConfirmation, subscribeToNewsletter } from "@poynt/email";
+import {
+  sendOrderConfirmation,
+  sendSaleNotification,
+  subscribeToNewsletter,
+} from "@poynt/email";
 import { db } from "@poynt/planner-db";
 import { type NextRequest, NextResponse } from "next/server";
 import { getPayload } from "payload";
@@ -182,6 +187,31 @@ export async function POST(req: NextRequest) {
           if (!result.success) {
             console.error("Nyhetsbrev-påmelding feilet:", result.error);
           }
+        }
+
+        // Internt salgsvarsel til oss. Svelg feil — en webhook-retry etter at
+        // ordren er betalt skal ikke utløses av et feilet varsel.
+        try {
+          await sendSaleNotification({
+            to: await getNotificationEmails(),
+            kind: "Produktsalg",
+            orderNumber: String(order.id),
+            customerName: customerName || order.customerName || undefined,
+            customerEmail: email || "ukjent",
+            items: (order.items ?? []).map((item) => ({
+              name:
+                typeof item.product === "object"
+                  ? item.product.name
+                  : `Produkt ${item.product}`,
+              quantity: item.quantity,
+              price: item.priceAtPurchase,
+            })),
+            total: order.total,
+            paymentProvider: "Vipps",
+            adminUrl: `${process.env.NEXT_PUBLIC_URL}/admin/collections/orders/${order.id}`,
+          });
+        } catch (notifyError) {
+          console.error("Salgsvarsel feilet:", notifyError);
         }
 
         console.log(`Vipps-ordre ${order.id} betalt og captura (${reference})`);

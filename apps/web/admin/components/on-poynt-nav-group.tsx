@@ -37,6 +37,12 @@ const links = [
     href: "/admin/radar",
     label: "Innholdsradar",
   },
+  // Dekker ALT innhold (også offentlige sider), men bor her sammen med
+  // Innholdsradar — de to er redaksjonens verktøy-hylle.
+  {
+    href: "/admin/kvalitet",
+    label: "Kvalitetsoversikt",
+  },
   {
     href: "/admin/inspirasjon",
     label: "Inspirasjonskilder",

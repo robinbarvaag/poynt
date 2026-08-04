@@ -20,6 +20,8 @@ interface BlockInfo {
   /** Teller blokka som mettet fargepanel i panel-rasjoneringen? */
   isPanel: boolean;
   primaryCtaUrl?: string;
+  eyebrow?: string;
+  title?: string;
 }
 
 const BLOCK_LABELS: Record<string, string> = {
@@ -67,8 +69,16 @@ function readBlocks(fields: Record<string, { value?: unknown }>): BlockInfo[] {
       typeof get("primaryCta.url") === "string"
         ? (get("primaryCta.url") as string)
         : undefined;
+    const eyebrow =
+      typeof get("eyebrow") === "string"
+        ? (get("eyebrow") as string).trim()
+        : undefined;
+    const title =
+      typeof get("title") === "string"
+        ? (get("title") as string).trim()
+        : undefined;
 
-    blocks.push({ index, blockType, isPanel, primaryCtaUrl });
+    blocks.push({ index, blockType, isPanel, primaryCtaUrl, eyebrow, title });
   }
   return blocks.sort((a, b) => a.index - b.index);
 }
@@ -157,7 +167,49 @@ function analyse(blocks: BlockInfo[]): Finding[] {
     }
   }
 
-  // 6. Veldig mange blokker → siden mister retning.
+  // 6. Etiketten over tittelen skal tilføre noe. Gjentar den tittelen (eller
+  //    omvendt), er den bare støy — da er det bedre å la den stå tom.
+  const norm = (s: string) =>
+    s
+      .toLowerCase()
+      .replace(/[^\p{L}\p{N} ]/gu, "")
+      .trim();
+  for (const b of blocks) {
+    if (!b.eyebrow || !b.title) continue;
+    const e = norm(b.eyebrow);
+    const t = norm(b.title);
+    if (e && t && (e === t || t.includes(e) || e.includes(t))) {
+      findings.push({
+        level: "tips",
+        text: `Den lille teksten over tittelen i ${label(b.blockType)} (seksjon ${b.index + 1}) sier omtrent det samme som tittelen («${b.eyebrow}» / «${b.title}»). Den skal gi leseren litt ekstra kontekst — la den heller stå tom enn å gjenta.`,
+      });
+    }
+  }
+
+  // 7. Samme etikett på flere seksjoner → mister funksjonen som veiviser.
+  const eyebrows = new Map<string, BlockInfo[]>();
+  for (const b of blocks) {
+    if (!b.eyebrow) continue;
+    const key = norm(b.eyebrow);
+    if (!key) continue;
+    const list = eyebrows.get(key) ?? [];
+    list.push(b);
+    eyebrows.set(key, list);
+  }
+  for (const sameEyebrow of eyebrows.values()) {
+    if (sameEyebrow.length > 1) {
+      findings.push({
+        level: "tips",
+        text: `Flere seksjoner (${sameEyebrow
+          .map((b) => `seksjon ${b.index + 1}`)
+          .join(
+            ", "
+          )}) har den samme lille teksten over tittelen («${sameEyebrow[0].eyebrow}»). Den fungerer som veiviser nedover siden — gi hver seksjon sin egen, eller la noen stå tomme.`,
+      });
+    }
+  }
+
+  // 8. Veldig mange blokker → siden mister retning.
   if (blocks.length > 12) {
     findings.push({
       level: "tips",
@@ -174,6 +226,7 @@ const GUIDELINES: string[] = [
   "Maks to seksjoner med farget bakgrunn per side — og aldri to rett etter hverandre.",
   "Velg én ting du vil at leseren skal gjøre. Ikke alle seksjoner trenger en knapp.",
   "Hero øverst, nyhetsbrev nederst. Avstanden mellom seksjoner er alltid den samme.",
+  "Den lille teksten over en tittel skal gi ekstra kontekst («Historien bak boka»), ikke gjenta tittelen. Usikker? Dropp den.",
 ];
 
 export const CompositionCheck = () => {

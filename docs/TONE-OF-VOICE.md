@@ -61,7 +61,8 @@ konkret neste steg.
 | Regel | Slik gjør vi det |
 |---|---|
 | Målform | Bokmål. Alltid. Ikke nynorsk, ikke riksmålsstivt. |
-| AI vs. KI | Skriv **AI** i all copy (etablert i navnet «AI-verktøy»). Ikke bland. |
+| AI vs. KI | Skriv **AI** i all copy (etablert i navnet «AI-verktøy»). Ikke bland. Unntak: produkter med eget etablert språk beholder sitt — boka «Verdifull vekst» skriver «KI», jf. omslaget «Forstå KI, salg og markedsføring». |
+| Etiketter over titler | Den lille teksten over en seksjonstittel skal tilføre kontekst tittelen ikke gir («Historien bak boka»), aldri gjenta den («Spørsmål» over «Det folk lurer på»). Heller tom enn generisk. |
 | CTA-er | Korte og muntlige, i jeg/meg-form der det passer: «Jeg vil ha hjelp», «Meld meg på», «Ta en prat», «Book et foredrag». Aldri «Les mer her» eller «Klikk her». |
 | Utropstegn | Maks ett per side. Entusiasmen skal ligge i innholdet. |
 | Store ord vi ikke bruker | markedsledende, unik, innovativ, synergi, «ta bedriften til neste nivå», «i verdensklasse», game-changer, disruptiv |

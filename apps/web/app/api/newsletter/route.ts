@@ -1,4 +1,7 @@
-import { subscribeToNewsletter } from "@poynt/email";
+import {
+  sendNewsletterSignupNotification,
+  subscribeToNewsletter,
+} from "@poynt/email";
 import { type NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
@@ -30,6 +33,20 @@ export async function POST(request: NextRequest) {
         { error: result.error || "Kunne ikke registrere e-postadressen" },
         { status: 500 }
       );
+    }
+
+    // Internt varsel til oss — aldri la det velte selve påmeldingen.
+    try {
+      const { getNotificationEmails } = await import(
+        "@/lib/notification-emails"
+      );
+      await sendNewsletterSignupNotification({
+        to: await getNotificationEmails(),
+        email,
+        source: "nyhetsbrev-skjema",
+      });
+    } catch (notifyError) {
+      console.error("Nyhetsbrev-varsel feilet:", notifyError);
     }
 
     return NextResponse.json({ success: true });

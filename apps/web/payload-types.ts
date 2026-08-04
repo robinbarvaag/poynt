@@ -4359,6 +4359,10 @@ export interface SiteSetting {
   email?: string | null;
   phone?: string | null;
   address?: string | null;
+  /**
+   * Hvem som får beskjed når det skjer noe: salg, nye påmeldinger til nyhetsbrevet, henvendelser fra kontaktskjemaet og ventelista. Flere adresser? Skill dem med komma.
+   */
+  notificationEmails?: string | null;
   socialLinks?:
     | {
         platform: 'facebook' | 'instagram' | 'linkedin' | 'twitter' | 'youtube' | 'tiktok';
@@ -4699,6 +4703,7 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   email?: T;
   phone?: T;
   address?: T;
+  notificationEmails?: T;
   socialLinks?:
     | T
     | {

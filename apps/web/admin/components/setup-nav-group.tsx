@@ -21,6 +21,10 @@ const links = [
     label: "Kasse og kvittering",
   },
   {
+    href: "/admin/epost",
+    label: "E-post",
+  },
+  {
     href: "/admin/collections/redirects",
     label: "Omdirigeringer",
   },

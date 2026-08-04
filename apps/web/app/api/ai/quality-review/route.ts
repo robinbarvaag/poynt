@@ -1,23 +1,11 @@
+import { getQualityOverview, getQualityRow } from "@/lib/quality-overview";
 import {
-  serializeBlogPostContent,
-  serializeCaseStudyContent,
-  serializePageContent,
-  serializeProductContent,
-  serializeServiceContent,
-} from "@/lib/quality-review-content";
-import {
-  hashGuideContent,
-  serializeGuideContent,
-} from "@/lib/serialize-guide-content";
+  hashQualityContent,
+  isQualityCollection,
+  serializeQualityContent,
+} from "@/lib/quality-review-stale";
 import { TONE_OF_VOICE } from "@/lib/tone-of-voice";
-import type {
-  BlogPost,
-  CaseStudy,
-  Guide,
-  Page,
-  Product,
-  Service,
-} from "@/payload-types";
+import type { Guide, Page } from "@/payload-types";
 import config from "@/payload.config";
 import { Output, gateway, streamText } from "ai";
 import { type NextRequest, NextResponse } from "next/server";
@@ -54,7 +42,6 @@ interface CollectionReviewConfig {
   label: string;
   rolle: string;
   dimensions: Dimension[];
-  serialize: (doc: unknown) => string;
   kontekst?: (doc: unknown) => string | null;
 }
 
@@ -233,7 +220,6 @@ const CONFIGS: Record<string, CollectionReviewConfig> = {
     rolle:
       "Du vurderer en medlems-guide i On Poynt. Vær konkret og litt streng – en flat lenke-liste uten egen innsikt skal IKKE score høyt selv om lenkene er nyttige.",
     dimensions: GUIDE_DIMENSIONS,
-    serialize: (doc) => serializeGuideContent(doc as Guide),
     kontekst: (doc) => `Seksjon: ${(doc as Guide).section}`,
   },
   pages: {
@@ -241,7 +227,6 @@ const CONFIGS: Record<string, CollectionReviewConfig> = {
     rolle:
       "Du vurderer en offentlig side på poynt.no, bygget av seksjoner/blokker. [Seksjon N: …]-merkene viser blokktype, [oppsett: …] viser layoutvalg, [Knapp …] viser CTA-er og [Bilde/medie …] viser bildebruk. Vurder siden som helhet – budskap, komposisjon og konvertering – ikke bare prosaen.",
     dimensions: PAGE_DIMENSIONS,
-    serialize: (doc) => serializePageContent(doc as Page),
     kontekst: (doc) => {
       const slug = (doc as Page).slug;
       return slug ? `URL: /${slug === "forside" ? "" : slug}` : null;
@@ -252,28 +237,24 @@ const CONFIGS: Record<string, CollectionReviewConfig> = {
     rolle:
       "Du vurderer en kundehistorie på poynt.no — tidløst salgsbevis, ikke fagstoff. Leseren er en potensiell kunde som lurer på om dette kan funke for dem: historien skal være konkret, troverdig og vise et faktisk resultat.",
     dimensions: CASE_STUDY_DIMENSIONS,
-    serialize: (doc) => serializeCaseStudyContent(doc as CaseStudy),
   },
   "blog-posts": {
     label: "blogginnlegg",
     rolle:
       "Du vurderer et offentlig blogginnlegg på poynt.no. Leseren er en travel småbedriftseier som skummer – og innlegget skal også kunne bli funnet og sitert av søkemotorer og AI-assistenter.",
     dimensions: BLOG_DIMENSIONS,
-    serialize: (doc) => serializeBlogPostContent(doc as BlogPost),
   },
   services: {
     label: "tjenesteside",
     rolle:
       "Du vurderer en tjenesteside på poynt.no — en salgsside for én konkret tjeneste. Leseren er en småbedriftseier som lurer på om dette er verdt pengene: siden skal gjøre det lett å forstå hva en får, hva det koster og hva neste steg er.",
     dimensions: SERVICE_DIMENSIONS,
-    serialize: (doc) => serializeServiceContent(doc as Service),
   },
   products: {
     label: "produktside",
     rolle:
       "Du vurderer en produktside i nettbutikken på poynt.no (bok, kurs, PDF eller medlemskap). Leseren er en småbedriftseier som vurderer å kjøpe: siden skal gjøre det lett å forstå hva produktet er, hva de får og hvorfor det er verdt pengene.",
     dimensions: PRODUCT_DIMENSIONS,
-    serialize: (doc) => serializeProductContent(doc as Product),
   },
 };
 
@@ -335,6 +316,51 @@ Du skal KUN diagnostisere. Ikke skriv om innholdet og ikke produser ferdig ersta
 Svar på norsk bokmål.`;
 }
 
+/**
+ * GET ?collection=&id= → stale-status for ett dokument (stripa i admin).
+ * GET uten parametre → hele kvalitetsoversikten (dashboardet): alle dokumenter
+ * i de seks innholdstypene med score, sist vurdert og om innholdet er endret
+ * siden forrige vurdering (hash-sammenligning, ikke updatedAt).
+ */
+export async function GET(req: NextRequest) {
+  try {
+    const payload = await getPayload({ config });
+    const { user } = await payload.auth({ headers: req.headers });
+    if (!user) {
+      return NextResponse.json({ error: "Ikke autorisert" }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const collection = searchParams.get("collection");
+    const id = searchParams.get("id");
+
+    if (collection && id) {
+      if (!isQualityCollection(collection)) {
+        return NextResponse.json(
+          { error: "Ukjent collection." },
+          { status: 400 }
+        );
+      }
+      const row = await getQualityRow(payload, collection, id);
+      if (!row) {
+        return NextResponse.json(
+          { error: "Fant ikke dokumentet." },
+          { status: 404 }
+        );
+      }
+      return NextResponse.json(row);
+    }
+
+    return NextResponse.json({ rows: await getQualityOverview(payload) });
+  } catch (error) {
+    console.error("Quality overview error:", error);
+    return NextResponse.json(
+      { error: "Kunne ikke hente kvalitetsoversikten." },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const payload = await getPayload({ config });
@@ -346,9 +372,14 @@ export async function POST(req: NextRequest) {
     const body = (await req.json().catch(() => ({}))) as {
       collection?: string;
       id?: string | number;
+      persist?: boolean;
     };
-    const cfg = body.collection ? CONFIGS[body.collection] : undefined;
-    if (!cfg || body.id === undefined || body.id === null) {
+    const slug =
+      body.collection && isQualityCollection(body.collection)
+        ? body.collection
+        : undefined;
+    const cfg = slug ? CONFIGS[slug] : undefined;
+    if (!slug || !cfg || body.id === undefined || body.id === null) {
       return NextResponse.json(
         {
           error:
@@ -359,18 +390,7 @@ export async function POST(req: NextRequest) {
     }
 
     const doc = await payload
-      .findByID({
-        collection: body.collection as
-          | "guides"
-          | "pages"
-          | "blog-posts"
-          | "case-studies"
-          | "services"
-          | "products",
-        id: body.id,
-        depth: 1,
-        draft: true,
-      })
+      .findByID({ collection: slug, id: body.id, depth: 1, draft: true })
       .catch(() => null);
 
     if (!doc) {
@@ -380,7 +400,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const serialized = cfg.serialize(doc);
+    const serialized = serializeQualityContent(slug, doc);
     if (serialized.trim().length < 40) {
       return NextResponse.json(
         { error: "For lite innhold til å vurdere – skriv litt mer først." },
@@ -418,9 +438,31 @@ ${serialized}
 
     // Hash av innholdet vi faktisk vurderte → lagres med scoren så radaren
     // (og panelet) kan se om innholdet er endret siden vurderingen.
-    const contentHash = hashGuideContent(serialized);
+    const contentHash = hashQualityContent(serialized);
+    const reviewedAt = new Date().toISOString();
+    const responseBody = { ...review, dimensjoner, contentHash, reviewedAt };
 
-    return NextResponse.json({ ...review, dimensjoner, contentHash });
+    // «Vurder kvalitet»-knappen persisterer via det åpne skjemaet (setValue →
+    // lagre) — en server-skriving samtidig ville gitt lagringskonflikt. Uten
+    // åpent skjema (dashboardets «kjør alle») må ruta lagre selv. Utkast
+    // forblir utkast: vi vurderte utkast-innholdet, så vurderingen hører til
+    // utkastet og skal ikke publisere noe.
+    if (body.persist) {
+      const isDraft = (doc as { _status?: string | null })._status === "draft";
+      await payload.update({
+        collection: slug,
+        id: body.id,
+        data: {
+          qualityScore: review.totalScore,
+          qualityReviewedAt: reviewedAt,
+          qualityReview: responseBody,
+        },
+        draft: isDraft,
+        depth: 0,
+      });
+    }
+
+    return NextResponse.json(responseBody);
   } catch (error) {
     console.error("Quality review error:", error);
     return NextResponse.json(

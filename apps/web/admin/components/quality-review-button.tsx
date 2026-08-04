@@ -82,6 +82,25 @@ export const QualityReviewButton = () => {
   const [elapsed, setElapsed] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
+  // Er innholdet endret siden forrige vurdering? Server-sjekk (hash av det
+  // faktiske innholdet, ikke updatedAt) ved åpning av dokumentet.
+  const [stale, setStale] = useState(false);
+  useEffect(() => {
+    if (id === undefined || id === null || !collectionSlug) return;
+    let cancelled = false;
+    fetch(
+      `/api/ai/quality-review?collection=${encodeURIComponent(collectionSlug)}&id=${encodeURIComponent(String(id))}`
+    )
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: { status?: string } | null) => {
+        if (!cancelled && data) setStale(data.status === "stale");
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [id, collectionSlug]);
+
   // Sekundteller mens vurderingen kjører — viser at det fortsatt skjer noe.
   useEffect(() => {
     if (!loading) return;
@@ -115,6 +134,7 @@ export const QualityReviewButton = () => {
         throw new Error(data.error || "Kunne ikke vurdere innholdet.");
       }
       setFresh(data);
+      setStale(false);
       // Persistér på dokumentet (autosave plukker opp endringene).
       setScore(data.totalScore);
       setReviewedAt(new Date().toISOString());
@@ -180,6 +200,25 @@ export const QualityReviewButton = () => {
           </span>
         )}
       </div>
+
+      {stale && !fresh && !loading && (
+        <p
+          style={{
+            margin: "0.5rem 0 0",
+            padding: "0.45rem 0.65rem",
+            fontSize: "0.78rem",
+            borderRadius: "var(--style-radius-m, 8px)",
+            border: "1px solid var(--theme-warning-500, #eab308)",
+            background:
+              "color-mix(in srgb, var(--theme-warning-500, #eab308) 12%, transparent)",
+            color: "var(--theme-elevation-800)",
+          }}
+        >
+          Innholdet er endret siden forrige kvalitetssjekk — scoren under
+          gjelder en eldre versjon. Vurder på nytt når du er ferdig med
+          endringene.
+        </p>
+      )}
 
       {!loading && (
         <p

@@ -184,6 +184,18 @@ export default buildConfig({
           exact: true,
           meta: { title: "Betalingsoppsett" },
         },
+        email: {
+          Component: "/admin/views/email/list#EmailOverviewView",
+          path: "/epost",
+          exact: true,
+          meta: { title: "E-post" },
+        },
+        quality: {
+          Component: "/admin/views/quality/list#QualityListView",
+          path: "/kvalitet",
+          exact: true,
+          meta: { title: "Kvalitetsoversikt" },
+        },
       },
     },
   },
@@ -505,7 +517,11 @@ export default buildConfig({
                     .filter(Boolean)
                     .join("\n");
 
+                  const { getNotificationEmails } = await import(
+                    "./lib/notification-emails"
+                  );
                   await sendContactEmails({
+                    to: await getNotificationEmails(),
                     name: get(["fulltnavn", "navn", "name"]) || "Ukjent",
                     email: applicantEmail,
                     subject: "Medlemskapssøknad – On Poynt",
@@ -520,7 +536,11 @@ export default buildConfig({
                 const message = get(["melding", "message", "beskjed"]);
                 if (!email || !message) return doc;
 
+                const { getNotificationEmails } = await import(
+                  "./lib/notification-emails"
+                );
                 await sendContactEmails({
+                  to: await getNotificationEmails(),
                   name: get(["navn", "name"]) || "Ukjent",
                   email,
                   phone: get(["telefon", "phone", "tlf"]),

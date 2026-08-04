@@ -118,6 +118,16 @@ export const SiteSettings: GlobalConfig = {
               type: "textarea",
               label: "Adresse",
             },
+            {
+              name: "notificationEmails",
+              type: "text",
+              label: "Varslings-e-poster",
+              admin: {
+                description:
+                  "Hvem som får beskjed når det skjer noe: salg, nye påmeldinger til nyhetsbrevet, henvendelser fra kontaktskjemaet og ventelista. Flere adresser? Skill dem med komma.",
+                placeholder: "robin@poynt.no, partner@poynt.no",
+              },
+            },
           ],
         },
         {

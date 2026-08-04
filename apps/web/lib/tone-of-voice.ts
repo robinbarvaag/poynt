@@ -13,4 +13,6 @@ Kjernen: en erfaren venninne i bransjen som sier det som det er — varm, konkre
 3. Lun, tørr humor i doser — maks én blunk per side, aldri i priser/betingelser/feilmeldinger.
 4. Senk terskelen, ikke nivået: leseren er en travel småbedriftseier uten markedsavdeling. Fagord forklares i praksis eller kuttes. Alt peker mot et konkret neste steg.
 
-Språkregler: bokmål (aldri nynorsk); skriv «AI», ikke «KI»; CTA-er korte og muntlige («Jeg vil ha hjelp», «Ta en prat» — aldri «Les mer her»); maks ett utropstegn per side; overskrifter i setningsform, ikke Title Case; meninger er lov og ønsket — tydelig standpunkt med kort begrunnelse slår nøytral prosa.`;
+Språkregler: bokmål (aldri nynorsk); skriv «AI», ikke «KI» (unntak: produkter med eget etablert språk beholder sitt — boka «Verdifull vekst» skriver «KI» fordi omslaget gjør det); CTA-er korte og muntlige («Jeg vil ha hjelp», «Ta en prat» — aldri «Les mer her»); maks ett utropstegn per side; overskrifter i setningsform, ikke Title Case; meninger er lov og ønsket — tydelig standpunkt med kort begrunnelse slår nøytral prosa.
+
+Etiketter (den lille teksten over en seksjonstittel): skal tilføre kontekst tittelen ikke gir («Historien bak boka», «Ny bok av Susanne Todnem») — aldri en generisk merkelapp som gjentar tittelen («Spørsmål», «Om oss»). Heller tom enn generisk.`;

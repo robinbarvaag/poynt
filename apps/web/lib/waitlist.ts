@@ -86,7 +86,9 @@ export async function handleWaitlistSubmission({
     .catch(() => undefined);
 
   const { sendWaitlistEmails } = await import("@poynt/email");
+  const { getNotificationEmails } = await import("@/lib/notification-emails");
   await sendWaitlistEmails({
+    to: await getNotificationEmails(),
     email,
     name,
     title: subject,

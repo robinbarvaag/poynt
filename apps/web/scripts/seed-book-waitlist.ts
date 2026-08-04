@@ -208,7 +208,9 @@ const page = {
         },
         {
           title: "Små justeringer, stor endring",
-          text: "Tenk om det bare er små justeringer som skal til for å skape radikal endring i bedriften din? Tenk om du er et tastetrykk unna gjennombruddet?",
+          // Bevisst ETT «tenk om» – to retoriske spørsmål på rad lukter
+          // generert tekst, og «gjennombrudd»-varianten var ren hype.
+          text: "Tenk om det bare er små justeringer som skal til for å skape radikal endring i bedriften din?",
         },
       ],
     },
@@ -239,7 +241,8 @@ const page = {
     },
     {
       blockType: "faq",
-      eyebrow: "Spørsmål",
+      // Ingen eyebrow: «Spørsmål» over «Det folk lurer på» sa det samme to
+      // ganger. Etiketten skal tilføre kontekst, ellers droppes den.
       title: "Det folk lurer på",
       items: faqItems,
     },
@@ -247,8 +250,9 @@ const page = {
       blockType: "ctaSection",
       variant: "colored",
       title: "Vil du vite når boka kommer?",
-      description:
-        "Sett deg på ventelista, så sier jeg fra i høst – før det går ut til alle andre. Ingen forpliktelser, ingen kjøpepress.",
+      // Kort med vilje: «før alle andre» står i FAQ-en, og gratis/uforpliktende
+      // står i hero-noten og FAQ-en – tredje gjentakelse kuttet.
+      description: "Sett deg på ventelista, så sier jeg fra i høst.",
       primaryCta: { text: "Meld deg på ventelista", url: "#venteliste" },
     },
   ],
