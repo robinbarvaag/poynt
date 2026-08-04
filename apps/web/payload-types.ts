@@ -74,6 +74,7 @@ export interface Config {
     categories: Category;
     media: Media;
     newsletters: Newsletter;
+    'email-templates': EmailTemplate;
     guides: Guide;
     courses: Course;
     products: Product;
@@ -101,6 +102,7 @@ export interface Config {
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     newsletters: NewslettersSelect<false> | NewslettersSelect<true>;
+    'email-templates': EmailTemplatesSelect<false> | EmailTemplatesSelect<true>;
     guides: GuidesSelect<false> | GuidesSelect<true>;
     courses: CoursesSelect<false> | CoursesSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
@@ -597,7 +599,7 @@ export interface Form {
     url: string;
   };
   /**
-   * E-poster som sendes automatisk når noen sender inn skjemaet — f.eks. en bekreftelse til innsenderen. Forhåndsvisning finner du under Drift → E-post.
+   * E-poster som sendes automatisk når noen sender inn skjemaet — f.eks. en bekreftelse til innsenderen. Se resultatet i «Forhåndsvisning»-fanen.
    */
   emails?:
     | {
@@ -1857,6 +1859,48 @@ export interface Newsletter {
   createdAt: string;
 }
 /**
+ * Tekstene i e-postene nettsiden sender automatisk. Endre teksten i «Innhold»-fanen og se resultatet i «Forhåndsvisning». Nyhetsbrev og skjema-e-poster redigeres på sitt eget sted — se oversikten under Drift → E-post.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "email-templates".
+ */
+export interface EmailTemplate {
+  id: number;
+  /**
+   * Emnefeltet mottakerne ser i innboksen. Kan bruke flettefelt, f.eks. {{navn}} — se «Slik virker malen» i sidemenyen.
+   */
+  subject?: string | null;
+  /**
+   * Selve e-posten. Poynt-ramma (logo og farger) og eventuelle knapper/detaljer legges på automatisk.
+   */
+  body?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  name: string;
+  /**
+   * Kobler malen til utsendingen i koden — kan ikke endres.
+   */
+  templateKey: string;
+  /**
+   * Hvilke flettefelt du kan bruke, og hva som legges på automatisk.
+   */
+  hint?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "guides".
  */
@@ -2524,6 +2568,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'newsletters';
         value: number | Newsletter;
+      } | null)
+    | ({
+        relationTo: 'email-templates';
+        value: number | EmailTemplate;
       } | null)
     | ({
         relationTo: 'guides';
@@ -3335,6 +3383,19 @@ export interface NewslettersSelect<T extends boolean = true> {
   status?: T;
   sentAt?: T;
   broadcastId?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "email-templates_select".
+ */
+export interface EmailTemplatesSelect<T extends boolean = true> {
+  subject?: T;
+  body?: T;
+  name?: T;
+  templateKey?: T;
+  hint?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -4468,9 +4529,13 @@ export interface OnPoyntFeature {
    */
   fellesskap?: boolean | null;
   /**
-   * Guider og kurs (hele Læring-huben).
+   * Læring-huben med guider. Skrus denne av, forsvinner hele Læring-området.
    */
   laering?: boolean | null;
+  /**
+   * Kurs-delen av Læring. Skru av for å vise bare guider.
+   */
+  kurs?: boolean | null;
   /**
    * Bedriftsprofil og merkevare.
    */
@@ -4780,6 +4845,7 @@ export interface OnPoyntFeaturesSelect<T extends boolean = true> {
   podcastTilInnhold?: T;
   fellesskap?: T;
   laering?: T;
+  kurs?: T;
   minBedrift?: T;
   minStrategi?: T;
   tilbakemelding?: T;

@@ -2,6 +2,7 @@
 
 import { useFormFields } from "@payloadcms/ui";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { simulateDarkMode } from "../email/dark-mode";
 
 /**
  * «Forhåndsvisning»-fanen på Nyhetsbrev-dokumentet: viser e-posten nøyaktig
@@ -22,6 +23,7 @@ export const NewsletterPreview = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [mobile, setMobile] = useState(false);
+  const [dark, setDark] = useState(false);
   const requestId = useRef(0);
 
   // Lexical-staten er et nytt objekt ved hver endring — sammenlign på innhold
@@ -93,34 +95,65 @@ export const NewsletterPreview = () => {
           Slik ser e-posten ut i innboksen — akkurat som den sendes.
           {loading ? " Oppdaterer …" : ""}
         </p>
-        <div style={{ display: "flex", gap: "0.25rem" }}>
-          {[
-            { label: "Desktop", value: false },
-            { label: "Mobil", value: true },
-          ].map((option) => (
-            <button
-              key={option.label}
-              type="button"
-              onClick={() => setMobile(option.value)}
-              style={{
-                padding: "0.3rem 0.75rem",
-                borderRadius: "999px",
-                border: "1px solid var(--theme-elevation-150)",
-                cursor: "pointer",
-                fontSize: "0.8rem",
-                background:
-                  mobile === option.value
-                    ? "var(--theme-elevation-800)"
-                    : "transparent",
-                color:
-                  mobile === option.value
-                    ? "var(--theme-elevation-0)"
-                    : "var(--theme-elevation-600)",
-              }}
-            >
-              {option.label}
-            </button>
-          ))}
+        <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: "0.25rem" }}>
+            {[
+              { label: "Desktop", value: false },
+              { label: "Mobil", value: true },
+            ].map((option) => (
+              <button
+                key={option.label}
+                type="button"
+                onClick={() => setMobile(option.value)}
+                style={{
+                  padding: "0.3rem 0.75rem",
+                  borderRadius: "999px",
+                  border: "1px solid var(--theme-elevation-150)",
+                  cursor: "pointer",
+                  fontSize: "0.8rem",
+                  background:
+                    mobile === option.value
+                      ? "var(--theme-elevation-800)"
+                      : "transparent",
+                  color:
+                    mobile === option.value
+                      ? "var(--theme-elevation-0)"
+                      : "var(--theme-elevation-600)",
+                }}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+          <div style={{ display: "flex", gap: "0.25rem" }}>
+            {[
+              { label: "Lys", value: false },
+              { label: "Mørk", value: true },
+            ].map((option) => (
+              <button
+                key={option.label}
+                type="button"
+                onClick={() => setDark(option.value)}
+                style={{
+                  padding: "0.3rem 0.75rem",
+                  borderRadius: "999px",
+                  border: "1px solid var(--theme-elevation-150)",
+                  cursor: "pointer",
+                  fontSize: "0.8rem",
+                  background:
+                    dark === option.value
+                      ? "var(--theme-elevation-800)"
+                      : "transparent",
+                  color:
+                    dark === option.value
+                      ? "var(--theme-elevation-0)"
+                      : "var(--theme-elevation-600)",
+                }}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -144,6 +177,20 @@ export const NewsletterPreview = () => {
         ) : null}
       </p>
 
+      {dark ? (
+        <p
+          style={{
+            margin: "0 0 0.75rem",
+            fontSize: "0.8rem",
+            color: "var(--theme-elevation-500)",
+          }}
+        >
+          Omtrent slik ser e-posten ut i klienter som tvinger mørk modus (f.eks.
+          Gmail og Outlook) — de gjør det litt ulikt, så dette er en tilnærming.
+          Apple Mail viser e-posten lys, slik den er designet.
+        </p>
+      ) : null}
+
       {error ? (
         <p style={{ color: "var(--theme-error-500)", fontSize: "0.85rem" }}>
           {error}
@@ -156,14 +203,14 @@ export const NewsletterPreview = () => {
             border: "1px solid var(--theme-elevation-150)",
             borderRadius: "10px",
             overflow: "hidden",
-            background: "#f2fafa",
+            background: dark ? "#0b0d0d" : "#f2fafa",
             display: "flex",
             justifyContent: "center",
           }}
         >
           <iframe
             title="Forhåndsvisning av nyhetsbrevet"
-            srcDoc={html}
+            srcDoc={dark ? simulateDarkMode(html) : html}
             sandbox=""
             style={{
               width: mobile ? "375px" : "100%",
@@ -171,7 +218,7 @@ export const NewsletterPreview = () => {
               height: "70vh",
               minHeight: "480px",
               border: "none",
-              background: "#f2fafa",
+              background: dark ? "#0b0d0d" : "#f2fafa",
             }}
           />
         </div>

@@ -25,6 +25,7 @@ import { BlogPosts } from "./collections/blog-posts";
 import { CaseStudies } from "./collections/case-studies";
 import { Categories } from "./collections/categories";
 import { Courses } from "./collections/courses";
+import { EmailTemplates } from "./collections/email-templates";
 import { Guides } from "./collections/guides";
 import { Media } from "./collections/media";
 import { Newsletters } from "./collections/newsletters";
@@ -178,6 +179,7 @@ export default buildConfig({
     Categories,
     Media,
     Newsletters,
+    EmailTemplates,
     // On Poynt-innhold (vises i den egenbygde «On Poynt»-nav-gruppen)
     Guides,
     Courses,
@@ -463,22 +465,102 @@ export default buildConfig({
           singular: "Skjema",
           plural: "Skjemaer",
         },
-        fields: ({ defaultFields }) =>
-          defaultFields.map((field) =>
-            "name" in field && field.name === "emails" && "fields" in field
-              ? ({
+        // Skjema-redigeringen ryddes i faner: Oppbygging / Etter innsending /
+        // E-poster / Forhåndsvisning (unavngitte tabs — ingen skjemaendring).
+        // Felt- og e-postlistene starter sammenslått for bedre oversikt.
+        fields: ({ defaultFields }) => {
+          type FormField = (typeof defaultFields)[number];
+          const byName = new Map<string, FormField>();
+          for (const field of defaultFields) {
+            if ("name" in field && typeof field.name === "string") {
+              byName.set(field.name, field);
+            }
+          }
+          const take = (name: string): FormField[] => {
+            const field = byName.get(name);
+            if (!field) return [];
+            byName.delete(name);
+            return [field];
+          };
+          const collapsed = (field: FormField): FormField =>
+            ({
+              ...field,
+              admin: {
+                ...("admin" in field ? field.admin : undefined),
+                initCollapsed: true,
+              },
+            }) as FormField;
+
+          const emailsField = take("emails").map((field) =>
+            "fields" in field
+              ? (collapsed({
                   ...field,
                   label: "E-poster ved innsending",
                   labels: { singular: "E-post", plural: "E-poster" },
                   admin: {
                     ...field.admin,
                     description:
-                      "E-poster som sendes automatisk når noen sender inn skjemaet — f.eks. en bekreftelse til innsenderen. Forhåndsvisning finner du under Drift → E-post.",
+                      "E-poster som sendes automatisk når noen sender inn skjemaet — f.eks. en bekreftelse til innsenderen. Se resultatet i «Forhåndsvisning»-fanen.",
                   },
                   fields: relabelFormEmailFields(field.fields),
-                } as typeof field)
+                } as typeof field) as FormField)
               : field
-          ),
+          );
+
+          const title = take("title");
+          const structureFields = [
+            ...take("fields").map(collapsed),
+            ...take("submitButtonLabel"),
+          ];
+          const afterSubmitFields = [
+            ...take("confirmationType"),
+            ...take("confirmationMessage"),
+            ...take("redirect"),
+          ];
+          // Eventuelle nye plugin-felter vi ikke kjenner havner i første fane
+          // i stedet for å forsvinne stille.
+          const leftovers = [...byName.values()];
+
+          return [
+            ...title,
+            {
+              type: "tabs",
+              tabs: [
+                {
+                  label: "Oppbygging",
+                  fields: [...structureFields, ...leftovers],
+                },
+                {
+                  label: "Etter innsending",
+                  description:
+                    "Hva innsenderen ser på skjermen rett etter å ha sendt inn.",
+                  fields: afterSubmitFields,
+                },
+                {
+                  label: "E-poster",
+                  fields: emailsField,
+                },
+                {
+                  label: "Forhåndsvisning",
+                  description:
+                    "E-postene fra «E-poster»-fanen slik de ser ut hos mottakeren — oppdateres mens du skriver.",
+                  fields: [
+                    {
+                      name: "emailsPreview",
+                      type: "ui",
+                      admin: {
+                        components: {
+                          Field:
+                            "/admin/components/email/form-emails-preview#FormEmailsPreview",
+                        },
+                      },
+                    },
+                  ],
+                },
+              ],
+            } as FormField,
+          ];
+        },
         // Skjemafeltene leses bak cacheTag("cms") (lib/contact.ts) — uten
         // dette slår skjemaendringer først gjennom når cachen utløper.
         hooks: {

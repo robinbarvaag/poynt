@@ -1,18 +1,37 @@
 import { Button, Section, Text } from "@react-email/components";
 import * as React from "react";
 import { EmailShell, emailStyles } from "./_layout";
+import { RichContent } from "./rich-content";
 
 export interface MagicLinkEmailProps {
   url: string;
   /** Minutter til lenken utløper (default 10). */
   expiresInMinutes?: number;
+  /**
+   * Admin-redigert innhold (E-postmaler) — erstatter standardteksten.
+   * «Logg inn»-knappen (med selve lenken) legges alltid på til slutt.
+   */
+  contentHtml?: string;
 }
 
 /** Magisk innloggingslenke for On Poynt-medlemmer. */
 export default function MagicLinkEmail({
   url,
   expiresInMinutes = 10,
+  contentHtml,
 }: MagicLinkEmailProps) {
+  if (contentHtml) {
+    return (
+      <EmailShell preview="Din innloggingslenke til On Poynt">
+        <RichContent html={contentHtml} />
+        <Section style={{ margin: "16px 0 8px" }}>
+          <Button href={url} style={emailStyles.button}>
+            Logg inn
+          </Button>
+        </Section>
+      </EmailShell>
+    );
+  }
   return (
     <EmailShell preview="Din innloggingslenke til On Poynt">
       <Text style={emailStyles.eyebrow}>Innlogging</Text>

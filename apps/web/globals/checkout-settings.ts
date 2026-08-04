@@ -165,6 +165,16 @@ export const CheckoutSettings: GlobalConfig = {
               defaultValue:
                 "Har du spørsmål om bestillingen, er det bare å svare på denne e-posten.",
             },
+            {
+              name: "emailPreview",
+              type: "ui",
+              admin: {
+                components: {
+                  Field:
+                    "/admin/components/email/order-email-preview#OrderEmailPreview",
+                },
+              },
+            },
           ],
         },
       ],

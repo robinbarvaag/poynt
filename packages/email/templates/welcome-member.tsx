@@ -1,11 +1,17 @@
 import { Button, Section, Text } from "@react-email/components";
 import * as React from "react";
 import { EmailShell, brand, emailStyles } from "./_layout";
+import { RichContent } from "./rich-content";
 
 interface WelcomeMemberEmailProps {
   memberName: string;
   tier: "Community" | "Community + AI";
   onboardingUrl: string;
+  /**
+   * Admin-redigert innhold (E-postmaler) — erstatter standardteksten.
+   * «Kom i gang»-knappen (med riktig lenke) legges alltid på til slutt.
+   */
+  contentHtml?: string;
 }
 
 /** Velkomst til nye On Poynt-medlemmer — samme Poynt-drakt som resten. */
@@ -13,7 +19,20 @@ export default function WelcomeMemberEmail({
   memberName,
   tier,
   onboardingUrl,
+  contentHtml,
 }: WelcomeMemberEmailProps) {
+  if (contentHtml) {
+    return (
+      <EmailShell preview="Velkommen til On Poynt — la oss komme i gang!">
+        <RichContent html={contentHtml} />
+        <Section style={{ margin: "16px 0 8px" }}>
+          <Button href={onboardingUrl} style={emailStyles.button}>
+            Kom i gang
+          </Button>
+        </Section>
+      </EmailShell>
+    );
+  }
   return (
     <EmailShell preview="Velkommen til On Poynt — la oss komme i gang!">
       <Text style={emailStyles.eyebrow}>Medlemskap · {tier}</Text>

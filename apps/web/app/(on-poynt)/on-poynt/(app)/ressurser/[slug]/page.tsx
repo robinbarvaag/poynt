@@ -125,11 +125,11 @@ export default async function GuidePage({ params }: GuidePageProps) {
       </div>
 
       <Link
-        href="/on-poynt/ressurser"
+        href="/on-poynt/laering"
         className="col-[content] inline-flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" />
-        <span>Tilbake til ressurser</span>
+        <span>Tilbake til Læring</span>
       </Link>
 
       <GuideBlocks blocks={guide.content} />

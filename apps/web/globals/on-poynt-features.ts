@@ -94,7 +94,12 @@ export const OnPoyntFeatures: GlobalConfig = {
         featureField(
           "laering",
           "Læring",
-          "Guider og kurs (hele Læring-huben)."
+          "Læring-huben med guider. Skrus denne av, forsvinner hele Læring-området."
+        ),
+        featureField(
+          "kurs",
+          "Kurs",
+          "Kurs-delen av Læring. Skru av for å vise bare guider."
         ),
         featureField(
           "minBedrift",

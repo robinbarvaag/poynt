@@ -1,6 +1,7 @@
 import { Button, Column, Row, Section, Text } from "@react-email/components";
 import * as React from "react";
 import { EmailShell, brand, emailStyles } from "./_layout";
+import { RichContent } from "./rich-content";
 
 export interface SaleNotificationItem {
   name: string;
@@ -22,6 +23,11 @@ export interface SaleNotificationProps {
   paymentProvider?: string;
   /** Lenke til ordren i admin. */
   adminUrl?: string;
+  /**
+   * Admin-redigert innledning (E-postmaler) — erstatter overskrift og intro.
+   * Kunde-, produkt- og sumdetaljene under legges alltid på automatisk.
+   */
+  introHtml?: string;
 }
 
 /** Internt varsel til Poynt når det kommer et salg eller nytt medlemskap. */
@@ -34,16 +40,23 @@ export default function SaleNotificationEmail({
   total,
   paymentProvider,
   adminUrl,
+  introHtml,
 }: SaleNotificationProps) {
   return (
     <EmailShell preview={`${kind} – ${customerEmail}`}>
-      <Text style={emailStyles.eyebrow}>{kind}</Text>
-      <Text style={emailStyles.heading}>Kaching! 🎉</Text>
-      <Text style={emailStyles.text}>
-        {orderNumber
-          ? `Det er lagt inn en ny bestilling (#${orderNumber}) på poynt.no.`
-          : "Det har kommet et nytt salg på poynt.no."}
-      </Text>
+      {introHtml ? (
+        <RichContent html={introHtml} />
+      ) : (
+        <>
+          <Text style={emailStyles.eyebrow}>{kind}</Text>
+          <Text style={emailStyles.heading}>Kaching! 🎉</Text>
+          <Text style={emailStyles.text}>
+            {orderNumber
+              ? `Det er lagt inn en ny bestilling (#${orderNumber}) på poynt.no.`
+              : "Det har kommet et nytt salg på poynt.no."}
+          </Text>
+        </>
+      )}
 
       <Section>
         <Text style={emailStyles.label}>Kunde</Text>

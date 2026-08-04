@@ -43,7 +43,8 @@ export function richText(input: string | string[]) {
 export type DocBlock =
   | string
   | { heading: string; level?: 2 | 3 }
-  | { list: string[] };
+  | { list: string[] }
+  | { quote: string };
 
 /**
  * Bygger et Lexical-dokument med overskrifter og punktlister i tillegg til
@@ -63,6 +64,16 @@ export function richDoc(blocks: DocBlock[]) {
         version: 1,
         direction: "ltr" as const,
         children: [textNode(block.heading)],
+      };
+    }
+    if ("quote" in block) {
+      return {
+        type: "quote",
+        format: "" as const,
+        indent: 0,
+        version: 1,
+        direction: "ltr" as const,
+        children: [textNode(block.quote)],
       };
     }
     return {

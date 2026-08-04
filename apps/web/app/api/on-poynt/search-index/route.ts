@@ -23,6 +23,12 @@ export async function GET(req: NextRequest) {
   try {
     const payload = await getPayload({ config });
     const published = { _status: { equals: "published" } } as const;
+    // Kurs-flagget leses direkte fra globalen (ikke getFeatureFlags) siden
+    // "use cache" ikke gjelder i route handlers.
+    const features = await payload
+      .findGlobal({ slug: "on-poynt-features" })
+      .catch(() => null);
+    const kursEnabled = features?.kurs !== false;
     const [guides, courses] = await Promise.all([
       payload.find({
         collection: "guides",
@@ -31,13 +37,15 @@ export async function GET(req: NextRequest) {
         limit: 300,
         select: { title: true, slug: true },
       }),
-      payload.find({
-        collection: "courses",
-        where: published,
-        depth: 0,
-        limit: 300,
-        select: { title: true, slug: true },
-      }),
+      kursEnabled
+        ? payload.find({
+            collection: "courses",
+            where: published,
+            depth: 0,
+            limit: 300,
+            select: { title: true, slug: true },
+          })
+        : Promise.resolve({ docs: [] }),
     ]);
 
     const items: SearchIndexItem[] = [

@@ -16,6 +16,9 @@ export * from "./chat";
 // Feedback / funksjonsønsker fra medlemmer
 export * from "./feedback";
 
+// Kursfremdrift (fullførte leksjoner) per medlem
+export * from "./course-progress";
+
 // Membership applications (søk → godkjenn)
 export * from "./membership-application";
 

@@ -1,18 +1,37 @@
 import { Button, Section, Text } from "@react-email/components";
 import * as React from "react";
 import { EmailShell, emailStyles } from "./_layout";
+import { RichContent } from "./rich-content";
 
 export interface PasswordResetEmailProps {
   url: string;
   /** Visningsnavn på mottakeren (valgfritt). */
   name?: string;
+  /**
+   * Admin-redigert innhold (E-postmaler) — erstatter standardteksten.
+   * «Velg nytt passord»-knappen (med selve lenken) legges alltid på til slutt.
+   */
+  contentHtml?: string;
 }
 
 /** Tilbakestilling av passord for Poynt-admin (Payload). */
 export default function PasswordResetEmail({
   url,
   name,
+  contentHtml,
 }: PasswordResetEmailProps) {
+  if (contentHtml) {
+    return (
+      <EmailShell preview="Tilbakestill passordet ditt for Poynt-admin">
+        <RichContent html={contentHtml} />
+        <Section style={{ margin: "16px 0 8px" }}>
+          <Button href={url} style={emailStyles.button}>
+            Velg nytt passord
+          </Button>
+        </Section>
+      </EmailShell>
+    );
+  }
   return (
     <EmailShell preview="Tilbakestill passordet ditt for Poynt-admin">
       <Text style={emailStyles.eyebrow}>Admin</Text>

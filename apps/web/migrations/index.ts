@@ -49,6 +49,8 @@ import * as migration_20260803_162537 from './20260803_162537';
 import * as migration_20260804_130110 from './20260804_130110';
 import * as migration_20260804_154129 from './20260804_154129';
 import * as migration_20260804_170251_courses_quality_fields from './20260804_170251_courses_quality_fields';
+import * as migration_20260804_193017 from './20260804_193017';
+import * as migration_20260804_201353_kurs_feature_flag from './20260804_201353_kurs_feature_flag';
 
 export const migrations = [
   {
@@ -304,6 +306,16 @@ export const migrations = [
   {
     up: migration_20260804_170251_courses_quality_fields.up,
     down: migration_20260804_170251_courses_quality_fields.down,
-    name: '20260804_170251_courses_quality_fields'
+    name: '20260804_170251_courses_quality_fields',
+  },
+  {
+    up: migration_20260804_193017.up,
+    down: migration_20260804_193017.down,
+    name: '20260804_193017',
+  },
+  {
+    up: migration_20260804_201353_kurs_feature_flag.up,
+    down: migration_20260804_201353_kurs_feature_flag.down,
+    name: '20260804_201353_kurs_feature_flag'
   },
 ];

@@ -16,6 +16,7 @@ export const FEATURE_KEYS = [
   // Øvrige områder
   "fellesskap",
   "laering",
+  "kurs",
   "minBedrift",
   "minStrategi",
   "tilbakemelding",

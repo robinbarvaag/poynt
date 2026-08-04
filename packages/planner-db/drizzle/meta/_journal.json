@@ -141,6 +141,13 @@
       "when": 1782937405391,
       "tag": "0019_strong_nighthawk",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1785880375800,
+      "tag": "0020_cynical_mother_askani",
+      "breakpoints": true
     }
   ]
 }

@@ -2,7 +2,7 @@ import { ArticleSearch } from "@/components/article-search";
 import { ChannelFilter } from "@/components/learning/channel-filter";
 import { LearningFilter } from "@/components/learning/learning-filter";
 import { PayloadImage } from "@/components/payload-image";
-import { requireFeature } from "@/lib/features/server";
+import { getFeatureFlags, requireFeature } from "@/lib/features/server";
 import type { Category, Course, Guide, Media } from "@/payload-types";
 import config from "@/payload.config";
 import {
@@ -13,6 +13,7 @@ import {
   EmptyState,
   PageHeader,
 } from "@poynt/ui";
+import { Icon, type IconName } from "@poynt/ui/icons";
 import { getPayload } from "payload";
 import type { ReactNode } from "react";
 
@@ -87,8 +88,52 @@ function mapCourse(c: Course): LearningItem {
   };
 }
 
+function SectionHeading({
+  icon,
+  title,
+  count,
+}: {
+  icon: IconName;
+  title: string;
+  count: number;
+}) {
+  return (
+    <div className="flex items-center gap-2.5">
+      <span className="flex size-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
+        <Icon name={icon} className="size-4" />
+      </span>
+      <h2 className="font-bold font-heading text-xl tracking-tight">{title}</h2>
+      <span className="rounded-full bg-muted px-2.5 py-0.5 font-medium text-muted-foreground text-xs tabular-nums">
+        {count}
+      </span>
+    </div>
+  );
+}
+
+function CardGrid({ items }: { items: LearningItem[] }) {
+  return (
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {items.map((item) => (
+        <ContentCard
+          key={item.id}
+          href={item.href}
+          format={item.format}
+          title={item.title}
+          lede={item.lede}
+          category={item.category}
+          cover={item.cover}
+          meta={item.meta}
+        />
+      ))}
+    </div>
+  );
+}
+
 export default async function LearningPage({ searchParams }: PageProps) {
   await requireFeature("laering");
+  const flags = await getFeatureFlags();
+  const kursEnabled = flags.kurs;
+
   const { type, kategori, sok } = await searchParams;
   const payload = await getPayload({ config });
 
@@ -100,34 +145,43 @@ export default async function LearningPage({ searchParams }: PageProps) {
       depth: 2,
       limit: 200,
     }),
-    payload.find({
-      collection: "courses",
-      where: { _status: { equals: "published" } },
-      sort: "-publishedAt",
-      depth: 2,
-      limit: 200,
-    }),
+    kursEnabled
+      ? payload.find({
+          collection: "courses",
+          where: { _status: { equals: "published" } },
+          sort: "-publishedAt",
+          depth: 2,
+          limit: 200,
+        })
+      : Promise.resolve({ docs: [] as Course[] }),
     payload.find({ collection: "categories", limit: 200 }),
   ]);
 
-  const items: LearningItem[] = [
-    ...guides.docs.map(mapGuide),
-    ...courses.docs.map(mapCourse),
-  ];
+  const guideItems = guides.docs.map(mapGuide);
+  const courseItems = courses.docs.map(mapCourse);
+  const items: LearningItem[] = [...guideItems, ...courseItems];
 
-  const typeFilter = type && type !== "alt" ? type : null;
+  const typeFilter =
+    type && type !== "alt" && (type !== "kurs" || kursEnabled) ? type : null;
   const query = sok?.toLowerCase().trim();
 
-  let filtered = items;
-  if (typeFilter) filtered = filtered.filter((i) => i.format === typeFilter);
-  if (kategori)
-    filtered = filtered.filter((i) => i.categorySlugs.includes(kategori));
-  if (query)
-    filtered = filtered.filter(
-      (i) =>
-        i.title.toLowerCase().includes(query) ||
-        i.lede?.toLowerCase().includes(query)
-    );
+  const matches = (i: LearningItem) => {
+    if (kategori && !i.categorySlugs.includes(kategori)) return false;
+    if (
+      query &&
+      !i.title.toLowerCase().includes(query) &&
+      !i.lede?.toLowerCase().includes(query)
+    ) {
+      return false;
+    }
+    return true;
+  };
+
+  const filteredGuides = guideItems.filter(matches);
+  const filteredCourses = courseItems.filter(matches);
+  const filtered = items
+    .filter(matches)
+    .filter((i) => !typeFilter || i.format === typeFilter);
 
   const isFiltering = Boolean(typeFilter || kategori || query);
 
@@ -147,7 +201,10 @@ export default async function LearningPage({ searchParams }: PageProps) {
       [...filtered].sort((a, b) => b.date - a.date)[0] ??
       null)
     : null;
-  const gridItems = [...filtered]
+
+  const sectionCourses = filteredCourses.filter((i) => i.id !== featured?.id);
+  const sectionGuides = filteredGuides.filter((i) => i.id !== featured?.id);
+  const flatItems = [...filtered]
     .filter((i) => i.id !== featured?.id)
     .sort((a, b) => b.date - a.date);
 
@@ -155,7 +212,11 @@ export default async function LearningPage({ searchParams }: PageProps) {
     <div className="flex flex-col gap-10">
       <PageHeader
         title="Læring"
-        description="Guider og kurs for markedsføring og innholdsproduksjon — alt samlet på ett sted."
+        description={
+          kursEnabled
+            ? "Kurs og guider for markedsføring og innholdsproduksjon — alt samlet på ett sted."
+            : "Guider for markedsføring og innholdsproduksjon — alt samlet på ett sted."
+        }
       />
 
       <div className="flex flex-col gap-5 rounded-3xl bg-card p-4 ring-1 ring-foreground/10 sm:p-5">
@@ -163,12 +224,14 @@ export default async function LearningPage({ searchParams }: PageProps) {
           <ArticleSearch />
         </div>
 
-        <div className="flex flex-col gap-2">
-          <span className="px-0.5 font-heading font-semibold text-muted-foreground text-xs uppercase tracking-[0.16em]">
-            Type
-          </span>
-          <LearningFilter />
-        </div>
+        {kursEnabled && (
+          <div className="flex flex-col gap-2">
+            <span className="px-0.5 font-heading font-semibold text-muted-foreground text-xs uppercase tracking-[0.16em]">
+              Type
+            </span>
+            <LearningFilter />
+          </div>
+        )}
 
         {categories.length > 0 && (
           <div className="flex flex-col gap-2">
@@ -208,21 +271,36 @@ export default async function LearningPage({ searchParams }: PageProps) {
             />
           )}
 
-          {gridItems.length > 0 && (
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {gridItems.map((item) => (
-                <ContentCard
-                  key={item.id}
-                  href={item.href}
-                  format={item.format}
-                  title={item.title}
-                  lede={item.lede}
-                  category={item.category}
-                  cover={item.cover}
-                  meta={item.meta}
-                />
-              ))}
-            </div>
+          {typeFilter ? (
+            // Filtrert på type — én flat liste holder.
+            flatItems.length > 0 && <CardGrid items={flatItems} />
+          ) : (
+            // Uten type-filter: kurs og guider som egne seksjoner.
+            <>
+              {kursEnabled && sectionCourses.length > 0 && (
+                <section className="flex flex-col gap-5">
+                  <SectionHeading
+                    icon="graduation-cap"
+                    title="Kurs"
+                    count={sectionCourses.length}
+                  />
+                  <CardGrid items={sectionCourses} />
+                </section>
+              )}
+
+              {sectionGuides.length > 0 && (
+                <section className="flex flex-col gap-5">
+                  {kursEnabled && (
+                    <SectionHeading
+                      icon="compass"
+                      title="Guider"
+                      count={sectionGuides.length}
+                    />
+                  )}
+                  <CardGrid items={sectionGuides} />
+                </section>
+              )}
+            </>
           )}
         </div>
       )}

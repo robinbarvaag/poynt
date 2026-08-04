@@ -5,12 +5,104 @@ import type {
 } from "./templates/order-confirmation";
 
 export type { OrderConfirmationContent, OrderConfirmationItem };
-export { renderEmailPreviews, type EmailPreview } from "./previews";
+export {
+  renderEmailPreviews,
+  type EmailPreview,
+  type PreviewTemplateOverrides,
+} from "./previews";
 
 export interface EmailAttachment {
   filename: string;
   /** Filinnhold, base64-kodet. */
   content: string;
+}
+
+/**
+ * Admin-redigert overstyring av en e-postmal (fra «E-postmaler» i Payload).
+ * `subject` og `bodyHtml` kan inneholde {{flettefelt}} som fylles ved sending.
+ */
+export interface EmailTemplateOverride {
+  subject?: string;
+  bodyHtml?: string;
+}
+
+type EmailTemplateProvider = (
+  key: string
+) => Promise<EmailTemplateOverride | null>;
+
+let templateProvider: EmailTemplateProvider | null = null;
+
+/**
+ * Registrer oppslaget mot admin-redigerte maler («E-postmaler» i Payload).
+ * Appen registrerer denne ved oppstart (instrumentation.ts); send-funksjonene
+ * slår så opp malen selv. Uten provider (seed-scripts o.l.) brukes de kodede
+ * standardtekstene.
+ */
+export function setEmailTemplateProvider(provider: EmailTemplateProvider) {
+  templateProvider = provider;
+}
+
+/** Hent overstyring for en mal — feil skal aldri velte en utsending. */
+async function getTemplateOverride(
+  key: string
+): Promise<EmailTemplateOverride | null> {
+  if (!templateProvider) return null;
+  try {
+    return await templateProvider(key);
+  } catch (error) {
+    console.error(`Klarte ikke hente e-postmalen «${key}»:`, error);
+    return null;
+  }
+}
+
+/**
+ * Fyll {{flettefelt}} med verdier. Ukjente felt fjernes (blir tom streng) —
+ * i forhåndsvisningen brukes i stedet eksempeldata, se previews.ts.
+ */
+export function fillEmailWildcards(
+  text: string,
+  values: Record<string, string | number | undefined>
+): string {
+  return text.replace(/\{\{(.+?)\}\}/g, (_, raw: string) => {
+    const value = values[raw.trim().toLowerCase()];
+    return value === undefined || value === null ? "" : String(value);
+  });
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+/**
+ * subject/bodyHtml fra en overstyring, ferdig utfylt med flettefelt-verdier.
+ * Verdiene kommer fra besøkende (navn, melding …) og HTML-escapes i brødteksten
+ * så innsendt tekst aldri kan smugle inn HTML i e-posten.
+ */
+function applyTemplate(
+  override: EmailTemplateOverride | null,
+  values: Record<string, string | number | undefined>
+): { subject?: string; contentHtml?: string } {
+  if (!override) return {};
+  const htmlSafeValues = Object.fromEntries(
+    Object.entries(values).map(([key, value]) => [
+      key,
+      value === undefined
+        ? undefined
+        : escapeHtml(String(value)).replace(/\n/g, "<br />"),
+    ])
+  );
+  return {
+    subject: override.subject
+      ? fillEmailWildcards(override.subject, values)
+      : undefined,
+    contentHtml: override.bodyHtml
+      ? fillEmailWildcards(override.bodyHtml, htmlSafeValues)
+      : undefined,
+  };
 }
 
 let _resend: Resend | null = null;
@@ -174,14 +266,30 @@ export async function sendSaleNotification(params: {
     "./templates/sale-notification"
   );
 
-  const html = await render(SaleNotificationEmail(params));
+  const template = applyTemplate(
+    await getTemplateOverride("sale-notification"),
+    {
+      type: params.kind,
+      ordrenummer: params.orderNumber,
+      navn: params.customerName,
+      epost: params.customerEmail,
+      sum: params.total,
+      betaling: params.paymentProvider,
+    }
+  );
+
+  const html = await render(
+    SaleNotificationEmail({ ...params, introHtml: template.contentHtml })
+  );
 
   await sendEmail({
     from: buildFrom("Poynt"),
     to: notifyTo,
-    subject: params.total
-      ? `${params.kind}: ${params.total} kr${params.orderNumber ? ` (#${params.orderNumber})` : ""}`
-      : `${params.kind}: ${params.customerEmail}`,
+    subject:
+      template.subject ||
+      (params.total
+        ? `${params.kind}: ${params.total} kr${params.orderNumber ? ` (#${params.orderNumber})` : ""}`
+        : `${params.kind}: ${params.customerEmail}`),
     html,
   });
 }
@@ -207,12 +315,22 @@ export async function sendNewsletterSignupNotification(params: {
     "./templates/newsletter-signup-notification"
   );
 
-  const html = await render(NewsletterSignupNotificationEmail(params));
+  const template = applyTemplate(
+    await getTemplateOverride("newsletter-signup-notification"),
+    { epost: params.email, kilde: params.source }
+  );
+
+  const html = await render(
+    NewsletterSignupNotificationEmail({
+      ...params,
+      introHtml: template.contentHtml,
+    })
+  );
 
   await sendEmail({
     from: buildFrom("Poynt"),
     to: notifyTo,
-    subject: `Ny på nyhetsbrevet: ${params.email}`,
+    subject: template.subject || `Ny på nyhetsbrevet: ${params.email}`,
     html,
   });
 }
@@ -231,17 +349,22 @@ export async function sendMagicLinkEmail(params: {
   const { render } = await import("@react-email/render");
   const { default: MagicLinkEmail } = await import("./templates/magic-link");
 
+  const template = applyTemplate(await getTemplateOverride("magic-link"), {
+    minutter: params.expiresInMinutes ?? 10,
+  });
+
   const html = await render(
     MagicLinkEmail({
       url: params.url,
       expiresInMinutes: params.expiresInMinutes,
+      contentHtml: template.contentHtml,
     })
   );
 
   await sendEmail({
     from: buildFrom("On Poynt"),
     to: params.email,
-    subject: "Logg inn på On Poynt",
+    subject: template.subject || "Logg inn på On Poynt",
     html,
   });
 }
@@ -259,7 +382,33 @@ export async function renderPasswordResetEmail(params: {
     "./templates/password-reset"
   );
 
-  return render(PasswordResetEmail({ url: params.url, name: params.name }));
+  const template = applyTemplate(await getTemplateOverride("password-reset"), {
+    navn: params.name,
+  });
+
+  return render(
+    PasswordResetEmail({
+      url: params.url,
+      name: params.name,
+      contentHtml: template.contentHtml,
+    })
+  );
+}
+
+/**
+ * Emnefeltet for en mal: admin-redigert hvis satt (med flettefelt utfylt),
+ * ellers standardteksten. Brukes der emnet genereres separat fra innholdet
+ * (f.eks. Payload sin forgotPassword-hook).
+ */
+export async function resolveTemplateSubject(
+  key: string,
+  values: Record<string, string | number | undefined>,
+  fallback: string
+): Promise<string> {
+  const override = await getTemplateOverride(key);
+  return override?.subject
+    ? fillEmailWildcards(override.subject, values)
+    : fallback;
 }
 
 /**
@@ -464,25 +613,48 @@ export async function sendContactEmails(params: {
 
   const from = buildFrom("Poynt");
 
+  const wildcardValues = {
+    navn: params.name,
+    epost: params.email,
+    telefon: params.phone,
+    gjelder: params.subject,
+    melding: params.message,
+    kilde: params.source,
+  };
+
   const notifyTo = resolveNotifyTo(params.to);
   if (notifyTo) {
-    const html = await render(ContactNotificationEmail(params));
+    const template = applyTemplate(
+      await getTemplateOverride("contact-notification"),
+      wildcardValues
+    );
+    const html = await render(
+      ContactNotificationEmail({ ...params, introHtml: template.contentHtml })
+    );
     await sendEmail({
       from,
       to: notifyTo,
       replyTo: params.email,
-      subject: `Ny henvendelse fra ${params.name}`,
+      subject: template.subject || `Ny henvendelse fra ${params.name}`,
       html,
     });
   }
 
+  const confirmationTemplate = applyTemplate(
+    await getTemplateOverride("contact-confirmation"),
+    wildcardValues
+  );
   const confirmationHtml = await render(
-    ContactConfirmationEmail({ name: params.name, message: params.message })
+    ContactConfirmationEmail({
+      name: params.name,
+      message: params.message,
+      contentHtml: confirmationTemplate.contentHtml,
+    })
   );
   await sendEmail({
     from,
     to: params.email,
-    subject: "Takk for din henvendelse – Poynt",
+    subject: confirmationTemplate.subject || "Takk for din henvendelse – Poynt",
     html: confirmationHtml,
   });
 }
@@ -582,18 +754,25 @@ export async function sendMemberWelcomeEmail(params: {
 
   const onboardingUrl = `${process.env.NEXT_PUBLIC_URL || "http://localhost:3000"}/on-poynt/onboarding`;
 
+  const template = applyTemplate(await getTemplateOverride("welcome-member"), {
+    navn: params.memberName,
+    nivå: params.tier,
+    niva: params.tier,
+  });
+
   const emailHtml = await render(
     WelcomeMemberEmail({
       memberName: params.memberName,
       tier: params.tier,
       onboardingUrl,
+      contentHtml: template.contentHtml,
     })
   );
 
   await sendEmail({
     from: buildFrom("On Poynt"),
     to: params.email,
-    subject: "Velkommen til On Poynt!",
+    subject: template.subject || "Velkommen til On Poynt!",
     html: emailHtml,
   });
 }

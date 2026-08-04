@@ -37,12 +37,15 @@ import { FolderTableCell as FolderTableCell_f9c02e79a4aed9a3924487c0cd4cafb1 } f
 import { FolderField as FolderField_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 import { NewsletterPreview as NewsletterPreview_34919c8e80fce11b54833d79b19e2329 } from '../../../admin/components/newsletters/newsletter-preview'
 import { SendNewsletterPanel as SendNewsletterPanel_75d3fa918eb52ceef0f5f7d7e08ab991 } from '../../../admin/components/newsletters/send-newsletter-panel'
+import { EmailTemplatePreview as EmailTemplatePreview_3c8f61e6f3f8a73cafef53b9dcdb32b6 } from '../../../admin/components/email-templates/email-template-preview'
 import { BookmarkOgFetch as BookmarkOgFetch_62526a99516db3c8451d3b97a5d7d286 } from '../../../admin/components/guides/bookmark-og-fetch'
 import { LinkToDoc as LinkToDoc_2e9be70cd13299dd4a11a5bd739a5a3c } from '@payloadcms/plugin-stripe/client'
+import { FormEmailsPreview as FormEmailsPreview_f70347317f04cd1ed95d2f261d6772ce } from '../../../admin/components/email/form-emails-preview'
 import { SubmissionView as SubmissionView_215eee700df82efc4fc6a7bab7c3add4 } from '../../../admin/components/submission-view'
 import { FolderTypeField as FolderTypeField_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
 import { LinkRowLabel as LinkRowLabel_f0fd4bee3885f2a3c8ca119ef52b5ffe } from '../../../admin/components/row-labels'
 import { ColumnRowLabel as ColumnRowLabel_f0fd4bee3885f2a3c8ca119ef52b5ffe } from '../../../admin/components/row-labels'
+import { OrderEmailPreview as OrderEmailPreview_da3d7bdfc79ddf11f937fbc6775a965d } from '../../../admin/components/email/order-email-preview'
 import { OnPoyntNavGroup as OnPoyntNavGroup_cbdd0274d832c585cca0ce893b25cc1e } from '../../../admin/components/on-poynt-nav-group'
 import { ContactsNavGroup as ContactsNavGroup_eaa602077b61895f57de2f69a860ec84 } from '../../../admin/components/contacts-nav-group'
 import { SetupNavGroup as SetupNavGroup_49db99829140aef9ec2dd6ea8d7e6d7f } from '../../../admin/components/setup-nav-group'
@@ -103,12 +106,15 @@ export const importMap = {
   "@payloadcms/next/rsc#FolderField": FolderField_f9c02e79a4aed9a3924487c0cd4cafb1,
   "/admin/components/newsletters/newsletter-preview#NewsletterPreview": NewsletterPreview_34919c8e80fce11b54833d79b19e2329,
   "/admin/components/newsletters/send-newsletter-panel#SendNewsletterPanel": SendNewsletterPanel_75d3fa918eb52ceef0f5f7d7e08ab991,
+  "/admin/components/email-templates/email-template-preview#EmailTemplatePreview": EmailTemplatePreview_3c8f61e6f3f8a73cafef53b9dcdb32b6,
   "/admin/components/guides/bookmark-og-fetch#BookmarkOgFetch": BookmarkOgFetch_62526a99516db3c8451d3b97a5d7d286,
   "@payloadcms/plugin-stripe/client#LinkToDoc": LinkToDoc_2e9be70cd13299dd4a11a5bd739a5a3c,
+  "/admin/components/email/form-emails-preview#FormEmailsPreview": FormEmailsPreview_f70347317f04cd1ed95d2f261d6772ce,
   "/admin/components/submission-view#SubmissionView": SubmissionView_215eee700df82efc4fc6a7bab7c3add4,
   "@payloadcms/next/client#FolderTypeField": FolderTypeField_2b8867833a34864a02ddf429b0728a40,
   "/admin/components/row-labels#LinkRowLabel": LinkRowLabel_f0fd4bee3885f2a3c8ca119ef52b5ffe,
   "/admin/components/row-labels#ColumnRowLabel": ColumnRowLabel_f0fd4bee3885f2a3c8ca119ef52b5ffe,
+  "/admin/components/email/order-email-preview#OrderEmailPreview": OrderEmailPreview_da3d7bdfc79ddf11f937fbc6775a965d,
   "/admin/components/on-poynt-nav-group#OnPoyntNavGroup": OnPoyntNavGroup_cbdd0274d832c585cca0ce893b25cc1e,
   "/admin/components/contacts-nav-group#ContactsNavGroup": ContactsNavGroup_eaa602077b61895f57de2f69a860ec84,
   "/admin/components/setup-nav-group#SetupNavGroup": SetupNavGroup_49db99829140aef9ec2dd6ea8d7e6d7f,
