@@ -4126,6 +4126,20 @@ export interface Homepage {
      */
     noIndex?: boolean | null;
   };
+  /**
+   * Settes av AI-vurderingen (0–100).
+   */
+  qualityScore?: number | null;
+  qualityReviewedAt?: string | null;
+  qualityReview?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -4591,6 +4605,9 @@ export interface HomepageSelect<T extends boolean = true> {
         image?: T;
         noIndex?: T;
       };
+  qualityScore?: T;
+  qualityReviewedAt?: T;
+  qualityReview?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

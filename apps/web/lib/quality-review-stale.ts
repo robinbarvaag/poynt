@@ -2,6 +2,7 @@ import {
   serializeBlogPostContent,
   serializeCaseStudyContent,
   serializeCourseContent,
+  serializeHomepageContent,
   serializePageContent,
   serializeProductContent,
   serializeServiceContent,
@@ -15,6 +16,7 @@ import type {
   CaseStudy,
   Course,
   Guide,
+  Homepage,
   Page,
   Product,
   Service,
@@ -43,13 +45,34 @@ export const QUALITY_COLLECTIONS = [
 
 export type QualityCollectionSlug = (typeof QUALITY_COLLECTIONS)[number];
 
+/**
+ * Globaler med kvalitetsvurdering. Forsiden er bygget av de samme
+ * layout-blokkene som Sider og er vår viktigste salgsside, så den skal
+ * vurderes på lik linje — men den har ingen id, så alle oppslag må gå via
+ * `payload.findGlobal`/`updateGlobal` i stedet for `findByID`.
+ */
+export const QUALITY_GLOBALS = ["homepage"] as const;
+
+export type QualityGlobalSlug = (typeof QUALITY_GLOBALS)[number];
+
+/** Alt som kan kvalitetsvurderes — collection eller global. */
+export type QualityTargetSlug = QualityCollectionSlug | QualityGlobalSlug;
+
 export function isQualityCollection(
   slug: string
 ): slug is QualityCollectionSlug {
   return (QUALITY_COLLECTIONS as readonly string[]).includes(slug);
 }
 
-const SERIALIZERS: Record<QualityCollectionSlug, (doc: unknown) => string> = {
+export function isQualityGlobal(slug: string): slug is QualityGlobalSlug {
+  return (QUALITY_GLOBALS as readonly string[]).includes(slug);
+}
+
+export function isQualityTarget(slug: string): slug is QualityTargetSlug {
+  return isQualityCollection(slug) || isQualityGlobal(slug);
+}
+
+const SERIALIZERS: Record<QualityTargetSlug, (doc: unknown) => string> = {
   guides: (doc) => serializeGuideContent(doc as Guide),
   courses: (doc) => serializeCourseContent(doc as Course),
   pages: (doc) => serializePageContent(doc as Page),
@@ -57,10 +80,11 @@ const SERIALIZERS: Record<QualityCollectionSlug, (doc: unknown) => string> = {
   "case-studies": (doc) => serializeCaseStudyContent(doc as CaseStudy),
   services: (doc) => serializeServiceContent(doc as Service),
   products: (doc) => serializeProductContent(doc as Product),
+  homepage: (doc) => serializeHomepageContent(doc as Homepage),
 };
 
 export function serializeQualityContent(
-  slug: QualityCollectionSlug,
+  slug: QualityTargetSlug,
   doc: unknown
 ): string {
   return SERIALIZERS[slug](doc);
@@ -90,7 +114,7 @@ export interface QualityStaleInfo {
 
 /** Re-serialiserer dokumentet og sammenligner hash med forrige vurdering. */
 export function getQualityStaleInfo(
-  slug: QualityCollectionSlug,
+  slug: QualityTargetSlug,
   doc: QualityDocFields & Record<string, unknown>
 ): QualityStaleInfo {
   const score = typeof doc.qualityScore === "number" ? doc.qualityScore : null;

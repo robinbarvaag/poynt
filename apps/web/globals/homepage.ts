@@ -1,5 +1,9 @@
 import type { GlobalConfig } from "payload";
 import { layoutBlocks } from "../blocks/layout-blocks";
+import {
+  qualityDataFields,
+  qualityReviewPanel,
+} from "../fields/quality-review";
 import { seoMetaField } from "../fields/seo-meta";
 import { revalidateCmsAfterChange } from "../lib/revalidate-cms";
 
@@ -64,6 +68,9 @@ export const Homepage: GlobalConfig = {
                 },
               },
             },
+            // Forsiden er en global uten id — API-et tar den via ?global=,
+            // se lib/quality-review-stale.ts (QUALITY_GLOBALS).
+            qualityReviewPanel(),
           ],
         },
         {
@@ -77,5 +84,8 @@ export const Homepage: GlobalConfig = {
         },
       ],
     },
+    // Score + sist vurdert i sidebaren, som på Sider. Krever migrasjon
+    // (nye kolonner på homepage-globalen).
+    ...qualityDataFields({ sidebarSection: true }),
   ],
 };

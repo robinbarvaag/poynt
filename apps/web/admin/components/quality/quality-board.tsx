@@ -171,11 +171,12 @@ export const QualityBoard = ({
       const res = await fetch("/api/ai/quality-review", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          collection: row.collection,
-          id: row.id,
-          persist: true,
-        }),
+        body: JSON.stringify(
+          // Globaler (Forsiden) har ingen id og går via ?global=.
+          row.isGlobal
+            ? { global: row.collection, persist: true }
+            : { collection: row.collection, id: row.id, persist: true }
+        ),
       });
       const data = (await res.json()) as {
         totalScore?: number;
@@ -460,7 +461,11 @@ export const QualityBoard = ({
                     }}
                   >
                     <Link
-                      href={`/admin/collections/${row.collection}/${row.id}`}
+                      href={
+                        row.isGlobal
+                          ? `/admin/globals/${row.collection}`
+                          : `/admin/collections/${row.collection}/${row.id}`
+                      }
                       prefetch={false}
                       style={{ textDecoration: "none" }}
                     >

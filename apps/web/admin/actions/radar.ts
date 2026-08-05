@@ -1,12 +1,25 @@
 "use server";
 
 import { inngest } from "@/lib/inngest/client";
+import {
+  type BindersData,
+  getBindersWidgetData,
+} from "@/lib/radar/widget-data";
 import { requireAdmin } from "@/lib/require-admin";
 import { db, eq } from "@poynt/planner-db";
 import {
   type ContentSuggestionStatus,
   plannerContentSuggestion,
 } from "@poynt/planner-db/schema";
+
+/**
+ * Data til den flytende Bindersen-assistenten (klienthentet). Dashbord-
+ * varianten henter det samme direkte i serverkomponenten.
+ */
+export async function getBindersData(): Promise<BindersData> {
+  await requireAdmin();
+  return getBindersWidgetData();
+}
 
 /**
  * Setter status på et forslag (snooze / ferdig / avvis / gjenåpne). Avviste

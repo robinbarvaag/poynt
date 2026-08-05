@@ -212,6 +212,9 @@ export default buildConfig({
         "/admin/components/setup-nav-group#SetupNavGroup",
       ],
       beforeDashboard: ["/admin/components/dashboard/radar-widget#RadarWidget"],
+      // Flytende Bindersen-assistent på alle admin-sider (unntatt dashbordet,
+      // der den allerede står inline).
+      providers: ["/admin/components/binders-provider#BindersProvider"],
       views: {
         radar: {
           Component: "/admin/views/radar/list#RadarListView",

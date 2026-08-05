@@ -50,6 +50,7 @@ import { OnPoyntNavGroup as OnPoyntNavGroup_cbdd0274d832c585cca0ce893b25cc1e } f
 import { ContactsNavGroup as ContactsNavGroup_eaa602077b61895f57de2f69a860ec84 } from '../../../admin/components/contacts-nav-group'
 import { SetupNavGroup as SetupNavGroup_49db99829140aef9ec2dd6ea8d7e6d7f } from '../../../admin/components/setup-nav-group'
 import { RadarWidget as RadarWidget_5b7947cd224091d66f29a1ea95235d6d } from '../../../admin/components/dashboard/radar-widget'
+import { BindersProvider as BindersProvider_f3c69e9301ea436c7ba85a5e33ded302 } from '../../../admin/components/binders-provider'
 import { VercelBlobClientUploadHandler as VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e } from '@payloadcms/storage-vercel-blob/client'
 import { RadarListView as RadarListView_a4e67c284447336809eb8f88f0de25c0 } from '../../../admin/views/radar/list'
 import { InspirationListView as InspirationListView_6ea26fbacc6952d42b486351c5c52406 } from '../../../admin/views/inspiration/list'
@@ -119,6 +120,7 @@ export const importMap = {
   "/admin/components/contacts-nav-group#ContactsNavGroup": ContactsNavGroup_eaa602077b61895f57de2f69a860ec84,
   "/admin/components/setup-nav-group#SetupNavGroup": SetupNavGroup_49db99829140aef9ec2dd6ea8d7e6d7f,
   "/admin/components/dashboard/radar-widget#RadarWidget": RadarWidget_5b7947cd224091d66f29a1ea95235d6d,
+  "/admin/components/binders-provider#BindersProvider": BindersProvider_f3c69e9301ea436c7ba85a5e33ded302,
   "@payloadcms/storage-vercel-blob/client#VercelBlobClientUploadHandler": VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e,
   "/admin/views/radar/list#RadarListView": RadarListView_a4e67c284447336809eb8f88f0de25c0,
   "/admin/views/inspiration/list#InspirationListView": InspirationListView_6ea26fbacc6952d42b486351c5c52406,

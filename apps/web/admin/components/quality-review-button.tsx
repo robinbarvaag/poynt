@@ -69,7 +69,10 @@ function formatDate(iso: string | null): string | null {
 }
 
 export const QualityReviewButton = () => {
-  const { id, collectionSlug } = useDocumentInfo();
+  // Globaler (Forsiden) har `globalSlug` og verken id eller collectionSlug —
+  // de identifiseres av slugen alene, og API-et tar dem via ?global=.
+  const { id, collectionSlug, globalSlug } = useDocumentInfo();
+  const isGlobal = Boolean(globalSlug) && !collectionSlug;
   const { setValue: setScore } = useField<number>({ path: "qualityScore" });
   const { setValue: setReviewedAt, value: reviewedAt } = useField<string>({
     path: "qualityReviewedAt",
@@ -86,11 +89,14 @@ export const QualityReviewButton = () => {
   // faktiske innholdet, ikke updatedAt) ved åpning av dokumentet.
   const [stale, setStale] = useState(false);
   useEffect(() => {
-    if (id === undefined || id === null || !collectionSlug) return;
+    const query = isGlobal
+      ? `global=${encodeURIComponent(String(globalSlug))}`
+      : id !== undefined && id !== null && collectionSlug
+        ? `collection=${encodeURIComponent(collectionSlug)}&id=${encodeURIComponent(String(id))}`
+        : null;
+    if (!query) return;
     let cancelled = false;
-    fetch(
-      `/api/ai/quality-review?collection=${encodeURIComponent(collectionSlug)}&id=${encodeURIComponent(String(id))}`
-    )
+    fetch(`/api/ai/quality-review?${query}`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data: { status?: string } | null) => {
         if (!cancelled && data) setStale(data.status === "stale");
@@ -99,7 +105,7 @@ export const QualityReviewButton = () => {
     return () => {
       cancelled = true;
     };
-  }, [id, collectionSlug]);
+  }, [id, collectionSlug, globalSlug, isGlobal]);
 
   // Sekundteller mens vurderingen kjører — viser at det fortsatt skjer noe.
   useEffect(() => {
@@ -115,7 +121,8 @@ export const QualityReviewButton = () => {
   const reviewedLabel = formatDate(fresh ? null : (reviewedAt ?? null));
 
   const onClick = async () => {
-    if (id === undefined || id === null) {
+    // Globaler finnes alltid — id-kravet gjelder bare collections.
+    if (!isGlobal && (id === undefined || id === null)) {
       setError(
         "Lagre dokumentet først, så kan vi lese innholdet og vurdere det."
       );
@@ -127,7 +134,9 @@ export const QualityReviewButton = () => {
       const res = await fetch("/api/ai/quality-review", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ collection: collectionSlug, id }),
+        body: JSON.stringify(
+          isGlobal ? { global: globalSlug } : { collection: collectionSlug, id }
+        ),
       });
       const data = (await res.json()) as Review & { error?: string };
       if (!res.ok || typeof data.totalScore !== "number") {

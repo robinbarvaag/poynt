@@ -1,7 +1,13 @@
-import { getQualityOverview, getQualityRow } from "@/lib/quality-overview";
 import {
+  getQualityGlobalRow,
+  getQualityOverview,
+  getQualityRow,
+} from "@/lib/quality-overview";
+import {
+  type QualityCollectionSlug,
   hashQualityContent,
   isQualityCollection,
+  isQualityGlobal,
   serializeQualityContent,
 } from "@/lib/quality-review-stale";
 import { TONE_OF_VOICE } from "@/lib/tone-of-voice";
@@ -291,6 +297,15 @@ const CONFIGS: Record<string, CollectionReviewConfig> = {
       "Du vurderer en produktside i nettbutikken på poynt.no (bok, kurs, PDF eller medlemskap). Leseren er en småbedriftseier som vurderer å kjøpe: siden skal gjøre det lett å forstå hva produktet er, hva de får og hvorfor det er verdt pengene.",
     dimensions: PRODUCT_DIMENSIONS,
   },
+  // Forsiden er en global, ikke en collection — men den bygges av de samme
+  // layout-blokkene som Sider, så den arver PAGE_DIMENSIONS.
+  homepage: {
+    label: "forside",
+    rolle:
+      "Du vurderer FORSIDEN på poynt.no — den viktigste siden vi har, og for de fleste det aller første møtet med Poynt. [Seksjon N: …]-merkene viser blokktype, [oppsett: …] viser layoutvalg, [Knapp …] viser CTA-er og [Bilde/medie …] viser bildebruk. Vær streng på de første seksjonene: en besøkende skal på få sekunder skjønne hva Poynt er, hvem det er for og hva neste steg er. Vurder helheten — budskap, rekkefølge, rytme og konvertering.",
+    dimensions: PAGE_DIMENSIONS,
+    kontekst: () => "URL: / (forsiden)",
+  },
 };
 
 const reviewSchema = z.object({
@@ -367,7 +382,22 @@ export async function GET(req: NextRequest) {
 
     const { searchParams } = new URL(req.url);
     const collection = searchParams.get("collection");
+    const globalSlug = searchParams.get("global");
     const id = searchParams.get("id");
+
+    if (globalSlug) {
+      if (!isQualityGlobal(globalSlug)) {
+        return NextResponse.json({ error: "Ukjent global." }, { status: 400 });
+      }
+      const row = await getQualityGlobalRow(payload, globalSlug);
+      if (!row) {
+        return NextResponse.json(
+          { error: "Fant ikke innholdet." },
+          { status: 404 }
+        );
+      }
+      return NextResponse.json(row);
+    }
 
     if (collection && id) {
       if (!isQualityCollection(collection)) {
@@ -406,27 +436,48 @@ export async function POST(req: NextRequest) {
 
     const body = (await req.json().catch(() => ({}))) as {
       collection?: string;
+      /** Globaler (Forsiden) sendes hit i stedet — de har ingen id. */
+      global?: string;
       id?: string | number;
       persist?: boolean;
     };
-    const slug =
+
+    const globalSlug =
+      body.global && isQualityGlobal(body.global) ? body.global : undefined;
+    const collectionSlug =
       body.collection && isQualityCollection(body.collection)
         ? body.collection
         : undefined;
+    const slug = globalSlug ?? collectionSlug;
     const cfg = slug ? CONFIGS[slug] : undefined;
-    if (!slug || !cfg || body.id === undefined || body.id === null) {
+
+    // Collections trenger id; globaler er identifisert av slugen alene.
+    if (
+      !slug ||
+      !cfg ||
+      (!globalSlug && (body.id === undefined || body.id === null))
+    ) {
       return NextResponse.json(
         {
           error:
-            "Mangler collection/id (guides, courses, pages, blog-posts, case-studies, services eller products).",
+            "Mangler collection/id (guides, courses, pages, blog-posts, case-studies, services eller products) eller global (homepage).",
         },
         { status: 400 }
       );
     }
 
-    const doc = await payload
-      .findByID({ collection: slug, id: body.id, depth: 1, draft: true })
-      .catch(() => null);
+    const doc = globalSlug
+      ? await payload
+          .findGlobal({ slug: globalSlug, depth: 1, draft: true })
+          .catch(() => null)
+      : await payload
+          .findByID({
+            collection: collectionSlug as QualityCollectionSlug,
+            id: body.id as string | number,
+            depth: 1,
+            draft: true,
+          })
+          .catch(() => null);
 
     if (!doc) {
       return NextResponse.json(
@@ -483,18 +534,30 @@ ${serialized}
     // forblir utkast: vi vurderte utkast-innholdet, så vurderingen hører til
     // utkastet og skal ikke publisere noe.
     if (body.persist) {
-      const isDraft = (doc as { _status?: string | null })._status === "draft";
-      await payload.update({
-        collection: slug,
-        id: body.id,
-        data: {
-          qualityScore: review.totalScore,
-          qualityReviewedAt: reviewedAt,
-          qualityReview: responseBody,
-        },
-        draft: isDraft,
-        depth: 0,
-      });
+      const data: Record<string, unknown> = {
+        qualityScore: review.totalScore,
+        qualityReviewedAt: reviewedAt,
+        qualityReview: responseBody,
+      };
+      if (globalSlug) {
+        await payload.updateGlobal({ slug: globalSlug, data, depth: 0 });
+      } else {
+        const isDraft =
+          (doc as { _status?: string | null })._status === "draft";
+        // Produkter synkes til Stripe av plugin-stripe på HVER update. En
+        // kvalitetsscore har ingenting med Stripe å gjøre, og synken feiler
+        // hardt (500) hvis dokumentets stripeID ikke finnes i den Stripe-
+        // kontoen nøkkelen gjelder for. `skipSync` er pluginens egen
+        // av-bryter; den nullstilles automatisk etter denne skrivingen.
+        if (collectionSlug === "products") data.skipSync = true;
+        await payload.update({
+          collection: collectionSlug as QualityCollectionSlug,
+          id: body.id as string | number,
+          data,
+          draft: isDraft,
+          depth: 0,
+        });
+      }
     }
 
     return NextResponse.json(responseBody);

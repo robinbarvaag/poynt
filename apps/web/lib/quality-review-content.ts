@@ -2,6 +2,7 @@ import type {
   BlogPost,
   CaseStudy,
   Course,
+  Homepage,
   Page,
   Product,
   Service,
@@ -150,6 +151,26 @@ export function serializePageContent(page: Page): string {
         .join("\n")}`
     );
   }
+
+  return parts.join("\n\n");
+}
+
+/**
+ * Serialiserer Forsiden (globalen) til lesbar markdown. Samme blokk-logikk som
+ * `serializePageContent` — forsiden bruker `layoutBlocks` akkurat som Sider —
+ * men globalen har verken tittel eller FAQ-felt, så de utgår.
+ */
+export function serializeHomepageContent(home: Homepage): string {
+  const parts: string[] = ["# Forsiden (poynt.no)"];
+  if (home.meta?.description)
+    parts.push(`_Meta-beskrivelse:_ ${home.meta.description}`);
+
+  (home.layout ?? []).forEach((block, i) => {
+    const label = BLOCK_LABELS[block.blockType] ?? block.blockType;
+    const lines: string[] = [];
+    serializeObject(block as unknown as Record<string, unknown>, lines);
+    parts.push(`## [Seksjon ${i + 1}: ${label}]\n${lines.join("\n")}`);
+  });
 
   return parts.join("\n\n");
 }
