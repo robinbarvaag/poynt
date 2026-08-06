@@ -1,5 +1,6 @@
 import { ChevronRight } from "lucide-react";
 import * as React from "react";
+import { UILink } from "../lib/link";
 import { cn } from "../lib/utils";
 
 export interface BreadcrumbItem {
@@ -30,12 +31,12 @@ export function Breadcrumbs({ items, className }: BreadcrumbsProps) {
               className="flex items-center gap-1.5"
             >
               {item.href && !isLast ? (
-                <a
+                <UILink
                   href={item.href}
                   className="transition-colors hover:text-foreground"
                 >
                   {item.label}
-                </a>
+                </UILink>
               ) : (
                 <span
                   className={cn(isLast && "font-medium text-foreground")}

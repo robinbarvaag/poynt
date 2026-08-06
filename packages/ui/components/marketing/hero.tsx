@@ -1,5 +1,6 @@
 import type { ComponentType, ReactNode } from "react";
 import { Icon, type IconName } from "../../icons";
+import { UILink } from "../../lib/link";
 import { cn } from "../../lib/utils";
 import { Badge } from "../badge";
 import { Button } from "../button";
@@ -182,10 +183,10 @@ export function Hero({
                         <Icon name="arrow-right" className="ml-2 size-4" />
                       </LinkComp>
                     ) : (
-                      <a href={primaryCta.href}>
+                      <UILink href={primaryCta.href}>
                         {primaryCta.text}
                         <Icon name="arrow-right" className="ml-2 size-4" />
-                      </a>
+                      </UILink>
                     )}
                   </Button>
                 )}
@@ -201,7 +202,9 @@ export function Hero({
                         {secondaryCta.text}
                       </LinkComp>
                     ) : (
-                      <a href={secondaryCta.href}>{secondaryCta.text}</a>
+                      <UILink href={secondaryCta.href}>
+                        {secondaryCta.text}
+                      </UILink>
                     )}
                   </Button>
                 )}

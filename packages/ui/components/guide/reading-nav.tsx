@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Icon } from "../../icons";
+import { UILink } from "../../lib/link";
 import { cn } from "../../lib/utils";
 import type { SectionRailItem } from "./section-rail";
 
@@ -111,7 +112,7 @@ export function ReadingNav({ items, partLabel, className }: ReadingNavProps) {
                 if (!isSub) mStep += 1;
                 return (
                   <li key={item.id}>
-                    <a
+                    <UILink
                       href={`#${item.id}`}
                       onClick={() => setOpen(false)}
                       className={cn(
@@ -159,7 +160,7 @@ export function ReadingNav({ items, partLabel, className }: ReadingNavProps) {
                       >
                         {item.label}
                       </span>
-                    </a>
+                    </UILink>
                   </li>
                 );
               });

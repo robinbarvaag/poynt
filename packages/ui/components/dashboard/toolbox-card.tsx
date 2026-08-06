@@ -1,4 +1,5 @@
 import { Icon, type IconName } from "../../icons";
+import { UILink } from "../../lib/link";
 import { Badge } from "../badge";
 import { Card } from "../card";
 
@@ -32,7 +33,7 @@ export function ToolboxCard({
       asChild
       className="group h-full p-0 transition-[transform,box-shadow,border-color] motion-safe:hover:-translate-y-0.5"
     >
-      <a href={href}>
+      <UILink href={href}>
         <div className="flex h-full flex-col gap-3 p-5">
           <div className="flex items-center justify-between gap-2">
             <span className="flex size-10 items-center justify-center rounded-lg bg-muted text-muted-foreground transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
@@ -55,7 +56,7 @@ export function ToolboxCard({
             {whenToUse}
           </p>
         </div>
-      </a>
+      </UILink>
     </Card>
   );
 }

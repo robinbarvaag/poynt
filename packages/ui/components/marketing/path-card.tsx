@@ -1,4 +1,5 @@
 import type * as React from "react";
+import { UILink } from "../../lib/link";
 import { cn } from "../../lib/utils";
 import { Card } from "../card";
 
@@ -85,7 +86,7 @@ export function PathCard({
         className
       )}
     >
-      <a href={href}>
+      <UILink href={href}>
         {(icon || eyebrow) && (
           <div className="mb-6 flex items-center gap-3">
             {icon && (
@@ -143,7 +144,7 @@ export function PathCard({
           {ctaLabel}
           <ArrowRight className="transition-transform duration-200 motion-safe:group-hover/path:translate-x-0.5" />
         </span>
-      </a>
+      </UILink>
     </Card>
   );
 }

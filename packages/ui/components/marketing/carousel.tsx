@@ -20,6 +20,7 @@ import {
   useMemo,
   useState,
 } from "react";
+import { UILink } from "../../lib/link";
 import { cn } from "../../lib/utils";
 import { Button } from "../button";
 import { Card } from "../card";
@@ -535,12 +536,12 @@ function CarouselSlide({
             {inner}
           </LinkComp>
         ) : (
-          <a
+          <UILink
             href={item.href}
             className="block h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             {inner}
-          </a>
+          </UILink>
         )
       ) : (
         inner

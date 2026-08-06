@@ -1,3 +1,4 @@
+import { UILink } from "../../lib/link";
 import { cn } from "../../lib/utils";
 import { Button } from "../button";
 import { Container } from "../container";
@@ -147,7 +148,7 @@ export function Pricing({ eyebrow, title, intro, tiers }: PricingProps) {
                     variant={featured ? "saffron" : "default"}
                     className="mt-10 w-full"
                   >
-                    <a href={tier.cta.href}>{tier.cta.text}</a>
+                    <UILink href={tier.cta.href}>{tier.cta.text}</UILink>
                   </Button>
                 </div>
               </div>

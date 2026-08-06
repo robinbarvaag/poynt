@@ -2,6 +2,7 @@ import "../globals.css";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { JsonLd } from "@/components/json-ld";
+import { UILinkProvider } from "@/components/ui-link-provider";
 import { organizationSchema, websiteSchema } from "@/lib/structured-data";
 import config from "@payload-config";
 import { Grain, cn } from "@poynt/ui";
@@ -97,32 +98,38 @@ export default async function FrontendLayout({
     <html lang="no" className={`${poppins.variable} ${bricolage.variable}`}>
       <body className={cn("min-h-screen bg-background font-sans antialiased")}>
         <JsonLd data={siteJsonLd} />
-        <Header
-          siteName={siteSettings?.siteName || "Poynt"}
-          logo={siteSettings?.logo as { url: string; alt?: string } | null}
-          ctaButton={header?.ctaButton as HeaderProps["ctaButton"]}
-          navItems={header?.navItems as unknown as HeaderProps["navItems"]}
-        />
-        <main className="min-h-screen pt-16">{children}</main>
-        {/* Parallel-route slot for intercepting-modaler (f.eks. /kontakt). */}
-        {modal}
-        <Footer
-          siteName={siteSettings?.siteName || "Poynt"}
-          logo={siteSettings?.logo as { url: string; alt?: string } | null}
-          columns={footer?.columns as FooterProps["columns"]}
-          bottomText={footer?.bottomText ?? undefined}
-          showSocialLinks={footer?.showSocialLinks ?? true}
-          socialLinks={siteSettings?.socialLinks as FooterProps["socialLinks"]}
-          newsletter={
-            footer?.showNewsletter
-              ? {
-                  enabled: footer.showNewsletter,
-                  title: footer.newsletterTitle ?? undefined,
-                  description: footer.newsletterDescription ?? undefined,
-                }
-              : undefined
-          }
-        />
+        {/* Kobler designsystemets interne lenker til next/link, så kort og
+            knapper i @poynt/ui navigerer på klienten (instant navigation). */}
+        <UILinkProvider>
+          <Header
+            siteName={siteSettings?.siteName || "Poynt"}
+            logo={siteSettings?.logo as { url: string; alt?: string } | null}
+            ctaButton={header?.ctaButton as HeaderProps["ctaButton"]}
+            navItems={header?.navItems as unknown as HeaderProps["navItems"]}
+          />
+          <main className="min-h-screen pt-16">{children}</main>
+          {/* Parallel-route slot for intercepting-modaler (f.eks. /kontakt). */}
+          {modal}
+          <Footer
+            siteName={siteSettings?.siteName || "Poynt"}
+            logo={siteSettings?.logo as { url: string; alt?: string } | null}
+            columns={footer?.columns as FooterProps["columns"]}
+            bottomText={footer?.bottomText ?? undefined}
+            showSocialLinks={footer?.showSocialLinks ?? true}
+            socialLinks={
+              siteSettings?.socialLinks as FooterProps["socialLinks"]
+            }
+            newsletter={
+              footer?.showNewsletter
+                ? {
+                    enabled: footer.showNewsletter,
+                    title: footer.newsletterTitle ?? undefined,
+                    description: footer.newsletterDescription ?? undefined,
+                  }
+                : undefined
+            }
+          />
+        </UILinkProvider>
         {/* Redaksjonell signatur: ett fint korn-lag over hele siden */}
         <Grain fixed />
       </body>

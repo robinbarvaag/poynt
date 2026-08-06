@@ -1,4 +1,5 @@
 import { Icon, type IconName } from "../../icons";
+import { UILink } from "../../lib/link";
 import { cn } from "../../lib/utils";
 import { Button } from "../button";
 import { Card } from "../card";
@@ -135,10 +136,10 @@ export function JourneyPath({ eyebrow, title, stages }: JourneyPathProps) {
                 <div className="mt-4">
                   {isActive && (
                     <Button asChild size="sm" className="w-full gap-2">
-                      <a href={stage.href}>
+                      <UILink href={stage.href}>
                         {stage.cta ?? "Start"}
                         <Icon name="arrow-right" className="size-4" />
-                      </a>
+                      </UILink>
                     </Button>
                   )}
                   {isDone && (
@@ -148,10 +149,10 @@ export function JourneyPath({ eyebrow, title, stages }: JourneyPathProps) {
                       size="sm"
                       className="h-auto gap-1.5 p-0 text-muted-foreground hover:bg-transparent hover:text-foreground"
                     >
-                      <a href={stage.href}>
+                      <UILink href={stage.href}>
                         <Icon name="check-circle" className="size-4" />
                         {stage.meta ?? "Ferdig"}
-                      </a>
+                      </UILink>
                     </Button>
                   )}
                   {isUpcoming && (

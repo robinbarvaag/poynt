@@ -1,4 +1,5 @@
 import "../globals.css";
+import { UILinkProvider } from "@/components/ui-link-provider";
 import { cn } from "@poynt/ui";
 import type { Metadata } from "next";
 import { Bricolage_Grotesque, Poppins } from "next/font/google";
@@ -66,7 +67,9 @@ export default function PlannerRootLayout({
       suppressHydrationWarning
     >
       <body className={cn("min-h-screen bg-background font-sans antialiased")}>
-        {children}
+        {/* Interne lenker i @poynt/ui skal navigere på klienten, ikke laste
+            hele siden på nytt. */}
+        <UILinkProvider>{children}</UILinkProvider>
       </body>
     </html>
   );

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { UILink } from "../../lib/link";
 import { cn } from "../../lib/utils";
 import { Button } from "../button";
 import { Container } from "../container";
@@ -84,7 +85,7 @@ export function ContentMedia({
           )}
           {cta && (
             <Button asChild size="lg" className="mt-8 rounded-full px-8">
-              <a href={cta.href}>{cta.text}</a>
+              <UILink href={cta.href}>{cta.text}</UILink>
             </Button>
           )}
         </Reveal>

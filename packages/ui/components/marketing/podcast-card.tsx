@@ -1,4 +1,5 @@
 import type * as React from "react";
+import { UILink } from "../../lib/link";
 import { cn } from "../../lib/utils";
 import { Card } from "../card";
 
@@ -155,7 +156,7 @@ export function PodcastCard({
         className
       )}
     >
-      <a href={href}>
+      <UILink href={href}>
         <div
           className={cn(
             featured && "md:grid md:h-full md:grid-cols-2 md:items-stretch"
@@ -164,7 +165,7 @@ export function PodcastCard({
           <Cover cover={cover} badge={badge} featured={featured} />
           {content}
         </div>
-      </a>
+      </UILink>
     </Card>
   );
 }

@@ -2,6 +2,12 @@ import { Switch } from "./components/switch";
 
 // Utils
 export { cn } from "./lib/utils";
+export {
+  LinkComponentProvider,
+  UILink,
+  type UILinkComponent,
+  type UILinkProps,
+} from "./lib/link";
 
 // Components
 export {

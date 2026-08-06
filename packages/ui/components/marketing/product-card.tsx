@@ -1,4 +1,5 @@
 import type * as React from "react";
+import { UILink } from "../../lib/link";
 import { cn } from "../../lib/utils";
 import { Card } from "../card";
 import { DecoBlob, hashSeed } from "./deco-blob";
@@ -167,7 +168,7 @@ export function ProductCard({
         className
       )}
     >
-      <a href={href}>
+      <UILink href={href}>
         <div
           className={cn(
             featured &&
@@ -239,7 +240,7 @@ export function ProductCard({
             )}
           </div>
         </div>
-      </a>
+      </UILink>
     </Card>
   );
 }

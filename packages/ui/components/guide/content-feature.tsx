@@ -1,5 +1,6 @@
 import type * as React from "react";
 import { Icon } from "../../icons";
+import { UILink } from "../../lib/link";
 import { cn } from "../../lib/utils";
 import {
   CONTENT_FORMATS,
@@ -48,7 +49,7 @@ export function ContentFeature({
   const config = CONTENT_FORMATS[format];
 
   return (
-    <a
+    <UILink
       href={href}
       className={cn(
         "group/feature grid overflow-hidden rounded-[2rem] ring-1 ring-foreground/10 transition-shadow duration-300 hover:shadow-[0_30px_70px_-35px_rgba(0,64,41,0.45)] md:grid-cols-2",
@@ -122,6 +123,6 @@ export function ContentFeature({
           />
         </span>
       </div>
-    </a>
+    </UILink>
   );
 }

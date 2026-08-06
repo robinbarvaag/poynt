@@ -1,4 +1,5 @@
 import { type MediaResource, PayloadImage } from "@/components/payload-image";
+import { isInterceptedHref } from "@/lib/intercepted-routes";
 import { formatServicePrice } from "@/lib/service";
 import { Heading, Text } from "@poynt/ui";
 import Link from "next/link";
@@ -26,7 +27,9 @@ export function ServiceCard({ service }: ServiceCardProps) {
   return (
     <Link
       href={href}
-      scroll={false}
+      // Tjenestesider vises som modal (intercepting-route) — da skal siden bak
+      // ikke scrolle. Egendefinerte CTA-lenker er vanlig navigasjon.
+      scroll={isInterceptedHref(href) ? false : undefined}
       className="group block bg-muted/50 rounded-2xl overflow-hidden hover:bg-muted transition-colors"
     >
       {service.image && (

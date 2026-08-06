@@ -1,3 +1,4 @@
+import { UILink } from "../../lib/link";
 import { cn } from "../../lib/utils";
 
 export type DownloadKind = "pdf" | "canva" | "link" | "other";
@@ -32,7 +33,7 @@ export function DownloadCard({
   const meta = kindMeta[kind];
   const isDownload = kind !== "link";
   return (
-    <a
+    <UILink
       href={href ?? "#"}
       {...(isDownload
         ? { download: true }
@@ -69,6 +70,6 @@ export function DownloadCard({
       >
         {isDownload ? "↓" : "→"}
       </span>
-    </a>
+    </UILink>
   );
 }

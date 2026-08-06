@@ -1,4 +1,5 @@
 import type * as React from "react";
+import { UILink } from "../../lib/link";
 import { cn } from "../../lib/utils";
 
 export interface ServiceCardProps {
@@ -55,7 +56,7 @@ export function ServiceCard({
   className,
 }: ServiceCardProps) {
   return (
-    <a href={href} className={cn("group/service block", className)}>
+    <UILink href={href} className={cn("group/service block", className)}>
       <div className="relative aspect-4/3 overflow-hidden rounded-3xl bg-muted">
         {image ?? (
           <div className="flex size-full items-center justify-center bg-foreground/5">
@@ -92,6 +93,6 @@ export function ServiceCard({
           <ArrowRight className="transition-transform duration-200 motion-safe:group-hover/service:translate-x-0.5" />
         </span>
       </div>
-    </a>
+    </UILink>
   );
 }

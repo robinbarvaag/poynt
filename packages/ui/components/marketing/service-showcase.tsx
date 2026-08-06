@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import type * as React from "react";
+import { UILink } from "../../lib/link";
 import { cn } from "../../lib/utils";
 import {
   CloseIcon,
@@ -166,13 +167,13 @@ function PanelBody({
             <ArrowRight className="transition-transform duration-200 motion-safe:group-hover:translate-x-0.5" />
           </CtaLink>
         ) : (
-          <a
+          <UILink
             href={service.ctaHref}
             className="group mt-8 inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3 font-semibold text-primary-foreground text-sm transition-colors"
           >
             {service.ctaLabel ?? "Ta kontakt"}
             <ArrowRight className="transition-transform duration-200 motion-safe:group-hover:translate-x-0.5" />
-          </a>
+          </UILink>
         ))}
     </>
   );
@@ -227,7 +228,11 @@ export function ServiceShowcaseGrid({
               layoutId={`service-${service.id}`}
               className="h-full overflow-hidden rounded-3xl"
             >
-              {LinkComp ? <LinkComp {...linkProps} /> : <a {...linkProps} />}
+              {LinkComp ? (
+                <LinkComp {...linkProps} />
+              ) : (
+                <UILink {...linkProps} />
+              )}
             </motion.div>
           </li>
         );

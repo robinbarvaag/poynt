@@ -1,5 +1,6 @@
 import type * as React from "react";
 import { Icon, type IconName } from "../../icons";
+import { UILink } from "../../lib/link";
 import { cn } from "../../lib/utils";
 import { Card } from "../card";
 
@@ -98,7 +99,7 @@ export function ContentCard({
         className
       )}
     >
-      <a href={href}>
+      <UILink href={href}>
         <div className="relative aspect-[2/1] shrink-0 overflow-hidden rounded-t-3xl">
           {cover ? (
             <div className="absolute inset-0 transform-gpu *:[img]:h-full *:[img]:w-full *:[img]:object-cover *:[img]:transition-transform *:[img]:duration-500 group-hover/content:*:[img]:scale-105">
@@ -160,7 +161,7 @@ export function ContentCard({
             </span>
           </div>
         </div>
-      </a>
+      </UILink>
     </Card>
   );
 }

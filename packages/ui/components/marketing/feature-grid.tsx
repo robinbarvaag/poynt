@@ -1,4 +1,5 @@
 import type * as React from "react";
+import { UILink } from "../../lib/link";
 import { cn } from "../../lib/utils";
 import { Card } from "../card";
 import { Container, gridVariants } from "../container";
@@ -134,7 +135,7 @@ export function FeatureGrid({
               </Text>
 
               {/* Footer — kun når det er en lenke eller et tall; pinnet til bunn.
-                    Hele kortet er lenken (Card asChild + <a>), så dette er kun
+                    Hele kortet er lenken (Card asChild + <UILink>), så dette er kun
                     et visuelt anker som animerer på hover over hele kortet. */}
               {feature.link && (
                 <span
@@ -175,7 +176,7 @@ export function FeatureGrid({
                   {LinkComp ? (
                     <LinkComp href={feature.link.href}>{cardBody}</LinkComp>
                   ) : (
-                    <a href={feature.link.href}>{cardBody}</a>
+                    <UILink href={feature.link.href}>{cardBody}</UILink>
                   )}
                 </Card>
               ) : (

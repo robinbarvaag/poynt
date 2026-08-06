@@ -4,6 +4,7 @@ import { cn } from "@poynt/ui";
 import { motion, useReducedMotion } from "framer-motion";
 import { ChevronDown, Menu } from "lucide-react";
 import * as React from "react";
+import { UILink } from "../lib/link";
 import { Button } from "./button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "./sheet";
 
@@ -57,7 +58,7 @@ export interface SiteHeaderProps {
 }
 
 function DefaultLink({ href, ...props }: SiteHeaderLinkProps) {
-  return <a href={href} {...props} />;
+  return <UILink href={href} {...props} />;
 }
 
 function linkRel(external?: boolean) {

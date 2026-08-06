@@ -1,5 +1,6 @@
 import type * as React from "react";
 import { Icon } from "../../icons";
+import { UILink } from "../../lib/link";
 import { cn } from "../../lib/utils";
 import type { ContentMetaItem } from "./content-card";
 
@@ -116,13 +117,13 @@ export function CourseHero({
           </div>
         )}
 
-        <a
+        <UILink
           href={ctaHref}
           className="mt-1 inline-flex w-fit items-center gap-2 rounded-2xl bg-primary px-6 py-3 font-semibold text-primary-foreground transition-transform duration-300 hover:-translate-y-0.5"
         >
           {ctaLabel}
           <Icon name="arrow-right" className="size-4" />
-        </a>
+        </UILink>
       </div>
     </section>
   );

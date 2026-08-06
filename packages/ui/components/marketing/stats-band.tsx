@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { UILink } from "../../lib/link";
 import { cn } from "../../lib/utils";
 import { Button } from "../button";
 import { Container, Panel } from "../container";
@@ -92,7 +93,11 @@ export function StatsBand({
   renderLink,
 }: StatsBandProps) {
   const link = (href: string, children: ReactNode) =>
-    renderLink ? renderLink(href, children) : <a href={href}>{children}</a>;
+    renderLink ? (
+      renderLink(href, children)
+    ) : (
+      <UILink href={href}>{children}</UILink>
+    );
 
   if (layout === "split") {
     return (

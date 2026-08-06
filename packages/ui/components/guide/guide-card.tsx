@@ -1,4 +1,5 @@
 import type * as React from "react";
+import { UILink } from "../../lib/link";
 import { cn } from "../../lib/utils";
 import { Card } from "../card";
 
@@ -51,7 +52,7 @@ export function GuideCard({
         className
       )}
     >
-      <a href={href}>
+      <UILink href={href}>
         {thumbnail && (
           <div className="relative aspect-[16/9] overflow-hidden bg-background/40 *:[img]:h-full *:[img]:w-full *:[img]:object-cover *:[img]:transition-transform *:[img]:duration-500 group-hover/guide:*:[img]:scale-105">
             {thumbnail}
@@ -97,7 +98,7 @@ export function GuideCard({
             </span>
           </span>
         </div>
-      </a>
+      </UILink>
     </Card>
   );
 }

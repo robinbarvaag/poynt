@@ -125,6 +125,15 @@ export function ShowcaseModal({
   const [open, setOpen] = useState(true);
   const close = () => setOpen(false);
 
+  // Next 16 (cacheComponents) unmounter ikke ruten når man navigerer bort —
+  // den skjules med React `<Activity>`, så komponenten (og `open: false`) lever
+  // videre. Uten denne ville modalet aldri åpnet seg igjen etter første
+  // lukking. Effekter kjøres på nytt når Activity viser ruten igjen, så vi
+  // åpner alltid modalet når det blir synlig.
+  useEffect(() => {
+    setOpen(true);
+  }, []);
+
   useModalBehavior(open, close);
 
   return (

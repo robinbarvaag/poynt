@@ -1,4 +1,5 @@
 import type * as React from "react";
+import { UILink } from "../../lib/link";
 import { cn } from "../../lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "../avatar";
 import { Card } from "../card";
@@ -157,7 +158,7 @@ export function BlogCard({
         className
       )}
     >
-      <a href={href}>
+      <UILink href={href}>
         {image ? (
           <div
             className={cn(
@@ -181,7 +182,7 @@ export function BlogCard({
         ) : (
           content
         )}
-      </a>
+      </UILink>
     </Card>
   );
 }

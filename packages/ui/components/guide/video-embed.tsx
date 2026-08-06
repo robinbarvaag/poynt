@@ -1,5 +1,6 @@
 "use client";
 
+import { UILink } from "../../lib/link";
 import { cn } from "../../lib/utils";
 import { Reveal } from "../motion/reveal";
 
@@ -69,7 +70,7 @@ export function VideoEmbed({
           />
         </div>
       ) : (
-        <a
+        <UILink
           href={url}
           target="_blank"
           rel="noopener noreferrer"
@@ -79,7 +80,7 @@ export function VideoEmbed({
             ▶︎
           </span>
           <span className="font-medium underline">{title}</span>
-        </a>
+        </UILink>
       )}
       {caption && <p className="text-current/70 text-sm">{caption}</p>}
     </Reveal>

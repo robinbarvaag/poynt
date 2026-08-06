@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Icon } from "../../icons";
+import { UILink } from "../../lib/link";
 import { cn } from "../../lib/utils";
 
 export interface SectionRailItem {
@@ -77,7 +78,7 @@ export function SectionRail({
           if (!isSub) step += 1;
           return (
             <li key={item.id}>
-              <a
+              <UILink
                 href={`#${item.id}`}
                 className={cn(
                   "group flex items-center gap-3 rounded-2xl transition-colors",
@@ -125,7 +126,7 @@ export function SectionRail({
                 >
                   {item.label}
                 </span>
-              </a>
+              </UILink>
             </li>
           );
         })}

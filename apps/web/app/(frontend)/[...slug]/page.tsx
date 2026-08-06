@@ -111,9 +111,20 @@ export async function generateMetadata({
 // Ukjente stier (f.eks. /sw.js → 404) finst ikkje i generateStaticParams, så
 // `params` blir runtime-data under prerender — må lesast bak ei Suspense-grense
 // for at cacheComponents/instant-validering ikkje skal klage.
+// Fallbacket MÅ rendre et ekte element: Next finner «toppen av den nye siden»
+// for å scrolle dit ved navigasjon, og et tomt fallback gir ingen node å måle
+// — da hopper scrollen over, og man lander midt på den nye siden.
 export default function Page({ params }: PageProps) {
   return (
-    <Suspense>
+    <Suspense
+      fallback={
+        <div className="mx-auto w-full max-w-7xl animate-pulse px-4 py-16 sm:px-6 lg:px-8">
+          <div className="h-6 w-32 rounded-full bg-muted" />
+          <div className="mt-6 h-12 w-2/3 rounded-2xl bg-muted" />
+          <div className="mt-4 h-5 w-1/2 rounded-full bg-muted" />
+        </div>
+      }
+    >
       <PageContent params={params} />
     </Suspense>
   );

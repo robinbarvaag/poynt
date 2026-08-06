@@ -1,4 +1,5 @@
 import { Icon, type IconName } from "../../icons";
+import { UILink } from "../../lib/link";
 import { cn } from "../../lib/utils";
 import { Button } from "../button";
 import { Eyebrow } from "../eyebrow";
@@ -67,22 +68,22 @@ export function NextStepHero({
           <div className="flex flex-col gap-3 pt-2 sm:flex-row">
             {primary && (
               <Button asChild size="lg" className="gap-2">
-                <a href={primary.href}>
+                <UILink href={primary.href}>
                   {primary.icon && (
                     <Icon name={primary.icon} className="size-4" />
                   )}
                   {primary.label}
-                </a>
+                </UILink>
               </Button>
             )}
             {secondary && (
               <Button asChild variant="outline" size="lg" className="gap-2">
-                <a href={secondary.href}>
+                <UILink href={secondary.href}>
                   {secondary.icon && (
                     <Icon name={secondary.icon} className="size-4" />
                   )}
                   {secondary.label}
-                </a>
+                </UILink>
               </Button>
             )}
           </div>
