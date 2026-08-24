@@ -5,7 +5,6 @@ import type { Metadata } from "next";
 import { cacheLife, cacheTag } from "next/cache";
 import { notFound, redirect } from "next/navigation";
 import { getPayload } from "payload";
-import { Suspense } from "react";
 
 interface PageProps {
   params: Promise<{
@@ -103,34 +102,21 @@ export async function generateMetadata({
   });
 }
 
-// Ukjente stier (f.eks. /sw.js → 404) finst ikkje i generateStaticParams, så
-// `params` blir runtime-data under prerender — må lesast bak ei Suspense-grense
-// for at cacheComponents/instant-validering ikkje skal klage. Kjende slugs
-// prerendres fullt (ingen draft-lesing her lenger — forhåndsvisning bur på
-// /forhandsvisning), så prefetch frå nav-en får heile sida og fallbacket
-// vises normalt aldri.
-// Fallbacket MÅ rendre et ekte element: Next finner «toppen av den nye siden»
-// for å scrolle dit ved navigasjon, og et tomt fallback gir ingen node å måle
-// — da hopper scrollen over, og man lander midt på den nye siden.
-export default function Page({ params }: PageProps) {
-  return (
-    <Suspense
-      fallback={
-        <div className="mx-auto w-full max-w-7xl animate-pulse px-4 py-16 sm:px-6 lg:px-8">
-          <div className="h-6 w-32 rounded-full bg-muted" />
-          <div className="mt-6 h-12 w-2/3 rounded-2xl bg-muted" />
-          <div className="mt-4 h-5 w-1/2 rounded-full bg-muted" />
-        </div>
-      }
-    >
-      <PageContent params={params} />
-    </Suspense>
-  );
-}
-
-async function PageContent({ params }: PageProps) {
+// INGEN Suspense rundt innhaldet — det er med vilje, og det er viktig:
+// eit tidlegare skjelett-fallback her gjorde at HEILE sida postponerte under
+// PPR (AdminBar sitt cookies()-kall bobla til den ytste grensa), så sjølv
+// kjende, prerendra slugs vart servert som skjelett + runtime-streaming på
+// kvar førespurnad. Utan grensa bakast heile sida inn i den statiske HTML-en
+// (berre AdminBar streamar, med usynleg null-fallback), og prefetch frå
+// nav-en får ferdig side. Ukjende stier (f.eks. /sw.js → 404) rendrast
+// dynamisk på førespurnad — dei er 404-ar og treng ikkje vere raske.
+export default async function Page({ params }: PageProps) {
   const { slug: slugArray } = await params;
   const slug = slugArray ? slugArray.join("/") : "forside";
+  return <PageContent slug={slug} />;
+}
+
+async function PageContent({ slug }: { slug: string }) {
   const pathname = `/${slug}`;
 
   // Sjekk for redirect først
