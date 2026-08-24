@@ -1,13 +1,6 @@
 "use client";
 
-import { type HTMLMotionProps, motion, useReducedMotion } from "framer-motion";
-import {
-  duration,
-  easeSoft,
-  revealRise,
-  revealViewport,
-  staggerStep,
-} from "./motion-tokens";
+import { type HTMLMotionProps, motion } from "framer-motion";
 
 type DivMotionProps = HTMLMotionProps<"div">;
 
@@ -21,28 +14,21 @@ interface RevealProps extends DivMotionProps {
 }
 
 /**
- * Fader + glir inn når elementet kommer i viewport. Den primære reveal-en —
- * samme varighet og easing overalt. Respekterer prefers-reduced-motion.
+ * Scroll-reveal er DEAKTIVERT (2026-08-24): innholdet lå server-rendret med
+ * opacity 0 til hydrering, så på treg last «poppet» det sent inn i stedet for
+ * å animere — det føltes tregt og hakkete. Komponentene beholder API-et sitt
+ * og rendrer nå innholdet statisk, synlig fra første paint. Historikken har
+ * den gamle implementasjonen om vi vil prøve igjen (da helst CSS-basert, uten
+ * hydrerings-avhengighet).
  */
 export function Reveal({
-  delay = 0,
-  rise = revealRise,
-  once = true,
+  delay: _delay,
+  rise: _rise,
+  once: _once,
   children,
   ...props
 }: RevealProps) {
-  const reduce = useReducedMotion();
-  return (
-    <motion.div
-      initial={reduce ? { opacity: 0 } : { opacity: 0, y: rise }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once, ...revealViewport }}
-      transition={{ duration: duration.base, ease: easeSoft, delay }}
-      {...props}
-    >
-      {children}
-    </motion.div>
-  );
+  return <motion.div {...props}>{children}</motion.div>;
 }
 
 interface StaggerProps extends DivMotionProps {
@@ -53,22 +39,12 @@ interface StaggerProps extends DivMotionProps {
 
 /** Container som staggrer sine `StaggerItem`-barn inn etter hvert. */
 export function Stagger({
-  step = staggerStep,
-  once = true,
+  step: _step,
+  once: _once,
   children,
   ...props
 }: StaggerProps) {
-  return (
-    <motion.div
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once, ...revealViewport }}
-      variants={{ visible: { transition: { staggerChildren: step } } }}
-      {...props}
-    >
-      {children}
-    </motion.div>
-  );
+  return <motion.div {...props}>{children}</motion.div>;
 }
 
 interface StaggerItemProps extends DivMotionProps {
@@ -77,24 +53,9 @@ interface StaggerItemProps extends DivMotionProps {
 
 /** Et barn i en `Stagger`. */
 export function StaggerItem({
-  rise = revealRise,
+  rise: _rise,
   children,
   ...props
 }: StaggerItemProps) {
-  const reduce = useReducedMotion();
-  return (
-    <motion.div
-      variants={{
-        hidden: reduce ? { opacity: 0 } : { opacity: 0, y: rise },
-        visible: {
-          opacity: 1,
-          y: 0,
-          transition: { duration: duration.base, ease: easeSoft },
-        },
-      }}
-      {...props}
-    >
-      {children}
-    </motion.div>
-  );
+  return <motion.div {...props}>{children}</motion.div>;
 }
