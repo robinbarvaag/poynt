@@ -24,7 +24,7 @@ interface BlogPageData {
 async function getBlogPageData() {
   "use cache";
   cacheTag("cms");
-  cacheLife("minutes");
+  cacheLife("max");
 
   const payload = await getPayload({ config });
 

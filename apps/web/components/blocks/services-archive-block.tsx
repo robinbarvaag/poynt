@@ -29,7 +29,7 @@ async function fetchArchiveServices(
 ): Promise<Service[]> {
   "use cache";
   cacheTag("cms");
-  cacheLife("minutes");
+  cacheLife("max");
 
   const payload = await getPayload({ config });
 

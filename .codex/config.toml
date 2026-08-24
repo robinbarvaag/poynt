@@ -1,0 +1,16 @@
+[mcp_servers.context7]
+command = "npx"
+args = [
+    "-y",
+    "@upstash/context7-mcp",
+    "--api-key",
+    "ctx7sk-a871c8f5-158a-4cdb-867f-84ee86e5931c",
+]
+
+[mcp_servers.puppeteer]
+command = "cmd"
+args = [
+    "/c",
+    "npx",
+    "@modelcontextprotocol/server-puppeteer",
+]

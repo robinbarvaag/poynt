@@ -20,7 +20,7 @@ interface ModalPageProps {
 async function getService(slug: string) {
   "use cache";
   cacheTag("cms");
-  cacheLife("minutes");
+  cacheLife("max");
 
   const payload = await getPayload({ config });
 

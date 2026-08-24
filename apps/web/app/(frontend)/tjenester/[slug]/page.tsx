@@ -29,7 +29,7 @@ interface ServicePageProps {
 async function getServicePageData(slug: string) {
   "use cache";
   cacheTag("cms");
-  cacheLife("minutes");
+  cacheLife("max");
 
   const payload = await getPayload({ config });
 

@@ -20,7 +20,7 @@ interface ProductPageProps {
 async function getProductPageData(slug: string) {
   "use cache";
   cacheTag("cms");
-  cacheLife("minutes");
+  cacheLife("max");
 
   const payload = await getPayload({ config });
 

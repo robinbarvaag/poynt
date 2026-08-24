@@ -3,9 +3,12 @@ import { draftMode } from "next/headers";
 import { getPayload } from "payload";
 
 /**
- * Utkast-lesing for forhåndsvisning: /api/preview slår på Next draft mode, og
- * sidene bytter da til en ucachet henting med `draft: true` slik at redaktøren
- * ser siste autosave — også for dokumenter som aldri er publisert.
+ * Utkast-lesing for forhåndsvisning: /api/preview slår på Next draft mode og
+ * sender redaktøren til /forhandsvisning-ruta, som henter ucachet med
+ * `draft: true` slik at redaktøren ser siste autosave — også for dokumenter
+ * som aldri er publisert. KUN /forhandsvisning skal bruke disse hjelperne;
+ * offentlige sider leser aldri draft-cookien (det ville gjort dem dynamiske
+ * og ødelagt prefetch/instant navigation).
  */
 
 /** Er draft mode på? (runtime-data — kall bak Suspense i cachede trær.) */

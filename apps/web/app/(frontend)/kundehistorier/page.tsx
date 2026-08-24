@@ -27,7 +27,7 @@ export function generateMetadata(): Metadata {
 async function getStories() {
   "use cache";
   cacheTag("cms");
-  cacheLife("minutes");
+  cacheLife("max");
 
   const payload = await getPayload({ config });
   return payload.find({

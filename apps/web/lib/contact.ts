@@ -14,7 +14,7 @@ export const CONTACT_FORM_TITLE = "Kontakt";
 export async function getContactForm(): Promise<Form | null> {
   "use cache";
   cacheTag("cms");
-  cacheLife("minutes");
+  cacheLife("max");
 
   const payload = await getPayload({ config });
   const res = await payload.find({

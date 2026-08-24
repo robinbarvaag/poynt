@@ -1,14 +1,6 @@
-import { AdminBar } from "@/components/admin-bar";
-import { JsonLd } from "@/components/json-ld";
-import { PageHero } from "@/components/page-hero";
-import { PreviewBanner } from "@/components/preview-banner";
-import { RenderBlocks } from "@/components/render-blocks";
-import { getDraftBySlug, isDraftModeEnabled } from "@/lib/draft";
-import { isHeroBlockType } from "@/lib/kontakt-page";
+import { CmsPageView } from "@/components/views/cms-page-view";
 import { buildMetadata, firstHeroImage, notFoundMetadata } from "@/lib/seo";
-import { faqSchema } from "@/lib/structured-data";
 import config from "@/payload.config";
-import { LandingCanvas } from "@poynt/ui";
 import type { Metadata } from "next";
 import { cacheLife, cacheTag } from "next/cache";
 import { notFound, redirect } from "next/navigation";
@@ -24,7 +16,10 @@ interface PageProps {
 async function getPage(slug: string) {
   "use cache";
   cacheTag("cms");
-  cacheLife("minutes");
+  // Innhold invalideres eksplisitt via cacheTag("cms") ved publisering
+  // (lib/revalidate-cms.ts) — tidsbasert utløp trengs ikke, og «max» holder
+  // cachen varm så navigasjonen ikke stopper på kalde Payload-spørringer.
+  cacheLife("max");
 
   const payload = await getPayload({ config });
 
@@ -44,7 +39,7 @@ async function getPage(slug: string) {
 async function checkRedirect(pathname: string) {
   "use cache";
   cacheTag("cms");
-  cacheLife("minutes");
+  cacheLife("max");
 
   const payload = await getPayload({ config });
 
@@ -110,7 +105,10 @@ export async function generateMetadata({
 
 // Ukjente stier (f.eks. /sw.js → 404) finst ikkje i generateStaticParams, så
 // `params` blir runtime-data under prerender — må lesast bak ei Suspense-grense
-// for at cacheComponents/instant-validering ikkje skal klage.
+// for at cacheComponents/instant-validering ikkje skal klage. Kjende slugs
+// prerendres fullt (ingen draft-lesing her lenger — forhåndsvisning bur på
+// /forhandsvisning), så prefetch frå nav-en får heile sida og fallbacket
+// vises normalt aldri.
 // Fallbacket MÅ rendre et ekte element: Next finner «toppen av den nye siden»
 // for å scrolle dit ved navigasjon, og et tomt fallback gir ingen node å måle
 // — da hopper scrollen over, og man lander midt på den nye siden.
@@ -141,42 +139,13 @@ async function PageContent({ params }: PageProps) {
     redirect(redirectInfo.destination);
   }
 
-  // Forhåndsvisning (via /api/preview): les siste utkast i stedet for
-  // publisert versjon. Vi er allerede bak Suspense, så runtime-lesing er ok.
-  const isDraft = await isDraftModeEnabled();
-  const page = isDraft
-    ? await getDraftBySlug("pages", slug)
-    : await getPage(slug);
+  const page = await getPage(slug);
 
   if (!page) {
     notFound();
   }
 
-  // Sjekk om første blokk er en hero - da viser vi ikke egen page hero
-  const firstBlock = page.layout?.[0];
-  const hasHeroBlock = isHeroBlockType(firstBlock?.blockType);
-
-  const faqLd = faqSchema(page.faq);
-
-  const body = (
-    <>
-      {!hasHeroBlock && <PageHero title={page.title} size="large" />}
-      {page.layout && <RenderBlocks blocks={page.layout} />}
-    </>
-  );
-
-  return (
-    <>
-      <AdminBar collection="pages" id={String(page.id)} singular="side" />
-      {isDraft && <PreviewBanner path={pathname} />}
-      {faqLd && <JsonLd data={faqLd} />}
-      {page.pageType === "landing" ? (
-        <LandingCanvas>{body}</LandingCanvas>
-      ) : (
-        body
-      )}
-    </>
-  );
+  return <CmsPageView page={page} />;
 }
 
 export async function generateStaticParams() {

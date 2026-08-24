@@ -30,7 +30,7 @@ async function fetchArchiveProducts(
 ): Promise<Product[]> {
   "use cache";
   cacheTag("cms");
-  cacheLife("minutes");
+  cacheLife("max");
 
   const payload = await getPayload({ config });
 

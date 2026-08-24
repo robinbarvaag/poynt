@@ -58,7 +58,7 @@ export const metadata: Metadata = {
 async function getGlobals() {
   "use cache";
   cacheTag("globals");
-  cacheLife("minutes");
+  cacheLife("max");
 
   const payload = await getPayload({ config });
 

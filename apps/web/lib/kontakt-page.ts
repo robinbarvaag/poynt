@@ -10,7 +10,7 @@ import { getPayload } from "payload";
 export async function getKontaktPage() {
   "use cache";
   cacheTag("cms");
-  cacheLife("minutes");
+  cacheLife("max");
 
   const payload = await getPayload({ config });
   const pages = await payload.find({

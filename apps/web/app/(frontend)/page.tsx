@@ -9,7 +9,7 @@ import { getPayload } from "payload";
 async function getHomepage() {
   "use cache";
   cacheTag("cms");
-  cacheLife("minutes");
+  cacheLife("max");
 
   const payload = await getPayload({ config });
   return payload.findGlobal({ slug: "homepage", depth: 2 });

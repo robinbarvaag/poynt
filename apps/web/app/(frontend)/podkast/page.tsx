@@ -16,7 +16,7 @@ import { getPayload } from "payload";
 async function getPodcastPageData() {
   "use cache";
   cacheTag("cms");
-  cacheLife("minutes");
+  cacheLife("hours");
 
   const payload = await getPayload({ config });
 

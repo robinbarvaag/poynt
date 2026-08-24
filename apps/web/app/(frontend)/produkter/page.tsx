@@ -15,7 +15,7 @@ import { getPayload } from "payload";
 async function getProductsPageData() {
   "use cache";
   cacheTag("cms");
-  cacheLife("minutes");
+  cacheLife("max");
 
   const payload = await getPayload({ config });
 

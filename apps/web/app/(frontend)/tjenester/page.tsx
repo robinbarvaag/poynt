@@ -12,7 +12,7 @@ import { getPayload } from "payload";
 async function getServicesPageData() {
   "use cache";
   cacheTag("cms");
-  cacheLife("minutes");
+  cacheLife("max");
 
   const payload = await getPayload({ config });
 

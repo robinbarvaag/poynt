@@ -4,10 +4,11 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getPayload } from "payload";
 
 /**
- * Slår på Next draft mode og sender redaktøren videre til siden. Preview- og
- * live preview-knappene i admin peker hit. Ingen delt hemmelighet — vi krever
- * i stedet en innlogget Payload-bruker (samme cookie som admin), så lenken er
- * ubrukelig for alle andre.
+ * Slår på Next draft mode og sender redaktøren til /forhandsvisning-ruta —
+ * den eneste ruta som leser draft-cookien (de offentlige sidene er fullt
+ * statiske). Preview- og live preview-knappene i admin peker hit. Ingen delt
+ * hemmelighet — vi krever i stedet en innlogget Payload-bruker (samme cookie
+ * som admin), så lenken er ubrukelig for alle andre.
  */
 export async function GET(req: NextRequest) {
   const path = req.nextUrl.searchParams.get("path") || "/";
@@ -27,5 +28,7 @@ export async function GET(req: NextRequest) {
   }
 
   (await draftMode()).enable();
-  return NextResponse.redirect(new URL(path, req.nextUrl.origin));
+  const previewPath =
+    path === "/" ? "/forhandsvisning" : `/forhandsvisning${path}`;
+  return NextResponse.redirect(new URL(previewPath, req.nextUrl.origin));
 }

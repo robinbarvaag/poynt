@@ -9,7 +9,7 @@ export default function robots(): MetadataRoute.Robots {
       // Admin, API og det innloggede medlemsområdet skal ikke indekseres.
       // Merk skråstreken: /on-poynt (uten) er den offentlige salgssiden for
       // medlemskapet og SKAL indekseres — kun undersidene er medlemsområdet.
-      disallow: ["/admin", "/api", "/on-poynt/"],
+      disallow: ["/admin", "/api", "/on-poynt/", "/forhandsvisning"],
     },
     sitemap: `${SITE_URL}/sitemap.xml`,
     host: SITE_URL,
