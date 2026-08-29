@@ -21,9 +21,8 @@ async function getServicesPageData() {
     payload.find({
       collection: "services",
       where: {
-        active: {
-          equals: true,
-        },
+        active: { equals: true },
+        _status: { equals: "published" },
       },
       sort: "sortOrder",
       limit: 100,

@@ -48,7 +48,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     payload
       .find({
         collection: "services",
-        where: { active: { equals: true } },
+        where: { active: { equals: true }, _status: { equals: "published" } },
         limit: 1000,
         depth: 0,
       })

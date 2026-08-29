@@ -29,6 +29,7 @@ async function getService(slug: string) {
     where: {
       slug: { equals: slug },
       active: { equals: true },
+      _status: { equals: "published" },
     },
     depth: 2,
     limit: 1,

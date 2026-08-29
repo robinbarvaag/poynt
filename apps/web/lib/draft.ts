@@ -23,7 +23,7 @@ export async function isDraftModeEnabled(): Promise<boolean> {
 
 /** Hent siste utkast av et dokument på slug — bevisst UTEN cache. */
 export async function getDraftBySlug<
-  TSlug extends "pages" | "blog-posts" | "case-studies",
+  TSlug extends "pages" | "blog-posts" | "case-studies" | "services",
 >(collection: TSlug, slug: string) {
   const payload = await getPayload({ config });
   const result = await payload.find({

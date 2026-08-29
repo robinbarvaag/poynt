@@ -39,6 +39,7 @@ async function fetchArchiveServices(
       where: {
         id: { in: serviceIds },
         active: { equals: true },
+        _status: { equals: "published" },
       },
       depth: 1,
       limit: 100,
@@ -53,9 +54,8 @@ async function fetchArchiveServices(
   const result = await payload.find({
     collection: "services",
     where: {
-      active: {
-        equals: true,
-      },
+      active: { equals: true },
+      _status: { equals: "published" },
     },
     sort: "sortOrder",
     limit: limit || 100,

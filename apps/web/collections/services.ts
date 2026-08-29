@@ -21,15 +21,25 @@ export const Services: CollectionConfig = {
     useAsTitle: "name",
     defaultColumns: ["name", "priceType", "qualityScore", "updatedAt"],
     group: "Innhold",
+    // Live preview + «Preview»-knapp går via /api/preview (draft mode) slik at
+    // redaktøren ser siste autosave på /forhandsvisning, ikke den statiske,
+    // cachede sida.
     livePreview: {
-      url: ({ data }) =>
-        `${process.env.NEXT_PUBLIC_URL || "http://localhost:3000"}/tjenester/${data?.slug}`,
+      url: ({ data }) => {
+        const base = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
+        return `${base}/api/preview?path=${encodeURIComponent(`/tjenester/${data?.slug}`)}`;
+      },
     },
-    // «Preview»-knapp i dokument-headeren → åpner tjenesten på nettsiden.
-    preview: (doc) =>
-      doc?.slug
-        ? `${process.env.NEXT_PUBLIC_URL || "http://localhost:3000"}/tjenester/${doc.slug}`
-        : null,
+    preview: (doc) => {
+      const base = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
+      if (!doc?.slug) return null;
+      return `${base}/api/preview?path=${encodeURIComponent(`/tjenester/${doc.slug}`)}`;
+    },
+  },
+  versions: {
+    drafts: {
+      autosave: true,
+    },
   },
   hooks: {
     beforeChange: [
@@ -68,7 +78,7 @@ export const Services: CollectionConfig = {
               label: "Kort beskrivelse",
               admin: {
                 description:
-                  "Vises i oversikten på forsiden — si hva kunden får, ikke hva vi gjør",
+                  "Én–to setninger, helst uten linjeskift — vises i oversikten på forsiden. Si hva kunden får, ikke hva vi gjør. Lengre tekst med avsnitt hører hjemme i Detaljert beskrivelse.",
               },
             },
             {

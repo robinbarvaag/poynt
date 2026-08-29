@@ -52,6 +52,8 @@ import * as migration_20260804_170251_courses_quality_fields from './20260804_17
 import * as migration_20260804_193017 from './20260804_193017';
 import * as migration_20260804_201353_kurs_feature_flag from './20260804_201353_kurs_feature_flag';
 import * as migration_20260805_183446_add_homepage_quality from './20260805_183446_add_homepage_quality';
+import * as migration_20260829_141509 from './20260829_141509';
+import * as migration_20260829_150000_media_relative_urls from './20260829_150000_media_relative_urls';
 
 export const migrations = [
   {
@@ -322,6 +324,16 @@ export const migrations = [
   {
     up: migration_20260805_183446_add_homepage_quality.up,
     down: migration_20260805_183446_add_homepage_quality.down,
-    name: '20260805_183446_add_homepage_quality'
+    name: '20260805_183446_add_homepage_quality',
+  },
+  {
+    up: migration_20260829_141509.up,
+    down: migration_20260829_141509.down,
+    name: '20260829_141509'
+  },
+  {
+    up: migration_20260829_150000_media_relative_urls.up,
+    down: migration_20260829_150000_media_relative_urls.down,
+    name: '20260829_150000_media_relative_urls',
   },
 ];

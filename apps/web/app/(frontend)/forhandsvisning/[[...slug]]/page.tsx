@@ -1,10 +1,14 @@
 import { PreviewBanner } from "@/components/preview-banner";
+import { RefreshOnSave } from "@/components/refresh-on-save";
 import { BlogPostView } from "@/components/views/blog-post-view";
 import { CaseStudyView } from "@/components/views/case-study-view";
 import { CmsPageView } from "@/components/views/cms-page-view";
+import { ServiceView } from "@/components/views/service-view";
 import { getDraftBySlug, isDraftModeEnabled } from "@/lib/draft";
+import config from "@/payload.config";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
+import { getPayload } from "payload";
 import { Suspense } from "react";
 
 /**
@@ -17,6 +21,7 @@ import { Suspense } from "react";
  *   /forhandsvisning/on-poynt           → pages «on-poynt»
  *   /forhandsvisning/blogg/[slug]       → blog-posts
  *   /forhandsvisning/kundehistorier/[…] → case-studies
+ *   /forhandsvisning/tjenester/[slug]   → services
  *
  * Alltid ucachet (utkast skal vise siste autosave), alltid noindex.
  */
@@ -65,8 +70,26 @@ async function PreviewContent({ params }: PreviewPageProps) {
     if (!post) notFound();
     return (
       <>
+        <RefreshOnSave />
         <PreviewBanner path={publicPath} />
         <BlogPostView post={post} isDraft />
+      </>
+    );
+  }
+
+  if (segments[0] === "tjenester" && segments.length > 1) {
+    const [service, servicesPage] = await Promise.all([
+      getDraftBySlug("services", segments.slice(1).join("/")),
+      getPayload({ config }).then((p) =>
+        p.findGlobal({ slug: "servicespage" })
+      ),
+    ]);
+    if (!service) notFound();
+    return (
+      <>
+        <RefreshOnSave />
+        <PreviewBanner path={publicPath} />
+        <ServiceView service={service} cta={servicesPage?.detailCta} />
       </>
     );
   }
@@ -79,6 +102,7 @@ async function PreviewContent({ params }: PreviewPageProps) {
     if (!story) notFound();
     return (
       <>
+        <RefreshOnSave />
         <PreviewBanner path={publicPath} />
         <CaseStudyView story={story} />
       </>
@@ -92,6 +116,7 @@ async function PreviewContent({ params }: PreviewPageProps) {
   if (!page) notFound();
   return (
     <>
+      <RefreshOnSave />
       <PreviewBanner path={publicPath} />
       <CmsPageView page={page} />
     </>

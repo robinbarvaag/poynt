@@ -43,6 +43,7 @@
         "@ai-sdk/rsc": "^2.0.241",
         "@payloadcms/db-postgres": "3.87.0",
         "@payloadcms/email-resend": "3.87.0",
+        "@payloadcms/live-preview-react": "3.87.0",
         "@payloadcms/next": "3.87.0",
         "@payloadcms/plugin-form-builder": "3.87.0",
         "@payloadcms/plugin-redirects": "3.87.0",
@@ -927,6 +928,10 @@
     "@payloadcms/email-resend": ["@payloadcms/email-resend@3.87.0", "", { "peerDependencies": { "payload": "3.87.0" } }, "sha512-4Y2NoOd4xSJe2hXF17I6g80qfX8NBOVNL3tddWi5NxeN1l79mcFEsQ21GgL2OHKGUG3Gx4W4YgwTaCgCiU/L5g=="],
 
     "@payloadcms/graphql": ["@payloadcms/graphql@3.87.0", "", { "dependencies": { "graphql-scalars": "1.22.2", "pluralize": "8.0.0", "ts-essentials": "10.0.3", "tsx": "4.22.4" }, "peerDependencies": { "graphql": "^16.8.1", "payload": "3.87.0" }, "bin": { "payload-graphql": "bin.js" } }, "sha512-P5p/AS2rdpbrHrM7lhHH8vb4LcDBxWwPQvVJf0r2hCFSX1IYg5/JcX+/By2SwOY9ybBZFiOtDTzfoXl7Kkfhrg=="],
+
+    "@payloadcms/live-preview": ["@payloadcms/live-preview@3.87.0", "", {}, "sha512-kR8G/G5dTs3J7p5kdIf5YSbVwP5JyQj0gsvKMvhL6UKoDx3Blx99fMNATxQYAL7IqPtRaB/DUlgLC34UyAOX6g=="],
+
+    "@payloadcms/live-preview-react": ["@payloadcms/live-preview-react@3.87.0", "", { "dependencies": { "@payloadcms/live-preview": "3.87.0" }, "peerDependencies": { "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.1 || ^19.1.2 || ^19.2.1", "react-dom": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.1 || ^19.1.2 || ^19.2.1" } }, "sha512-feJ7j3T85qJD7e3EsAFeGlzvoiwHCbeFUJEOrV8oI5+MXVY+IPP1fvSeE6WiylbabxN4tVit35IlVwYLs6pEgQ=="],
 
     "@payloadcms/next": ["@payloadcms/next@3.87.0", "", { "dependencies": { "@dnd-kit/core": "6.3.1", "@dnd-kit/modifiers": "9.0.0", "@dnd-kit/sortable": "10.0.0", "@payloadcms/graphql": "3.87.0", "@payloadcms/translations": "3.87.0", "@payloadcms/ui": "3.87.0", "busboy": "^1.6.0", "dequal": "2.0.3", "file-type": "21.3.4", "graphql-http": "^1.22.0", "graphql-playground-html": "1.6.30", "http-status": "2.1.0", "path-to-regexp": "6.3.0", "qs-esm": "8.0.1", "sass": "1.77.4", "uuid": "13.0.2" }, "peerDependencies": { "graphql": "^16.8.1", "next": ">=15.2.9 <15.3.0 || >=15.3.9 <15.4.0 || >=15.4.11 <15.5.0 || >=16.2.6 <17.0.0", "payload": "3.87.0" } }, "sha512-kMXzuHbS8yH/rCvpvpRq1Qvwd6+/uOoT6OWY2YZHofiLbz08S60an6mG21eAJCVXRmzJ2g1M2cEDLC0oysvOfg=="],
 
