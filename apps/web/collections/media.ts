@@ -2,6 +2,7 @@ import {
   generateBlurDataURL,
   supportsBlurPlaceholder,
 } from "@/lib/blur-data-url";
+import { toRelativeMediaUrl } from "@/lib/media-url";
 import type { CollectionConfig } from "payload";
 import {
   revalidateCmsAfterChange,
@@ -22,6 +23,28 @@ export const Media: CollectionConfig = {
         }
         const blurDataURL = await generateBlurDataURL(file.data);
         return blurDataURL ? { ...data, blurDataURL } : data;
+      },
+    ],
+    // Blob-pluginen lagrer absolutte URL-er med serverURL fra opplastings-
+    // øyeblikket (lokalt = http://localhost:3000). Admin bruker verdien rått,
+    // så vi normaliserer til host-relative stier ved lesing — de virker på
+    // alle domener. Migrasjonen 20260829_150000 rettet eksisterende rader.
+    afterRead: [
+      ({ doc }) => {
+        if (typeof doc.url === "string") doc.url = toRelativeMediaUrl(doc.url);
+        if (typeof doc.thumbnailURL === "string") {
+          doc.thumbnailURL = toRelativeMediaUrl(doc.thumbnailURL);
+        }
+        if (doc.sizes && typeof doc.sizes === "object") {
+          for (const size of Object.values(doc.sizes) as Array<{
+            url?: string | null;
+          }>) {
+            if (size && typeof size.url === "string") {
+              size.url = toRelativeMediaUrl(size.url);
+            }
+          }
+        }
+        return doc;
       },
     ],
     afterChange: [revalidateCmsAfterChange],
