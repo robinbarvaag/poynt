@@ -16,19 +16,22 @@ export interface StepsProps {
   steps: Step[];
 }
 
-// Marker-strek i høy-kontrast farge, og en rolig fade-flate i samme
-// farge som rammer inn hvert steg. `grad` er kun fra/til —
+// Tall + marker-strek i høy-kontrast farger, og en rolig fade-flate i samme
+// farge som binder tall og innhold sammen i ett steg. `grad` er kun fra/til —
 // retningen settes av zig-zag (flip) under.
 const accents = [
   {
+    text: "text-primary",
     bar: "bg-primary",
     grad: "from-primary/[0.12] to-primary/[0.02]",
   },
   {
+    text: "text-accent-2",
     bar: "bg-accent-2",
     grad: "from-accent-2/[0.16] to-accent-2/[0.03]",
   },
   {
+    text: "text-foreground",
     bar: "bg-foreground",
     grad: "from-foreground/[0.07] to-foreground/[0.01]",
   },
@@ -36,9 +39,9 @@ const accents = [
 
 /**
  * «Slik funker det» — reisen nedover siden som en redaksjonell zig-zag.
- * Ingen tall eller ikoner — vekslende side for
- * bevegelse, og en rolig fade-flate per steg som rammer inn
- * innholdet. Hvert steg glir inn ved scroll. Innholds-only.
+ * Gigantiske tall som grafisk anker (ingen ikoner), vekslende side for
+ * bevegelse, og en rolig fade-flate per steg som tydelig binder tall og
+ * innhold sammen. Hvert steg glir inn ved scroll. Innholds-only.
  */
 export function Steps({ eyebrow, title, intro, steps }: StepsProps) {
   return (
@@ -74,11 +77,28 @@ export function Steps({ eyebrow, title, intro, steps }: StepsProps) {
                   accent.grad
                 )}
               >
-                {/* Innhold — zig-zag: annethvert steg skyves mot høyre */}
+                {/* Gigantisk tall */}
                 <div
                   className={cn(
-                    "md:col-span-8",
-                    flip ? "md:col-start-5" : "md:col-start-1"
+                    "md:row-start-1 md:col-span-4",
+                    flip ? "md:col-start-9 md:text-right" : "md:col-start-1"
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "font-heading font-bold text-7xl leading-none tracking-tighter md:text-[9rem]",
+                      accent.text
+                    )}
+                  >
+                    {index + 1}
+                  </span>
+                </div>
+
+                {/* Innhold */}
+                <div
+                  className={cn(
+                    "md:row-start-1 md:col-span-8",
+                    flip ? "md:col-start-1" : "md:col-start-5"
                   )}
                 >
                   <Eyebrow marker markerClassName={accent.bar}>

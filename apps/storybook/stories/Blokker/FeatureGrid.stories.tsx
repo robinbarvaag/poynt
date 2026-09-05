@@ -10,7 +10,7 @@ const meta: Meta<typeof FeatureGrid> = {
       description: {
         component:
           "Verdi-/feature-rutenett i modig fargeblokk-stil (INSPO/PayPal). Hvert " +
-          "kort er en hel mettet flate med fet tittel med " +
+          "kort er en hel mettet flate med stor line-art-ikon, fet tittel med " +
           "aksent-stjerne, tynn skillelinje og enten en lenke eller et nøkkeltall. " +
           "Kortene er bevisst varierte — ikke tre identiske bokser.",
       },
