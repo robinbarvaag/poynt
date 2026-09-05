@@ -98,27 +98,13 @@ export function FeatureGrid({
           );
           const cardBody = (
             <>
-              {/* Tall — fast sone */}
-              <Text
-                type="span"
-                size="display-xl"
-                weight="bold"
-                color="inherit"
-                customStyles={cn(
-                  "font-heading leading-none tracking-tight",
-                  theme.accent
-                )}
-              >
-                0{index + 1}
-              </Text>
-
               {/* Tittel — alltid 2 rader avsatt */}
               <Heading
                 variant="h3"
                 size="display-sm"
                 color="inherit"
                 weight="bold"
-                customStyles="mt-8 line-clamp-2 min-h-[4.2rem] leading-[1.1]"
+                customStyles="line-clamp-2 min-h-[4.2rem] leading-[1.1]"
               >
                 {base}
                 {star && <span className={theme.accent}>*</span>}

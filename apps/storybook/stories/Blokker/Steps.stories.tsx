@@ -10,7 +10,7 @@ const meta: Meta<typeof Steps> = {
       description: {
         component:
           "«Slik funker det» — reisen nedover siden som en redaksjonell zig-zag. " +
-          "Gigantiske tall som anker (ingen ikoner), vekslende side for bevegelse " +
+          "Ingen tall eller ikoner — vekslende side for bevegelse " +
           "og en marker-strek som aksent. Hvert steg glir inn ved scroll.",
       },
     },
