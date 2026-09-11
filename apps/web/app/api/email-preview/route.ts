@@ -1,4 +1,5 @@
 import { fillFormWildcards } from "@/lib/form-email-previews";
+import { buildOrderEmailExtras } from "@/lib/order-email";
 import config from "@/payload.config";
 import { convertLexicalToHTML } from "@payloadcms/richtext-lexical/html";
 import type { SerializedEditorState } from "@payloadcms/richtext-lexical/lexical";
@@ -97,6 +98,9 @@ export async function POST(req: NextRequest) {
     }
 
     if (body.kind === "order") {
+      // Selger + juridisk fra «Nettbutikk», så forhåndsvisningen viser det som
+      // faktisk sendes. Tekstene i skjemaet vinner over lagrede verdier.
+      const extras = await buildOrderEmailExtras(payload, []);
       const previews = await renderEmailPreviews({
         orderSubject: body.subject || undefined,
         orderContent: {
@@ -105,6 +109,8 @@ export async function POST(req: NextRequest) {
           pdfNote: body.pdfNote || undefined,
           footer: body.footer || undefined,
         },
+        orderSeller: extras.seller,
+        orderLegal: extras.legal,
       });
       const preview = previews.find((p) => p.key === "order-confirmation");
       return NextResponse.json({

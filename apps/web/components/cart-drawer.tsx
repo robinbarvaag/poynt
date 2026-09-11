@@ -1,5 +1,6 @@
 "use client";
 
+import { CheckoutConsentNotice } from "@/components/checkout-consent-notice";
 import { VippsButton } from "@/components/vipps-button";
 import { formatPrice } from "@/lib/format";
 import { useCartReady } from "@/lib/use-cart-ready";
@@ -99,6 +100,7 @@ export function CartDrawer() {
               loading={vippsLoading}
               onClick={handleVippsCheckout}
             />
+            <CheckoutConsentNotice compact />
           </div>
         }
         emptyAction={

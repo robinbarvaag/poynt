@@ -1,33 +1,66 @@
-import type { EmailAttachment, OrderConfirmationContent } from "@poynt/email";
+import { parseVatRate } from "@/lib/vat";
+import type {
+  EmailAttachment,
+  OrderConfirmationContent,
+  OrderConfirmationLegal,
+  OrderConfirmationSeller,
+} from "@poynt/email";
 import type { Payload } from "payload";
 
 /** Grense per Resend: 40 MB totalt per e-post — vi holder god margin. */
 const MAX_TOTAL_ATTACHMENT_BYTES = 25 * 1024 * 1024;
 
+/** Per-produkt-data som varelinjene i e-posten trenger utover ordren selv. */
+export interface OrderEmailProductMeta {
+  /** MVA-sats i prosent fra produktet. */
+  vatRate: number;
+  /** Absolutt URL til miniatyrbilde, om produktet har hovedbilde. */
+  imageUrl?: string;
+}
+
 export interface OrderEmailExtras {
   subject?: string;
   content?: OrderConfirmationContent;
+  seller?: OrderConfirmationSeller;
+  legal?: OrderConfirmationLegal;
   attachments: EmailAttachment[];
+  /** Nøkkel: produkt-id som streng. */
+  products: Map<string, OrderEmailProductMeta>;
+}
+
+function siteUrl(): string {
+  return (process.env.NEXT_PUBLIC_URL ?? "").replace(/\/$/, "");
+}
+
+/** Gjør en media-URL absolutt; e-postklienter viser ikke relative bilder. */
+function absoluteMediaUrl(url: string | null | undefined): string | undefined {
+  if (!url) return undefined;
+  return url.startsWith("http") ? url : `${siteUrl()}${url}`;
 }
 
 /**
- * Samler admin-redigerte e-posttekster (checkout-settings-globalen) og
- * PDF-vedlegg for produktene i en ordre. Brukes av både Stripe- og
- * Vipps-webhooken før sendOrderConfirmation.
+ * Samler alt ordrebekreftelsen trenger utover selve ordren: admin-redigerte
+ * tekster (checkout-settings), selgeropplysninger og juridiske lenker
+ * (shop-settings), produktbilder + MVA-sats per produkt, og PDF-vedlegg.
+ * Brukes av både Stripe- og Vipps-webhooken før sendOrderConfirmation.
  *
- * Vedlegg som mangler fil eller sprenger størrelsesgrensen hoppes over med
- * logg — e-posten skal alltid ut, med eller uten vedlegg.
+ * Alt her er «best effort»: feil på ett delelement logges og hoppes over —
+ * e-posten skal alltid ut.
  */
 export async function buildOrderEmailExtras(
   payload: Payload,
   productIds: (number | string)[]
 ): Promise<OrderEmailExtras> {
-  const settings = await payload
-    .findGlobal({ slug: "checkout-settings" })
-    .catch((error) => {
+  const [settings, shop] = await Promise.all([
+    payload.findGlobal({ slug: "checkout-settings" }).catch((error) => {
       console.error("Klarte ikke hente checkout-settings:", error);
       return null;
-    });
+    }),
+    payload.findGlobal({ slug: "shop-settings", depth: 1 }).catch((error) => {
+      console.error("Klarte ikke hente shop-settings:", error);
+      return null;
+    }),
+  ]);
 
   const content: OrderConfirmationContent | undefined = settings
     ? {
@@ -38,7 +71,32 @@ export async function buildOrderEmailExtras(
       }
     : undefined;
 
+  const seller: OrderConfirmationSeller | undefined = shop
+    ? {
+        name: shop.sellerName || "Poynt AS",
+        orgNumber: shop.orgNumber ?? undefined,
+        vatRegistered: shop.vatRegistered ?? true,
+        address: shop.address ?? undefined,
+        supportEmail: shop.supportEmail ?? undefined,
+        supportPhone: shop.supportPhone ?? undefined,
+      }
+    : undefined;
+
+  const pageUrl = (page: unknown): string | undefined => {
+    if (!page || typeof page !== "object") return undefined;
+    const slug = (page as { slug?: string | null }).slug;
+    return slug ? `${siteUrl()}/${slug}` : undefined;
+  };
+  const legal: OrderConfirmationLegal | undefined = shop
+    ? {
+        withdrawalNotice: shop.withdrawalNotice ?? undefined,
+        termsUrl: pageUrl(shop.termsPage),
+        privacyUrl: pageUrl(shop.privacyPage),
+      }
+    : undefined;
+
   const attachments: EmailAttachment[] = [];
+  const products = new Map<string, OrderEmailProductMeta>();
   let totalBytes = 0;
 
   for (const id of productIds) {
@@ -48,6 +106,16 @@ export async function buildOrderEmailExtras(
         id,
         depth: 2,
       });
+
+      const image =
+        typeof product.featuredImage === "object"
+          ? product.featuredImage
+          : null;
+      products.set(String(product.id), {
+        vatRate: parseVatRate(product.vatRate),
+        imageUrl: absoluteMediaUrl(image?.sizes?.thumbnail?.url ?? image?.url),
+      });
+
       if (product.type !== "pdf" || !product.pdfFile) continue;
 
       const media =
@@ -71,9 +139,7 @@ export async function buildOrderEmailExtras(
         continue;
       }
 
-      const fileUrl = mediaPath.startsWith("http")
-        ? mediaPath
-        : `${process.env.NEXT_PUBLIC_URL}${mediaPath}`;
+      const fileUrl = absoluteMediaUrl(mediaPath) as string;
       const res = await fetch(fileUrl);
       if (!res.ok) {
         console.error(
@@ -103,6 +169,9 @@ export async function buildOrderEmailExtras(
   return {
     subject: settings?.emailSubject ?? undefined,
     content,
+    seller,
+    legal,
     attachments,
+    products,
   };
 }

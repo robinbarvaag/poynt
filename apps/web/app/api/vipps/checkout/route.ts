@@ -1,6 +1,7 @@
 import { resolveCheckoutItems } from "@/lib/checkout-items";
 import { discountedTotal, resolveCoupon } from "@/lib/coupon";
 import { getSessionWithMembership } from "@/lib/membership";
+import { calculateVatTotal, parseVatRate } from "@/lib/vat";
 import { createVippsPayment } from "@/lib/vipps";
 import config from "@/payload.config";
 import { type NextRequest, NextResponse } from "next/server";
@@ -88,14 +89,26 @@ export async function POST(req: NextRequest) {
               ? `${p.product.variantLabel} ${p.variant}`
               : (p.variant ?? undefined),
           priceAtPurchase: p.unitPrice,
+          vatRate: parseVatRate(p.product.vatRate),
         })),
         // Eksakt beløp i kr (kan ha øredesimaler ved rabatt). MÅ samsvare med
         // amountValue: webhooken capturer Math.round(total * 100), og et avvik
         // gir delvis capture hos Vipps.
         total: amountValue / 100,
+        vatTotal: calculateVatTotal(
+          products.map((p) => ({
+            unitPrice: p.unitPrice,
+            quantity: p.quantity,
+            ratePercent: parseVatRate(p.product.vatRate),
+          })),
+          amountValue / 100
+        ),
         status: "pending",
         paymentProvider: "vipps",
         newsletterOptIn: newsletterOptIn === true,
+        // Forbeholdet om umiddelbar levering og bortfall av angrerett står
+        // ved alle betalingsknappene (CheckoutConsentNotice).
+        termsAccepted: true,
       },
     });
 

@@ -1,5 +1,6 @@
 "use client";
 import { AddToCartButton } from "@/components/add-to-cart-button";
+import { CheckoutConsentNotice } from "@/components/checkout-consent-notice";
 import { type MediaResource, PayloadImage } from "@/components/payload-image";
 import { VippsButton } from "@/components/vipps-button";
 import { startVippsBuyNow } from "@/lib/vipps-checkout-client";
@@ -419,6 +420,9 @@ function ProductDetailInteractive({
                   disabled={hasVariants && !selectedVariant}
                   onClick={handleVippsBuyNow}
                 />
+              )}
+              {info.type !== "membership" && !isSoldOut && (
+                <CheckoutConsentNotice className="mt-3" />
               )}
               {vippsError && (
                 <p

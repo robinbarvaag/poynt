@@ -54,6 +54,7 @@ import * as migration_20260804_201353_kurs_feature_flag from './20260804_201353_
 import * as migration_20260805_183446_add_homepage_quality from './20260805_183446_add_homepage_quality';
 import * as migration_20260829_141509 from './20260829_141509';
 import * as migration_20260829_150000_media_relative_urls from './20260829_150000_media_relative_urls';
+import * as migration_20260911_183740_shop_settings_vat from './20260911_183740_shop_settings_vat';
 
 export const migrations = [
   {
@@ -329,11 +330,16 @@ export const migrations = [
   {
     up: migration_20260829_141509.up,
     down: migration_20260829_141509.down,
-    name: '20260829_141509'
+    name: '20260829_141509',
   },
   {
     up: migration_20260829_150000_media_relative_urls.up,
     down: migration_20260829_150000_media_relative_urls.down,
     name: '20260829_150000_media_relative_urls',
+  },
+  {
+    up: migration_20260911_183740_shop_settings_vat.up,
+    down: migration_20260911_183740_shop_settings_vat.down,
+    name: '20260911_183740_shop_settings_vat'
   },
 ];

@@ -2,9 +2,16 @@ import { Resend } from "resend";
 import type {
   OrderConfirmationContent,
   OrderConfirmationItem,
+  OrderConfirmationLegal,
+  OrderConfirmationSeller,
 } from "./templates/order-confirmation";
 
-export type { OrderConfirmationContent, OrderConfirmationItem };
+export type {
+  OrderConfirmationContent,
+  OrderConfirmationItem,
+  OrderConfirmationLegal,
+  OrderConfirmationSeller,
+};
 export {
   renderEmailPreviews,
   type EmailPreview,
@@ -185,14 +192,24 @@ function resolveRecipients(email: string): string | string[] {
 export async function sendOrderConfirmation(params: {
   email: string;
   orderNumber: string;
+  /** Kjøpsdato — standard nå. */
+  orderDate?: Date | string;
   customerName?: string;
+  /** «Vipps» eller «Kort (Stripe)» — vises i ordrefakta. */
+  paymentMethod?: string;
   items: OrderConfirmationItem[];
-  /** Totalsum i kr. */
+  /** Totalsum i kr, inkl. MVA, etter rabatt. */
   total: number;
+  /** Rabatt i kr (positivt) — egen linje i oppsummeringen. */
+  discount?: number;
   /** Admin-redigerbart emnefelt – ordrenummer legges på automatisk. */
   subject?: string;
   /** Admin-redigerbare tekster i e-posten. */
   content?: OrderConfirmationContent;
+  /** Selgeropplysninger (org.nr., adresse …) fra «Nettbutikk»-innstillingene. */
+  seller?: OrderConfirmationSeller;
+  /** Angrerett-tekst og lenker til vilkår/personvern. */
+  legal?: OrderConfirmationLegal;
   /** Vedlegg (f.eks. kjøpte PDF-er), base64-kodet. */
   attachments?: EmailAttachment[];
 }) {
@@ -206,10 +223,16 @@ export async function sendOrderConfirmation(params: {
   const html = await render(
     OrderConfirmationEmail({
       orderNumber: params.orderNumber,
+      orderDate: params.orderDate,
       customerName: params.customerName,
+      customerEmail: params.email,
+      paymentMethod: params.paymentMethod,
       items: params.items,
       total: params.total,
+      discount: params.discount,
       content: params.content,
+      seller: params.seller,
+      legal: params.legal,
       hasAttachments: (params.attachments?.length ?? 0) > 0,
     })
   );

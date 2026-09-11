@@ -1,4 +1,8 @@
-import type { OrderConfirmationContent } from "./templates/order-confirmation";
+import type {
+  OrderConfirmationContent,
+  OrderConfirmationLegal,
+  OrderConfirmationSeller,
+} from "./templates/order-confirmation";
 
 /** Én e-postmal, ferdig rendret med eksempeldata for forhåndsvisning i admin. */
 export interface EmailPreview {
@@ -79,6 +83,9 @@ const TEMPLATES_EDIT_HINT = {
 export async function renderEmailPreviews(options?: {
   orderSubject?: string;
   orderContent?: OrderConfirmationContent;
+  /** Faktiske selgeropplysninger fra «Nettbutikk» — ellers eksempeldata. */
+  orderSeller?: OrderConfirmationSeller;
+  orderLegal?: OrderConfirmationLegal;
   templates?: PreviewTemplateOverrides;
 }): Promise<EmailPreview[]> {
   const { render } = await import("@react-email/render");
@@ -115,9 +122,22 @@ export async function renderEmailPreviews(options?: {
   };
 
   const sampleItems = [
-    { name: "Verdifull vekst (e-bok)", quantity: 1, price: 349 },
-    { name: "Synlighetspakken", quantity: 1, price: 990 },
+    { name: "Verdifull vekst (e-bok)", quantity: 1, price: 349, vatRate: 25 },
+    { name: "Synlighetspakken", quantity: 1, price: 990, vatRate: 25 },
   ];
+  const sampleSeller: OrderConfirmationSeller = options?.orderSeller ?? {
+    name: "Poynt AS",
+    orgNumber: "123 456 789",
+    vatRegistered: true,
+    address: "Eksempelveien 1\n4000 Stavanger",
+    supportEmail: "hei@poynt.no",
+  };
+  const sampleLegal: OrderConfirmationLegal = options?.orderLegal ?? {
+    withdrawalNotice:
+      "Digitalt innhold leveres umiddelbart etter kjøp. Ved å fullføre kjøpet ba du om at leveringen startet med en gang, og du godtok at angreretten dermed bortfaller (angrerettloven § 22 bokstav n).",
+    termsUrl: "https://www.poynt.no/kjopsbetingelser",
+    privacyUrl: "https://www.poynt.no/personvern",
+  };
 
   return [
     {
@@ -136,9 +156,13 @@ export async function renderEmailPreviews(options?: {
         OrderConfirmationEmail({
           orderNumber: "1042",
           customerName: "Kari Nordmann",
+          customerEmail: "kari@example.com",
+          paymentMethod: "Vipps",
           items: sampleItems,
           total: 1339,
           content: options?.orderContent,
+          seller: sampleSeller,
+          legal: sampleLegal,
           hasAttachments: true,
         })
       ),

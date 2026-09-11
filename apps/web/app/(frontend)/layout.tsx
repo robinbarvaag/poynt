@@ -13,6 +13,7 @@ import { organizationSchema, websiteSchema } from "@/lib/structured-data";
 import config from "@payload-config";
 import { Grain, cn } from "@poynt/ui";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
 import { cacheLife, cacheTag } from "next/cache";
 import { Bricolage_Grotesque, Poppins } from "next/font/google";
@@ -147,9 +148,10 @@ export default async function FrontendLayout({
         </ConsentProvider>
         {/* Redaksjonell signatur: ett fint korn-lag over hele siden */}
         <Grain fixed />
-        {/* Vercel Web Analytics: cookie-fri og krever ikke samtykke, så den
-            ligger utenfor ConsentProvider og teller alle besøk. */}
+        {/* Vercel Web Analytics og Speed Insights: cookie-frie og krever ikke
+            samtykke, så de ligger utenfor ConsentProvider og måler alle besøk. */}
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

@@ -131,6 +131,7 @@ export interface Config {
     footer: Footer;
     'site-settings': SiteSetting;
     'checkout-settings': CheckoutSetting;
+    'shop-settings': ShopSetting;
     'on-poynt-features': OnPoyntFeature;
   };
   globalsSelect: {
@@ -143,6 +144,7 @@ export interface Config {
     footer: FooterSelect<false> | FooterSelect<true>;
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     'checkout-settings': CheckoutSettingsSelect<false> | CheckoutSettingsSelect<true>;
+    'shop-settings': ShopSettingsSelect<false> | ShopSettingsSelect<true>;
     'on-poynt-features': OnPoyntFeaturesSelect<false> | OnPoyntFeaturesSelect<true>;
   };
   locale: null;
@@ -1232,6 +1234,10 @@ export interface Product {
    * Valgfritt – vis en overstrøket førpris for å vise rabatt
    */
   compareAtPrice?: number | null;
+  /**
+   * Prisen er inkludert MVA. Satsen brukes til å spesifisere MVA på kvitteringen. Usikker? Avklar med regnskapsfører – e-bok-fritaket gjelder bare publikasjoner som regnes som bok.
+   */
+  vatRate: '25' | '0';
   /**
    * Lavere tall vises først i produktoversikten (f.eks. 1 for boka). Produkter uten verdi havner bakerst, nyeste først.
    */
@@ -2448,9 +2454,24 @@ export interface Order {
      */
     variant?: string | null;
     priceAtPurchase: number;
+    /**
+     * Satsen produktet hadde da ordren ble lagt
+     */
+    vatRate?: number | null;
     id?: string | null;
   }[];
+  /**
+   * Inkludert MVA
+   */
   total: number;
+  /**
+   * Beregnet fra varelinjene og produktenes MVA-sats, fordelt på eventuell rabatt
+   */
+  vatTotal?: number | null;
+  /**
+   * Kunden fikk forbeholdet om umiddelbar levering og bortfall av angrerett ved betalingsknappen (angrerettloven § 22 n)
+   */
+  termsAccepted?: boolean | null;
   status: 'pending' | 'paid' | 'cancelled';
   /**
    * Kunden krysset aktivt av for nyhetsbrev i utsjekken (dokumentert samtykke)
@@ -3721,6 +3742,7 @@ export interface ProductsSelect<T extends boolean = true> {
   applyUrl?: T;
   price?: T;
   compareAtPrice?: T;
+  vatRate?: T;
   displayOrder?: T;
   active?: T;
   categories?: T;
@@ -3819,9 +3841,12 @@ export interface OrdersSelect<T extends boolean = true> {
         quantity?: T;
         variant?: T;
         priceAtPurchase?: T;
+        vatRate?: T;
         id?: T;
       };
   total?: T;
+  vatTotal?: T;
+  termsAccepted?: T;
   status?: T;
   newsletterOptIn?: T;
   paymentProvider?: T;
@@ -4509,6 +4534,38 @@ export interface CheckoutSetting {
   createdAt?: string | null;
 }
 /**
+ * Selgeropplysninger, MVA og juridiske tekster som brukes i ordrebekreftelsen.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "shop-settings".
+ */
+export interface ShopSetting {
+  id: number;
+  sellerName: string;
+  /**
+   * Ni siffer, f.eks. «123 456 789»
+   */
+  orgNumber?: string | null;
+  /**
+   * Når avkrysset legges «MVA» til etter org.nr., og MVA spesifiseres på kvitteringen. Alle priser i nettbutikken er inkludert MVA.
+   */
+  vatRegistered?: boolean | null;
+  /**
+   * Gate, postnummer og sted. Linjeskift beholdes.
+   */
+  address?: string | null;
+  supportEmail?: string | null;
+  supportPhone?: string | null;
+  termsPage?: (number | null) | Page;
+  privacyPage?: (number | null) | Page;
+  /**
+   * Loven krever at kunden får denne bekreftelsen på et varig medium (e-post). Samme forbehold vises ved betalingsknappene i kassen.
+   */
+  withdrawalNotice?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * Skru funksjoner i medlemsområdet av og på. Avskrudde funksjoner forsvinner fra menyen, og sidene blir utilgjengelige for medlemmene.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -4847,6 +4904,24 @@ export interface CheckoutSettingsSelect<T extends boolean = true> {
   emailIntro?: T;
   emailPdfNote?: T;
   emailFooter?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "shop-settings_select".
+ */
+export interface ShopSettingsSelect<T extends boolean = true> {
+  sellerName?: T;
+  orgNumber?: T;
+  vatRegistered?: T;
+  address?: T;
+  supportEmail?: T;
+  supportPhone?: T;
+  termsPage?: T;
+  privacyPage?: T;
+  withdrawalNotice?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

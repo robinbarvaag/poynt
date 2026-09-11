@@ -46,6 +46,7 @@ import {
   PodcastPage,
   ProductsPage,
   ServicesPage,
+  ShopSettings,
   SiteSettings,
 } from "./globals";
 
@@ -201,6 +202,7 @@ export default buildConfig({
     Footer,
     SiteSettings,
     CheckoutSettings,
+    ShopSettings,
     OnPoyntFeatures,
   ],
   admin: {

@@ -7,6 +7,7 @@ import {
 } from "@/lib/membership/sync-subscription";
 import { getNotificationEmails } from "@/lib/notification-emails";
 import { buildOrderEmailExtras } from "@/lib/order-email";
+import { calculateVatTotal, parseVatRate } from "@/lib/vat";
 import { claimWebhookEvent, releaseWebhookEvent } from "@/lib/webhook-events";
 import config from "@/payload.config";
 import {
@@ -161,6 +162,8 @@ async function handleProductPurchase(session: Stripe.Checkout.Session) {
     quantity: number;
     variant?: string;
     priceAtPurchase: number;
+    /** MVA-sats i prosent fra produktet på kjøpstidspunktet. */
+    vatRate: number;
     /** Kun til e-postkvittering – lagres ikke på ordren. */
     name: string;
   };
@@ -201,6 +204,7 @@ async function handleProductPurchase(session: Stripe.Checkout.Session) {
           quantity: line.q,
           variant,
           priceAtPurchase: unitPrice,
+          vatRate: parseVatRate(product.vatRate),
           name: product.name,
         };
       })
@@ -245,6 +249,7 @@ async function handleProductPurchase(session: Stripe.Checkout.Session) {
           product: product.id,
           quantity: item.quantity ?? 1,
           priceAtPurchase: product.price,
+          vatRate: parseVatRate(product.vatRate),
           name: product.name,
         };
       })
@@ -262,9 +267,20 @@ async function handleProductPurchase(session: Stripe.Checkout.Session) {
       customerName: session.customer_details?.name || undefined,
       items: orderItems.map(({ name: _name, ...item }) => item),
       total,
+      vatTotal: calculateVatTotal(
+        orderItems.map((item) => ({
+          unitPrice: item.priceAtPurchase,
+          quantity: item.quantity,
+          ratePercent: item.vatRate,
+        })),
+        total
+      ),
       status: "paid",
       paymentProvider: "stripe",
       newsletterOptIn: session.metadata?.newsletter === "1",
+      // Forbeholdet om umiddelbar levering og bortfall av angrerett står ved
+      // alle betalingsknappene (CheckoutConsentNotice).
+      termsAccepted: true,
       stripeSessionId: session.id,
       stripePaymentIntentId: session.payment_intent as string,
     },
@@ -289,19 +305,32 @@ async function handleProductPurchase(session: Stripe.Checkout.Session) {
       orderItems.map((item) => item.product)
     );
 
+    const linesGross = orderItems.reduce(
+      (sum, item) => sum + item.priceAtPurchase * item.quantity,
+      0
+    );
+    const discount = Math.round((linesGross - total) * 100) / 100;
+
     await sendOrderConfirmation({
       email: customerEmail,
       orderNumber: String(order.id),
+      orderDate: order.createdAt,
       customerName: session.customer_details?.name || undefined,
+      paymentMethod: "Kort (Stripe)",
       items: orderItems.map((item) => ({
         name: item.name,
         quantity: item.quantity,
         price: item.priceAtPurchase,
         variant: item.variant,
+        vatRate: item.vatRate,
+        imageUrl: extras.products.get(String(item.product))?.imageUrl,
       })),
       total,
+      discount: discount > 0 ? discount : undefined,
       subject: extras.subject,
       content: extras.content,
+      seller: extras.seller,
+      legal: extras.legal,
       attachments: extras.attachments,
     });
   } catch (error) {

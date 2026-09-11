@@ -1,5 +1,6 @@
 "use client";
 
+import { CheckoutConsentNotice } from "@/components/checkout-consent-notice";
 import { VippsButton } from "@/components/vipps-button";
 import { formatPrice } from "@/lib/format";
 import { useCartReady } from "@/lib/use-cart-ready";
@@ -378,6 +379,8 @@ export default function CartPage() {
                 disabled={isLoading || !ready}
                 onClick={handleVippsCheckout}
               />
+
+              <CheckoutConsentNotice className="mt-4" />
 
               <ul className="mt-5 space-y-2.5 text-muted-foreground text-sm">
                 <li className="flex items-center gap-2.5">

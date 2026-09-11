@@ -1,6 +1,7 @@
 import "../globals.css";
 import { UILinkProvider } from "@/components/ui-link-provider";
 import { cn } from "@poynt/ui";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
 import { Bricolage_Grotesque, Poppins } from "next/font/google";
 
@@ -70,6 +71,9 @@ export default function PlannerRootLayout({
         {/* Interne lenker i @poynt/ui skal navigere på klienten, ikke laste
             hele siden på nytt. */}
         <UILinkProvider>{children}</UILinkProvider>
+        {/* Cookie-fri ytelsesmåling (Core Web Vitals) — samme som på
+            frontend, så medlemsområdet også dukker opp i Speed Insights. */}
+        <SpeedInsights />
       </body>
     </html>
   );

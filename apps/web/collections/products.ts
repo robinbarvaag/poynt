@@ -407,6 +407,25 @@ export const Products: CollectionConfig = {
       },
     },
     {
+      name: "vatRate",
+      type: "select",
+      label: "MVA-sats",
+      required: true,
+      defaultValue: "25",
+      options: [
+        {
+          label: "25 % (alminnelig sats – kurs, maler, medlemskap)",
+          value: "25",
+        },
+        { label: "0 % (fritatt – e-bøker som regnes som bok)", value: "0" },
+      ],
+      admin: {
+        position: "sidebar",
+        description:
+          "Prisen er inkludert MVA. Satsen brukes til å spesifisere MVA på kvitteringen. Usikker? Avklar med regnskapsfører – e-bok-fritaket gjelder bare publikasjoner som regnes som bok.",
+      },
+    },
+    {
       name: "displayOrder",
       type: "number",
       label: "Visningsrekkefølge",

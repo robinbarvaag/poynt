@@ -175,22 +175,42 @@ export async function POST(req: NextRequest) {
             )
           );
 
+          const linesGross = (order.items ?? []).reduce(
+            (sum, item) => sum + item.priceAtPurchase * item.quantity,
+            0
+          );
+          const discount = Math.round((linesGross - order.total) * 100) / 100;
+
           await sendOrderConfirmation({
             email,
             orderNumber: String(order.id),
+            orderDate: order.createdAt,
             customerName: customerName || order.customerName || undefined,
-            items: (order.items ?? []).map((item) => ({
-              name:
+            paymentMethod: "Vipps",
+            items: (order.items ?? []).map((item) => {
+              const productId =
                 typeof item.product === "object"
-                  ? item.product.name
-                  : `Produkt ${item.product}`,
-              quantity: item.quantity,
-              price: item.priceAtPurchase,
-              variant: item.variant ?? undefined,
-            })),
+                  ? item.product.id
+                  : item.product;
+              const meta = extras.products.get(String(productId));
+              return {
+                name:
+                  typeof item.product === "object"
+                    ? item.product.name
+                    : `Produkt ${item.product}`,
+                quantity: item.quantity,
+                price: item.priceAtPurchase,
+                variant: item.variant ?? undefined,
+                vatRate: item.vatRate ?? meta?.vatRate,
+                imageUrl: meta?.imageUrl,
+              };
+            }),
             total: order.total,
+            discount: discount > 0 ? discount : undefined,
             subject: extras.subject,
             content: extras.content,
+            seller: extras.seller,
+            legal: extras.legal,
             attachments: extras.attachments,
           });
         } else {

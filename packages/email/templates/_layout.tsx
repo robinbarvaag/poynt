@@ -142,9 +142,12 @@ export const emailStyles = {
 export function EmailShell({
   preview,
   children,
+  footerLinks = [],
 }: {
   preview: string;
   children: ReactNode;
+  /** Ekstra lenker i bunnteksten (kjøpsbetingelser, personvern …). */
+  footerLinks?: { label: string; href: string }[];
 }) {
   return (
     <Html lang="no">
@@ -164,6 +167,14 @@ export function EmailShell({
             <Link href="https://www.poynt.no" style={footerLink}>
               poynt.no
             </Link>
+            {footerLinks.map((link) => (
+              <React.Fragment key={link.href}>
+                {" · "}
+                <Link href={link.href} style={footerLink}>
+                  {link.label}
+                </Link>
+              </React.Fragment>
+            ))}
           </Text>
         </Container>
       </Body>

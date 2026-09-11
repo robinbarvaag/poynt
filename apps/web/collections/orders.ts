@@ -65,6 +65,14 @@ export const Orders: CollectionConfig = {
           required: true,
           label: "Pris ved kjøp (kr)",
         },
+        {
+          name: "vatRate",
+          type: "number",
+          label: "MVA-sats (%)",
+          admin: {
+            description: "Satsen produktet hadde da ordren ble lagt",
+          },
+        },
       ],
     },
     {
@@ -72,6 +80,27 @@ export const Orders: CollectionConfig = {
       type: "number",
       required: true,
       label: "Totalpris (kr)",
+      admin: { description: "Inkludert MVA" },
+    },
+    {
+      name: "vatTotal",
+      type: "number",
+      label: "Herav MVA (kr)",
+      admin: {
+        description:
+          "Beregnet fra varelinjene og produktenes MVA-sats, fordelt på eventuell rabatt",
+      },
+    },
+    {
+      name: "termsAccepted",
+      type: "checkbox",
+      defaultValue: false,
+      label: "Godtok vilkår og bortfall av angrerett",
+      admin: {
+        position: "sidebar",
+        description:
+          "Kunden fikk forbeholdet om umiddelbar levering og bortfall av angrerett ved betalingsknappen (angrerettloven § 22 n)",
+      },
     },
     {
       name: "status",
