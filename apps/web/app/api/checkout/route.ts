@@ -7,6 +7,12 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getPayload } from "payload";
 import type Stripe from "stripe";
 
+// Stripe skrur på Managed Payments (Stripe som «merchant of record», +3,5 %
+// gebyr, kvitteringer fra Link) som standard for nye kontoer. Vi vil være
+// selger selv, som på Wix, så vi sier eksplisitt nei per sesjon. SDK 20.x
+// mangler feltet i typene; Stripe sender ukjente felt videre uendret.
+const managedPaymentsOff = { managed_payments: { enabled: false } } as const;
+
 export async function POST(req: NextRequest) {
   const { getClientIp, rateLimit } = await import("@/lib/rate-limit");
   const ip = getClientIp(req.headers);
@@ -100,8 +106,8 @@ export async function POST(req: NextRequest) {
         }));
 
       const session = await stripe.checkout.sessions.create({
+        ...managedPaymentsOff,
         mode: "subscription",
-        payment_method_types: ["card"],
         line_items: lineItems,
         ...(discounts && { discounts }),
         ...(authSession && { customer_email: authSession.user.email }),
@@ -145,8 +151,8 @@ export async function POST(req: NextRequest) {
     );
 
     const session = await stripe.checkout.sessions.create({
+      ...managedPaymentsOff,
       mode: "payment",
-      payment_method_types: ["card"],
       line_items: lineItems,
       ...(discounts && { discounts }),
       ...(authSession && { customer_email: authSession.user.email }),

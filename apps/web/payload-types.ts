@@ -1446,7 +1446,7 @@ export interface Service {
   id: number;
   name: string;
   /**
-   * Vises i oversikten på forsiden — si hva kunden får, ikke hva vi gjør
+   * Én–to setninger, helst uten linjeskift — vises i oversikten på forsiden. Si hva kunden får, ikke hva vi gjør. Lengre tekst med avsnitt hører hjemme i Detaljert beskrivelse.
    */
   shortDescription: string;
   /**
