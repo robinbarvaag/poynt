@@ -6,7 +6,6 @@ import { FloatingShapes, Heading, Text } from "@poynt/ui";
 import { Facebook, Instagram, Linkedin, Twitter, Youtube } from "lucide-react";
 import { cacheLife } from "next/cache";
 import Link from "next/link";
-import type React from "react";
 import { NewsletterForm } from "./newsletter-form";
 
 interface FooterLink {
@@ -33,19 +32,8 @@ interface SocialLink {
   url: string;
 }
 
-/** Selgeropplysninger fra Nettbutikk-globalen, vist som tabell nederst. */
-export interface FooterSeller {
-  name: string;
-  orgNumber?: string | null;
-  vatRegistered?: boolean | null;
-  address?: string | null;
-  supportEmail?: string | null;
-  supportPhone?: string | null;
-}
-
 interface FooterProps {
   siteName?: string;
-  seller?: FooterSeller | null;
   logo?: MediaResource | null;
   columns?: FooterColumn[];
   bottomText?: SerializedEditorState;
@@ -92,54 +80,8 @@ async function getCurrentYear() {
   return new Date().getFullYear();
 }
 
-function sellerRows(seller: FooterSeller) {
-  const rows: { label: string; value: React.ReactNode }[] = [
-    { label: "Selger", value: seller.name },
-  ];
-  if (seller.orgNumber) {
-    rows.push({
-      label: "Org.nr.",
-      value: `${seller.orgNumber}${seller.vatRegistered ? " MVA" : ""}`,
-    });
-  }
-  if (seller.address) {
-    rows.push({
-      label: "Adresse",
-      value: seller.address.split(/\r?\n/).filter(Boolean).join(", "),
-    });
-  }
-  if (seller.supportEmail) {
-    rows.push({
-      label: "E-post",
-      value: (
-        <a
-          href={`mailto:${seller.supportEmail}`}
-          className="hover:text-foreground transition-colors"
-        >
-          {seller.supportEmail}
-        </a>
-      ),
-    });
-  }
-  if (seller.supportPhone) {
-    rows.push({
-      label: "Telefon",
-      value: (
-        <a
-          href={`tel:${seller.supportPhone.replace(/\s+/g, "")}`}
-          className="hover:text-foreground transition-colors"
-        >
-          {seller.supportPhone}
-        </a>
-      ),
-    });
-  }
-  return rows;
-}
-
 export async function Footer({
   siteName = "Poynt",
-  seller,
   logo,
   columns = [],
   bottomText,
@@ -238,26 +180,7 @@ export async function Footer({
           ))}
         </div>
 
-        {seller ? (
-          // Selgeropplysninger som tabell (samme oppsett som i ordrebekreftelsen):
-          // etikett/verdi-rader er lettere å lese enn én lang linje.
-          <dl className="mt-12 pt-8 border-t border-border grid grid-cols-[auto_1fr] gap-x-6 gap-y-1.5 text-sm max-w-md">
-            {sellerRows(seller).map((row) => (
-              <div key={row.label} className="contents">
-                <dt className="text-muted-foreground whitespace-nowrap">
-                  {row.label}
-                </dt>
-                <dd className="text-foreground font-medium break-words">
-                  {row.value}
-                </dd>
-              </div>
-            ))}
-          </dl>
-        ) : null}
-
-        <div
-          className={`${seller ? "mt-8 pt-6" : "mt-12 pt-8"} border-t border-border flex flex-col md:flex-row items-center justify-between gap-4`}
-        >
+        <div className="mt-12 pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="text-sm text-muted-foreground">
             {bottomText ? (
               <RichText data={bottomText} />
