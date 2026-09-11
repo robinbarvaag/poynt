@@ -49,6 +49,7 @@
     "@trpc/client": "^11.18.0",
     "@trpc/react-query": "^11.18.0",
     "@trpc/server": "^11.18.0",
+    "@vercel/analytics": "^2.0.1",
     "@vercel/blob": "^0.22.3",
     "ai": "^6.0.241",
     "babel-plugin-react-compiler": "^1.0.0",

@@ -29,6 +29,7 @@ import { MetaTitleComponent as MetaTitleComponent_a8a977ebc872c5d5ea7ee689724c08
 import { MetaDescriptionComponent as MetaDescriptionComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { MetaImageComponent as MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { SeoPreview as SeoPreview_ed93029457eb2f3e08b012fe21d95953 } from '../../../admin/components/seo/seo-preview'
+import { OpenOnSiteButton as OpenOnSiteButton_fb0f337f3ab45b4d6e02970dc5b51a64 } from '../../../admin/components/open-on-site-button'
 import { StockFieldButton as StockFieldButton_e1d51fcd745605f9c32df95d9becf02c } from '../../../admin/components/media/stock-field-button'
 import { TextCheck as TextCheck_4aa3d66cdcd5d7ba843b8519bee12971 } from '../../../admin/components/text-check'
 import { StockMediaPicker as StockMediaPicker_7d8c930913c9c09e14d244ff8c96b4e3 } from '../../../admin/components/media/stock-picker'
@@ -99,6 +100,7 @@ export const importMap = {
   "@payloadcms/plugin-seo/client#MetaDescriptionComponent": MetaDescriptionComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@payloadcms/plugin-seo/client#MetaImageComponent": MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "/admin/components/seo/seo-preview#SeoPreview": SeoPreview_ed93029457eb2f3e08b012fe21d95953,
+  "/admin/components/open-on-site-button#OpenOnSiteButton": OpenOnSiteButton_fb0f337f3ab45b4d6e02970dc5b51a64,
   "/admin/components/media/stock-field-button#StockFieldButton": StockFieldButton_e1d51fcd745605f9c32df95d9becf02c,
   "/admin/components/text-check#TextCheck": TextCheck_4aa3d66cdcd5d7ba843b8519bee12971,
   "/admin/components/media/stock-picker#StockMediaPicker": StockMediaPicker_7d8c930913c9c09e14d244ff8c96b4e3,

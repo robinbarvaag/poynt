@@ -28,6 +28,14 @@ export const Courses: CollectionConfig = {
     plural: "Kurs",
   },
   admin: {
+    // «Åpne på nettsiden» i dokument-headeren → den publiserte URL-en, ny fane.
+    components: {
+      edit: {
+        beforeDocumentControls: [
+          "/admin/components/open-on-site-button#OpenOnSiteButton",
+        ],
+      },
+    },
     useAsTitle: "title",
     defaultColumns: ["title", "categories", "publishedAt", "status"],
     // Ligger i den egenbygde «On Poynt»-nav-gruppen (on-poynt-nav-group.tsx),

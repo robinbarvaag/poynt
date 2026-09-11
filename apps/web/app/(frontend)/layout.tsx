@@ -3,6 +3,7 @@ import {
   ConsentProvider,
   CookieBanner,
   GoogleAnalytics,
+  MetaPixel,
 } from "@/components/consent";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
@@ -11,6 +12,7 @@ import { UILinkProvider } from "@/components/ui-link-provider";
 import { organizationSchema, websiteSchema } from "@/lib/structured-data";
 import config from "@payload-config";
 import { Grain, cn } from "@poynt/ui";
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { cacheLife, cacheTag } from "next/cache";
 import { Bricolage_Grotesque, Poppins } from "next/font/google";
@@ -104,7 +106,8 @@ export default async function FrontendLayout({
       <body className={cn("min-h-screen bg-background font-sans antialiased")}>
         <JsonLd data={siteJsonLd} />
         {/* Samtykke først: GA lastes kun etter aktivt «ja» til statistikk,
-            og banneret + footer-lenken deler samme kontekst. */}
+            Meta Pixel kun etter «ja» til markedsføring, og banneret +
+            footer-lenken deler samme kontekst. */}
         <ConsentProvider>
           {/* Kobler designsystemets interne lenker til next/link, så kort og
             knapper i @poynt/ui navigerer på klienten (instant navigation). */}
@@ -140,9 +143,13 @@ export default async function FrontendLayout({
           </UILinkProvider>
           <CookieBanner />
           <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
+          <MetaPixel pixelId={process.env.NEXT_PUBLIC_META_PIXEL_ID} />
         </ConsentProvider>
         {/* Redaksjonell signatur: ett fint korn-lag over hele siden */}
         <Grain fixed />
+        {/* Vercel Web Analytics: cookie-fri og krever ikke samtykke, så den
+            ligger utenfor ConsentProvider og teller alle besøk. */}
+        <Analytics />
       </body>
     </html>
   );

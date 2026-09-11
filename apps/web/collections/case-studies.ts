@@ -24,6 +24,14 @@ export const CaseStudies: CollectionConfig = {
     plural: "Kundehistorier",
   },
   admin: {
+    // «Åpne på nettsiden» i dokument-headeren → den publiserte URL-en, ny fane.
+    components: {
+      edit: {
+        beforeDocumentControls: [
+          "/admin/components/open-on-site-button#OpenOnSiteButton",
+        ],
+      },
+    },
     useAsTitle: "title",
     defaultColumns: ["title", "customer", "qualityScore", "updatedAt"],
     group: "Innhold",

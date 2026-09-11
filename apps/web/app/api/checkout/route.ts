@@ -13,6 +13,13 @@ import type Stripe from "stripe";
 // mangler feltet i typene; Stripe sender ukjente felt videre uendret.
 const managedPaymentsOff = { managed_payments: { enabled: false } } as const;
 
+// Uten `locale` følger Stripe nettleserspråket, så kassen kom på engelsk.
+// Kundene er norske; lås til bokmål.
+const sessionDefaults = {
+  ...managedPaymentsOff,
+  locale: "nb",
+} as const;
+
 export async function POST(req: NextRequest) {
   const { getClientIp, rateLimit } = await import("@/lib/rate-limit");
   const ip = getClientIp(req.headers);
@@ -106,7 +113,7 @@ export async function POST(req: NextRequest) {
         }));
 
       const session = await stripe.checkout.sessions.create({
-        ...managedPaymentsOff,
+        ...sessionDefaults,
         mode: "subscription",
         line_items: lineItems,
         ...(discounts && { discounts }),
@@ -151,7 +158,7 @@ export async function POST(req: NextRequest) {
     );
 
     const session = await stripe.checkout.sessions.create({
-      ...managedPaymentsOff,
+      ...sessionDefaults,
       mode: "payment",
       line_items: lineItems,
       ...(discounts && { discounts }),

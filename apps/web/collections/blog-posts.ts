@@ -17,6 +17,14 @@ export const BlogPosts: CollectionConfig = {
     plural: "Blogginnlegg",
   },
   admin: {
+    // «Åpne på nettsiden» i dokument-headeren → den publiserte URL-en, ny fane.
+    components: {
+      edit: {
+        beforeDocumentControls: [
+          "/admin/components/open-on-site-button#OpenOnSiteButton",
+        ],
+      },
+    },
     useAsTitle: "title",
     defaultColumns: ["title", "author", "publishedAt", "status"],
     group: "Innhold",

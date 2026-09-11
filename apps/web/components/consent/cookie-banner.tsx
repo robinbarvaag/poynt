@@ -13,7 +13,8 @@ import { useConsent } from "./consent-provider";
  *  - «Avvis alle» og «Godta alle» er likestilte, like synlige knapper.
  *  - Ingen forhåndsavkryssede valg utover nødvendige.
  *  - Valget kan endres senere (lenke i footer åpner dette på nytt).
- *  - Ingen sporing før valget er tatt (GoogleAnalytics venter på consent).
+ *  - Ingen sporing før valget er tatt (GoogleAnalytics/MetaPixel venter på
+ *    consent).
  *
  * Banneret blokkerer ikke siden — det er et ikke-modalt dialog-kort nederst.
  */
@@ -22,6 +23,7 @@ export function CookieBanner() {
     useConsent();
   const [showDetails, setShowDetails] = useState(false);
   const [analytics, setAnalytics] = useState(false);
+  const [marketing, setMarketing] = useState(false);
   const titleId = useId();
   const descId = useId();
 
@@ -29,6 +31,7 @@ export function CookieBanner() {
   useEffect(() => {
     if (settingsOpen) {
       setAnalytics(consent?.categories.analytics ?? false);
+      setMarketing(consent?.categories.marketing ?? false);
       setShowDetails(true);
     }
   }, [settingsOpen, consent]);
@@ -58,7 +61,8 @@ export function CookieBanner() {
           <p id={descId} className="mt-1 text-sm text-muted-foreground">
             Vi bruker nødvendige informasjonskapsler for at handlekurv og
             innlogging skal virke. Med ditt samtykke bruker vi også Google
-            Analytics for å forstå hvordan siden brukes.{" "}
+            Analytics for å forstå hvordan siden brukes, og Meta Pixel for å
+            måle annonser på Facebook og Instagram.{" "}
             <Link
               href="/personvern"
               className="underline underline-offset-4 hover:text-foreground"
@@ -112,6 +116,25 @@ export function CookieBanner() {
               onCheckedChange={setAnalytics}
             />
           </li>
+          <li className="flex items-center justify-between gap-4">
+            <div>
+              <label
+                htmlFor="consent-marketing"
+                className="block text-sm font-medium text-foreground"
+              >
+                Markedsføring
+              </label>
+              <Text variant="muted" customStyles="text-xs">
+                Meta Pixel. Måler om annonser på Facebook og Instagram fører til
+                kjøp, og kan brukes til å vise deg relevante annonser der.
+              </Text>
+            </div>
+            <Switch
+              id="consent-marketing"
+              checked={marketing}
+              onCheckedChange={setMarketing}
+            />
+          </li>
         </ul>
       )}
 
@@ -121,7 +144,7 @@ export function CookieBanner() {
             type="button"
             variant="ghost"
             size="sm"
-            onClick={() => save({ analytics })}
+            onClick={() => save({ analytics, marketing })}
           >
             Lagre valg
           </Button>

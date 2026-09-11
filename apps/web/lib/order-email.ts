@@ -57,14 +57,23 @@ export async function buildOrderEmailExtras(
               collection: "media",
               id: product.pdfFile,
             });
-      if (!media?.url) {
+      // Enkelte store opplastinger (videoer, PDF-er over noen MB) har tomt
+      // `url`-felt i databasen, men filen serveres uansett på Payloads
+      // standardsti. Uten denne fallbacken gikk ordrebekreftelsen ut uten
+      // PDF-vedlegg (ordre #12, sept. 2026).
+      const mediaPath =
+        media?.url ||
+        (media?.filename
+          ? `/api/media/file/${encodeURIComponent(media.filename)}`
+          : null);
+      if (!mediaPath) {
         console.error(`PDF-produkt ${product.name} mangler fil-URL`);
         continue;
       }
 
-      const fileUrl = media.url.startsWith("http")
-        ? media.url
-        : `${process.env.NEXT_PUBLIC_URL}${media.url}`;
+      const fileUrl = mediaPath.startsWith("http")
+        ? mediaPath
+        : `${process.env.NEXT_PUBLIC_URL}${mediaPath}`;
       const res = await fetch(fileUrl);
       if (!res.ok) {
         console.error(

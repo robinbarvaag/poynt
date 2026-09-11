@@ -8,14 +8,17 @@
  * Kategorier:
  *  - Nødvendige: alltid på (handlekurv, innlogging, betaling). Ikke lagret her.
  *  - analytics:  Google Analytics 4. Lastes kun etter aktivt samtykke.
+ *  - marketing:  Meta Pixel (Facebook/Instagram-annonser). Lastes kun etter
+ *                aktivt samtykke.
  */
 
 export const CONSENT_COOKIE = "poynt-consent";
-export const CONSENT_VERSION = 1;
+/** v2: la til «marketing» (Meta Pixel). */
+export const CONSENT_VERSION = 2;
 /** 6 måneder — Datatilsynet anbefaler å spørre på nytt minst årlig. */
 const CONSENT_MAX_AGE_SECONDS = 60 * 60 * 24 * 182;
 
-export type ConsentCategory = "analytics";
+export type ConsentCategory = "analytics" | "marketing";
 
 export type ConsentCategories = Record<ConsentCategory, boolean>;
 
@@ -26,8 +29,14 @@ export interface ConsentState {
   categories: ConsentCategories;
 }
 
-export const ALL_DENIED: ConsentCategories = { analytics: false };
-export const ALL_GRANTED: ConsentCategories = { analytics: true };
+export const ALL_DENIED: ConsentCategories = {
+  analytics: false,
+  marketing: false,
+};
+export const ALL_GRANTED: ConsentCategories = {
+  analytics: true,
+  marketing: true,
+};
 
 function readCookie(name: string): string | null {
   if (typeof document === "undefined") return null;
@@ -49,14 +58,18 @@ export function readConsent(): ConsentState | null {
     if (
       parsed.version !== CONSENT_VERSION ||
       typeof parsed.timestamp !== "string" ||
-      typeof parsed.categories?.analytics !== "boolean"
+      typeof parsed.categories?.analytics !== "boolean" ||
+      typeof parsed.categories?.marketing !== "boolean"
     ) {
       return null;
     }
     return {
       version: parsed.version,
       timestamp: parsed.timestamp,
-      categories: { analytics: parsed.categories.analytics },
+      categories: {
+        analytics: parsed.categories.analytics,
+        marketing: parsed.categories.marketing,
+      },
     };
   } catch {
     return null;
@@ -79,4 +92,9 @@ export function writeConsent(categories: ConsentCategories): ConsentState {
 /** Rask synkron sjekk brukt av trackEvent — unngår React-kontekst i lib. */
 export function hasAnalyticsConsent(): boolean {
   return readConsent()?.categories.analytics === true;
+}
+
+/** Rask synkron sjekk brukt av trackEvent — unngår React-kontekst i lib. */
+export function hasMarketingConsent(): boolean {
+  return readConsent()?.categories.marketing === true;
 }
