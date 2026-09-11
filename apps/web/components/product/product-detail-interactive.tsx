@@ -14,6 +14,7 @@ import {
   type RefObject,
   type SetStateAction,
   useEffect,
+  useId,
   useRef,
   useState,
 } from "react";
@@ -52,7 +53,7 @@ interface ProductDetailInteractiveProps {
   info: ProductPurchaseInfo;
   /** Bilde-URL til handlekurvlinja (første produktbilde). */
   cartImageUrl?: string;
-  /** Media for miniatyren i den sticky kjøpslinja. */
+  /** Media for miniatyren i den faste kjøpslinja. */
   stickyMedia?: MediaResource;
   /** Server-rendrede statiske deler sendes inn som ferdig JSX, slik at tungt
       innhold (rik tekst, historie-seksjoner, relaterte produkter) ikke
@@ -87,7 +88,7 @@ function MembershipApplyButton({ applyUrl }: { applyUrl?: string }) {
 
 // Antall-stepper: bor inne i samme pill som kjøpsknappen, slik at antall og
 // kjøp leses som ÉN handling i stedet for to adskilte felt. `compact` brukes
-// i den sticky kjøpslinja der plassen er trangere.
+// i den faste kjøpslinja der plassen er trangere.
 function QuantityStepper({
   quantity,
   setQuantity,
@@ -132,15 +133,107 @@ function QuantityStepper({
   );
 }
 
-// Sticky kjøpslinje: glir inn nederst når kjøpsboksen er scrollet forbi
-// (oppover ut av viewporten). Bunnen – ikke toppen – fordi headeren allerede
-// eier toppen (fixed + vis-ved-scroll-opp), og bunnen er tommel-sonen på
-// mobil. z-40 ligger bevisst under headerens z-50.
+// Variantvalg (f.eks. «Signert?») som pill-knapper – ikke dropdown – så alle
+// valg er synlige med én gang, og at valget MÅ tas kommer tydelig frem.
+// Brukes både i kjøpsboksen og i den faste kjøpslinja; begge speiler samme
+// state, så et valg ett sted er valgt begge steder. `name` må være unik per
+// forekomst, ellers blir de to radiogruppene én i nettleseren.
+function VariantPicker({
+  name,
+  label,
+  options,
+  selected,
+  onSelect,
+  compact = false,
+}: {
+  name: string;
+  label: string;
+  options: ProductVariantOption[];
+  selected?: string;
+  onSelect: (label: string | undefined) => void;
+  /** Lav, enrads variant for den faste kjøpslinja (ledetekst til venstre). */
+  compact?: boolean;
+}) {
+  const labelId = useId();
+
+  return (
+    <div
+      className={
+        compact ? "flex min-w-0 items-center gap-2.5 sm:gap-3" : undefined
+      }
+    >
+      <span
+        id={labelId}
+        className={`font-medium text-sm ${
+          compact ? "shrink-0 whitespace-nowrap" : "mb-2 block"
+        }`}
+      >
+        {label}
+      </span>
+      <div
+        role="radiogroup"
+        aria-labelledby={labelId}
+        className={
+          compact
+            ? "flex min-w-0 gap-1.5 overflow-x-auto"
+            : "flex flex-wrap gap-2"
+        }
+      >
+        {options.map((option) => {
+          const checked = selected === option.label;
+          return (
+            /* Skjult native radio i en pill-label: gratis tastatur-navigasjon
+               og riktig semantikk, uten synlig sirkel. */
+            <label
+              key={option.id ?? option.label}
+              className={`pressable inline-flex shrink-0 cursor-pointer items-center whitespace-nowrap rounded-full border-2 font-medium text-sm transition-colors has-focus-visible:ring-2 has-focus-visible:ring-ring has-focus-visible:ring-offset-2 ${
+                compact ? "h-9 px-4" : "h-11 px-5"
+              } ${
+                checked
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-card text-foreground hover:border-primary/50"
+              }`}
+            >
+              <input
+                type="radio"
+                name={name}
+                value={option.label ?? ""}
+                checked={checked}
+                onChange={() => onSelect(option.label ?? undefined)}
+                className="sr-only"
+              />
+              {option.label}
+              {option.priceDelta ? (
+                <span
+                  className={`ml-1.5 text-xs ${
+                    checked
+                      ? "text-primary-foreground/80"
+                      : "text-muted-foreground"
+                  }`}
+                >
+                  {option.priceDelta > 0 ? "+" : ""}
+                  {option.priceDelta} kr
+                </span>
+              ) : null}
+            </label>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// Fast kjøpslinje: glir inn nederst så snart kjøpsboksen er ute av viewporten
+// – både når den ennå ligger under folden (typisk mobil: det høye A5-bildet
+// fyller skjermen ved sidelast) og når den er scrollet forbi oppover. Bunnen
+// – ikke toppen – fordi headeren allerede eier toppen (fixed + vis-ved-
+// scroll-opp), og bunnen er tommel-sonen på mobil. z-40 ligger bevisst under
+// headerens z-50.
 //
-// `position: sticky` (ikke fixed) med plassering SIST i sideinnholdet: linja
-// henger på viewport-bunnen mens man scroller, og når man når bunnen av siden
-// legger den seg naturlig til ro på sin egen plass over footeren – i stedet
-// for å dekke footeren eller brått forsvinne.
+// `position: fixed` (ikke sticky): linja skal henge på viewport-bunnen hele
+// veien, også over footeren. Så lenge den er synlig får <body> like mye
+// padding-bottom som linja er høy, slik at bunnen av footeren fortsatt kan
+// scrolles fram og ikke ligger permanent gjemt bak linja.
 function StickyBuyBar({
   targetRef,
   productName,
@@ -153,31 +246,57 @@ function StickyBuyBar({
   productName: string;
   priceInKr: string;
   media?: MediaResource;
-  /** Når kontrollene inneholder antall-stepper: la dem ta hele bredden på
-      mobil og gjem navn/pris (navnet er uansett åpenbart på produktsiden). */
+  /** Når kontrollene trenger plassen (antall-stepper, variantvalg): la dem ta
+      hele bredden på mobil og gjem navn/pris (navnet er uansett åpenbart på
+      produktsiden). */
   wideControls?: boolean;
   children: ReactNode;
 }) {
   const [visible, setVisible] = useState(false);
+  const barRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const el = targetRef.current;
     if (!el) {
       return;
     }
-    const observer = new IntersectionObserver(([entry]) => {
-      // Kun når boksen har passert OVER viewporten – ikke ved sidelast der
-      // den fortsatt ligger nedenfor (da er linja bare støy).
-      setVisible(!entry.isIntersecting && entry.boundingClientRect.top < 0);
-    });
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setVisible(!entry.isIntersecting);
+      },
+      {
+        // Den faste headeren (h-16 = 64px) dekker toppen av viewporten: en
+        // kjøpsboks som bare «vises» bak headeren regnes som ute av syne.
+        rootMargin: "-64px 0px 0px 0px",
+      }
+    );
     observer.observe(el);
     return () => observer.disconnect();
   }, [targetRef]);
 
+  // Reserver plass nederst i dokumentet mens linja er synlig (se over).
+  useEffect(() => {
+    const el = barRef.current;
+    if (!(visible && el)) {
+      return;
+    }
+    const reserve = () => {
+      document.body.style.paddingBottom = `${el.offsetHeight}px`;
+    };
+    reserve();
+    const observer = new ResizeObserver(reserve);
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+      document.body.style.paddingBottom = "";
+    };
+  }, [visible]);
+
   return (
     <div
+      ref={barRef}
       inert={!visible}
-      className={`sticky bottom-0 z-40 border-border border-t bg-background/90 backdrop-blur-xl transition-transform duration-300 ease-drawer motion-reduce:transition-opacity motion-reduce:duration-200 ${
+      className={`fixed inset-x-0 bottom-0 z-40 border-border border-t bg-background/90 backdrop-blur-xl transition-transform duration-300 ease-drawer motion-reduce:transition-opacity motion-reduce:duration-200 ${
         visible
           ? "translate-y-0 opacity-100"
           : "translate-y-full opacity-0 motion-reduce:translate-y-0"
@@ -246,6 +365,8 @@ function ProductDetailInteractive({
     : undefined;
   const priceDelta = selectedOption?.priceDelta ?? 0;
   const effectivePrice = info.price + priceDelta;
+  // Kjøp er låst til variant er valgt – styrer både kjøpsboksen og kjøpslinja.
+  const needsVariant = hasVariants && !selectedVariant;
 
   // Antall – kun for produkter som tillater det (digitale: alltid 1).
   const [quantity, setQuantity] = useState(1);
@@ -313,55 +434,14 @@ function ProductDetailInteractive({
             {notice}
 
             <div ref={buyBoxRef} className="space-y-5 pt-6">
-              {/* Variant som pill-knapper (ikke dropdown) – alle valg er synlige
-                med én gang, og at valget MÅ tas kommer tydelig frem. */}
               {info.type !== "membership" && !isSoldOut && hasVariants && (
-                <div>
-                  <Text weight="medium" customStyles="mb-2 text-sm">
-                    {info.variantLabel}
-                  </Text>
-                  <div className="flex flex-wrap gap-2">
-                    {variantOptions.map((option) => {
-                      const checked = selectedVariant === option.label;
-                      return (
-                        /* Skjult native radio i en pill-label: gratis tastatur-
-                         navigasjon og riktig semantikk, uten synlig sirkel. */
-                        <label
-                          key={option.id}
-                          className={`pressable inline-flex h-11 cursor-pointer items-center rounded-full border-2 px-5 font-medium text-sm transition-colors has-focus-visible:ring-2 has-focus-visible:ring-ring has-focus-visible:ring-offset-2 ${
-                            checked
-                              ? "border-primary bg-primary text-primary-foreground"
-                              : "border-border bg-card text-foreground hover:border-primary/50"
-                          }`}
-                        >
-                          <input
-                            type="radio"
-                            name={`variant-${info.id}`}
-                            value={option.label ?? ""}
-                            checked={checked}
-                            onChange={() =>
-                              setSelectedVariant(option.label ?? undefined)
-                            }
-                            className="sr-only"
-                          />
-                          {option.label}
-                          {option.priceDelta ? (
-                            <span
-                              className={`ml-1.5 text-xs ${
-                                checked
-                                  ? "text-primary-foreground/80"
-                                  : "text-muted-foreground"
-                              }`}
-                            >
-                              {option.priceDelta > 0 ? "+" : ""}
-                              {option.priceDelta} kr
-                            </span>
-                          ) : null}
-                        </label>
-                      );
-                    })}
-                  </div>
-                </div>
+                <VariantPicker
+                  name={`variant-${info.id}`}
+                  label={info.variantLabel ?? ""}
+                  options={variantOptions}
+                  selected={selectedVariant}
+                  onSelect={setSelectedVariant}
+                />
               )}
 
               {info.type === "membership" ? (
@@ -401,7 +481,7 @@ function ProductDetailInteractive({
                     quantity={quantity}
                     maxQuantity={maxQuantity}
                     allowQuantity={allowQuantity}
-                    disabled={hasVariants && !selectedVariant}
+                    disabled={needsVariant}
                     disabledLabel={`Velg ${info.variantLabel ?? "alternativ"}`}
                     className={
                       allowQuantity ? "min-w-0 rounded-none" : undefined
@@ -417,7 +497,7 @@ function ProductDetailInteractive({
                 <VippsButton
                   stretched
                   loading={vippsLoading}
-                  disabled={hasVariants && !selectedVariant}
+                  disabled={needsVariant}
                   onClick={handleVippsBuyNow}
                 />
               )}
@@ -445,34 +525,26 @@ function ProductDetailInteractive({
         {related}
       </Container>
 
-      {/* Sticky kjøpslinje for kjøpbare produkter – SIST i sideinnholdet
-          (utenfor Container) så `position: sticky` kan parkere den over
-          footeren når man når bunnen. Mangler variantvalg, scroller knappen
-          deg tilbake til valget i stedet for å være død. */}
+      {/* Fast kjøpslinje for kjøpbare produkter. Mangler variantvalg, vises
+          selve valget i linja (samme state som kjøpsboksen) – og i det valget
+          er tatt bytter linja til kjøpsknapp + Vipps, uten å scrolle. */}
       {info.type !== "membership" && !isSoldOut && (
         <StickyBuyBar
           targetRef={buyBoxRef}
           productName={info.name}
           priceInKr={priceInKr}
           media={stickyMedia}
-          wideControls={allowQuantity && !(hasVariants && !selectedVariant)}
+          wideControls={needsVariant || allowQuantity}
         >
-          {hasVariants && !selectedVariant ? (
-            <Button
-              size="lg"
-              onClick={() =>
-                buyBoxRef.current?.scrollIntoView({
-                  behavior: window.matchMedia(
-                    "(prefers-reduced-motion: reduce)"
-                  ).matches
-                    ? "auto"
-                    : "smooth",
-                  block: "center",
-                })
-              }
-            >
-              Velg {info.variantLabel ?? "alternativ"}
-            </Button>
+          {needsVariant ? (
+            <VariantPicker
+              name={`variant-${info.id}-sticky`}
+              label={info.variantLabel ?? ""}
+              options={variantOptions}
+              selected={selectedVariant}
+              onSelect={setSelectedVariant}
+              compact
+            />
           ) : (
             /* Samme samlede pill som i kjøpsboksen (kompakt stepper), så
                antall kan justeres uten å scrolle tilbake opp — pluss kompakt

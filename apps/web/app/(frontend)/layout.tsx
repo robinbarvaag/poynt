@@ -122,7 +122,14 @@ export default async function FrontendLayout({
               ctaButton={header?.ctaButton as HeaderProps["ctaButton"]}
               navItems={header?.navItems as unknown as HeaderProps["navItems"]}
             />
-            <main className="min-h-screen pt-16">{children}</main>
+            {/* `overflow-x-clip` (ikke `hidden`): dekor som stikker ut av
+                kolonnene (DecoBlob bak produktbildet, roterte kort) skal ikke
+                gi sidescroll på mobil. `clip` lager – i motsetning til
+                `hidden` – ingen scroll-container, så `position: sticky`
+                (galleriet) fungerer fortsatt inne i main. */}
+            <main className="min-h-screen overflow-x-clip pt-16">
+              {children}
+            </main>
             {/* Parallel-route slot for intercepting-modaler (f.eks. /kontakt). */}
             {modal}
             <Footer
