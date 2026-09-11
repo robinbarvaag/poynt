@@ -6,6 +6,9 @@ import { DecoBlob, hashSeed } from "./deco-blob";
 
 export type ProductSurface = "default" | "saffron" | "salmon" | "mint";
 
+/** Aksentfarge for blob og detaljer – brukes når kortflaten er nøytral. */
+export type ProductAccent = "saffron" | "salmon" | "mint";
+
 export type ProductBadgeTone = "new" | "presale" | "soldout" | "neutral";
 
 export interface ProductBadge {
@@ -30,13 +33,19 @@ export interface ProductCardProps {
   priceLabel?: string;
   /**
    * Media-slot — send f.eks. et `next/image` med `fill className="object-cover"`.
-   * Rammen er i A5-format (148:210); bruk `object-cover` så bildet fyller hele
-   * rammen (fokuspunkt fra Payload styrer beskjæringen).
+   * Vanlige kort viser hele bildet (`object-contain`) i en 4:5-ramme med luft
+   * rundt, så omslag/forsider aldri beskjæres. Fremhevede kort bruker A5-format
+   * (148:210) og fyller rammen (fokuspunkt fra Payload styrer beskjæringen).
    * Uten media vises en dempet plassholder.
    */
   image?: React.ReactNode;
-  /** Fargeblokk-tint. `default` er det lyse kortet. */
+  /** Fargeblokk-tint på hele kortflaten. Default er det nøytrale, lyse kortet. */
   surface?: ProductSurface;
+  /**
+   * Aksentfarge for bloben bak bildet. Brukes på nøytrale kort for å gi liv
+   * uten å farge hele flaten. Ignoreres når `surface` er en farget flate.
+   */
+  accent?: ProductAccent;
   /** Stort, fremhevet kort: bilde og innhold side-om-side (spenn 2 kolonner). */
   featured?: boolean;
   /** Status-merkelapp (Nyhet/Forhåndssalg/Utsolgt) – vises øverst til venstre. */
@@ -62,6 +71,12 @@ const blobBySurface: Record<ProductSurface, string> = {
   mint: "bg-accent-2",
 };
 
+const blobByAccent: Record<ProductAccent, string> = {
+  saffron: "bg-accent-1",
+  salmon: "bg-accent-2",
+  mint: "bg-accent-3",
+};
+
 // Mulige hjørner for bloben — hvilket som brukes utledes av kortets seed,
 // så plasseringen varierer fra kort til kort uten å kollidere med badgen
 // (øverst til venstre) eller «Tilbud»-pillen (øverst til høyre) for ofte.
@@ -80,6 +95,7 @@ function formatPrice(value: number) {
 function ImageFrame({
   image,
   surface,
+  accent,
   featured,
   discount,
   badge,
@@ -87,6 +103,7 @@ function ImageFrame({
 }: {
   image?: React.ReactNode;
   surface: ProductSurface;
+  accent?: ProductAccent;
   featured?: boolean;
   discount?: boolean;
   badge?: ProductBadge;
@@ -99,17 +116,25 @@ function ImageFrame({
         seed={seed}
         size={featured ? 128 : 96}
         className={cn(
-          "absolute opacity-70 blur-[2px]",
+          "absolute blur-[2px]",
+          // På nøytral flate bærer bloben fargen alene – litt kraftigere.
+          surface === "default" ? "opacity-90" : "opacity-70",
           blobCorners[hashSeed(seed) % blobCorners.length],
-          blobBySurface[surface]
+          surface === "default" && accent
+            ? blobByAccent[accent]
+            : blobBySurface[surface]
         )}
       />
       <div
         className={cn(
-          "relative z-10 overflow-hidden rounded-2xl bg-background/50",
-          // A5-format (148:210) – matcher boka og hovedbildet på produktsiden.
-          // Bildet fyller rammen (`object-cover`) og beskjæres etter fokuspunkt.
-          "aspect-[148/210]"
+          "relative z-10 overflow-hidden rounded-2xl",
+          featured
+            ? // A5-format (148:210) – matcher boka og hovedbildet på produktsiden.
+              // Bildet fyller rammen (`object-cover`) og beskjæres etter fokuspunkt.
+              "aspect-[148/210] bg-background/50"
+            : // 4:5-ramme med luft: hele bildet vises (`object-contain`) på en
+              // dempet flate, så omslag og forsider aldri kuttes.
+              "aspect-[4/5] bg-foreground/[0.04] p-4 [&_img]:object-contain"
         )}
       >
         {image ?? (
@@ -151,6 +176,7 @@ export function ProductCard({
   priceLabel,
   image,
   surface = "default",
+  accent,
   featured = false,
   badge,
   className,
@@ -180,6 +206,7 @@ export function ProductCard({
           <ImageFrame
             image={image}
             surface={surface}
+            accent={accent}
             featured={featured}
             discount={discount}
             badge={badge}

@@ -1,9 +1,9 @@
 import type * as React from "react";
 import { cn } from "../../lib/utils";
 import {
+  type ProductAccent,
   ProductCard,
   type ProductCardProps,
-  type ProductSurface,
 } from "./product-card";
 
 export interface ProductGridItem extends ProductCardProps {
@@ -20,14 +20,16 @@ export interface ProductGridProps {
   className?: string;
 }
 
-// Roterende fargeblokk-tinter — gir liv uten masonry-kaos.
-const palette: ProductSurface[] = ["saffron", "salmon", "mint"];
+// Roterende aksentfarger for bloben bak bildet — gir liv på nøytrale kort
+// uten å farge hele flaten.
+const palette: ProductAccent[] = ["saffron", "salmon", "mint"];
 
 /**
- * Produkt-rutenett i fargeblokk-stil: uniformt grid med ett fremhevet kort
- * (2 kolonner) for magasin-rytme. Hvert kort får en roterende surface-tint med
- * mindre produktet selv oppgir `surface`. Presentasjons-only — mat den med
- * ferdige props (appen kobler Payload-data og `next/image` inn i `image`).
+ * Produkt-rutenett: uniformt grid med ett fremhevet kort (2 kolonner) for
+ * magasin-rytme. Kortene er nøytrale; fargen kommer som en roterende aksent i
+ * bloben bak bildet, med mindre produktet selv oppgir `surface`/`accent`.
+ * Presentasjons-only — mat den med ferdige props (appen kobler Payload-data og
+ * `next/image` inn i `image`).
  */
 export function ProductGrid({
   products,
@@ -42,13 +44,13 @@ export function ProductGrid({
       )}
     >
       {products.map((product, index) => {
-        const { id, featured, surface, ...rest } = product;
+        const { id, featured, accent, ...rest } = product;
         return (
           <ProductCard
             key={id}
             {...rest}
             featured={featured ?? (featureFirst && index === 0)}
-            surface={surface ?? palette[index % palette.length]}
+            accent={accent ?? palette[index % palette.length]}
           />
         );
       })}

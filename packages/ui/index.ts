@@ -367,6 +367,7 @@ export {
   type ProductBadgeTone,
   ProductCard,
   type ProductCardProps,
+  type ProductAccent,
   type ProductSurface,
   ProductGrid,
   type ProductGridItem,

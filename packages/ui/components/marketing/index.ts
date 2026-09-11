@@ -65,6 +65,7 @@ export {
   type ProductBadgeTone,
   ProductCard,
   type ProductCardProps,
+  type ProductAccent,
   type ProductSurface,
 } from "./product-card";
 export {
