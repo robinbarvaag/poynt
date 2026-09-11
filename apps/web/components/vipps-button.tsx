@@ -9,7 +9,12 @@ import Script from "next/script";
 const VIPPS_BUTTON_SCRIPT =
   "https://cdn.vippsmobilepay.com/js/button/button.js";
 
-// Web-komponenten leser attributter som strenger ("true"/"false").
+// NB: send ekte booleans, ikke "true"/"false"-strenger. React 19 setter props
+// som *egenskaper* på custom elements så snart web-komponenten er oppgradert
+// (`key in element`), og strengen "false" er truthy — det ga evig spinner.
+// Med booleans gjør React det rette i begge tilfeller: før oppgradering blir
+// `true` til et tomt attributt (som Vipps tolker som true) og `false` fjerner
+// attributtet; etter oppgradering settes egenskapen direkte.
 declare global {
   namespace React {
     namespace JSX {
@@ -21,7 +26,7 @@ declare global {
           brand?: "vipps" | "mobilepay";
           language?: "no" | "en" | "dk" | "fi" | "sv";
           variant?: "primary" | "dark" | "light";
-          rounded?: "true" | "false";
+          rounded?: boolean;
           verb?:
             | "buy"
             | "pay"
@@ -30,9 +35,9 @@ declare global {
             | "continue"
             | "confirm"
             | "donate";
-          stretched?: "true" | "false";
-          compact?: "true" | "false";
-          loading?: "true" | "false";
+          stretched?: boolean;
+          compact?: boolean;
+          loading?: boolean;
         };
       }
     }
@@ -77,11 +82,11 @@ export function VippsButton({
         brand="vipps"
         language="no"
         variant="primary"
-        rounded="true"
+        rounded
         verb={verb}
-        stretched={stretched ? "true" : "false"}
-        compact={compact ? "true" : "false"}
-        loading={loading ? "true" : "false"}
+        stretched={stretched}
+        compact={compact}
+        loading={loading}
         onClick={() => {
           if (!blocked) {
             onClick();
