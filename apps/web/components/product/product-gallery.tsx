@@ -49,7 +49,7 @@ function ProductGallery({
             hashSeed(seed) % 2 === 0 ? "-top-5 -left-5" : "-top-4 -right-5"
           }`}
         />
-        <div className="relative z-10 aspect-square w-full overflow-hidden rounded-3xl bg-muted shadow-sm">
+        <div className="relative z-10 aspect-[4/5] w-full overflow-hidden rounded-3xl bg-muted shadow-sm">
           {currentImage ? (
             <Lightbox
               src={resolveMediaUrl(currentImage.media)}
@@ -88,7 +88,7 @@ function ProductGallery({
               // biome-ignore lint/suspicious/noArrayIndexKey: Using index as key is acceptable here because the list is static and does not change order
               key={index}
               onClick={() => setSelectedImage(index)}
-              className={`relative size-20 shrink-0 overflow-hidden rounded-2xl border-2 transition-colors ${
+              className={`relative aspect-[4/5] w-20 shrink-0 overflow-hidden rounded-2xl border-2 transition-colors ${
                 selectedImage === index
                   ? "border-primary"
                   : "border-transparent hover:border-border"

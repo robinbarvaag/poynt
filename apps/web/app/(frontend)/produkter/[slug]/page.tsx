@@ -144,7 +144,7 @@ export default function ProductPage(props: ProductPageProps) {
         <div className="mx-auto w-full max-w-7xl animate-pulse px-4 py-8 sm:px-6 lg:px-8">
           <div className="mb-8 h-5 w-56 rounded-full bg-muted" />
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-16">
-            <div className="aspect-square w-full rounded-3xl bg-muted" />
+            <div className="aspect-[4/5] w-full rounded-3xl bg-muted" />
             <div className="space-y-4">
               <div className="h-6 w-24 rounded-full bg-muted" />
               <div className="h-10 w-3/4 rounded-2xl bg-muted" />
