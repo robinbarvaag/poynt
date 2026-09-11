@@ -1,5 +1,6 @@
 "use client";
 
+import { parseNotificationEmails } from "@/lib/parse-notification-emails";
 import { useState } from "react";
 
 /**
@@ -18,21 +19,32 @@ export function NotificationEmailsField({
 }) {
   const [value, setValue] = useState(initialValue);
   const [savedValue, setSavedValue] = useState(initialValue);
-  const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">(
-    "idle"
-  );
+  const [status, setStatus] = useState<
+    "idle" | "saving" | "saved" | "error" | "invalid"
+  >("idle");
+  const [invalidAddresses, setInvalidAddresses] = useState<string[]>([]);
 
   const save = async () => {
+    // Stopp skrivefeil («a@x.no.b@y.no») før de lagres — en ugyldig adresse
+    // gjør at Resend avviser hele varselet.
+    const { valid, invalid } = parseNotificationEmails(value);
+    if (invalid.length > 0) {
+      setInvalidAddresses(invalid);
+      setStatus("invalid");
+      return;
+    }
+    const normalized = valid.join(", ");
     setStatus("saving");
     try {
       const res = await fetch("/api/globals/site-settings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ notificationEmails: value.trim() }),
+        body: JSON.stringify({ notificationEmails: normalized }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      setSavedValue(value);
+      setValue(normalized);
+      setSavedValue(normalized);
       setStatus("saved");
     } catch (error) {
       console.error("Lagring av varslingsadresser feilet:", error);
@@ -127,6 +139,19 @@ export function NotificationEmailsField({
           }}
         >
           Lagret — varslene går nå til {savedValue.trim() || "CONTACT_EMAIL"}.
+        </p>
+      )}
+      {status === "invalid" && (
+        <p
+          role="alert"
+          style={{
+            margin: "0.5rem 0 0",
+            fontSize: "0.85rem",
+            color: "var(--theme-error-500)",
+          }}
+        >
+          Dette ser ikke ut som gyldige e-postadresser:{" "}
+          {invalidAddresses.join(", ")}. Skill adressene med komma.
         </p>
       )}
       {status === "error" && (

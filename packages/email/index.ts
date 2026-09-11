@@ -622,22 +622,30 @@ export async function sendContactEmails(params: {
     kilde: params.source,
   };
 
+  // Varselet til Poynt og bekreftelsen til avsender er uavhengige: feiler
+  // varselet (f.eks. ugyldig mottakeradresse i admin), skal avsender likevel
+  // få bekreftelsen. Feilen kastes videre etterpå så den havner i loggen.
+  let notifyError: unknown;
   const notifyTo = resolveNotifyTo(params.to);
   if (notifyTo) {
-    const template = applyTemplate(
-      await getTemplateOverride("contact-notification"),
-      wildcardValues
-    );
-    const html = await render(
-      ContactNotificationEmail({ ...params, introHtml: template.contentHtml })
-    );
-    await sendEmail({
-      from,
-      to: notifyTo,
-      replyTo: params.email,
-      subject: template.subject || `Ny henvendelse fra ${params.name}`,
-      html,
-    });
+    try {
+      const template = applyTemplate(
+        await getTemplateOverride("contact-notification"),
+        wildcardValues
+      );
+      const html = await render(
+        ContactNotificationEmail({ ...params, introHtml: template.contentHtml })
+      );
+      await sendEmail({
+        from,
+        to: notifyTo,
+        replyTo: params.email,
+        subject: template.subject || `Ny henvendelse fra ${params.name}`,
+        html,
+      });
+    } catch (error) {
+      notifyError = error;
+    }
   }
 
   const confirmationTemplate = applyTemplate(
@@ -657,6 +665,8 @@ export async function sendContactEmails(params: {
     subject: confirmationTemplate.subject || "Takk for din henvendelse – Poynt",
     html: confirmationHtml,
   });
+
+  if (notifyError) throw notifyError;
 }
 
 /**
