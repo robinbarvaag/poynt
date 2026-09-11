@@ -1,5 +1,6 @@
 "use client";
 
+import { trackEvent } from "@/lib/analytics";
 import { useCartReady } from "@/lib/use-cart-ready";
 import { useCart, useCartUi } from "@poynt/cart";
 import { Button } from "@poynt/ui";
@@ -72,6 +73,19 @@ export function AddToCartButton({
       },
       quantity
     );
+    trackEvent("add_to_cart", {
+      currency: "NOK",
+      value: product.price * quantity,
+      items: [
+        {
+          item_id: product.id,
+          item_name: product.name,
+          price: product.price,
+          quantity,
+          item_variant: variantValue,
+        },
+      ],
+    });
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
     // Drawer-en åpnes som kjøpsbekreftelse – med et lite beat først, så

@@ -1,4 +1,9 @@
 import "../globals.css";
+import {
+  ConsentProvider,
+  CookieBanner,
+  GoogleAnalytics,
+} from "@/components/consent";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { JsonLd } from "@/components/json-ld";
@@ -98,38 +103,44 @@ export default async function FrontendLayout({
     <html lang="no" className={`${poppins.variable} ${bricolage.variable}`}>
       <body className={cn("min-h-screen bg-background font-sans antialiased")}>
         <JsonLd data={siteJsonLd} />
-        {/* Kobler designsystemets interne lenker til next/link, så kort og
+        {/* Samtykke først: GA lastes kun etter aktivt «ja» til statistikk,
+            og banneret + footer-lenken deler samme kontekst. */}
+        <ConsentProvider>
+          {/* Kobler designsystemets interne lenker til next/link, så kort og
             knapper i @poynt/ui navigerer på klienten (instant navigation). */}
-        <UILinkProvider>
-          <Header
-            siteName={siteSettings?.siteName || "Poynt"}
-            logo={siteSettings?.logo as { url: string; alt?: string } | null}
-            ctaButton={header?.ctaButton as HeaderProps["ctaButton"]}
-            navItems={header?.navItems as unknown as HeaderProps["navItems"]}
-          />
-          <main className="min-h-screen pt-16">{children}</main>
-          {/* Parallel-route slot for intercepting-modaler (f.eks. /kontakt). */}
-          {modal}
-          <Footer
-            siteName={siteSettings?.siteName || "Poynt"}
-            logo={siteSettings?.logo as { url: string; alt?: string } | null}
-            columns={footer?.columns as FooterProps["columns"]}
-            bottomText={footer?.bottomText ?? undefined}
-            showSocialLinks={footer?.showSocialLinks ?? true}
-            socialLinks={
-              siteSettings?.socialLinks as FooterProps["socialLinks"]
-            }
-            newsletter={
-              footer?.showNewsletter
-                ? {
-                    enabled: footer.showNewsletter,
-                    title: footer.newsletterTitle ?? undefined,
-                    description: footer.newsletterDescription ?? undefined,
-                  }
-                : undefined
-            }
-          />
-        </UILinkProvider>
+          <UILinkProvider>
+            <Header
+              siteName={siteSettings?.siteName || "Poynt"}
+              logo={siteSettings?.logo as { url: string; alt?: string } | null}
+              ctaButton={header?.ctaButton as HeaderProps["ctaButton"]}
+              navItems={header?.navItems as unknown as HeaderProps["navItems"]}
+            />
+            <main className="min-h-screen pt-16">{children}</main>
+            {/* Parallel-route slot for intercepting-modaler (f.eks. /kontakt). */}
+            {modal}
+            <Footer
+              siteName={siteSettings?.siteName || "Poynt"}
+              logo={siteSettings?.logo as { url: string; alt?: string } | null}
+              columns={footer?.columns as FooterProps["columns"]}
+              bottomText={footer?.bottomText ?? undefined}
+              showSocialLinks={footer?.showSocialLinks ?? true}
+              socialLinks={
+                siteSettings?.socialLinks as FooterProps["socialLinks"]
+              }
+              newsletter={
+                footer?.showNewsletter
+                  ? {
+                      enabled: footer.showNewsletter,
+                      title: footer.newsletterTitle ?? undefined,
+                      description: footer.newsletterDescription ?? undefined,
+                    }
+                  : undefined
+              }
+            />
+          </UILinkProvider>
+          <CookieBanner />
+          <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
+        </ConsentProvider>
         {/* Redaksjonell signatur: ett fint korn-lag over hele siden */}
         <Grain fixed />
       </body>

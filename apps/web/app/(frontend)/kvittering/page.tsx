@@ -1,5 +1,6 @@
 import { ClearCart } from "@/components/clear-cart";
 import { NewsletterOptIn } from "@/components/newsletter-opt-in";
+import { TrackPurchase } from "@/components/track-purchase";
 import { getVippsPayment } from "@/lib/vipps";
 import config from "@/payload.config";
 import { stripe } from "@poynt/stripe";
@@ -59,6 +60,9 @@ export default async function ReceiptPage({ searchParams }: Props) {
   const payload = await getPayload({ config });
 
   let state: ReceiptState = "pending";
+  // Ordreverdi i kroner til GA4 `purchase` (kun sendt ved samtykke).
+  let orderValue: number | null = null;
+  let orderCurrency = "NOK";
   if (sessionId) {
     // Stripe: slå opp sesjonen og sjekk at den faktisk er betalt. En ugyldig
     // eller påfunnet session_id skal ikke gi en suksess-side.
@@ -69,6 +73,12 @@ export default async function ReceiptPage({ searchParams }: Props) {
         session.payment_status === "no_payment_required"
           ? "paid"
           : "pending";
+      if (typeof session.amount_total === "number") {
+        orderValue = session.amount_total / 100;
+      }
+      if (session.currency) {
+        orderCurrency = session.currency.toUpperCase();
+      }
     } catch (error) {
       console.error("Kvittering: ugyldig Stripe-session", error);
       redirect("/");
@@ -87,6 +97,7 @@ export default async function ReceiptPage({ searchParams }: Props) {
     if (!order) {
       redirect("/");
     }
+    orderValue = order.total;
 
     if (order.status === "paid") {
       state = "paid";
@@ -178,6 +189,13 @@ export default async function ReceiptPage({ searchParams }: Props) {
   return (
     <div className="flex min-h-[75vh] items-center justify-center px-4 py-16">
       {state === "paid" && <ClearCart />}
+      {state === "paid" && reference && orderValue !== null && (
+        <TrackPurchase
+          transactionId={reference}
+          value={orderValue}
+          currency={orderCurrency}
+        />
+      )}
       <div className="relative w-full max-w-2xl overflow-hidden rounded-3xl border border-border bg-card px-6 py-16 text-center shadow-sm sm:px-12">
         <FloatingShapes variant={aborted ? "subtle" : "default"} />
         <GridPattern fade className="text-primary/10" />

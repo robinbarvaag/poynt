@@ -1,3 +1,4 @@
+import { CookieSettingsButton } from "@/components/consent";
 import { type MediaResource, PayloadImage } from "@/components/payload-image";
 import type { SerializedEditorState } from "@payloadcms/richtext-lexical/lexical";
 import { RichText } from "@payloadcms/richtext-lexical/react";
@@ -189,6 +190,8 @@ export async function Footer({
               </Text>
             )}
           </div>
+          {/* Lovpålagt: samtykket skal kunne endres like lett som det ble gitt. */}
+          <CookieSettingsButton className="text-sm text-muted-foreground hover:text-foreground transition-colors" />
         </div>
       </div>
     </footer>
