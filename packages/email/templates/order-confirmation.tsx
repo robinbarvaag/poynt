@@ -110,8 +110,12 @@ function vatSummary(items: OrderConfirmationItem[], total: number) {
   const rows = [...byRate.entries()]
     .filter(([, amount]) => amount > 0)
     .sort((a, b) => b[0] - a[0])
-    .map(([rate, amount]) => ({ rate, amount: Math.round(amount * 100) / 100 }));
-  const vatTotal = Math.round(rows.reduce((s, r) => s + r.amount, 0) * 100) / 100;
+    .map(([rate, amount]) => ({
+      rate,
+      amount: Math.round(amount * 100) / 100,
+    }));
+  const vatTotal =
+    Math.round(rows.reduce((s, r) => s + r.amount, 0) * 100) / 100;
   return { rows, vatTotal, net: Math.round((total - vatTotal) * 100) / 100 };
 }
 
@@ -327,10 +331,7 @@ export default function OrderConfirmationEmail({
             {seller.supportEmail ? (
               <>
                 <br />
-                <Link
-                  href={`mailto:${seller.supportEmail}`}
-                  style={sellerLink}
-                >
+                <Link href={`mailto:${seller.supportEmail}`} style={sellerLink}>
                   {seller.supportEmail}
                 </Link>
               </>

@@ -61,6 +61,9 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  other: {
+    "facebook-domain-verification": "a05he1h2j0guy6lz1jqm4g0x2sdlsf",
+  },
 };
 
 async function getGlobals() {
