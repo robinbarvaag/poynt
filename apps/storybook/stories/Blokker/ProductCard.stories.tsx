@@ -5,7 +5,7 @@ const img = (seed: string) => (
   <img
     src={`https://picsum.photos/seed/${seed}/600/450`}
     alt=""
-    className="size-full object-cover"
+    className="size-full object-contain"
   />
 );
 

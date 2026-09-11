@@ -1,12 +1,4 @@
-import {
-  Column,
-  Hr,
-  Img,
-  Link,
-  Row,
-  Section,
-  Text,
-} from "@react-email/components";
+import { Img, Link, Section, Text } from "@react-email/components";
 import * as React from "react";
 import { EmailShell, brand, emailStyles } from "./_layout";
 
@@ -58,6 +50,7 @@ export interface OrderConfirmationProps {
   /** Kjøpsdato — formateres som «11. september 2026». */
   orderDate?: Date | string;
   customerName?: string;
+  /** Vises ikke i e-posten (mottakeren er kunden) — beholdt for kompatibilitet. */
   customerEmail?: string;
   /** «Vipps» eller «Kort (Stripe)». */
   paymentMethod?: string;
@@ -124,7 +117,6 @@ export default function OrderConfirmationEmail({
   orderNumber,
   orderDate,
   customerName,
-  customerEmail,
   paymentMethod,
   items,
   total,
@@ -139,6 +131,27 @@ export default function OrderConfirmationEmail({
   const orgLabel = seller?.orgNumber
     ? `Org.nr. ${seller.orgNumber}${vatRegistered ? " MVA" : ""}`
     : null;
+
+  const facts: { label: string; value: string }[] = [
+    { label: "Ordrenummer", value: `#${orderNumber}` },
+    { label: "Dato", value: formatDate(orderDate) },
+    ...(paymentMethod ? [{ label: "Betalt med", value: paymentMethod }] : []),
+  ];
+
+  const summaryRows: { label: string; value: string }[] = [
+    ...(discount && discount > 0
+      ? [{ label: "Rabatt", value: `−${kr(discount)}` }]
+      : []),
+    ...(vat
+      ? [
+          { label: "Beløp uten MVA", value: kr(vat.net) },
+          ...vat.rows.map((row) => ({
+            label: `MVA ${row.rate} %`,
+            value: kr(row.amount),
+          })),
+        ]
+      : []),
+  ];
 
   return (
     <EmailShell
@@ -165,128 +178,90 @@ export default function OrderConfirmationEmail({
       </Text>
 
       {hasAttachments && content?.pdfNote ? (
-        <Section style={pdfCallout}>
-          <Text style={pdfCalloutText}>📎 {content.pdfNote}</Text>
-        </Section>
+        <Text style={pdfNoteText}>{content.pdfNote}</Text>
       ) : null}
 
-      {/* Ordrefakta: nummer, dato, betalingsmåte, kunde */}
+      {/* Ordrefakta: nummer, dato, betalingsmåte */}
       <Section style={factsPanel}>
-        <Row>
-          <Column style={factCol}>
-            <Text style={emailStyles.label}>Ordrenummer</Text>
-            <Text style={factValue}>#{orderNumber}</Text>
-          </Column>
-          <Column style={factCol}>
-            <Text style={emailStyles.label}>Dato</Text>
-            <Text style={factValue}>{formatDate(orderDate)}</Text>
-          </Column>
-        </Row>
-        {paymentMethod || customerEmail ? (
-          <Row>
-            {paymentMethod ? (
-              <Column style={factCol}>
-                <Text style={emailStyles.label}>Betalt med</Text>
-                <Text style={factValue}>{paymentMethod}</Text>
-              </Column>
-            ) : null}
-            {customerEmail ? (
-              <Column style={factCol}>
-                <Text style={emailStyles.label}>Kunde</Text>
-                <Text style={factValue}>
-                  {customerName ? `${customerName} · ` : ""}
-                  {customerEmail}
-                </Text>
-              </Column>
-            ) : null}
-          </Row>
-        ) : null}
+        <table
+          style={table}
+          cellPadding={0}
+          cellSpacing={0}
+          role="presentation"
+        >
+          <tbody>
+            {facts.map((fact, index) => (
+              <tr key={fact.label}>
+                <td style={index === 0 ? factLabelCellFirst : factLabelCell}>
+                  {fact.label}
+                </td>
+                <td style={index === 0 ? factValueCellFirst : factValueCell}>
+                  {fact.value}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </Section>
 
       {/* Varelinjer */}
       <Section style={itemsPanel}>
-        {items.map((item, index) => (
-          <React.Fragment key={`${item.name}-${item.variant ?? ""}`}>
-            {index > 0 ? (
-              <Hr style={{ borderColor: brand.border, margin: "12px 0" }} />
-            ) : null}
-            <Row>
-              {item.imageUrl ? (
-                <Column style={imageCol}>
-                  <Img
-                    src={item.imageUrl}
-                    alt=""
-                    width={56}
-                    height={56}
-                    style={thumb}
-                  />
-                </Column>
-              ) : null}
-              <Column>
-                <Text style={lineName}>{item.name}</Text>
-                <Text style={lineMeta}>
-                  {item.variant ? `${item.variant} · ` : ""}
-                  {item.quantity} × {kr(item.price)}
-                  {vatRegistered && item.vatRate != null
-                    ? ` · ${item.vatRate} % MVA`
-                    : ""}
-                </Text>
-              </Column>
-              <Column
-                style={{ textAlign: "right" as const, verticalAlign: "top" }}
-              >
-                <Text style={linePrice}>{kr(item.price * item.quantity)}</Text>
-              </Column>
-            </Row>
-          </React.Fragment>
-        ))}
-
-        <Hr style={totalRule} />
-
-        {discount && discount > 0 ? (
-          <Row>
-            <Column>
-              <Text style={summaryLabel}>Rabatt</Text>
-            </Column>
-            <Column style={{ textAlign: "right" as const }}>
-              <Text style={summaryValue}>−{kr(discount)}</Text>
-            </Column>
-          </Row>
-        ) : null}
-
-        {vat ? (
-          <>
-            <Row>
-              <Column>
-                <Text style={summaryLabel}>Beløp uten MVA</Text>
-              </Column>
-              <Column style={{ textAlign: "right" as const }}>
-                <Text style={summaryValue}>{kr(vat.net)}</Text>
-              </Column>
-            </Row>
-            {vat.rows.map((row) => (
-              <Row key={row.rate}>
-                <Column>
-                  <Text style={summaryLabel}>MVA {row.rate} %</Text>
-                </Column>
-                <Column style={{ textAlign: "right" as const }}>
-                  <Text style={summaryValue}>{kr(row.amount)}</Text>
-                </Column>
-              </Row>
+        <table
+          style={table}
+          cellPadding={0}
+          cellSpacing={0}
+          role="presentation"
+        >
+          <thead>
+            <tr>
+              <th style={thLeft}>Produkt</th>
+              <th style={thCenter}>Antall</th>
+              <th style={thRight}>Beløp</th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map((item) => (
+              <tr key={`${item.name}-${item.variant ?? ""}`}>
+                <td style={lineCell}>
+                  {item.imageUrl ? (
+                    <Img
+                      src={item.imageUrl}
+                      alt=""
+                      width={44}
+                      height={44}
+                      style={thumb}
+                    />
+                  ) : null}
+                  <span style={lineName}>{item.name}</span>
+                  <br />
+                  <span style={lineMeta}>
+                    {item.variant ? `${item.variant} · ` : ""}
+                    {kr(item.price)} per stk
+                    {vatRegistered && item.vatRate != null
+                      ? ` · ${item.vatRate} % MVA`
+                      : ""}
+                  </span>
+                </td>
+                <td style={lineCellCenter}>{item.quantity}</td>
+                <td style={lineCellRight}>{kr(item.price * item.quantity)}</td>
+              </tr>
             ))}
-          </>
-        ) : null}
-
-        <Row>
-          <Column>
-            <Text style={totalLabel}>
-              Totalt{vatRegistered ? " (inkl. MVA)" : ""}
-            </Text>
-          </Column>
-          <Column style={{ textAlign: "right" as const }}>
-            <Text style={totalValue}>{kr(total)}</Text>
-          </Column>
-        </Row>
+            {summaryRows.map((row) => (
+              <tr key={row.label}>
+                <td colSpan={2} style={summaryLabelCell}>
+                  {row.label}
+                </td>
+                <td style={summaryValueCell}>{row.value}</td>
+              </tr>
+            ))}
+            <tr>
+              <td colSpan={2} style={totalLabelCell}>
+                Totalt{vatRegistered ? " (inkl. MVA)" : ""}
+              </td>
+              <td style={totalValueCell}>{kr(total)}</td>
+            </tr>
+          </tbody>
+        </table>
         {vat ? (
           <Text style={vatNote}>Herav MVA: {kr(vat.vatTotal)}</Text>
         ) : (
@@ -349,113 +324,153 @@ export default function OrderConfirmationEmail({
   );
 }
 
-const pdfCallout = {
-  backgroundColor: brand.panel,
-  borderRadius: "14px",
-  borderLeft: `3px solid ${brand.saffron}`,
-  padding: "14px 18px",
-  margin: "0 0 20px",
+const pdfNoteText = {
+  color: brand.body,
+  fontSize: "14px",
+  lineHeight: "21px",
+  margin: "-4px 0 20px",
 };
 
-const pdfCalloutText = {
-  color: brand.ink,
-  fontSize: "15px",
-  lineHeight: "23px",
-  fontWeight: "600",
-  margin: 0,
+const table = {
+  width: "100%",
+  borderCollapse: "collapse" as const,
 };
 
 const factsPanel = {
   margin: "0 0 16px",
 };
 
-const factCol = {
+const factLabelCell = {
+  color: brand.muted,
+  fontSize: "14px",
+  lineHeight: "20px",
+  padding: "9px 0",
+  borderTop: `1px solid ${brand.border}`,
   verticalAlign: "top" as const,
-  paddingRight: "12px",
+  whiteSpace: "nowrap" as const,
 };
 
-const factValue = {
+const factLabelCellFirst = { ...factLabelCell, borderTop: "none" };
+
+const factValueCell = {
   color: brand.ink,
-  fontSize: "15px",
-  lineHeight: "22px",
-  margin: "0 0 12px",
+  fontSize: "14px",
+  lineHeight: "20px",
+  fontWeight: "600",
+  padding: "9px 0",
+  borderTop: `1px solid ${brand.border}`,
+  textAlign: "right" as const,
+  verticalAlign: "top" as const,
 };
+
+const factValueCellFirst = { ...factValueCell, borderTop: "none" };
 
 const itemsPanel = {
   backgroundColor: brand.bg,
   borderRadius: "14px",
   border: `1px solid ${brand.border}`,
-  padding: "18px 20px",
+  padding: "6px 18px 14px",
   margin: "4px 0 0",
 };
 
-const imageCol = {
-  width: "68px",
+const th = {
+  color: brand.muted,
+  fontSize: "11px",
+  fontWeight: "700",
+  letterSpacing: "0.06em",
+  textTransform: "uppercase" as const,
+  padding: "10px 0 8px",
+  borderBottom: `1px solid ${brand.border}`,
+  verticalAlign: "bottom" as const,
+};
+
+const thLeft = { ...th, textAlign: "left" as const };
+const thCenter = {
+  ...th,
+  textAlign: "center" as const,
+  padding: "10px 12px 8px",
+};
+const thRight = { ...th, textAlign: "right" as const };
+
+const thumb = {
+  borderRadius: "8px",
+  border: `1px solid ${brand.border}`,
+  objectFit: "cover" as const,
+  display: "inline-block",
+  verticalAlign: "middle",
+  marginRight: "12px",
+};
+
+const lineCell = {
+  padding: "12px 0",
+  borderBottom: `1px solid ${brand.border}`,
   verticalAlign: "top" as const,
 };
 
-const thumb = {
-  borderRadius: "10px",
-  border: `1px solid ${brand.border}`,
-  objectFit: "cover" as const,
-  display: "block",
+const lineCellCenter = {
+  ...lineCell,
+  color: brand.ink,
+  fontSize: "15px",
+  lineHeight: "22px",
+  textAlign: "center" as const,
+  padding: "12px 12px",
+};
+
+const lineCellRight = {
+  ...lineCell,
+  color: brand.ink,
+  fontSize: "15px",
+  lineHeight: "22px",
+  fontWeight: "600",
+  textAlign: "right" as const,
+  whiteSpace: "nowrap" as const,
 };
 
 const lineName = {
   color: brand.ink,
-  fontSize: "16px",
+  fontSize: "15px",
   lineHeight: "22px",
   fontWeight: "600",
-  margin: 0,
 };
 
 const lineMeta = {
   color: brand.muted,
   fontSize: "13px",
   lineHeight: "18px",
-  margin: "2px 0 0",
 };
 
-const linePrice = {
-  color: brand.ink,
-  fontSize: "16px",
-  lineHeight: "22px",
-  fontWeight: "600",
-  margin: 0,
-};
-
-const totalRule = {
-  borderColor: brand.saffron,
-  borderTopWidth: "2px",
-  margin: "14px 0 12px",
-};
-
-const summaryLabel = {
+const summaryLabelCell = {
   color: brand.muted,
   fontSize: "14px",
   lineHeight: "20px",
-  margin: "0 0 4px",
+  padding: "6px 0 0",
+  textAlign: "right" as const,
 };
 
-const summaryValue = {
+const summaryValueCell = {
   color: brand.ink,
   fontSize: "14px",
   lineHeight: "20px",
-  margin: "0 0 4px",
+  padding: "6px 0 0",
+  textAlign: "right" as const,
+  whiteSpace: "nowrap" as const,
 };
 
-const totalLabel = {
+const totalLabelCell = {
   color: brand.ink,
-  fontSize: "17px",
+  fontSize: "16px",
   fontWeight: "800",
-  margin: "6px 0 0",
+  padding: "10px 0 0",
+  textAlign: "right" as const,
 };
 
-const totalValue = {
+const totalValueCell = {
   color: brand.ink,
-  fontSize: "20px",
+  fontSize: "18px",
   fontWeight: "800",
-  margin: "6px 0 0",
+  padding: "10px 0 0",
+  textAlign: "right" as const,
+  whiteSpace: "nowrap" as const,
 };
 
 const vatNote = {
@@ -463,12 +478,12 @@ const vatNote = {
   fontSize: "12px",
   lineHeight: "18px",
   margin: "8px 0 0",
+  textAlign: "right" as const,
 };
 
 const noticePanel = {
   backgroundColor: brand.panel,
   borderRadius: "14px",
-  borderLeft: `3px solid ${brand.primary}`,
   padding: "14px 18px",
   margin: "20px 0 0",
 };

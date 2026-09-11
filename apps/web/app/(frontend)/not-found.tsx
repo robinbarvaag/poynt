@@ -3,8 +3,8 @@ import { Button, Eyebrow, Heading, Text } from "@poynt/ui";
 import Link from "next/link";
 
 /**
- * 404 i Poynt-drakt. Rolig side; det eneste lille påfunnet er et par
- * klistremerker som følger musepekeren (kun med mus, aldri ved
+ * 404 i Poynt-drakt. Rolig side; det eneste lille påfunnet er en svak
+ * rosa blur i bakgrunnen som følger musepekeren (kun med mus, aldri ved
  * prefers-reduced-motion). Pynten er aria-hidden.
  */
 export default function NotFound() {

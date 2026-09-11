@@ -29,7 +29,9 @@ export interface ProductCardProps {
   /** Overstyr prisvisningen helt, f.eks. "Gratis" eller "Fra 99 kr". */
   priceLabel?: string;
   /**
-   * Media-slot — send f.eks. et `next/image` med `fill className="object-cover"`.
+   * Media-slot — send f.eks. et `next/image` med `fill className="object-contain"`.
+   * Rammen er i A5-format (148:210); bruk `object-contain` så bilder i andre
+   * formater ikke beskjæres.
    * Uten media vises en dempet plassholder.
    */
   image?: React.ReactNode;
@@ -105,9 +107,9 @@ function ImageFrame({
       <div
         className={cn(
           "relative z-10 overflow-hidden rounded-2xl bg-background/50",
-          featured
-            ? "aspect-4/3 md:aspect-auto md:h-full md:min-h-72"
-            : "aspect-4/3"
+          // A5-format (148:210) – matcher boka og hovedbildet på produktsiden,
+          // så bildene aldri beskjæres.
+          "aspect-[148/210]"
         )}
       >
         {image ?? (
