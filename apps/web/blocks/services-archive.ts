@@ -35,7 +35,8 @@ export const ServicesArchive: Block = {
       hasMany: true,
       label: "Velg tjenester",
       admin: {
-        condition: (data) => data?.selectionMode === "manual",
+        condition: (_data, siblingData) =>
+          siblingData?.selectionMode === "manual",
         description:
           "Velg hvilke tjenester som skal vises, i ønsket rekkefølge",
       },
@@ -46,7 +47,8 @@ export const ServicesArchive: Block = {
       label: "Maks antall tjenester",
       admin: {
         description: "La stå tom for å vise alle",
-        condition: (data) => data?.selectionMode === "auto",
+        condition: (_data, siblingData) =>
+          siblingData?.selectionMode === "auto",
       },
     },
     {

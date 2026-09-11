@@ -62,7 +62,7 @@ function ProductGallery({
                 media={currentImage.media}
                 alt={currentImage.media.alt || productName}
                 fill
-                className="object-contain"
+                className="object-cover"
                 priority
               />
             </Lightbox>

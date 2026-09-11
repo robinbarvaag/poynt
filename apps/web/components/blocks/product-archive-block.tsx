@@ -7,14 +7,31 @@ import { cacheLife, cacheTag } from "next/cache";
 import Link from "next/link";
 import { type Where, getPayload } from "payload";
 
+type ProductTypeFilter = "all" | "product" | "course" | "pdf" | "bundle";
+
+type ProductRef = number | string | Product;
+
 interface ProductArchiveBlockProps {
   title?: string;
   description?: string;
   selectionMode?: "auto" | "manual";
-  selectedProducts?: (string | Product)[];
-  filterByType?: "all" | "course" | "pdf" | "bundle";
-  limit?: number;
-  showMoreLink?: boolean;
+  selectedProducts?: ProductRef[] | null;
+  featuredProduct?: ProductRef | null;
+  filterByType?: ProductTypeFilter;
+  limit?: number | null;
+  featureFirst?: boolean | null;
+  showMoreLink?: boolean | null;
+}
+
+/**
+ * Payload-id-er er tall i dette prosjektet, men en relasjon kan komme som
+ * tall, streng eller fullt dokument avhengig av `depth`. Én løser for alle.
+ */
+function toProductId(ref: ProductRef | null | undefined): number | null {
+  if (ref == null) return null;
+  if (typeof ref === "object") return ref.id;
+  const id = typeof ref === "string" ? Number(ref) : ref;
+  return Number.isFinite(id) ? id : null;
 }
 
 /**
@@ -24,8 +41,8 @@ interface ProductArchiveBlockProps {
  * id-er FØR den cachede grensen.
  */
 async function fetchArchiveProducts(
-  productIds: (string | number)[],
-  filterByType: "all" | "course" | "pdf" | "bundle",
+  productIds: number[],
+  filterByType: ProductTypeFilter,
   limit: number
 ): Promise<Product[]> {
   "use cache";
@@ -45,7 +62,7 @@ async function fetchArchiveProducts(
       limit: 100,
     });
 
-    // Preserve the order of selectedProducts
+    // Behold rekkefølgen fra redaktørens utvalg.
     return productIds
       .map((id) => result.docs.find((doc) => doc.id === id))
       .filter((doc): doc is Product => !!doc);
@@ -76,20 +93,42 @@ export async function ProductArchiveBlock({
   description,
   selectionMode = "auto",
   selectedProducts,
+  featuredProduct,
   filterByType = "all",
-  limit = 8,
-  showMoreLink = false,
+  limit,
+  featureFirst,
+  showMoreLink,
 }: ProductArchiveBlockProps) {
-  const productIds =
-    selectionMode === "manual" && selectedProducts?.length
-      ? selectedProducts.map((p) => (typeof p === "string" ? p : p.id))
-      : [];
+  const isManual = selectionMode === "manual";
 
-  const products = await fetchArchiveProducts(productIds, filterByType, limit);
+  const featuredId = isManual ? toProductId(featuredProduct) : null;
+
+  // Fremhevet produkt legges alltid først; dupliseres ikke om det også ligger
+  // i utvalget. Tom manuell liste faller tilbake til automatisk visning.
+  const manualIds = isManual
+    ? (selectedProducts ?? [])
+        .map(toProductId)
+        .filter((id): id is number => id != null && id !== featuredId)
+    : [];
+  const productIds =
+    featuredId != null ? [featuredId, ...manualIds] : manualIds;
+
+  const products = await fetchArchiveProducts(
+    productIds,
+    filterByType,
+    limit ?? 8
+  );
 
   if (!products.length) {
     return null;
   }
+
+  const items = products.map((product) => ({
+    ...toProductGridItem(product),
+    // Manuelt: kun det valgte produktet fremheves. Automatisk: første kort
+    // hvis redaktøren har skrudd det på.
+    ...(isManual ? { featured: product.id === featuredId } : {}),
+  }));
 
   return (
     <BlockSection background="default" containerSize={false}>
@@ -97,8 +136,8 @@ export async function ProductArchiveBlock({
         <SectionHeader title={title} intro={description} reveal={false} />
 
         <ProductGrid
-          products={products.map(toProductGridItem)}
-          featureFirst={false}
+          products={items}
+          featureFirst={!isManual && Boolean(featureFirst)}
         />
 
         {showMoreLink && (

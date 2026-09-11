@@ -52,9 +52,9 @@ const payload = await getPayload({ config });
 // biome-ignore lint/suspicious/noExplicitAny: seed-data matcher footer-skjemaet
 const data: any = {
   columns,
-  bottomText: richText(
-    "© Poynt AS · Org.nr 930 714 151 MVA · Ramsvigstien 5A, 4015 Stavanger · hei@poynt.no"
-  ),
+  // Selgeropplysninger (org.nr., adresse, e-post) hentes fra Nettbutikk-globalen
+  // og vises som tabell i footeren — bunnteksten er kun copyright.
+  bottomText: richText("© Poynt AS. Alle rettigheter reservert."),
   showSocialLinks: true,
   showNewsletter: false,
 };

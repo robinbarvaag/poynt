@@ -86,6 +86,8 @@ export async function renderEmailPreviews(options?: {
   /** Faktiske selgeropplysninger fra «Nettbutikk» — ellers eksempeldata. */
   orderSeller?: OrderConfirmationSeller;
   orderLegal?: OrderConfirmationLegal;
+  /** Om eksempelordren skal vises med PDF-vedlegg (default: ja). */
+  orderHasAttachments?: boolean;
   templates?: PreviewTemplateOverrides;
 }): Promise<EmailPreview[]> {
   const { render } = await import("@react-email/render");
@@ -163,7 +165,7 @@ export async function renderEmailPreviews(options?: {
           content: options?.orderContent,
           seller: sampleSeller,
           legal: sampleLegal,
-          hasAttachments: true,
+          hasAttachments: options?.orderHasAttachments ?? true,
         })
       ),
     },

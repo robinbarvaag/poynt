@@ -35,8 +35,22 @@ export const ProductArchive: Block = {
       hasMany: true,
       label: "Velg produkter",
       admin: {
-        condition: (data) => data?.selectionMode === "manual",
-        description: "Velg hvilke produkter som skal vises",
+        condition: (_data, siblingData) =>
+          siblingData?.selectionMode === "manual",
+        description:
+          "Velg hvilke produkter som skal vises. Rekkefølgen her styrer rekkefølgen i rutenettet.",
+      },
+    },
+    {
+      name: "featuredProduct",
+      type: "relationship",
+      relationTo: "products",
+      label: "Fremhevet produkt",
+      admin: {
+        condition: (_data, siblingData) =>
+          siblingData?.selectionMode === "manual",
+        description:
+          "Vises som et stort, fremhevet kort først i rutenettet. Trenger ikke å være med i utvalget over.",
       },
     },
     {
@@ -52,7 +66,8 @@ export const ProductArchive: Block = {
       ],
       defaultValue: "all",
       admin: {
-        condition: (data) => data?.selectionMode === "auto",
+        condition: (_data, siblingData) =>
+          siblingData?.selectionMode === "auto",
       },
     },
     {
@@ -62,7 +77,8 @@ export const ProductArchive: Block = {
       defaultValue: 8,
       admin: {
         description: "La stå tom for å vise alle",
-        condition: (data) => data?.selectionMode === "auto",
+        condition: (_data, siblingData) =>
+          siblingData?.selectionMode === "auto",
       },
     },
     {
@@ -71,6 +87,18 @@ export const ProductArchive: Block = {
       label: "Utseende",
       admin: { initCollapsed: true },
       fields: [
+        {
+          name: "featureFirst",
+          type: "checkbox",
+          label: "Fremhev første produkt (stort kort)",
+          defaultValue: false,
+          admin: {
+            condition: (_data, siblingData) =>
+              siblingData?.selectionMode === "auto",
+            description:
+              "Det nyeste produktet vises som et stort kort over to kolonner.",
+          },
+        },
         {
           name: "showMoreLink",
           type: "checkbox",

@@ -1,5 +1,6 @@
 "use client";
 
+import type React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { simulateDarkMode } from "./dark-mode";
 
@@ -67,7 +68,7 @@ export function useEmailPreview(request: Record<string, unknown> | null) {
   return { html, subject, error, loading };
 }
 
-function TogglePills({
+export function TogglePills({
   value,
   onChange,
   options,
@@ -113,6 +114,7 @@ export function PreviewFrame({
   error,
   emptyText,
   title = "Forhåndsvisning",
+  extraControls,
 }: {
   html: string | null;
   subject?: string | null;
@@ -120,6 +122,8 @@ export function PreviewFrame({
   error?: string | null;
   emptyText?: string;
   title?: string;
+  /** Ekstra brytere ved siden av Desktop/Mobil og Lys/Mørk. */
+  extraControls?: React.ReactNode;
 }) {
   const [mobile, setMobile] = useState(false);
   const [dark, setDark] = useState(false);
@@ -147,6 +151,7 @@ export function PreviewFrame({
           {loading ? " Oppdaterer …" : ""}
         </p>
         <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+          {extraControls}
           <TogglePills
             value={mobile}
             onChange={setMobile}

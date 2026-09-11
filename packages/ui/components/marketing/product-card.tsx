@@ -29,9 +29,9 @@ export interface ProductCardProps {
   /** Overstyr prisvisningen helt, f.eks. "Gratis" eller "Fra 99 kr". */
   priceLabel?: string;
   /**
-   * Media-slot — send f.eks. et `next/image` med `fill className="object-contain"`.
-   * Rammen er i A5-format (148:210); bruk `object-contain` så bilder i andre
-   * formater ikke beskjæres.
+   * Media-slot — send f.eks. et `next/image` med `fill className="object-cover"`.
+   * Rammen er i A5-format (148:210); bruk `object-cover` så bildet fyller hele
+   * rammen (fokuspunkt fra Payload styrer beskjæringen).
    * Uten media vises en dempet plassholder.
    */
   image?: React.ReactNode;
@@ -107,8 +107,8 @@ function ImageFrame({
       <div
         className={cn(
           "relative z-10 overflow-hidden rounded-2xl bg-background/50",
-          // A5-format (148:210) – matcher boka og hovedbildet på produktsiden,
-          // så bildene aldri beskjæres.
+          // A5-format (148:210) – matcher boka og hovedbildet på produktsiden.
+          // Bildet fyller rammen (`object-cover`) og beskjæres etter fokuspunkt.
           "aspect-[148/210]"
         )}
       >

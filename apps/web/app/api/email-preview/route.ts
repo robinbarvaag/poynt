@@ -47,6 +47,8 @@ interface OrderBody {
   intro?: string;
   pdfNote?: string;
   footer?: string;
+  /** Vis e-posten som om ordren har PDF-vedlegg (default: ja). */
+  hasAttachments?: boolean;
 }
 
 type PreviewRequest = TemplateBody | FormBody | OrderBody;
@@ -111,6 +113,7 @@ export async function POST(req: NextRequest) {
         },
         orderSeller: extras.seller,
         orderLegal: extras.legal,
+        orderHasAttachments: body.hasAttachments ?? true,
       });
       const preview = previews.find((p) => p.key === "order-confirmation");
       return NextResponse.json({

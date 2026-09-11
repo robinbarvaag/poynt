@@ -73,13 +73,14 @@ async function getGlobals() {
 
   const payload = await getPayload({ config });
 
-  const [siteSettings, header, footer] = await Promise.all([
+  const [siteSettings, header, footer, shopSettings] = await Promise.all([
     payload.findGlobal({ slug: "site-settings" }).catch(() => null),
     payload.findGlobal({ slug: "header" }).catch(() => null),
     payload.findGlobal({ slug: "footer" }).catch(() => null),
+    payload.findGlobal({ slug: "shop-settings", depth: 0 }).catch(() => null),
   ]);
 
-  return { siteSettings, header, footer };
+  return { siteSettings, header, footer, shopSettings };
 }
 
 export default async function FrontendLayout({
@@ -89,7 +90,7 @@ export default async function FrontendLayout({
   children: React.ReactNode;
   modal: React.ReactNode;
 }) {
-  const { siteSettings, header, footer } = await getGlobals();
+  const { siteSettings, header, footer, shopSettings } = await getGlobals();
 
   // Nettstedsdekkende strukturert data (GEO/SEO): organisasjon + nettsted.
   const siteJsonLd = [
@@ -127,6 +128,18 @@ export default async function FrontendLayout({
             {modal}
             <Footer
               siteName={siteSettings?.siteName || "Poynt"}
+              seller={
+                shopSettings?.sellerName
+                  ? {
+                      name: shopSettings.sellerName,
+                      orgNumber: shopSettings.orgNumber,
+                      vatRegistered: shopSettings.vatRegistered,
+                      address: shopSettings.address,
+                      supportEmail: shopSettings.supportEmail,
+                      supportPhone: shopSettings.supportPhone,
+                    }
+                  : null
+              }
               logo={siteSettings?.logo as { url: string; alt?: string } | null}
               columns={footer?.columns as FooterProps["columns"]}
               bottomText={footer?.bottomText ?? undefined}

@@ -1067,14 +1067,22 @@ export interface ProductArchiveBlock {
   description?: string | null;
   selectionMode?: ('auto' | 'manual') | null;
   /**
-   * Velg hvilke produkter som skal vises
+   * Velg hvilke produkter som skal vises. Rekkefølgen her styrer rekkefølgen i rutenettet.
    */
   selectedProducts?: (number | Product)[] | null;
+  /**
+   * Vises som et stort, fremhevet kort først i rutenettet. Trenger ikke å være med i utvalget over.
+   */
+  featuredProduct?: (number | null) | Product;
   filterByType?: ('all' | 'product' | 'course' | 'pdf' | 'bundle') | null;
   /**
    * La stå tom for å vise alle
    */
   limit?: number | null;
+  /**
+   * Det nyeste produktet vises som et stort kort over to kolonner.
+   */
+  featureFirst?: boolean | null;
   showMoreLink?: boolean | null;
   id?: string | null;
   blockName?: string | null;
@@ -3137,8 +3145,10 @@ export interface ProductArchiveBlockSelect<T extends boolean = true> {
   description?: T;
   selectionMode?: T;
   selectedProducts?: T;
+  featuredProduct?: T;
   filterByType?: T;
   limit?: T;
+  featureFirst?: T;
   showMoreLink?: T;
   id?: T;
   blockName?: T;

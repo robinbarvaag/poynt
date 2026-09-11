@@ -68,7 +68,7 @@ export function toProductGridItem(product: Product): ProductGridItem {
         media={media}
         alt={media.alt || product.name}
         fill
-        className="object-contain"
+        className="object-cover"
       />
     ) : undefined,
   };

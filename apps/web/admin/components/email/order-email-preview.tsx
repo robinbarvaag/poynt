@@ -1,13 +1,15 @@
 "use client";
 
 import { useFormFields } from "@payloadcms/ui";
-import { useMemo } from "react";
-import { PreviewFrame, useEmailPreview } from "./preview-frame";
+import { useMemo, useState } from "react";
+import { PreviewFrame, TogglePills, useEmailPreview } from "./preview-frame";
 
 /**
  * Live forhåndsvisning av ordrebekreftelsen, rett under tekstfeltene i
  * «Kasse og kvittering» → Ordrebekreftelse (e-post). Ordrenummer og
  * produktliste er eksempeldata; tekstene er dine egne, også ulagrede.
+ * Bryteren «Med/Uten vedlegg» viser hvordan e-posten ser ut for en ordre
+ * med PDF-produkter (PDF-meldingen vises) kontra en uten.
  */
 export const OrderEmailPreview = () => {
   const subject = useFormFields(
@@ -26,9 +28,19 @@ export const OrderEmailPreview = () => {
     ([fields]) => fields.emailFooter?.value as string | undefined
   );
 
+  const [hasAttachments, setHasAttachments] = useState(true);
+
   const request = useMemo(
-    () => ({ kind: "order", subject, heading, intro, pdfNote, footer }),
-    [subject, heading, intro, pdfNote, footer]
+    () => ({
+      kind: "order",
+      subject,
+      heading,
+      intro,
+      pdfNote,
+      footer,
+      hasAttachments,
+    }),
+    [subject, heading, intro, pdfNote, footer, hasAttachments]
   );
 
   const {
@@ -45,6 +57,16 @@ export const OrderEmailPreview = () => {
       loading={loading}
       error={error}
       title="Forhåndsvisning av ordrebekreftelsen"
+      extraControls={
+        <TogglePills
+          value={hasAttachments}
+          onChange={setHasAttachments}
+          options={[
+            { label: "Med vedlegg", value: true },
+            { label: "Uten vedlegg", value: false },
+          ]}
+        />
+      }
     />
   );
 };
