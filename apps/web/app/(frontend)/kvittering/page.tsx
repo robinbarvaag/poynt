@@ -1,5 +1,7 @@
 import { ClearCart } from "@/components/clear-cart";
 import { NewsletterOptIn } from "@/components/newsletter-opt-in";
+import { resolveMediaUrl } from "@/components/payload-image";
+import { RestoreCart, type RestoreCartLine } from "@/components/restore-cart";
 import { TrackPurchase } from "@/components/track-purchase";
 import { getVippsPayment } from "@/lib/vipps";
 import config from "@/payload.config";
@@ -122,6 +124,47 @@ export default async function ReceiptPage({ searchParams }: Props) {
   }
 
   const aborted = state === "aborted";
+
+  // Avbrutt Vipps-betaling: «Kjøp nå» på produktsiden går utenom kurven, så
+  // vi legger ordrelinjene tilbake i kurven — ellers er «Tilbake til
+  // handlekurven» en lenke til en tom kurv. Prisen hentes fra produktet
+  // (ikke ordren), så kurven viser dagens pris akkurat som ellers.
+  const restoreLines: RestoreCartLine[] = [];
+  if (ref && aborted) {
+    const orders = await payload.find({
+      collection: "orders",
+      where: { vippsReference: { equals: ref } },
+      limit: 1,
+      depth: 1,
+    });
+    for (const line of orders.docs[0]?.items ?? []) {
+      const product = line.product;
+      if (!product || typeof product !== "object") continue;
+      if (!product.active || product.statusBadge === "soldout") continue;
+      const variantLabel = product.variantLabel ?? undefined;
+      // Ordren lagrer «Label Verdi» i én streng — hent verdien tilbake.
+      const variantValue =
+        line.variant && variantLabel && line.variant.startsWith(variantLabel)
+          ? line.variant.slice(variantLabel.length).trim() || undefined
+          : (line.variant ?? undefined);
+      const option = variantValue
+        ? (product.variantOptions ?? []).find((o) => o.label === variantValue)
+        : undefined;
+      restoreLines.push({
+        id: String(product.id),
+        name: product.name,
+        price: product.price + (option?.priceDelta ?? 0),
+        quantity: line.quantity ?? 1,
+        image:
+          product.featuredImage && typeof product.featuredImage === "object"
+            ? resolveMediaUrl(product.featuredImage)
+            : undefined,
+        variantLabel: variantValue ? variantLabel : undefined,
+        variantValue,
+        maxQuantity: product.allowQuantity ? undefined : 1,
+      });
+    }
+  }
   const settings = await payload
     .findGlobal({ slug: "checkout-settings" })
     .catch(() => null);
@@ -189,6 +232,7 @@ export default async function ReceiptPage({ searchParams }: Props) {
   return (
     <div className="flex min-h-[75vh] items-center justify-center px-4 py-16">
       {state === "paid" && <ClearCart />}
+      {restoreLines.length > 0 && <RestoreCart lines={restoreLines} />}
       {state === "paid" && reference && orderValue !== null && (
         <TrackPurchase
           transactionId={reference}
