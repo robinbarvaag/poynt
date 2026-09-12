@@ -9,6 +9,11 @@ export interface BlogGridProps {
   posts: BlogGridItem[];
   /** Gjør det første innlegget fremhevet (2 kolonner). Default true. */
   featureFirst?: boolean;
+  /**
+   * Maks antall kolonner på desktop. Default 3 (2 på små skjermer).
+   * Bruk 2 når du vet du har få innlegg, så kortene fyller bredden.
+   */
+  columns?: 2 | 3;
   className?: string;
 }
 
@@ -24,12 +29,14 @@ const palette: BlogSurface[] = ["saffron", "primary", "salmon", "mint"];
 export function BlogGrid({
   posts,
   featureFirst = true,
+  columns = 3,
   className,
 }: BlogGridProps) {
   return (
     <div
       className={cn(
-        "grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3",
+        "grid grid-cols-1 gap-5 sm:grid-cols-2",
+        columns === 3 && "lg:grid-cols-3",
         className
       )}
     >
