@@ -7,6 +7,7 @@ import {
 } from "../fields/quality-review";
 import { stockPickerAfterInput } from "../fields/stock-picker-after-input";
 import { generateSlug } from "../lib/generate-slug";
+import { withPoyntLinks } from "../lib/lexical/link-feature";
 import {
   revalidateCmsAfterChange,
   revalidateCmsAfterDelete,
@@ -111,7 +112,7 @@ export const BlogPosts: CollectionConfig = {
               // vise produktet det handler om med bilde, pris og kjøpsknapp.
               editor: lexicalEditor({
                 features: ({ defaultFeatures }) => [
-                  ...defaultFeatures,
+                  ...withPoyntLinks(defaultFeatures),
                   BlocksFeature({ blocks: [ProductSpotlight] }),
                 ],
               }),

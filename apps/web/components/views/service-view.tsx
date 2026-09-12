@@ -1,11 +1,11 @@
 import { CtaSectionBlock } from "@/components/blocks/cta-section-block";
 import { MediaCredit } from "@/components/media-credit";
 import { PayloadImage } from "@/components/payload-image";
+import { RichText } from "@/components/rich-text";
 import { resolveMedia } from "@/lib/payload";
 import { formatServicePrice } from "@/lib/service";
 import { detailBreadcrumbs } from "@/lib/ui-text";
 import type { Service, Servicespage } from "@/payload-types";
-import { RichText } from "@payloadcms/richtext-lexical/react";
 import { Breadcrumbs, Container, Heading, Text } from "@poynt/ui";
 
 interface ServiceViewProps {

@@ -1,5 +1,6 @@
 "use client";
 
+import { linkConverters } from "@/components/rich-text";
 import { generateSlug } from "@/lib/generate-slug";
 import type { DefaultNodeTypes } from "@payloadcms/richtext-lexical";
 import type { SerializedEditorState } from "@payloadcms/richtext-lexical/lexical";
@@ -27,6 +28,7 @@ const jsxConverters: JSXConvertersFunction<DefaultNodeTypes> = ({
   defaultConverters,
 }) => ({
   ...defaultConverters,
+  ...linkConverters,
   heading: ({ node, nodesToJSX }) => {
     const Tag = node.tag as "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
     const children = nodesToJSX({

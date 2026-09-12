@@ -8,10 +8,10 @@ import {
   ProductGallery,
 } from "@/components/product/product-gallery";
 import { ProductStorySections } from "@/components/product/product-story-sections";
+import { RichText } from "@/components/rich-text";
 import { PRODUCT_TYPE_LABELS, getProductBadge } from "@/lib/product";
 import { detailBreadcrumbs } from "@/lib/ui-text";
 import type { Product } from "@/payload-types";
-import { RichText } from "@payloadcms/richtext-lexical/react";
 import {
   Badge,
   Breadcrumbs,

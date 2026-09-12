@@ -1,4 +1,5 @@
 import { ProductSpotlightCard } from "@/components/product-spotlight";
+import { linkConverters } from "@/components/rich-text";
 import type { ProductSpotlightBlock } from "@/payload-types";
 import type {
   DefaultNodeTypes,
@@ -23,6 +24,7 @@ const converters: JSXConvertersFunction<BlogNodeTypes> = ({
   defaultConverters,
 }) => ({
   ...defaultConverters,
+  ...linkConverters,
   blocks: {
     productSpotlight: ({ node }) => (
       <div className="not-prose my-10">
