@@ -16,35 +16,43 @@ interface SocialFabProps {
   hideNearSelector?: string;
 }
 
-/** Antall ikoner som ligger i stabelen når docken er lukket. */
-const PEEK_COUNT = 3;
-
 /** Myk ease-out — speiler --ease-soft i web.css. */
 const EASE_SOFT = [0.22, 1, 0.36, 1] as const;
 
 /**
- * Fjæra som driver morfingen. Litt spenst, men langt unna sprett: docken skal
- * kjennes som et fysisk objekt som utvider seg, ikke som en ballong.
+ * Fjæra som driver morfingen. Litt spenst, men langt unna sprett: fanen skal
+ * kjennes som et fysisk objekt som skyves ut, ikke som en ballong.
  */
-const MORPH = { type: "spring", duration: 0.5, bounce: 0.22 } as const;
+const MORPH = { type: "spring", duration: 0.5, bounce: 0.2 } as const;
 
-/** Hvor lenge vi venter etter siste scroll-piksel før docken folder seg ut. */
-const SETTLE_MS = 420;
+/** Fjær for utglidningen fra kanten — litt raskere, den skjer oftere. */
+const SLIDE = { type: "spring", duration: 0.42, bounce: 0.16 } as const;
+
+/** Hvor lenge vi venter etter siste scroll-piksel før fanen sklir ut igjen. */
+const SETTLE_MS = 380;
 
 /**
- * Flytende «dock» nede til høyre med kanalene våre.
+ * Hvor langt fanen er skjøvet ut over høyrekanten (px). Jo høyere tall, jo
+ * mindre av den er synlig.
+ */
+const TUCK = { scrolling: 46, resting: 28, open: 0 } as const;
+
+/**
+ * Organisk «fane» som ligger halvveis utenfor høyrekanten, omtrent i
+ * øyehøyde — samme grep som Instagram sin nye pluss-knapp.
  *
  * Tre tilstander, én og samme boks som morfer mellom dem:
  * 1. **Skjult** – toppen av siden, eller footeren i synsfeltet (kanalene står
  *    allerede der).
- * 2. **Sammentrukket** – mens man scroller krymper docken til en liten
- *    ikonstabel, så den ikke stjeler oppmerksomhet fra lesingen.
- * 3. **Utfoldet** – står scrollen stille vokser den til en pille med tekst, og
- *    ett trykk morfer den videre til et panel med alle kanalene.
+ * 2. **Hvilende** – en myk, halvt bortgjemt form med et pluss-tegn. Mens man
+ *    scroller sklir den lenger ut i kanten, så den ikke stjeler blikket.
+ * 3. **Åpen** – ett trykk drar hele formen inn på skjermen, den vokser til et
+ *    panel med kanalene, og plusset roterer til et kryss.
  *
- * Morfingen går via `layout` i framer-motion: boksen er det samme DOM-elementet
- * hele veien, så størrelse, radius og posisjon interpoleres i stedet for at to
- * elementer krysstoner.
+ * Morfingen går via `layout` i framer-motion: skallet er det samme DOM-
+ * elementet hele veien, så størrelse og form interpoleres i stedet for at to
+ * elementer krysstoner. Utglidningen ligger på et eget element utenpå, siden
+ * `layout` selv eier `transform` på skallet.
  */
 export function SocialFab({
   links,
@@ -57,7 +65,7 @@ export function SocialFab({
   const containerRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
-  // Skiller «lukket av bruker» fra «lukket fordi docken forsvant», så vi ikke
+  // Skiller «lukket av bruker» fra «lukket fordi fanen forsvant», så vi ikke
   // river fokus tilbake til en knapp som ikke lenger er synlig.
   const restoreFocus = useRef(false);
   const panelId = useId();
@@ -95,18 +103,6 @@ export function SocialFab({
     setOpen(false);
   }, []);
 
-  // Knappen forsvinner når panelet morfer fram, så fokus må flyttes med.
-  useEffect(() => {
-    if (open) {
-      panelRef.current?.querySelector<HTMLElement>("a, button")?.focus();
-      return;
-    }
-    if (restoreFocus.current) {
-      restoreFocus.current = false;
-      triggerRef.current?.focus();
-    }
-  }, [open]);
-
   useEffect(() => {
     if (!open) return;
     const onKeyDown = (event: KeyboardEvent) => {
@@ -123,94 +119,91 @@ export function SocialFab({
     };
   }, [open, close]);
 
+  // Første lenke i panelet tar fokus når det åpner, og knappen får det
+  // tilbake når man lukker.
+  useEffect(() => {
+    if (open) {
+      panelRef.current?.querySelector<HTMLElement>("a")?.focus();
+      return;
+    }
+    if (restoreFocus.current) {
+      restoreFocus.current = false;
+      triggerRef.current?.focus();
+    }
+  }, [open]);
+
   const visible = scrolledPast && !footerVisible;
 
   useEffect(() => {
     if (!visible) setOpen(false);
   }, [visible]);
 
-  // Mens man scroller trekker docken seg sammen — men aldri mens den er åpen,
-  // da ville panelet rykket bort under fingeren.
-  const compact = scrolling && !open;
-  const peek = links.slice(0, PEEK_COUNT);
+  const tuck = open ? TUCK.open : scrolling ? TUCK.scrolling : TUCK.resting;
   const morph = reduceMotion ? { duration: 0.2, ease: EASE_SOFT } : MORPH;
+  const slide = reduceMotion ? { duration: 0.2, ease: EASE_SOFT } : SLIDE;
 
   if (links.length === 0) return null;
 
   return (
     <div
       ref={containerRef}
-      className="pointer-events-none fixed right-4 bottom-4 z-50 flex justify-end sm:right-6 sm:bottom-6"
+      // Fanen sitter i øyehøyde langs høyrekanten, ikke nede i hjørnet.
+      className="pointer-events-none fixed right-3 bottom-[26vh] z-50 flex justify-end"
     >
       <motion.div
         initial={false}
         animate={{
           opacity: visible ? 1 : 0,
-          transform: visible
-            ? "translateY(0px) scale(1)"
-            : reduceMotion
-              ? "translateY(0px) scale(1)"
-              : "translateY(16px) scale(0.94)",
+          // Utglidningen: skjult → langt ut, scrollende → nesten ute,
+          // hvilende → halvveis inne, åpen → helt inne.
+          transform: `translateX(${visible ? tuck : 88}px)`,
         }}
-        transition={{ duration: 0.28, ease: EASE_SOFT }}
+        transition={slide}
         style={{ pointerEvents: visible ? "auto" : "none" }}
       >
         <motion.div
           id={panelId}
           layout
-          animate={{ borderRadius: open ? 28 : 999 }}
+          animate={{
+            // Organisk form: elliptiske hjørner gir en mykere, mer «levende»
+            // silhuett enn en vanlig pille. Formen roer seg når den åpner.
+            borderRadius: open
+              ? "34px 30px 30px 34px / 30px 26px 26px 30px"
+              : "30px 26px 26px 30px / 34px 30px 30px 34px",
+          }}
           transition={morph}
           className={cn(
-            "relative overflow-hidden",
-            // Glass: bakgrunnen skinner gjennom, som i det nye Instagram-baret.
-            "bg-card/80 shadow-[0_18px_50px_-20px_rgb(0_0_0/0.45)] ring-1 ring-border/60 backdrop-blur-xl",
-            "supports-backdrop-filter:bg-card/60"
+            "relative min-h-14 min-w-14",
+            // Glass: bakgrunnen skinner gjennom, som i Instagram sin nye knapp.
+            "bg-card/75 shadow-[0_20px_50px_-18px_rgb(0_0_0/0.45)] ring-1 ring-border/50 backdrop-blur-2xl",
+            "supports-backdrop-filter:bg-card/55"
           )}
         >
-          {/* Mykt fargeskjær i bakkant, så flaten ikke blir helt død. */}
+          {/* Mykt fargeskjær bak glasset, så flaten ikke blir helt død. */}
           <motion.span
             aria-hidden="true"
             layout
-            className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_140%_at_100%_100%,color-mix(in_oklab,var(--color-primary)_22%,transparent),transparent_65%)]"
-            animate={{ opacity: open ? 0.9 : 0.45 }}
+            className="pointer-events-none absolute inset-0 rounded-[inherit] bg-[radial-gradient(120%_140%_at_100%_50%,color-mix(in_oklab,var(--color-primary)_24%,transparent),transparent_70%)]"
+            animate={{ opacity: open ? 0.85 : 0.4 }}
             transition={morph}
           />
 
-          <AnimatePresence initial={false} mode="popLayout">
-            {open ? (
+          <AnimatePresence initial={false}>
+            {open && (
               <motion.div
-                key="panel"
                 ref={panelRef}
+                key="panel"
                 layout
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.18, ease: EASE_SOFT }}
-                className="relative w-[min(19rem,calc(100vw-2rem))] p-3"
+                transition={{ duration: 0.16, ease: EASE_SOFT }}
+                className="relative w-[min(17.5rem,calc(100vw-1.5rem))] p-2.5 pt-3"
               >
-                <div className="flex items-center justify-between px-2 pb-2">
-                  <span className="font-medium text-muted-foreground text-xs">
-                    Følg oss
-                  </span>
-                  <button
-                    type="button"
-                    onClick={close}
-                    aria-label="Lukk sosiale kanaler"
-                    className="grid size-7 place-items-center rounded-full text-muted-foreground transition-colors duration-200 hover:bg-foreground/5 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                  >
-                    <svg
-                      viewBox="0 0 24 24"
-                      className="size-4"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      aria-hidden="true"
-                    >
-                      <path d="M6 6l12 12M18 6L6 18" />
-                    </svg>
-                  </button>
-                </div>
+                {/* «Følg» står bare her inne — ute er plusset nok. */}
+                <p className="px-2 pr-14 pb-1.5 font-medium text-muted-foreground text-xs tracking-wide">
+                  Følg
+                </p>
 
                 <ul className="flex flex-col">
                   {links.map((link, index) => {
@@ -223,18 +216,18 @@ export function SocialFab({
                             ? { opacity: 0 }
                             : {
                                 opacity: 0,
-                                transform: "translateY(8px) scale(0.97)",
+                                transform: "translateX(14px) scale(0.97)",
                               }
                         }
                         animate={{
                           opacity: 1,
-                          transform: "translateY(0px) scale(1)",
+                          transform: "translateX(0px) scale(1)",
                         }}
                         exit={{ opacity: 0 }}
                         transition={{
                           duration: 0.26,
                           ease: EASE_SOFT,
-                          // Radene kommer inn ovenfra og ned, 40 ms mellom hver.
+                          // Radene sklir inn fra kanten, 40 ms mellom hver.
                           delay: reduceMotion ? 0 : 0.04 * index,
                         }}
                       >
@@ -249,7 +242,7 @@ export function SocialFab({
                             } as React.CSSProperties
                           }
                           className={cn(
-                            "group flex items-center gap-3 rounded-2xl px-2 py-2",
+                            "group flex items-center gap-3 rounded-full px-2 py-1.5",
                             "transition-colors duration-200 ease-out",
                             "hover:bg-foreground/4",
                             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--brand)"
@@ -294,74 +287,53 @@ export function SocialFab({
                   })}
                 </ul>
               </motion.div>
-            ) : (
-              <motion.button
-                key="trigger"
-                ref={triggerRef}
-                layout
-                type="button"
-                onClick={() => {
-                  restoreFocus.current = false;
-                  setOpen(true);
-                }}
-                aria-expanded={false}
-                aria-controls={panelId}
-                aria-label="Følg oss i sosiale kanaler"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.18, ease: EASE_SOFT }}
-                whileTap={reduceMotion ? undefined : { scale: 0.94 }}
-                className={cn(
-                  "relative flex items-center gap-2 py-2 pr-2 pl-3",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                )}
-              >
-                {/* Teksten forsvinner når man scroller — bare stabelen blir
-                    igjen, og boksen krymper rundt den. */}
-                <AnimatePresence initial={false} mode="popLayout">
-                  {!compact && (
-                    <motion.span
-                      key="label"
-                      layout
-                      initial={{ opacity: 0, transform: "scale(0.9)" }}
-                      animate={{ opacity: 1, transform: "scale(1)" }}
-                      exit={{ opacity: 0, transform: "scale(0.9)" }}
-                      transition={{ duration: 0.18, ease: EASE_SOFT }}
-                      className="whitespace-nowrap font-medium text-foreground text-sm"
-                    >
-                      Følg oss
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-
-                {/* Ikonstabelen: overlappende brikker, som en avatargruppe. */}
-                <motion.span layout className="flex items-center">
-                  {peek.map((link, index) => (
-                    <motion.span
-                      key={link.platform}
-                      layout
-                      aria-hidden="true"
-                      style={
-                        {
-                          "--brand": socialColor(link.platform),
-                          zIndex: peek.length - index,
-                        } as React.CSSProperties
-                      }
-                      transition={morph}
-                      className={cn(
-                        "grid size-8 place-items-center rounded-full",
-                        "bg-card text-(--brand) ring-2 ring-card",
-                        index > 0 && "-ml-2"
-                      )}
-                    >
-                      <SocialIcon platform={link.platform} className="size-4" />
-                    </motion.span>
-                  ))}
-                </motion.span>
-              </motion.button>
             )}
           </AnimatePresence>
+
+          {/* Plusset blir værende gjennom hele morfingen: det står midt i fanen
+              når den er lukket, og glir opp i hjørnet når panelet vokser fram.
+              `layout` flytter det, så det aldri forsvinner og kommer tilbake. */}
+          <motion.button
+            ref={triggerRef}
+            layout
+            type="button"
+            onClick={() => {
+              if (open) {
+                close();
+                return;
+              }
+              restoreFocus.current = false;
+              setOpen(true);
+            }}
+            aria-expanded={open}
+            aria-controls={panelId}
+            aria-label={open ? "Lukk sosiale kanaler" : "Følg"}
+            transition={morph}
+            whileTap={reduceMotion ? undefined : { scale: 0.92 }}
+            className={cn(
+              // Lukket er skallet 3,5 rem bredt og høyt, så 0,5 rem inset
+              // setter den 2,5 rem store knappen midt i det.
+              "absolute top-2 right-2 grid size-10 place-items-center rounded-full",
+              "text-foreground/70 transition-colors duration-200 ease-out",
+              "hover:bg-foreground/5 hover:text-foreground",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            )}
+          >
+            <motion.svg
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.9"
+              strokeLinecap="round"
+              className="size-5"
+              // Ett og samme tegn: plusset roterer 45° og blir lukkekrysset.
+              animate={{ transform: `rotate(${open ? 45 : 0}deg)` }}
+              transition={morph}
+            >
+              <path d="M12 5v14M5 12h14" />
+            </motion.svg>
+          </motion.button>
         </motion.div>
       </motion.div>
     </div>
