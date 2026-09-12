@@ -105,7 +105,22 @@ export type DocBlock =
   | string
   | { heading: string; level?: 2 | 3 }
   | { list: string[] }
-  | { quote: string };
+  | { quote: string }
+  | { productCard: ProductCard };
+
+/** Feltene i «Produktkort»-blokken (blocks/product-spotlight.ts). */
+export interface ProductCard {
+  product: number;
+  eyebrow?: string;
+  text?: string;
+  showAddToCart?: boolean;
+}
+
+/** Blokk-ID i samme format som Payload bruker (24 hex-tegn). */
+const blockId = () =>
+  Array.from(crypto.getRandomValues(new Uint8Array(12)), (b) =>
+    b.toString(16).padStart(2, "0")
+  ).join("");
 
 /**
  * Bygger et Lexical-dokument med overskrifter og punktlister i tillegg til
@@ -125,6 +140,28 @@ export function richDoc(blocks: DocBlock[]) {
         version: 1,
         direction: "ltr" as const,
         children: inlineNodes(block.heading),
+      };
+    }
+    if ("productCard" in block) {
+      const {
+        product,
+        eyebrow,
+        text,
+        showAddToCart = true,
+      } = block.productCard;
+      return {
+        type: "block",
+        format: "" as const,
+        version: 2,
+        fields: {
+          id: blockId(),
+          blockName: "",
+          blockType: "productSpotlight",
+          product,
+          ...(eyebrow ? { eyebrow } : {}),
+          ...(text ? { text } : {}),
+          showAddToCart,
+        },
       };
     }
     if ("quote" in block) {

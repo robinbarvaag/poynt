@@ -9,8 +9,30 @@ type Node = {
   tag?: string;
   listType?: string;
   text?: string;
+  fields?: { blockType?: string; product?: unknown };
   children?: Node[];
 };
+
+const isProductCard = (node: Node) =>
+  node.type === "block" && node.fields?.blockType === "productSpotlight";
+
+/** Produkt-ID-ene produktkortene i dokumentet peker på (unike). */
+export function productCardIds(content: unknown): number[] {
+  const ids = new Set<number>();
+  const walk = (node: Node | undefined) => {
+    if (!node || typeof node !== "object") return;
+    if (isProductCard(node)) {
+      const ref = node.fields?.product;
+      const id = Number(
+        typeof ref === "object" && ref ? (ref as { id: unknown }).id : ref
+      );
+      if (Number.isFinite(id)) ids.add(id);
+    }
+    for (const child of node.children ?? []) walk(child);
+  };
+  walk((content as { root?: Node })?.root);
+  return [...ids];
+}
 
 /** Nodetyper markdownToLexical kan gjenskape uten tap. */
 const MARKDOWN_SAFE = new Set([
@@ -27,7 +49,7 @@ const MARKDOWN_SAFE = new Set([
 ]);
 
 const LABELS: Record<string, string> = {
-  block: "produktkort/blokk",
+  block: "blokk",
   upload: "innfelt bilde",
   relationship: "relasjon",
   horizontalrule: "skillelinje",
@@ -44,7 +66,7 @@ export function markdownLossyParts(content: unknown): string[] {
   const walk = (node: Node | undefined) => {
     if (!node || typeof node !== "object") return;
     const type = node.type ?? "";
-    if (type && !MARKDOWN_SAFE.has(type)) {
+    if (type && !MARKDOWN_SAFE.has(type) && !isProductCard(node)) {
       found.add(LABELS[type] ?? type);
     }
     if (type === "list" && node.listType && node.listType !== "bullet") {

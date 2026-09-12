@@ -1,5 +1,6 @@
 import { CookieSettingsButton } from "@/components/consent";
 import { type MediaResource, PayloadImage } from "@/components/payload-image";
+import { ContactLink } from "@/components/rich-text/contact-link";
 import {
   type SocialLink,
   SocialRow,
@@ -146,7 +147,7 @@ export async function Footer({
               <Text weight="semibold" customStyles="mb-3 text-foreground">
                 {column.title}
               </Text>
-              <ul className="space-y-2">
+              <ul className="space-y-1 md:space-y-1.5">
                 {column.links?.map((link, linkIndex) => (
                   <li key={`${column.title}-link-${linkIndex}`}>
                     <Link
@@ -155,7 +156,7 @@ export async function Footer({
                       rel={
                         link.openInNewTab ? "noopener noreferrer" : undefined
                       }
-                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      className="inline-block py-1.5 text-base text-muted-foreground transition-colors hover:text-foreground md:py-1 md:text-[15px]"
                     >
                       {link.label}
                     </Link>
@@ -169,8 +170,8 @@ export async function Footer({
         {/* Bunnlinje: firma/org.nr på én rad, kontaktinfo på neste, merknad
             under — og informasjonskapsler til høyre. Ingen fri tekst her;
             hvert felt rendres på sin faste plass. */}
-        <div className="mt-12 flex flex-col gap-6 border-border border-t pt-8 text-muted-foreground text-sm md:flex-row md:items-end md:justify-between">
-          <div className="flex flex-col gap-2">
+        <div className="mt-12 flex flex-col gap-6 border-border border-t pt-8 text-[15px] text-muted-foreground md:flex-row md:items-end md:justify-between">
+          <div className="flex flex-col gap-3 md:gap-2">
             <p className="text-foreground">
               © {currentYear} {companyName}
               {orgNumber && (
@@ -181,7 +182,7 @@ export async function Footer({
               )}
             </p>
             {(address || email) && (
-              <ul className="flex flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:gap-x-5">
+              <ul className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:gap-x-5">
                 {address && (
                   <li className="flex items-center gap-2">
                     <MapPin className="size-4 shrink-0" aria-hidden="true" />
@@ -191,22 +192,26 @@ export async function Footer({
                 {email && (
                   <li className="flex items-center gap-2">
                     <Mail className="size-4 shrink-0" aria-hidden="true" />
-                    <a
+                    <ContactLink
+                      kind="email"
                       href={`mailto:${email}`}
-                      className="transition-colors hover:text-foreground"
+                      value={email}
+                      className="-my-2 py-2 transition-colors hover:text-foreground"
                     >
                       {email}
-                    </a>
+                    </ContactLink>
                   </li>
                 )}
               </ul>
             )}
             {disclaimer && (
-              <p className="text-muted-foreground/80 text-xs">{disclaimer}</p>
+              <p className="text-muted-foreground/80 text-[13px]">
+                {disclaimer}
+              </p>
             )}
           </div>
           {/* Lovpålagt: samtykket skal kunne endres like lett som det ble gitt. */}
-          <CookieSettingsButton className="shrink-0 self-start text-muted-foreground text-sm transition-colors hover:text-foreground md:self-end" />
+          <CookieSettingsButton className="-my-2 shrink-0 self-start py-2 text-[15px] text-muted-foreground transition-colors hover:text-foreground md:self-end" />
         </div>
       </div>
     </footer>

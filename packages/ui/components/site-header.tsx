@@ -363,10 +363,10 @@ export function SiteHeader({
                 variant="ghost"
                 size="icon"
                 aria-label="Meny"
-                className="size-9 rounded-full md:hidden"
+                className="size-11 rounded-full md:hidden"
                 onClick={() => setMobileOpen(true)}
               >
-                <Menu className="size-5" />
+                <Menu className="size-6" />
               </Button>
             )}
           </div>
@@ -399,7 +399,7 @@ export function SiteHeader({
             initial="hidden"
             animate="visible"
             variants={listVariants}
-            className="flex flex-1 flex-col gap-1 overflow-y-auto px-4 py-5"
+            className="flex flex-1 flex-col gap-2 overflow-y-auto px-4 py-6"
           >
             {navItems.map((item) => (
               <motion.div key={item.label} variants={itemVariants}>
@@ -409,7 +409,7 @@ export function SiteHeader({
                   rel={linkRel(item.external)}
                   onClick={() => setMobileOpen(false)}
                   className={cn(
-                    "block rounded-2xl px-4 py-3 font-heading font-semibold text-lg transition-colors",
+                    "block rounded-2xl px-4 py-3.5 font-heading font-semibold text-xl transition-colors",
                     isActive(item)
                       ? "bg-foreground/8 text-foreground"
                       : "text-foreground/80 hover:bg-foreground/5 hover:text-foreground"
@@ -418,7 +418,7 @@ export function SiteHeader({
                   {item.label}
                 </Link>
                 {item.subItems && item.subItems.length > 0 && (
-                  <div className="mt-1 ml-4 flex flex-col gap-0.5 border-foreground/10 border-l-2 pl-3">
+                  <div className="mt-1.5 ml-4 flex flex-col gap-1 border-foreground/10 border-l-2 pl-3">
                     {item.subItems.map((subItem) => (
                       <Link
                         key={subItem.label}
@@ -427,7 +427,7 @@ export function SiteHeader({
                         rel={linkRel(subItem.external)}
                         onClick={() => setMobileOpen(false)}
                         className={cn(
-                          "block rounded-xl px-3 py-2 text-sm transition-colors",
+                          "block rounded-xl px-3 py-3 text-base transition-colors",
                           matchesPath(subItem.href)
                             ? "font-medium text-foreground"
                             : "text-muted-foreground hover:text-foreground"

@@ -36,7 +36,7 @@ export function SocialRow({ links, className }: SocialRowProps) {
                 } as React.CSSProperties
               }
               className={cn(
-                "group relative grid size-10 place-items-center rounded-xl text-muted-foreground",
+                "group relative grid size-11 place-items-center rounded-xl text-muted-foreground",
                 "bg-background/60 ring-1 ring-border/60 ring-inset",
                 "transition-[color,transform,box-shadow,background-color] duration-300 ease-out",
                 "hover:bg-background hover:text-[var(--brand)] hover:shadow-[0_8px_24px_-10px_var(--brand)]",

@@ -68,7 +68,7 @@ claude mcp add --transport http poynt-cms https://<domene>/api/mcp/<MCP_SECRET>
 | `list_related` | Produkter, tjenester, skjemaer og kategorier → ID til relationship-felt. |
 | `get_product` | Hele produktet: type, pris, førpris, MVA, beskrivelser (markdown), varianter, medlemskapsinnstillinger. For å lese/vurdere det som selges. |
 | `list_blog_posts` / `list_case_studies` | Eksisterende innlegg/kundehistorier (også utkast) med status og om SEO-feltene er fylt ut. |
-| `get_blog_post` / `get_case_study` | Hele dokumentet som markdown + SEO-felt. `contentNotInMarkdown` lister det markdown ikke gjengir (produktkort, bilder, nummererte lister). |
+| `get_blog_post` / `get_case_study` | Hele dokumentet som markdown + SEO-felt. `contentNotInMarkdown` lister det markdown ikke gjengir (bilder, nummererte lister). Produktkort kommer som `[produktkort id=…]`-linjer. |
 | `update_blog_post_draft` / `update_case_study_draft` | Nytt utkast på eksisterende innlegg/kundehistorie. `contentEdits` (finn/erstatt i Lexical) bevarer alt; `content` erstatter hele teksten og nektes hvis noe da går tapt, med mindre `allowContentLoss`. Slug endres ikke (krever omdirigering). |
 | `get_seo_guidelines` | SEO-reglene: meta-tittel/-beskrivelse, delingsbilde, alt-tekst, struktur, arbeidsflyt. |
 | `seo_audit` | SEO-revisjon av sider, blogg, kundehistorier, tjenester, produkter og forsiden: lengder slik de faktisk vises (med fallback), delingsbilde, alt-tekst, noindex/canonical, struktur, duplikater. |
@@ -94,6 +94,12 @@ Layouten Claude sender og får er identisk med Payloads, med ett unntak:
 `> sitat`). `lib/mcp/layout-convert.ts` oversetter begge veier, så
 `get_page` → rediger → `update_page_draft` er en trygg rundtur. Inline-
 formatering (fet, lenker) blir ren tekst — det finpusses i admin.
+
+I blogginnlegg og kundehistorier kan en linje for seg selv være et
+**produktkort**: `[produktkort id=12 etikett="Anbefalt" tekst="…" kjøpsknapp=nei]`
+(bare `id` påkrevd). Det blir en ekte «Produktkort»-blokk, og `get_*` gir den
+samme linjen tilbake. Verktøyene avviser ID-er som ikke er aktive produkter.
+Sideblokker bruker i stedet `productSpotlight`-blokken.
 
 Komposisjonsreglene (`lib/composition-rules.ts`) er de samme som Sidesjekk-
 panelet i admin bruker. Ny regel der gjelder begge steder.

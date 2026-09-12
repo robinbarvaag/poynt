@@ -141,7 +141,7 @@ export function Header({
   );
 
   const mobileFooter = hasCta ? (
-    <Button className="w-full rounded-full" asChild>
+    <Button className="h-12 w-full rounded-full text-base" asChild>
       {ctaIsContact ? (
         <ContactLink kilde="header-mobil">{ctaText}</ContactLink>
       ) : (

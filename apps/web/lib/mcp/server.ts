@@ -12,8 +12,11 @@ import { getPayload } from "payload";
 import { z } from "zod";
 import { getBlockSchema, summarizeBlocks } from "./block-schema";
 import { LayoutError, toMcpLayout, toPayloadLayout } from "./layout-convert";
-import { lexicalToMarkdown, markdownToLexical } from "./lexical-markdown";
-import { registerArticleTools } from "./tools-articles";
+import { lexicalToMarkdown } from "./lexical-markdown";
+import {
+  articleContentFromMarkdown,
+  registerArticleTools,
+} from "./tools-articles";
 import { registerSeoTools } from "./tools-seo";
 import { adminUrl, fail, siteUrl, text } from "./util";
 
@@ -119,6 +122,8 @@ export const mcpHandler = createMcpHandler(() => {
           "Typisk oppbygging av en landingsside: hero → (statsBand eller featureGrid) → contentMedia/content → testimonials → pricing eller ctaSection → faq → newsletter. En vanlig innholdsside: hero → content → featureGrid → ctaSection. Sett pageType «landing» kun på kampanjer/lanseringer.",
           "",
           "Kundehistorie (create_case_study_draft): tittelen sier resultatet, ikke bare kundenavnet («Hageland nådde målene sine med On Poynt»). Innholdet i tre deler: Utfordringen (hvor sto kunden, konkret nok til å kjenne seg igjen) → Hva vi gjorde (konkrete grep: kanaler, verktøy, valg) → Resultatet (helst tall; «fra kaos til plan» teller også). Minst ett resultat i tall i results, og et sitat fra kunden med navn — men bare det Susanne faktisk har oppgitt.",
+          "",
+          'Produktkort i blogginnlegg og kundehistorier: handler teksten om et produkt Poynt selger (kurs, PDF, medlemskap), sett inn et kort der det passer naturlig — oftest etter avsnittet som omtaler det, maks ett–to per tekst. Skriv det på egen linje: [produktkort id=12 etikett="Omtalt i innlegget" tekst="Én setning som knytter produktet til teksten"]. Bare id er påkrevd (fra list_related, collection «products»); kjøpsknapp=nei skjuler «Legg i handlekurv».',
           "",
           "Blogginnlegg (create_blog_post_draft): leseren skumleser. Kroken: første setning gir grunn til å lese videre, aldri «I denne artikkelen …». Kjøttet: korte avsnitt, mellomtitler (##) som alene forteller historien, konkrete eksempler. Landingen: ett konkret neste steg, gjerne lenke til tjeneste/guide/kundehistorie. Tittel på minst 25 tegn som folk faktisk søker etter. Sett minst én kategori (list_categories).",
         ].join("\n")
@@ -587,7 +592,12 @@ export const mcpHandler = createMcpHandler(() => {
           .string()
           .optional()
           .describe("Én til to setninger som selger historien i lister"),
-        content: z.string().min(1).describe("Historien som markdown"),
+        content: z
+          .string()
+          .min(1)
+          .describe(
+            "Historien som markdown. Produktkort på egen linje: [produktkort id=12]"
+          ),
         results: z
           .array(
             z.object({
@@ -635,6 +645,8 @@ export const mcpHandler = createMcpHandler(() => {
           );
         }
       }
+      const built = await articleContentFromMarkdown(payload, content);
+      if (typeof built === "string") return fail(built);
       try {
         const doc = await payload.create({
           collection: "case-studies",
@@ -644,7 +656,7 @@ export const mcpHandler = createMcpHandler(() => {
             title,
             customer,
             excerpt,
-            content: markdownToLexical(content) as never,
+            content: built.content as never,
             results,
             quote,
             featuredImage: featuredImageId,
@@ -707,7 +719,12 @@ export const mcpHandler = createMcpHandler(() => {
           .string()
           .optional()
           .describe("Ingress i lister og søkeresultat"),
-        content: z.string().min(1).describe("Innlegget som markdown"),
+        content: z
+          .string()
+          .min(1)
+          .describe(
+            "Innlegget som markdown. Produktkort på egen linje: [produktkort id=12]"
+          ),
         featuredImageId: z.number().optional().describe("Media-ID"),
         categoryIds: z
           .array(z.number())
@@ -737,6 +754,8 @@ export const mcpHandler = createMcpHandler(() => {
           );
         }
       }
+      const built = await articleContentFromMarkdown(payload, content);
+      if (typeof built === "string") return fail(built);
       try {
         const doc = await payload.create({
           collection: "blog-posts",
@@ -745,7 +764,7 @@ export const mcpHandler = createMcpHandler(() => {
           data: {
             title,
             excerpt,
-            content: markdownToLexical(content) as never,
+            content: built.content as never,
             featuredImage: featuredImageId,
             categories: categoryIds,
             slug: slug ?? "",

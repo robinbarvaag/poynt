@@ -1,8 +1,13 @@
+import { notTestProduct } from "@/lib/test-products";
 import config from "@/payload.config";
 import type { McpServer } from "@modelcontextprotocol/server";
 import { getPayload } from "payload";
 import { z } from "zod";
-import { applyTextEdits, markdownLossyParts } from "./lexical-edit";
+import {
+  applyTextEdits,
+  markdownLossyParts,
+  productCardIds,
+} from "./lexical-edit";
 import { lexicalToMarkdown, markdownToLexical } from "./lexical-markdown";
 import { analyseSeo } from "./seo";
 import { type SeoDoc, loadMedia, seoInputFor } from "./seo-data";
@@ -65,6 +70,37 @@ const articleSummary = (collection: ArticleCollection, doc: SeoDoc) => ({
 
 const idOrSlugField = z.string().describe("ID eller slug");
 
+/**
+ * Markdown → Lexical for blogginnlegg/kundehistorier, med produktkort. Sjekker
+ * at hvert kort peker på et aktivt produkt (ellers vises kortet ikke) —
+ * returnerer en feilmelding i stedet for å lagre et tomt kort.
+ */
+export async function articleContentFromMarkdown(
+  payload: Payload,
+  markdown: string
+): Promise<{ content: ReturnType<typeof markdownToLexical> } | string> {
+  let content: ReturnType<typeof markdownToLexical>;
+  try {
+    content = markdownToLexical(markdown, { productCards: true });
+  } catch (err) {
+    return `${errorMessage(err)} Ingenting ble lagret.`;
+  }
+  const ids = productCardIds(content);
+  if (!ids.length) return { content };
+  const res = await payload.find({
+    collection: "products",
+    where: { id: { in: ids }, active: { equals: true }, ...notTestProduct },
+    depth: 0,
+    limit: ids.length,
+    pagination: false,
+  });
+  const found = new Set(res.docs.map((d) => d.id));
+  const missing = ids.filter((id) => !found.has(id));
+  return missing.length
+    ? `Fant ikke aktivt produkt med ID ${missing.join(", ")} til produktkort. Bruk ID fra list_related (collection «products»). Ingenting ble lagret.`
+    : { content };
+}
+
 /** Felles felt for update_*_draft. */
 const updateBase = {
   idOrSlug: idOrSlugField,
@@ -75,7 +111,7 @@ const updateBase = {
     .min(1)
     .optional()
     .describe(
-      "Erstatter HELE innholdet med markdown. Foretrekk contentEdits for mindre endringer — de bevarer produktkort, bilder og formatering."
+      'Erstatter HELE innholdet med markdown. Produktkort på egen linje: [produktkort id=12 etikett="Anbefalt" tekst="…" kjøpsknapp=nei] (bare id påkrevd). Foretrekk contentEdits for mindre endringer — de bevarer bilder og formatering.'
     ),
   contentEdits: z
     .array(
@@ -97,7 +133,7 @@ const updateBase = {
     .boolean()
     .optional()
     .describe(
-      "Kun når Susanne har bekreftet: tillat at content erstatter innhold med produktkort/bilder/nummererte lister som markdown ikke kan gjengi."
+      "Kun når Susanne har bekreftet: tillat at content erstatter innhold med bilder/nummererte lister som markdown ikke kan gjengi."
     ),
   featuredImageId: z
     .number()
@@ -134,10 +170,11 @@ type UpdateBase = {
 };
 
 /** Bygger data for felles felt, eller en feilmelding. */
-function baseUpdateData(
+async function baseUpdateData(
+  payload: Payload,
   doc: SeoDoc,
   input: UpdateBase
-): { data: Record<string, unknown>; editResults?: unknown } | string {
+): Promise<{ data: Record<string, unknown>; editResults?: unknown } | string> {
   const data: Record<string, unknown> = { _status: "draft" };
   let editResults: unknown;
 
@@ -155,7 +192,9 @@ function baseUpdateData(
     if (lossy.length && !input.allowContentLoss) {
       return `Innholdet inneholder ${lossy.join(", ")} som går tapt om hele innholdet erstattes med markdown. Bruk contentEdits for å endre tekst, eller sett allowContentLoss: true etter at Susanne har bekreftet.`;
     }
-    data.content = markdownToLexical(input.content);
+    const built = await articleContentFromMarkdown(payload, input.content);
+    if (typeof built === "string") return built;
+    data.content = built.content;
   }
   if (input.contentEdits?.length) {
     const { content, results } = applyTextEdits(
@@ -259,7 +298,7 @@ export function registerArticleTools(server: McpServer) {
     {
       title: "Hent blogginnlegg",
       description:
-        "Hele blogginnlegget (siste utkast): tittel, utdrag, innhold som markdown, bilder, kategorier og SEO-felt. contentNotInMarkdown lister det markdown ikke gjengir (bruk da contentEdits ved oppdatering).",
+        "Hele blogginnlegget (siste utkast): tittel, utdrag, innhold som markdown (produktkort som [produktkort id=…]-linjer), bilder, kategorier og SEO-felt. contentNotInMarkdown lister det markdown ikke gjengir (bruk da contentEdits ved oppdatering).",
       inputSchema: z.object({ idOrSlug: idOrSlugField }),
       annotations: { readOnlyHint: true },
     },
@@ -303,7 +342,7 @@ export function registerArticleTools(server: McpServer) {
       const payload = await getPayload({ config });
       const doc = await findArticle(payload, "blog-posts", idOrSlug);
       if (!doc) return fail(`Fant ikke blogginnlegg «${idOrSlug}».`);
-      const built = baseUpdateData(doc, input);
+      const built = await baseUpdateData(payload, doc, input);
       if (typeof built === "string") return fail(built);
       if (categoryIds !== undefined) built.data.categories = categoryIds;
       return saveArticle(
@@ -321,7 +360,7 @@ export function registerArticleTools(server: McpServer) {
     {
       title: "Hent kundehistorie",
       description:
-        "Hele kundehistorien (siste utkast): kunde, innhold som markdown, resultater, sitat, bilde og SEO-felt.",
+        "Hele kundehistorien (siste utkast): kunde, innhold som markdown (produktkort som [produktkort id=…]-linjer), resultater, sitat, bilde og SEO-felt.",
       inputSchema: z.object({ idOrSlug: idOrSlugField }),
       annotations: { readOnlyHint: true },
     },
@@ -374,7 +413,7 @@ export function registerArticleTools(server: McpServer) {
       const payload = await getPayload({ config });
       const doc = await findArticle(payload, "case-studies", idOrSlug);
       if (!doc) return fail(`Fant ikke kundehistorie «${idOrSlug}».`);
-      const built = baseUpdateData(doc, input);
+      const built = await baseUpdateData(payload, doc, input);
       if (typeof built === "string") return fail(built);
       if (customer !== undefined) built.data.customer = customer;
       if (results !== undefined) built.data.results = results;

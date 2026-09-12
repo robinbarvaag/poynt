@@ -45,22 +45,19 @@ describe("markdownLossyParts", () => {
     expect(markdownLossyParts(doc)).toEqual([]);
   });
 
-  test("produktkort, bilde og nummerert liste flagges", () => {
+  test("ukjent blokk, bilde og nummerert liste flagges — produktkort ikke", () => {
     expect(
       markdownLossyParts({
         root: {
           type: "root",
           children: [
+            { type: "block", fields: { blockType: "productSpotlight" } },
             { type: "block" },
             { type: "upload" },
             { type: "list", listType: "number", children: [] },
           ],
         },
       })
-    ).toEqual([
-      "produktkort/blokk",
-      "innfelt bilde",
-      "nummerert liste / sjekkliste",
-    ]);
+    ).toEqual(["blokk", "innfelt bilde", "nummerert liste / sjekkliste"]);
   });
 });

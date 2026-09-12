@@ -18,7 +18,7 @@ const TEXT = {
 } as const;
 
 const itemClass =
-  "flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm text-foreground no-underline outline-hidden select-none hover:bg-accent hover:text-accent-foreground hover:opacity-100 focus-visible:bg-accent focus-visible:text-accent-foreground [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-muted-foreground";
+  "flex w-full cursor-pointer items-center gap-2 rounded-sm px-3 py-3 text-left text-base text-foreground sm:px-2 sm:py-2 sm:text-sm no-underline outline-hidden select-none hover:bg-accent hover:text-accent-foreground hover:opacity-100 focus-visible:bg-accent focus-visible:text-accent-foreground [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-muted-foreground";
 
 interface ContactLinkProps {
   kind: "email" | "phone";

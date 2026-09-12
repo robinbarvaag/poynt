@@ -99,7 +99,15 @@ function inlineText(node: LexicalNode): string {
   return "";
 }
 
-export function lexicalToMarkdown(content: unknown): string {
+export interface LexicalToMarkdownOptions {
+  /** Gjør en blokk-node (BlocksFeature) om til én markdown-linje. Utelatt = hoppes over. */
+  block?: (fields: Record<string, unknown>) => string | undefined;
+}
+
+export function lexicalToMarkdown(
+  content: unknown,
+  options: LexicalToMarkdownOptions = {}
+): string {
   const root = (content as { root?: { children?: LexicalNode[] } })?.root;
   if (!root?.children) return "";
   const lines: string[] = [];
@@ -140,6 +148,13 @@ export function lexicalToMarkdown(content: unknown): string {
         case "quote": {
           const text = inlineChildren(node.children);
           if (text.trim()) lines.push(`> ${text}`);
+          break;
+        }
+        case "block": {
+          const line = options.block?.(
+            (node as { fields?: Record<string, unknown> }).fields ?? {}
+          );
+          if (line) lines.push(line);
           break;
         }
         default: {
