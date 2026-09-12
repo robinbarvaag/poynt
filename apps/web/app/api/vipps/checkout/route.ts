@@ -1,5 +1,6 @@
 import {
   CONSENT_REQUIRED_ERROR,
+  checkoutNeedsConsent,
   snapshotConsent,
 } from "@/lib/checkout-consent-server";
 import { resolveCheckoutItems } from "@/lib/checkout-items";
@@ -31,15 +32,6 @@ export async function POST(req: NextRequest) {
     const { items, couponCode, newsletterOptIn, termsAccepted } =
       await req.json();
 
-    // Aktivt samtykke til umiddelbar levering / bortfall av angrerett
-    // (angrerettloven § 22 n) er et krav — uten det ingen betaling.
-    if (termsAccepted !== true) {
-      return NextResponse.json(
-        { error: CONSENT_REQUIRED_ERROR },
-        { status: 400 }
-      );
-    }
-
     const authSession = await getSessionWithMembership(req);
 
     const payload = await getPayload({ config });
@@ -54,6 +46,16 @@ export async function POST(req: NextRequest) {
       );
     }
     const products = resolved.lines;
+
+    // Aktivt samtykke til umiddelbar levering / bortfall av angrerett
+    // (angrerettloven § 22 n) kreves når kurven har digitalt innhold som
+    // leveres umiddelbart (produktets «Levering» i admin).
+    if (checkoutNeedsConsent(products) && termsAccepted !== true) {
+      return NextResponse.json(
+        { error: CONSENT_REQUIRED_ERROR },
+        { status: 400 }
+      );
+    }
 
     // Vipps-flyten støttar ikkje gjentakande betaling — medlemskap må via kort.
     if (products.some((p) => p.product.type === "membership")) {
@@ -121,7 +123,9 @@ export async function POST(req: NextRequest) {
         paymentProvider: "vipps",
         newsletterOptIn: newsletterOptIn === true,
         // Dokumentasjon på samtykket: huket av, når, og teksten kunden så.
-        ...(await snapshotConsent(payload)),
+        ...(termsAccepted === true
+          ? await snapshotConsent(payload)
+          : { termsAccepted: false }),
       },
     });
 

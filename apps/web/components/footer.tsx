@@ -1,9 +1,12 @@
 import { CookieSettingsButton } from "@/components/consent";
 import { type MediaResource, PayloadImage } from "@/components/payload-image";
-import { RichText } from "@/components/rich-text";
-import type { SerializedEditorState } from "@payloadcms/richtext-lexical/lexical";
+import {
+  type SocialLink,
+  SocialRow,
+  normalizeSocialLinks,
+} from "@/components/social";
 import { FloatingShapes, Heading, Text } from "@poynt/ui";
-import { Facebook, Instagram, Linkedin, Twitter, Youtube } from "lucide-react";
+import { Mail, MapPin } from "lucide-react";
 import { cacheLife } from "next/cache";
 import Link from "next/link";
 import { NewsletterForm } from "./newsletter-form";
@@ -21,22 +24,20 @@ interface FooterColumn {
   links?: FooterLink[];
 }
 
-interface SocialLink {
-  platform:
-    | "facebook"
-    | "instagram"
-    | "twitter"
-    | "linkedin"
-    | "youtube"
-    | "tiktok";
-  url: string;
+/** Strukturert bunnlinje: hvert felt har sin faste plass i rendringen. */
+export interface FooterLegal {
+  companyName?: string | null;
+  orgNumber?: string | null;
+  address?: string | null;
+  email?: string | null;
+  disclaimer?: string | null;
 }
 
 interface FooterProps {
   siteName?: string;
   logo?: MediaResource | null;
   columns?: FooterColumn[];
-  bottomText?: SerializedEditorState;
+  legal?: FooterLegal | null;
   showSocialLinks?: boolean;
   socialLinks?: SocialLink[];
   newsletter?: {
@@ -58,20 +59,6 @@ function getHref(item: {
   return item.url || "#";
 }
 
-const socialIcons = {
-  facebook: Facebook,
-  instagram: Instagram,
-  twitter: Twitter,
-  linkedin: Linkedin,
-  youtube: Youtube,
-  tiktok: () => (
-    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-      <title>TikTok Icon</title>
-      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
-    </svg>
-  ),
-};
-
 // Årstallet i copyright-linjen: cacheComponents tillater ikke `new Date()`
 // under prerender, så det caches med døgn-levetid i stedet.
 async function getCurrentYear() {
@@ -84,15 +71,21 @@ export async function Footer({
   siteName = "Poynt",
   logo,
   columns = [],
-  bottomText,
+  legal,
   showSocialLinks = true,
   socialLinks = [],
   newsletter,
 }: FooterProps) {
   const currentYear = await getCurrentYear();
+  const socials = normalizeSocialLinks(socialLinks);
+  const companyName = legal?.companyName?.trim() || siteName;
+  const orgNumber = legal?.orgNumber?.trim();
+  const address = legal?.address?.trim();
+  const email = legal?.email?.trim();
+  const disclaimer = legal?.disclaimer?.trim();
 
   return (
-    <footer className="relative mt-20 overflow-hidden">
+    <footer id="site-footer" className="relative mt-20 overflow-hidden">
       <div className="absolute -top-20 left-0 right-0 h-20 bg-gradient-to-b from-transparent to-muted/40 pointer-events-none" />
 
       <div className="absolute inset-0 bg-muted/40" />
@@ -135,22 +128,15 @@ export async function Footer({
                 </span>
               )}
             </Link>
-            {showSocialLinks && socialLinks.length > 0 && (
-              <div className="flex gap-3 mt-4">
-                {socialLinks.map((social) => {
-                  const Icon = socialIcons[social.platform];
-                  return (
-                    <a
-                      key={`${social.platform}-link`}
-                      href={social.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-2 rounded-md text-muted-foreground hover:text-primary hover:bg-accent transition-[transform,color,background-color] duration-300 motion-safe:hover:scale-105"
-                    >
-                      <Icon className="h-5 w-5" />
-                    </a>
-                  );
-                })}
+            {showSocialLinks && socials.length > 0 && (
+              <div className="mt-6">
+                <Text
+                  weight="semibold"
+                  customStyles="mb-3 text-foreground text-sm"
+                >
+                  Følg oss
+                </Text>
+                <SocialRow links={socials} />
               </div>
             )}
           </div>
@@ -180,18 +166,47 @@ export async function Footer({
           ))}
         </div>
 
-        <div className="mt-12 pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="text-sm text-muted-foreground">
-            {bottomText ? (
-              <RichText data={bottomText} />
-            ) : (
-              <Text variant="muted">
-                © {currentYear} {siteName}. Alle rettigheter reservert.
-              </Text>
+        {/* Bunnlinje: firma/org.nr på én rad, kontaktinfo på neste, merknad
+            under — og informasjonskapsler til høyre. Ingen fri tekst her;
+            hvert felt rendres på sin faste plass. */}
+        <div className="mt-12 flex flex-col gap-6 border-border border-t pt-8 text-muted-foreground text-sm md:flex-row md:items-end md:justify-between">
+          <div className="flex flex-col gap-2">
+            <p className="text-foreground">
+              © {currentYear} {companyName}
+              {orgNumber && (
+                <span className="text-muted-foreground">
+                  {" "}
+                  · Org.nr {orgNumber}
+                </span>
+              )}
+            </p>
+            {(address || email) && (
+              <ul className="flex flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:gap-x-5">
+                {address && (
+                  <li className="flex items-center gap-2">
+                    <MapPin className="size-4 shrink-0" aria-hidden="true" />
+                    <span>{address}</span>
+                  </li>
+                )}
+                {email && (
+                  <li className="flex items-center gap-2">
+                    <Mail className="size-4 shrink-0" aria-hidden="true" />
+                    <a
+                      href={`mailto:${email}`}
+                      className="transition-colors hover:text-foreground"
+                    >
+                      {email}
+                    </a>
+                  </li>
+                )}
+              </ul>
+            )}
+            {disclaimer && (
+              <p className="text-muted-foreground/80 text-xs">{disclaimer}</p>
             )}
           </div>
           {/* Lovpålagt: samtykket skal kunne endres like lett som det ble gitt. */}
-          <CookieSettingsButton className="text-sm text-muted-foreground hover:text-foreground transition-colors" />
+          <CookieSettingsButton className="shrink-0 self-start text-muted-foreground text-sm transition-colors hover:text-foreground md:self-end" />
         </div>
       </div>
     </footer>

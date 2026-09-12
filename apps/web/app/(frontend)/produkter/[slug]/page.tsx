@@ -4,6 +4,7 @@ import { ProductDetail } from "@/components/product-detail";
 import { toProductGridItem } from "@/lib/product";
 import { SITE_URL, buildMetadata, notFoundMetadata } from "@/lib/seo";
 import { breadcrumbSchema, productSchema } from "@/lib/structured-data";
+import { isAdminViewer, notTestProduct } from "@/lib/test-products";
 import config from "@/payload.config";
 import type { Metadata } from "next";
 import { cacheLife, cacheTag } from "next/cache";
@@ -47,6 +48,7 @@ async function getProductPageData(slug: string) {
   const relatedWhere: Where = {
     active: { equals: true },
     id: { not_equals: product.id },
+    ...notTestProduct,
     ...(categoryIds.length > 0 && {
       categories: { in: categoryIds },
     }),
@@ -63,7 +65,11 @@ async function getProductPageData(slug: string) {
   if (related.docs.length === 0 && categoryIds.length > 0) {
     related = await payload.find({
       collection: "products",
-      where: { active: { equals: true }, id: { not_equals: product.id } },
+      where: {
+        active: { equals: true },
+        id: { not_equals: product.id },
+        ...notTestProduct,
+      },
       sort: "-createdAt",
       depth: 1,
       limit: 3,
@@ -89,7 +95,7 @@ export async function generateMetadata({
     description: product.meta?.description || product.shortDescription || "",
     path: `/produkter/${slug}`,
     image: product.meta?.image || product.featuredImage,
-    noIndex: product.meta?.noIndex ?? undefined,
+    noIndex: product.testProduct ? true : (product.meta?.noIndex ?? undefined),
     canonicalUrl: product.meta?.canonicalUrl,
   });
 }
@@ -102,6 +108,13 @@ async function ProductPageContent({ params }: ProductPageProps) {
   const data = await getProductPageData(slug);
 
   if (!data) {
+    notFound();
+  }
+
+  // Testprodukt: synlig kun for oss som er logget inn i Payload-admin.
+  // Sjekken ligger her, utenfor den cachede datahentinga, slik at svaret
+  // ikke kan cachast på tvers av besøkande.
+  if (data.product.testProduct && !(await isAdminViewer())) {
     notFound();
   }
 
@@ -131,7 +144,13 @@ async function ProductPageContent({ params }: ProductPageProps) {
         id={String(product.id)}
         singular="produkt"
       />
-      <JsonLd data={jsonLd} />
+      {product.testProduct ? null : <JsonLd data={jsonLd} />}
+      {product.testProduct ? (
+        <div className="border-amber-400 border-b bg-amber-50 px-4 py-2 text-amber-900 text-sm dark:bg-amber-950/40 dark:text-amber-200">
+          Testprodukt — denne siden er skjult for besøkende og vises bare fordi
+          du er logget inn i admin.
+        </div>
+      ) : null}
       <ProductDetail product={product} relatedProducts={relatedProducts} />
     </>
   );
@@ -168,6 +187,7 @@ export async function generateStaticParams() {
     collection: "products",
     where: {
       active: { equals: true },
+      ...notTestProduct,
     },
     limit: 1000,
   });

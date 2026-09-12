@@ -88,13 +88,28 @@ export const ProductArchive: Block = {
       admin: { initCollapsed: true },
       fields: [
         {
+          name: "layout",
+          type: "select",
+          label: "Visning",
+          defaultValue: "grid",
+          options: [
+            { label: "Rutenett", value: "grid" },
+            { label: "Karusell (sveipbar rad)", value: "carousel" },
+          ],
+          admin: {
+            description:
+              "Karusell egner seg når produktene er et sideinnslag (forside, «relaterte produkter»); rutenett når produktene er hovedinnholdet.",
+          },
+        },
+        {
           name: "featureFirst",
           type: "checkbox",
           label: "Fremhev første produkt (stort kort)",
           defaultValue: false,
           admin: {
             condition: (_data, siblingData) =>
-              siblingData?.selectionMode === "auto",
+              siblingData?.selectionMode === "auto" &&
+              siblingData?.layout !== "carousel",
             description:
               "Det nyeste produktet vises som et stort kort over to kolonner.",
           },

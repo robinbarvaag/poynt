@@ -151,7 +151,8 @@ const layout = [
     selectionMode: "auto",
     filterByType: "all",
     limit: 3,
-    layout: "grid",
+    // Sveipbar rad — produktene er et innslag på forsiden, ikke innholdet.
+    layout: "carousel",
     showMoreLink: true,
   },
 

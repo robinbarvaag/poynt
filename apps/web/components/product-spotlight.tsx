@@ -2,6 +2,7 @@ import { AddToCartButton } from "@/components/add-to-cart-button";
 import { PayloadImage, resolveMediaUrl } from "@/components/payload-image";
 import { resolveMedia } from "@/lib/payload";
 import { PRODUCT_TYPE_LABELS, getProductBadge } from "@/lib/product";
+import { notTestProduct } from "@/lib/test-products";
 import type { Product } from "@/payload-types";
 import config from "@/payload.config";
 import { ProductSpotlight } from "@poynt/ui";
@@ -28,7 +29,7 @@ async function fetchProduct(id: number): Promise<Product | null> {
   const payload = await getPayload({ config });
   const result = await payload.find({
     collection: "products",
-    where: { id: { equals: id }, active: { equals: true } },
+    where: { id: { equals: id }, active: { equals: true }, ...notTestProduct },
     depth: 1,
     limit: 1,
   });
@@ -37,7 +38,8 @@ async function fetchProduct(id: number): Promise<Product | null> {
 
 async function resolveProduct(ref: ProductRef | null | undefined) {
   if (ref == null) return null;
-  if (typeof ref === "object") return ref.active ? ref : null;
+  if (typeof ref === "object")
+    return ref.active && !ref.testProduct ? ref : null;
   const id = typeof ref === "string" ? Number(ref) : ref;
   return Number.isFinite(id) ? fetchProduct(id) : null;
 }
@@ -103,6 +105,7 @@ export async function ProductSpotlightCard({
               price: product.price,
               slug: product.slug,
               image: resolveMediaUrl(media),
+              instantDelivery: product.deliveryType === "instant",
             }}
             allowQuantity={Boolean(product.allowQuantity)}
             maxQuantity={product.allowQuantity ? undefined : 1}

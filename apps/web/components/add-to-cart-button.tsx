@@ -13,6 +13,8 @@ interface Product {
   price: number;
   slug?: string;
   image?: string;
+  /** Digitalt innhold som leveres umiddelbart — utløser samtykke i kassen. */
+  instantDelivery?: boolean;
 }
 
 interface AddToCartButtonProps {
@@ -70,6 +72,7 @@ export function AddToCartButton({
         variantLabel,
         variantValue,
         maxQuantity,
+        instantDelivery: product.instantDelivery,
       },
       quantity
     );

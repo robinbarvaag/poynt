@@ -1,7 +1,14 @@
 import { toProductGridItem } from "@/lib/product";
+import { notTestProduct } from "@/lib/test-products";
 import type { Product } from "@/payload-types";
 import config from "@/payload.config";
-import { BlockSection, Container, ProductGrid, SectionHeader } from "@poynt/ui";
+import {
+  BlockSection,
+  Container,
+  ProductCarousel,
+  ProductGrid,
+  SectionHeader,
+} from "@poynt/ui";
 import { ArrowRight } from "lucide-react";
 import { cacheLife, cacheTag } from "next/cache";
 import Link from "next/link";
@@ -19,6 +26,8 @@ interface ProductArchiveBlockProps {
   featuredProduct?: ProductRef | null;
   filterByType?: ProductTypeFilter;
   limit?: number | null;
+  /** Rutenett (standard) eller sveipbar rad. */
+  layout?: "grid" | "carousel" | null;
   featureFirst?: boolean | null;
   showMoreLink?: boolean | null;
 }
@@ -57,6 +66,7 @@ async function fetchArchiveProducts(
       where: {
         id: { in: productIds },
         active: { equals: true },
+        ...notTestProduct,
       },
       depth: 1,
       limit: 100,
@@ -72,6 +82,7 @@ async function fetchArchiveProducts(
     active: {
       equals: true,
     },
+    ...notTestProduct,
   };
 
   if (filterByType !== "all") {
@@ -96,6 +107,7 @@ export async function ProductArchiveBlock({
   featuredProduct,
   filterByType = "all",
   limit,
+  layout,
   featureFirst,
   showMoreLink,
 }: ProductArchiveBlockProps) {
@@ -129,6 +141,41 @@ export async function ProductArchiveBlock({
     // hvis redaktøren har skrudd det på.
     ...(isManual ? { featured: product.id === featuredId } : {}),
   }));
+
+  if (layout === "carousel") {
+    // Karusellen har ikke plass til et fremhevet kort — alle kort like store
+    // (ProductCarousel ignorerer `featured`).
+    return (
+      <BlockSection background="default" containerSize={false}>
+        <Container padding="none">
+          <ProductCarousel
+            products={items}
+            label={title ?? "Produkter"}
+            header={
+              <SectionHeader
+                title={title}
+                intro={description}
+                reveal={false}
+                className="mb-0"
+              />
+            }
+          />
+
+          {showMoreLink && (
+            <div className="mt-8 text-center">
+              <Link
+                href="/produkter"
+                className="inline-flex items-center gap-2 font-medium text-primary hover:underline"
+              >
+                Se alle produkter
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          )}
+        </Container>
+      </BlockSection>
+    );
+  }
 
   return (
     <BlockSection background="default" containerSize={false}>

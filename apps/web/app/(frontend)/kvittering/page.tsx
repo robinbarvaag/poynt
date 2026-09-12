@@ -162,6 +162,7 @@ export default async function ReceiptPage({ searchParams }: Props) {
         variantLabel: variantValue ? variantLabel : undefined,
         variantValue,
         maxQuantity: product.allowQuantity ? undefined : 1,
+        instantDelivery: product.deliveryType === "instant",
       });
     }
   }

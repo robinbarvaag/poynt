@@ -9,6 +9,7 @@ import {
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { JsonLd } from "@/components/json-ld";
+import { SocialFab, normalizeSocialLinks } from "@/components/social";
 import { UILinkProvider } from "@/components/ui-link-provider";
 import { organizationSchema, websiteSchema } from "@/lib/structured-data";
 import config from "@payload-config";
@@ -95,6 +96,7 @@ export default async function FrontendLayout({
   modal: React.ReactNode;
 }) {
   const { siteSettings, header, footer, shopSettings } = await getGlobals();
+  const socialLinks = normalizeSocialLinks(siteSettings?.socialLinks);
   const consentTexts = shopSettings
     ? {
         checkboxLabel: shopSettings.consentCheckboxLabel,
@@ -155,11 +157,9 @@ export default async function FrontendLayout({
               siteName={siteSettings?.siteName || "Poynt"}
               logo={siteSettings?.logo as { url: string; alt?: string } | null}
               columns={footer?.columns as FooterProps["columns"]}
-              bottomText={footer?.bottomText ?? undefined}
+              legal={footer?.legal ?? undefined}
               showSocialLinks={footer?.showSocialLinks ?? true}
-              socialLinks={
-                siteSettings?.socialLinks as FooterProps["socialLinks"]
-              }
+              socialLinks={socialLinks}
               newsletter={
                 footer?.showNewsletter
                   ? {
@@ -170,6 +170,11 @@ export default async function FrontendLayout({
                   : undefined
               }
             />
+            {/* Kanalene følger med gjennom hele siden, og trekker seg
+              tilbake når footeren – der de samme lenkene står – er synlig. */}
+            {(siteSettings?.showSocialFab ?? true) && (
+              <SocialFab links={socialLinks} />
+            )}
           </UILinkProvider>
           <CookieBanner />
           <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />

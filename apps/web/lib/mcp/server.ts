@@ -536,6 +536,9 @@ export const mcpHandler = createMcpHandler(() => {
             }
           : null,
         allowQuantity: doc.allowQuantity ?? false,
+        // «instant» = digitalt innhold, kunden må samtykke til bortfall av
+        // angrerett i kassen; «standard» = tjeneste/medlemskap/fysisk vare.
+        deliveryType: doc.deliveryType,
         membership:
           doc.type === "membership"
             ? {

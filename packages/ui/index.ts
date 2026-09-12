@@ -402,6 +402,8 @@ export {
   type ProductCardProps,
   type ProductAccent,
   type ProductSurface,
+  ProductCarousel,
+  type ProductCarouselProps,
   ProductGrid,
   type ProductGridItem,
   type ProductGridProps,

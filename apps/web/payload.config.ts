@@ -229,6 +229,12 @@ export default buildConfig({
       // der den allerede står inline).
       providers: ["/admin/components/binders-provider#BindersProvider"],
       views: {
+        unpublished: {
+          Component: "/admin/views/unpublished/list#UnpublishedListView",
+          path: "/upublisert",
+          exact: true,
+          meta: { title: "Klar til publisering" },
+        },
         radar: {
           Component: "/admin/views/radar/list#RadarListView",
           path: "/radar",

@@ -1,4 +1,5 @@
 import { SITE_URL } from "@/lib/seo";
+import { notTestProduct } from "@/lib/test-products";
 import config from "@/payload.config";
 import type { MetadataRoute } from "next";
 import { cacheLife, cacheTag } from "next/cache";
@@ -32,7 +33,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     payload
       .find({
         collection: "products",
-        where: { active: { equals: true } },
+        where: { active: { equals: true }, ...notTestProduct },
         limit: 1000,
         depth: 0,
       })

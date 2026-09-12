@@ -38,6 +38,9 @@ export interface ProductPurchaseInfo {
   price: number;
   isSoldOut: boolean;
   allowQuantity: boolean;
+  /** Digitalt innhold som leveres umiddelbart: Vipps-knappen går via
+      samtykkevinduet, og linja i kurven krever avkryssing. */
+  instantDelivery: boolean;
   /** Variant-spørsmål, f.eks. «Signert?». Tom = ingen varianter. */
   variantLabel?: string;
   variantOptions: ProductVariantOption[];
@@ -349,7 +352,7 @@ function ProductDetailInteractive({
   storySections,
   related,
 }: ProductDetailInteractiveProps) {
-  const { isSoldOut, allowQuantity } = info;
+  const { isSoldOut, allowQuantity, instantDelivery } = info;
 
   // Kjøpsboksen observeres av den sticky kjøpslinja: når boksen scrolles ut
   // av viewporten (oppover), glir linja inn nederst.
@@ -378,26 +381,34 @@ function ProductDetailInteractive({
   const [vippsLoading, setVippsLoading] = useState(false);
   const [vippsError, setVippsError] = useState<string | null>(null);
   // Vipps-knappene (kjøpsboks + sticky linje) åpner først samtykkevinduet
-  // (angrerettloven § 22 n); betalingen starter fra Vipps-knappen i vinduet.
+  // (angrerettloven § 22 n) når produktet leveres umiddelbart; betalingen
+  // starter da fra Vipps-knappen i vinduet. Andre produkter går rett til Vipps.
   const [consentOpen, setConsentOpen] = useState(false);
-  const openConsent = () => {
-    setVippsError(null);
-    setConsentOpen(true);
-  };
   const handleVippsBuyNow = async () => {
     setVippsLoading(true);
     setVippsError(null);
     try {
-      await startVippsBuyNow({
-        id: info.id,
-        quantity,
-        variant: selectedVariant,
-      });
+      await startVippsBuyNow(
+        {
+          id: info.id,
+          quantity,
+          variant: selectedVariant,
+        },
+        instantDelivery
+      );
     } catch (error) {
       console.error("Vipps checkout error:", error);
       setVippsError(error instanceof Error ? error.message : "Noe gikk galt");
       setVippsLoading(false);
     }
+  };
+  const onVippsClick = () => {
+    setVippsError(null);
+    if (instantDelivery) {
+      setConsentOpen(true);
+      return;
+    }
+    void handleVippsBuyNow();
   };
 
   const priceInKr = effectivePrice.toLocaleString("nb-NO");
@@ -481,6 +492,7 @@ function ProductDetailInteractive({
                       price: effectivePrice,
                       slug: info.slug,
                       image: cartImageUrl,
+                      instantDelivery,
                     }}
                     variantLabel={
                       hasVariants ? (info.variantLabel ?? undefined) : undefined
@@ -506,10 +518,10 @@ function ProductDetailInteractive({
                   stretched
                   loading={vippsLoading}
                   disabled={needsVariant}
-                  onClick={openConsent}
+                  onClick={onVippsClick}
                 />
               )}
-              {info.type !== "membership" && !isSoldOut && (
+              {info.type !== "membership" && !isSoldOut && instantDelivery && (
                 <CheckoutConsentNotice className="mt-3" />
               )}
               {vippsError && !consentOpen && (
@@ -579,6 +591,7 @@ function ProductDetailInteractive({
                     price: effectivePrice,
                     slug: info.slug,
                     image: cartImageUrl,
+                    instantDelivery,
                   }}
                   variantLabel={
                     hasVariants ? (info.variantLabel ?? undefined) : undefined
@@ -595,7 +608,7 @@ function ProductDetailInteractive({
               <VippsButton
                 compact
                 loading={vippsLoading}
-                onClick={openConsent}
+                onClick={onVippsClick}
                 className="shrink-0"
               />
             </div>
@@ -603,7 +616,7 @@ function ProductDetailInteractive({
         </StickyBuyBar>
       )}
 
-      {info.type !== "membership" && !isSoldOut && (
+      {info.type !== "membership" && !isSoldOut && instantDelivery && (
         <CheckoutConsentDialog
           open={consentOpen}
           onOpenChange={setConsentOpen}

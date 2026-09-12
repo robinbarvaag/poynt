@@ -61,6 +61,9 @@ import * as migration_20260912_092727_product_spotlight_block from './20260912_0
 import * as migration_20260912_095412_media_large_size from './20260912_095412_media_large_size';
 import * as migration_20260912_114100_consent_checkbox from './20260912_114100_consent_checkbox';
 import * as migration_20260912_114600_resource_hub from './20260912_114600_resource_hub';
+import * as migration_20260912_155914_delivery_type_footer_legal from './20260912_155914_delivery_type_footer_legal';
+import * as migration_20260912_162030_test_product_flag from './20260912_162030_test_product_flag';
+import * as migration_20260912_162138_social_channels from './20260912_162138_social_channels';
 
 export const migrations = [
   {
@@ -376,6 +379,21 @@ export const migrations = [
   {
     up: migration_20260912_114600_resource_hub.up,
     down: migration_20260912_114600_resource_hub.down,
-    name: '20260912_114600_resource_hub'
+    name: '20260912_114600_resource_hub',
+  },
+  {
+    up: migration_20260912_155914_delivery_type_footer_legal.up,
+    down: migration_20260912_155914_delivery_type_footer_legal.down,
+    name: '20260912_155914_delivery_type_footer_legal',
+  },
+  {
+    up: migration_20260912_162030_test_product_flag.up,
+    down: migration_20260912_162030_test_product_flag.down,
+    name: '20260912_162030_test_product_flag',
+  },
+  {
+    up: migration_20260912_162138_social_channels.up,
+    down: migration_20260912_162138_social_channels.down,
+    name: '20260912_162138_social_channels'
   },
 ];

@@ -8,7 +8,7 @@ import {
   CheckoutRequestError,
   startVippsCheckout,
 } from "@/lib/vipps-checkout-client";
-import { useCart, useCartUi } from "@poynt/cart";
+import { cartNeedsConsent, useCart, useCartUi } from "@poynt/cart";
 import { Button, CartDrawer as CartDrawerShell, CartLineItem } from "@poynt/ui";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -43,9 +43,11 @@ export function CartDrawer() {
   } = useCart();
   const [vippsLoading, setVippsLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
-  // Vipps-knappen åpner først samtykkevinduet (angrerettloven § 22 n);
-  // selve betalingen starter fra Vipps-knappen inne i vinduet.
+  // Har kurven digitalt innhold med umiddelbar levering, åpner Vipps-knappen
+  // først samtykkevinduet (angrerettloven § 22 n) og betalingen starter fra
+  // Vipps-knappen inne i vinduet. Ellers går den rett til Vipps.
   const [consentOpen, setConsentOpen] = useState(false);
+  const needsConsent = cartNeedsConsent(items);
 
   // Inntil klienten har montert behandler vi kurven som tom (se useCartReady).
   const cartItems = ready ? items : [];
@@ -55,7 +57,7 @@ export function CartDrawer() {
     setCheckoutError(null);
     try {
       // Rabattkoden fra handlekurv-siden følger med (bor i cart-storen).
-      await startVippsCheckout(items, coupon?.code);
+      await startVippsCheckout(items, coupon?.code, false, needsConsent);
     } catch (error) {
       console.error("Vipps checkout error:", error);
       if (
@@ -103,16 +105,22 @@ export function CartDrawer() {
               loading={vippsLoading}
               onClick={() => {
                 setCheckoutError(null);
-                setConsentOpen(true);
+                if (needsConsent) {
+                  setConsentOpen(true);
+                  return;
+                }
+                void handleVippsCheckout();
               }}
             />
-            <CheckoutConsentDialog
-              open={consentOpen}
-              onOpenChange={setConsentOpen}
-              onConfirm={handleVippsCheckout}
-              loading={vippsLoading}
-              error={checkoutError}
-            />
+            {needsConsent && (
+              <CheckoutConsentDialog
+                open={consentOpen}
+                onOpenChange={setConsentOpen}
+                onConfirm={handleVippsCheckout}
+                loading={vippsLoading}
+                error={checkoutError}
+              />
+            )}
           </div>
         }
         emptyAction={

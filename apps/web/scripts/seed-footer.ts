@@ -10,7 +10,6 @@
  */
 import config from "@payload-config";
 import { getPayload } from "payload";
-import { richText } from "./_lexical";
 
 const link = (label: string, url: string) => ({
   label,
@@ -52,9 +51,13 @@ const payload = await getPayload({ config });
 // biome-ignore lint/suspicious/noExplicitAny: seed-data matcher footer-skjemaet
 const data: any = {
   columns,
-  bottomText: richText(
-    "© Poynt AS · Org.nr 930 714 151 MVA · Ramsvigstien 5A, 4015 Stavanger · hei@poynt.no"
-  ),
+  legal: {
+    companyName: "Poynt AS",
+    orgNumber: "930 714 151 MVA",
+    address: "Ramsvigstien 5A, 4015 Stavanger",
+    email: "hei@poynt.no",
+    disclaimer: "Deler av nettsiden og noe innhold er laget med hjelp av KI.",
+  },
   showSocialLinks: true,
   showNewsletter: false,
 };

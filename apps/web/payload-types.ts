@@ -1219,6 +1219,10 @@ export interface ProductArchiveBlock {
    */
   limit?: number | null;
   /**
+   * Karusell egner seg når produktene er et sideinnslag (forside, «relaterte produkter»); rutenett når produktene er hovedinnholdet.
+   */
+  layout?: ('grid' | 'carousel') | null;
+  /**
    * Det nyeste produktet vises som et stort kort over to kolonner.
    */
   featureFirst?: boolean | null;
@@ -1365,6 +1369,10 @@ export interface Product {
   slug: string;
   type: 'product' | 'course' | 'pdf' | 'bundle' | 'membership';
   /**
+   * «Digitalt» gjør at kunden må bekrefte umiddelbar levering og bortfall av angrerett før betaling. Gjelder alle PDF-er og annet innhold som er tilgjengelig rett etter kjøp.
+   */
+  deliveryType: 'instant' | 'standard';
+  /**
    * Antall måneder mellom hver fakturering (f.eks. 1, 3, 6, 12)
    */
   recurringInterval?: number | null;
@@ -1393,6 +1401,10 @@ export interface Product {
    * Skru av for å skjule produktet fra nettsiden
    */
   active?: boolean | null;
+  /**
+   * Skjuler produktet fra produktoversikt, blokker og sitemap. Produktsiden kan fortsatt åpnes direkte av deg som er logget inn i admin.
+   */
+  testProduct?: boolean | null;
   categories?: (number | Category)[] | null;
   /**
    * Settes av AI-vurderingen (0–100).
@@ -3400,6 +3412,7 @@ export interface ProductArchiveBlockSelect<T extends boolean = true> {
   featuredProduct?: T;
   filterByType?: T;
   limit?: T;
+  layout?: T;
   featureFirst?: T;
   showMoreLink?: T;
   id?: T;
@@ -4020,6 +4033,7 @@ export interface ProductsSelect<T extends boolean = true> {
       };
   slug?: T;
   type?: T;
+  deliveryType?: T;
   recurringInterval?: T;
   membershipTier?: T;
   applyUrl?: T;
@@ -4028,6 +4042,7 @@ export interface ProductsSelect<T extends boolean = true> {
   vatRate?: T;
   displayOrder?: T;
   active?: T;
+  testProduct?: T;
   categories?: T;
   qualityScore?: T;
   qualityReviewedAt?: T;
@@ -4716,24 +4731,19 @@ export interface Footer {
         id?: string | null;
       }[]
     | null;
-  /**
-   * Vises nederst i footeren, f.eks. copyright
-   */
-  bottomText?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  legal?: {
+    /**
+     * Vises som «© årstall Firmanavn».
+     */
+    companyName?: string | null;
+    orgNumber?: string | null;
+    address?: string | null;
+    email?: string | null;
+    /**
+     * Kort setning under kontaktlinjen, f.eks. om bruk av KI. La stå tom for å skjule.
+     */
+    disclaimer?: string | null;
+  };
   /**
    * Henter fra Nettsted-innstillinger
    */
@@ -4779,11 +4789,24 @@ export interface SiteSetting {
   notificationEmails?: string | null;
   socialLinks?:
     | {
-        platform: 'facebook' | 'instagram' | 'linkedin' | 'twitter' | 'youtube' | 'tiktok';
+        platform:
+          | 'facebook'
+          | 'instagram'
+          | 'linkedin'
+          | 'twitter'
+          | 'youtube'
+          | 'tiktok'
+          | 'threads'
+          | 'pinterest'
+          | 'snapchat';
         url: string;
         id?: string | null;
       }[]
     | null;
+  /**
+   * Liten knapp nede til høyre som slår ut kanalene. Skjuler seg selv når footeren er synlig.
+   */
+  showSocialFab?: boolean | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -5144,7 +5167,15 @@ export interface FooterSelect<T extends boolean = true> {
             };
         id?: T;
       };
-  bottomText?: T;
+  legal?:
+    | T
+    | {
+        companyName?: T;
+        orgNumber?: T;
+        address?: T;
+        email?: T;
+        disclaimer?: T;
+      };
   showSocialLinks?: T;
   showNewsletter?: T;
   newsletterTitle?: T;
@@ -5177,6 +5208,7 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         url?: T;
         id?: T;
       };
+  showSocialFab?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

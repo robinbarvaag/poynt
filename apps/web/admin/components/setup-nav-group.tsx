@@ -30,6 +30,11 @@ const links = [
     href: "/admin/kvalitet",
     label: "Kvalitetsoversikt",
   },
+  // Utkast som venter på å bli publisert — gjelder alt innhold med versjoner.
+  {
+    href: "/admin/upublisert",
+    label: "Klar til publisering",
+  },
   {
     href: "/admin/collections/redirects",
     label: "Omdirigeringer",

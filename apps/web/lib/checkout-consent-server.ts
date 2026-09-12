@@ -1,9 +1,21 @@
+import type { Product } from "@/payload-types";
 import type { Payload } from "payload";
 import { DEFAULT_CHECKOUT_CONSENT_TEXTS } from "./checkout-consent";
 
 /** Feilmeldingen kassene svarer med når samtykket mangler. */
 export const CONSENT_REQUIRED_ERROR =
   "Du må godta vilkårene for kjøp av digitalt innhold før du kan betale.";
+
+/**
+ * Samtykket kreves bare når kurven inneholder digitalt innhold som leveres
+ * umiddelbart — produktets «Levering» i admin (`deliveryType: "instant"`).
+ * Serveren avgjør dette ut fra produktene, aldri ut fra hva klienten sier.
+ */
+export function checkoutNeedsConsent(
+  lines: { product: Pick<Product, "deliveryType"> }[]
+): boolean {
+  return lines.some((line) => line.product.deliveryType === "instant");
+}
 
 /**
  * Hva som lagres på ordren som dokumentasjon på samtykket (angrerettloven

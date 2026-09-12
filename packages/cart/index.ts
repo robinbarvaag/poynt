@@ -18,6 +18,12 @@ export interface CartItem {
   variantValue?: string;
   /** Maks antall per linje (f.eks. 1 for digitale engangsprodukter). */
   maxQuantity?: number;
+  /**
+   * Digitalt innhold som leveres umiddelbart (produktets «Levering» i admin).
+   * Har kurven minst én slik linje, må kunden samtykke til bortfall av
+   * angrerett (angrerettloven § 22 n) før betaling.
+   */
+  instantDelivery?: boolean;
 }
 
 /** Rabattkode validert av serveren (/api/coupon) — følger kurven i alle kasser. */
@@ -37,6 +43,12 @@ export interface AddToCartInput {
   variantLabel?: string;
   variantValue?: string;
   maxQuantity?: number;
+  instantDelivery?: boolean;
+}
+
+/** True når minst én linje er digitalt innhold med umiddelbar levering. */
+export function cartNeedsConsent(items: Pick<CartItem, "instantDelivery">[]) {
+  return items.some((item) => item.instantDelivery === true);
 }
 
 function lineKey(id: string, variantValue?: string): string {
@@ -106,6 +118,7 @@ export const useCart = create<CartState>()(
                 variantLabel: input.variantLabel,
                 variantValue: input.variantValue,
                 maxQuantity: input.maxQuantity,
+                instantDelivery: input.instantDelivery,
               },
             ],
           };

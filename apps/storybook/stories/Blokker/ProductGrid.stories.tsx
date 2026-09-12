@@ -1,4 +1,9 @@
-import { ProductGrid, type ProductGridItem } from "@poynt/ui";
+import {
+  ProductCarousel,
+  ProductGrid,
+  type ProductGridItem,
+  SectionHeader,
+} from "@poynt/ui";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
 const img = (seed: string) => (
@@ -82,6 +87,29 @@ export const UtenFremhevet: Story = {
   render: () => (
     <div className="mx-auto max-w-6xl p-8">
       <ProductGrid products={products} featureFirst={false} />
+    </div>
+  ),
+};
+
+/**
+ * Karusell-varianten: samme kort i en sveipbar rad. Brukes der produktene
+ * er et innslag på siden (forside, «Andre produkter»), ikke selve innholdet.
+ */
+export const Karusell: Story = {
+  render: () => (
+    <div className="mx-auto max-w-6xl p-8">
+      <ProductCarousel
+        products={products}
+        label="Utvalgte produkter"
+        header={
+          <SectionHeader
+            title="Utvalgte produkter"
+            intro="Sveip eller bruk pilene for å se flere."
+            reveal={false}
+            className="mb-0"
+          />
+        }
+      />
     </div>
   ),
 };

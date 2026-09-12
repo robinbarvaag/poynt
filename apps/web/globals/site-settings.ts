@@ -149,6 +149,9 @@ export const SiteSettings: GlobalConfig = {
                     { label: "Twitter/X", value: "twitter" },
                     { label: "YouTube", value: "youtube" },
                     { label: "TikTok", value: "tiktok" },
+                    { label: "Threads", value: "threads" },
+                    { label: "Pinterest", value: "pinterest" },
+                    { label: "Snapchat", value: "snapchat" },
                   ],
                   label: "Plattform",
                 },
@@ -159,6 +162,16 @@ export const SiteSettings: GlobalConfig = {
                   label: "URL",
                 },
               ],
+            },
+            {
+              name: "showSocialFab",
+              type: "checkbox",
+              defaultValue: true,
+              label: "Vis flytende følg-oss-knapp",
+              admin: {
+                description:
+                  "Liten knapp nede til høyre som slår ut kanalene. Skjuler seg selv når footeren er synlig.",
+              },
             },
           ],
         },

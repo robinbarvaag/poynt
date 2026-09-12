@@ -95,6 +95,10 @@ export {
   type ProductSurface,
 } from "./product-card";
 export {
+  ProductCarousel,
+  type ProductCarouselProps,
+} from "./product-carousel";
+export {
   ProductGrid,
   type ProductGridItem,
   type ProductGridProps,

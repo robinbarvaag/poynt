@@ -8,7 +8,7 @@ import {
   CheckoutRequestError,
   startVippsCheckout,
 } from "@/lib/vipps-checkout-client";
-import { type AppliedCoupon, useCart } from "@poynt/cart";
+import { type AppliedCoupon, cartNeedsConsent, useCart } from "@poynt/cart";
 import {
   Button,
   CartLineItem,
@@ -51,15 +51,18 @@ export default function CartPage() {
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
   // Nyhetsbrev-samtykke: må starte uavkrysset (aktivt samtykke, mfl. § 15)
   const [newsletterOptIn, setNewsletterOptIn] = useState(false);
-  // Vilkår for digitalt innhold (angrerettloven § 22 n): må hukes av aktivt
-  // før noen av betalingsknappene slipper kunden videre. Uten avkryssing
-  // peker begge knappene på boksen i stedet for å bli grået ut — en grå
-  // Vipps-knapp leses som «Vipps virker ikke».
+  // Vilkår for digitalt innhold (angrerettloven § 22 n): kreves bare når
+  // kurven har minst én linje med umiddelbar levering (produktets «Levering»
+  // i admin). Da må boksen hukes av aktivt før noen av betalingsknappene
+  // slipper kunden videre. Uten avkryssing peker begge knappene på boksen i
+  // stedet for å bli grået ut — en grå Vipps-knapp leses som «Vipps virker
+  // ikke».
+  const needsConsent = cartNeedsConsent(items);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [termsError, setTermsError] = useState(false);
   const termsRef = useRef<HTMLDivElement>(null);
   const requireTerms = (): boolean => {
-    if (termsAccepted) return true;
+    if (!needsConsent || termsAccepted) return true;
     setTermsError(true);
     termsRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
     return false;
@@ -131,7 +134,7 @@ export default function CartPage() {
           })),
           couponCode: coupon?.code,
           newsletterOptIn,
-          termsAccepted,
+          termsAccepted: needsConsent && termsAccepted,
         }),
       });
 
@@ -163,7 +166,12 @@ export default function CartPage() {
     setVippsLoading(true);
     setCheckoutError(null);
     try {
-      await startVippsCheckout(items, coupon?.code, newsletterOptIn);
+      await startVippsCheckout(
+        items,
+        coupon?.code,
+        newsletterOptIn,
+        needsConsent && termsAccepted
+      );
     } catch (error) {
       console.error("Vipps checkout error:", error);
       if (
@@ -217,19 +225,31 @@ export default function CartPage() {
 
   return (
     <Container size="default" padding="xl">
-      <div className="mb-8">
-        <Heading variant="h1" color="foreground" weight="bold">
-          Handlekurv
-        </Heading>
-        <Text variant="muted" customStyles="mt-2">
-          {itemCount} {itemCount === 1 ? "produkt" : "produkter"} klare til kjøp
-        </Text>
+      {/* Topplinje: tittel + antall til venstre, «Fortsett å handle» til
+          høyre. Tilbakelenken hører til toppen av siden (der leseren kom
+          inn), ikke nede ved sammendraget. */}
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <Heading variant="h1" color="foreground" weight="bold">
+            Handlekurv
+          </Heading>
+          <Text variant="muted" customStyles="mt-2">
+            {itemCount} {itemCount === 1 ? "produkt" : "produkter"}{" "}
+            {itemCount === 1 ? "klart" : "klare"} til kjøp
+          </Text>
+        </div>
+        <Link
+          href="/produkter"
+          className="inline-flex w-fit items-center gap-2 rounded-full border border-border bg-card px-4 py-2 font-medium text-foreground text-sm transition-colors hover:bg-accent sm:mb-1"
+        >
+          <ArrowLeft className="size-4" />
+          Fortsett å handle
+        </Link>
       </div>
 
-      {/* Varene bruker hele bredden; sammendraget ligger under, forankret til
-          høyre, slik at siden ikke får en tom venstrekolonne når kurven bare
-          har én–to varer. */}
-      <div className="flex flex-col gap-10">
+      {/* Klassisk kasse-oppsett: varene til venstre, sammendraget i en
+          klebrig kolonne til høyre på store skjermer. På mobil stables de. */}
+      <div className="flex flex-col gap-8 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] lg:items-start lg:gap-12">
         {/* Varer */}
         <div>
           <ul className="space-y-3">
@@ -264,119 +284,109 @@ export default function CartPage() {
           </ul>
         </div>
 
-        <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
-          <Link
-            href="/produkter"
-            className="inline-flex items-center gap-2 text-muted-foreground text-sm transition-colors hover:text-foreground"
-          >
-            <ArrowLeft className="size-4" />
-            Fortsett å handle
-          </Link>
+        {/* Sammendrag */}
+        <aside className="w-full lg:sticky lg:top-24">
+          <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-6 shadow-sm">
+            <GridPattern fade className="text-primary/10" />
+            <div className="relative z-10">
+              <Heading
+                variant="h2"
+                color="foreground"
+                weight="bold"
+                customStyles="mb-5 text-lg"
+              >
+                Sammendrag
+              </Heading>
 
-          {/* Sammendrag */}
-          <aside className="w-full lg:max-w-md">
-            <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-6 shadow-sm">
-              <GridPattern fade className="text-primary/10" />
-              <div className="relative z-10">
-                <Heading
-                  variant="h2"
-                  color="foreground"
-                  weight="bold"
-                  customStyles="mb-5 text-lg"
-                >
-                  Sammendrag
-                </Heading>
-
-                <div className="space-y-3 text-sm">
-                  <div className="flex items-center justify-between text-muted-foreground">
-                    <span>Delsum</span>
-                    <span className="tabular-nums">{formatPrice(total())}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-muted-foreground">
-                    <span>Mva</span>
-                    <span>Inkludert</span>
-                  </div>
-                  {coupon && discount > 0 && (
-                    <div className="flex items-center justify-between font-medium text-primary">
-                      <span className="flex items-center gap-1.5">
-                        <Tag className="size-3.5" />
-                        {coupon.code}
-                      </span>
-                      <span className="tabular-nums">
-                        −{formatPrice(discount)}
-                      </span>
-                    </div>
-                  )}
+              <div className="space-y-3 text-sm">
+                <div className="flex items-center justify-between text-muted-foreground">
+                  <span>Delsum</span>
+                  <span className="tabular-nums">{formatPrice(total())}</span>
                 </div>
-
-                {/* Rabattkode */}
-                {coupon ? (
-                  <div className="mt-4 flex items-center justify-between gap-2 rounded-xl bg-accent-3/30 px-3 py-2 text-sm">
-                    <span className="flex min-w-0 items-center gap-2 text-foreground">
-                      <Tag className="size-4 shrink-0 text-primary" />
-                      <span className="truncate font-medium">
-                        {coupon.code}
-                      </span>
-                      <span className="shrink-0 text-muted-foreground text-xs">
-                        {coupon.label}
-                      </span>
+                <div className="flex items-center justify-between text-muted-foreground">
+                  <span>Mva</span>
+                  <span>Inkludert</span>
+                </div>
+                {coupon && discount > 0 && (
+                  <div className="flex items-center justify-between font-medium text-primary">
+                    <span className="flex items-center gap-1.5">
+                      <Tag className="size-3.5" />
+                      {coupon.code}
                     </span>
-                    <button
-                      type="button"
-                      onClick={removeCoupon}
-                      aria-label="Fjern rabattkode"
-                      className="shrink-0 rounded-full p-1 text-muted-foreground transition-colors hover:text-destructive"
-                    >
-                      <X className="size-4" />
-                    </button>
+                    <span className="tabular-nums">
+                      −{formatPrice(discount)}
+                    </span>
                   </div>
-                ) : (
-                  <form onSubmit={applyCoupon} className="mt-4">
-                    <div className="flex gap-2">
-                      <Input
-                        value={couponInput}
-                        onChange={(e) => setCouponInput(e.target.value)}
-                        placeholder="Rabattkode"
-                        aria-label="Rabattkode"
-                        className="h-10"
-                      />
-                      <Button
-                        type="submit"
-                        variant="outline"
-                        className="h-10 shrink-0"
-                        disabled={couponLoading || !couponInput.trim()}
-                      >
-                        {couponLoading ? "..." : "Bruk"}
-                      </Button>
-                    </div>
-                    {couponError && (
-                      <p className="mt-1.5 text-destructive text-xs">
-                        {couponError}
-                      </p>
-                    )}
-                  </form>
                 )}
+              </div>
 
-                <div className="mt-4 flex items-center justify-between border-border border-t pt-4">
-                  <span className="font-bold text-foreground">Totalt</span>
-                  <span className="font-bold text-foreground text-xl tabular-nums">
-                    {formatPrice(grandTotal)}
+              {/* Rabattkode */}
+              {coupon ? (
+                <div className="mt-4 flex items-center justify-between gap-2 rounded-xl bg-accent-3/30 px-3 py-2 text-sm">
+                  <span className="flex min-w-0 items-center gap-2 text-foreground">
+                    <Tag className="size-4 shrink-0 text-primary" />
+                    <span className="truncate font-medium">{coupon.code}</span>
+                    <span className="shrink-0 text-muted-foreground text-xs">
+                      {coupon.label}
+                    </span>
                   </span>
+                  <button
+                    type="button"
+                    onClick={removeCoupon}
+                    aria-label="Fjern rabattkode"
+                    className="shrink-0 rounded-full p-1 text-muted-foreground transition-colors hover:text-destructive"
+                  >
+                    <X className="size-4" />
+                  </button>
                 </div>
+              ) : (
+                <form onSubmit={applyCoupon} className="mt-4">
+                  <div className="flex gap-2">
+                    <Input
+                      value={couponInput}
+                      onChange={(e) => setCouponInput(e.target.value)}
+                      placeholder="Rabattkode"
+                      aria-label="Rabattkode"
+                      className="h-10"
+                    />
+                    <Button
+                      type="submit"
+                      variant="outline"
+                      className="h-10 shrink-0"
+                      disabled={couponLoading || !couponInput.trim()}
+                    >
+                      {couponLoading ? "..." : "Bruk"}
+                    </Button>
+                  </div>
+                  {couponError && (
+                    <p className="mt-1.5 text-destructive text-xs">
+                      {couponError}
+                    </p>
+                  )}
+                </form>
+              )}
 
-                <label className="mt-5 flex cursor-pointer items-start gap-2.5 text-muted-foreground text-sm">
-                  <input
-                    type="checkbox"
-                    checked={newsletterOptIn}
-                    onChange={(e) => setNewsletterOptIn(e.target.checked)}
-                    className="mt-0.5 size-4 shrink-0 accent-primary"
-                  />
-                  <span>
-                    Ja takk, jeg vil motta nyhetsbrev med tips og tilbud fra
-                    Poynt. Du kan melde deg av når som helst.
-                  </span>
-                </label>
+              <div className="mt-4 flex items-center justify-between border-border border-t pt-4">
+                <span className="font-bold text-foreground">Totalt</span>
+                <span className="font-bold text-foreground text-xl tabular-nums">
+                  {formatPrice(grandTotal)}
+                </span>
+              </div>
 
+              <label className="mt-5 flex cursor-pointer items-start gap-2.5 text-muted-foreground text-sm">
+                <input
+                  type="checkbox"
+                  checked={newsletterOptIn}
+                  onChange={(e) => setNewsletterOptIn(e.target.checked)}
+                  className="mt-0.5 size-4 shrink-0 accent-primary"
+                />
+                <span>
+                  Ja takk, jeg vil motta nyhetsbrev med tips og tilbud fra
+                  Poynt. Du kan melde deg av når som helst.
+                </span>
+              </label>
+
+              {needsConsent && (
                 <div ref={termsRef}>
                   <CheckoutConsentCheckbox
                     className="mt-4 rounded-2xl bg-accent-3/30 p-4"
@@ -388,59 +398,61 @@ export default function CartPage() {
                     error={termsError}
                   />
                 </div>
+              )}
 
-                {checkoutError && (
-                  <p
-                    role="alert"
-                    className="mt-4 rounded-xl bg-destructive/10 px-3 py-2 text-destructive text-sm"
-                  >
-                    {checkoutError}
-                  </p>
-                )}
-
-                <Button
-                  size="lg"
-                  className="mt-4 w-full rounded-full"
-                  onClick={handleCheckout}
-                  disabled={isLoading || vippsLoading || !ready}
+              {checkoutError && (
+                <p
+                  role="alert"
+                  className="mt-4 rounded-xl bg-destructive/10 px-3 py-2 text-destructive text-sm"
                 >
-                  {isLoading ? "Laster..." : "Gå til kassen"}
-                </Button>
-
-                {/* Offisiell Vipps-knapp — retningslinjene tillater ikke egen design. */}
-                <VippsButton
-                  stretched
-                  className="mt-3"
-                  loading={vippsLoading}
-                  disabled={isLoading || !ready}
-                  onClick={handleVippsCheckout}
-                />
-
-                <p className="mt-4 text-muted-foreground text-xs leading-relaxed">
-                  Les om behandling av personopplysninger i{" "}
-                  <Link
-                    href="/personvern"
-                    className="underline underline-offset-2 hover:text-foreground"
-                  >
-                    personvernerklæringen
-                  </Link>
-                  .
+                  {checkoutError}
                 </p>
+              )}
 
-                <ul className="mt-5 space-y-2.5 text-muted-foreground text-sm">
-                  <li className="flex items-center gap-2.5">
-                    <ShieldCheck className="size-4 shrink-0 text-primary" />
-                    Sikker betaling med Stripe eller Vipps
-                  </li>
+              <Button
+                size="lg"
+                className="mt-4 w-full rounded-full"
+                onClick={handleCheckout}
+                disabled={isLoading || vippsLoading || !ready}
+              >
+                {isLoading ? "Laster..." : "Gå til kassen"}
+              </Button>
+
+              {/* Offisiell Vipps-knapp — retningslinjene tillater ikke egen design. */}
+              <VippsButton
+                stretched
+                className="mt-3"
+                loading={vippsLoading}
+                disabled={isLoading || !ready}
+                onClick={handleVippsCheckout}
+              />
+
+              <p className="mt-4 text-muted-foreground text-xs leading-relaxed">
+                Les om behandling av personopplysninger i{" "}
+                <Link
+                  href="/personvern"
+                  className="underline underline-offset-2 hover:text-foreground"
+                >
+                  personvernerklæringen
+                </Link>
+                .
+              </p>
+
+              <ul className="mt-5 space-y-2.5 text-muted-foreground text-sm">
+                <li className="flex items-center gap-2.5">
+                  <ShieldCheck className="size-4 shrink-0 text-primary" />
+                  Sikker betaling med Stripe eller Vipps
+                </li>
+                {needsConsent && (
                   <li className="flex items-center gap-2.5">
                     <Zap className="size-4 shrink-0 text-primary" />
                     Tilgang umiddelbart etter kjøp
                   </li>
-                </ul>
-              </div>
+                )}
+              </ul>
             </div>
-          </aside>
-        </div>
+          </div>
+        </aside>
       </div>
     </Container>
   );

@@ -1,4 +1,7 @@
-import { CONSENT_REQUIRED_ERROR } from "@/lib/checkout-consent-server";
+import {
+  CONSENT_REQUIRED_ERROR,
+  checkoutNeedsConsent,
+} from "@/lib/checkout-consent-server";
 import { resolveCheckoutItems } from "@/lib/checkout-items";
 import { resolveCoupon } from "@/lib/coupon";
 import { getSessionWithMembership } from "@/lib/membership";
@@ -35,17 +38,6 @@ export async function POST(req: NextRequest) {
     const { items, couponCode, newsletterOptIn, termsAccepted } =
       await req.json();
 
-    // Aktivt samtykke til umiddelbar levering / bortfall av angrerett
-    // (angrerettloven § 22 n) er et krav — uten det ingen betaling. Ordren
-    // opprettes først i webhooken, så tidspunktet følger med som metadata.
-    if (termsAccepted !== true) {
-      return NextResponse.json(
-        { error: CONSENT_REQUIRED_ERROR },
-        { status: 400 }
-      );
-    }
-    const termsMeta = { terms: "1", termsAt: new Date().toISOString() };
-
     // Try to get logged-in user (optional — guests can buy products too)
     const authSession = await getSessionWithMembership(req);
 
@@ -68,6 +60,21 @@ export async function POST(req: NextRequest) {
       );
     }
     const products = resolved.lines;
+
+    // Aktivt samtykke til umiddelbar levering / bortfall av angrerett
+    // (angrerettloven § 22 n) kreves når kurven har digitalt innhold som
+    // leveres umiddelbart (produktets «Levering» i admin). Ordren opprettes
+    // først i webhooken, så tidspunktet følger med som metadata.
+    if (checkoutNeedsConsent(products) && termsAccepted !== true) {
+      return NextResponse.json(
+        { error: CONSENT_REQUIRED_ERROR },
+        { status: 400 }
+      );
+    }
+    const termsMeta: Record<string, string> =
+      termsAccepted === true
+        ? { terms: "1", termsAt: new Date().toISOString() }
+        : {};
 
     for (const p of products) {
       if (!p.product.stripeID) {

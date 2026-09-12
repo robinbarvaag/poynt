@@ -352,6 +352,31 @@ export const Products: CollectionConfig = {
       },
     },
     {
+      // Styrer om kassen krever samtykke til bortfall av angrerett
+      // (angrerettloven § 22 n). Påkrevd uten standardverdi, slik at valget
+      // tas eksplisitt for hvert produkt og aldri glemmes.
+      name: "deliveryType",
+      type: "radio",
+      required: true,
+      label: "Levering",
+      options: [
+        {
+          label: "Digitalt – leveres umiddelbart (angreretten bortfaller)",
+          value: "instant",
+        },
+        {
+          label: "Annet – tjeneste, medlemskap eller fysisk vare",
+          value: "standard",
+        },
+      ],
+      admin: {
+        position: "sidebar",
+        layout: "vertical",
+        description:
+          "«Digitalt» gjør at kunden må bekrefte umiddelbar levering og bortfall av angrerett før betaling. Gjelder alle PDF-er og annet innhold som er tilgjengelig rett etter kjøp.",
+      },
+    },
+    {
       name: "recurringInterval",
       type: "number",
       label: "Faktureringsintervall (måneder)",
@@ -444,6 +469,18 @@ export const Products: CollectionConfig = {
       admin: {
         position: "sidebar",
         description: "Skru av for å skjule produktet fra nettsiden",
+      },
+    },
+    {
+      name: "testProduct",
+      type: "checkbox",
+      defaultValue: false,
+      index: true,
+      label: "Testprodukt",
+      admin: {
+        position: "sidebar",
+        description:
+          "Skjuler produktet fra produktoversikt, blokker og sitemap. Produktsiden kan fortsatt åpnes direkte av deg som er logget inn i admin.",
       },
     },
     {

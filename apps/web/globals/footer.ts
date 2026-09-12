@@ -81,12 +81,71 @@ export const Footer: GlobalConfig = {
       ],
     },
     {
-      name: "bottomText",
-      type: "richText",
-      label: "Bunntekst",
-      admin: {
-        description: "Vises nederst i footeren, f.eks. copyright",
-      },
+      // Strukturert bunnlinje i stedet for fri rik tekst: hvert felt rendres
+      // på sin faste plass, så linjen alltid ser ordentlig ut.
+      name: "legal",
+      type: "group",
+      label: "Bunnlinje",
+      fields: [
+        {
+          type: "row",
+          fields: [
+            {
+              name: "companyName",
+              type: "text",
+              label: "Firmanavn",
+              defaultValue: "Poynt AS",
+              admin: {
+                width: "50%",
+                description: "Vises som «© årstall Firmanavn».",
+              },
+            },
+            {
+              name: "orgNumber",
+              type: "text",
+              label: "Organisasjonsnummer",
+              admin: {
+                width: "50%",
+                placeholder: "930 714 151 MVA",
+              },
+            },
+          ],
+        },
+        {
+          type: "row",
+          fields: [
+            {
+              name: "address",
+              type: "text",
+              label: "Adresse",
+              admin: {
+                width: "50%",
+                placeholder: "Ramsvigstien 5A, 4015 Stavanger",
+              },
+            },
+            {
+              name: "email",
+              type: "email",
+              label: "E-post",
+              admin: {
+                width: "50%",
+                placeholder: "hei@poynt.no",
+              },
+            },
+          ],
+        },
+        {
+          name: "disclaimer",
+          type: "text",
+          label: "Merknad",
+          admin: {
+            description:
+              "Kort setning under kontaktlinjen, f.eks. om bruk av KI. La stå tom for å skjule.",
+            placeholder:
+              "Deler av nettsiden og noe innhold er laget med hjelp av KI.",
+          },
+        },
+      ],
     },
     {
       name: "showSocialLinks",

@@ -6,11 +6,13 @@ import {
 } from "@/components/product-explorer";
 import { PRODUCT_TYPE_FILTERS, toProductGridItem } from "@/lib/product";
 import { buildMetadata } from "@/lib/seo";
+import { isAdminViewer, notTestProduct } from "@/lib/test-products";
 import config from "@/payload.config";
-import { Container } from "@poynt/ui";
+import { Container, ProductGrid } from "@poynt/ui";
 import type { Metadata } from "next";
 import { cacheLife, cacheTag } from "next/cache";
 import { getPayload } from "payload";
+import { Suspense } from "react";
 
 async function getProductsPageData() {
   "use cache";
@@ -25,6 +27,7 @@ async function getProductsPageData() {
       collection: "products",
       where: {
         active: { equals: true },
+        ...notTestProduct,
       },
       // Manuell rekkefølge først (lavest displayOrder → først, tomme sist),
       // deretter nyeste først som fallback.
@@ -34,6 +37,39 @@ async function getProductsPageData() {
   ]);
 
   return { pageConfig, products };
+}
+
+/**
+ * Testprodukter for innloggede. Hentes utenfor «use cache» fordi svaret er
+ * avhengig av innloggingscookien — resten av oversikten er fortsatt cachet
+ * og delt av alle.
+ */
+async function TestProductsSection() {
+  if (!(await isAdminViewer())) return null;
+
+  const payload = await getPayload({ config });
+  const result = await payload.find({
+    collection: "products",
+    where: { testProduct: { equals: true } },
+    sort: ["displayOrder", "-createdAt"],
+    limit: 50,
+  });
+
+  if (result.docs.length === 0) return null;
+
+  return (
+    <Container padding="default" className="pb-12">
+      <div className="rounded-3xl border border-amber-300 border-dashed bg-amber-50/60 p-6 dark:bg-amber-950/20">
+        <p className="mb-4 font-medium text-amber-900 text-sm dark:text-amber-200">
+          Testprodukter — kun synlig for deg som er logget inn i admin.
+        </p>
+        <ProductGrid
+          products={result.docs.map(toProductGridItem)}
+          featureFirst={false}
+        />
+      </div>
+    </Container>
+  );
 }
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -99,6 +135,10 @@ export default async function ProductsPage() {
           emptyStateText={emptyStateText}
         />
       </Container>
+
+      <Suspense fallback={null}>
+        <TestProductsSection />
+      </Suspense>
     </>
   );
 }

@@ -14,13 +14,18 @@ export class CheckoutRequestError extends Error {
 /**
  * Start Vipps-hurtigkasse frå klienten: POST kurven til API-et og redirect
  * til Vipps-landingssida. Kastar CheckoutRequestError med norsk melding ved feil.
- * Kallaren MÅ ha fått aktivt samtykke (CheckoutConsentCheckbox) først —
- * API-et avviser kjøp utan `termsAccepted: true`.
+ * Inneheld kurven digitalt innhald med umiddelbar levering MÅ kallaren ha
+ * fått aktivt samtykke (CheckoutConsentCheckbox) først — API-et avviser då
+ * kjøp utan `termsAccepted: true`. `termsAccepted` sendast som det er, så
+ * serveren (som kjenner produkta) avgjer om det var påkravd.
  */
 export async function startVippsCheckout(
   items: CartItem[],
   couponCode?: string,
-  newsletterOptIn?: boolean
+  newsletterOptIn?: boolean,
+  // Aldri utleidd frå kurven her: berre kallaren veit om boksen faktisk vart
+  // huka av.
+  termsAccepted = false
 ): Promise<void> {
   await postVippsCheckout(
     items.map((item) => ({
@@ -28,6 +33,7 @@ export async function startVippsCheckout(
       quantity: item.quantity,
       variant: item.variantValue,
     })),
+    termsAccepted,
     couponCode,
     newsletterOptIn
   );
@@ -37,16 +43,20 @@ export async function startVippsCheckout(
  * «Kjøp nå» med Vipps rett frå produktsida: hoppar over handlekurven og
  * sender eitt enkelt produkt til hurtigkassa.
  */
-export async function startVippsBuyNow(item: {
-  id: string;
-  quantity: number;
-  variant?: string;
-}): Promise<void> {
-  await postVippsCheckout([item]);
+export async function startVippsBuyNow(
+  item: {
+    id: string;
+    quantity: number;
+    variant?: string;
+  },
+  termsAccepted: boolean
+): Promise<void> {
+  await postVippsCheckout([item], termsAccepted);
 }
 
 async function postVippsCheckout(
   items: { id: string; quantity: number; variant?: string }[],
+  termsAccepted: boolean,
   couponCode?: string,
   newsletterOptIn?: boolean
 ): Promise<void> {
@@ -57,9 +67,9 @@ async function postVippsCheckout(
       items,
       couponCode,
       newsletterOptIn: newsletterOptIn === true,
-      // Kunden har huket av samtykkeboksen (angrerettloven § 22 n) før
-      // knappen slapp gjennom — serveren krever feltet.
-      termsAccepted: true,
+      // Samtykke til bortfall av angrerett (angrerettloven § 22 n) — kravet
+      // avgjerast på serveren ut frå produkta i kurven.
+      termsAccepted: termsAccepted === true,
     }),
   });
 

@@ -74,6 +74,11 @@ function splitTitle(title: string) {
  * en mettet farge med et stort tall som grafisk anker (ingen ikoner), fet
  * tittel med aksent-stjerne, skillelinje og en lenke eller et nøkkeltall.
  * Faste sone-høyder gjør at alle kort blir nøyaktig like høye. Innholds-only.
+ *
+ * På mobil stables kortene, og tre høye fargeblokker etter hverandre blir en
+ * vegg. Der brukes en kompakt variant: tall og tittel på samme linje, mindre
+ * luft, ingen reserverte sone-høyder (kortene står ikke ved siden av hverandre
+ * og trenger ikke være like høye).
  */
 export function FeatureGrid({
   eyebrow,
@@ -92,44 +97,49 @@ export function FeatureGrid({
           const theme = themes[index % themes.length];
           const { base, star } = splitTitle(feature.title);
           const cardClassName = cn(
-            "h-full gap-0 rounded-[1.75rem] p-8 transition-transform duration-300 hover:-translate-y-1.5",
+            "h-full gap-0 rounded-3xl p-5 transition-transform duration-300 hover:-translate-y-1.5 sm:rounded-[1.75rem] sm:p-8",
             feature.link &&
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current focus-visible:ring-offset-2"
           );
           const cardBody = (
             <>
-              {/* Tall — fast sone */}
-              <Text
-                type="span"
-                size="display-xl"
-                weight="bold"
-                color="inherit"
-                customStyles={cn(
-                  "font-heading leading-none tracking-tight",
-                  theme.accent
-                )}
-              >
-                {index + 1}
-              </Text>
+              {/* Mobil: tall + tittel på én linje. Fra sm: tallet alene som
+                  grafisk anker, tittelen under med fast 2-raders sone. */}
+              <div className="flex items-center gap-4 sm:block">
+                <Text
+                  type="span"
+                  size="display-xl"
+                  weight="bold"
+                  color="inherit"
+                  customStyles={cn(
+                    "shrink-0 font-heading leading-none tracking-tight max-sm:text-4xl",
+                    theme.accent
+                  )}
+                >
+                  {index + 1}
+                </Text>
 
-              {/* Tittel — alltid 2 rader avsatt */}
-              <Heading
-                variant="h3"
-                size="display-sm"
-                color="inherit"
-                weight="bold"
-                customStyles="mt-8 line-clamp-2 min-h-[4.2rem] leading-[1.1]"
-              >
-                {base}
-                {star && <span className={theme.accent}>*</span>}
-              </Heading>
+                <Heading
+                  variant="h3"
+                  size="display-sm"
+                  color="inherit"
+                  weight="bold"
+                  customStyles="line-clamp-2 leading-[1.1] max-sm:text-xl sm:mt-8 sm:min-h-[4.2rem]"
+                >
+                  {base}
+                  {star && <span className={theme.accent}>*</span>}
+                </Heading>
+              </div>
 
-              <hr className={cn("my-5 border-t", theme.rule)} />
+              <hr className={cn("my-4 border-t sm:my-5", theme.rule)} />
 
               {/* Beskrivelse — line-clamp 4, men følger teksten i høyde */}
               <Text
                 color="inherit"
-                customStyles={cn("line-clamp-4 leading-relaxed", theme.muted)}
+                customStyles={cn(
+                  "line-clamp-4 leading-relaxed max-sm:text-sm",
+                  theme.muted
+                )}
               >
                 {feature.text}
               </Text>
@@ -140,7 +150,7 @@ export function FeatureGrid({
               {feature.link && (
                 <span
                   className={cn(
-                    "mt-auto inline-flex w-fit flex-col gap-2 pt-8 font-bold text-sm",
+                    "mt-auto inline-flex w-fit flex-col gap-2 pt-5 font-bold text-sm sm:pt-8",
                     theme.accent
                   )}
                 >
@@ -152,7 +162,7 @@ export function FeatureGrid({
                 </span>
               )}
               {!feature.link && feature.stat && (
-                <div className="mt-auto pt-8">
+                <div className="mt-auto pt-5 sm:pt-8">
                   <Text
                     type="div"
                     size="display-md"

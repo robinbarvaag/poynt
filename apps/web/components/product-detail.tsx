@@ -16,7 +16,7 @@ import {
   Badge,
   Breadcrumbs,
   Heading,
-  ProductGrid,
+  ProductCarousel,
   type ProductGridItem,
   Text,
 } from "@poynt/ui";
@@ -115,6 +115,7 @@ function ProductDetail({ product, relatedProducts = [] }: ProductDetailProps) {
         price: product.price,
         isSoldOut,
         allowQuantity: Boolean(product.allowQuantity),
+        instantDelivery: product.deliveryType === "instant",
         variantLabel: product.variantLabel ?? undefined,
         variantOptions,
         applyUrl: product.applyUrl ?? undefined,
@@ -240,20 +241,25 @@ function ProductDetail({ product, relatedProducts = [] }: ProductDetailProps) {
       }
       related={
         relatedProducts.length > 0 ? (
-          <div className="mt-16 pt-16 border-t border-border">
-            <div className="mb-8 flex items-center justify-between gap-4">
-              <Heading size="h2" color="foreground">
-                Andre produkter
-              </Heading>
-              <Link
-                href="/produkter"
-                className="inline-flex shrink-0 items-center gap-2 font-medium text-primary hover:underline"
-              >
-                Se alle
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-            <ProductGrid products={relatedProducts} featureFirst={false} />
+          <div className="mt-16 border-border border-t pt-16">
+            <ProductCarousel
+              products={relatedProducts}
+              label="Andre produkter"
+              header={
+                <div className="flex min-w-0 flex-1 items-center justify-between gap-4">
+                  <Heading size="h2" color="foreground">
+                    Andre produkter
+                  </Heading>
+                  <Link
+                    href="/produkter"
+                    className="inline-flex shrink-0 items-center gap-2 font-medium text-primary hover:underline"
+                  >
+                    Se alle
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </div>
+              }
+            />
           </div>
         ) : null
       }
