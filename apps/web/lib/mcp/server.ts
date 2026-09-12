@@ -3,6 +3,7 @@ import {
   analyseComposition,
   blocksFromLayout,
 } from "@/lib/composition-rules";
+import { MAX_UPLOAD_BYTES, MAX_UPLOAD_LABEL } from "@/lib/media-limits";
 import { TONE_OF_VOICE } from "@/lib/tone-of-voice";
 import config from "@/payload.config";
 import { McpServer, createMcpHandler } from "@modelcontextprotocol/server";
@@ -10,6 +11,7 @@ import { getPayload } from "payload";
 import { z } from "zod";
 import { getBlockSchema, summarizeBlocks } from "./block-schema";
 import { LayoutError, toMcpLayout, toPayloadLayout } from "./layout-convert";
+import { markdownToLexical } from "./lexical-markdown";
 
 /**
  * MCP-server som lar Claude (claude.ai-connector, Claude Desktop, Claude Code)
@@ -21,18 +23,22 @@ import { LayoutError, toMcpLayout, toPayloadLayout } from "./layout-convert";
  */
 
 const siteUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
-const adminUrl = (id: number | string) =>
-  `${siteUrl}/admin/collections/pages/${id}`;
+const adminUrl = (id: number | string, collection = "pages") =>
+  `${siteUrl}/admin/collections/${collection}/${id}`;
 
-const INSTRUCTIONS = `Du hjelper Susanne (Poynt) med å bygge sider i Payload CMS. Sidene består av blokker (seksjoner) i rekkefølge.
+const INSTRUCTIONS = `Du hjelper Susanne (Poynt) med innhold i Payload CMS: sider (bygd av blokker), kundehistorier og blogginnlegg.
 
-Arbeidsflyt:
-1. Kall get_guidelines én gang først — den gir tone of voice og komposisjonsregler.
+Arbeidsflyt for en side:
+1. Kall get_guidelines én gang først — den gir tone of voice, komposisjonsregler og oppskriftene for kundehistorie/blogg.
 2. Kall list_blocks for å se hvilke seksjoner som finnes, og get_block_schema for feltene i dem du vil bruke.
 3. Se gjerne på en eksisterende side med get_page som mal (f.eks. slug «om» eller «tjenester»).
 4. Bygg layout, kjør check_layout, og opprett med create_page_draft. Svar med admin-lenken.
 
-Regler: alt lagres som utkast, aldri publisert. Skriv på bokmål i Poynts tone. richText-felter sendes som markdown-streng. Bilder refereres med media-ID fra search_media (utelat bildefelt om du ikke finner et passende). Ikke finn på tall, kundenavn eller priser — spør, eller la feltet stå tomt.`;
+Kundehistorie og blogginnlegg: create_case_study_draft / create_blog_post_draft. Forteller Susanne om et kundebesøk, foreslå gjerne begge (samme bilder, ulik vinkel) — men lag dem bare når hun bekrefter.
+
+Bilder: search_media finner bilder som allerede er lastet opp i admin. upload_media_from_url henter et bilde fra en lenke (Drive, Dropbox, nettside) inn i mediebiblioteket. Bilder limt inn i chatten kan du IKKE laste opp — be Susanne laste dem opp i admin (Media) eller dele en lenke.
+
+Regler: alt lagres som utkast, aldri publisert. Skriv på bokmål i Poynts tone. richText-felter sendes som markdown-streng. Ikke finn på tall, kundenavn, sitater eller priser — spør, eller la feltet stå tomt.`;
 
 const text = (data: unknown) => ({
   content: [
@@ -119,6 +125,10 @@ export const mcpHandler = createMcpHandler(() => {
           ...COMPOSITION_GUIDELINES.map((g) => `- ${g}`),
           "",
           "Typisk oppbygging av en landingsside: hero → (statsBand eller featureGrid) → contentMedia/content → testimonials → pricing eller ctaSection → faq → newsletter. En vanlig innholdsside: hero → content → featureGrid → ctaSection. Sett pageType «landing» kun på kampanjer/lanseringer.",
+          "",
+          "Kundehistorie (create_case_study_draft): tittelen sier resultatet, ikke bare kundenavnet («Hageland nådde målene sine med On Poynt»). Innholdet i tre deler: Utfordringen (hvor sto kunden, konkret nok til å kjenne seg igjen) → Hva vi gjorde (konkrete grep: kanaler, verktøy, valg) → Resultatet (helst tall; «fra kaos til plan» teller også). Minst ett resultat i tall i results, og et sitat fra kunden med navn — men bare det Susanne faktisk har oppgitt.",
+          "",
+          "Blogginnlegg (create_blog_post_draft): leseren skumleser. Kroken: første setning gir grunn til å lese videre, aldri «I denne artikkelen …». Kjøttet: korte avsnitt, mellomtitler (##) som alene forteller historien, konkrete eksempler. Landingen: ett konkret neste steg, gjerne lenke til tjeneste/guide/kundehistorie. Tittel på minst 25 tegn som folk faktisk søker etter. Sett minst én kategori (list_categories).",
         ].join("\n")
       )
   );
@@ -423,7 +433,7 @@ export const mcpHandler = createMcpHandler(() => {
       description:
         "Produkter, tjenester eller skjemaer som blokker kan peke på (ID + navn). Bruk ID-en i relationship-felt.",
       inputSchema: z.object({
-        collection: z.enum(["products", "services", "forms"]),
+        collection: z.enum(["products", "services", "forms", "categories"]),
         query: z.string().optional(),
       }),
       annotations: { readOnlyHint: true },
@@ -449,6 +459,330 @@ export const mcpHandler = createMcpHandler(() => {
           return { id: doc.id, title: doc.title ?? doc.name, slug: doc.slug };
         })
       );
+    }
+  );
+
+  const seoSchema = {
+    metaTitle: z.string().max(70).optional().describe("SEO-tittel"),
+    metaDescription: z
+      .string()
+      .max(160)
+      .optional()
+      .describe("SEO-beskrivelse (teksten Google viser)"),
+  };
+  const slugField = z
+    .string()
+    .regex(/^[a-z0-9-]+$/, "Kun små bokstaver, tall og bindestrek")
+    .optional()
+    .describe("Genereres fra tittel om den utelates");
+
+  async function slugTaken(
+    payload: Awaited<ReturnType<typeof getPayload>>,
+    collection: "case-studies" | "blog-posts",
+    slug: string
+  ) {
+    const res = await payload.find({
+      collection,
+      where: { slug: { equals: slug } },
+      draft: true,
+      depth: 0,
+      limit: 1,
+    });
+    return res.docs[0] ?? null;
+  }
+
+  server.registerTool(
+    "create_case_study_draft",
+    {
+      title: "Opprett kundehistorie (utkast)",
+      description:
+        "Oppretter en kundehistorie som UTKAST (vises på /kundehistorier når den publiseres). Innholdet skrives som markdown i tre deler: utfordringen, hva vi gjorde, resultatet. Se get_guidelines.",
+      inputSchema: z.object({
+        title: z.string().min(1).describe("Tittel som sier resultatet"),
+        customer: z.string().min(1).describe("Kundens/bedriftens navn"),
+        excerpt: z
+          .string()
+          .optional()
+          .describe("Én til to setninger som selger historien i lister"),
+        content: z.string().min(1).describe("Historien som markdown"),
+        results: z
+          .array(
+            z.object({
+              value: z.string().describe("F.eks. «2×» eller «52»"),
+              label: z.string().describe("F.eks. «så mange følgere»"),
+            })
+          )
+          .optional()
+          .describe("Resultater i tall — kun det Susanne har oppgitt"),
+        quote: z
+          .object({
+            text: z.string(),
+            author: z.string(),
+            role: z.string().optional(),
+          })
+          .optional()
+          .describe("Sitat fra kunden, med navn"),
+        featuredImageId: z
+          .number()
+          .optional()
+          .describe("Media-ID fra search_media/upload_media_from_url"),
+        slug: slugField,
+        ...seoSchema,
+      }),
+      annotations: { destructiveHint: false },
+    },
+    async ({
+      title,
+      customer,
+      excerpt,
+      content,
+      results,
+      quote,
+      featuredImageId,
+      slug,
+      metaTitle,
+      metaDescription,
+    }) => {
+      const payload = await getPayload({ config });
+      if (slug) {
+        const existing = await slugTaken(payload, "case-studies", slug);
+        if (existing) {
+          return fail(
+            `Slug «${slug}» er allerede i bruk (kundehistorie #${existing.id}).`
+          );
+        }
+      }
+      try {
+        const doc = await payload.create({
+          collection: "case-studies",
+          draft: true,
+          depth: 0,
+          data: {
+            title,
+            customer,
+            excerpt,
+            content: markdownToLexical(content) as never,
+            results,
+            quote,
+            featuredImage: featuredImageId,
+            slug: slug ?? "",
+            publishedAt: new Date().toISOString(),
+            meta: { title: metaTitle, description: metaDescription },
+            _status: "draft",
+          },
+        });
+        return text({
+          id: doc.id,
+          title: doc.title,
+          slug: doc.slug,
+          status: "utkast",
+          adminUrl: adminUrl(doc.id, "case-studies"),
+          missing: [
+            !featuredImageId && "hovedbilde (ekte bilde av kunden)",
+            !results?.length && "minst ett resultat i tall",
+            !quote && "sitat fra kunden med navn",
+          ].filter(Boolean),
+        });
+      } catch (err) {
+        return fail(
+          `Payload avviste kundehistorien: ${err instanceof Error ? err.message : String(err)}`
+        );
+      }
+    }
+  );
+
+  server.registerTool(
+    "list_categories",
+    {
+      title: "List bloggkategorier",
+      description: "Kategorier et blogginnlegg kan ha (ID + navn).",
+      inputSchema: z.object({}),
+      annotations: { readOnlyHint: true },
+    },
+    async () => {
+      const payload = await getPayload({ config });
+      const res = await payload.find({
+        collection: "categories",
+        depth: 0,
+        limit: 100,
+      });
+      return text(
+        res.docs.map((c) => ({ id: c.id, name: c.name, slug: c.slug }))
+      );
+    }
+  );
+
+  server.registerTool(
+    "create_blog_post_draft",
+    {
+      title: "Opprett blogginnlegg (utkast)",
+      description:
+        "Oppretter et blogginnlegg som UTKAST (vises på /blogg når det publiseres). Innhold som markdown med ##-mellomtitler. Se get_guidelines.",
+      inputSchema: z.object({
+        title: z.string().min(1),
+        excerpt: z
+          .string()
+          .optional()
+          .describe("Ingress i lister og søkeresultat"),
+        content: z.string().min(1).describe("Innlegget som markdown"),
+        featuredImageId: z.number().optional().describe("Media-ID"),
+        categoryIds: z
+          .array(z.number())
+          .optional()
+          .describe("ID-er fra list_categories"),
+        slug: slugField,
+        ...seoSchema,
+      }),
+      annotations: { destructiveHint: false },
+    },
+    async ({
+      title,
+      excerpt,
+      content,
+      featuredImageId,
+      categoryIds,
+      slug,
+      metaTitle,
+      metaDescription,
+    }) => {
+      const payload = await getPayload({ config });
+      if (slug) {
+        const existing = await slugTaken(payload, "blog-posts", slug);
+        if (existing) {
+          return fail(
+            `Slug «${slug}» er allerede i bruk (blogginnlegg #${existing.id}).`
+          );
+        }
+      }
+      try {
+        const doc = await payload.create({
+          collection: "blog-posts",
+          draft: true,
+          depth: 0,
+          data: {
+            title,
+            excerpt,
+            content: markdownToLexical(content) as never,
+            featuredImage: featuredImageId,
+            categories: categoryIds,
+            slug: slug ?? "",
+            publishedAt: new Date().toISOString(),
+            meta: { title: metaTitle, description: metaDescription },
+            _status: "draft",
+          },
+        });
+        return text({
+          id: doc.id,
+          title: doc.title,
+          slug: doc.slug,
+          status: "utkast",
+          adminUrl: adminUrl(doc.id, "blog-posts"),
+          missing: [
+            !featuredImageId && "hovedbilde",
+            !categoryIds?.length && "kategori",
+          ].filter(Boolean),
+        });
+      } catch (err) {
+        return fail(
+          `Payload avviste innlegget: ${err instanceof Error ? err.message : String(err)}`
+        );
+      }
+    }
+  );
+
+  server.registerTool(
+    "upload_media_from_url",
+    {
+      title: "Last opp bilde fra lenke",
+      description: `Henter et bilde fra en offentlig URL (direktelenke til fila) inn i mediebiblioteket og returnerer media-ID. Maks ${MAX_UPLOAD_LABEL}. Bilder limt inn i chatten kan ikke lastes opp her.`,
+      inputSchema: z.object({
+        url: z
+          .string()
+          .url()
+          .describe("Direktelenke til bildefila (http/https)"),
+        alt: z
+          .string()
+          .min(1)
+          .describe("Alt-tekst: hva bildet viser, for skjermlesere og SEO"),
+        filename: z
+          .string()
+          .optional()
+          .describe("Ønsket filnavn, uten sti (valgfritt)"),
+      }),
+      annotations: { destructiveHint: false },
+    },
+    async ({ url, alt, filename }) => {
+      let parsed: URL;
+      try {
+        parsed = new URL(url);
+      } catch {
+        return fail("Ugyldig URL.");
+      }
+      if (!["http:", "https:"].includes(parsed.protocol)) {
+        return fail("Kun http/https-lenker.");
+      }
+      // Ikke la serveren hente fra interne adresser (SSRF).
+      if (
+        /^(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|0\.|\[::1\])/.test(
+          parsed.hostname
+        )
+      ) {
+        return fail("Interne adresser er ikke tillatt.");
+      }
+      let res: Response;
+      try {
+        res = await fetch(url, { cache: "no-store", redirect: "follow" });
+      } catch (err) {
+        return fail(
+          `Kunne ikke hente bildet: ${err instanceof Error ? err.message : String(err)}`
+        );
+      }
+      if (!res.ok) return fail(`Kunne ikke hente bildet (HTTP ${res.status}).`);
+      const mimetype = (res.headers.get("content-type") ?? "")
+        .split(";")[0]
+        .trim();
+      if (!mimetype.startsWith("image/")) {
+        return fail(
+          `Lenken gir «${mimetype || "ukjent"}», ikke et bilde. Trenger en direktelenke til selve fila (Drive/Dropbox: bruk «last ned»-lenken).`
+        );
+      }
+      const buffer = Buffer.from(await res.arrayBuffer());
+      if (buffer.length > MAX_UPLOAD_BYTES) {
+        return fail(
+          `Bildet er for stort (${(buffer.length / 1024 / 1024).toFixed(1)} MB). Maks ${MAX_UPLOAD_LABEL}.`
+        );
+      }
+      const ext = mimetype.split("/")[1]?.replace("jpeg", "jpg") ?? "jpg";
+      const fromPath = decodeURIComponent(
+        parsed.pathname.split("/").pop() ?? ""
+      );
+      const safeName = (filename || fromPath || `bilde.${ext}`)
+        .replace(/[^\p{L}\p{N}._-]+/gu, "-")
+        .replace(/^-+|-+$/g, "");
+      const name = /\.[a-z0-9]{2,5}$/i.test(safeName)
+        ? safeName
+        : `${safeName}.${ext}`;
+      const payload = await getPayload({ config });
+      try {
+        const created = await payload.create({
+          collection: "media",
+          depth: 0,
+          data: { alt, sourceUrl: url },
+          file: { data: buffer, mimetype, name, size: buffer.length },
+        });
+        return text({
+          id: created.id,
+          filename: created.filename,
+          alt: created.alt,
+          width: created.width,
+          height: created.height,
+          adminUrl: adminUrl(created.id, "media"),
+        });
+      } catch (err) {
+        return fail(
+          `Opplasting feilet: ${err instanceof Error ? err.message : String(err)}`
+        );
+      }
     }
   );
 

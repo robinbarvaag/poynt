@@ -30,8 +30,11 @@ Lekker hemmeligheten: bytt `MCP_SECRET` i Vercel og oppdater connectoren.
 Endepunkt: `https://<domene>/api/mcp/<MCP_SECRET>` (Streamable HTTP).
 
 **claude.ai / Claude Desktop:** Innstillinger → Connectors → «Add custom
-connector» → lim inn URL-en. Ingen OAuth. Deretter er verktøyene tilgjengelige
-i alle samtaler (og kan slås av per samtale).
+connector». Velg «No sign-in». Anbefalt: URL `https://<domene>/api/mcp/claude`
+(siste ledd er vilkårlig) og en request header `Authorization` med verdi
+`Bearer <MCP_SECRET>` — da lagres hemmeligheten skjult. Alternativt legges
+hemmeligheten i URL-en uten header. Deretter er verktøyene tilgjengelige i alle
+samtaler (og kan slås av per samtale).
 
 **Claude Code:**
 
@@ -54,8 +57,17 @@ claude mcp add --transport http poynt-cms https://<domene>/api/mcp/<MCP_SECRET>
 | `check_layout` | Validerer uten å lagre: ukjente blokker, manglende påkrevde felt, komposisjonsregler. |
 | `create_page_draft` | Oppretter ny side som utkast. Returnerer admin-lenke + komposisjonsfunn. |
 | `update_page_draft` | Nytt utkast på eksisterende side (publisert versjon urørt). |
+| `create_case_study_draft` | Kundehistorie som utkast: tittel, kunde, historie (markdown), resultater i tall, sitat, hovedbilde. |
+| `create_blog_post_draft` | Blogginnlegg som utkast: tittel, ingress, innhold (markdown), hovedbilde, kategorier. |
+| `list_categories` | Bloggkategorier → ID. |
 | `search_media` | Finn bilder (alt/filnavn) → media-ID til bildefelt. |
-| `list_related` | Produkter, tjenester og skjemaer → ID til relationship-felt. |
+| `upload_media_from_url` | Henter et bilde fra en offentlig direktelenke inn i mediebiblioteket (maks 40 MB, kun `image/*`, interne adresser avvist). |
+| `list_related` | Produkter, tjenester, skjemaer og kategorier → ID til relationship-felt. |
+
+**Bilder fra chatten** kan Claude ikke laste opp via MCP. Flyten er: Susanne
+laster opp i admin (Media, dra og slipp) eller deler en direktelenke, så
+finner Claude bildet med `search_media` eller henter det med
+`upload_media_from_url`.
 
 Blokk-skjemaene genereres **automatisk** fra blokk-configene i `apps/web/blocks/`
 (`lib/mcp/block-schema.ts`). Ny blokk i `layoutBlocks` dukker opp for Claude
@@ -83,6 +95,6 @@ panelet i admin bruker. Ny regel der gjelder begge steder.
 
 ## Ideer videre
 
-- Forside (`homepage`-globalen) og andre innholdstyper (blogg, tjenester).
+- Forside (`homepage`-globalen) og andre innholdstyper (tjenester, guider).
 - Eget verktøy som kaller `/api/ai/quality-review` for AI-vurdering av utkastet.
 - OAuth i stedet for delt hemmelighet hvis flere skal ha tilgang.
