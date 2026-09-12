@@ -13,6 +13,12 @@ export {
   type CarouselPresentation,
   type CarouselProps,
 } from "./carousel";
+export {
+  Coverflow,
+  type CoverflowItem,
+  type CoverflowLinkProps,
+  type CoverflowProps,
+} from "./coverflow";
 export { BookCover, type BookCoverProps } from "./book-cover";
 export { BookHero, type BookHeroProps } from "./book-hero";
 export {

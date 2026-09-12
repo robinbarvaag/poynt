@@ -150,7 +150,11 @@ const CONTENT_SURFACES = ["saffron", "salmon", "primary"] as const;
  * / depth) som følger fingeren i stedet for å spille av en fast animasjon.
  *
  * Innholds-only (ingen `<section>`/`py-*`) — pakkes av `BlockSection`.
- * Respekterer `prefers-reduced-motion`: da droppes både tween og auto-scroll.
+ * Respekterer `prefers-reduced-motion`: da droppes tween og autoplay. Auto-
+ * scroll (logo-stripen) fortsetter i lavere tempo — en jevn, lineær strøm er
+ * ikke det innstillingen er ment å fjerne, og uten den sto stripen bom stille
+ * på iPhone med «Reduser bevegelse» på, uten piler eller noe annet hint om at
+ * den kunne blas i.
  */
 export function Carousel({
   eyebrow,
@@ -203,20 +207,22 @@ export function Carousel({
     // høy som det høyeste bildet, og de lave etterlater et stort tomrom under
     // seg. AutoHeight lar viewporten følge det som faktisk er i visning.
     const autoHeight = aspect === "auto" ? [AutoHeight()] : [];
-    if (reduceMotion) return autoHeight;
     if (autoScroll) {
       return [
         ...autoHeight,
         AutoScroll({
           // Rolig tempo: en logo-stripe er et troverdighets-element, ikke en
           // ticker. Går den fort leses den som støy, og navnene rekker ikke
-          // å feste seg. Merkbar bevegelse, men uten hastverk.
-          speed: 0.9,
+          // å feste seg. Merkbar bevegelse, men uten hastverk. Ved redusert
+          // bevegelse senker vi tempoet ytterligere i stedet for å stoppe:
+          // en stillestående stripe uten piler ser bare ødelagt ut.
+          speed: reduceMotion ? 0.5 : 0.9,
           stopOnInteraction: false,
           stopOnMouseEnter: true,
         }),
       ];
     }
+    if (reduceMotion) return autoHeight;
     if (autoplay > 0) {
       return [
         ...autoHeight,
@@ -394,7 +400,19 @@ export function Carousel({
             ARIA-mønsteret for karuseller.
           */}
           <section
-            className="overflow-hidden"
+            className={cn(
+              "overflow-hidden",
+              // Auto-scroll-strømmen går fra skjermkant til skjermkant, ikke
+              // bare innholdsbredden: da er det alltid en logo på vei inn og
+              // en på vei ut, og det er tydelig at stripen beveger seg / kan
+              // sveipes. Masken fader logoene ut mot kantene, slik at de er
+              // fullt synlige innenfor innholdsbredden og borte ved
+              // skjermkanten. `--rail-bleed` er avstanden fra skjermkant til
+              // innholdskant (Container default = 72rem + 1rem padding), med
+              // et minimum så smale skjermer også får en synlig fade.
+              autoScroll &&
+                "mx-[calc(50%-50vw)] w-screen [--rail-bleed:max(2.5rem,calc((100vw-72rem)/2+1rem))] [mask-image:linear-gradient(to_right,transparent,black_var(--rail-bleed),black_calc(100%-var(--rail-bleed)),transparent)]"
+            )}
             ref={emblaRef}
             aria-roledescription="karusell"
             aria-label={title ?? eyebrow ?? "Karusell"}

@@ -91,6 +91,8 @@ Linting and formatting are handled entirely by **Biome** (`biome.json` at root) 
 
 **Media-opplasting**: Vercel Blob med `clientUploads: true` (fila går nettleser → Blob, utenom Vercels 4,5 MB-grense). Maksstørrelse i `apps/web/lib/media-limits.ts`. Originalen lagres urørt; `imageSizes.large` (webp, maks 2400 px) er leveringskilden `<PayloadImage>` foretrekker. Nye imageSizes krever Payload-migrasjon + `scripts/regenerate-media-sizes.ts` for eksisterende bilder.
 
+**MCP-server for Claude**: `POST /api/mcp/<MCP_SECRET>` lar Claude (claude.ai-connector, Claude Code) bygge sider som **utkast** via Payloads lokale API. Blokk-skjemaene genereres fra `blocks/` automatisk; richText sendes som markdown. Kode i `apps/web/lib/mcp/`, oppsett i `docs/MCP.md`.
+
 **Cart constraint**: Digital products limited to 1 per item in cart. Cart state persists to localStorage as "poynt-cart".
 
 **Stripe sync**: Products and prices automatically sync to Stripe via Payload plugin. Stripe IDs stored on Product and User documents.

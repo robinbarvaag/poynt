@@ -42,7 +42,12 @@ export function PathCards({
     <Container padding="none">
       <SectionHeader eyebrow={eyebrow} title={title} intro={intro} />
 
-      <Stagger className={cn(gridVariants({ cols: columns, gap: "md" }))}>
+      <Stagger
+        className={cn(
+          gridVariants({ cols: columns, gap: "md" }),
+          "gap-4 sm:gap-6"
+        )}
+      >
         {paths.map(({ id, surface, ...path }, index) => (
           <StaggerItem key={id} className="h-full">
             <PathCard

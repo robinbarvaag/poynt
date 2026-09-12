@@ -21,6 +21,7 @@
   "dependencies": {
     "@ai-sdk/react": "^3.0.243",
     "@ai-sdk/rsc": "^2.0.241",
+    "@modelcontextprotocol/server": "2.0.0",
     "@payloadcms/db-postgres": "3.87.0",
     "@payloadcms/email-resend": "3.87.0",
     "@payloadcms/live-preview-react": "3.87.0",

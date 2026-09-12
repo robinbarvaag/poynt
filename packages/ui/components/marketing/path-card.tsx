@@ -82,13 +82,13 @@ export function PathCard({
       asChild
       surface={surface}
       className={cn(
-        "group/path h-full gap-0 p-8 transition-transform duration-300 hover:-translate-y-1.5 md:p-10",
+        "group/path h-full gap-0 p-6 transition-transform duration-300 hover:-translate-y-1.5 sm:p-8 md:p-10",
         className
       )}
     >
       <UILink href={href}>
         {(icon || eyebrow) && (
-          <div className="mb-6 flex items-center gap-3">
+          <div className="mb-4 flex items-center gap-3 md:mb-6">
             {icon && (
               <span
                 className={cn(
@@ -102,7 +102,7 @@ export function PathCard({
             {eyebrow && (
               <span
                 className={cn(
-                  "font-heading font-semibold text-sm uppercase tracking-[0.18em]",
+                  "font-heading font-semibold text-xs uppercase tracking-[0.18em] sm:text-sm",
                   accentClass
                 )}
               >
@@ -112,20 +112,28 @@ export function PathCard({
           </div>
         )}
 
-        <h3 className="font-bold font-heading text-3xl leading-tight tracking-tight md:text-4xl">
+        <h3 className="font-bold font-heading text-2xl leading-tight tracking-tight sm:text-3xl md:text-4xl">
           {title}
         </h3>
 
         {description && (
-          <p className={cn("mt-4 text-base leading-relaxed", mutedClass)}>
+          <p
+            className={cn(
+              "mt-3 text-sm leading-relaxed sm:text-base md:mt-4",
+              mutedClass
+            )}
+          >
             {description}
           </p>
         )}
 
         {items && items.length > 0 && (
-          <ul className="mt-6 flex flex-col gap-3">
+          <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 sm:mt-6 sm:flex-col sm:gap-3">
             {items.map((item) => (
-              <li key={item} className="flex items-start gap-2.5 text-sm">
+              <li
+                key={item}
+                className="flex items-start gap-2 text-xs sm:gap-2.5 sm:text-sm"
+              >
                 <span className={accentClass}>
                   <Check />
                 </span>
@@ -137,7 +145,7 @@ export function PathCard({
 
         <span
           className={cn(
-            "mt-8 inline-flex items-center gap-2 pt-2 font-bold text-sm transition-colors",
+            "mt-6 inline-flex items-center gap-2 pt-2 font-bold text-sm transition-colors md:mt-8",
             accentClass
           )}
         >
