@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useEffect, useId, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Icon, type IconName } from "../icons";
 import { UILink } from "../lib/link";
 import { cn } from "../lib/utils";
@@ -12,6 +12,10 @@ export interface HubNavItem {
   id: string;
   label: string;
   icon?: IconName;
+  /** Én setning om hva seksjonen inneholder. Vises i oversiktsrutenettet. */
+  description?: string;
+  /** Kort mengdeangivelse, f.eks. «8 prompter». Vises i meny og oversikt. */
+  meta?: string;
 }
 
 export interface HubLayoutProps {
@@ -20,6 +24,11 @@ export interface HubLayoutProps {
   navTitle?: string;
   /** Valgfritt innhold under menyen på desktop (kontaktkort, «sist oppdatert»). */
   aside?: ReactNode;
+  /**
+   * Kortrutenettet øverst som viser alle seksjonene på én gang. Default: på når
+   * det er minst to seksjoner. Slå av for sider der heroen allerede er kartet.
+   */
+  showIndex?: boolean;
   children: ReactNode;
   className?: string;
 }
@@ -28,16 +37,38 @@ export interface HubLayoutProps {
  * Posisjonsbasert scroll-spy: aktiv seksjon = den siste hvis topp har passert
  * en linje nær toppen. Robust når man klikker og hopper rett til en seksjon
  * (IntersectionObserver-bånd bommer da).
+ *
+ * Følger samtidig med på om selve oversiktsområdet er i bildet, slik at den
+ * faste mobilbaren bare vises når menyen faktisk har noe å peke på.
  */
-function useActiveSection(items: HubNavItem[], offset = 140) {
+function useActiveSection(
+  items: HubNavItem[],
+  rootRef: { current: HTMLDivElement | null },
+  offset = 140
+) {
   const [activeId, setActiveId] = useState<string | undefined>(items[0]?.id);
   const [progress, setProgress] = useState(0);
+  const [inSection, setInSection] = useState(false);
 
   useEffect(() => {
     const update = () => {
-      const el = document.documentElement;
-      const max = el.scrollHeight - el.clientHeight;
-      setProgress(max > 0 ? Math.min(100, (el.scrollTop / max) * 100) : 0);
+      const root = rootRef.current;
+      if (root) {
+        const rect = root.getBoundingClientRect();
+        // Baren kommer ned idet første seksjon når opp til headeren — altså
+        // når kortrutenettet er passert og du trenger en snarvei i stedet for
+        // kartet — og går igjen når hele oversikten er scrollet forbi.
+        const firstSection = items[0]
+          ? document.getElementById(items[0].id)
+          : null;
+        const enterAt = (firstSection ?? root).getBoundingClientRect().top;
+        setInSection(enterAt <= 72 && rect.bottom > 160);
+        const travelled = -rect.top;
+        const span = rect.height - window.innerHeight;
+        setProgress(
+          span > 0 ? Math.min(100, Math.max(0, (travelled / span) * 100)) : 0
+        );
+      }
       if (items.length === 0) return;
       let current = items[0]?.id;
       for (const item of items) {
@@ -55,9 +86,66 @@ function useActiveSection(items: HubNavItem[], offset = 140) {
       window.removeEventListener("scroll", update);
       window.removeEventListener("resize", update);
     };
-  }, [items, offset]);
+  }, [items, offset, rootRef]);
 
-  return { activeId, progress };
+  return { activeId, progress, inSection };
+}
+
+/** Ikonet for en seksjon — `layers` når redaktøren ikke har valgt noe. */
+const iconOf = (item?: HubNavItem): IconName => item?.icon ?? "layers";
+
+/**
+ * Kortrutenettet øverst: alle seksjonene på én gang, med hva de inneholder og
+ * hvor mye. Dette er hovedgrepet for oversikt — menyene er for å komme tilbake,
+ * kortene er for å se hele siden før du begynner å scrolle.
+ */
+export function HubIndex({
+  items,
+  title = "På denne siden",
+  className,
+}: {
+  items: HubNavItem[];
+  title?: string;
+  className?: string;
+}) {
+  if (items.length === 0) return null;
+
+  return (
+    <nav aria-label={title} className={cn("py-8 lg:py-12", className)}>
+      <span className="mb-4 block font-heading font-semibold text-muted-foreground text-xs uppercase tracking-[0.18em]">
+        {title}
+      </span>
+      <ul className="grid grid-cols-2 gap-3 lg:grid-cols-3 lg:gap-4">
+        {items.map((item) => (
+          <li key={item.id}>
+            <UILink
+              href={`#${item.id}`}
+              className="group flex h-full flex-col gap-2 rounded-3xl border border-foreground/10 bg-background/70 p-4 transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-[0_18px_40px_-28px_rgba(0,64,41,0.6)] motion-reduce:transform-none lg:p-5"
+            >
+              <span className="flex size-9 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                <Icon name={iconOf(item)} className="size-4" />
+              </span>
+              <span className="font-heading font-semibold text-[0.95rem] text-foreground leading-snug">
+                {item.label}
+              </span>
+              {item.description && (
+                <span className="hidden text-muted-foreground text-sm leading-snug sm:line-clamp-2">
+                  {item.description}
+                </span>
+              )}
+              <span className="mt-auto flex items-center gap-1.5 pt-1 font-medium text-primary text-xs">
+                {item.meta ?? "Se seksjonen"}
+                <Icon
+                  name="arrow-right"
+                  className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transform-none"
+                />
+              </span>
+            </UILink>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
 }
 
 /** Sticky sidemeny (desktop). */
@@ -106,7 +194,14 @@ function HubRail({
                     )}
                   />
                 )}
-                <span className="leading-snug">{item.label}</span>
+                <span className="min-w-0 flex-1 leading-snug">
+                  {item.label}
+                </span>
+                {item.meta && (
+                  <span className="shrink-0 text-[0.7rem] text-muted-foreground tabular-nums">
+                    {item.meta}
+                  </span>
+                )}
               </UILink>
             </li>
           );
@@ -116,21 +211,51 @@ function HubRail({
   );
 }
 
-/** Sticky topplinje med nedtrekk (mobil). */
+/**
+ * Fast topplinje med brikker (mobil). Ligger `fixed` rett under sidens header,
+ * ikke i innholdsflyten — så den dukker ikke opp som en rar stripe midt på
+ * siden, den kommer ned som en del av toppen idet oversikten begynner.
+ *
+ * Brikkene er vannrett scrollbare og viser alle seksjonene samtidig. Det er
+ * ett trykk til hvor som helst, mot to med et nedtrekk.
+ */
 function HubBar({
   items,
   title,
   activeId,
   progress,
+  visible,
 }: {
   items: HubNavItem[];
   title: string;
   activeId?: string;
   progress: number;
+  visible: boolean;
 }) {
-  const [open, setOpen] = useState(false);
-  const menuId = useId();
-  const current = items.find((i) => i.id === activeId) ?? items[0];
+  const scrollerRef = useRef<HTMLUListElement | null>(null);
+  const chipRefs = useRef(new Map<string, HTMLLIElement>());
+
+  const registerChip = useCallback(
+    (id: string) => (node: HTMLLIElement | null) => {
+      if (node) {
+        chipRefs.current.set(id, node);
+      } else {
+        chipRefs.current.delete(id);
+      }
+    },
+    []
+  );
+
+  // Hold den aktive brikka synlig. Vi flytter `scrollLeft` selv i stedet for
+  // `scrollIntoView`, som også ville dratt i sidens loddrette scroll.
+  useEffect(() => {
+    const scroller = scrollerRef.current;
+    const chip = activeId ? chipRefs.current.get(activeId) : undefined;
+    if (!(scroller && chip)) return;
+    const target =
+      chip.offsetLeft - (scroller.clientWidth - chip.clientWidth) / 2;
+    scroller.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
+  }, [activeId]);
 
   return (
     <div
@@ -139,98 +264,60 @@ function HubBar({
       // den har skjult seg ved scroll nedover). Baren følger med i samme
       // tempo/kurve som headeren, så de beveger seg som én enhet. Uten
       // header (Storybook, andre flater) er offset 0 = som før.
-      className="sticky z-40 transition-[top] duration-300 ease-drawer motion-reduce:transition-none lg:hidden"
+      className={cn(
+        "fixed inset-x-0 z-40 transition-[top,transform,opacity] duration-300 ease-drawer motion-reduce:transition-none lg:hidden",
+        visible
+          ? "translate-y-0 opacity-100"
+          : "-translate-y-4 pointer-events-none opacity-0"
+      )}
       style={{ top: "var(--site-header-offset, 0px)" }}
+      aria-hidden={!visible}
     >
       <div className="border-primary/15 border-b bg-background/95 shadow-[0_12px_32px_-20px_rgba(0,64,41,0.45)] backdrop-blur-xl">
-        <button
-          type="button"
-          onClick={() => setOpen((o) => !o)}
-          className="flex w-full items-center gap-3 px-4 py-3 text-left"
-          aria-expanded={open}
-          aria-controls={menuId}
-        >
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_6px_14px_-6px_rgba(0,64,41,0.6)]">
-            <Icon name={current?.icon ?? "layers"} className="size-4" />
-          </span>
-          <span className="flex min-w-0 flex-1 flex-col">
-            <span className="font-heading font-semibold text-[0.65rem] text-primary uppercase tracking-[0.16em]">
-              {title}
-            </span>
-            <span className="truncate font-heading font-semibold text-[0.95rem] text-foreground">
-              {current?.label}
-            </span>
-          </span>
-          <span
-            className={cn(
-              "flex size-8 shrink-0 items-center justify-center rounded-full border border-foreground/15 text-foreground transition-colors",
-              open && "bg-primary/10 border-primary/30 text-primary"
-            )}
+        <nav aria-label={title}>
+          <ul
+            ref={scrollerRef}
+            className="flex gap-2 overflow-x-auto px-4 py-2.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
-            <Icon name="chevrons-up-down" className="size-4" />
-          </span>
-        </button>
-        <div className="h-1 bg-primary/10">
-          <div
-            className="h-full rounded-r-full bg-primary transition-[width] duration-150 ease-out"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-      </div>
-
-      {open && (
-        <div
-          id={menuId}
-          className="absolute inset-x-0 top-full border-foreground/10 border-b bg-background shadow-[0_20px_40px_-20px_rgba(0,64,41,0.35)]"
-        >
-          <ul className="flex flex-col p-2">
             {items.map((item) => {
               const active = item.id === activeId;
               return (
-                <li key={item.id}>
+                <li key={item.id} ref={registerChip(item.id)}>
                   <UILink
                     href={`#${item.id}`}
-                    onClick={() => setOpen(false)}
+                    aria-current={active ? "location" : undefined}
+                    tabIndex={visible ? undefined : -1}
                     className={cn(
-                      "flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm",
+                      "flex items-center gap-1.5 whitespace-nowrap rounded-full border px-3 py-1.5 font-heading font-semibold text-[0.8rem] transition-colors duration-200",
                       active
-                        ? "bg-primary/10 font-semibold text-foreground"
-                        : "text-muted-foreground active:bg-foreground/5"
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-foreground/12 bg-foreground/[0.03] text-muted-foreground"
                     )}
                   >
-                    {item.icon ? (
-                      <Icon
-                        name={item.icon}
-                        className={cn(
-                          "size-4 shrink-0",
-                          active ? "text-primary" : "text-muted-foreground"
-                        )}
-                      />
-                    ) : (
-                      <span
-                        className={cn(
-                          "size-1.5 shrink-0 rounded-full",
-                          active ? "bg-primary" : "bg-foreground/25"
-                        )}
-                      />
-                    )}
+                    <Icon name={iconOf(item)} className="size-3.5 shrink-0" />
                     {item.label}
                   </UILink>
                 </li>
               );
             })}
           </ul>
+        </nav>
+        <div className="h-0.5 bg-primary/10">
+          <div
+            className="h-full rounded-r-full bg-primary transition-[width] duration-150 ease-out"
+            style={{ width: `${progress}%` }}
+          />
         </div>
-      )}
+      </div>
     </div>
   );
 }
 
 /**
- * Oversiktsside med sidemeny: innholdet i én kolonne, en sticky meny til
- * venstre på desktop som følger med når du scroller, og en sticky topplinje
- * med nedtrekk på mobil. Menyen peker på #ankre i innholdet — så alt som
- * trengs er at hver seksjon har en `id`.
+ * Oversiktsside med sidemeny: et kortrutenett øverst som viser alle seksjonene
+ * på én gang, innholdet i én kolonne, en sticky meny til venstre på desktop, og
+ * en fast brikkelinje under headeren på mobil. Menyene peker på #ankre i
+ * innholdet — så alt som trengs er at hver seksjon har en `id`.
  *
  * Ulikt `SectionRail` (guider) er den IKKE nummerert: en ressursside er et
  * kart, ikke en oppskrift — du skal kunne hoppe rett til «Prompter».
@@ -239,20 +326,24 @@ export function HubLayout({
   nav,
   navTitle = "På denne siden",
   aside,
+  showIndex,
   children,
   className,
 }: HubLayoutProps) {
-  const { activeId, progress } = useActiveSection(nav);
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const { activeId, progress, inSection } = useActiveSection(nav, rootRef);
   const hasNav = nav.length > 0;
+  const withIndex = showIndex ?? nav.length > 1;
 
   return (
-    <div className={cn("relative", className)}>
+    <div className={cn("relative", className)} ref={rootRef}>
       {hasNav && (
         <HubBar
           items={nav}
           title={navTitle}
           activeId={activeId}
           progress={progress}
+          visible={inSection}
         />
       )}
       <Container size="lg" padding="none">
@@ -270,7 +361,10 @@ export function HubLayout({
               </div>
             </aside>
           )}
-          <div className="min-w-0">{children}</div>
+          <div className="min-w-0">
+            {withIndex && <HubIndex items={nav} title={navTitle} />}
+            {children}
+          </div>
         </div>
       </Container>
     </div>

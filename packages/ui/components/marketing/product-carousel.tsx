@@ -9,6 +9,7 @@ import { cn } from "../../lib/utils";
 import { Button } from "../button";
 import { type ProductAccent, ProductCard } from "./product-card";
 import type { ProductGridItem } from "./product-grid";
+import { RailBleed } from "./rail-bleed";
 
 export interface ProductCarouselProps {
   products: ProductGridItem[];
@@ -142,34 +143,37 @@ export function ProductCarousel({
         </div>
       )}
 
-      {/* Viewport: negativ margin + padding på kortene gir mellomrommet. Litt
-          ekstra luft over/under så hover-løftet og skyggen ikke klippes. */}
-      <section
-        ref={emblaRef}
-        className="-my-3 overflow-hidden py-3"
-        aria-roledescription="karusell"
-        aria-label={label}
-        onKeyDown={onKeyDown}
-      >
-        <ul className="-ml-5 flex touch-pan-y">
-          {products.map((product, index) => {
-            const { id, featured: _featured, accent, ...rest } = product;
-            return (
-              <li
-                key={id}
-                className="min-w-0 flex-none basis-[82%] pl-5 sm:basis-1/2 lg:basis-1/3"
-                aria-label={`${index + 1} av ${products.length}`}
-              >
-                <ProductCard
-                  {...rest}
-                  className="h-full"
-                  accent={accent ?? palette[index % palette.length]}
-                />
-              </li>
-            );
-          })}
-        </ul>
-      </section>
+      {/* Viewport: negativ margin + padding på kortene gir mellomrommet.
+          Raden går helt ut til skjermkanten og tones ut der (RailBleed) i
+          stedet for å klippes hardt ved innholdskanten. */}
+      <RailBleed>
+        <section
+          ref={emblaRef}
+          className="overflow-visible"
+          aria-roledescription="karusell"
+          aria-label={label}
+          onKeyDown={onKeyDown}
+        >
+          <ul className="-ml-5 flex touch-pan-y">
+            {products.map((product, index) => {
+              const { id, featured: _featured, accent, ...rest } = product;
+              return (
+                <li
+                  key={id}
+                  className="min-w-0 flex-none basis-[82%] pl-5 sm:basis-1/2 lg:basis-1/3"
+                  aria-label={`${index + 1} av ${products.length}`}
+                >
+                  <ProductCard
+                    {...rest}
+                    className="h-full"
+                    accent={accent ?? palette[index % palette.length]}
+                  />
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      </RailBleed>
 
       {/* Prikker bare på mobil, der pilene er skjult — på desktop viser pilene
           allerede hvor i raden man er. */}

@@ -33,6 +33,7 @@ import {
   applyCarouselTween,
   resetCarouselTween,
 } from "./carousel-tween";
+import { RailBleed } from "./rail-bleed";
 
 export type { CarouselEffect } from "./carousel-tween";
 
@@ -398,63 +399,59 @@ export function Carousel({
             `section` + navn gir en landemerke-region, og `aria-roledescription`
             får skjermleseren til å si «karusell» i stedet for «region» — WAI-
             ARIA-mønsteret for karuseller.
+
+            Raden går helt ut til skjermkanten (RailBleed): viewporten holder
+            innholdsbredden, men klipper ikke — det som stikker utenfor tones
+            ut mot kanten i stedet for å kuttes hardt. For auto-scroll-stripen
+            betyr det at det alltid er en logo på vei inn og en på vei ut.
           */}
-          <section
-            className={cn(
-              "overflow-hidden",
-              // Auto-scroll-strømmen går fra skjermkant til skjermkant, ikke
-              // bare innholdsbredden: da er det alltid en logo på vei inn og
-              // en på vei ut, og det er tydelig at stripen beveger seg / kan
-              // sveipes. Masken fader logoene ut mot kantene, slik at de er
-              // fullt synlige innenfor innholdsbredden og borte ved
-              // skjermkanten. `--rail-bleed` er avstanden fra skjermkant til
-              // innholdskant (Container default = 72rem + 1rem padding), med
-              // et minimum så smale skjermer også får en synlig fade.
-              autoScroll &&
-                "mx-[calc(50%-50vw)] w-screen [--rail-bleed:max(2.5rem,calc((100vw-72rem)/2+1rem))] [mask-image:linear-gradient(to_right,transparent,black_var(--rail-bleed),black_calc(100%-var(--rail-bleed)),transparent)]"
-            )}
-            ref={emblaRef}
-            aria-roledescription="karusell"
-            aria-label={title ?? eyebrow ?? "Karusell"}
-            onKeyDown={onKeyDown}
-          >
-            <div
-              className={cn(
-                "flex touch-pan-y",
-                isLogoRail ? "-ml-8 items-center" : "-ml-4 md:-ml-6",
-                // AutoHeight setter høyden på denne containeren inline —
-                // overgangen gjør at den glir i stedet for å hoppe. Selve
-                // høydejusteringen beholdes ved redusert bevegelse (den er
-                // layout, ikke pynt); det er glidningen vi dropper.
-                aspect === "auto" && "items-start",
-                aspect === "auto" &&
-                  !reduceMotion &&
-                  "transition-[height] duration-300 ease-out"
-              )}
+          <RailBleed>
+            <section
+              className="overflow-visible"
+              ref={emblaRef}
+              aria-roledescription="karusell"
+              aria-label={title ?? eyebrow ?? "Karusell"}
+              onKeyDown={onKeyDown}
             >
-              {renderItems.map(({ item, duplicate }, index) => (
-                <CarouselSlide
-                  key={`${item.id ?? item.title ?? item.src ?? "slide"}-${index}`}
-                  item={item}
-                  index={index}
-                  total={items.length}
-                  aspect={aspect}
-                  presentation={presentation}
-                  parallax={isParallax}
-                  duplicate={duplicate}
-                  className={cn(
-                    "min-w-0 flex-none",
-                    isLogoRail
-                      ? "basis-1/2 pl-8 sm:basis-1/3 lg:basis-1/5"
-                      : cn(basis, "pl-4 md:pl-6"),
-                    dimNeighbours && "transition-opacity duration-500 ease-out",
-                    dimNeighbours && index !== selectedIndex && "opacity-40"
-                  )}
-                  linkComponent={LinkComp}
-                />
-              ))}
-            </div>
-          </section>
+              <div
+                className={cn(
+                  "flex touch-pan-y",
+                  isLogoRail ? "-ml-8 items-center" : "-ml-4 md:-ml-6",
+                  // AutoHeight setter høyden på denne containeren inline —
+                  // overgangen gjør at den glir i stedet for å hoppe. Selve
+                  // høydejusteringen beholdes ved redusert bevegelse (den er
+                  // layout, ikke pynt); det er glidningen vi dropper.
+                  aspect === "auto" && "items-start",
+                  aspect === "auto" &&
+                    !reduceMotion &&
+                    "transition-[height] duration-300 ease-out"
+                )}
+              >
+                {renderItems.map(({ item, duplicate }, index) => (
+                  <CarouselSlide
+                    key={`${item.id ?? item.title ?? item.src ?? "slide"}-${index}`}
+                    item={item}
+                    index={index}
+                    total={items.length}
+                    aspect={aspect}
+                    presentation={presentation}
+                    parallax={isParallax}
+                    duplicate={duplicate}
+                    className={cn(
+                      "min-w-0 flex-none",
+                      isLogoRail
+                        ? "basis-1/2 pl-8 sm:basis-1/3 lg:basis-1/5"
+                        : cn(basis, "pl-4 md:pl-6"),
+                      dimNeighbours &&
+                        "transition-opacity duration-500 ease-out",
+                      dimNeighbours && index !== selectedIndex && "opacity-40"
+                    )}
+                    linkComponent={LinkComp}
+                  />
+                ))}
+              </div>
+            </section>
+          </RailBleed>
 
           {withDots && (
             <div className="flex items-center justify-center gap-2">

@@ -94,6 +94,12 @@ export {
   type ProductAccent,
   type ProductSurface,
 } from "./product-card";
+export { RailBleed } from "./rail-bleed";
+export {
+  TestimonialRail,
+  type TestimonialRailItem,
+  type TestimonialRailProps,
+} from "./testimonial-rail";
 export {
   ProductCarousel,
   type ProductCarouselProps,

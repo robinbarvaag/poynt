@@ -7,8 +7,73 @@ import { isHeroBlockType } from "@/lib/kontakt-page";
 import { faqSchema } from "@/lib/structured-data";
 import type { Page } from "@/payload-types";
 import { HubLayout, type HubNavItem, LandingCanvas } from "@poynt/ui";
+import type { IconName } from "@poynt/ui/icons";
 
 type Block = NonNullable<Page["layout"]>[number];
+
+/**
+ * Ikon per blokktype — menyen og oversiktskortene skal kunne skilles fra
+ * hverandre på en halv blikk, uten at redaktøren må velge noe i admin.
+ */
+const HUB_ICONS: Record<string, IconName> = {
+  promptLibrary: "bot",
+  resourceList: "download",
+  featureGrid: "sparkles",
+  steps: "layers",
+  faq: "message-square",
+  pathCards: "compass",
+  carousel: "image",
+  contentMedia: "image",
+  content: "file-text",
+  pricing: "wallet",
+  testimonials: "quote",
+  logoCloud: "building",
+  statsBand: "bar-chart",
+  newsletter: "mail",
+  ctaSection: "send",
+  productArchive: "briefcase",
+  productSpotlight: "briefcase",
+  podcastArchive: "headphones",
+  spotifyEmbed: "headphones",
+  servicesArchive: "wrench",
+  form: "pencil",
+  countdown: "timer",
+  media: "image",
+};
+
+/**
+ * Hvor mange ting seksjonen inneholder, og hva de heter. Gir «8 prompter» i
+ * stedet for bare «Prompter» — mengden er halve oversikten.
+ */
+const HUB_COUNTS: Record<string, { field: string; one: string; many: string }> =
+  {
+    promptLibrary: { field: "prompts", one: "prompt", many: "prompter" },
+    resourceList: { field: "items", one: "ressurs", many: "ressurser" },
+    featureGrid: { field: "features", one: "tips", many: "tips" },
+    steps: { field: "steps", one: "steg", many: "steg" },
+    faq: { field: "items", one: "spørsmål", many: "spørsmål" },
+    pathCards: { field: "paths", one: "vei", many: "veier" },
+    pricing: { field: "tiers", one: "pakke", many: "pakker" },
+    testimonials: { field: "testimonials", one: "sitat", many: "sitater" },
+  };
+
+function hubMeta(block: Block): string | undefined {
+  const spec = HUB_COUNTS[block.blockType];
+  if (!spec) return undefined;
+  const value = (block as unknown as Record<string, unknown>)[spec.field];
+  if (!Array.isArray(value) || value.length === 0) return undefined;
+  return `${value.length} ${value.length === 1 ? spec.one : spec.many}`;
+}
+
+/** Første ingress-lignende felt på blokka, som beskrivelse på oversiktskortet. */
+function hubDescription(block: Block): string | undefined {
+  const record = block as unknown as Record<string, unknown>;
+  for (const key of ["intro", "subtitle", "description"]) {
+    const value = record[key];
+    if (typeof value === "string" && value.trim()) return value.trim();
+  }
+  return undefined;
+}
 
 /**
  * Menypunktene på en oversiktsside: hver blokk med et «Blokk-navn» i admin.
@@ -21,6 +86,9 @@ function hubNavFrom(blocks: Block[]): HubNavItem[] {
     .map((block) => ({
       id: slugifyAnchor(block.blockName as string),
       label: block.blockName as string,
+      icon: HUB_ICONS[block.blockType],
+      description: hubDescription(block),
+      meta: hubMeta(block),
     }));
 }
 

@@ -313,6 +313,7 @@ export {
 } from "./components/landing-canvas";
 
 export {
+  HubIndex,
   HubLayout,
   type HubLayoutProps,
   type HubNavItem,
@@ -404,6 +405,10 @@ export {
   type ProductSurface,
   ProductCarousel,
   type ProductCarouselProps,
+  RailBleed,
+  TestimonialRail,
+  type TestimonialRailItem,
+  type TestimonialRailProps,
   ProductGrid,
   type ProductGridItem,
   type ProductGridProps,

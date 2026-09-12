@@ -3,6 +3,7 @@ import { Container, gridVariants } from "../container";
 import { Reveal, Stagger, StaggerItem } from "../motion";
 import { SectionHeader } from "../section-header";
 import { TestimonialCard, type TestimonialCardProps } from "./testimonial-card";
+import { TestimonialRail } from "./testimonial-rail";
 
 export interface TestimonialItem extends TestimonialCardProps {
   id: string | number;
@@ -27,6 +28,11 @@ export interface TestimonialsProps {
  * ett stort, sentrert sitat (`quote`). Samme byggekloss som de andre
  * marketing-seksjonene (eyebrow + tittel + intro, deretter innholdet).
  * Presentasjons-only.
+ *
+ * På mobil ville rutenettet stablet sitatene under hverandre — tre høye kort
+ * på rad leses som en liste. Der vises de i stedet som en sveipbar rad
+ * (`TestimonialRail`) som går helt ut til skjermkanten; fra `sm` og opp er
+ * det plass til rutenettet.
  */
 export function Testimonials({
   eyebrow,
@@ -90,7 +96,18 @@ export function Testimonials({
   return (
     <Container padding="none">
       <SectionHeader eyebrow={eyebrow} title={title} intro={intro} />
-      <Stagger className={cn(gridVariants({ cols: columns, gap: "md" }))}>
+      <div className="sm:hidden">
+        <TestimonialRail
+          testimonials={testimonials}
+          label={title ?? eyebrow ?? "Kundehistorier"}
+        />
+      </div>
+      <Stagger
+        className={cn(
+          gridVariants({ cols: columns, gap: "md" }),
+          "hidden sm:grid"
+        )}
+      >
         {testimonials.map(({ id, ...testimonial }) => (
           <StaggerItem key={id} className="h-full">
             <TestimonialCard {...testimonial} />
