@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { Icon, type IconName } from "../icons";
 import { UILink } from "../lib/link";
 import { cn } from "../lib/utils";
@@ -129,43 +129,60 @@ function HubBar({
   progress: number;
 }) {
   const [open, setOpen] = useState(false);
+  const menuId = useId();
   const current = items.find((i) => i.id === activeId) ?? items[0];
 
   return (
-    <div className="sticky top-0 z-40 lg:hidden">
-      <div className="border-foreground/10 border-b bg-background/85 backdrop-blur">
+    <div
+      // Fester seg rett under sidens header når den finnes: `SiteHeader`
+      // publiserer sin høyde som `--site-header-offset` (4rem synlig, 0 når
+      // den har skjult seg ved scroll nedover). Baren følger med i samme
+      // tempo/kurve som headeren, så de beveger seg som én enhet. Uten
+      // header (Storybook, andre flater) er offset 0 = som før.
+      className="sticky z-40 transition-[top] duration-300 ease-drawer motion-reduce:transition-none lg:hidden"
+      style={{ top: "var(--site-header-offset, 0px)" }}
+    >
+      <div className="border-primary/15 border-b bg-background/95 shadow-[0_12px_32px_-20px_rgba(0,64,41,0.45)] backdrop-blur-xl">
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
           className="flex w-full items-center gap-3 px-4 py-3 text-left"
           aria-expanded={open}
+          aria-controls={menuId}
         >
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_6px_14px_-6px_rgba(0,64,41,0.6)]">
             <Icon name={current?.icon ?? "layers"} className="size-4" />
           </span>
           <span className="flex min-w-0 flex-1 flex-col">
-            <span className="font-heading text-[0.65rem] text-muted-foreground uppercase tracking-[0.16em]">
+            <span className="font-heading font-semibold text-[0.65rem] text-primary uppercase tracking-[0.16em]">
               {title}
             </span>
-            <span className="truncate font-semibold text-foreground text-sm">
+            <span className="truncate font-heading font-semibold text-[0.95rem] text-foreground">
               {current?.label}
             </span>
           </span>
-          <Icon
-            name="chevrons-up-down"
-            className="size-4 shrink-0 text-muted-foreground"
-          />
+          <span
+            className={cn(
+              "flex size-8 shrink-0 items-center justify-center rounded-full border border-foreground/15 text-foreground transition-colors",
+              open && "bg-primary/10 border-primary/30 text-primary"
+            )}
+          >
+            <Icon name="chevrons-up-down" className="size-4" />
+          </span>
         </button>
-        <div className="h-0.5 bg-foreground/5">
+        <div className="h-1 bg-primary/10">
           <div
-            className="h-full bg-primary transition-[width] duration-150 ease-out"
+            className="h-full rounded-r-full bg-primary transition-[width] duration-150 ease-out"
             style={{ width: `${progress}%` }}
           />
         </div>
       </div>
 
       {open && (
-        <div className="absolute inset-x-0 top-full border-foreground/10 border-b bg-background shadow-[0_20px_40px_-20px_rgba(0,64,41,0.35)]">
+        <div
+          id={menuId}
+          className="absolute inset-x-0 top-full border-foreground/10 border-b bg-background shadow-[0_20px_40px_-20px_rgba(0,64,41,0.35)]"
+        >
           <ul className="flex flex-col p-2">
             {items.map((item) => {
               const active = item.id === activeId;
