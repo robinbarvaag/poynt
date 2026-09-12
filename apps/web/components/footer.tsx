@@ -1,7 +1,7 @@
 import { CookieSettingsButton } from "@/components/consent";
 import { type MediaResource, PayloadImage } from "@/components/payload-image";
+import { RichText } from "@/components/rich-text";
 import type { SerializedEditorState } from "@payloadcms/richtext-lexical/lexical";
-import { RichText } from "@payloadcms/richtext-lexical/react";
 import { FloatingShapes, Heading, Text } from "@poynt/ui";
 import { Facebook, Instagram, Linkedin, Twitter, Youtube } from "lucide-react";
 import { cacheLife } from "next/cache";

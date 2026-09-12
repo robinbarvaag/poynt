@@ -8,9 +8,26 @@ const textNode = (text: string, format = 0) => ({
   version: 1,
 });
 
+/**
+ * Lenkefelt som i editoren (se lib/lexical/link-feature.ts): `mailto:` og
+ * `tel:` i markdown blir e-post-/telefonlenker med popover på nettsiden,
+ * alt annet en vanlig nettadresse.
+ */
+const linkFields = (url: string) => {
+  const mailto = /^mailto:([^?]+)/i.exec(url);
+  if (mailto?.[1]) {
+    return { linkType: "email" as const, email: mailto[1], url, newTab: false };
+  }
+  const tel = /^tel:(.+)$/i.exec(url);
+  if (tel?.[1]) {
+    return { linkType: "phone" as const, phone: tel[1], url, newTab: false };
+  }
+  return { linkType: "custom" as const, url, newTab: false };
+};
+
 const linkNode = (label: string, url: string, format: number) => ({
   type: "link",
-  fields: { url, newTab: false, linkType: "custom" as const },
+  fields: linkFields(url),
   format: "" as const,
   indent: 0,
   version: 3,

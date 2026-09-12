@@ -163,6 +163,13 @@ export {
 } from "./components/tooltip";
 
 export {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  PopoverAnchor,
+} from "./components/popover";
+
+export {
   DropdownMenu,
   DropdownMenuPortal,
   DropdownMenuTrigger,

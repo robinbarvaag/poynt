@@ -93,6 +93,8 @@ Linting and formatting are handled entirely by **Biome** (`biome.json` at root) 
 
 **MCP-server for Claude**: `POST /api/mcp/<MCP_SECRET>` lar Claude (claude.ai-connector, Claude Code) lage sider, kundehistorier og blogginnlegg som **utkast** via Payloads lokale API. Blokk-skjemaene genereres fra `blocks/` automatisk; richText sendes som markdown. Kode i `apps/web/lib/mcp/`, oppsett i `docs/MCP.md`.
 
+**Lenker i rik tekst**: Lexical-lenker har typene nettadresse, side på nettstedet, forsiden, e-post og telefon (`apps/web/lib/lexical/link-feature.ts`, bruk `withPoyntLinks(defaultFeatures)` i alle `lexicalEditor({ features })`). Frontend rendrer alltid via `@/components/rich-text` (eller sprer inn `linkConverters`): eksterne lenker får ny fane + ikon, e-post/telefon får popover med «send/ring» og «kopier». Lenkelogikken ligger i `lib/lexical/link-fields.ts` (testet).
+
 **Cart constraint**: Digital products limited to 1 per item in cart. Cart state persists to localStorage as "poynt-cart".
 
 **Stripe sync**: Products and prices automatically sync to Stripe via Payload plugin. Stripe IDs stored on Product and User documents.

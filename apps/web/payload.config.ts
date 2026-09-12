@@ -7,6 +7,7 @@ import { vercelBlobStorage } from "@payloadcms/storage-vercel-blob";
 import { nb } from "@payloadcms/translations/languages/nb";
 import { buildConfig } from "payload";
 import sharp from "sharp";
+import { withPoyntLinks } from "./lib/lexical/link-feature";
 
 import { formBuilderPlugin } from "@payloadcms/plugin-form-builder";
 import { redirectsPlugin } from "@payloadcms/plugin-redirects";
@@ -126,7 +127,11 @@ function relabelFormEmailFields(fields: any[]): any[] {
 }
 
 export default buildConfig({
-  editor: lexicalEditor({}),
+  // Standardverktøy + våre lenketyper (forside, e-post, telefon). Se
+  // lib/lexical/link-feature.ts.
+  editor: lexicalEditor({
+    features: ({ defaultFeatures }) => withPoyntLinks(defaultFeatures),
+  }),
   secret: payloadSecret,
   serverURL: siteUrl,
   // Avsender for e-poster Payload selv sender (i praksis skjema-e-postene fra

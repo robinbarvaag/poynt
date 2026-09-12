@@ -1,3 +1,7 @@
+import {
+  type LexicalLinkFields,
+  lexicalLinkHref,
+} from "@/lib/lexical/link-fields";
 import type { Guide } from "@/payload-types";
 
 /**
@@ -15,7 +19,7 @@ interface LexicalNode {
   /** Bitmaske fra Lexical: 1 = fet, 2 = kursiv (resten ignorerer vi). */
   format?: number | string;
   listType?: string;
-  fields?: { url?: string; newTab?: boolean };
+  fields?: LexicalLinkFields;
   url?: string;
   value?: { alt?: string; filename?: string };
   children?: LexicalNode[];
@@ -86,7 +90,7 @@ function inlineText(node: LexicalNode): string {
   if (node.type === "linebreak") return "\n";
   if (node.type === "link" || node.type === "autolink") {
     const label = inlineChildren(node.children);
-    const url = node.fields?.url ?? node.url ?? "";
+    const url = lexicalLinkHref(node.fields) ?? node.url ?? "";
     return url ? `[${label}](${url})` : label;
   }
   if (node.children && Array.isArray(node.children)) {

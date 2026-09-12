@@ -1,8 +1,8 @@
+import { RichText } from "@/components/rich-text";
 import { ServiceModal } from "@/components/service-modal";
 import { resolveMedia } from "@/lib/payload";
 import { formatServicePrice, withContactSource } from "@/lib/service";
 import config from "@/payload.config";
-import { RichText } from "@payloadcms/richtext-lexical/react";
 import { cacheLife, cacheTag } from "next/cache";
 import { getPayload } from "payload";
 import { Suspense } from "react";

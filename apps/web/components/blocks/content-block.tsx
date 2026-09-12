@@ -1,5 +1,5 @@
+import { RichText } from "@/components/rich-text";
 import type { SerializedEditorState } from "@payloadcms/richtext-lexical/lexical";
-import { RichText } from "@payloadcms/richtext-lexical/react";
 import { Container } from "@poynt/ui";
 
 interface ContentBlockProps {
