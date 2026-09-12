@@ -101,9 +101,6 @@ export function BlogPostView({
           )}
 
           <div className="mt-6 flex items-center gap-4">
-            {post.author && typeof post.author === "object" && (
-              <Text variant="muted">Av {post.author.email}</Text>
-            )}
             <Text variant="muted">{formatLongDate(post.publishedAt)}</Text>
           </div>
         </header>

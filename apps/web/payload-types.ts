@@ -1670,7 +1670,6 @@ export interface BlogPost {
    * Genereres automatisk fra tittel
    */
   slug: string;
-  author?: (number | null) | User;
   categories?: (number | Category)[] | null;
   publishedAt: string;
   relatedPosts?: (number | BlogPost)[] | null;
@@ -1691,38 +1690,6 @@ export interface BlogPost {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: number;
-  firstName?: string | null;
-  lastName?: string | null;
-  avatar?: (number | null) | Media;
-  /**
-   * Kort beskrivelse som vises på blogginnlegg
-   */
-  bio?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'users';
 }
 /**
  * Tidløst salgsbevis om ÉN kunde: utfordringen → hva vi gjorde → resultatet. Vises på /kundehistorier og lenkes fra salgssidene. Fagstoff, tips og nyheter hører hjemme i Blogginnlegg.
@@ -2494,6 +2461,38 @@ export interface Order {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: number;
+  firstName?: string | null;
+  lastName?: string | null;
+  avatar?: (number | null) | Media;
+  /**
+   * Kort beskrivelse som vises på blogginnlegg
+   */
+  bio?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
 export interface Redirect {
@@ -3227,7 +3226,6 @@ export interface BlogPostsSelect<T extends boolean = true> {
         ogType?: T;
       };
   slug?: T;
-  author?: T;
   categories?: T;
   publishedAt?: T;
   relatedPosts?: T;

@@ -26,7 +26,7 @@ export const BlogPosts: CollectionConfig = {
       },
     },
     useAsTitle: "title",
-    defaultColumns: ["title", "author", "publishedAt", "status"],
+    defaultColumns: ["title", "publishedAt", "status"],
     group: "Innhold",
     description:
       "Fag og aktualitet med dato: tips, innsikt, meninger og nyheter. Handler teksten om én kundes reise og resultat, skriv den som Kundehistorie i stedet.",
@@ -161,12 +161,6 @@ export const BlogPosts: CollectionConfig = {
         initCollapsed: false,
       },
       fields: [
-        {
-          name: "author",
-          type: "relationship",
-          relationTo: "users",
-          label: "Forfatter",
-        },
         {
           name: "categories",
           type: "relationship",
