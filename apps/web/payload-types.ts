@@ -206,6 +206,7 @@ export interface Page {
         | TestimonialsBlock
         | CtaSectionBlock
         | ProductArchiveBlock
+        | ProductSpotlightBlock
         | PodcastArchiveBlock
         | ServicesArchiveBlock
         | FormBlock
@@ -1413,6 +1414,31 @@ export interface Category {
   icon?: string | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProductSpotlightBlock".
+ */
+export interface ProductSpotlightBlock {
+  /**
+   * Bilde, pris og merkelapp hentes fra produktet.
+   */
+  product: number | Product;
+  /**
+   * Liten tekst over produktnavnet, f.eks. «Anbefalt» eller «Omtalt i innlegget». Tom = produkttypen.
+   */
+  eyebrow?: string | null;
+  /**
+   * Erstatter produktets korte beskrivelse. Bruk den til å knytte produktet til det du skriver om.
+   */
+  text?: string | null;
+  /**
+   * Skjules automatisk for medlemskap, utsolgte produkter og produkter med varianter (de må velges på produktsiden).
+   */
+  showAddToCart?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'productSpotlight';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2708,6 +2734,7 @@ export interface PagesSelect<T extends boolean = true> {
         testimonials?: T | TestimonialsBlockSelect<T>;
         ctaSection?: T | CtaSectionBlockSelect<T>;
         productArchive?: T | ProductArchiveBlockSelect<T>;
+        productSpotlight?: T | ProductSpotlightBlockSelect<T>;
         podcastArchive?: T | PodcastArchiveBlockSelect<T>;
         servicesArchive?: T | ServicesArchiveBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
@@ -3149,6 +3176,18 @@ export interface ProductArchiveBlockSelect<T extends boolean = true> {
   limit?: T;
   featureFirst?: T;
   showMoreLink?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProductSpotlightBlock_select".
+ */
+export interface ProductSpotlightBlockSelect<T extends boolean = true> {
+  product?: T;
+  eyebrow?: T;
+  text?: T;
+  showAddToCart?: T;
   id?: T;
   blockName?: T;
 }
@@ -4137,6 +4176,7 @@ export interface Homepage {
         | TestimonialsBlock
         | CtaSectionBlock
         | ProductArchiveBlock
+        | ProductSpotlightBlock
         | PodcastArchiveBlock
         | ServicesArchiveBlock
         | FormBlock
@@ -4659,6 +4699,7 @@ export interface HomepageSelect<T extends boolean = true> {
         testimonials?: T | TestimonialsBlockSelect<T>;
         ctaSection?: T | CtaSectionBlockSelect<T>;
         productArchive?: T | ProductArchiveBlockSelect<T>;
+        productSpotlight?: T | ProductSpotlightBlockSelect<T>;
         podcastArchive?: T | PodcastArchiveBlockSelect<T>;
         servicesArchive?: T | ServicesArchiveBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;

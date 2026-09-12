@@ -37,8 +37,10 @@ function ProductGallery({
 
   return (
     /* Bildet pinnes mens teksten til høyre scroller forbi – fyller luft
-       uten å gjemme brødteksten bak tabs. */
-    <div className="space-y-4 lg:sticky lg:top-20 lg:self-start">
+       uten å gjemme brødteksten bak tabs. Bredden er capped (og på store
+       skjermer avledet av viewport-høyden) så A5-omslaget ikke blir høyere
+       enn skjermen på f.eks. en 13" Mac – resten av kolonnen blir luft. */
+    <div className="mx-auto w-full max-w-md space-y-4 lg:sticky lg:top-20 lg:mx-0 lg:max-w-[min(28rem,calc((100vh_-_11rem)*148/210))] lg:self-start">
       <div className="relative">
         {/* Lekent blob-pek bak bildet (INSPO/Steady-signaturen) —
             form/hjørne varierer per produkt, samme seed som kortet */}

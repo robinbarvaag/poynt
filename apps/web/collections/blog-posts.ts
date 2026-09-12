@@ -1,4 +1,6 @@
+import { BlocksFeature, lexicalEditor } from "@payloadcms/richtext-lexical";
 import type { CollectionConfig } from "payload";
+import { ProductSpotlight } from "../blocks/product-spotlight";
 import {
   qualityDataFields,
   qualityReviewPanel,
@@ -104,6 +106,15 @@ export const BlogPosts: CollectionConfig = {
               type: "richText",
               required: true,
               label: "Innhold",
+              // Standardverktøyene + «Produktkort» som kan settes inn midt i
+              // teksten (via «/»-menyen eller +-knappen), så et innlegg kan
+              // vise produktet det handler om med bilde, pris og kjøpsknapp.
+              editor: lexicalEditor({
+                features: ({ defaultFeatures }) => [
+                  ...defaultFeatures,
+                  BlocksFeature({ blocks: [ProductSpotlight] }),
+                ],
+              }),
             },
           ],
         },

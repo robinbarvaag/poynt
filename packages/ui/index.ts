@@ -372,6 +372,8 @@ export {
   ProductGrid,
   type ProductGridItem,
   type ProductGridProps,
+  ProductSpotlight,
+  type ProductSpotlightProps,
   Pricing,
   type PricingProps,
   type PricingTier,

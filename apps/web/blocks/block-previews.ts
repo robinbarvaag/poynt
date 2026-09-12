@@ -64,6 +64,10 @@ export const blockPreviews: Record<string, BlockPreview> = {
     story: "Blokker/ProductGrid",
     alt: "Rutenett med produktkort",
   },
+  productSpotlight: {
+    story: "Blokker/ProductSpotlight",
+    alt: "Ett produkt liggende med bilde, pris og kjøpsknapp",
+  },
   podcastArchive: {
     story: "Blokker/PodcastGrid",
     alt: "Rutenett med podkast-episoder",

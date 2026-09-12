@@ -20,6 +20,7 @@ import { PathCardsBlock } from "./blocks/path-cards-block";
 import { PodcastArchiveBlock } from "./blocks/podcast-archive-block";
 import { PricingBlock } from "./blocks/pricing-block";
 import { ProductArchiveBlock } from "./blocks/product-archive-block";
+import { ProductSpotlightBlock } from "./blocks/product-spotlight-block";
 import { ServicesArchiveBlock } from "./blocks/services-archive-block";
 import { SpotifyEmbedBlock } from "./blocks/spotify-embed-block";
 import { StatsBandBlock } from "./blocks/stats-band-block";
@@ -163,6 +164,14 @@ function renderBlock(block: Block): ReactNode {
       return (
         <ProductArchiveBlock
           {...(block as unknown as ComponentProps<typeof ProductArchiveBlock>)}
+        />
+      );
+    case "productSpotlight":
+      return (
+        <ProductSpotlightBlock
+          {...(block as unknown as ComponentProps<
+            typeof ProductSpotlightBlock
+          >)}
         />
       );
     case "servicesArchive":

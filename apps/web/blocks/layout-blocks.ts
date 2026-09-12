@@ -18,6 +18,7 @@ import { PathCards } from "./path-cards";
 import { PodcastArchive } from "./podcast-archive";
 import { Pricing } from "./pricing";
 import { ProductArchive } from "./product-archive";
+import { ProductSpotlight } from "./product-spotlight";
 import { ServicesArchive } from "./services-archive";
 import { SpotifyEmbed } from "./spotify-embed";
 import { StatsBand } from "./stats-band";
@@ -59,6 +60,7 @@ export const layoutBlocks: Block[] = [
   Testimonials,
   CtaSection,
   ProductArchive,
+  ProductSpotlight,
   PodcastArchive,
   ServicesArchive,
   FormBlock,

@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { cacheLife, cacheTag } from "next/cache";
 import { notFound, redirect } from "next/navigation";
 import { getPayload } from "payload";
+import { Suspense } from "react";
 
 interface PageProps {
   params: Promise<{
@@ -102,15 +103,24 @@ export async function generateMetadata({
   });
 }
 
-// INGEN Suspense rundt innhaldet — det er med vilje, og det er viktig:
-// eit tidlegare skjelett-fallback her gjorde at HEILE sida postponerte under
-// PPR (AdminBar sitt cookies()-kall bobla til den ytste grensa), så sjølv
-// kjende, prerendra slugs vart servert som skjelett + runtime-streaming på
-// kvar førespurnad. Utan grensa bakast heile sida inn i den statiske HTML-en
-// (berre AdminBar streamar, med usynleg null-fallback), og prefetch frå
-// nav-en får ferdig side. Ukjende stier (f.eks. /sw.js → 404) rendrast
-// dynamisk på førespurnad — dei er 404-ar og treng ikkje vere raske.
-export default async function Page({ params }: PageProps) {
+// params er URL-data og må lesast bak ei Suspense-grense (Instant Navigations
+// med cacheComponents). Fallbacken er null med vilje: eit tidlegare
+// skjelett-fallback her gjorde at HEILE sida postponerte under PPR (AdminBar
+// sitt cookies()-kall bobla til den ytste grensa), så sjølv kjende, prerendra
+// slugs vart servert som skjelett + runtime-streaming på kvar førespurnad.
+// AdminBar har no si eiga grense, og med null-fallback bakast kjende slugs
+// framleis inn i den statiske HTML-en, så prefetch frå nav-en får ferdig side.
+// Ukjende stier (f.eks. /sw.js → 404) rendrast dynamisk på førespurnad — dei
+// er 404-ar og treng ikkje vere raske.
+export default function Page({ params }: PageProps) {
+  return (
+    <Suspense fallback={null}>
+      <ResolvedPage params={params} />
+    </Suspense>
+  );
+}
+
+async function ResolvedPage({ params }: PageProps) {
   const { slug: slugArray } = await params;
   const slug = slugArray ? slugArray.join("/") : "forside";
   return <PageContent slug={slug} />;

@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { cacheLife, cacheTag } from "next/cache";
 import { notFound } from "next/navigation";
 import { getPayload } from "payload";
+import { Suspense } from "react";
 
 interface PostPageProps {
   params: Promise<{
@@ -57,7 +58,11 @@ export async function generateMetadata({
 
 // Kun publisert innhold her — forhåndsvisning av utkast bor på
 // /forhandsvisning/blogg/[slug], så denne ruta kan prerendres statisk.
-export default async function PostPage({ params }: PostPageProps) {
+//
+// Alt innholdet avhenger av `slug`, så params leses her – bak Suspense-grensa
+// i default-exporten. Da kan Next servere et umiddelbart skall (Instant
+// Navigations med cacheComponents) og strømme inn innlegget.
+async function PostPageContent({ params }: PostPageProps) {
   const { slug } = await params;
   const post = await getPost(slug);
   if (!post) {
@@ -65,6 +70,33 @@ export default async function PostPage({ params }: PostPageProps) {
   }
 
   return <BlogPostView post={post} />;
+}
+
+export default function PostPage(props: PostPageProps) {
+  return (
+    <Suspense
+      fallback={
+        <div className="mx-auto w-full max-w-3xl animate-pulse px-4 py-8 sm:px-6 lg:px-8">
+          <div className="mb-8 h-5 w-48 rounded-full bg-muted" />
+          <div className="mb-8 space-y-4">
+            <div className="h-6 w-24 rounded-full bg-muted" />
+            <div className="h-10 w-4/5 rounded-2xl bg-muted" />
+            <div className="h-5 w-2/3 rounded-full bg-muted" />
+            <div className="h-4 w-40 rounded-full bg-muted" />
+          </div>
+          <div className="mb-8 aspect-[16/9] w-full rounded-3xl bg-muted" />
+          <div className="space-y-3">
+            <div className="h-4 w-full rounded-full bg-muted" />
+            <div className="h-4 w-full rounded-full bg-muted" />
+            <div className="h-4 w-5/6 rounded-full bg-muted" />
+            <div className="h-4 w-3/4 rounded-full bg-muted" />
+          </div>
+        </div>
+      }
+    >
+      <PostPageContent {...props} />
+    </Suspense>
+  );
 }
 
 export async function generateStaticParams() {

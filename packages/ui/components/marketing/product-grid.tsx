@@ -39,7 +39,10 @@ export function ProductGrid({
   return (
     <div
       className={cn(
-        "grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3",
+        "grid grid-cols-1 gap-5 sm:grid-cols-2",
+        // Ett enkelt (fremhevet) produkt fyller hele bredden i 2 kolonner;
+        // med 3 kolonner ville det stått i 2/3 med en tom kolonne til høyre.
+        products.length > 1 && "lg:grid-cols-3",
         className
       )}
     >

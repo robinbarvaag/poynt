@@ -73,6 +73,10 @@ export {
   type ProductGridItem,
   type ProductGridProps,
 } from "./product-grid";
+export {
+  ProductSpotlight,
+  type ProductSpotlightProps,
+} from "./product-spotlight";
 export { Pricing, type PricingProps, type PricingTier } from "./pricing";
 export { ServiceCard, type ServiceCardProps } from "./service-card";
 export {

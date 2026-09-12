@@ -1,4 +1,5 @@
 import { AdminBar } from "@/components/admin-bar";
+import { BlogRichText } from "@/components/blog-rich-text";
 import { JsonLd } from "@/components/json-ld";
 import { MediaCredit } from "@/components/media-credit";
 import { PayloadImage } from "@/components/payload-image";
@@ -10,7 +11,6 @@ import { SITE_URL } from "@/lib/seo";
 import { articleSchema, breadcrumbSchema } from "@/lib/structured-data";
 import { detailBreadcrumbs } from "@/lib/ui-text";
 import type { BlogPost } from "@/payload-types";
-import { RichText } from "@payloadcms/richtext-lexical/react";
 import {
   Badge,
   Breadcrumbs,
@@ -127,7 +127,7 @@ export function BlogPostView({
         )}
 
         <div className="prose prose-lg max-w-none prose-headings:text-foreground prose-p:text-foreground prose-a:text-primary prose-strong:text-foreground">
-          <RichText data={post.content} />
+          <BlogRichText data={post.content} />
         </div>
 
         <RelatedPosts posts={relatedPosts} />

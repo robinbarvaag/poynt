@@ -33,7 +33,7 @@ export interface ProductCardProps {
   priceLabel?: string;
   /**
    * Media-slot — send f.eks. et `next/image` med `fill className="object-cover"`.
-   * Vanlige kort viser hele bildet (`object-contain`) i en 4:5-ramme med luft
+   * Vanlige kort viser hele bildet (`object-contain`) i en kvadratisk ramme med luft
    * rundt, så omslag/forsider aldri beskjæres. Fremhevede kort bruker A5-format
    * (148:210) og fyller rammen (fokuspunkt fra Payload styrer beskjæringen).
    * Uten media vises en dempet plassholder.
@@ -132,9 +132,11 @@ function ImageFrame({
             ? // A5-format (148:210) – matcher boka og hovedbildet på produktsiden.
               // Bildet fyller rammen (`object-cover`) og beskjæres etter fokuspunkt.
               "aspect-[148/210] bg-background/50"
-            : // 4:5-ramme med luft: hele bildet vises (`object-contain`) på en
-              // dempet flate, så omslag og forsider aldri kuttes.
-              "aspect-[4/5] bg-foreground/[0.04] p-4 [&_img]:object-contain"
+            : // Kvadratisk ramme med luft: hele bildet vises (`object-contain`)
+              // på en dempet flate, så omslag og forsider aldri kuttes. Kvadrat
+              // (ikke 4:5) fordi bilde + tekst da matcher høyden på det
+              // fremhevede A5-kortet i samme rad – 4:5 ble for høyt.
+              "aspect-square bg-foreground/[0.04] p-4 [&_img]:object-contain"
         )}
       >
         {image ?? (
