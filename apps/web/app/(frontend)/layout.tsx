@@ -9,12 +9,12 @@ import {
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { JsonLd } from "@/components/json-ld";
+import { SiteAnalytics } from "@/components/site-analytics";
 import { SocialFab, normalizeSocialLinks } from "@/components/social";
 import { UILinkProvider } from "@/components/ui-link-provider";
 import { organizationSchema, websiteSchema } from "@/lib/structured-data";
 import config from "@payload-config";
 import { Grain, cn } from "@poynt/ui";
-import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
 import { cacheLife, cacheTag } from "next/cache";
@@ -183,8 +183,9 @@ export default async function FrontendLayout({
         {/* Redaksjonell signatur: ett fint korn-lag over hele siden */}
         <Grain fixed />
         {/* Vercel Web Analytics og Speed Insights: cookie-frie og krever ikke
-            samtykke, så de ligger utenfor ConsentProvider og måler alle besøk. */}
-        <Analytics />
+            samtykke, så de ligger utenfor ConsentProvider og måler alle besøk
+            – bortsett fra våre egne (se site-analytics.tsx, `?va=off`). */}
+        <SiteAnalytics />
         <SpeedInsights />
       </body>
     </html>

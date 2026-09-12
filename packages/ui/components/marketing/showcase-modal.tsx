@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type * as React from "react";
 import { cn } from "../../lib/utils";
 
@@ -123,7 +123,15 @@ export function ShowcaseModal({
 }: ShowcaseModalProps) {
   const reduce = useReducedMotion();
   const [open, setOpen] = useState(true);
-  const close = () => setOpen(false);
+  // Sann fra lukking starter til ruten faktisk er navigert bort (og skjult).
+  const [closing, setClosing] = useState(false);
+  // Stien modalet ble vist på — `onClosed` (typisk `router.back()`) skal bare
+  // kjøres hvis brukeren fortsatt står der.
+  const pathRef = useRef<string | null>(null);
+  const close = () => {
+    setOpen(false);
+    setClosing(true);
+  };
 
   // Next 16 (cacheComponents) unmounter ikke ruten når man navigerer bort —
   // den skjules med React `<Activity>`, så komponenten (og `open: false`) lever
@@ -132,52 +140,73 @@ export function ShowcaseModal({
   // åpner alltid modalet når det blir synlig.
   useEffect(() => {
     setOpen(true);
+    setClosing(false);
+    pathRef.current = window.location.pathname;
   }, []);
 
   useModalBehavior(open, close);
 
-  return (
-    <AnimatePresence onExitComplete={onClosed}>
-      {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-          <motion.button
-            type="button"
-            aria-label="Lukk"
-            onClick={close}
-            className="absolute inset-0 bg-foreground/40 backdrop-blur-sm"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          />
-          <motion.dialog
-            open
-            layoutId={layoutId}
-            initial={reduce ? false : { opacity: 0, scale: 0.96, y: 8 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            className={cn(
-              "relative z-10 m-0 flex max-h-[88vh] w-full max-w-2xl flex-col overflow-hidden rounded-4xl border-0 bg-card p-0 text-foreground shadow-2xl ring-1 ring-foreground/10",
-              className
-            )}
-            aria-label={ariaLabel}
-          >
-            <ImageFrame
-              image={image}
-              className={cn("aspect-video shrink-0", imageClassName)}
-            />
-            <button
-              type="button"
-              onClick={close}
-              aria-label="Lukk"
-              className="absolute top-4 right-4 flex size-10 items-center justify-center rounded-full bg-background/90 text-foreground shadow-md ring-1 ring-foreground/10 transition-colors hover:bg-background"
-            >
-              <CloseIcon />
-            </button>
+  const handleExitComplete = () => {
+    // Har brukeren allerede navigert bort (f.eks. nettleserens tilbake-knapp
+    // under exit-animasjonen), ville en ny `back()` hoppet ett steg for langt.
+    if (window.location.pathname !== pathRef.current) {
+      setClosing(false);
+      return;
+    }
+    onClosed();
+  };
 
-            <PanelFade>{children}</PanelFade>
-          </motion.dialog>
-        </div>
+  return (
+    <>
+      {/* `router.back()` er asynkron. Uten dette laget kunne et klikk på et
+          nytt kort rekke å navigere før tilbake-steget landet — da spiste
+          `back()` den nye navigasjonen, og man fikk feil tjeneste i modalet
+          (eller feil URL). Laget forsvinner når ruten skjules. */}
+      {closing && !open && (
+        <div aria-hidden="true" className="fixed inset-0 z-50" />
       )}
-    </AnimatePresence>
+      <AnimatePresence onExitComplete={handleExitComplete}>
+        {open && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+            <motion.button
+              type="button"
+              aria-label="Lukk"
+              onClick={close}
+              className="absolute inset-0 bg-foreground/40 backdrop-blur-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            />
+            <motion.dialog
+              open
+              layoutId={layoutId}
+              initial={reduce ? false : { opacity: 0, scale: 0.96, y: 8 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className={cn(
+                "relative z-10 m-0 flex max-h-[88vh] w-full max-w-2xl flex-col overflow-hidden rounded-4xl border-0 bg-card p-0 text-foreground shadow-2xl ring-1 ring-foreground/10",
+                className
+              )}
+              aria-label={ariaLabel}
+            >
+              <ImageFrame
+                image={image}
+                className={cn("aspect-video shrink-0", imageClassName)}
+              />
+              <button
+                type="button"
+                onClick={close}
+                aria-label="Lukk"
+                className="absolute top-4 right-4 flex size-10 items-center justify-center rounded-full bg-background/90 text-foreground shadow-md ring-1 ring-foreground/10 transition-colors hover:bg-background"
+              >
+                <CloseIcon />
+              </button>
+
+              <PanelFade>{children}</PanelFade>
+            </motion.dialog>
+          </div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

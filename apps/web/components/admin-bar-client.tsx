@@ -1,5 +1,6 @@
 "use client";
 
+import { ANALYTICS_OPT_OUT_KEY } from "@/components/site-analytics";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -67,6 +68,10 @@ export function AdminBarClient(props: AdminBarProps) {
     fetch("/api/users/me", { credentials: "include" })
       .then((res) => res.json())
       .then((data) => {
+        // Innlogget admin: ikke tell denne nettleseren i Vercel Analytics.
+        if (data?.user) {
+          window.localStorage.setItem(ANALYTICS_OPT_OUT_KEY, "1");
+        }
         if (active) setUser(data?.user ?? null);
       })
       .catch(() => {
@@ -97,7 +102,7 @@ export function AdminBarClient(props: AdminBarProps) {
         type="button"
         onClick={() => setCollapsedPersisted(false)}
         aria-label="Vis admin-verktøy"
-        className="fixed right-6 bottom-6 z-50 flex size-11 items-center justify-center rounded-full bg-foreground text-background shadow-lg ring-1 ring-black/10 transition hover:scale-105 print:hidden"
+        className="fixed right-6 bottom-[calc(1.5rem+var(--sticky-bar-height,0px))] z-50 flex size-11 items-center justify-center rounded-full bg-foreground text-background shadow-lg ring-1 ring-black/10 transition hover:scale-105 print:hidden"
       >
         <Pencil className="size-4" />
       </button>
@@ -105,7 +110,7 @@ export function AdminBarClient(props: AdminBarProps) {
   }
 
   return (
-    <div className="fixed right-6 bottom-6 z-50 print:hidden">
+    <div className="fixed right-6 bottom-[calc(1.5rem+var(--sticky-bar-height,0px))] z-50 print:hidden">
       <div className="flex items-center gap-1 rounded-full bg-foreground p-1 pl-3 text-background shadow-lg ring-1 ring-black/10 backdrop-blur">
         <span className="pr-1 pl-1 font-medium text-background/70 text-xs">
           Admin

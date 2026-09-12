@@ -139,6 +139,7 @@ function QuantityStepper({
 
 // Variantvalg (f.eks. «Signert?») som pill-knapper – ikke dropdown – så alle
 // valg er synlige med én gang, og at valget MÅ tas kommer tydelig frem.
+// Pillene brytes over flere linjer (ikke sidescroll), så ingen valg gjemmes.
 // Brukes både i kjøpsboksen og i den faste kjøpslinja; begge speiler samme
 // state, så et valg ett sted er valgt begge steder. `name` må være unik per
 // forekomst, ellers blir de to radiogruppene én i nettleseren.
@@ -149,39 +150,37 @@ function VariantPicker({
   selected,
   onSelect,
   compact = false,
+  hint,
 }: {
   name: string;
   label: string;
   options: ProductVariantOption[];
   selected?: string;
   onSelect: (label: string | undefined) => void;
-  /** Lav, enrads variant for den faste kjøpslinja (ledetekst til venstre). */
+  /** Tettere variant for den faste kjøpslinja (lavere pills). */
   compact?: boolean;
+  /** Forklaring over spørsmålet, f.eks. hvorfor valget må tas. Et element
+      (ikke bare tekst) så kjøpslinja kan legge prisen på samme rad. */
+  hint?: ReactNode;
 }) {
   const labelId = useId();
+  const hintId = useId();
 
   return (
-    <div
-      className={
-        compact ? "flex min-w-0 items-center gap-2.5 sm:gap-3" : undefined
-      }
-    >
-      <span
-        id={labelId}
-        className={`font-medium text-sm ${
-          compact ? "shrink-0 whitespace-nowrap" : "mb-2 block"
-        }`}
-      >
+    <div className="min-w-0">
+      {hint && (
+        <div id={hintId} className="mb-1.5">
+          {hint}
+        </div>
+      )}
+      <span id={labelId} className="mb-2 block font-medium text-sm">
         {label}
       </span>
       <div
         role="radiogroup"
         aria-labelledby={labelId}
-        className={
-          compact
-            ? "flex min-w-0 gap-1.5 overflow-x-auto"
-            : "flex flex-wrap gap-2"
-        }
+        aria-describedby={hint ? hintId : undefined}
+        className={`flex flex-wrap ${compact ? "gap-1.5" : "gap-2"}`}
       >
         {options.map((option) => {
           const checked = selected === option.label;
@@ -191,7 +190,7 @@ function VariantPicker({
             <label
               key={option.id ?? option.label}
               className={`pressable inline-flex shrink-0 cursor-pointer items-center whitespace-nowrap rounded-full border-2 font-medium text-sm transition-colors has-focus-visible:ring-2 has-focus-visible:ring-ring has-focus-visible:ring-offset-2 ${
-                compact ? "h-9 px-4" : "h-11 px-5"
+                compact ? "h-10 px-4" : "h-11 px-5"
               } ${
                 checked
                   ? "border-primary bg-primary text-primary-foreground"
@@ -284,8 +283,12 @@ function StickyBuyBar({
     if (!(visible && el)) {
       return;
     }
+    // `--sticky-bar-height` lar andre flytende elementer (admin-blyanten)
+    // løfte seg over linja uten å kjenne til denne komponenten.
+    const root = document.documentElement;
     const reserve = () => {
       document.body.style.paddingBottom = `${el.offsetHeight}px`;
+      root.style.setProperty("--sticky-bar-height", `${el.offsetHeight}px`);
     };
     reserve();
     const observer = new ResizeObserver(reserve);
@@ -293,6 +296,7 @@ function StickyBuyBar({
     return () => {
       observer.disconnect();
       document.body.style.paddingBottom = "";
+      root.style.removeProperty("--sticky-bar-height");
     };
   }, [visible]);
 
@@ -564,6 +568,18 @@ function ProductDetailInteractive({
               selected={selectedVariant}
               onSelect={setSelectedVariant}
               compact
+              hint={
+                <div className="flex items-baseline justify-between gap-3">
+                  <p className="text-muted-foreground text-xs">
+                    Velg ett alternativ før du kan kjøpe
+                  </p>
+                  {/* Navn/pris er gjemt på mobil i denne modusen – prisen
+                      hører likevel med når man skal ta et valg. */}
+                  <p className="shrink-0 font-medium text-sm tabular-nums sm:hidden">
+                    {priceInKr} kr
+                  </p>
+                </div>
+              }
             />
           ) : (
             /* Samme samlede pill som i kjøpsboksen (kompakt stepper), så

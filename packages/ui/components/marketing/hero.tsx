@@ -7,6 +7,7 @@ import { Button } from "../button";
 import { GridPattern } from "../decorative";
 import { CountUp, Reveal, Stagger, StaggerItem } from "../motion";
 import { Heading, Text } from "../typography";
+import { HeroPortrait } from "./hero-portrait";
 
 export interface HeroStat {
   value: number;
@@ -55,34 +56,6 @@ export interface HeroProps {
   }>;
 }
 
-const PILL_POSITIONS = [
-  "-left-4 top-12",
-  "top-1/3 right-0",
-  "bottom-10 left-6",
-];
-
-function FloatingPill({
-  className,
-  icon,
-  label,
-}: {
-  className: string;
-  icon?: IconName;
-  label: string;
-}) {
-  return (
-    <div
-      className={cn(
-        "absolute flex items-center gap-2 rounded-full bg-card px-4 py-2 shadow-lg ring-1 ring-foreground/5",
-        className
-      )}
-    >
-      {icon && <Icon name={icon} className="size-4 text-primary" />}
-      <span className="font-medium text-card-foreground text-sm">{label}</span>
-    </div>
-  );
-}
-
 /**
  * Forsidens hero (jf. docs/DESIGN-PLAN.md §2). Tekst til venstre, et ekte foto
  * klippet i en organisk form med duotone-effekt og flytende pills til høyre, og
@@ -121,7 +94,7 @@ export function Hero({
 
       <div
         className={cn(
-          "relative z-10 mx-auto grid items-center gap-12 px-6 pt-32 pb-24 lg:pt-40",
+          "relative z-10 mx-auto grid items-center gap-12 px-6 pt-32 pb-16 sm:pb-24 lg:pt-40",
           split ? "max-w-6xl lg:grid-cols-2" : "max-w-3xl text-center"
         )}
       >
@@ -233,37 +206,17 @@ export function Hero({
           )}
         </Stagger>
 
-        {/* Foto klippet i organisk form, med duotone/brand-effekt */}
+        {/* Foto klippet i organisk form, med duotone/brand-effekt. På mobil
+            havner det under teksten, litt mindre og med innrykk til sidene så
+            de flytende pillene ikke klippes av skjermkanten. */}
         {split && (
           <Reveal
             delay={0.2}
-            className="relative mx-auto hidden w-full max-w-md lg:block"
+            className="relative mx-auto w-full max-w-[18rem] sm:max-w-sm lg:max-w-md"
           >
-            <div className="relative aspect-4/5 w-full overflow-hidden rounded-[60%_40%_42%_58%/55%_45%_55%_45%] shadow-xl ring-1 ring-foreground/10">
+            <HeroPortrait duotone={duotone} pills={pills}>
               {media}
-              {duotone && (
-                <>
-                  {/* Duotone-tint i merkefarge */}
-                  <div
-                    aria-hidden="true"
-                    className="absolute inset-0 bg-primary/30 mix-blend-multiply"
-                  />
-                  {/* Mykt fargedybde-overlegg (teal → coral) */}
-                  <div
-                    aria-hidden="true"
-                    className="absolute inset-0 bg-linear-to-br from-primary/20 via-transparent to-accent/35 mix-blend-screen"
-                  />
-                </>
-              )}
-            </div>
-            {pills?.slice(0, PILL_POSITIONS.length).map((pill, index) => (
-              <FloatingPill
-                key={pill.label}
-                className={PILL_POSITIONS[index] ?? ""}
-                icon={pill.icon}
-                label={pill.label}
-              />
-            ))}
+            </HeroPortrait>
           </Reveal>
         )}
       </div>

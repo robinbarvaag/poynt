@@ -1,7 +1,12 @@
 "use client";
 
 import { cn } from "@poynt/ui";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import {
+  motion,
+  useReducedMotion,
+  useSpring,
+  useTransform,
+} from "framer-motion";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import {
   SocialIcon,
@@ -16,42 +21,171 @@ interface SocialFabProps {
   hideNearSelector?: string;
 }
 
-/** Myk ease-out — speiler --ease-soft i web.css. */
-const EASE_SOFT = [0.22, 1, 0.36, 1] as const;
+type Mode = "hidden" | "rest" | "peek" | "open";
 
-/** Fjær for utvidelsen. Litt spenst, ikke sprett. */
-const POP = { type: "spring", duration: 0.42, bounce: 0.18 } as const;
+interface Shape {
+  /** Hvor langt formen stikker inn fra høyrekanten (px). */
+  w: number;
+  /** Høyden på kroppen, uten overgangene mot kanten (px). */
+  h: number;
+  /** Høyden på skuldrene øverst og nederst (px). */
+  ry: number;
+  /** Hvor dypt midjene mellom ikonene snører inn (px). 0 = rett side. */
+  wave: number;
+  /** Vipp: toppen trekkes ut, bunnen inn. 0 = rett. */
+  lean: number;
+  /** 0 = panel med vanlige hjørner, 1 = dråpe med skuldre helt inn. */
+  round: number;
+}
 
-/** Fjær for vippingen mot kanten — skjer ofte, så den er kjappere. */
-const TILT = { type: "spring", duration: 0.5, bounce: 0.1 } as const;
-
-/** Hvor lenge vi venter etter siste scroll-piksel før fanen retter seg opp. */
-const SETTLE_MS = 320;
-
-/** Antall merker som vises i stabelen når fanen er lukket. */
+/** Tegneflaten. Formen tegnes inni den, festet til høyrekanten. */
+const BOX_W = 300;
+const ROW_H = 48;
+const HEADER_H = 58;
+const PANEL_PAD = 14;
+const ICON = 36;
+/** Avstand fra radens venstrekant til ikonsenteret. */
+const ICON_CX = 6 + ICON / 2;
 const PEEK_COUNT = 3;
+/** Plass over og under kroppen til overgangene mot kanten. */
+const FILLET_ROOM = 48;
+/** Tid etter siste scroll-piksel før formen trekker seg tilbake. */
+const SETTLE_MS = 450;
 
 /**
- * Organiske hjørner: ulike radier horisontalt og vertikalt gir en asymmetrisk,
- * litt «håndtegnet» silhuett i stedet for en maskinell pille. Verdiene er
- * statiske — de animeres aldri, så flatene slipper å males om per frame.
+ * Én fjær for både formen og ikonene, så de beveger seg som ett legeme.
+ * Dempingsgrad ≈ 1: den glir på plass uten etterslag.
  */
-const BLOB_TAB = "2.1rem 1.8rem 2.3rem 2rem / 2.6rem 2.9rem 2.2rem 2.4rem";
-const BLOB_PANEL = "2.4rem 1.9rem 2.6rem 2.1rem / 2.1rem 2.6rem 1.9rem 2.4rem";
+const SPRING = { stiffness: 220, damping: 30, mass: 1 } as const;
+const SPRING_REDUCED = { stiffness: 600, damping: 70, mass: 1 } as const;
+
+/** Hvor tydelig hvert ikon i stabelen er. Nederste ikon toner ut. */
+const STACK_FADE: Record<"rest" | "peek", number[]> = {
+  rest: [0.85, 0.65, 0.45],
+  peek: [1, 0.85, 0.7],
+};
 
 /**
- * Organisk «fane» som ligger langs høyrekanten, omtrent i øyehøyde.
+ * Størrelser på den lukkede formen. På mobil er den smalere, så den stikker
+ * kortere inn over teksten.
+ */
+const CLOSED = {
+  wide: {
+    rest: { w: 52, ry: 24, spacing: 36, scale: 0.8 },
+    peek: { w: 68, ry: 30, spacing: 42, scale: 0.95 },
+  },
+  narrow: {
+    rest: { w: 38, ry: 18, spacing: 30, scale: 0.66 },
+    peek: { w: 48, ry: 22, spacing: 34, scale: 0.76 },
+  },
+} as const;
+
+/** Hvor langt ned på skjermen formen sitter (prosent av høyden). */
+const ANCHOR_SVH = 78;
+
+/** Under denne bredden (px) brukes de smale størrelsene. */
+const NARROW_BELOW = 640;
+
+/**
+ * Banen for formen. Den er festet til høyrekanten (x = W):
  *
- * Den er synlig hele tiden, ikke gjemt bak et scroll-triks: i ro står den
- * inntil kanten med en liten stabel av kanalmerkene. Scroller man, vipper og
- * sklir den litt ut mot kanten, som om farten dytter den unna. Ett trykk og
- * den vokser til et panel med alle kanalene.
+ * 1. en innadbuet overgang fra kanten,
+ * 2. en skulder ned til første bue,
+ * 3. tre svake buer — én per ikon — med slake midjer mellom seg,
+ * 4. en skulder og en innadbuet overgang tilbake til kanten.
  *
- * **Ytelse.** Ingenting her animerer størrelse eller form. De to flatene ligger
- * oppå hverandre, forankret i samme hjørne, og bytter plass med `transform` og
- * `opacity` alene. Det var morfingen via `layout` som hakket: å endre bredde
- * på en flate med `backdrop-filter` tvinger fram ny layout, maling og ny
- * uskarphetsberegning i hver eneste frame.
+ * Buene er det som gjør formen levende: den ser ut som tre dråper som har
+ * flytt sammen. Som panel er midjene 0 og sidene rette.
+ *
+ * Hvert toppunkt og hver midje har loddrett tangent, og hvert segment finnes i
+ * alle tilstander, så banen interpoleres uten knekk.
+ */
+function blobPath(W: number, H: number, s: Shape) {
+  const cy = H / 2;
+  const top = cy - s.h / 2;
+  const bottom = cy + s.h / 2;
+  // Lange, slake overganger: formen glir ut av kanten i stedet for å knekke.
+  const f = Math.max(0, Math.min(40, s.w * 0.5, s.h * 0.28));
+  // Litt større overgang øverst enn nederst — ingen perfekt symmetri.
+  const ft = f * 1.1;
+  const fb = f * 0.9;
+  const ry = Math.max(0, Math.min(s.ry, s.h / 2 - 1));
+  const cap = 46 + 400 * s.round;
+  const rxTop = Math.max(0, Math.min(s.w + s.lean - ft, cap));
+  const rxBot = Math.max(0, Math.min(s.w - s.lean - fb, cap));
+
+  // Toppunktene for de tre buene. Vippen skyver den øverste ut.
+  const xTop = W - s.w - s.lean;
+  const xMid = W - s.w;
+  const xBot = W - s.w + s.lean;
+  const waist = Math.max(0, Math.min(s.wave, (s.w - ft) * 0.45));
+  const xW1 = (xTop + xMid) / 2 + waist;
+  const xW2 = (xMid + xBot) / 2 + waist;
+
+  const yA = top + ry;
+  const yB = bottom - ry;
+  const yM = (yA + yB) / 2;
+  const yW1 = (yA + yM) / 2;
+  const yW2 = (yM + yB) / 2;
+  // Håndtakslengde for S-kurvene mellom toppunkt og midje.
+  const q = (yB - yA) * 0.25 * 0.7;
+  const k = 0.45;
+
+  return [
+    `M${W} ${top - ft}`,
+    `C${W} ${top - ft * 0.5} ${W - ft * 0.5} ${top} ${W - ft} ${top}`,
+    `L${xTop + rxTop} ${top}`,
+    `C${xTop + rxTop * k} ${top} ${xTop} ${top + ry * k} ${xTop} ${yA}`,
+    `C${xTop} ${yA + q} ${xW1} ${yW1 - q} ${xW1} ${yW1}`,
+    `C${xW1} ${yW1 + q} ${xMid} ${yM - q} ${xMid} ${yM}`,
+    `C${xMid} ${yM + q} ${xW2} ${yW2 - q} ${xW2} ${yW2}`,
+    `C${xW2} ${yW2 + q} ${xBot} ${yB - q} ${xBot} ${yB}`,
+    `C${xBot} ${yB + ry * k} ${xBot + rxBot * k} ${bottom} ${xBot + rxBot} ${bottom}`,
+    `L${W - fb} ${bottom}`,
+    `C${W - fb * 0.5} ${bottom} ${W} ${bottom + fb * 0.5} ${W} ${bottom + fb}`,
+    "Z",
+  ].join(" ");
+}
+
+function shapeFor(
+  mode: Mode,
+  linkCount: number,
+  openW: number,
+  narrow: boolean
+): Shape {
+  if (mode === "open") {
+    return {
+      w: openW,
+      h: HEADER_H + linkCount * ROW_H + PANEL_PAD,
+      ry: 46,
+      wave: 0,
+      lean: 0,
+      round: 0,
+    };
+  }
+  const size =
+    CLOSED[narrow ? "narrow" : "wide"][mode === "peek" ? "peek" : "rest"];
+  return {
+    w: mode === "hidden" ? 0 : size.w,
+    h: size.ry * 2 + size.spacing * 2,
+    ry: size.ry,
+    wave: 0,
+    lean: 0,
+    round: 1,
+  };
+}
+
+/**
+ * Organisk form som vokser ut av høyrekanten — samme grep som Instagram.
+ *
+ * - **I ro** stikker en myk, grønn form fram med kanalikonene.
+ * - **Når man scroller** (eller holder pekeren over) vokser den rolig ut.
+ * - **Ved trykk** flyter buene sammen til et panel med alle kanalene, og
+ *   ikonene glir fra stabelen ut i hver sin rad.
+ *
+ * **Ytelse.** Formen er én SVG-bane uten filter eller uskarphet. Fjærene
+ * skriver rett til `d`-attributtet og til `transform` på ikonene, forbi React,
+ * så ingenting rendres på nytt per frame og ingenting utløser layout.
  */
 export function SocialFab({
   links,
@@ -60,14 +194,17 @@ export function SocialFab({
   const [open, setOpen] = useState(false);
   const [footerVisible, setFooterVisible] = useState(false);
   const [scrolling, setScrolling] = useState(false);
+  const [hovering, setHovering] = useState(false);
+  const [openW, setOpenW] = useState(272);
+  const [narrow, setNarrow] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
-  // Skiller «lukket av bruker» fra «lukket fordi fanen forsvant», så vi ikke
+  // Skiller «lukket av bruker» fra «lukket fordi formen forsvant», så vi ikke
   // river fokus tilbake til en knapp som ikke lenger er synlig.
   const restoreFocus = useRef(false);
   const panelId = useId();
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = useReducedMotion() ?? false;
 
   useEffect(() => {
     let settleTimer: ReturnType<typeof setTimeout>;
@@ -81,6 +218,16 @@ export function SocialFab({
       clearTimeout(settleTimer);
       window.removeEventListener("scroll", onScroll);
     };
+  }, []);
+
+  useEffect(() => {
+    const onResize = () => {
+      setOpenW(Math.min(272, window.innerWidth - 16));
+      setNarrow(window.innerWidth < NARROW_BELOW);
+    };
+    onResize();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
   }, []);
 
   useEffect(() => {
@@ -115,11 +262,9 @@ export function SocialFab({
     };
   }, [open, close]);
 
-  // Knappen er skjult mens panelet står åpent, så fokus må følge med begge
-  // veier.
   useEffect(() => {
     if (open) {
-      panelRef.current?.querySelector<HTMLElement>("a")?.focus();
+      listRef.current?.querySelector<HTMLElement>("a")?.focus();
       return;
     }
     if (restoreFocus.current) {
@@ -134,246 +279,262 @@ export function SocialFab({
     if (!visible) setOpen(false);
   }, [visible]);
 
-  const peek = links.slice(0, PEEK_COUNT);
-
-  /**
-   * Fanen henger i hjørnet sitt og svinger rundt det: i ro står den rett, i
-   * fart vipper den ut mot kanten, åpen retter den seg opp og trekker inn.
-   */
-  const anchor = !visible
-    ? "translateX(96px) rotate(6deg)"
+  const mode: Mode = !visible
+    ? "hidden"
     : open
-      ? "translateX(-12px) rotate(0deg)"
-      : scrolling
-        ? "translateX(18px) rotate(7deg)"
-        : "translateX(6px) rotate(0deg)";
+      ? "open"
+      : scrolling || hovering
+        ? "peek"
+        : "rest";
 
-  const pop = reduceMotion ? { duration: 0.18, ease: EASE_SOFT } : POP;
-  const tilt = reduceMotion ? { duration: 0.2, ease: EASE_SOFT } : TILT;
+  const count = links.length;
+  const panelH = HEADER_H + count * ROW_H + PANEL_PAD;
+  const boxH =
+    Math.max(panelH, CLOSED.wide.peek.ry * 2 + CLOSED.wide.peek.spacing * 2) +
+    FILLET_ROOM * 2;
+  const cy = boxH / 2;
+  const shape = shapeFor(mode, count, openW, narrow);
+  const spring = reduceMotion ? SPRING_REDUCED : SPRING;
 
-  if (links.length === 0) return null;
+  const w = useSpring(shape.w, spring);
+  const h = useSpring(shape.h, spring);
+  const ry = useSpring(shape.ry, spring);
+  const wave = useSpring(shape.wave, spring);
+  const lean = useSpring(shape.lean, spring);
+  const round = useSpring(shape.round, spring);
+
+  useEffect(() => {
+    w.set(shape.w);
+    h.set(shape.h);
+    ry.set(shape.ry);
+    wave.set(shape.wave);
+    lean.set(shape.lean);
+    round.set(shape.round);
+  }, [w, h, ry, wave, lean, round, shape]);
+
+  const d = useTransform(
+    [w, h, ry, wave, lean, round],
+    ([wv, hv, ryv, wav, lv, rv]) =>
+      blobPath(BOX_W, boxH, {
+        w: wv as number,
+        h: hv as number,
+        ry: ryv as number,
+        wave: wav as number,
+        lean: lv as number,
+        round: rv as number,
+      })
+  );
+
+  if (count === 0) return null;
+
+  const stack = Math.min(PEEK_COUNT, count);
+  const panelLeft = BOX_W - openW;
+  const panelTop = cy - panelH / 2;
+
+  /** Hvor rad nr. `index` skal stå, og hvor synlig ikonet er. */
+  function rowTarget(index: number) {
+    if (mode === "open") {
+      return {
+        x: panelLeft + PANEL_PAD,
+        y: panelTop + HEADER_H + index * ROW_H,
+        scale: 1,
+        opacity: 1,
+      };
+    }
+    // Ikoner utenfor stabelen gjemmer seg bak det nederste.
+    const slot = Math.min(index, stack - 1);
+    const t = stack > 1 ? slot / (stack - 1) : 0.5;
+    const size =
+      CLOSED[narrow ? "narrow" : "wide"][mode === "peek" ? "peek" : "rest"];
+    const spacing = size.spacing;
+    const centerY = cy + (slot - (stack - 1) / 2) * spacing;
+    // Hvert ikon står midt i sin egen bue, som følger vippen.
+    const leanOffset = shape.lean * (1 - 2 * t);
+    const centerX = BOX_W - (Math.max(shape.w, 24) + leanOffset) / 2;
+    const fade =
+      mode === "hidden" || index >= stack ? 0 : (STACK_FADE[mode][slot] ?? 0);
+    return {
+      x: centerX - ICON_CX,
+      y: centerY - ROW_H / 2,
+      scale: size.scale,
+      opacity: fade,
+    };
+  }
 
   return (
     <div
       ref={containerRef}
-      // Øyehøyde langs høyrekanten, ikke nede i hjørnet.
-      className="pointer-events-none fixed right-0 bottom-[24vh] z-50"
+      className="pointer-events-none fixed right-0 z-50 -translate-y-1/2"
+      style={{
+        width: BOX_W,
+        height: boxH,
+        // Lavt på siden, der den er i veien for minst mulig tekst. Taket sørger
+        // for at det åpne panelet aldri går ut under skjermkanten.
+        top: `min(${ANCHOR_SVH}svh, calc(100svh - ${panelH / 2 + 56}px))`,
+      }}
     >
-      <motion.div
-        initial={false}
-        // Nullstor boks: begge flatene forankres i dette punktet, og rotasjonen
-        // svinger rundt det i stedet for rundt et flatesenter.
-        className="relative"
-        style={{ transformOrigin: "100% 100%" }}
-        animate={{
-          transform: reduceMotion
-            ? `translateX(${visible ? (open ? -12 : 6) : 96}px)`
-            : anchor,
-          opacity: visible ? 1 : 0,
-        }}
-        transition={tilt}
+      <svg
+        aria-hidden="true"
+        width={BOX_W}
+        height={boxH}
+        viewBox={`0 0 ${BOX_W} ${boxH}`}
+        // Én piksel ut over kanten, så streken langs kanten ikke synes.
+        className="absolute top-0 -right-px overflow-visible"
       >
-        {/* Mykt fargeskjær bak flatene. Ligger utenfor dem, så det aldri
-            tvinger fram ny maling av selve glasset. */}
-        <motion.span
-          aria-hidden="true"
-          className="-z-10 pointer-events-none absolute right-0 bottom-0 size-40 origin-bottom-right rounded-full bg-primary/25 blur-3xl"
-          animate={{
-            opacity: open ? 0.7 : 0.35,
-            transform: `scale(${open ? 1.35 : 0.7})`,
-          }}
-          transition={pop}
+        <motion.path
+          d={d}
+          className="fill-card stroke-border"
+          strokeWidth={1}
+          // Bare den malte formen fanger klikk — ikke den tomme tegneflaten.
+          style={{ pointerEvents: open ? "visiblePainted" : "none" }}
         />
+      </svg>
 
-        {/* Begge flatene er absolutt plassert i samme hjørne, så de kan ligge
-            oppå hverandre og krysse — ingen «wait», ingen layout-hopp. */}
-        <AnimatePresence initial={false}>
-          {open ? (
-            <motion.div
-              ref={panelRef}
-              key="panel"
-              id={panelId}
-              // Vokser ut fra hjørnet den kom fra, og trekker seg inn samme vei.
-              style={{
-                borderRadius: BLOB_PANEL,
-                transformOrigin: "100% 100%",
-                pointerEvents: visible ? "auto" : "none",
-              }}
-              initial={{
-                opacity: 0,
-                transform: reduceMotion ? "scale(1)" : "scale(0.86)",
-              }}
-              animate={{ opacity: 1, transform: "scale(1)" }}
-              exit={{
-                opacity: 0,
-                transform: reduceMotion ? "scale(1)" : "scale(0.9)",
-              }}
-              transition={pop}
-              className={cn(
-                "absolute right-0 bottom-0 w-[min(17.5rem,calc(100vw-1.5rem))] p-2.5",
-                "bg-card/80 shadow-[0_24px_60px_-20px_rgb(0_0_0/0.5)] ring-1 ring-border/50 backdrop-blur-2xl",
-                "supports-backdrop-filter:bg-card/60"
-              )}
-            >
-              <div className="flex items-center justify-between px-2 pb-1">
-                <span className="font-medium text-muted-foreground text-xs">
-                  Følg
-                </span>
-                <button
-                  type="button"
-                  onClick={close}
-                  aria-label="Lukk sosiale kanaler"
-                  className="-mr-1 grid size-8 place-items-center rounded-full text-muted-foreground transition-colors duration-200 ease-out hover:bg-foreground/5 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    className="size-4"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    aria-hidden="true"
-                  >
-                    <path d="M6 6l12 12M18 6L6 18" />
-                  </svg>
-                </button>
-              </div>
+      {/* Toppen av panelet: tittel og lukkeknapp. Innrykket følger den store
+          radien i hjørnet, så teksten ikke kolliderer med kurven. */}
+      <motion.div
+        id={panelId}
+        aria-hidden={!open}
+        className="absolute flex items-center justify-between"
+        style={{
+          left: panelLeft,
+          top: panelTop,
+          width: openW,
+          height: HEADER_H,
+          paddingLeft: 30,
+          paddingRight: 18,
+          paddingTop: 6,
+          pointerEvents: open ? "auto" : "none",
+        }}
+        initial={false}
+        animate={{ opacity: open ? 1 : 0 }}
+        transition={{
+          duration: open ? 0.22 : 0.1,
+          delay: open ? 0.08 : 0,
+          ease: [0.22, 1, 0.36, 1],
+        }}
+      >
+        <span className="font-medium text-muted-foreground text-xs">Følg</span>
+        <button
+          type="button"
+          onClick={close}
+          tabIndex={open ? 0 : -1}
+          aria-label="Lukk sosiale kanaler"
+          className="grid size-8 place-items-center rounded-full text-muted-foreground transition-colors duration-200 ease-out hover:bg-foreground/5 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            className="size-4"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            aria-hidden="true"
+          >
+            <path d="M6 6l12 12M18 6L6 18" />
+          </svg>
+        </button>
+      </motion.div>
 
-              <ul className="flex flex-col">
-                {links.map((link, index) => {
-                  const label = socialLabel(link.platform);
-                  return (
-                    <motion.li
-                      key={link.platform}
-                      initial={
-                        reduceMotion
-                          ? { opacity: 0 }
-                          : { opacity: 0, transform: "translateX(12px)" }
-                      }
-                      animate={{ opacity: 1, transform: "translateX(0px)" }}
-                      transition={{
-                        duration: 0.24,
-                        ease: EASE_SOFT,
-                        // Radene sklir inn fra kanten, 35 ms mellom hver.
-                        delay: reduceMotion ? 0 : 0.035 * index,
-                      }}
-                    >
-                      <a
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={`${label} (åpnes i ny fane)`}
-                        style={
-                          {
-                            "--brand": socialColor(link.platform),
-                          } as React.CSSProperties
-                        }
-                        className={cn(
-                          "group flex items-center gap-3 rounded-full px-2 py-1.5",
-                          "transition-colors duration-200 ease-out",
-                          "hover:bg-foreground/4",
-                          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--brand)"
-                        )}
-                      >
-                        <span
-                          className={cn(
-                            "grid size-9 shrink-0 place-items-center rounded-full",
-                            "bg-(--brand)/10 text-(--brand)",
-                            "transition-transform duration-200 ease-out",
-                            "motion-safe:group-hover:scale-105 motion-safe:group-active:scale-95"
-                          )}
-                        >
-                          <SocialIcon
-                            platform={link.platform}
-                            className="size-4.5"
-                          />
-                        </span>
-                        <span className="font-medium text-foreground text-sm">
-                          {label}
-                        </span>
-                        <svg
-                          viewBox="0 0 24 24"
-                          aria-hidden="true"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className={cn(
-                            "ml-auto size-4 text-muted-foreground/60",
-                            "transition-[opacity,transform] duration-200 ease-out",
-                            "opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100",
-                            "motion-safe:-translate-x-1 motion-safe:group-hover:translate-x-0"
-                          )}
-                        >
-                          <path d="M7 17 17 7M9 7h8v8" />
-                        </svg>
-                      </a>
-                    </motion.li>
-                  );
-                })}
-              </ul>
-            </motion.div>
-          ) : (
-            <motion.button
-              ref={triggerRef}
-              key="tab"
-              type="button"
-              onClick={() => {
-                restoreFocus.current = false;
-                setOpen(true);
-              }}
-              aria-expanded={false}
-              aria-controls={panelId}
-              aria-label="Følg oss i sosiale kanaler"
+      <ul ref={listRef} inert={!open} aria-label="Sosiale kanaler">
+        {links.map((link, index) => {
+          const label = socialLabel(link.platform);
+          const target = rowTarget(index);
+          return (
+            <motion.li
+              key={link.platform}
+              className="absolute top-0 left-0"
               style={{
-                borderRadius: BLOB_TAB,
-                transformOrigin: "100% 100%",
-                pointerEvents: visible ? "auto" : "none",
+                width: openW - PANEL_PAD * 2,
+                height: ROW_H,
+                transformOrigin: `${ICON_CX}px 50%`,
+                pointerEvents: open ? "auto" : "none",
               }}
-              initial={{
-                opacity: 0,
-                transform: reduceMotion ? "scale(1)" : "scale(0.88)",
+              initial={false}
+              animate={{
+                transform: `translate(${target.x}px, ${target.y}px) scale(${target.scale})`,
+                opacity: target.opacity,
               }}
-              animate={{ opacity: 1, transform: "scale(1)" }}
-              exit={{
-                opacity: 0,
-                transform: reduceMotion ? "scale(1)" : "scale(0.88)",
+              transition={{
+                type: "spring",
+                ...spring,
+                // Radene løsner fra stabelen én og én på vei ut.
+                delay: open && !reduceMotion ? index * 0.018 : 0,
               }}
-              transition={pop}
-              whileTap={reduceMotion ? undefined : { transform: "scale(0.94)" }}
-              className={cn(
-                "absolute right-0 bottom-0 flex flex-col items-center gap-0 py-2.5 pr-3.5 pl-2.5",
-                "bg-card/80 shadow-[0_18px_45px_-18px_rgb(0_0_0/0.45)] ring-1 ring-border/50 backdrop-blur-2xl",
-                "supports-backdrop-filter:bg-card/60",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-              )}
             >
-              {/* Merkene i stedet for et plusstegn: man ser med én gang hva
-                  fanen inneholder. De overlapper som en avatarstabel. */}
-              {peek.map((link, index) => (
+              <a
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`${label} (åpnes i ny fane)`}
+                style={
+                  {
+                    "--brand": socialColor(link.platform),
+                  } as React.CSSProperties
+                }
+                className={cn(
+                  "group flex size-full items-center gap-3 rounded-full pr-3 pl-1.5",
+                  "transition-colors duration-200 ease-out",
+                  "hover:bg-foreground/4",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                )}
+              >
                 <span
-                  key={link.platform}
-                  aria-hidden="true"
-                  style={
-                    {
-                      "--brand": socialColor(link.platform),
-                      zIndex: peek.length - index,
-                    } as React.CSSProperties
-                  }
                   className={cn(
-                    "grid size-8 place-items-center rounded-full",
-                    "bg-card text-(--brand) ring-2 ring-card",
-                    index > 0 && "-mt-2.5"
+                    "grid size-9 shrink-0 place-items-center rounded-full",
+                    "bg-(--brand)/10 text-(--brand)",
+                    "transition-transform duration-200 ease-out",
+                    "motion-safe:group-active:scale-95"
                   )}
                 >
-                  <SocialIcon platform={link.platform} className="size-4" />
+                  <SocialIcon platform={link.platform} className="size-4.5" />
                 </span>
-              ))}
-            </motion.button>
-          )}
-        </AnimatePresence>
-      </motion.div>
+                <motion.span
+                  className="font-medium text-foreground text-sm"
+                  initial={false}
+                  animate={{
+                    opacity: open ? 1 : 0,
+                    transform: `translateX(${open || reduceMotion ? 0 : -8}px)`,
+                  }}
+                  transition={{
+                    duration: open ? 0.22 : 0.08,
+                    delay: open ? 0.1 + index * 0.02 : 0,
+                    ease: [0.22, 1, 0.36, 1],
+                  }}
+                >
+                  {label}
+                </motion.span>
+              </a>
+            </motion.li>
+          );
+        })}
+      </ul>
+
+      {/* Treffflaten for den lukkede formen. Litt større enn det synlige, så
+          den er lett å treffe med tommelen. */}
+      <button
+        ref={triggerRef}
+        type="button"
+        onClick={() => {
+          restoreFocus.current = false;
+          setOpen(true);
+        }}
+        onPointerEnter={(event) => {
+          if (event.pointerType === "mouse") setHovering(true);
+        }}
+        onPointerLeave={() => setHovering(false)}
+        tabIndex={open || !visible ? -1 : 0}
+        aria-expanded={open}
+        aria-controls={panelId}
+        aria-label="Følg oss i sosiale kanaler"
+        className="absolute right-0 rounded-l-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        style={{
+          top: cy - 100,
+          width: 84,
+          height: 200,
+          pointerEvents: open || !visible ? "none" : "auto",
+        }}
+      />
     </div>
   );
 }

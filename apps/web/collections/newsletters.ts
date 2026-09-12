@@ -18,6 +18,12 @@ export const Newsletters: CollectionConfig = {
     group: "Kommunikasjon",
     description:
       "Skriv nyhetsbrevet her, send en test til deg selv, og send så til alle abonnenter.",
+    components: {
+      // Intro-boks over lista: hvordan skrive, teste og sende.
+      beforeListTable: [
+        "/admin/components/newsletters/newsletter-intro#NewsletterIntro",
+      ],
+    },
   },
   fields: [
     {
