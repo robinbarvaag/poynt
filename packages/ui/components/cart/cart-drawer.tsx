@@ -54,7 +54,7 @@ export function CartDrawer({
   emptyAction,
   emptyTitle = "Ingen produkter ennå",
   emptyDescription = "Utforsk produktene våre og legg noe i kurven",
-  clearLabel = "Tøm handlekurv",
+  clearLabel = "Tøm kurven",
   totalLabel = "Totalt",
   checkoutNote,
   open,
@@ -123,31 +123,46 @@ export function CartDrawer({
         </div>
 
         {hasItems && (
-          <div className="space-y-4 border-border border-t px-6 py-4">
-            <div className="flex items-center justify-between">
-              <span className="font-medium">{totalLabel}</span>
-              <span className="font-semibold text-lg">{total}</span>
-            </div>
-            <div className="space-y-2">
-              {checkout}
-              {onClear && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className="w-full text-muted-foreground"
-                  onClick={onClear}
-                >
-                  <Trash2 className="mr-2 size-4" />
-                  {clearLabel}
-                </Button>
-              )}
+          <div className="border-border border-t bg-background px-6 pt-4 pb-5">
+            {/* Sum: etikett + «inkl. mva» til venstre, stor sum til høyre. */}
+            <div className="flex items-baseline justify-between gap-4">
+              <div className="flex flex-col">
+                <span className="font-medium text-sm">{totalLabel}</span>
+                <span className="text-muted-foreground text-xs">Inkl. mva</span>
+              </div>
+              <span className="font-semibold text-2xl tabular-nums tracking-tight">
+                {total}
+              </span>
             </div>
 
-            {checkoutNote === null ? null : (
-              <p className="flex items-center justify-center gap-2 text-muted-foreground text-xs">
-                <ShieldCheck className="size-3.5 text-primary" />
-                {checkoutNote ?? "Sikker betaling · tilgang umiddelbart"}
-              </p>
+            <div className="mt-4 space-y-2">{checkout}</div>
+
+            {/* Én rolig linje under knappene: trygghet til venstre, tøm som en
+                liten tekst-handling til høyre — lav emfase, så den ikke
+                konkurrerer med betalingsknappene. */}
+            {(checkoutNote !== null || onClear) && (
+              <div className="mt-4 flex items-center justify-between gap-3 text-xs">
+                {checkoutNote === null ? (
+                  <span />
+                ) : (
+                  <p className="flex min-w-0 items-center gap-1.5 text-muted-foreground">
+                    <ShieldCheck className="size-3.5 shrink-0 text-primary" />
+                    <span className="truncate">
+                      {checkoutNote ?? "Sikker betaling · tilgang umiddelbart"}
+                    </span>
+                  </p>
+                )}
+                {onClear && (
+                  <button
+                    type="button"
+                    onClick={onClear}
+                    className="inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-1 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  >
+                    <Trash2 className="size-3.5" />
+                    {clearLabel}
+                  </button>
+                )}
+              </div>
             )}
           </div>
         )}

@@ -23,10 +23,30 @@ export { BookCover, type BookCoverProps } from "./book-cover";
 export { BookHero, type BookHeroProps } from "./book-hero";
 export {
   type Chapter,
+  type ChapterMarkers,
   type ChapterPalette,
   ChapterRotator,
   type ChapterRotatorProps,
+  chapterPaletteFrom,
+  FIGURE_ASPECT_CLASS,
+  type FigureAspect,
+  POYNT_CHAPTER_PALETTE,
 } from "./chapter-rotator";
+export {
+  PromptCard,
+  type PromptItem,
+  PromptLibrary,
+  type PromptLibraryProps,
+} from "./prompt-library";
+export {
+  RESOURCE_KINDS,
+  ResourceCard,
+  ResourceGrid,
+  type ResourceGridProps,
+  type ResourceItem,
+  type ResourceKind,
+  type ResourceLinkProps,
+} from "./resource-grid";
 export { ContentMedia, type ContentMediaProps } from "./content-media";
 export { Countdown, type CountdownProps } from "./countdown";
 export { Marquee, type MarqueeProps } from "./marquee";

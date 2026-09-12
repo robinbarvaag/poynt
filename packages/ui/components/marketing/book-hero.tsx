@@ -20,10 +20,20 @@ export interface BookHeroProps {
    * ikke hva som står der.
    */
   figure?: ReactNode;
+  /** Hvilken side figuren står på (desktop). Default `right`. */
+  figureSide?: "left" | "right";
   /** Påmeldingsskjemaet. Ligger rett i heroen: ett skjermbilde, én handling. */
   form?: ReactNode;
-  /** Liten tekst under skjemaet (personvern, hva som skjer videre). */
+  /**
+   * Knapper (typisk to `<Button asChild>`) når heroen ikke har skjema — en
+   * ressursside vil heller sende leseren ned på siden enn be om e-post.
+   */
+  actions?: ReactNode;
+  /** Liten tekst under skjemaet/knappene (personvern, hva som skjer videre). */
   note?: string;
+  /** Fargeflekkene i bakgrunnen. Default `subtle`; `none` skrur dem av. */
+  shapes?: "subtle" | "default" | "vibrant" | "none";
+  className?: string;
 }
 
 /**
@@ -31,6 +41,9 @@ export interface BookHeroProps {
  * fysisk objekt til høyre. Fargeflekkene bak boka driver sakte, og omslaget
  * vipper mot pekeren — bevegelsen er dekorativ og sitter på det ene elementet
  * blikket allerede hviler på, ikke utover hele siden.
+ *
+ * Samme hero bærer også en ressurs-/oversiktsside: kapittelkortet blir da en
+ * innholdsfortegnelse, og `actions` erstatter skjemaet.
  */
 export function BookHero({
   eyebrow,
@@ -39,16 +52,24 @@ export function BookHero({
   badge,
   bullets,
   figure,
+  figureSide = "right",
   form,
+  actions,
   note,
+  shapes = "subtle",
+  className,
 }: BookHeroProps) {
+  const figureLeft = figureSide === "left";
+
   return (
-    <section className="relative overflow-hidden py-16 md:py-24">
-      <FloatingShapes variant="subtle" />
+    <section
+      className={cn("relative overflow-hidden py-16 md:py-24", className)}
+    >
+      {shapes !== "none" && <FloatingShapes variant={shapes} />}
 
       <Container padding="none" className="relative z-10">
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-16">
-          <div className="lg:col-span-7">
+          <div className={cn("lg:col-span-7", figureLeft && "lg:order-2")}>
             <Stagger>
               {badge && (
                 <StaggerItem>
@@ -115,6 +136,14 @@ export function BookHero({
                 </StaggerItem>
               )}
 
+              {!form && actions && (
+                <StaggerItem>
+                  <div className="mt-9 flex flex-wrap items-center gap-3">
+                    {actions}
+                  </div>
+                </StaggerItem>
+              )}
+
               {note && (
                 <StaggerItem>
                   <Text
@@ -129,11 +158,12 @@ export function BookHero({
           </div>
 
           {figure && (
-            <div className="lg:col-span-5">
+            <div className={cn("lg:col-span-5", figureLeft && "lg:order-1")}>
               <Reveal
                 delay={0.1}
                 className={cn(
-                  "mx-auto w-full max-w-[19rem] md:max-w-sm lg:ml-auto lg:mr-0"
+                  "mx-auto w-full max-w-[19rem] md:max-w-sm",
+                  figureLeft ? "lg:mr-auto lg:ml-0" : "lg:mr-0 lg:ml-auto"
                 )}
               >
                 {figure}

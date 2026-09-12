@@ -86,7 +86,7 @@ export const ShopSettings: GlobalConfig = {
         {
           label: "Vilkår og angrerett",
           description:
-            "Lenkene og angrerettsteksten som tas med i ordrebekreftelsen.",
+            "Samtykketekstene kunden ser i kassen, og angrerettsteksten som tas med i ordrebekreftelsen.",
           fields: [
             {
               type: "row",
@@ -115,7 +115,53 @@ export const ShopSettings: GlobalConfig = {
                 "Digitalt innhold leveres umiddelbart etter kjøp. Ved å fullføre kjøpet ba du om at leveringen startet med en gang, og du godtok at angreretten dermed bortfaller (angrerettloven § 22 bokstav n). Er noe galt med leveransen, hjelper vi deg selvsagt – ta kontakt.",
               admin: {
                 description:
-                  "Loven krever at kunden får denne bekreftelsen på et varig medium (e-post). Samme forbehold vises ved betalingsknappene i kassen.",
+                  "Loven krever at kunden får denne bekreftelsen på et varig medium (e-post). Samme forbehold må kunden aktivt godta i kassen (feltene under).",
+              },
+            },
+            {
+              name: "consentCheckboxLabel",
+              type: "textarea",
+              label: "Samtykke – tekst ved avkryssingsboksen",
+              required: true,
+              defaultValue:
+                "Jeg ber om at det digitale innholdet leveres umiddelbart, og forstår at angreretten dermed bortfaller. Jeg godtar kjøpsbetingelsene.",
+              admin: {
+                description:
+                  "Vises ved boksen kunden må huke av før betaling (handlekurv og bekreftelsesvinduet). Lenker til kjøpsbetingelser og personvern legges til automatisk. Teksten kunden godtok lagres på ordren.",
+              },
+            },
+            {
+              type: "row",
+              fields: [
+                {
+                  name: "consentDialogTitle",
+                  type: "text",
+                  label: "Bekreftelsesvindu – tittel",
+                  required: true,
+                  defaultValue: "Før du betaler",
+                  admin: { width: "50%" },
+                },
+                {
+                  name: "consentErrorMessage",
+                  type: "text",
+                  label: "Feilmelding når boksen ikke er huket av",
+                  required: true,
+                  defaultValue:
+                    "Du må godta vilkårene før du kan gå videre til betaling.",
+                  admin: { width: "50%" },
+                },
+              ],
+            },
+            {
+              name: "consentDialogText",
+              type: "textarea",
+              label: "Bekreftelsesvindu – tekst",
+              required: true,
+              defaultValue:
+                "Digitalt innhold leveres med en gang betalingen er gjennomført. For at vi skal kunne levere umiddelbart, må du bekrefte at du ber om det og godtar at angreretten bortfaller (angrerettloven § 22 bokstav n).",
+              admin: {
+                description:
+                  "Vinduet dukker opp ved «Kjøp nå med Vipps» på produktsiden og i kurv-skuffen, der det ikke er plass til avkryssingsboksen.",
               },
             },
           ],

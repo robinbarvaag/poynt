@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckoutConsentNotice } from "@/components/checkout-consent-notice";
+import { CheckoutConsentCheckbox } from "@/components/checkout-consent-checkbox";
 import { VippsButton } from "@/components/vipps-button";
 import { formatPrice } from "@/lib/format";
 import { useCartReady } from "@/lib/use-cart-ready";
@@ -21,7 +21,7 @@ import {
 } from "@poynt/ui";
 import { ArrowLeft, ShieldCheck, ShoppingBag, Tag, X, Zap } from "lucide-react";
 import Link from "next/link";
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useRef, useState } from "react";
 
 /** Rabatt i kr ut fra dagens delsum — så den følger antalsendringer. */
 function couponDiscount(
@@ -51,6 +51,19 @@ export default function CartPage() {
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
   // Nyhetsbrev-samtykke: må starte uavkrysset (aktivt samtykke, mfl. § 15)
   const [newsletterOptIn, setNewsletterOptIn] = useState(false);
+  // Vilkår for digitalt innhold (angrerettloven § 22 n): må hukes av aktivt
+  // før noen av betalingsknappene slipper kunden videre. Uten avkryssing
+  // peker begge knappene på boksen i stedet for å bli grået ut — en grå
+  // Vipps-knapp leses som «Vipps virker ikke».
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [termsError, setTermsError] = useState(false);
+  const termsRef = useRef<HTMLDivElement>(null);
+  const requireTerms = (): boolean => {
+    if (termsAccepted) return true;
+    setTermsError(true);
+    termsRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    return false;
+  };
 
   // Rabattkode (selve koden bor i cart-storen så alle kasser ser den)
   const [couponInput, setCouponInput] = useState("");
@@ -101,6 +114,7 @@ export default function CartPage() {
   };
 
   const handleCheckout = async () => {
+    if (!requireTerms()) return;
     setIsLoading(true);
     setCheckoutError(null);
     try {
@@ -117,6 +131,7 @@ export default function CartPage() {
           })),
           couponCode: coupon?.code,
           newsletterOptIn,
+          termsAccepted,
         }),
       });
 
@@ -144,6 +159,7 @@ export default function CartPage() {
   };
 
   const handleVippsCheckout = async () => {
+    if (!requireTerms()) return;
     setVippsLoading(true);
     setCheckoutError(null);
     try {
@@ -184,7 +200,9 @@ export default function CartPage() {
               Utforsk produktene våre og legg noe i kurven for å komme i gang.
             </Text>
             <Link href="/produkter">
-              <Button size="lg">Se alle produkter</Button>
+              <Button size="lg" className="rounded-full">
+                Se alle produkter
+              </Button>
             </Link>
           </div>
         </div>
@@ -208,9 +226,12 @@ export default function CartPage() {
         </Text>
       </div>
 
-      <div className="grid items-start gap-8 lg:grid-cols-3">
+      {/* Varene bruker hele bredden; sammendraget ligger under, forankret til
+          høyre, slik at siden ikke får en tom venstrekolonne når kurven bare
+          har én–to varer. */}
+      <div className="flex flex-col gap-10">
         {/* Varer */}
-        <div className="lg:col-span-2">
+        <div>
           <ul className="space-y-3">
             {items.map((item) => (
               <CartLineItem
@@ -241,160 +262,185 @@ export default function CartPage() {
               />
             ))}
           </ul>
+        </div>
 
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
           <Link
             href="/produkter"
-            className="mt-6 inline-flex items-center gap-2 text-muted-foreground text-sm transition-colors hover:text-foreground"
+            className="inline-flex items-center gap-2 text-muted-foreground text-sm transition-colors hover:text-foreground"
           >
             <ArrowLeft className="size-4" />
             Fortsett å handle
           </Link>
-        </div>
 
-        {/* Sammendrag */}
-        <aside className="lg:sticky lg:top-28">
-          <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-6 shadow-sm">
-            <GridPattern fade className="text-primary/10" />
-            <div className="relative z-10">
-              <Heading
-                variant="h2"
-                color="foreground"
-                weight="bold"
-                customStyles="mb-5 text-lg"
-              >
-                Sammendrag
-              </Heading>
-
-              <div className="space-y-3 text-sm">
-                <div className="flex items-center justify-between text-muted-foreground">
-                  <span>Delsum</span>
-                  <span className="tabular-nums">{formatPrice(total())}</span>
-                </div>
-                <div className="flex items-center justify-between text-muted-foreground">
-                  <span>Mva</span>
-                  <span>Inkludert</span>
-                </div>
-                {coupon && discount > 0 && (
-                  <div className="flex items-center justify-between font-medium text-primary">
-                    <span className="flex items-center gap-1.5">
-                      <Tag className="size-3.5" />
-                      {coupon.code}
-                    </span>
-                    <span className="tabular-nums">
-                      −{formatPrice(discount)}
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              {/* Rabattkode */}
-              {coupon ? (
-                <div className="mt-4 flex items-center justify-between gap-2 rounded-xl bg-accent-3/30 px-3 py-2 text-sm">
-                  <span className="flex min-w-0 items-center gap-2 text-foreground">
-                    <Tag className="size-4 shrink-0 text-primary" />
-                    <span className="truncate font-medium">{coupon.code}</span>
-                    <span className="shrink-0 text-muted-foreground text-xs">
-                      {coupon.label}
-                    </span>
-                  </span>
-                  <button
-                    type="button"
-                    onClick={removeCoupon}
-                    aria-label="Fjern rabattkode"
-                    className="shrink-0 rounded-full p-1 text-muted-foreground transition-colors hover:text-destructive"
-                  >
-                    <X className="size-4" />
-                  </button>
-                </div>
-              ) : (
-                <form onSubmit={applyCoupon} className="mt-4">
-                  <div className="flex gap-2">
-                    <Input
-                      value={couponInput}
-                      onChange={(e) => setCouponInput(e.target.value)}
-                      placeholder="Rabattkode"
-                      aria-label="Rabattkode"
-                      className="h-10"
-                    />
-                    <Button
-                      type="submit"
-                      variant="outline"
-                      className="h-10 shrink-0"
-                      disabled={couponLoading || !couponInput.trim()}
-                    >
-                      {couponLoading ? "..." : "Bruk"}
-                    </Button>
-                  </div>
-                  {couponError && (
-                    <p className="mt-1.5 text-destructive text-xs">
-                      {couponError}
-                    </p>
-                  )}
-                </form>
-              )}
-
-              <div className="mt-4 flex items-center justify-between border-border border-t pt-4">
-                <span className="font-bold text-foreground">Totalt</span>
-                <span className="font-bold text-foreground text-xl tabular-nums">
-                  {formatPrice(grandTotal)}
-                </span>
-              </div>
-
-              <label className="mt-5 flex cursor-pointer items-start gap-2.5 text-muted-foreground text-sm">
-                <input
-                  type="checkbox"
-                  checked={newsletterOptIn}
-                  onChange={(e) => setNewsletterOptIn(e.target.checked)}
-                  className="mt-0.5 size-4 shrink-0 accent-primary"
-                />
-                <span>
-                  Ja takk, jeg vil motta nyhetsbrev med tips og tilbud fra
-                  Poynt. Du kan melde deg av når som helst.
-                </span>
-              </label>
-
-              {checkoutError && (
-                <p
-                  role="alert"
-                  className="mt-4 rounded-xl bg-destructive/10 px-3 py-2 text-destructive text-sm"
+          {/* Sammendrag */}
+          <aside className="w-full lg:max-w-md">
+            <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-6 shadow-sm">
+              <GridPattern fade className="text-primary/10" />
+              <div className="relative z-10">
+                <Heading
+                  variant="h2"
+                  color="foreground"
+                  weight="bold"
+                  customStyles="mb-5 text-lg"
                 >
-                  {checkoutError}
+                  Sammendrag
+                </Heading>
+
+                <div className="space-y-3 text-sm">
+                  <div className="flex items-center justify-between text-muted-foreground">
+                    <span>Delsum</span>
+                    <span className="tabular-nums">{formatPrice(total())}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-muted-foreground">
+                    <span>Mva</span>
+                    <span>Inkludert</span>
+                  </div>
+                  {coupon && discount > 0 && (
+                    <div className="flex items-center justify-between font-medium text-primary">
+                      <span className="flex items-center gap-1.5">
+                        <Tag className="size-3.5" />
+                        {coupon.code}
+                      </span>
+                      <span className="tabular-nums">
+                        −{formatPrice(discount)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Rabattkode */}
+                {coupon ? (
+                  <div className="mt-4 flex items-center justify-between gap-2 rounded-xl bg-accent-3/30 px-3 py-2 text-sm">
+                    <span className="flex min-w-0 items-center gap-2 text-foreground">
+                      <Tag className="size-4 shrink-0 text-primary" />
+                      <span className="truncate font-medium">
+                        {coupon.code}
+                      </span>
+                      <span className="shrink-0 text-muted-foreground text-xs">
+                        {coupon.label}
+                      </span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={removeCoupon}
+                      aria-label="Fjern rabattkode"
+                      className="shrink-0 rounded-full p-1 text-muted-foreground transition-colors hover:text-destructive"
+                    >
+                      <X className="size-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <form onSubmit={applyCoupon} className="mt-4">
+                    <div className="flex gap-2">
+                      <Input
+                        value={couponInput}
+                        onChange={(e) => setCouponInput(e.target.value)}
+                        placeholder="Rabattkode"
+                        aria-label="Rabattkode"
+                        className="h-10"
+                      />
+                      <Button
+                        type="submit"
+                        variant="outline"
+                        className="h-10 shrink-0"
+                        disabled={couponLoading || !couponInput.trim()}
+                      >
+                        {couponLoading ? "..." : "Bruk"}
+                      </Button>
+                    </div>
+                    {couponError && (
+                      <p className="mt-1.5 text-destructive text-xs">
+                        {couponError}
+                      </p>
+                    )}
+                  </form>
+                )}
+
+                <div className="mt-4 flex items-center justify-between border-border border-t pt-4">
+                  <span className="font-bold text-foreground">Totalt</span>
+                  <span className="font-bold text-foreground text-xl tabular-nums">
+                    {formatPrice(grandTotal)}
+                  </span>
+                </div>
+
+                <label className="mt-5 flex cursor-pointer items-start gap-2.5 text-muted-foreground text-sm">
+                  <input
+                    type="checkbox"
+                    checked={newsletterOptIn}
+                    onChange={(e) => setNewsletterOptIn(e.target.checked)}
+                    className="mt-0.5 size-4 shrink-0 accent-primary"
+                  />
+                  <span>
+                    Ja takk, jeg vil motta nyhetsbrev med tips og tilbud fra
+                    Poynt. Du kan melde deg av når som helst.
+                  </span>
+                </label>
+
+                <div ref={termsRef}>
+                  <CheckoutConsentCheckbox
+                    className="mt-4 rounded-2xl bg-accent-3/30 p-4"
+                    checked={termsAccepted}
+                    onCheckedChange={(value) => {
+                      setTermsAccepted(value);
+                      if (value) setTermsError(false);
+                    }}
+                    error={termsError}
+                  />
+                </div>
+
+                {checkoutError && (
+                  <p
+                    role="alert"
+                    className="mt-4 rounded-xl bg-destructive/10 px-3 py-2 text-destructive text-sm"
+                  >
+                    {checkoutError}
+                  </p>
+                )}
+
+                <Button
+                  size="lg"
+                  className="mt-4 w-full rounded-full"
+                  onClick={handleCheckout}
+                  disabled={isLoading || vippsLoading || !ready}
+                >
+                  {isLoading ? "Laster..." : "Gå til kassen"}
+                </Button>
+
+                {/* Offisiell Vipps-knapp — retningslinjene tillater ikke egen design. */}
+                <VippsButton
+                  stretched
+                  className="mt-3"
+                  loading={vippsLoading}
+                  disabled={isLoading || !ready}
+                  onClick={handleVippsCheckout}
+                />
+
+                <p className="mt-4 text-muted-foreground text-xs leading-relaxed">
+                  Les om behandling av personopplysninger i{" "}
+                  <Link
+                    href="/personvern"
+                    className="underline underline-offset-2 hover:text-foreground"
+                  >
+                    personvernerklæringen
+                  </Link>
+                  .
                 </p>
-              )}
 
-              <Button
-                size="lg"
-                className="mt-4 w-full"
-                onClick={handleCheckout}
-                disabled={isLoading || vippsLoading || !ready}
-              >
-                {isLoading ? "Laster..." : "Gå til kassen"}
-              </Button>
-
-              {/* Offisiell Vipps-knapp — retningslinjene tillater ikke egen design. */}
-              <VippsButton
-                stretched
-                className="mt-3"
-                loading={vippsLoading}
-                disabled={isLoading || !ready}
-                onClick={handleVippsCheckout}
-              />
-
-              <CheckoutConsentNotice className="mt-4" />
-
-              <ul className="mt-5 space-y-2.5 text-muted-foreground text-sm">
-                <li className="flex items-center gap-2.5">
-                  <ShieldCheck className="size-4 shrink-0 text-primary" />
-                  Sikker betaling med Stripe eller Vipps
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <Zap className="size-4 shrink-0 text-primary" />
-                  Tilgang umiddelbart etter kjøp
-                </li>
-              </ul>
+                <ul className="mt-5 space-y-2.5 text-muted-foreground text-sm">
+                  <li className="flex items-center gap-2.5">
+                    <ShieldCheck className="size-4 shrink-0 text-primary" />
+                    Sikker betaling med Stripe eller Vipps
+                  </li>
+                  <li className="flex items-center gap-2.5">
+                    <Zap className="size-4 shrink-0 text-primary" />
+                    Tilgang umiddelbart etter kjøp
+                  </li>
+                </ul>
+              </div>
             </div>
-          </div>
-        </aside>
+          </aside>
+        </div>
       </div>
     </Container>
   );

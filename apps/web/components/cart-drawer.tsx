@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckoutConsentNotice } from "@/components/checkout-consent-notice";
+import { CheckoutConsentDialog } from "@/components/checkout-consent-dialog";
 import { VippsButton } from "@/components/vipps-button";
 import { formatPrice } from "@/lib/format";
 import { useCartReady } from "@/lib/use-cart-ready";
@@ -43,6 +43,9 @@ export function CartDrawer() {
   } = useCart();
   const [vippsLoading, setVippsLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  // Vipps-knappen åpner først samtykkevinduet (angrerettloven § 22 n);
+  // selve betalingen starter fra Vipps-knappen inne i vinduet.
+  const [consentOpen, setConsentOpen] = useState(false);
 
   // Inntil klienten har montert behandler vi kurven som tom (se useCartReady).
   const cartItems = ready ? items : [];
@@ -81,15 +84,15 @@ export function CartDrawer() {
         onClear={clearCart}
         checkout={
           <div className="space-y-2">
-            {checkoutError && (
+            {checkoutError && !consentOpen && (
               <p
                 role="alert"
-                className="rounded-xl bg-destructive/10 px-3 py-2 text-destructive text-sm"
+                className="rounded-2xl bg-destructive/10 px-4 py-2.5 text-destructive text-sm"
               >
                 {checkoutError}
               </p>
             )}
-            <Button className="w-full" size="lg" asChild>
+            <Button className="w-full rounded-full" size="lg" asChild>
               <Link href="/handlekurv" onClick={() => setOpen(false)}>
                 Gå til kassen
               </Link>
@@ -98,13 +101,22 @@ export function CartDrawer() {
             <VippsButton
               stretched
               loading={vippsLoading}
-              onClick={handleVippsCheckout}
+              onClick={() => {
+                setCheckoutError(null);
+                setConsentOpen(true);
+              }}
             />
-            <CheckoutConsentNotice compact />
+            <CheckoutConsentDialog
+              open={consentOpen}
+              onOpenChange={setConsentOpen}
+              onConfirm={handleVippsCheckout}
+              loading={vippsLoading}
+              error={checkoutError}
+            />
           </div>
         }
         emptyAction={
-          <Button variant="outline" asChild>
+          <Button variant="outline" className="rounded-full" asChild>
             <Link href="/produkter" onClick={() => setOpen(false)}>
               Se produkter
             </Link>

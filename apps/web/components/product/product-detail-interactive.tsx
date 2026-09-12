@@ -1,5 +1,6 @@
 "use client";
 import { AddToCartButton } from "@/components/add-to-cart-button";
+import { CheckoutConsentDialog } from "@/components/checkout-consent-dialog";
 import { CheckoutConsentNotice } from "@/components/checkout-consent-notice";
 import { type MediaResource, PayloadImage } from "@/components/payload-image";
 import { VippsButton } from "@/components/vipps-button";
@@ -75,7 +76,7 @@ function MembershipApplyButton({ applyUrl }: { applyUrl?: string }) {
 
   return (
     <div className="space-y-3">
-      <Button asChild size="lg" className="w-full">
+      <Button asChild size="lg" className="w-full rounded-full">
         <Link href={href}>Søk om medlemskap</Link>
       </Button>
       <Text variant="muted" customStyles="text-sm">
@@ -376,6 +377,13 @@ function ProductDetailInteractive({
   // sender kun dette produktet (medlemskap støttes ikke — API-et avviser).
   const [vippsLoading, setVippsLoading] = useState(false);
   const [vippsError, setVippsError] = useState<string | null>(null);
+  // Vipps-knappene (kjøpsboks + sticky linje) åpner først samtykkevinduet
+  // (angrerettloven § 22 n); betalingen starter fra Vipps-knappen i vinduet.
+  const [consentOpen, setConsentOpen] = useState(false);
+  const openConsent = () => {
+    setVippsError(null);
+    setConsentOpen(true);
+  };
   const handleVippsBuyNow = async () => {
     setVippsLoading(true);
     setVippsError(null);
@@ -447,7 +455,7 @@ function ProductDetailInteractive({
               {info.type === "membership" ? (
                 <MembershipApplyButton applyUrl={info.applyUrl} />
               ) : isSoldOut ? (
-                <Button size="lg" className="w-full" disabled>
+                <Button size="lg" className="w-full rounded-full" disabled>
                   Utsolgt
                 </Button>
               ) : (
@@ -456,7 +464,7 @@ function ProductDetailInteractive({
                 <div
                   className={
                     allowQuantity
-                      ? "flex items-stretch overflow-hidden rounded-2xl border border-border bg-card"
+                      ? "flex items-stretch overflow-hidden rounded-full border border-border bg-card"
                       : undefined
                   }
                 >
@@ -484,7 +492,7 @@ function ProductDetailInteractive({
                     disabled={needsVariant}
                     disabledLabel={`Velg ${info.variantLabel ?? "alternativ"}`}
                     className={
-                      allowQuantity ? "min-w-0 rounded-none" : undefined
+                      allowQuantity ? "min-w-0 rounded-none" : "rounded-full"
                     }
                   />
                 </div>
@@ -498,13 +506,13 @@ function ProductDetailInteractive({
                   stretched
                   loading={vippsLoading}
                   disabled={needsVariant}
-                  onClick={handleVippsBuyNow}
+                  onClick={openConsent}
                 />
               )}
               {info.type !== "membership" && !isSoldOut && (
                 <CheckoutConsentNotice className="mt-3" />
               )}
-              {vippsError && (
+              {vippsError && !consentOpen && (
                 <p
                   role="alert"
                   className="rounded-xl bg-destructive/10 px-3 py-2 text-destructive text-sm"
@@ -553,7 +561,7 @@ function ProductDetailInteractive({
               <div
                 className={
                   allowQuantity
-                    ? "flex min-w-0 flex-1 items-stretch overflow-hidden rounded-2xl border border-border bg-card sm:flex-none"
+                    ? "flex min-w-0 flex-1 items-stretch overflow-hidden rounded-full border border-border bg-card sm:flex-none"
                     : undefined
                 }
               >
@@ -579,18 +587,30 @@ function ProductDetailInteractive({
                   quantity={quantity}
                   maxQuantity={maxQuantity}
                   allowQuantity={allowQuantity}
-                  className={allowQuantity ? "min-w-0 rounded-none" : undefined}
+                  className={
+                    allowQuantity ? "min-w-0 rounded-none" : "rounded-full"
+                  }
                 />
               </div>
               <VippsButton
                 compact
                 loading={vippsLoading}
-                onClick={handleVippsBuyNow}
+                onClick={openConsent}
                 className="shrink-0"
               />
             </div>
           )}
         </StickyBuyBar>
+      )}
+
+      {info.type !== "membership" && !isSoldOut && (
+        <CheckoutConsentDialog
+          open={consentOpen}
+          onOpenChange={setConsentOpen}
+          onConfirm={handleVippsBuyNow}
+          loading={vippsLoading}
+          error={vippsError}
+        />
       )}
     </>
   );

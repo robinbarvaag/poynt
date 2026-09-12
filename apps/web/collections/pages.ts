@@ -10,6 +10,7 @@ import {
   revalidateCmsAfterChange,
   revalidateCmsAfterDelete,
 } from "../lib/revalidate-cms";
+import { secretSlugToken } from "../lib/secret-slug";
 
 export const Pages: CollectionConfig = {
   slug: "pages",
@@ -52,16 +53,24 @@ export const Pages: CollectionConfig = {
     },
   },
   hooks: {
-    beforeChange: [
-      async ({ data, originalDoc, req, operation }) => {
-        // Auto-generer slug fra tittel hvis ikke satt
+    beforeValidate: [
+      // Kjører FØR påkrevd-sjekken på slug, så en tom slug fylles inn i stedet
+      // for å stoppe lagringa. Skjulte sider får et tilfeldig suffiks – en
+      // adresse som ikke kan gjettes er hele poenget med dem (QR-kode-sider,
+      // kunde-ressurser).
+      async ({ data }) => {
+        if (!data) return data;
         if (!data.slug && data.title) {
-          data.slug = generateSlug(data.title);
+          const base = generateSlug(data.title);
+          data.slug = data.unlisted ? `${base}-${secretSlugToken()}` : base;
         }
-
+        return data;
+      },
+    ],
+    beforeChange: [
+      async ({ data }) => {
         // Redirects plugin håndterer automatisk redirect ved slug-endring
         // når collection er registrert i pluginet
-
         return data;
       },
     ],
@@ -147,7 +156,18 @@ export const Pages: CollectionConfig = {
       admin: {
         position: "sidebar",
         description:
-          "Genereres automatisk fra tittel. Bruk 'forside' for forsida.",
+          "Genereres automatisk fra tittel. Bruk 'forside' for forsida. Er «Skjult side» på og slug står tom, får adressen et tilfeldig suffiks som ikke kan gjettes.",
+      },
+    },
+    {
+      name: "unlisted",
+      type: "checkbox",
+      label: "Skjult side (kun via lenke / QR-kode)",
+      defaultValue: false,
+      admin: {
+        position: "sidebar",
+        description:
+          "Siden er åpen for alle som har adressen, men holdes utenfor Google (noindex), sitemap og menyer. Bruk til QR-kode-sider og ressurser for kunder. Tips: la slug stå tom ved opprettelse, så lages en adresse som er vanskelig å gjette.",
       },
     },
     {
@@ -158,11 +178,12 @@ export const Pages: CollectionConfig = {
       options: [
         { label: "Vanlig side", value: "standard" },
         { label: "Landingsside", value: "landing" },
+        { label: "Oversiktsside med sidemeny", value: "hub" },
       ],
       admin: {
         position: "sidebar",
         description:
-          "Landingsside gir siden en mykere fargevask i bakgrunnen og en tynn fremdriftsbar i toppen. Bruk den til kampanjer og lanseringer – ikke til vanlige innholdssider.",
+          "Landingsside gir siden en mykere fargevask i bakgrunnen og en tynn fremdriftsbar i toppen – for kampanjer og lanseringer. Oversiktsside med sidemeny legger en meny ved siden av innholdet som følger med når man scroller; hver blokk med et «Blokk-navn» blir et menypunkt. For ressurssider med mye innhold.",
       },
     },
     ...qualityDataFields({ sidebarSection: true }),

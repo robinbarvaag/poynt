@@ -1,3 +1,7 @@
+import {
+  CONSENT_REQUIRED_ERROR,
+  snapshotConsent,
+} from "@/lib/checkout-consent-server";
 import { resolveCheckoutItems } from "@/lib/checkout-items";
 import { discountedTotal, resolveCoupon } from "@/lib/coupon";
 import { getSessionWithMembership } from "@/lib/membership";
@@ -24,7 +28,17 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { items, couponCode, newsletterOptIn } = await req.json();
+    const { items, couponCode, newsletterOptIn, termsAccepted } =
+      await req.json();
+
+    // Aktivt samtykke til umiddelbar levering / bortfall av angrerett
+    // (angrerettloven § 22 n) er et krav — uten det ingen betaling.
+    if (termsAccepted !== true) {
+      return NextResponse.json(
+        { error: CONSENT_REQUIRED_ERROR },
+        { status: 400 }
+      );
+    }
 
     const authSession = await getSessionWithMembership(req);
 
@@ -106,9 +120,8 @@ export async function POST(req: NextRequest) {
         status: "pending",
         paymentProvider: "vipps",
         newsletterOptIn: newsletterOptIn === true,
-        // Forbeholdet om umiddelbar levering og bortfall av angrerett står
-        // ved alle betalingsknappene (CheckoutConsentNotice).
-        termsAccepted: true,
+        // Dokumentasjon på samtykket: huket av, når, og teksten kunden så.
+        ...(await snapshotConsent(payload)),
       },
     });
 

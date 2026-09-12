@@ -21,6 +21,8 @@ import { PodcastArchiveBlock } from "./blocks/podcast-archive-block";
 import { PricingBlock } from "./blocks/pricing-block";
 import { ProductArchiveBlock } from "./blocks/product-archive-block";
 import { ProductSpotlightBlock } from "./blocks/product-spotlight-block";
+import { PromptLibraryBlock } from "./blocks/prompt-library-block";
+import { ResourceListBlock } from "./blocks/resource-list-block";
 import { ServicesArchiveBlock } from "./blocks/services-archive-block";
 import { SpotifyEmbedBlock } from "./blocks/spotify-embed-block";
 import { StatsBandBlock } from "./blocks/stats-band-block";
@@ -31,6 +33,12 @@ type Block = NonNullable<Page["layout"]>[number];
 
 interface RenderBlocksProps {
   blocks: Block[];
+  /**
+   * Vertikal rytme mellom blokkene. Default "lg" (vanlige sider). Oversikts-
+   * sider med sidemeny bruker "md" — der står blokkene i én smalere kolonne
+   * og trenger mindre luft for å henge sammen.
+   */
+  spacing?: "md" | "lg";
 }
 
 // Full-bleed / self-styled blocks render as-is, never wrapped in BlockSection.
@@ -64,6 +72,8 @@ const SELF_REVEAL_BLOCK_TYPES = new Set([
   "newsletter",
   "carousel",
   "countdown",
+  "resourceList",
+  "promptLibrary",
 ]);
 
 function renderBlock(block: Block): ReactNode {
@@ -210,6 +220,18 @@ function renderBlock(block: Block): ReactNode {
           {...(block as unknown as ComponentProps<typeof SpotifyEmbedBlock>)}
         />
       );
+    case "resourceList":
+      return (
+        <ResourceListBlock
+          {...(block as unknown as ComponentProps<typeof ResourceListBlock>)}
+        />
+      );
+    case "promptLibrary":
+      return (
+        <PromptLibraryBlock
+          {...(block as unknown as ComponentProps<typeof PromptLibraryBlock>)}
+        />
+      );
     case "formBlock":
       return (
         <FormBlockComponent
@@ -221,7 +243,7 @@ function renderBlock(block: Block): ReactNode {
   }
 }
 
-export function RenderBlocks({ blocks }: RenderBlocksProps) {
+export function RenderBlocks({ blocks, spacing = "lg" }: RenderBlocksProps) {
   // Én jevn bakgrunn (Azure) hele veien — INGEN veksel-tint mellom seksjoner.
   // Farge/rytme kommer fra innholdet: fargede kort (path/produkt/testimonials)
   // og flytende avrundede paneler (statsBand/ctaSection colored/newsletter).
@@ -248,6 +270,7 @@ export function RenderBlocks({ blocks }: RenderBlocksProps) {
         ) : (
           <BlockSection
             background="default"
+            spacing={spacing}
             containerSize={false}
             reveal={!SELF_REVEAL_BLOCK_TYPES.has(block.blockType)}
           >

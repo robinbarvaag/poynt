@@ -63,6 +63,7 @@ claude mcp add --transport http poynt-cms https://<domene>/api/mcp/<MCP_SECRET>
 | `search_media` | Finn bilder (alt/filnavn) → media-ID til bildefelt. |
 | `upload_media_from_url` | Henter et bilde fra en offentlig direktelenke inn i mediebiblioteket (maks 40 MB, kun `image/*`, interne adresser avvist). |
 | `list_related` | Produkter, tjenester, skjemaer og kategorier → ID til relationship-felt. |
+| `get_product` | Hele produktet: type, pris, førpris, MVA, beskrivelser (markdown), varianter, medlemskapsinnstillinger. For å lese/vurdere det som selges. |
 
 **Bilder fra chatten** kan Claude ikke laste opp via MCP. Flyten er: Susanne
 laster opp i admin (Media, dra og slipp) eller deler en direktelenke, så

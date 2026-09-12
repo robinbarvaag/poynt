@@ -1,3 +1,4 @@
+import { CONSENT_REQUIRED_ERROR } from "@/lib/checkout-consent-server";
 import { resolveCheckoutItems } from "@/lib/checkout-items";
 import { resolveCoupon } from "@/lib/coupon";
 import { getSessionWithMembership } from "@/lib/membership";
@@ -31,7 +32,19 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { items, couponCode, newsletterOptIn } = await req.json();
+    const { items, couponCode, newsletterOptIn, termsAccepted } =
+      await req.json();
+
+    // Aktivt samtykke til umiddelbar levering / bortfall av angrerett
+    // (angrerettloven § 22 n) er et krav — uten det ingen betaling. Ordren
+    // opprettes først i webhooken, så tidspunktet følger med som metadata.
+    if (termsAccepted !== true) {
+      return NextResponse.json(
+        { error: CONSENT_REQUIRED_ERROR },
+        { status: 400 }
+      );
+    }
+    const termsMeta = { terms: "1", termsAt: new Date().toISOString() };
 
     // Try to get logged-in user (optional — guests can buy products too)
     const authSession = await getSessionWithMembership(req);
@@ -122,6 +135,7 @@ export async function POST(req: NextRequest) {
           productType: "membership",
           tier,
           ...(authSession && { userId: authSession.user.id }),
+          ...termsMeta,
           // Samtykke fra handlekurven fulgte tidligere bare produktkjøp —
           // medlemskapsveien mistet det stille.
           ...(newsletterOptIn === true && { newsletter: "1" }),
@@ -165,6 +179,7 @@ export async function POST(req: NextRequest) {
       ...(authSession && { customer_email: authSession.user.email }),
       metadata: {
         ...(cartMeta.length <= 500 && { cart: cartMeta }),
+        ...termsMeta,
         ...(newsletterOptIn === true && { newsletter: "1" }),
       },
       success_url: `${process.env.NEXT_PUBLIC_URL}/kvittering?session_id={CHECKOUT_SESSION_ID}`,

@@ -201,6 +201,8 @@ export interface Page {
         | NewsletterBlock
         | ContentBlock
         | MediaBlock
+        | ResourceListBlock
+        | PromptLibraryBlock
         | PathCardsBlock
         | CarouselBlock
         | TestimonialsBlock
@@ -250,13 +252,17 @@ export interface Page {
     ogType?: ('website' | 'article' | 'product') | null;
   };
   /**
-   * Genereres automatisk fra tittel. Bruk 'forside' for forsida.
+   * Genereres automatisk fra tittel. Bruk 'forside' for forsida. Er «Skjult side» på og slug står tom, får adressen et tilfeldig suffiks som ikke kan gjettes.
    */
   slug: string;
   /**
-   * Landingsside gir siden en mykere fargevask i bakgrunnen og en tynn fremdriftsbar i toppen. Bruk den til kampanjer og lanseringer – ikke til vanlige innholdssider.
+   * Siden er åpen for alle som har adressen, men holdes utenfor Google (noindex), sitemap og menyer. Bruk til QR-kode-sider og ressurser for kunder. Tips: la slug stå tom ved opprettelse, så lages en adresse som er vanskelig å gjette.
    */
-  pageType?: ('standard' | 'landing') | null;
+  unlisted?: boolean | null;
+  /**
+   * Landingsside gir siden en mykere fargevask i bakgrunnen og en tynn fremdriftsbar i toppen – for kampanjer og lanseringer. Oversiktsside med sidemeny legger en meny ved siden av innholdet som følger med når man scroller; hver blokk med et «Blokk-navn» blir et menypunkt. For ressurssider med mye innhold.
+   */
+  pageType?: ('standard' | 'landing' | 'hub') | null;
   /**
    * Settes av AI-vurderingen (0–100).
    */
@@ -429,7 +435,7 @@ export interface FolderInterface {
  */
 export interface BookHeroBlock {
   /**
-   * Kort statuslinje øverst med en liten blinkende prikk, f.eks. «Kommer våren 2027».
+   * Kort statuslinje øverst med en liten prikk, f.eks. «Kommer våren 2027» eller «Oppdatert september 2026».
    */
   badge?: string | null;
   eyebrow?: string | null;
@@ -445,11 +451,11 @@ export interface BookHeroBlock {
       }[]
     | null;
   /**
-   * Stående bilde av omslaget (2:3). Så lenge dette står tomt, vises kapittel-kortet under i stedet – last opp omslaget når det finnes, så tar det over plassen automatisk.
+   * Stående bilde (2:3 for bok). Så lenge dette står tomt, vises kapittel-kortet under i stedet – last opp bildet når det finnes, så tar det over plassen automatisk.
    */
   cover?: (number | null) | Media;
   /**
-   * Vises som et kort der kapitlene byttes ett om gangen. Forbokstavene i kapittelnavnene lyser opp under kortet – velger du navn som staver ut boktittelen (V-E-K-S-T), blir det synlig for leseren. Brukes kun når det ikke er lastet opp et bokomslag.
+   * Vises som et kort der kapitlene byttes ett om gangen. Med brikketype «Forbokstaver» lyser forbokstavene opp under kortet – velger du navn som staver ut et ord (V-E-K-S-T), blir det synlig for leseren. Gi hvert kapittel en lenke (f.eks. #prompter) så blir kortet en innholdsfortegnelse. Brukes kun når det ikke er lastet opp et bilde.
    */
   chapters?:
     | {
@@ -458,17 +464,60 @@ export interface BookHeroBlock {
          */
         title: string;
         text?: string | null;
+        /**
+         * F.eks. «#prompter» for å hoppe til en seksjon på samme side (blokk-navnet på seksjonen blir ankeret).
+         */
+        href?: string | null;
+        /**
+         * Standard «Gå til».
+         */
+        linkLabel?: string | null;
         id?: string | null;
       }[]
     | null;
   /**
-   * Skjemaet vises rett i heroen, så leseren kan melde seg på uten å scrolle.
+   * Skjemaet vises rett i heroen, så leseren kan melde seg på uten å scrolle. Uten skjema vises knappene under i stedet.
    */
   form?: (number | null) | Form;
+  primaryCta?: {
+    text?: string | null;
+    /**
+     * URL eller #anker på samme side.
+     */
+    url?: string | null;
+  };
+  secondaryCta?: {
+    text?: string | null;
+    url?: string | null;
+  };
   /**
    * F.eks. hva som skjer videre, eller at man kan melde seg av når som helst.
    */
   note?: string | null;
+  figureSide?: ('right' | 'left') | null;
+  figureAspect?: ('book' | 'card' | 'square') | null;
+  /**
+   * Gjelder kapittel-kortet. Et produkt med egen identitet bør ha sine egne farger her – ikke Poynt-grønt.
+   */
+  palette?: ('book' | 'poynt' | 'custom') | null;
+  customPalette?: {
+    /**
+     * Hex, f.eks. #cdc1da
+     */
+    surface?: string | null;
+    ink?: string | null;
+    accent?: string | null;
+  };
+  /**
+   * Standard «Kapitlene i boka».
+   */
+  rotatorEyebrow?: string | null;
+  rotatorMarkers?: ('initials' | 'numbers' | 'dots') | null;
+  /**
+   * Hvor lenge hvert kapittel står før kortet blar.
+   */
+  rotatorInterval?: number | null;
+  shapes?: ('subtle' | 'default' | 'none') | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'bookHero';
@@ -913,6 +962,87 @@ export interface MediaBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'media';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ResourceListBlock".
+ */
+export interface ResourceListBlock {
+  eyebrow?: string | null;
+  title?: string | null;
+  intro?: string | null;
+  /**
+   * Én rad per ting. Bruk «Kategori» til å gruppere (f.eks. «Podkast», «Musikk», «Fokus») – da får leseren filter-brikker over lista.
+   */
+  items?:
+    | {
+        title: string;
+        kind: 'link' | 'file' | 'book' | 'podcast' | 'music' | 'video' | 'tool' | 'app';
+        description?: string | null;
+        /**
+         * Ekstern URL. For filer: last heller opp fila under.
+         */
+        url?: string | null;
+        /**
+         * Fila som skal lastes ned (PDF, mal, regneark …).
+         */
+        file?: (number | null) | Media;
+        /**
+         * Bokomslag (stående), podkast-cover (kvadrat) eller et skjermbilde (liggende). Valgfritt – uten bilde vises et ikon.
+         */
+        image?: (number | null) | Media;
+        /**
+         * Fri tekst. Lik stavemåte = samme filter-brikke.
+         */
+        category?: string | null;
+        /**
+         * Forfatter, «anbefalt av …», varighet.
+         */
+        note?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  layout?: ('grid' | 'list') | null;
+  columns?: ('2' | '3' | '4') | null;
+  showFilter?: ('auto' | 'always' | 'never') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'resourceList';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PromptLibraryBlock".
+ */
+export interface PromptLibraryBlock {
+  eyebrow?: string | null;
+  title?: string | null;
+  intro?: string | null;
+  prompts?:
+    | {
+        title: string;
+        /**
+         * Valgfritt – vises som en liten merkelapp.
+         */
+        tool?: ('ChatGPT' | 'Claude' | 'Gemini' | 'Copilot' | 'Midjourney' | 'Alle KI-verktøy') | null;
+        /**
+         * Én–to setninger om hva prompten hjelper deg med.
+         */
+        description?: string | null;
+        /**
+         * Akkurat slik den skal limes inn. Linjeskift bevares. Bruk [klammer] for det leseren skal bytte ut, f.eks. [bedriftsnavn].
+         */
+        prompt: string;
+        /**
+         * Komma-separert, f.eks. «salg, e-post».
+         */
+        tags?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  columns?: ('1' | '2' | '3') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'promptLibrary';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2478,9 +2608,17 @@ export interface Order {
    */
   vatTotal?: number | null;
   /**
-   * Kunden fikk forbeholdet om umiddelbar levering og bortfall av angrerett ved betalingsknappen (angrerettloven § 22 n)
+   * Kunden huket aktivt av for umiddelbar levering og bortfall av angrerett før betaling (angrerettloven § 22 n)
    */
   termsAccepted?: boolean | null;
+  /**
+   * Tidspunktet kunden huket av boksen i kassen
+   */
+  termsAcceptedAt?: string | null;
+  /**
+   * Kopi av teksten ved avkryssingsboksen slik den var da kjøpet ble gjort — dokumentasjon ved en eventuell tvist
+   */
+  termsAcceptedText?: string | null;
   status: 'pending' | 'paid' | 'cancelled';
   /**
    * Kunden krysset aktivt av for nyhetsbrev i utsjekken (dokumentert samtykke)
@@ -2737,6 +2875,8 @@ export interface PagesSelect<T extends boolean = true> {
         newsletter?: T | NewsletterBlockSelect<T>;
         content?: T | ContentBlockSelect<T>;
         media?: T | MediaBlockSelect<T>;
+        resourceList?: T | ResourceListBlockSelect<T>;
+        promptLibrary?: T | PromptLibraryBlockSelect<T>;
         pathCards?: T | PathCardsBlockSelect<T>;
         carousel?: T | CarouselBlockSelect<T>;
         testimonials?: T | TestimonialsBlockSelect<T>;
@@ -2766,6 +2906,7 @@ export interface PagesSelect<T extends boolean = true> {
         ogType?: T;
       };
   slug?: T;
+  unlisted?: T;
   pageType?: T;
   qualityScore?: T;
   qualityReviewedAt?: T;
@@ -2826,10 +2967,38 @@ export interface BookHeroBlockSelect<T extends boolean = true> {
     | {
         title?: T;
         text?: T;
+        href?: T;
+        linkLabel?: T;
         id?: T;
       };
   form?: T;
+  primaryCta?:
+    | T
+    | {
+        text?: T;
+        url?: T;
+      };
+  secondaryCta?:
+    | T
+    | {
+        text?: T;
+        url?: T;
+      };
   note?: T;
+  figureSide?: T;
+  figureAspect?: T;
+  palette?: T;
+  customPalette?:
+    | T
+    | {
+        surface?: T;
+        ink?: T;
+        accent?: T;
+      };
+  rotatorEyebrow?: T;
+  rotatorMarkers?: T;
+  rotatorInterval?: T;
+  shapes?: T;
   id?: T;
   blockName?: T;
 }
@@ -3056,6 +3225,55 @@ export interface ContentBlockSelect<T extends boolean = true> {
 export interface MediaBlockSelect<T extends boolean = true> {
   media?: T;
   caption?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ResourceListBlock_select".
+ */
+export interface ResourceListBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  title?: T;
+  intro?: T;
+  items?:
+    | T
+    | {
+        title?: T;
+        kind?: T;
+        description?: T;
+        url?: T;
+        file?: T;
+        image?: T;
+        category?: T;
+        note?: T;
+        id?: T;
+      };
+  layout?: T;
+  columns?: T;
+  showFilter?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PromptLibraryBlock_select".
+ */
+export interface PromptLibraryBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  title?: T;
+  intro?: T;
+  prompts?:
+    | T
+    | {
+        title?: T;
+        tool?: T;
+        description?: T;
+        prompt?: T;
+        tags?: T;
+        id?: T;
+      };
+  columns?: T;
   id?: T;
   blockName?: T;
 }
@@ -3912,6 +4130,8 @@ export interface OrdersSelect<T extends boolean = true> {
   total?: T;
   vatTotal?: T;
   termsAccepted?: T;
+  termsAcceptedAt?: T;
+  termsAcceptedText?: T;
   status?: T;
   newsletterOptIn?: T;
   paymentProvider?: T;
@@ -4189,6 +4409,8 @@ export interface Homepage {
         | NewsletterBlock
         | ContentBlock
         | MediaBlock
+        | ResourceListBlock
+        | PromptLibraryBlock
         | PathCardsBlock
         | CarouselBlock
         | TestimonialsBlock
@@ -4625,9 +4847,19 @@ export interface ShopSetting {
   termsPage?: (number | null) | Page;
   privacyPage?: (number | null) | Page;
   /**
-   * Loven krever at kunden får denne bekreftelsen på et varig medium (e-post). Samme forbehold vises ved betalingsknappene i kassen.
+   * Loven krever at kunden får denne bekreftelsen på et varig medium (e-post). Samme forbehold må kunden aktivt godta i kassen (feltene under).
    */
   withdrawalNotice?: string | null;
+  /**
+   * Vises ved boksen kunden må huke av før betaling (handlekurv og bekreftelsesvinduet). Lenker til kjøpsbetingelser og personvern legges til automatisk. Teksten kunden godtok lagres på ordren.
+   */
+  consentCheckboxLabel: string;
+  consentDialogTitle: string;
+  consentErrorMessage: string;
+  /**
+   * Vinduet dukker opp ved «Kjøp nå med Vipps» på produktsiden og i kurv-skuffen, der det ikke er plass til avkryssingsboksen.
+   */
+  consentDialogText: string;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -4712,6 +4944,8 @@ export interface HomepageSelect<T extends boolean = true> {
         newsletter?: T | NewsletterBlockSelect<T>;
         content?: T | ContentBlockSelect<T>;
         media?: T | MediaBlockSelect<T>;
+        resourceList?: T | ResourceListBlockSelect<T>;
+        promptLibrary?: T | PromptLibraryBlockSelect<T>;
         pathCards?: T | PathCardsBlockSelect<T>;
         carousel?: T | CarouselBlockSelect<T>;
         testimonials?: T | TestimonialsBlockSelect<T>;
@@ -4989,6 +5223,10 @@ export interface ShopSettingsSelect<T extends boolean = true> {
   termsPage?: T;
   privacyPage?: T;
   withdrawalNotice?: T;
+  consentCheckboxLabel?: T;
+  consentDialogTitle?: T;
+  consentErrorMessage?: T;
+  consentDialogText?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

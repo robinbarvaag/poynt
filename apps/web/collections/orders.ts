@@ -99,7 +99,32 @@ export const Orders: CollectionConfig = {
       admin: {
         position: "sidebar",
         description:
-          "Kunden fikk forbeholdet om umiddelbar levering og bortfall av angrerett ved betalingsknappen (angrerettloven § 22 n)",
+          "Kunden huket aktivt av for umiddelbar levering og bortfall av angrerett før betaling (angrerettloven § 22 n)",
+      },
+    },
+    {
+      name: "termsAcceptedAt",
+      type: "date",
+      label: "Vilkår godtatt",
+      admin: {
+        position: "sidebar",
+        readOnly: true,
+        date: {
+          pickerAppearance: "dayAndTime",
+          displayFormat: "d. MMM yyyy HH:mm",
+        },
+        description: "Tidspunktet kunden huket av boksen i kassen",
+      },
+    },
+    {
+      name: "termsAcceptedText",
+      type: "textarea",
+      label: "Samtykketekst kunden godtok",
+      admin: {
+        position: "sidebar",
+        readOnly: true,
+        description:
+          "Kopi av teksten ved avkryssingsboksen slik den var da kjøpet ble gjort — dokumentasjon ved en eventuell tvist",
       },
     },
     {

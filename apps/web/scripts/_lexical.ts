@@ -1,12 +1,56 @@
-const textNode = (text: string) => ({
+const textNode = (text: string, format = 0) => ({
   type: "text",
   mode: "normal" as const,
   text,
   detail: 0,
-  format: 0,
+  format,
   style: "",
   version: 1,
 });
+
+const linkNode = (label: string, url: string, format: number) => ({
+  type: "link",
+  fields: { url, newTab: false, linkType: "custom" as const },
+  format: "" as const,
+  indent: 0,
+  version: 3,
+  direction: "ltr" as const,
+  children: [textNode(label, format)],
+});
+
+const FORMAT_BOLD = 1;
+const FORMAT_ITALIC = 2;
+
+/**
+ * Enkel inline-markdown → Lexical-noder: `**fet**`, `_kursiv_`/`*kursiv*` og
+ * `[tekst](url)`. Motstykket til `lexicalToMarkdown`, slik at innhold hentet
+ * via MCP kan sendes tilbake uendret uten at markørene havner som ren tekst.
+ * Alt annet (kode, bilder osv.) beholdes som det står.
+ */
+const INLINE =
+  /\[([^\]]+)\]\(([^)\s]+)\)|\*\*(.+?)\*\*|(?<![\w*])[_*](?=\S)(.+?)(?<=\S)[_*](?![\w*])/g;
+
+export function inlineNodes(text: string, format = 0) {
+  const nodes: Array<
+    ReturnType<typeof textNode> | ReturnType<typeof linkNode>
+  > = [];
+  let last = 0;
+  for (const m of text.matchAll(INLINE)) {
+    const start = m.index ?? 0;
+    if (start > last) nodes.push(textNode(text.slice(last, start), format));
+    const [, linkLabel, linkUrl, bold, italic] = m;
+    if (linkLabel !== undefined && linkUrl !== undefined) {
+      nodes.push(linkNode(linkLabel, linkUrl, format));
+    } else if (bold !== undefined) {
+      nodes.push(...inlineNodes(bold, format | FORMAT_BOLD));
+    } else if (italic !== undefined) {
+      nodes.push(...inlineNodes(italic, format | FORMAT_ITALIC));
+    }
+    last = start + m[0].length;
+  }
+  if (last < text.length) nodes.push(textNode(text.slice(last), format));
+  return nodes.length ? nodes : [textNode(text, format)];
+}
 
 const paragraphNode = (text: string) => ({
   type: "paragraph",
@@ -15,7 +59,7 @@ const paragraphNode = (text: string) => ({
   version: 1,
   direction: "ltr" as const,
   textFormat: 0,
-  children: [textNode(text)],
+  children: inlineNodes(text),
 });
 
 /**
@@ -63,7 +107,7 @@ export function richDoc(blocks: DocBlock[]) {
         indent: 0,
         version: 1,
         direction: "ltr" as const,
-        children: [textNode(block.heading)],
+        children: inlineNodes(block.heading),
       };
     }
     if ("quote" in block) {
@@ -73,7 +117,7 @@ export function richDoc(blocks: DocBlock[]) {
         indent: 0,
         version: 1,
         direction: "ltr" as const,
-        children: [textNode(block.quote)],
+        children: inlineNodes(block.quote),
       };
     }
     return {
@@ -92,7 +136,7 @@ export function richDoc(blocks: DocBlock[]) {
         indent: 0,
         version: 1,
         direction: "ltr" as const,
-        children: [textNode(item)],
+        children: inlineNodes(item),
       })),
     };
   });

@@ -5,13 +5,14 @@ import {
 } from "@/lib/composition-rules";
 import { MAX_UPLOAD_BYTES, MAX_UPLOAD_LABEL } from "@/lib/media-limits";
 import { TONE_OF_VOICE } from "@/lib/tone-of-voice";
+import type { Product } from "@/payload-types";
 import config from "@/payload.config";
 import { McpServer, createMcpHandler } from "@modelcontextprotocol/server";
 import { getPayload } from "payload";
 import { z } from "zod";
 import { getBlockSchema, summarizeBlocks } from "./block-schema";
 import { LayoutError, toMcpLayout, toPayloadLayout } from "./layout-convert";
-import { markdownToLexical } from "./lexical-markdown";
+import { lexicalToMarkdown, markdownToLexical } from "./lexical-markdown";
 
 /**
  * MCP-server som lar Claude (claude.ai-connector, Claude Desktop, Claude Code)
@@ -37,6 +38,8 @@ Arbeidsflyt for en side:
 Kundehistorie og blogginnlegg: create_case_study_draft / create_blog_post_draft. Forteller Susanne om et kundebesøk, foreslå gjerne begge (samme bilder, ulik vinkel) — men lag dem bare når hun bekrefter.
 
 Bilder: search_media finner bilder som allerede er lastet opp i admin. upload_media_from_url henter et bilde fra en lenke (Drive, Dropbox, nettside) inn i mediebiblioteket. Bilder limt inn i chatten kan du IKKE laste opp — be Susanne laste dem opp i admin (Media) eller dele en lenke.
+
+Lese og vurdere: list_pages/get_page og list_related/get_product gir deg innholdet slik det står på nettsiden — bruk dem også når Susanne bare spør om noe (f.eks. «stemmer kjøpsbetingelsene med produktene?»), ikke bare når hun vil bygge.
 
 Regler: alt lagres som utkast, aldri publisert. Skriv på bokmål i Poynts tone. richText-felter sendes som markdown-streng. Ikke finn på tall, kundenavn, sitater eller priser — spør, eller la feltet stå tomt.`;
 
@@ -459,6 +462,94 @@ export const mcpHandler = createMcpHandler(() => {
           return { id: doc.id, title: doc.title ?? doc.name, slug: doc.slug };
         })
       );
+    }
+  );
+
+  server.registerTool(
+    "get_product",
+    {
+      title: "Hent produkt",
+      description:
+        "Hele produktet fra nettbutikken: type, pris, førpris, MVA-sats, beskrivelser (markdown), varianter, medlemskapsinnstillinger og status. Bruk den for å lese eller vurdere det som selges, f.eks. opp mot kjøpsbetingelser.",
+      inputSchema: z.object({
+        idOrSlug: z
+          .string()
+          .describe("Produkt-ID eller slug (fra list_related)"),
+      }),
+      annotations: { readOnlyHint: true },
+    },
+    async ({ idOrSlug }) => {
+      const payload = await getPayload({ config });
+      const asId = Number(idOrSlug);
+      let doc: Product | null = null;
+      if (Number.isInteger(asId) && String(asId) === idOrSlug) {
+        doc = await payload
+          .findByID({ collection: "products", id: asId, depth: 0 })
+          .catch(() => null);
+      } else {
+        const res = await payload.find({
+          collection: "products",
+          where: { slug: { equals: idOrSlug } },
+          depth: 0,
+          limit: 1,
+        });
+        doc = res.docs[0] ?? null;
+      }
+      if (!doc) return fail(`Fant ingen produkt «${idOrSlug}».`);
+
+      const typeLabels: Record<Product["type"], string> = {
+        product: "Produkt",
+        course: "Kurs",
+        pdf: "PDF",
+        bundle: "Bundle",
+        membership: "Medlemskap",
+      };
+      const mediaId = (m: unknown) =>
+        typeof m === "object" && m !== null ? (m as { id: number }).id : m;
+
+      return text({
+        id: doc.id,
+        name: doc.name,
+        slug: doc.slug,
+        url: `${siteUrl}/produkter/${doc.slug}`,
+        type: doc.type,
+        typeLabel: typeLabels[doc.type],
+        active: doc.active ?? true,
+        price: doc.price,
+        compareAtPrice: doc.compareAtPrice ?? null,
+        vatRate: doc.vatRate ? `${doc.vatRate} %` : null,
+        shortDescription: doc.shortDescription ?? null,
+        description: doc.description ? lexicalToMarkdown(doc.description) : "",
+        highlights: (doc.highlights ?? []).map((h) => h.text),
+        statusBadge: doc.statusBadge ?? "none",
+        statusBadgeLabel: doc.statusBadgeLabel ?? null,
+        notice: doc.notice
+          ? { title: doc.noticeTitle ?? null, text: doc.notice }
+          : null,
+        variants: doc.variantOptions?.length
+          ? {
+              label: doc.variantLabel ?? null,
+              options: doc.variantOptions.map((v) => ({
+                label: v.label,
+                priceDelta: v.priceDelta ?? 0,
+              })),
+            }
+          : null,
+        allowQuantity: doc.allowQuantity ?? false,
+        membership:
+          doc.type === "membership"
+            ? {
+                recurringIntervalMonths: doc.recurringInterval ?? null,
+                tier: doc.membershipTier ?? null,
+                applyUrl: doc.applyUrl ?? null,
+              }
+            : null,
+        hasPdfFile: Boolean(doc.pdfFile),
+        featuredImageId: doc.featuredImage ? mediaId(doc.featuredImage) : null,
+        categoryIds: (doc.categories ?? []).map(mediaId),
+        updatedAt: doc.updatedAt,
+        adminUrl: adminUrl(doc.id, "products"),
+      });
     }
   );
 

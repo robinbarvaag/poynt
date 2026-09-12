@@ -103,7 +103,8 @@ export async function generateMetadata({
     // «Open Graph type»-feltet fra SEO-fanen (product mangler i Next-typen —
     // faller tilbake til website, som er riktig oppførsel for delingskort).
     type: seo.ogType === "article" ? "article" : "website",
-    noIndex: seo.noIndex ?? undefined,
+    // Skjulte sider (QR-kode-/kunderessurser) er noindex uansett SEO-fane.
+    noIndex: (seo.noIndex || page.unlisted) ?? undefined,
     canonicalUrl: seo.canonicalUrl,
   });
 }

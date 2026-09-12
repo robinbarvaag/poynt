@@ -14,6 +14,8 @@ export class CheckoutRequestError extends Error {
 /**
  * Start Vipps-hurtigkasse frå klienten: POST kurven til API-et og redirect
  * til Vipps-landingssida. Kastar CheckoutRequestError med norsk melding ved feil.
+ * Kallaren MÅ ha fått aktivt samtykke (CheckoutConsentCheckbox) først —
+ * API-et avviser kjøp utan `termsAccepted: true`.
  */
 export async function startVippsCheckout(
   items: CartItem[],
@@ -55,6 +57,9 @@ async function postVippsCheckout(
       items,
       couponCode,
       newsletterOptIn: newsletterOptIn === true,
+      // Kunden har huket av samtykkeboksen (angrerettloven § 22 n) før
+      // knappen slapp gjennom — serveren krever feltet.
+      termsAccepted: true,
     }),
   });
 

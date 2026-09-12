@@ -19,6 +19,8 @@ import { PodcastArchive } from "./podcast-archive";
 import { Pricing } from "./pricing";
 import { ProductArchive } from "./product-archive";
 import { ProductSpotlight } from "./product-spotlight";
+import { PromptLibrary } from "./prompt-library";
+import { ResourceList } from "./resource-list";
 import { ServicesArchive } from "./services-archive";
 import { SpotifyEmbed } from "./spotify-embed";
 import { StatsBand } from "./stats-band";
@@ -55,6 +57,9 @@ export const layoutBlocks: Block[] = [
   Newsletter,
   Content,
   MediaBlock,
+  // Ressurssider: lenker/filer/bøker og kopierbare prompter.
+  ResourceList,
+  PromptLibrary,
   PathCards,
   Carousel,
   Testimonials,

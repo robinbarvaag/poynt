@@ -1,3 +1,4 @@
+import { snapshotConsent } from "@/lib/checkout-consent-server";
 import { canonicalizeEmail } from "@/lib/email-normalize";
 import {
   type MembershipTier,
@@ -278,9 +279,16 @@ async function handleProductPurchase(session: Stripe.Checkout.Session) {
       status: "paid",
       paymentProvider: "stripe",
       newsletterOptIn: session.metadata?.newsletter === "1",
-      // Forbeholdet om umiddelbar levering og bortfall av angrerett står ved
-      // alle betalingsknappene (CheckoutConsentNotice).
-      termsAccepted: true,
+      // Samtykket ble krevd i /api/checkout før sesjonen ble opprettet;
+      // tidspunktet ligger i metadata, teksten hentes fra shop-settings.
+      ...(session.metadata?.terms === "1"
+        ? await snapshotConsent(
+            payload,
+            session.metadata.termsAt
+              ? new Date(session.metadata.termsAt)
+              : new Date()
+          )
+        : { termsAccepted: false }),
       stripeSessionId: session.id,
       stripePaymentIntentId: session.payment_intent as string,
     },

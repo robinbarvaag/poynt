@@ -33,6 +33,9 @@ export const BLOCK_LABELS: Record<string, string> = {
   podcastArchive: "Podkast",
   servicesArchive: "Tjenester",
   logoCloud: "Logo-stripe",
+  bookHero: "Objekt-hero",
+  resourceList: "Ressursliste",
+  promptLibrary: "Prompt-bibliotek",
 };
 
 export function blockLabel(blockType: string): string {

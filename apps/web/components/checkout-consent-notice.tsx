@@ -1,11 +1,11 @@
 import Link from "next/link";
 
 /**
- * Forbeholdet angrerettloven § 22 bokstav n krever FØR kjøp av digitalt
- * innhold som leveres umiddelbart: kunden ber uttrykkelig om at leveringen
- * starter med en gang, og erkjenner at angreretten dermed bortfaller. Vises
- * rett under betalingsknappene overalt der et kjøp kan startes (handlekurv,
- * kurv-skuff, produktside). Samme forbehold gjentas i ordrebekreftelsen.
+ * Informasjonslinje under betalingsknappene på produktsiden. Selve
+ * samtykket (angrerettloven § 22 bokstav n) gis aktivt i
+ * CheckoutConsentCheckbox — i handlekurven, eller i CheckoutConsentDialog
+ * som Vipps-knappen åpner her. Denne linja forbereder kunden på det og
+ * lenker til vilkårene. Samme forbehold gjentas i ordrebekreftelsen.
  */
 export function CheckoutConsentNotice({
   className = "",
@@ -18,8 +18,8 @@ export function CheckoutConsentNotice({
   return (
     <p className={`text-muted-foreground text-xs leading-relaxed ${className}`}>
       {compact
-        ? "Ved å betale godtar du "
-        : "Ved å betale ber du om umiddelbar levering av digitalt innhold og godtar at angreretten bortfaller, jf. "}
+        ? "Før betaling bekrefter du "
+        : "Digitalt innhold leveres umiddelbart. Før betaling bekrefter du at du ber om det, og at angreretten bortfaller, jf. "}
       <Link
         href="/kjopsbetingelser"
         className="underline underline-offset-2 hover:text-foreground"

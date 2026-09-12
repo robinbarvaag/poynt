@@ -80,7 +80,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const pageRoutes: Entry[] = (pages?.docs ?? [])
     .filter((p) => p.slug && p.slug !== "forside" && p.slug !== "kontakt")
-    .filter((p) => !p.meta?.noIndex)
+    .filter((p) => !p.meta?.noIndex && !p.unlisted)
     .map((p) => ({
       url: `${SITE_URL}/${p.slug}`,
       lastModified: p.updatedAt,

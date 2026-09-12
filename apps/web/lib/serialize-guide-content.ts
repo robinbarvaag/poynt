@@ -12,6 +12,8 @@ interface LexicalNode {
   type: string;
   tag?: string;
   text?: string;
+  /** Bitmaske fra Lexical: 1 = fet, 2 = kursiv (resten ignorerer vi). */
+  format?: number | string;
   listType?: string;
   fields?: { url?: string; newTab?: boolean };
   url?: string;
@@ -19,15 +21,76 @@ interface LexicalNode {
   children?: LexicalNode[];
 }
 
+const FORMAT_BOLD = 1;
+const FORMAT_ITALIC = 2;
+
+/**
+ * Fet/kursiv som markdown. Lexical legger ofte mellomrom inne i den
+ * formaterte noden («Verdifull vekst »); markdown krever at markørene ligger
+ * inntil ordet, så vi flytter mellomrommene utenfor.
+ */
+function formatText(text: string, format: number): string {
+  const bold = (format & FORMAT_BOLD) !== 0;
+  const italic = (format & FORMAT_ITALIC) !== 0;
+  if (!bold && !italic) return text;
+  const core = text.trim();
+  if (!core) return text;
+  const lead = text.slice(0, text.indexOf(core));
+  const trail = text.slice(lead.length + core.length);
+  let wrapped = core;
+  if (italic) wrapped = `_${wrapped}_`;
+  if (bold) wrapped = `**${wrapped}**`;
+  return `${lead}${wrapped}${trail}`;
+}
+
+const textFormat = (node: LexicalNode) =>
+  typeof node.format === "number" ? node.format : Number(node.format) || 0;
+
+/**
+ * Lexical deler gjerne én fet setning i flere tekstnoder (f.eks. rundt en
+ * tankestrek). Slår sammen naboer med samme format så vi får «**a – b**»
+ * i stedet for «**a** **–** **b**».
+ */
+function mergeTextRuns(nodes: LexicalNode[]): LexicalNode[] {
+  const out: LexicalNode[] = [];
+  for (const node of nodes) {
+    const prev = out[out.length - 1];
+    if (
+      node.type === "text" &&
+      prev?.type === "text" &&
+      textFormat(prev) === textFormat(node)
+    ) {
+      out[out.length - 1] = {
+        ...prev,
+        text: (prev.text ?? "") + (node.text ?? ""),
+      };
+    } else {
+      out.push(node);
+    }
+  }
+  return out;
+}
+
+function inlineChildren(nodes: LexicalNode[] | undefined): string {
+  return mergeTextRuns(nodes ?? [])
+    .map(inlineText)
+    .join("");
+}
+
 function inlineText(node: LexicalNode): string {
-  if (node.type === "text") return node.text ?? "";
+  if (node.type === "text") {
+    return formatText(node.text ?? "", textFormat(node));
+  }
+  // Shift+Enter i editoren. Ett linjeskift = myk linje, to = nytt avsnitt;
+  // begge deler blir lesbart som "\n" i markdown.
+  if (node.type === "linebreak") return "\n";
   if (node.type === "link" || node.type === "autolink") {
-    const label = (node.children ?? []).map(inlineText).join("");
+    const label = inlineChildren(node.children);
     const url = node.fields?.url ?? node.url ?? "";
     return url ? `[${label}](${url})` : label;
   }
   if (node.children && Array.isArray(node.children)) {
-    return node.children.map(inlineText).join("");
+    return inlineChildren(node.children);
   }
   return "";
 }
@@ -45,12 +108,12 @@ export function lexicalToMarkdown(content: unknown): string {
             (node.tag ?? "h2").replace("h", ""),
             10
           );
-          const text = (node.children ?? []).map(inlineText).join("");
+          const text = inlineChildren(node.children);
           if (text) lines.push(`${"#".repeat(level)} ${text}`);
           break;
         }
         case "paragraph": {
-          const text = (node.children ?? []).map(inlineText).join("");
+          const text = inlineChildren(node.children);
           if (text.trim()) lines.push(text);
           break;
         }
@@ -58,7 +121,7 @@ export function lexicalToMarkdown(content: unknown): string {
           const ordered = node.listType === "number";
           (node.children ?? []).forEach((item, i) => {
             const bullet = ordered ? `${i + 1}.` : "-";
-            const text = (item.children ?? []).map(inlineText).join("");
+            const text = inlineChildren(item.children);
             if (text.trim()) lines.push(`${bullet} ${text}`);
           });
           break;
@@ -71,7 +134,7 @@ export function lexicalToMarkdown(content: unknown): string {
           break;
         }
         case "quote": {
-          const text = (node.children ?? []).map(inlineText).join("");
+          const text = inlineChildren(node.children);
           if (text.trim()) lines.push(`> ${text}`);
           break;
         }

@@ -306,6 +306,12 @@ export {
 } from "./components/landing-canvas";
 
 export {
+  HubLayout,
+  type HubLayoutProps,
+  type HubNavItem,
+} from "./components/hub-layout";
+
+export {
   BlogCard,
   type BlogCardProps,
   type BlogSurface,
@@ -315,9 +321,25 @@ export {
   BookHero,
   type BookHeroProps,
   type Chapter,
+  type ChapterMarkers,
   type ChapterPalette,
   ChapterRotator,
   type ChapterRotatorProps,
+  chapterPaletteFrom,
+  FIGURE_ASPECT_CLASS,
+  type FigureAspect,
+  POYNT_CHAPTER_PALETTE,
+  PromptCard,
+  type PromptItem,
+  PromptLibrary,
+  type PromptLibraryProps,
+  RESOURCE_KINDS,
+  ResourceCard,
+  ResourceGrid,
+  type ResourceGridProps,
+  type ResourceItem,
+  type ResourceKind,
+  type ResourceLinkProps,
   Countdown,
   type CountdownProps,
   Marquee,

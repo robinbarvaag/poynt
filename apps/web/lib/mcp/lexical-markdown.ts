@@ -5,8 +5,9 @@ export { lexicalToMarkdown } from "@/lib/serialize-guide-content";
  * Enkel markdown → Lexical for richText-felter som kommer inn via MCP.
  * Støtter det redaktøren faktisk bruker i innholdsblokker: avsnitt (skilt med
  * blank linje), `## `/`### ` overskrifter, `- ` punktlister og `> ` sitat.
- * Inline-formatering (fet, lenker) beholdes som ren tekst — det justerer
- * Susanne i admin om hun trenger det. Motstykket til `lexicalToMarkdown`.
+ * Inline-formatering (`**fet**`, `_kursiv_`, `[lenke](url)`) blir ekte
+ * Lexical-noder via `inlineNodes` i scripts/_lexical. Motstykket til
+ * `lexicalToMarkdown`.
  */
 export function markdownToLexical(markdown: string) {
   const blocks: DocBlock[] = [];

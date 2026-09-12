@@ -24,6 +24,10 @@ export const blockPreviews: Record<string, BlockPreview> = {
     story: "Blokker/Hero",
     alt: "Stor intro-seksjon med bilde og knapper",
   },
+  bookHero: {
+    story: "Blokker/BookHero",
+    alt: "Hero med tekst til venstre og et kort som blar gjennom kapitler til høyre",
+  },
   featureGrid: {
     story: "Blokker/FeatureGrid",
     alt: "Rutenett med fargede kort som fremhever tilbud",
@@ -75,6 +79,14 @@ export const blockPreviews: Record<string, BlockPreview> = {
   servicesArchive: {
     story: "Blokker/ServiceShowcase",
     alt: "Tjenester presentert som kort",
+  },
+  resourceList: {
+    story: "Blokker/ResourceList",
+    alt: "Kort med lenker, bøker og filer, med filter-brikker over",
+  },
+  promptLibrary: {
+    story: "Blokker/PromptLibrary",
+    alt: "Prompter i kort med kopier-knapp",
   },
 };
 
