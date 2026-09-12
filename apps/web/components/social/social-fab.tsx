@@ -87,6 +87,14 @@ const ANCHOR_SVH = 78;
 const NARROW_BELOW = 640;
 
 /**
+ * På mobil sitter den lukkede formen helt nede ved skjermkanten: avstand (px)
+ * fra kroppens underkant til bunnen av skjermen, med plass til overgangen.
+ */
+const NARROW_BOTTOM_GAP = 36;
+/** Minste avstand fra det åpne panelet til skjermbunnen på mobil (px). */
+const NARROW_OPEN_GAP = 16;
+
+/**
  * Banen for formen. Den er festet til høyrekanten (x = W):
  *
  * 1. en innadbuet overgang fra kanten,
@@ -197,6 +205,7 @@ export function SocialFab({
   const [hovering, setHovering] = useState(false);
   const [openW, setOpenW] = useState(272);
   const [narrow, setNarrow] = useState(false);
+  const [viewportH, setViewportH] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -224,6 +233,7 @@ export function SocialFab({
     const onResize = () => {
       setOpenW(Math.min(272, window.innerWidth - 16));
       setNarrow(window.innerWidth < NARROW_BELOW);
+      setViewportH(window.innerHeight);
     };
     onResize();
     window.addEventListener("resize", onResize);
@@ -331,6 +341,19 @@ export function SocialFab({
   const panelLeft = BOX_W - openW;
   const panelTop = cy - panelH / 2;
 
+  // Mobil: lukket helt nede, og løft hele formen når panelet åpnes så det
+  // ikke går ut under skjermkanten.
+  const bottomAnchored = narrow && viewportH > 0;
+  const narrowPeek = CLOSED.narrow.peek;
+  const closedCenter =
+    viewportH - (narrowPeek.ry + narrowPeek.spacing) - NARROW_BOTTOM_GAP;
+  const openCenter = Math.min(
+    closedCenter,
+    viewportH - panelH / 2 - NARROW_OPEN_GAP
+  );
+  const lift =
+    bottomAnchored && mode === "open" ? openCenter - closedCenter : 0;
+
   /** Hvor rad nr. `index` skal stå, og hvor synlig ikonet er. */
   function rowTarget(index: number) {
     if (mode === "open") {
@@ -362,16 +385,22 @@ export function SocialFab({
   }
 
   return (
-    <div
+    <motion.div
       ref={containerRef}
-      className="pointer-events-none fixed right-0 z-50 -translate-y-1/2"
+      className="pointer-events-none fixed right-0 z-50"
       style={{
         width: BOX_W,
         height: boxH,
+        marginTop: -boxH / 2,
         // Lavt på siden, der den er i veien for minst mulig tekst. Taket sørger
         // for at det åpne panelet aldri går ut under skjermkanten.
-        top: `min(${ANCHOR_SVH}svh, calc(100svh - ${panelH / 2 + 56}px))`,
+        top: bottomAnchored
+          ? closedCenter
+          : `min(${ANCHOR_SVH}svh, calc(100svh - ${panelH / 2 + 56}px))`,
       }}
+      initial={false}
+      animate={{ y: lift }}
+      transition={{ type: "spring", ...spring }}
     >
       <svg
         aria-hidden="true"
@@ -535,6 +564,6 @@ export function SocialFab({
           pointerEvents: open || !visible ? "none" : "auto",
         }}
       />
-    </div>
+    </motion.div>
   );
 }
