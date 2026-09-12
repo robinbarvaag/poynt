@@ -133,6 +133,21 @@ export function SiteHeader({
   // Vis alltid headeren når mobil-menyen er åpen.
   const isHidden = hidden && !mobileOpen;
 
+  // Headeren er `fixed` og eier toppen av viewporten. Andre sticky-elementer
+  // (f.eks. mobil-baren i HubLayout) må vite hvor mye plass den tar akkurat
+  // nå — 4rem når den vises, 0 når den har skjult seg ved scroll nedover — så
+  // de kan feste seg rett under i stedet for å havne bak den. Publiseres som
+  // CSS-variabel på <html>, slik at komponenter i @poynt/ui kan lese den uten
+  // å kjenne headeren; utenfor denne headeren (Storybook, planner) faller de
+  // tilbake til 0.
+  React.useEffect(() => {
+    const root = document.documentElement;
+    root.style.setProperty("--site-header-offset", isHidden ? "0px" : "4rem");
+    return () => {
+      root.style.removeProperty("--site-header-offset");
+    };
+  }, [isHidden]);
+
   // Hover-intent for dropdowns: liten lukke-forsinkelse så en kort avstikker
   // med pekeren (eller diagonalen ned mot panelet) ikke lukker menyen.
   const closeTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);

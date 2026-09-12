@@ -260,7 +260,8 @@ export function RenderBlocks({ blocks, spacing = "lg" }: RenderBlocksProps) {
 
         // Et «Blokk-navn» i admin gir blokka en adresserbar #anker, slik at
         // menyen kan lenke rett til seksjonen (f.eks. /for-bedrifter#styre).
-        // scroll-mt holder seksjonen klar av den faste headeren ved hopp.
+        // scroll-mt holder seksjonen klar av den faste headeren ved hopp — og
+        // på mobil også av HubLayouts sticky meny som ligger under headeren.
         const anchorId = block.blockName
           ? slugifyAnchor(block.blockName)
           : undefined;
@@ -280,7 +281,11 @@ export function RenderBlocks({ blocks, spacing = "lg" }: RenderBlocksProps) {
 
         if (anchorId) {
           return (
-            <div key={key} id={anchorId} className="scroll-mt-28">
+            <div
+              key={key}
+              id={anchorId}
+              className="scroll-mt-36 lg:scroll-mt-28"
+            >
               {content}
             </div>
           );
