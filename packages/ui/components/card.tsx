@@ -6,12 +6,15 @@ import { cn } from "@poynt/ui";
 
 // Kortet er bygget i samme «modige fargeblokk»-språk som FeatureGrid/INSPO
 // (PayPal-kortene): store, runde hjørner, romslig luft og et lite løft på hover.
+// Transition-lista tar med `transform`, så kort som legger på `hover:-translate-y-*`
+// glir opp i takt med skyggen i stedet for å hoppe (200 ms + ease-soft = hus-
+// grammatikken for hover, se web.css).
 // `surface` styrer flate + tekstfarge. `default` er det nøytrale kortet (lys flate
 // + tynn ring); de mettede flatene (saffron/salmon/primary/ink) gir fargeblokk-
 // looken. Når du bruker en farget surface, sett selv kontrastfarger på
 // beskrivelse/aksenter via className (text-muted-foreground passer ikke der).
 const cardVariants = cva(
-  "group/card flex flex-col gap-5 overflow-hidden rounded-3xl py-6 text-sm shadow-sm transition-[box-shadow,border-color,background-color] duration-300 hover:shadow-md has-[>img:first-child]:pt-0 data-[size=sm]:gap-4 data-[size=sm]:rounded-2xl data-[size=sm]:py-4 *:[img:first-child]:rounded-t-3xl *:[img:last-child]:rounded-b-3xl",
+  "group/card flex flex-col gap-5 overflow-hidden rounded-3xl py-6 text-sm shadow-sm transition-[transform,box-shadow,border-color,background-color] duration-200 ease-soft hover:shadow-md has-[>img:first-child]:pt-0 data-[size=sm]:gap-4 data-[size=sm]:rounded-2xl data-[size=sm]:py-4 *:[img:first-child]:rounded-t-3xl *:[img:last-child]:rounded-b-3xl",
   {
     variants: {
       surface: {

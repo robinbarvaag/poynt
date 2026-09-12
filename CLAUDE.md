@@ -89,6 +89,8 @@ Linting and formatting are handled entirely by **Biome** (`biome.json` at root) 
 
 **Block previews**: blokkvelgeren («Legg til blokk») viser et Storybook-skjermbilde per blokk. Mappingen blokk-slug → story ligger i `apps/web/blocks/block-previews.ts`; bildene genereres av `bun run block-previews` og committes til `apps/web/public/block-previews/`. Ny blokk med story → legg til i mappingen og kjør kommandoen.
 
+**Media-opplasting**: Vercel Blob med `clientUploads: true` (fila går nettleser → Blob, utenom Vercels 4,5 MB-grense). Maksstørrelse i `apps/web/lib/media-limits.ts`. Originalen lagres urørt; `imageSizes.large` (webp, maks 2400 px) er leveringskilden `<PayloadImage>` foretrekker. Nye imageSizes krever Payload-migrasjon + `scripts/regenerate-media-sizes.ts` for eksisterende bilder.
+
 **Cart constraint**: Digital products limited to 1 per item in cart. Cart state persists to localStorage as "poynt-cart".
 
 **Stripe sync**: Products and prices automatically sync to Stripe via Payload plugin. Stripe IDs stored on Product and User documents.

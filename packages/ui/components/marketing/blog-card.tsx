@@ -153,7 +153,7 @@ export function BlogCard({
       asChild
       surface={surface}
       className={cn(
-        "group/post gap-0 overflow-hidden p-0 transition-transform duration-300 hover:-translate-y-1.5",
+        "group/post pressable gap-0 overflow-hidden p-0 motion-safe:hover:-translate-y-1.5",
         featured && "sm:col-span-2",
         className
       )}

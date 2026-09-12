@@ -95,7 +95,7 @@ export function ContentCard({
         // hover-transformen. Uten dette dropper Chrome det avrundede klippet
         // (overflow-hidden + rounded-3xl) midt i transisjonen, så hjørnene
         // «popper» firkantet og runde igjen ved hover inn/ut.
-        "group/content h-full transform-gpu gap-0 overflow-hidden p-0 transition-transform duration-300 will-change-transform hover:-translate-y-1.5",
+        "group/content pressable h-full gap-0 overflow-hidden p-0 motion-safe:hover:-translate-y-1.5",
         className
       )}
     >

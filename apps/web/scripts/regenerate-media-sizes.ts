@@ -1,14 +1,15 @@
 /**
- * Regenererer bildestørrelser for eksisterende Media-dokumenter, slik at den
- * nye `og`-størrelsen (1200×630 for delingskort) finnes også for bilder lastet
- * opp FØR størrelsen ble lagt til i collection-configen.
+ * Regenererer bildestørrelser for eksisterende Media-dokumenter, slik at
+ * størrelser lagt til i collection-configen i ettertid (`og` for delingskort,
+ * `large` som webp-leveringskilde for <PayloadImage>) finnes også for bilder
+ * lastet opp FØR de ble lagt til.
  *
- * Idempotent: hopper over dokumenter som allerede har `sizes.og`, og
+ * Idempotent: hopper over dokumenter som allerede har alle størrelsene, og
  * ikke-bilder (video/pdf/svg/gif animasjoner håndteres av sharp/Payload selv).
  * Laster ned originalfilen og lagrer dokumentet på nytt med `file` satt, som
  * får Payload til å kjøre sharp-pipelinen (alle imageSizes) på nytt.
  *
- *   bun run --cwd apps/web payload run scripts/regenerate-media-og.ts
+ *   bun run --cwd apps/web payload run scripts/regenerate-media-sizes.ts
  */
 import config from "@payload-config";
 import { getPayload } from "payload";
@@ -29,7 +30,8 @@ async function main() {
   for (const doc of docs) {
     const isRasterImage =
       doc.mimeType?.startsWith("image/") && doc.mimeType !== "image/svg+xml";
-    if (!isRasterImage || doc.sizes?.og?.url || !doc.url) {
+    const hasAllSizes = Boolean(doc.sizes?.og?.url && doc.sizes?.large?.url);
+    if (!isRasterImage || hasAllSizes || !doc.url) {
       skipped++;
       continue;
     }

@@ -27,17 +27,21 @@ export type MediaResource = {
   /** Lenke til kilden (fotografprofil / Giphy-side) for krediteringen. */
   sourceUrl?: string | null;
   /**
-   * Genererte bildestørrelser fra Payload (`upload.imageSizes`). Kun `og`
-   * (1200×630-beskjæring for deling) leses her — nevnte nøkler holder typen
+   * Genererte bildestørrelser fra Payload (`upload.imageSizes`). `large`
+   * (maks 2400 px bred, webp) foretrekkes som `src` av `<PayloadImage>`; `og`
+   * (1200×630-beskjæring) brukes til delingskort. Nevnte nøkler holder typen
    * strukturelt kompatibel med Payloads genererte `Media`-type.
    */
   sizes?: {
-    og?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-    } | null;
+    large?: MediaSize | null;
+    og?: MediaSize | null;
   } | null;
+};
+
+export type MediaSize = {
+  url?: string | null;
+  width?: number | null;
+  height?: number | null;
 };
 
 type MediaInput = MediaResource | number | null | undefined;
@@ -65,6 +69,34 @@ export function resolveMediaUrl(
   return url ? toRelativeMediaUrl(url) : undefined;
 }
 
+/**
+ * Velger kilden `<PayloadImage>` skal rendre: `sizes.large` (webp, maks 2400 px)
+ * når Payload har generert den, ellers originalen. Media lastet opp før
+ * `large`-størrelsen fantes mangler varianten til de er regenerert
+ * (scripts/regenerate-media-sizes.ts), og svg/gif-animasjoner hopper sharp
+ * over — begge faller pent tilbake til originalen.
+ */
+export function pickImageSource(resource: MediaResource): {
+  src: string;
+  width?: number;
+  height?: number;
+} | null {
+  const large = resource.sizes?.large;
+  if (large?.url) {
+    return {
+      src: toRelativeMediaUrl(large.url),
+      width: large.width ?? undefined,
+      height: large.height ?? undefined,
+    };
+  }
+  if (!resource.url) return null;
+  return {
+    src: toRelativeMediaUrl(resource.url),
+    width: resource.width ?? undefined,
+    height: resource.height ?? undefined,
+  };
+}
+
 export type PayloadImageProps = Omit<ImageProps, "src" | "alt"> & {
   /** Payload-media-objekt (eller `null`/id ved manglende opplasting). */
   media: MediaInput;
@@ -90,10 +122,11 @@ export function PayloadImage({
   ...rest
 }: PayloadImageProps) {
   const resource = asResource(media);
-  const src = resource?.url ? toRelativeMediaUrl(resource.url) : undefined;
-  if (!(resource && src)) {
+  const source = resource ? pickImageSource(resource) : null;
+  if (!(resource && source)) {
     return null;
   }
+  const src = source.src;
 
   const resolvedAlt = alt ?? resource.alt ?? "";
 
@@ -115,8 +148,8 @@ export function PayloadImage({
   const dimensionProps: Partial<ImageProps> = fill
     ? { fill: true, sizes: sizes ?? "100vw" }
     : {
-        width: width ?? resource.width ?? undefined,
-        height: height ?? resource.height ?? undefined,
+        width: width ?? source.width,
+        height: height ?? source.height,
         ...(sizes ? { sizes } : {}),
       };
 

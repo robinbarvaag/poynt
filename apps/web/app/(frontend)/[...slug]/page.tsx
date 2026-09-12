@@ -1,4 +1,5 @@
 import { CmsPageView } from "@/components/views/cms-page-view";
+import { getPublicPath } from "@/lib/public-path";
 import { buildMetadata, firstHeroImage, notFoundMetadata } from "@/lib/seo";
 import config from "@/payload.config";
 import type { Metadata } from "next";
@@ -65,10 +66,14 @@ async function checkRedirect(pathname: string) {
     redirectDoc.to?.type === "reference" &&
     redirectDoc.to?.reference
   ) {
+    // Bruk den felles collection → sti-mappingen, slik at et produkt havner på
+    // /produkter/<slug>, et blogginnlegg på /blogg/<slug> osv. — ikke /<slug>.
     const ref = redirectDoc.to.reference;
     const value = typeof ref.value === "object" ? ref.value : null;
     if (!value || !("slug" in value)) return null;
-    destination = value.slug === "forside" ? "/" : `/${value.slug}`;
+    const path = getPublicPath(ref.relationTo, value.slug);
+    if (!path) return null;
+    destination = path;
   } else {
     return null;
   }

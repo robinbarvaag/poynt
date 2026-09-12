@@ -116,7 +116,9 @@ function ImageFrame({
         seed={seed}
         size={featured ? 128 : 96}
         className={cn(
-          "absolute blur-[2px]",
+          "absolute",
+          // Ingen blur her: bloben morpher border-radius hver frame, og et filter oppå
+          // gjør hele kortet til en repaint under hover-løftet.
           // På nøytral flate bærer bloben fargen alene – litt kraftigere.
           surface === "default" ? "opacity-90" : "opacity-70",
           blobCorners[hashSeed(seed) % blobCorners.length],
@@ -193,7 +195,7 @@ export function ProductCard({
       asChild
       surface={surface}
       className={cn(
-        "group/product gap-0 overflow-hidden p-0 hover:-translate-y-1.5",
+        "group/product pressable gap-0 overflow-hidden p-0 motion-safe:hover:-translate-y-1.5",
         featured && "sm:col-span-2",
         className
       )}
@@ -229,7 +231,7 @@ export function ProductCard({
 
             <h3
               className={cn(
-                "font-bold font-heading leading-snug tracking-tight transition-colors",
+                "font-bold font-heading leading-snug tracking-tight",
                 featured ? "text-2xl md:text-3xl" : "line-clamp-2 text-lg"
               )}
             >

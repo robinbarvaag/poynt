@@ -14,6 +14,7 @@ import { redirectsPlugin } from "@payloadcms/plugin-redirects";
 import { seoPlugin } from "@payloadcms/plugin-seo";
 import { stripePlugin } from "@payloadcms/plugin-stripe";
 
+import { MAX_UPLOAD_BYTES } from "./lib/media-limits";
 import { rateLimit } from "./lib/rate-limit";
 import {
   revalidateCmsAfterChange,
@@ -148,6 +149,11 @@ export default buildConfig({
     ),
   }),
   sharp,
+  // Gjelder multipart-opplasting (lokal lagring). Blob-stien med clientUploads
+  // håndheves av beforeOperation-hooken i collections/media.ts.
+  upload: {
+    limits: { fileSize: MAX_UPLOAD_BYTES },
+  },
   // Admin-grensesnittet er norsk (bokmål) — uten dette faller Payload tilbake
   // på engelsk, og innebygde strenger blir «Add Layout» i stedet for
   // «Legg til blokk». Kun nb er støttet, så språkvelgeren i profilen forsvinner.
@@ -301,6 +307,16 @@ export default buildConfig({
               media: true,
             },
             token: process.env.BLOB_READ_WRITE_TOKEN,
+            // Vercel avviser request-bodyer over 4,5 MB til serverless-
+            // funksjoner, så server-opplasting satte et hardt tak på bilde-
+            // størrelsen. Med clientUploads går fila rett fra nettleseren til
+            // Blob (signert via /api/vercel-blob-client-upload-route). Payload
+            // henter den så tilbake på serveren før create/update, så sharp
+            // (imageSizes) og blur-hooken i Media får bytes som før. Merk:
+            // originalen ligger allerede i Blob når hookene kjører, så
+            // resizeOptions/formatOptions på HOVEDFILA ville gitt en
+            // konvertert fil som aldri lastes opp — bruk imageSizes i stedet.
+            clientUploads: true,
           }),
         ]
       : []),

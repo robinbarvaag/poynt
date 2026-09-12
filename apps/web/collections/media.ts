@@ -2,8 +2,9 @@ import {
   generateBlurDataURL,
   supportsBlurPlaceholder,
 } from "@/lib/blur-data-url";
+import { MAX_UPLOAD_BYTES, MAX_UPLOAD_LABEL } from "@/lib/media-limits";
 import { toRelativeMediaUrl } from "@/lib/media-url";
-import type { CollectionConfig } from "payload";
+import { APIError, type CollectionConfig } from "payload";
 import {
   revalidateCmsAfterChange,
   revalidateCmsAfterDelete,
@@ -13,6 +14,23 @@ export const Media: CollectionConfig = {
   slug: "media",
   folders: true,
   hooks: {
+    beforeOperation: [
+      // Størrelsesgrense for Blob-stien. Med clientUploads går fila utenom
+      // multipart-parseren (og dermed `upload.limits`), så vi sjekker her, rett
+      // etter at Payload har hentet fila tilbake fra Blob og før sharp kjører.
+      ({ req, operation }) => {
+        if (operation !== "create" && operation !== "update") return;
+        const file = req.file;
+        if (!file) return;
+        const size = file.size || file.data?.byteLength || 0;
+        if (size > MAX_UPLOAD_BYTES) {
+          throw new APIError(
+            `Fila er for stor (${(size / 1024 / 1024).toFixed(1)} MB). Maks ${MAX_UPLOAD_LABEL} per opplasting.`,
+            400
+          );
+        }
+      },
+    ],
     beforeChange: [
       // Lager en base64 blur-plassholder (LQIP) når en ny bildefil lastes opp.
       // Rene metadata-endringer (req.file mangler) beholder eksisterende verdi.
@@ -74,6 +92,21 @@ export const Media: CollectionConfig = {
   upload: {
     focalPoint: true,
     imageSizes: [
+      // Leveringskilde for frontend: <PayloadImage> bruker denne i stedet for
+      // originalen når den finnes. Begrenset bredde + webp gir Next sin
+      // image-optimizer en liten kilde å jobbe fra, uansett hvor stor jpeg-en
+      // redaktøren lastet opp. `withoutEnlargement: true` gjør at også bilder
+      // smalere enn 2400 px får en webp-variant (i originalstørrelse) i stedet
+      // for å hoppes over. Originalen lagres urørt (se clientUploads-notatet i
+      // payload.config.ts). Ikke brukt for svg/video/pdf — sharp hopper over.
+      {
+        name: "large",
+        width: 2400,
+        height: undefined,
+        position: "centre",
+        withoutEnlargement: true,
+        formatOptions: { format: "webp", options: { quality: 80 } },
+      },
       {
         name: "thumbnail",
         width: 400,

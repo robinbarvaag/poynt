@@ -48,7 +48,7 @@ export function GuideCard({
       asChild
       surface={surface}
       className={cn(
-        "group/guide h-full gap-0 overflow-hidden p-0 transition-transform duration-300 hover:-translate-y-1.5",
+        "group/guide pressable h-full gap-0 overflow-hidden p-0 motion-safe:hover:-translate-y-1.5",
         className
       )}
     >
