@@ -134,7 +134,7 @@ export async function Footer({
                   weight="semibold"
                   customStyles="mb-3 text-foreground text-sm"
                 >
-                  Følg oss
+                  Sosiale medier
                 </Text>
                 <SocialRow links={socials} />
               </div>
