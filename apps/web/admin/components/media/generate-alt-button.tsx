@@ -5,14 +5,24 @@ import { useEffect, useState } from "react";
 
 /**
  * «Foreslå alt-tekst»-knapp rett under alt-tekst-feltet (montert som
- * `admin.components.afterInput` på `alt`). Sender Media-dokumentets id til
- * `/api/ai/alt-text`, som leser bildet med en vision-modell og returnerer en
- * forslags-alt-tekst, og fyller den inn i feltet. Partneren kan redigere
- * forslaget etterpå.
+ * `admin.components.afterInput` på `alt`). Fyller feltet med et AI-forslag fra
+ * `/api/ai/alt-text`, som leser bildet med en vision-modell. Partneren kan
+ * redigere forslaget etterpå.
+ *
+ * Bildet hentes på to måter:
+ * - Er det valgt en fil i opplastingsfeltet (nytt dokument, eller ny fil på et
+ *   eksisterende), sendes selve fila som multipart. Da trenger man ikke lagre
+ *   først – noe som ellers lukker «Opprett ny»-modalet.
+ * - Ellers sendes dokumentets id, og endepunktet henter den lagrede fila.
  */
 export const GenerateAltButton = () => {
   const { id } = useDocumentInfo();
   const { setValue, value } = useField<string>({ path: "alt" });
+  // Payloads Upload-komponent legger den valgte fila her (som File) fram til
+  // dokumentet lagres. `null`/undefined når ingen ny fil er valgt.
+  const { value: pendingFile } = useField<File | null | undefined>({
+    path: "file",
+  });
   const [loading, setLoading] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -25,19 +35,36 @@ export const GenerateAltButton = () => {
     return () => clearInterval(timer);
   }, [loading]);
 
+  const hasPendingFile =
+    typeof File !== "undefined" && pendingFile instanceof File;
+  const hasSavedDoc = id !== undefined && id !== null;
+
   const onClick = async () => {
-    if (id === undefined || id === null) {
-      setError("Lagre bildet først, så kan vi lese det for å lage alt-tekst.");
+    if (!hasPendingFile && !hasSavedDoc) {
+      setError("Velg eller last opp et bilde først, så kan vi lage alt-tekst.");
+      return;
+    }
+    if (hasPendingFile && !pendingFile.type.startsWith("image/")) {
+      setError("Alt-tekst kan kun genereres for bilder.");
       return;
     }
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/ai/alt-text", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mediaId: id }),
-      });
+      // Fila i skjemaet vinner over lagret dokument: har partneren byttet
+      // bilde uten å lagre, skal forslaget beskrive det nye bildet.
+      let res: Response;
+      if (hasPendingFile) {
+        const form = new FormData();
+        form.append("file", pendingFile);
+        res = await fetch("/api/ai/alt-text", { method: "POST", body: form });
+      } else {
+        res = await fetch("/api/ai/alt-text", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mediaId: id }),
+        });
+      }
       const data = (await res.json()) as { alt?: string; error?: string };
       if (!res.ok || !data.alt) {
         throw new Error(data.error || "Kunne ikke lage et forslag.");
