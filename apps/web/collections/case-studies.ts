@@ -1,10 +1,13 @@
+import { BlocksFeature, lexicalEditor } from "@payloadcms/richtext-lexical";
 import type { CollectionConfig } from "payload";
+import { ProductSpotlight } from "../blocks/product-spotlight";
 import {
   qualityDataFields,
   qualityReviewPanel,
 } from "../fields/quality-review";
 import { stockPickerAfterInput } from "../fields/stock-picker-after-input";
 import { generateSlug } from "../lib/generate-slug";
+import { withPoyntLinks } from "../lib/lexical/link-feature";
 import {
   revalidateCmsAfterChange,
   revalidateCmsAfterDelete,
@@ -126,6 +129,14 @@ export const CaseStudies: CollectionConfig = {
                 description:
                   "Fortell i tre deler: utfordringen (hvor sto de?), hva vi gjorde (konkrete grep), og resultatet (hva endret seg?).",
               },
+              // Samme som Blogginnlegg: standardverktøyene + «Produktkort»,
+              // så historien kan vise produktet kunden brukte.
+              editor: lexicalEditor({
+                features: ({ defaultFeatures }) => [
+                  ...withPoyntLinks(defaultFeatures),
+                  BlocksFeature({ blocks: [ProductSpotlight] }),
+                ],
+              }),
             },
             {
               name: "results",

@@ -189,6 +189,11 @@ export function getBlockSchema(blockType: string): BlockSchema | undefined {
   return getBlockSchemas().get(blockType);
 }
 
+/** Skjema for en vilkårlig blokkliste (f.eks. produktenes historie-seksjoner). */
+export function schemasForBlocks(blocks: Block[]): Map<string, BlockSchema> {
+  return new Map(blocks.map((b) => [b.slug, serializeBlock(b)]));
+}
+
 /** Kort oversikt: hva finnes, og hva er hovedfeltene. */
 export function summarizeBlocks() {
   return [...getBlockSchemas().values()].map((b) => ({

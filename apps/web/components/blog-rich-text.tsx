@@ -16,7 +16,7 @@ type BlogNodeTypes =
   | SerializedBlockNode<ProductSpotlightBlock>;
 
 /**
- * Lexical → JSX for blogginnlegg: standard-konverterne pluss «Produktkort»-
+ * Lexical → JSX for blogginnlegg og kundehistorier: standard-konverterne pluss «Produktkort»-
  * blokken redaktøren kan sette inn i teksten. Kortet bryter ut av prose-
  * typografien (`not-prose`) og får egen luft over og under.
  */
@@ -39,7 +39,7 @@ const converters: JSXConvertersFunction<BlogNodeTypes> = ({
   },
 });
 
-/** Server-rendret innholdstekst for blogginnlegg (må kunne hente produkter). */
+/** Server-rendret innholdstekst for blogginnlegg og kundehistorier (må kunne hente produkter). */
 export function BlogRichText({ data }: { data: SerializedEditorState }) {
   return <RichText converters={converters} data={data} />;
 }

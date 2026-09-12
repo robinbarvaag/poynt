@@ -13,6 +13,9 @@ import { z } from "zod";
 import { getBlockSchema, summarizeBlocks } from "./block-schema";
 import { LayoutError, toMcpLayout, toPayloadLayout } from "./layout-convert";
 import { lexicalToMarkdown, markdownToLexical } from "./lexical-markdown";
+import { registerArticleTools } from "./tools-articles";
+import { registerSeoTools } from "./tools-seo";
+import { adminUrl, fail, siteUrl, text } from "./util";
 
 /**
  * MCP-server som lar Claude (claude.ai-connector, Claude Desktop, Claude Code)
@@ -22,10 +25,6 @@ import { lexicalToMarkdown, markdownToLexical } from "./lexical-markdown";
  * ved lagring i admin. Autentisering (delt hemmelighet) ligger i ruta:
  * app/api/mcp/[secret]/route.ts.
  */
-
-const siteUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
-const adminUrl = (id: number | string, collection = "pages") =>
-  `${siteUrl}/admin/collections/${collection}/${id}`;
 
 const INSTRUCTIONS = `Du hjelper Susanne (Poynt) med innhold i Payload CMS: sider (bygd av blokker), kundehistorier og blogginnlegg.
 
@@ -37,25 +36,15 @@ Arbeidsflyt for en side:
 
 Kundehistorie og blogginnlegg: create_case_study_draft / create_blog_post_draft. Forteller Susanne om et kundebesøk, foreslå gjerne begge (samme bilder, ulik vinkel) — men lag dem bare når hun bekrefter.
 
+Endre eksisterende blogginnlegg/kundehistorier: finn med list_blog_posts/list_case_studies, les med get_blog_post/get_case_study, lagre med update_blog_post_draft/update_case_study_draft. Bruk contentEdits (finn/erstatt) for tekstendringer — det bevarer produktkort, bilder og formatering. Sider endres med update_page_draft. Aldri create_* for noe som finnes fra før.
+
+SEO: kall get_seo_guidelines først. seo_audit gir oversikt over hele nettstedet, get_seo detaljer for ett dokument (hva Google og delingskortet faktisk viser), check_live_seo leser den publiserte siden og sjekker at og:image laster. Foreslå endringer (før → etter, med tegnantall) og vent på ja før update_seo_draft. update_media_alt endrer alt-tekst med en gang (media har ikke utkast) — kun etter ja.
+
 Bilder: search_media finner bilder som allerede er lastet opp i admin. upload_media_from_url henter et bilde fra en lenke (Drive, Dropbox, nettside) inn i mediebiblioteket. Bilder limt inn i chatten kan du IKKE laste opp — be Susanne laste dem opp i admin (Media) eller dele en lenke.
 
 Lese og vurdere: list_pages/get_page og list_related/get_product gir deg innholdet slik det står på nettsiden — bruk dem også når Susanne bare spør om noe (f.eks. «stemmer kjøpsbetingelsene med produktene?»), ikke bare når hun vil bygge.
 
 Regler: alt lagres som utkast, aldri publisert. Skriv på bokmål i Poynts tone. richText-felter sendes som markdown-streng. Ikke finn på tall, kundenavn, sitater eller priser — spør, eller la feltet stå tomt.`;
-
-const text = (data: unknown) => ({
-  content: [
-    {
-      type: "text" as const,
-      text: typeof data === "string" ? data : JSON.stringify(data, null, 2),
-    },
-  ],
-});
-
-const fail = (message: string) => ({
-  isError: true,
-  content: [{ type: "text" as const, text: message }],
-});
 
 const layoutSchema = z
   .array(z.record(z.string(), z.unknown()))
@@ -879,6 +868,9 @@ export const mcpHandler = createMcpHandler(() => {
       }
     }
   );
+
+  registerArticleTools(server);
+  registerSeoTools(server);
 
   return server;
 });

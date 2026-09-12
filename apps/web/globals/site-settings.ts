@@ -131,6 +131,146 @@ export const SiteSettings: GlobalConfig = {
           ],
         },
         {
+          label: "Bedrift",
+          description:
+            "Fakta om bedriften som publiseres som strukturert data (JSON-LD) og i llms.txt. Hjelper Google og AI-tjenester (ChatGPT, Claude, Perplexity) å forstå hvem Poynt er. Tomme felt utelates.",
+          fields: [
+            {
+              name: "company",
+              type: "group",
+              label: false,
+              fields: [
+                {
+                  type: "row",
+                  fields: [
+                    {
+                      name: "legalName",
+                      type: "text",
+                      label: "Juridisk navn",
+                      admin: { placeholder: "Poynt AS", width: "50%" },
+                    },
+                    {
+                      name: "orgNumber",
+                      type: "text",
+                      label: "Organisasjonsnummer",
+                      admin: {
+                        placeholder: "930 714 151",
+                        width: "50%",
+                        description:
+                          "Kobler bedriften til Brønnøysundregistrene.",
+                      },
+                    },
+                  ],
+                },
+                {
+                  type: "row",
+                  fields: [
+                    {
+                      name: "foundingDate",
+                      type: "text",
+                      label: "Etablert",
+                      admin: {
+                        placeholder: "2020 eller 2020-03-01",
+                        width: "50%",
+                      },
+                    },
+                    {
+                      name: "areaServed",
+                      type: "text",
+                      label: "Område bedriften betjener",
+                      defaultValue: "Norge",
+                      admin: { width: "50%" },
+                    },
+                  ],
+                },
+                {
+                  name: "slogan",
+                  type: "text",
+                  label: "Slagord",
+                },
+                {
+                  name: "knowsAbout",
+                  type: "array",
+                  label: "Fagområder",
+                  labels: { singular: "Fagområde", plural: "Fagområder" },
+                  admin: {
+                    description:
+                      "Temaer bedriften er ekspert på, f.eks. «Markedsføring», «Kunstig intelligens», «LinkedIn».",
+                  },
+                  fields: [
+                    {
+                      name: "topic",
+                      type: "text",
+                      required: true,
+                      label: "Fagområde",
+                    },
+                  ],
+                },
+                {
+                  name: "founder",
+                  type: "group",
+                  label: "Grunnlegger / daglig leder",
+                  admin: {
+                    description:
+                      "Personen bak bedriften. Styrker troverdigheten (E-E-A-T) i søk og AI-svar.",
+                  },
+                  fields: [
+                    {
+                      type: "row",
+                      fields: [
+                        {
+                          name: "name",
+                          type: "text",
+                          label: "Navn",
+                          admin: { width: "50%" },
+                        },
+                        {
+                          name: "jobTitle",
+                          type: "text",
+                          label: "Tittel",
+                          admin: {
+                            placeholder: "Daglig leder og rådgiver",
+                            width: "50%",
+                          },
+                        },
+                      ],
+                    },
+                    {
+                      name: "description",
+                      type: "textarea",
+                      label: "Kort bio",
+                    },
+                    {
+                      name: "image",
+                      type: "upload",
+                      relationTo: "media",
+                      label: "Portrett",
+                    },
+                    {
+                      name: "sameAs",
+                      type: "array",
+                      label: "Profiler",
+                      labels: { singular: "Profil", plural: "Profiler" },
+                      admin: {
+                        description:
+                          "Lenker til personens egne profiler, f.eks. LinkedIn eller en Wikipedia-side.",
+                      },
+                      fields: [
+                        {
+                          name: "url",
+                          type: "text",
+                          required: true,
+                          label: "URL",
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        {
           label: "Sosiale medier",
           fields: [
             {

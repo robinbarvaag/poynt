@@ -116,8 +116,12 @@ export default async function FrontendLayout({
       phone: siteSettings?.phone,
       address: siteSettings?.address,
       socialLinks: siteSettings?.socialLinks,
+      company: siteSettings?.company,
     }),
-    websiteSchema({ name: siteSettings?.siteName }),
+    websiteSchema({
+      name: siteSettings?.siteName,
+      description: siteSettings?.siteDescription,
+    }),
   ];
 
   return (

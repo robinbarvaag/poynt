@@ -95,6 +95,8 @@ Linting and formatting are handled entirely by **Biome** (`biome.json` at root) 
 
 **Lenker i rik tekst**: Lexical-lenker har typene nettadresse, side på nettstedet, forsiden, e-post og telefon (`apps/web/lib/lexical/link-feature.ts`, bruk `withPoyntLinks(defaultFeatures)` i alle `lexicalEditor({ features })`). Frontend rendrer alltid via `@/components/rich-text` (eller sprer inn `linkConverters`): eksterne lenker får ny fane + ikon, e-post/telefon får popover med «send/ring» og «kopier». Lenkelogikken ligger i `lib/lexical/link-fields.ts` (testet).
 
+**Markdown for AI-agenter / llms.txt**: Alle offentlige sider kan hentes som markdown via `/<sti>.md` (forsiden `/index.md`), `?format=md` eller `Accept: text/markdown`. `proxy.ts` rewriter til `app/api/md/[[...path]]`; konverteringen (`lib/markdown/`) er skjemadrevet fra blokk-definisjonene, så nye blokker får markdown automatisk. `/llms.txt` og `/llms-full.txt` bygges fra samme data. Organisasjons-JSON-LD henter bedriftsfakta fra «Bedrift»-fanen i Nettsted-innstillinger (`lib/structured-data.ts`).
+
 **Cart constraint**: Digital products limited to 1 per item in cart. Cart state persists to localStorage as "poynt-cart".
 
 **Stripe sync**: Products and prices automatically sync to Stripe via Payload plugin. Stripe IDs stored on Product and User documents.

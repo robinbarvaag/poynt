@@ -12,8 +12,11 @@ export function JsonLd({ data }: { data: object | object[] }) {
     <>
       {items.map((item, i) => (
         <script
+          // `<` escapes så CMS-tekst som «</script>» ikke kan bryte ut av taggen.
           // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD krever rå script-innhold
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(item) }}
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(item).replace(/</g, "\\u003c"),
+          }}
           // biome-ignore lint/suspicious/noArrayIndexKey: statisk, rekkefølge-stabil liste
           key={`ld-${i}`}
           type="application/ld+json"

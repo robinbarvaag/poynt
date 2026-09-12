@@ -64,6 +64,7 @@ import * as migration_20260912_114600_resource_hub from './20260912_114600_resou
 import * as migration_20260912_155914_delivery_type_footer_legal from './20260912_155914_delivery_type_footer_legal';
 import * as migration_20260912_162030_test_product_flag from './20260912_162030_test_product_flag';
 import * as migration_20260912_162138_social_channels from './20260912_162138_social_channels';
+import * as migration_20260912_192437_company_info from './20260912_192437_company_info';
 
 export const migrations = [
   {
@@ -394,6 +395,11 @@ export const migrations = [
   {
     up: migration_20260912_162138_social_channels.up,
     down: migration_20260912_162138_social_channels.down,
-    name: '20260912_162138_social_channels'
+    name: '20260912_162138_social_channels',
+  },
+  {
+    up: migration_20260912_192437_company_info.up,
+    down: migration_20260912_192437_company_info.down,
+    name: '20260912_192437_company_info'
   },
 ];

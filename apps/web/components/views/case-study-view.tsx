@@ -1,8 +1,8 @@
 import { AdminBar } from "@/components/admin-bar";
+import { BlogRichText } from "@/components/blog-rich-text";
 import { JsonLd } from "@/components/json-ld";
 import { MediaCredit } from "@/components/media-credit";
 import { PayloadImage } from "@/components/payload-image";
-import { RichText } from "@/components/rich-text";
 import { resolveMedia } from "@/lib/payload";
 import { SITE_URL } from "@/lib/seo";
 import { articleSchema, breadcrumbSchema } from "@/lib/structured-data";
@@ -116,7 +116,7 @@ export function CaseStudyView({ story }: { story: CaseStudy }) {
         )}
 
         <div className="prose prose-lg max-w-none prose-headings:text-foreground prose-p:text-foreground prose-a:text-primary prose-strong:text-foreground">
-          <RichText data={story.content} />
+          <BlogRichText data={story.content} />
         </div>
 
         {quote?.text && (

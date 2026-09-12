@@ -3,6 +3,7 @@ import {
   toRelativeMediaUrl,
 } from "@/components/payload-image";
 import type { Metadata } from "next";
+import { markdownUrlFor } from "./markdown/negotiation";
 
 /** Side-URL ett sted, med lokal fallback. */
 export const SITE_URL = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
@@ -202,7 +203,11 @@ export function buildMetadata({
   return {
     title: absoluteTitle ? { absolute: cleanTitle } : cleanTitle,
     description,
-    alternates: { canonical: canonicalUrl?.trim() || url },
+    alternates: {
+      canonical: canonicalUrl?.trim() || url,
+      // Markdown-versjonen for AI-agenter (proxy.ts → /api/md).
+      types: { "text/markdown": markdownUrlFor(SITE_URL, path || "/") },
+    },
     // NB: Next fletter IKKE `openGraph` fra layout og side — sidens objekt
     // erstatter hele layout-objektet. Derfor må siteName/locale gjentas her,
     // ellers mister alle undersider og:site_name og og:locale.

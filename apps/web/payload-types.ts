@@ -4787,6 +4787,43 @@ export interface SiteSetting {
   phone?: string | null;
   address?: string | null;
   notificationEmails?: string | null;
+  company?: {
+    legalName?: string | null;
+    /**
+     * Kobler bedriften til Brønnøysundregistrene.
+     */
+    orgNumber?: string | null;
+    foundingDate?: string | null;
+    areaServed?: string | null;
+    slogan?: string | null;
+    /**
+     * Temaer bedriften er ekspert på, f.eks. «Markedsføring», «Kunstig intelligens», «LinkedIn».
+     */
+    knowsAbout?:
+      | {
+          topic: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Personen bak bedriften. Styrker troverdigheten (E-E-A-T) i søk og AI-svar.
+     */
+    founder?: {
+      name?: string | null;
+      jobTitle?: string | null;
+      description?: string | null;
+      image?: (number | null) | Media;
+      /**
+       * Lenker til personens egne profiler, f.eks. LinkedIn eller en Wikipedia-side.
+       */
+      sameAs?:
+        | {
+            url: string;
+            id?: string | null;
+          }[]
+        | null;
+    };
+  };
   socialLinks?:
     | {
         platform:
@@ -5201,6 +5238,35 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   phone?: T;
   address?: T;
   notificationEmails?: T;
+  company?:
+    | T
+    | {
+        legalName?: T;
+        orgNumber?: T;
+        foundingDate?: T;
+        areaServed?: T;
+        slogan?: T;
+        knowsAbout?:
+          | T
+          | {
+              topic?: T;
+              id?: T;
+            };
+        founder?:
+          | T
+          | {
+              name?: T;
+              jobTitle?: T;
+              description?: T;
+              image?: T;
+              sameAs?:
+                | T
+                | {
+                    url?: T;
+                    id?: T;
+                  };
+            };
+      };
   socialLinks?:
     | T
     | {

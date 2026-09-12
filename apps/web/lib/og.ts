@@ -50,11 +50,11 @@ function attrMeta(
 }
 
 /** og:* bruker `property`, twitter:* og description bruker `name`. */
-function pickMeta(html: string, key: string): string | undefined {
+export function pickMeta(html: string, key: string): string | undefined {
   return attrMeta(html, key, "property") ?? attrMeta(html, key, "name");
 }
 
-function titleTag(html: string): string | undefined {
+export function titleTag(html: string): string | undefined {
   const m = html.match(/<title[^>]*>([^<]*)<\/title>/i);
   return m?.[1] ? decodeEntities(m[1].trim()) : undefined;
 }

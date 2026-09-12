@@ -16,12 +16,65 @@ function absoluteMediaUrl(media: MediaInput | string): string | undefined {
   return url.startsWith("http") ? url : `${SITE_URL}${url}`;
 }
 
-/** Stabil `@id` for organisasjonen, så andre noder kan referere til den. */
-const ORG_ID = `${SITE_URL}/#organization`;
+/** Stabile `@id`-er, så noder på tvers av sider kan referere til hverandre. */
+export const ORG_ID = `${SITE_URL}/#organization`;
+export const WEBSITE_ID = `${SITE_URL}/#website`;
+export const FOUNDER_ID = `${SITE_URL}/#founder`;
+const LOGO_ID = `${SITE_URL}/#logo`;
+
+const nonEmpty = (value: string | null | undefined): value is string =>
+  typeof value === "string" && value.trim() !== "";
+
+/**
+ * Norsk adresse fra ett tekstfelt («Gate 1\n4006 Stavanger») → PostalAddress.
+ * Linja med firesifret postnummer blir postnummer + sted; resten er gateadresse.
+ */
+export function parseNorwegianAddress(address: string): {
+  streetAddress?: string;
+  postalCode?: string;
+  addressLocality?: string;
+} {
+  const lines = address
+    .split(/\n|,/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const postalIndex = lines.findLastIndex((line) =>
+    /^(?:NO-)?\d{4}\s+\S/.test(line)
+  );
+  if (postalIndex === -1) {
+    return lines.length ? { streetAddress: lines.join(", ") } : {};
+  }
+  const match = /^(?:NO-)?(\d{4})\s+(.+)$/.exec(lines[postalIndex]);
+  const street = lines.filter((_, i) => i !== postalIndex).join(", ");
+  return {
+    ...(street ? { streetAddress: street } : {}),
+    ...(match ? { postalCode: match[1], addressLocality: match[2] } : {}),
+  };
+}
+
+/** Fakta om bedriften fra «Bedrift»-fanen i nettsted-innstillingene. */
+export interface CompanyInfo {
+  legalName?: string | null;
+  orgNumber?: string | null;
+  foundingDate?: string | null;
+  areaServed?: string | null;
+  slogan?: string | null;
+  knowsAbout?: { topic?: string | null }[] | null;
+  founder?: {
+    name?: string | null;
+    jobTitle?: string | null;
+    description?: string | null;
+    image?: MediaInput;
+    sameAs?: { url?: string | null }[] | null;
+  } | null;
+}
 
 /**
  * Organisasjonen bak nettstedet. Bygges fra `site-settings` og fungerer som
- * felles «avsender» for resten av den strukturerte dataen.
+ * felles «avsender» (publisher/provider/brand) for resten av den strukturerte
+ * dataen. Jo mer entydig bedriften er beskrevet (juridisk navn, org.nr.,
+ * grunnlegger, profiler), jo tryggere kobler søkemotorer og AI-tjenester
+ * omtaler av Poynt til riktig enhet.
  */
 export function organizationSchema(opts: {
   name?: string | null;
@@ -31,36 +84,114 @@ export function organizationSchema(opts: {
   phone?: string | null;
   address?: string | null;
   socialLinks?: { platform?: string; url?: string | null }[] | null;
+  company?: CompanyInfo | null;
 }) {
-  const sameAs = (opts.socialLinks ?? [])
-    .map((s) => s.url)
-    .filter((url): url is string => Boolean(url));
+  const company = opts.company ?? {};
+  const name = opts.name || SITE_NAME;
+  const orgNumber = company.orgNumber?.replace(/\D/g, "");
   const logoUrl = absoluteMediaUrl(opts.logo);
+  const logoSize =
+    opts.logo && typeof opts.logo === "object"
+      ? { width: opts.logo.width, height: opts.logo.height }
+      : {};
+
+  const sameAs = [
+    ...(opts.socialLinks ?? []).map((s) => s.url),
+    // Brønnøysundregistrene er den autoritative kilden for norske foretak.
+    orgNumber?.length === 9
+      ? `https://virksomhet.brreg.no/nb/oppslag/enheter/${orgNumber}`
+      : null,
+  ].filter(nonEmpty);
+
+  const founder = company.founder;
+  const founderImage = absoluteMediaUrl(founder?.image);
+  const founderSameAs = (founder?.sameAs ?? [])
+    .map((s) => s.url)
+    .filter(nonEmpty);
+  const knowsAbout = (company.knowsAbout ?? [])
+    .map((k) => k.topic)
+    .filter(nonEmpty);
+  const address = opts.address ? parseNorwegianAddress(opts.address) : {};
 
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
     "@id": ORG_ID,
-    name: opts.name || SITE_NAME,
+    name,
     url: SITE_URL,
+    ...(nonEmpty(company.legalName) ? { legalName: company.legalName } : {}),
     ...(opts.description ? { description: opts.description } : {}),
-    ...(logoUrl ? { logo: logoUrl } : {}),
+    ...(nonEmpty(company.slogan) ? { slogan: company.slogan } : {}),
+    ...(logoUrl
+      ? {
+          logo: {
+            "@type": "ImageObject",
+            "@id": LOGO_ID,
+            url: logoUrl,
+            contentUrl: logoUrl,
+            caption: name,
+            ...(logoSize.width ? { width: logoSize.width } : {}),
+            ...(logoSize.height ? { height: logoSize.height } : {}),
+          },
+          image: { "@id": LOGO_ID },
+        }
+      : {}),
+    ...(opts.email ? { email: opts.email } : {}),
+    ...(opts.phone ? { telephone: opts.phone } : {}),
+    ...(orgNumber
+      ? {
+          taxID: orgNumber,
+          identifier: {
+            "@type": "PropertyValue",
+            propertyID: "Organisasjonsnummer (Brønnøysundregistrene)",
+            value: orgNumber,
+          },
+        }
+      : {}),
+    ...(nonEmpty(company.foundingDate)
+      ? { foundingDate: company.foundingDate.trim() }
+      : {}),
+    areaServed: {
+      "@type": "Country",
+      name: company.areaServed?.trim() || "Norge",
+    },
+    ...(knowsAbout.length ? { knowsAbout } : {}),
+    ...(nonEmpty(founder?.name)
+      ? {
+          founder: {
+            "@type": "Person",
+            "@id": FOUNDER_ID,
+            name: founder.name,
+            ...(nonEmpty(founder.jobTitle)
+              ? { jobTitle: founder.jobTitle }
+              : {}),
+            ...(nonEmpty(founder.description)
+              ? { description: founder.description }
+              : {}),
+            ...(founderImage ? { image: founderImage } : {}),
+            ...(founderSameAs.length ? { sameAs: founderSameAs } : {}),
+            worksFor: { "@id": ORG_ID },
+          },
+        }
+      : {}),
     ...(sameAs.length ? { sameAs } : {}),
     ...(opts.email || opts.phone
       ? {
           contactPoint: {
             "@type": "ContactPoint",
             contactType: "customer service",
+            availableLanguage: ["Norwegian"],
+            areaServed: "NO",
             ...(opts.email ? { email: opts.email } : {}),
             ...(opts.phone ? { telephone: opts.phone } : {}),
           },
         }
       : {}),
-    ...(opts.address
+    ...(Object.keys(address).length
       ? {
           address: {
             "@type": "PostalAddress",
-            streetAddress: opts.address,
+            ...address,
             addressCountry: "NO",
           },
         }
@@ -69,13 +200,17 @@ export function organizationSchema(opts: {
 }
 
 /** Selve nettstedet. Refererer til organisasjonen som utgiver. */
-export function websiteSchema(opts: { name?: string | null }) {
+export function websiteSchema(opts: {
+  name?: string | null;
+  description?: string | null;
+}) {
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    "@id": `${SITE_URL}/#website`,
+    "@id": WEBSITE_ID,
     name: opts.name || SITE_NAME,
     url: SITE_URL,
+    ...(opts.description ? { description: opts.description } : {}),
     publisher: { "@id": ORG_ID },
     inLanguage: "nb-NO",
   };
@@ -103,11 +238,16 @@ export function articleSchema(opts: {
     url: opts.url,
     ...(opts.datePublished ? { datePublished: opts.datePublished } : {}),
     ...(opts.dateModified ? { dateModified: opts.dateModified } : {}),
-    author: {
-      "@type": opts.authorName ? "Person" : "Organization",
-      name: opts.authorName || SITE_NAME,
-    },
+    author: opts.authorName
+      ? { "@type": "Person", name: opts.authorName }
+      : {
+          "@type": "Organization",
+          "@id": ORG_ID,
+          name: SITE_NAME,
+          url: SITE_URL,
+        },
     publisher: { "@id": ORG_ID },
+    isPartOf: { "@id": WEBSITE_ID },
     inLanguage: "nb-NO",
   };
 }
@@ -130,13 +270,14 @@ export function serviceSchema(opts: {
     ...(imageUrl ? { image: imageUrl } : {}),
     url: opts.url,
     provider: { "@id": ORG_ID },
-    areaServed: "NO",
+    areaServed: { "@type": "Country", name: "Norge" },
     ...(typeof opts.price === "number"
       ? {
           offers: {
             "@type": "Offer",
             price: opts.price,
             priceCurrency: "NOK",
+            seller: { "@id": ORG_ID },
           },
         }
       : {}),
@@ -169,6 +310,7 @@ export function productSchema(opts: {
             priceCurrency: "NOK",
             availability: "https://schema.org/InStock",
             url: opts.url,
+            seller: { "@id": ORG_ID },
           },
         }
       : {}),

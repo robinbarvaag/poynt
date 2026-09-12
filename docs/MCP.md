@@ -12,6 +12,9 @@ justerer og publiserer selv.
 - **Alt lagres som utkast.** Serveren setter alltid `_status: draft` og bruker
   `draft: true`. Den publiserte versjonen av en side røres aldri, og
   publisering skjer kun av et menneske i admin.
+- **Ett unntak:** `update_media_alt` endrer alt-teksten på et bilde direkte,
+  fordi Media ikke har utkast. Det er ikke-destruktivt (tidligere verdi
+  returneres), og Claude er instruert om å få ja først.
 - **Ingen sletting.** Det finnes ikke noe verktøy for å slette sider, media
   eller noe annet.
 - **Delt hemmelighet** i `MCP_SECRET` (minst 16 tegn; lag med
@@ -64,6 +67,15 @@ claude mcp add --transport http poynt-cms https://<domene>/api/mcp/<MCP_SECRET>
 | `upload_media_from_url` | Henter et bilde fra en offentlig direktelenke inn i mediebiblioteket (maks 40 MB, kun `image/*`, interne adresser avvist). |
 | `list_related` | Produkter, tjenester, skjemaer og kategorier → ID til relationship-felt. |
 | `get_product` | Hele produktet: type, pris, førpris, MVA, beskrivelser (markdown), varianter, medlemskapsinnstillinger. For å lese/vurdere det som selges. |
+| `list_blog_posts` / `list_case_studies` | Eksisterende innlegg/kundehistorier (også utkast) med status og om SEO-feltene er fylt ut. |
+| `get_blog_post` / `get_case_study` | Hele dokumentet som markdown + SEO-felt. `contentNotInMarkdown` lister det markdown ikke gjengir (produktkort, bilder, nummererte lister). |
+| `update_blog_post_draft` / `update_case_study_draft` | Nytt utkast på eksisterende innlegg/kundehistorie. `contentEdits` (finn/erstatt i Lexical) bevarer alt; `content` erstatter hele teksten og nektes hvis noe da går tapt, med mindre `allowContentLoss`. Slug endres ikke (krever omdirigering). |
+| `get_seo_guidelines` | SEO-reglene: meta-tittel/-beskrivelse, delingsbilde, alt-tekst, struktur, arbeidsflyt. |
+| `seo_audit` | SEO-revisjon av sider, blogg, kundehistorier, tjenester, produkter og forsiden: lengder slik de faktisk vises (med fallback), delingsbilde, alt-tekst, noindex/canonical, struktur, duplikater. |
+| `get_seo` | SEO for ett dokument: råfelt, Google-forhåndsvisning, hvilket delingsbilde som brukes og hvorfor. |
+| `update_seo_draft` | Meta-tittel/-beskrivelse/-bilde, noindex, canonical og FAQ som utkast (sider, blogg, kundehistorier, tjenester). Produkter og forsiden har ikke utkast og endres i admin. |
+| `check_live_seo` | Leser `<head>` på den publiserte siden (kun eget domene): title, description, canonical, robots, OG, Twitter, H1, JSON-LD — og laster og:image (status, type, størrelse). |
+| `update_media_alt` | Setter alt-tekst på et bilde. **Gjelder med en gang** (media har ikke utkast) — Claude skal få ja først. |
 
 **Bilder fra chatten** kan Claude ikke laste opp via MCP. Flyten er: Susanne
 laster opp i admin (Media, dra og slipp) eller deler en direktelenke, så
