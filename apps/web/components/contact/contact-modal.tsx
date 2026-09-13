@@ -45,13 +45,13 @@ export function ContactModal({ form, subject, image }: ContactModalProps) {
       <span className="font-heading font-semibold text-primary text-xs uppercase tracking-[0.18em]">
         Kontakt
       </span>
-      <h2 className="mt-2 font-bold font-heading text-3xl leading-tight tracking-tight md:text-4xl">
+      <h2 className="mt-3 font-bold font-heading text-3xl leading-tight tracking-tight md:text-4xl">
         {heading}
       </h2>
-      <p className="mt-5 text-base text-muted-foreground leading-relaxed">
+      <p className="mt-3 text-base text-muted-foreground leading-relaxed">
         Fyll ut skjemaet, så hører du fra meg – vanligvis innen et par dager.
       </p>
-      <div className="mt-7">
+      <div className="mt-8">
         <FormBlockComponent
           form={form}
           variant="default"

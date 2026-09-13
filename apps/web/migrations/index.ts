@@ -66,6 +66,7 @@ import * as migration_20260912_162030_test_product_flag from './20260912_162030_
 import * as migration_20260912_162138_social_channels from './20260912_162138_social_channels';
 import * as migration_20260912_192437_company_info from './20260912_192437_company_info';
 import * as migration_20260913_093437_book_access from './20260913_093437_book_access';
+import * as migration_20260913_094816_book_store_poynt from './20260913_094816_book_store_poynt';
 
 export const migrations = [
   {
@@ -406,6 +407,11 @@ export const migrations = [
   {
     up: migration_20260913_093437_book_access.up,
     down: migration_20260913_093437_book_access.down,
-    name: '20260913_093437_book_access'
+    name: '20260913_093437_book_access',
+  },
+  {
+    up: migration_20260913_094816_book_store_poynt.up,
+    down: migration_20260913_094816_book_store_poynt.down,
+    name: '20260913_094816_book_store_poynt'
   },
 ];

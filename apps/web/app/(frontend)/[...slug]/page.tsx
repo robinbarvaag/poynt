@@ -122,9 +122,14 @@ export async function generateMetadata({
 // framleis inn i den statiske HTML-en, så prefetch frå nav-en får ferdig side.
 // Ukjende stier (f.eks. /sw.js → 404) rendrast dynamisk på førespurnad — dei
 // er 404-ar og treng ikkje vere raske.
+//
+// Fallbacken er likevel ein tom boks med høgde, ikkje null: Next sin
+// «scroll til toppen» måler segmentet i det det blir sett inn. Er det tomt
+// (null), gir Next opp og prøver ikkje igjen når innhaldet strøymer inn — då
+// blir ein ståande nede ved footeren etter å ha klikka ei lenke der.
 export default function Page({ params }: PageProps) {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<div className="min-h-screen" aria-hidden="true" />}>
       <ResolvedPage params={params} />
     </Suspense>
   );

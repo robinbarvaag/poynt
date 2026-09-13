@@ -80,7 +80,7 @@ function lexicalToPlainText(value: unknown): string | null {
 
 /** Delt felt-styling så tekstfelt og select får identisk høyde. */
 const fieldControlClasses =
-  "h-12 w-full rounded-xl border border-input bg-background px-4 focus:outline-none focus:ring-2 focus:ring-ring";
+  "h-12 w-full rounded-xl border border-input bg-background px-4 text-base focus:outline-none focus:ring-2 focus:ring-ring";
 
 export function FormBlockComponent({
   form,
@@ -242,9 +242,11 @@ export function FormBlockComponent({
       <form
         key={ctx.emne ?? "default"}
         onSubmit={handleSubmit}
-        className="space-y-5"
+        className="space-y-8"
       >
-        <div className="grid grid-cols-1 gap-x-4 gap-y-5 md:grid-cols-2">
+        {/* items-end: halvbredde-felt på samme rad får inputene på linje selv
+            om den ene labelen brekker over to linjer. */}
+        <div className="grid grid-cols-1 gap-x-5 gap-y-6 md:grid-cols-2 md:items-end">
           {formData.fields
             ?.filter((field) => "name" in field && field.name)
             .map((field) => {
@@ -272,14 +274,12 @@ export function FormBlockComponent({
                   {field.blockType !== "checkbox" && (
                     <Label
                       htmlFor={inputId}
-                      className="mb-2 flex items-start font-heading font-semibold text-foreground leading-snug md:min-h-[2lh]"
+                      className="mb-2 block font-heading font-semibold text-base text-foreground leading-snug"
                     >
-                      <span>
-                        {fieldLabel}
-                        {isRequired && (
-                          <span className="text-destructive">&nbsp;*</span>
-                        )}
-                      </span>
+                      {fieldLabel}
+                      {isRequired && (
+                        <span className="text-destructive">&nbsp;*</span>
+                      )}
                     </Label>
                   )}
 
@@ -319,7 +319,7 @@ export function FormBlockComponent({
                       name={fieldName}
                       required={isRequired}
                       rows={4}
-                      className="w-full px-4 py-3 rounded-xl border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+                      className="block w-full px-4 py-3 text-base rounded-xl border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none"
                     />
                   )}
 

@@ -89,9 +89,11 @@ export function BookGate({ pageId, title }: { pageId: number; title: string }) {
           <div className="flex flex-col gap-2">
             <Label htmlFor="book-email">
               E-post{" "}
-              <span className="font-normal text-muted-foreground">
-                (frivillig)
-              </span>
+              {!newsletter && (
+                <span className="font-normal text-muted-foreground">
+                  (frivillig)
+                </span>
+              )}
             </Label>
             <Input
               id="book-email"
@@ -100,26 +102,26 @@ export function BookGate({ pageId, title }: { pageId: number; title: string }) {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="navn@eksempel.no"
               autoComplete="email"
+              required={newsletter}
               disabled={loading}
             />
           </div>
 
-          {email && (
-            <div className="flex items-start gap-3">
-              <Checkbox
-                id="book-newsletter"
-                checked={newsletter}
-                onCheckedChange={(checked) => setNewsletter(checked === true)}
-                disabled={loading}
-              />
-              <Label
-                htmlFor="book-newsletter"
-                className="font-normal text-muted-foreground text-sm leading-snug"
-              >
-                Send meg nye ressurser og tips på e-post
-              </Label>
-            </div>
-          )}
+          {/* Alltid synlig: å krysse av gjør e-posten påkrevd. */}
+          <div className="flex items-center gap-3">
+            <Checkbox
+              id="book-newsletter"
+              checked={newsletter}
+              onCheckedChange={(checked) => setNewsletter(checked === true)}
+              disabled={loading}
+            />
+            <Label
+              htmlFor="book-newsletter"
+              className="font-normal text-muted-foreground text-sm"
+            >
+              Send meg nye ressurser og tips på e-post
+            </Label>
+          </div>
 
           {status === "error" && (
             <p role="alert" className="swap-in text-destructive text-sm">
@@ -131,10 +133,10 @@ export function BookGate({ pageId, title }: { pageId: number; title: string }) {
             {loading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              <>
+              <span className="flex items-center gap-2">
                 <Lock className="h-4 w-4" />
                 Lås opp
-              </>
+              </span>
             )}
           </Button>
         </form>

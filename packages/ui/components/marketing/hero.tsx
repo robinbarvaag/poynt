@@ -167,8 +167,8 @@ export function Hero({
                   <Button
                     asChild
                     size="lg"
-                    variant="ghost"
-                    className="rounded-full px-6"
+                    variant="outline"
+                    className="rounded-full border-primary/30 bg-transparent px-8 text-primary hover:border-primary/50 hover:bg-primary/5 hover:text-primary"
                   >
                     {LinkComp ? (
                       <LinkComp href={secondaryCta.href}>

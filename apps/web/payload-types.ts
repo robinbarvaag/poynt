@@ -2658,7 +2658,7 @@ export interface Order {
 export interface BookAccess {
   id: number;
   orderNumber: string;
-  store: 'ark' | 'norli' | 'annet';
+  store: 'ark' | 'norli' | 'poynt';
   page?: (number | null) | Page;
   email?: string | null;
   newsletterOptIn?: boolean | null;

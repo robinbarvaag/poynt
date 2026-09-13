@@ -2,7 +2,7 @@
 export const BOOK_STORES = [
   { value: "ark", label: "ARK" },
   { value: "norli", label: "Norli" },
-  { value: "annet", label: "Annet sted" },
+  { value: "poynt", label: "poynt.no" },
 ] as const;
 
 export type BookStore = (typeof BOOK_STORES)[number]["value"];
