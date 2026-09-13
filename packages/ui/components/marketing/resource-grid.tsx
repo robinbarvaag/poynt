@@ -6,7 +6,6 @@ import { Icon, type IconName } from "../../icons";
 import { UILink } from "../../lib/link";
 import { cn } from "../../lib/utils";
 import { Card } from "../card";
-import { gridVariants } from "../container";
 import { Stagger, StaggerItem } from "../motion";
 import { SectionHeader } from "../section-header";
 
@@ -100,11 +99,22 @@ function hostOf(url?: string): string | null {
   }
 }
 
-const IMAGE_CLASS: Record<KindConfig["image"], string> = {
-  wide: "aspect-[16/9]",
-  square: "aspect-square",
-  portrait: "aspect-[2/3]",
-  none: "",
+/**
+ * ÉN felles bildeflate for alle korttyper, så bilder og overskrifter står på
+ * linje i rutenettet uansett blanding av bøker, podkaster og lenker. Typen
+ * styrer bare hvordan bildet plasseres inni flaten.
+ */
+const CARD_MEDIA = "relative aspect-[16/10] overflow-hidden rounded-t-3xl";
+
+/**
+ * Kolonner styres av kortets egen flate (container query), ikke skjermen —
+ * blokken står både i full bredde og ved siden av en sidemeny. Kortene får
+ * minst ~17rem før de brytes til færre kolonner.
+ */
+const GRID_COLS: Record<NonNullable<ResourceGridProps["columns"]>, string> = {
+  2: "@xl:grid-cols-2",
+  3: "@xl:grid-cols-2 @5xl:grid-cols-3",
+  4: "@xl:grid-cols-2 @5xl:grid-cols-3 @7xl:grid-cols-4",
 };
 
 /** Kompakt bilde-/ikon-rute brukt av begge layoutene. */
@@ -131,7 +141,12 @@ function Thumb({
 
   if (config.image === "none" || !item.image) {
     return (
-      <div className="flex aspect-[16/9] items-center justify-center rounded-t-3xl bg-gradient-to-br from-accent-1/60 via-accent-1/25 to-background">
+      <div
+        className={cn(
+          CARD_MEDIA,
+          "flex items-center justify-center bg-gradient-to-br from-accent-1/60 via-accent-1/25 to-background"
+        )}
+      >
         <Icon
           name={config.icon}
           className="size-12 text-foreground/20"
@@ -143,10 +158,16 @@ function Thumb({
 
   if (config.image === "portrait") {
     // Bokomslag: stående bilde med skygge på en rolig flate, ikke strukket
-    // til kortets bredde.
+    // til kortets bredde. Høyden er låst til flaten (ikke bildets egen), så
+    // et høyt omslag aldri gjør kortet høyere enn naboene.
     return (
-      <div className="flex aspect-[16/9] items-end justify-center overflow-hidden rounded-t-3xl bg-gradient-to-br from-accent-3/60 via-accent-3/25 to-background px-6 pt-6">
-        <div className="w-[38%] overflow-hidden rounded-t-md shadow-xl ring-1 ring-foreground/10 transition-transform duration-500 group-hover/resource:-translate-y-1 *:[img]:h-auto *:[img]:w-full">
+      <div
+        className={cn(
+          CARD_MEDIA,
+          "flex items-end justify-center bg-gradient-to-br from-accent-3/60 via-accent-3/25 to-background"
+        )}
+      >
+        <div className="aspect-[2/3] h-[82%] overflow-hidden rounded-t-md shadow-xl ring-1 ring-foreground/10 transition-transform duration-500 group-hover/resource:-translate-y-1 *:[img]:h-full *:[img]:w-full *:[img]:object-cover">
           {item.image}
         </div>
       </div>
@@ -156,8 +177,8 @@ function Thumb({
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-t-3xl bg-muted/40 *:[img]:absolute *:[img]:inset-0 *:[img]:h-full *:[img]:w-full *:[img]:object-cover *:[img]:transition-transform *:[img]:duration-500 group-hover/resource:*:[img]:scale-105",
-        config.image === "square" ? "aspect-[16/10]" : IMAGE_CLASS.wide
+        CARD_MEDIA,
+        "bg-muted/40 *:[img]:absolute *:[img]:inset-0 *:[img]:h-full *:[img]:w-full *:[img]:object-cover *:[img]:transition-transform *:[img]:duration-500 group-hover/resource:*:[img]:scale-105"
       )}
     >
       {item.image}
@@ -347,7 +368,7 @@ export function ResourceGrid({
   if (items.length === 0) return null;
 
   return (
-    <div className={className}>
+    <div className={cn("@container", className)}>
       <SectionHeader eyebrow={eyebrow} title={title} intro={intro} />
 
       {showFilter && categories.length > 0 && (
@@ -380,7 +401,7 @@ export function ResourceGrid({
         key={active ?? "__all"}
         className={
           layout === "grid"
-            ? cn(gridVariants({ cols: columns, gap: "md" }))
+            ? cn("grid grid-cols-1 gap-6", GRID_COLS[columns])
             : "flex flex-col gap-3"
         }
       >
