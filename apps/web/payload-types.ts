@@ -79,6 +79,7 @@ export interface Config {
     courses: Course;
     products: Product;
     orders: Order;
+    'book-access': BookAccess;
     users: User;
     redirects: Redirect;
     forms: Form;
@@ -107,6 +108,7 @@ export interface Config {
     courses: CoursesSelect<false> | CoursesSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
     orders: OrdersSelect<false> | OrdersSelect<true>;
+    'book-access': BookAccessSelect<false> | BookAccessSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
@@ -259,6 +261,10 @@ export interface Page {
    * Siden er åpen for alle som har adressen, men holdes utenfor Google (noindex), sitemap og menyer. Bruk til QR-kode-sider og ressurser for kunder. Tips: la slug stå tom ved opprettelse, så lages en adresse som er vanskelig å gjette.
    */
   unlisted?: boolean | null;
+  /**
+   * Besøkende må skrive inn ordrenummeret fra ARK/Norli før de ser innholdet. Hvem som har låst opp, logges under Nettbutikk → Boktilganger. Kombiner gjerne med «Skjult side».
+   */
+  bookGate?: boolean | null;
   /**
    * Landingsside gir siden en mykere fargevask i bakgrunnen og en tynn fremdriftsbar i toppen – for kampanjer og lanseringer. Oversiktsside med sidemeny legger en meny ved siden av innholdet som følger med når man scroller; hver blokk med et «Blokk-navn» blir et menypunkt. For ressurssider med mye innhold.
    */
@@ -2644,6 +2650,31 @@ export interface Order {
   createdAt: string;
 }
 /**
+ * Registreres automatisk når noen låser opp en side med «Krever bokkjøp». Ordrenumre kan ikke sjekkes mot ARK/Norli — hold øye med dem som er brukt mer enn 5 ganger, og kryss av «Sperret» ved misbruk.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "book-access".
+ */
+export interface BookAccess {
+  id: number;
+  orderNumber: string;
+  store: 'ark' | 'norli' | 'annet';
+  page?: (number | null) | Page;
+  email?: string | null;
+  newsletterOptIn?: boolean | null;
+  /**
+   * Over 5 kan tyde på at ordrenummeret er delt.
+   */
+  uses?: number | null;
+  lastUsedAt?: string | null;
+  /**
+   * Ordrenummeret kan ikke brukes til å låse opp siden igjen. De som allerede er inne beholder tilgangen på sin enhet.
+   */
+  blocked?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
@@ -2803,6 +2834,10 @@ export interface PayloadLockedDocument {
         value: number | Order;
       } | null)
     | ({
+        relationTo: 'book-access';
+        value: number | BookAccess;
+      } | null)
+    | ({
         relationTo: 'users';
         value: number | User;
       } | null)
@@ -2919,6 +2954,7 @@ export interface PagesSelect<T extends boolean = true> {
       };
   slug?: T;
   unlisted?: T;
+  bookGate?: T;
   pageType?: T;
   qualityScore?: T;
   qualityReviewedAt?: T;
@@ -4153,6 +4189,22 @@ export interface OrdersSelect<T extends boolean = true> {
   vippsReference?: T;
   stripeSessionId?: T;
   stripePaymentIntentId?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "book-access_select".
+ */
+export interface BookAccessSelect<T extends boolean = true> {
+  orderNumber?: T;
+  store?: T;
+  page?: T;
+  email?: T;
+  newsletterOptIn?: T;
+  uses?: T;
+  lastUsedAt?: T;
+  blocked?: T;
   updatedAt?: T;
   createdAt?: T;
 }

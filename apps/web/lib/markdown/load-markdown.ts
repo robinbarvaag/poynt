@@ -370,7 +370,9 @@ async function pageBySlug(slug: string): Promise<MarkdownDocument | null> {
     { slug: { equals: slug } },
     { limit: 1 }
   );
-  if (!page) return null;
+  // Sider som krever bokkjøp har ingen markdown-versjon — ellers kunne hvem
+  // som helst hente innholdet via /<slug>.md forbi døra.
+  if (!page || page.bookGate) return null;
   return pageDocument(page, { ...ctx, path: `/${slug}` });
 }
 
@@ -405,6 +407,7 @@ async function siteDescription(
 function isListedPage(page: {
   slug?: string | null;
   unlisted?: boolean | null;
+  bookGate?: boolean | null;
   meta?: { noIndex?: boolean | null } | null;
 }) {
   return (
@@ -412,6 +415,7 @@ function isListedPage(page: {
     page.slug !== "forside" &&
     page.slug !== "kontakt" &&
     !page.unlisted &&
+    !page.bookGate &&
     !page.meta?.noIndex
   );
 }

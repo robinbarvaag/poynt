@@ -171,6 +171,17 @@ export const Pages: CollectionConfig = {
       },
     },
     {
+      name: "bookGate",
+      type: "checkbox",
+      label: "Krever bokkjøp",
+      defaultValue: false,
+      admin: {
+        position: "sidebar",
+        description:
+          "Besøkende må skrive inn ordrenummeret fra ARK/Norli før de ser innholdet. Hvem som har låst opp, logges under Nettbutikk → Boktilganger. Kombiner gjerne med «Skjult side».",
+      },
+    },
+    {
       name: "pageType",
       type: "select",
       label: "Sidetype",

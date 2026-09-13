@@ -1,9 +1,12 @@
+import { BookGate } from "@/components/book-gate";
 import { CmsPageView } from "@/components/views/cms-page-view";
+import { bookCookieName, verifyBookCookie } from "@/lib/book-access";
 import { getPublicPath } from "@/lib/public-path";
 import { buildMetadata, firstHeroImage, notFoundMetadata } from "@/lib/seo";
 import config from "@/payload.config";
 import type { Metadata } from "next";
 import { cacheLife, cacheTag } from "next/cache";
+import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { getPayload } from "payload";
 import { Suspense } from "react";
@@ -103,8 +106,9 @@ export async function generateMetadata({
     // «Open Graph type»-feltet fra SEO-fanen (product mangler i Next-typen —
     // faller tilbake til website, som er riktig oppførsel for delingskort).
     type: seo.ogType === "article" ? "article" : "website",
-    // Skjulte sider (QR-kode-/kunderessurser) er noindex uansett SEO-fane.
-    noIndex: (seo.noIndex || page.unlisted) ?? undefined,
+    // Skjulte og låste sider (QR-kode-/kunderessurser) er noindex uansett
+    // SEO-fane.
+    noIndex: (seo.noIndex || page.unlisted || page.bookGate) ?? undefined,
     canonicalUrl: seo.canonicalUrl,
   });
 }
@@ -145,6 +149,19 @@ async function PageContent({ slug }: { slug: string }) {
 
   if (!page) {
     notFound();
+  }
+
+  // Sider som krever bokkjøp: cookien leses her, bak Suspense-grensa i Page,
+  // så bare disse sidene blir dynamiske — resten prerendres som før.
+  if (page.bookGate) {
+    const cookieStore = await cookies();
+    const unlocked = verifyBookCookie(
+      page.id,
+      cookieStore.get(bookCookieName(page.id))?.value
+    );
+    if (!unlocked) {
+      return <BookGate pageId={page.id} title={page.title} />;
+    }
   }
 
   return <CmsPageView page={page} />;

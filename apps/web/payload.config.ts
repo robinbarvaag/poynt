@@ -24,6 +24,7 @@ import {
 
 // Collections
 import { BlogPosts } from "./collections/blog-posts";
+import { BookAccess } from "./collections/book-access";
 import { CaseStudies } from "./collections/case-studies";
 import { Categories } from "./collections/categories";
 import { Courses } from "./collections/courses";
@@ -198,6 +199,7 @@ export default buildConfig({
     // Nettbutikk
     Products,
     Orders,
+    BookAccess,
     // Hidden
     Users,
   ],
