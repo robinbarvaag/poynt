@@ -2,6 +2,7 @@
 
 import { Button, Text } from "@poynt/ui";
 import { Mail } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 
 /**
@@ -56,7 +57,15 @@ export function NewsletterOptIn({
           </Text>
           <Text variant="muted" customStyles="mt-1 text-sm">
             Meld deg på nyhetsbrevet ({maskedEmail}). Du kan melde deg av når
-            som helst.
+            som helst. Les mer i{" "}
+            <Link
+              href="/personvern"
+              target="_blank"
+              className="underline underline-offset-2 hover:text-foreground"
+            >
+              personvernerklæringen
+            </Link>
+            .
           </Text>
           <Button
             size="sm"

@@ -6,8 +6,9 @@ import {
   isPlausibleOrderNumber,
   normalizeOrderNumber,
 } from "@/lib/book-access";
+import { subscribeWithConsent } from "@/lib/newsletter-consent";
+import { NEWSLETTER_CONSENT_TEXTS } from "@/lib/newsletter-consent-texts";
 import config from "@/payload.config";
-import { subscribeToNewsletter } from "@poynt/email";
 import { type NextRequest, NextResponse } from "next/server";
 import { getPayload } from "payload";
 
@@ -125,9 +126,13 @@ export async function POST(request: NextRequest) {
 
     if (newsletter) {
       // Påmeldinga skal aldri stoppe opplåsinga.
-      const result = await subscribeToNewsletter(email).catch(
-        (error: unknown) => ({ success: false, error: String(error) })
-      );
+      const result = await subscribeWithConsent({
+        email,
+        source: "book-access",
+        consentText: NEWSLETTER_CONSENT_TEXTS.bookAccess,
+        path: page.slug ? `/${page.slug}` : undefined,
+        reference: access.id,
+      });
       if (!result.success) {
         console.error("Nyhetsbrev fra boktilgang feilet:", result.error);
       }

@@ -1,3 +1,5 @@
+import { subscribeWithConsent } from "@/lib/newsletter-consent";
+import { NEWSLETTER_CONSENT_TEXTS } from "@/lib/newsletter-consent-texts";
 import { getNotificationEmails } from "@/lib/notification-emails";
 import { buildOrderEmailExtras } from "@/lib/order-email";
 import {
@@ -8,11 +10,7 @@ import {
 } from "@/lib/vipps";
 import { claimWebhookEvent, releaseWebhookEvent } from "@/lib/webhook-events";
 import config from "@/payload.config";
-import {
-  sendOrderConfirmation,
-  sendSaleNotification,
-  subscribeToNewsletter,
-} from "@poynt/email";
+import { sendOrderConfirmation, sendSaleNotification } from "@poynt/email";
 import { db } from "@poynt/planner-db";
 import { type NextRequest, NextResponse } from "next/server";
 import { getPayload } from "payload";
@@ -222,7 +220,12 @@ export async function POST(req: NextRequest) {
         // Aktivt samtykke fra utsjekken → meld på nyhetsbrevet. Bruk den
         // EKTE kundeadressen (ikke test-omdirigering) og svelg feil.
         if (order.newsletterOptIn && email) {
-          const result = await subscribeToNewsletter(email);
+          const result = await subscribeWithConsent({
+            email,
+            source: "checkout",
+            consentText: NEWSLETTER_CONSENT_TEXTS.checkout,
+            reference: order.id,
+          });
           if (!result.success) {
             console.error("Nyhetsbrev-påmelding feilet:", result.error);
           }

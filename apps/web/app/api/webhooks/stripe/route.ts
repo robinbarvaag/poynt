@@ -6,6 +6,8 @@ import {
   mapSubscriptionStatus,
   syncSubscriptionToDrizzle,
 } from "@/lib/membership/sync-subscription";
+import { subscribeWithConsent } from "@/lib/newsletter-consent";
+import { NEWSLETTER_CONSENT_TEXTS } from "@/lib/newsletter-consent-texts";
 import { getNotificationEmails } from "@/lib/notification-emails";
 import { buildOrderEmailExtras } from "@/lib/order-email";
 import { calculateVatTotal, parseVatRate } from "@/lib/vat";
@@ -15,7 +17,6 @@ import {
   sendMemberWelcomeEmail,
   sendOrderConfirmation,
   sendSaleNotification,
-  subscribeToNewsletter,
 } from "@poynt/email";
 import { db, eq } from "@poynt/planner-db";
 import { plannerUser } from "@poynt/planner-db/schema";
@@ -96,7 +97,13 @@ async function handleMembershipPurchase(session: Stripe.Checkout.Session) {
 
   // Aktivt samtykke fra utsjekken → meld på nyhetsbrevet. Svelg feil.
   if (session.metadata?.newsletter === "1") {
-    const result = await subscribeToNewsletter(email);
+    const result = await subscribeWithConsent({
+      email,
+      source: "membership",
+      consentText: NEWSLETTER_CONSENT_TEXTS.checkout,
+      path: "/handlekurv",
+      reference: session.id,
+    });
     if (!result.success) {
       console.error("Nyhetsbrev-påmelding feilet:", result.error);
     }
@@ -297,7 +304,13 @@ async function handleProductPurchase(session: Stripe.Checkout.Session) {
   // Aktivt samtykke fra utsjekken → meld på nyhetsbrevet. Aldri la en feil
   // her velte ordreflyten.
   if (session.metadata?.newsletter === "1") {
-    const result = await subscribeToNewsletter(customerEmail);
+    const result = await subscribeWithConsent({
+      email: customerEmail,
+      source: "checkout",
+      consentText: NEWSLETTER_CONSENT_TEXTS.checkout,
+      path: "/handlekurv",
+      reference: session.id,
+    });
     if (!result.success) {
       console.error("Nyhetsbrev-påmelding feilet:", result.error);
     }

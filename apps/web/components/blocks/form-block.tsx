@@ -17,6 +17,7 @@ import {
 } from "@poynt/ui";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import type { Form as PayloadForm } from "../../payload-types";
+import { PrivacyNotice } from "../privacy-notice";
 
 interface FormBlockProps {
   form: PayloadForm | string;
@@ -397,15 +398,21 @@ export function FormBlockComponent({
           </div>
         )}
 
-        <Button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full md:w-auto"
-        >
-          {isSubmitting
-            ? "Sender..."
-            : formData.submitButtonLabel || "Send inn"}
-        </Button>
+        <div className="space-y-3">
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full md:w-auto"
+          >
+            {isSubmitting
+              ? "Sender..."
+              : formData.submitButtonLabel || "Send inn"}
+          </Button>
+          <PrivacyNotice
+            purpose="Vi bruker opplysningene kun til å svare på henvendelsen din."
+            className="text-muted-foreground"
+          />
+        </div>
       </form>
     </div>
   );

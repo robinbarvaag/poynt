@@ -74,6 +74,7 @@ export interface Config {
     categories: Category;
     media: Media;
     newsletters: Newsletter;
+    'newsletter-consents': NewsletterConsent;
     'email-templates': EmailTemplate;
     guides: Guide;
     courses: Course;
@@ -103,6 +104,7 @@ export interface Config {
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     newsletters: NewslettersSelect<false> | NewslettersSelect<true>;
+    'newsletter-consents': NewsletterConsentsSelect<false> | NewsletterConsentsSelect<true>;
     'email-templates': EmailTemplatesSelect<false> | EmailTemplatesSelect<true>;
     guides: GuidesSelect<false> | GuidesSelect<true>;
     courses: CoursesSelect<false> | CoursesSelect<true>;
@@ -2023,6 +2025,35 @@ export interface Newsletter {
   createdAt: string;
 }
 /**
+ * Registreres automatisk ved hver påmelding til nyhetsbrevet. Dokumenterer samtykket — ikke rediger. Avmeldinger håndteres i Resend. Ved krav om sletting: slett radene for e-posten her og kontakten i Resend.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "newsletter-consents".
+ */
+export interface NewsletterConsent {
+  id: number;
+  email: string;
+  source: 'newsletter-form' | 'book-access' | 'checkout' | 'receipt' | 'membership' | 'waitlist';
+  /**
+   * Teksten brukeren så og sa ja til.
+   */
+  consentText: string;
+  /**
+   * Hvor på nettstedet påmeldingen skjedde.
+   */
+  path?: string | null;
+  /**
+   * F.eks. ordre-ID, boktilgang-ID eller skjema-ID.
+   */
+  reference?: string | null;
+  /**
+   * Av = samtykket ble gitt, men påmeldingen i Resend feilet (se server-loggen).
+   */
+  subscribed?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Tekstene i e-postene nettsiden sender automatisk. Endre teksten i «Innhold»-fanen og se resultatet i «Forhåndsvisning». Nyhetsbrev og skjema-e-poster redigeres på sitt eget sted — se oversikten under Drift → E-post.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2812,6 +2843,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'newsletters';
         value: number | Newsletter;
+      } | null)
+    | ({
+        relationTo: 'newsletter-consents';
+        value: number | NewsletterConsent;
       } | null)
     | ({
         relationTo: 'email-templates';
@@ -3738,6 +3773,20 @@ export interface NewslettersSelect<T extends boolean = true> {
   status?: T;
   sentAt?: T;
   broadcastId?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "newsletter-consents_select".
+ */
+export interface NewsletterConsentsSelect<T extends boolean = true> {
+  email?: T;
+  source?: T;
+  consentText?: T;
+  path?: T;
+  reference?: T;
+  subscribed?: T;
   updatedAt?: T;
   createdAt?: T;
 }

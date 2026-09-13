@@ -1,5 +1,6 @@
+import { subscribeWithConsent } from "@/lib/newsletter-consent";
+import { NEWSLETTER_CONSENT_TEXTS } from "@/lib/newsletter-consent-texts";
 import config from "@/payload.config";
-import { subscribeToNewsletter } from "@poynt/email";
 import { type NextRequest, NextResponse } from "next/server";
 import { getPayload } from "payload";
 
@@ -43,7 +44,13 @@ export async function POST(req: NextRequest) {
     }
 
     if (!order.newsletterOptIn) {
-      const result = await subscribeToNewsletter(order.customerEmail);
+      const result = await subscribeWithConsent({
+        email: order.customerEmail,
+        source: "receipt",
+        consentText: NEWSLETTER_CONSENT_TEXTS.receipt,
+        path: "/kvittering",
+        reference: order.id,
+      });
       if (!result.success) {
         console.error("Nyhetsbrev-påmelding feilet:", result.error);
         return NextResponse.json(

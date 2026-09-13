@@ -37,11 +37,17 @@ const body: DocBlock[] = [
     ],
   },
 
-  { heading: "5. Paragraf 6 f som alternativ til valgt samtykke via nettside" },
-  "Samtykke ditt kan trekkes. Vi tar utgangspunkt i legitimt samtykke utifra Paragraf 6f i personvernloven. Hvis du har inngått et kundeforhold med oss tidligere, eller du er en ny kunde vil dette være en legitim grunn til å sende deg informasjon. Dette sidestilles med et samtykke i henhold til markedsføringsloven slik loven har vært i Norge i mange år.",
-  "Du kan når som helst trekke dette samtykket om at vi skal behandle dine personopplysninger.",
-  "Trekker du tilbake samtykket, vil vi slette de opplysningene vi har om deg.",
-  "Merk at sletting av informasjonen hos oss kan påvirke leveransen av informasjon innenfor rammen for kunderelasjonen, samt påvirke pågående dialoger.",
+  { heading: "5. Behandlingsgrunnlag og hva vi bruker opplysningene til" },
+  "Vi behandler bare personopplysninger når vi har et lovlig grunnlag etter personvernforordningen (GDPR) artikkel 6. Her er de vanligste situasjonene:",
+  {
+    list: [
+      "Nyhetsbrev: Når du melder deg på nyhetsbrevet (i et nyhetsbrevskjema, i handlekurven, på kvitteringssiden, på en venteliste eller når du låser opp bokressurser), behandler vi e-postadressen din basert på samtykket ditt (art. 6 nr. 1 a). Vi lagrer når og hvor du meldte deg på og hvilken tekst du sa ja til, slik at vi kan dokumentere samtykket. Du kan melde deg av når som helst via lenken nederst i hvert nyhetsbrev.",
+      "Kontaktskjema: Når du sender oss en henvendelse, bruker vi opplysningene du oppgir kun til å svare deg og følge opp dialogen. Grunnlaget er vår berettigede interesse i å besvare henvendelser (art. 6 nr. 1 f), eller at du ønsker et tilbud eller en avtale med oss (art. 6 nr. 1 b).",
+      "Kjøp: Når du kjøper produkter eller medlemskap, behandler vi navn, e-post og ordreopplysninger for å levere det du har kjøpt og sende kvittering (art. 6 nr. 1 b), og for å oppfylle krav i bokføringsloven (art. 6 nr. 1 c).",
+      "Bokressurser: Når du låser opp sider for bokkjøpere, lagrer vi ordrenummeret, hvor boka er kjøpt og eventuelt e-postadressen du oppgir. Ordrenummeret brukes kun til å gi deg tilgang og hindre misbruk (art. 6 nr. 1 f). E-posten brukes bare til nyhetsbrev dersom du krysser av for det.",
+    ],
+  },
+  "Der behandlingen bygger på samtykke, kan du når som helst trekke det tilbake. Det påvirker ikke lovligheten av behandlingen før du trakk samtykket. Der vi bygger på berettiget interesse, kan du protestere mot behandlingen.",
 
   { heading: "6. Informasjon fra andre kilder" },
   "Når du samtykker til at vi behandler dine personopplysninger, godkjenner du også at vi kan registrere andre opplysninger om deg som du har gitt oss ved en tidligere anledning. Basert på offentlig tilgjengelig informasjon, kan vi også supplere dine registrerte opplysninger med bransje og ytterligere kontaktinformasjon.",
@@ -87,7 +93,8 @@ const body: DocBlock[] = [
   "Vi behandler personopplysningene bare så lenge det tar å oppfylle hensikten med deres innsamling, deretter sletter vi informasjonen.",
   "Har du en aktiv dialog med oss, tar vi vare på opplysningene dine i to år fra den siste kontakten. Deretter fjerner vi opplysningene vi har om deg.",
   "En aktiv dialog defineres som at du har hatt interaksjon med Poynt AS eller representanter for oss de siste to årene via telefon, ved å besvare e-post, lastet ned materiale på nettsiden eller registrert deg via et skjema.",
-  "Har du samtykket til behandling av dine personopplysninger i forbindelse med at du takket ja til regelmessig e-poster, fortsetter vi å behandle dine personopplysninger til du avslutter ditt abonnement. Deretter lagrer vi dine personopplysninger i to år før vi sletter informasjonen.",
+  "Har du meldt deg på nyhetsbrevet, behandler vi e-postadressen din til du melder deg av. Dokumentasjonen av samtykket (tidspunkt, kilde og samtykketekst) lagrer vi i inntil to år etter avmelding, slik at vi kan vise at samtykket var gyldig.",
+  "Ordreopplysninger lagres i fem år etter utgangen av regnskapsåret, som bokføringsloven krever. Henvendelser fra kontaktskjemaet slettes når dialogen er avsluttet, og senest etter to år uten kontakt.",
   "Hvis du er ansatt i en virksomhet som er kunde hos oss, behandler vi dine opplysninger innenfor rammen for kundebehandling. For aktive kunderelasjoner behandler vi dine opplysninger inntil (1) du avslutter din stilling i virksomheten, eller at (2) virksomheten ikke lenger har en aktiv kunderelasjon med oss.",
   "Når en kunderelasjon avsluttes, går vilkårene for lagring og behandling av opplysninger over til de samme vilkårene som er beskrevet i de foregående avsnittene. Avslutter du din ansettelse i virksomheten, er du selv ansvarlig for å gi oss beskjed slik at vi kan slette dine opplysninger.",
 
@@ -107,15 +114,24 @@ const body: DocBlock[] = [
   "Hvis vi har registrert dine opplysninger i forbindelse med en begivenhet som utføres sammen med en ekstern part, kan vi overføre samme kategorier av personopplysninger som angitt ovenfor, samt eventuelle svar på ytterligere skjema- eller utdypende spørsmål.",
 
   { heading: "12. Hvor oppbevares opplysningene?" },
-  "Opplysningene oppbevares av Poynt AS sine kundesystememer.",
-  "Vi har også avtaler med tredjeparter som kan oppbevare deler av personopplysningene dine for oss.",
+  "Opplysningene oppbevares i Poynt AS sine kundesystemer.",
+  "Vi bruker disse databehandlerne, som behandler opplysninger på våre vegne etter databehandleravtale:",
+  {
+    list: [
+      "Resend — utsending av e-post og nyhetsbrev, og listen over abonnenter",
+      "Stripe og Vipps MobilePay — betaling",
+      "Vercel — drift av nettsiden, database og fillagring",
+    ],
+  },
+  "Enkelte av disse leverandørene kan behandle opplysninger utenfor EU/EØS. Overføringen skjer i så fall med EUs standard personvernbestemmelser eller annet gyldig overføringsgrunnlag.",
 
   {
     heading:
       "13. Dine rettigheter i forhold til innsyn, sletting og eventuelt flytting",
   },
   "Du har rett til å få informasjon om hvilke opplysninger vi har om deg. Du kan også kreve at vi retter opp i feilaktige opplysninger eller sletter informasjonen din.",
-  "Ønsker du å trekke tilbake ditt samtykke eller kreve å få oversikt over opplysninger, rettelse eller sletting, kontakter du oss på e-postadressen vi har angitt under avsnittet for kontaktinformasjon. For å motta slik info må du sende en elektronisk kopi av forespørselen på et signert dokument. Ønsker du å flytte informasjon, kan vi også hjelpe deg med det.",
+  "Ønsker du å trekke tilbake samtykket ditt, eller kreve innsyn, retting eller sletting, kontakter du oss på e-postadressen under avsnittet for kontaktinformasjon. Vi kan be deg bekrefte identiteten din før vi gir ut opplysninger. Vi svarer uten ugrunnet opphold og senest innen én måned. Ønsker du å flytte opplysningene dine, hjelper vi deg med det.",
+  "Mener du at vi behandler personopplysninger i strid med regelverket, kan du klage til Datatilsynet (datatilsynet.no).",
 
   { heading: "14. Andre formål" },
   "Dersom vi skal bruke personopplysningene til et annet formål enn det de ble samlet inn for inntrer informasjonsplikten på nytt og vi må da opplyse hva det nye formålet er og gi deler av informasjonen ovenfor på nytt.",

@@ -1,7 +1,5 @@
-import {
-  sendNewsletterSignupNotification,
-  subscribeToNewsletter,
-} from "@poynt/email";
+import { NEWSLETTER_CONSENT_TEXTS } from "@/lib/newsletter-consent-texts";
+import { sendNewsletterSignupNotification } from "@poynt/email";
 import { type NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
@@ -15,10 +13,11 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = await request.json();
-    const { email } = body;
+    const body = (await request.json()) as { email?: unknown; path?: unknown };
+    const email =
+      typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
 
-    if (!email || typeof email !== "string") {
+    if (!email) {
       return NextResponse.json(
         { error: "E-postadresse er påkrevd" },
         { status: 400 }
@@ -34,7 +33,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = await subscribeToNewsletter(email);
+    const { subscribeWithConsent } = await import("@/lib/newsletter-consent");
+    const result = await subscribeWithConsent({
+      email,
+      source: "newsletter-form",
+      consentText: NEWSLETTER_CONSENT_TEXTS.newsletterForm,
+      path: typeof body.path === "string" ? body.path : undefined,
+    });
 
     if (!result.success) {
       console.error("Newsletter subscription failed:", result.error);

@@ -31,6 +31,7 @@ import { Courses } from "./collections/courses";
 import { EmailTemplates } from "./collections/email-templates";
 import { Guides } from "./collections/guides";
 import { Media } from "./collections/media";
+import { NewsletterConsents } from "./collections/newsletter-consents";
 import { Newsletters } from "./collections/newsletters";
 import { Orders } from "./collections/orders";
 import { Pages } from "./collections/pages";
@@ -192,6 +193,7 @@ export default buildConfig({
     Categories,
     Media,
     Newsletters,
+    NewsletterConsents,
     EmailTemplates,
     // On Poynt-innhold (vises i den egenbygde «On Poynt»-nav-gruppen)
     Guides,

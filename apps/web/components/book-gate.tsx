@@ -1,10 +1,12 @@
 "use client";
 
 import { BOOK_STORES, type BookStore } from "@/lib/book-stores";
+import { NEWSLETTER_CONSENT_TEXTS } from "@/lib/newsletter-consent-texts";
 import { Button, Checkbox, Input, Label } from "@poynt/ui";
 import { BookOpen, Loader2, Lock } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { PrivacyNotice } from "./privacy-notice";
 
 /**
  * Døra foran en side som krever bokkjøp. Ordrenummer + butikk er alt som
@@ -119,9 +121,14 @@ export function BookGate({ pageId, title }: { pageId: number; title: string }) {
               htmlFor="book-newsletter"
               className="font-normal text-muted-foreground text-sm"
             >
-              Send meg nye ressurser og tips på e-post
+              {NEWSLETTER_CONSENT_TEXTS.bookAccess}
             </Label>
           </div>
+
+          <PrivacyNotice
+            purpose="Ordrenummeret brukes bare til å gi deg tilgang. E-posten brukes kun til nyhetsbrevet hvis du krysser av, og du kan melde deg av når som helst."
+            className="text-muted-foreground"
+          />
 
           {status === "error" && (
             <p role="alert" className="swap-in text-destructive text-sm">

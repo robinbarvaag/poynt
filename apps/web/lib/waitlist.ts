@@ -75,8 +75,16 @@ export async function handleWaitlistSubmission({
   const subject = waitlistSubjectFromTitle(formTitle);
 
   if (wantsNewsletter) {
-    const { subscribeToNewsletter } = await import("@poynt/email");
-    const result = await subscribeToNewsletter(email);
+    const { subscribeWithConsent } = await import("@/lib/newsletter-consent");
+    const { NEWSLETTER_CONSENT_TEXTS } = await import(
+      "@/lib/newsletter-consent-texts"
+    );
+    const result = await subscribeWithConsent({
+      email,
+      source: "waitlist",
+      consentText: `${NEWSLETTER_CONSENT_TEXTS.waitlist}: «${formTitle}»`,
+      reference: formId,
+    });
     if (!result.success) {
       req.payload.logger.error(
         `Nyhetsbrev-påmelding fra venteliste feilet: ${result.error}`

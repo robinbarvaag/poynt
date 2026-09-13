@@ -3,6 +3,7 @@
 import { CheckoutConsentCheckbox } from "@/components/checkout-consent-checkbox";
 import { VippsButton } from "@/components/vipps-button";
 import { formatPrice } from "@/lib/format";
+import { NEWSLETTER_CONSENT_TEXTS } from "@/lib/newsletter-consent-texts";
 import { useCartReady } from "@/lib/use-cart-ready";
 import {
   CheckoutRequestError,
@@ -380,10 +381,7 @@ export default function CartPage() {
                   onChange={(e) => setNewsletterOptIn(e.target.checked)}
                   className="mt-0.5 size-4 shrink-0 accent-primary"
                 />
-                <span>
-                  Ja takk, jeg vil motta nyhetsbrev med tips og tilbud fra
-                  Poynt. Du kan melde deg av når som helst.
-                </span>
+                <span>{NEWSLETTER_CONSENT_TEXTS.checkout}</span>
               </label>
 
               {needsConsent && (
