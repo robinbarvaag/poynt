@@ -88,7 +88,7 @@ export const ResourceList: Block = {
           label: "Bilde / omslag",
           admin: {
             description:
-              "Bokomslag (stående), podkast-cover (kvadrat) eller et skjermbilde (liggende). Valgfritt – uten bilde vises et ikon.",
+              "Fyller hele bildeflaten på kortet og beskjæres i kantene – liggende bilder passer best. Ser det rart ut, bytt bilde. Valgfritt – uten bilde vises et ikon.",
           },
         },
         {
@@ -131,15 +131,20 @@ export const ResourceList: Block = {
               label: "Visning",
               defaultValue: "grid",
               options: [
-                { label: "Kort med bilde", value: "grid" },
-                { label: "Kompakt liste", value: "list" },
+                { label: "Store kort med bilde", value: "grid" },
+                { label: "Små kort (passer til mange)", value: "compact" },
+                { label: "Liste med beskrivelse", value: "list" },
               ],
-              admin: { width: "50%" },
+              admin: {
+                width: "50%",
+                description:
+                  "Har du mange ressurser, velg «Små kort» – da får du plass til mye mer uten at leseren må scrolle langt.",
+              },
             },
             {
               name: "columns",
               type: "select",
-              label: "Antall kolonner (kort)",
+              label: "Maks antall kolonner",
               defaultValue: "3",
               options: [
                 { label: "2", value: "2" },
@@ -148,10 +153,22 @@ export const ResourceList: Block = {
               ],
               admin: {
                 width: "50%",
+                description:
+                  "Blir automatisk færre når det er lite plass, f.eks. på mobil.",
                 condition: (_, siblingData) => siblingData?.layout !== "list",
               },
             },
           ],
+        },
+        {
+          name: "collapse",
+          type: "checkbox",
+          label: "Fold sammen lange lister",
+          defaultValue: true,
+          admin: {
+            description:
+              "Viser starten av lista med en «Vis alle»-knapp når den blir lang. Korte lister vises alltid i sin helhet.",
+          },
         },
         {
           name: "showFilter",

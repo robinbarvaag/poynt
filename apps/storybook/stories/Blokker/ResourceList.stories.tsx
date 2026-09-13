@@ -10,8 +10,9 @@ const meta: Meta<typeof ResourceGrid> = {
       description: {
         component:
           "Ressursliste for lenker, filer, bøker, podkaster, musikk, video og verktøy. " +
-          "Typen styrer ikon og bildeform (bøker stående, podkast kvadratisk), " +
-          "kategorien gir filter-brikker. To visninger: kort med bilde og kompakt liste.",
+          "Typen styrer ikon og etikett, bildet fyller alltid flaten. Kategorien gir filter-brikker. " +
+          "Tre visninger: store kort, små kort (for mange ressurser) og liste. " +
+          "Kolonnene følger blokkens bredde (container query), og lange lister foldes sammen bak «Vis alle».",
       },
     },
   },
@@ -99,6 +100,28 @@ export const KortMedFilter: Story = {
     intro: "Ting jeg bruker selv og anbefaler oftest. Filtrer på kategori.",
     items,
     columns: 3,
+  },
+};
+
+const many: ResourceItem[] = Array.from({ length: 4 }, (_, round) =>
+  items.map((item) => ({ ...item, title: `${item.title} ${round + 1}` }))
+).flat();
+
+export const SmaKortMange: Story = {
+  name: "Små kort (mange, sammenfoldet)",
+  render: (args) => (
+    <Section spacing="lg">
+      <div className="mx-auto max-w-6xl px-4">
+        <ResourceGrid {...args} />
+      </div>
+    </Section>
+  ),
+  args: {
+    eyebrow: "Anbefalinger",
+    title: "Alt jeg anbefaler",
+    items: many,
+    layout: "compact",
+    columns: 4,
   },
 };
 

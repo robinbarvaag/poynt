@@ -1,7 +1,7 @@
 "use client";
 
 import type * as React from "react";
-import { useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Icon, type IconName } from "../../icons";
 import { UILink } from "../../lib/link";
 import { cn } from "../../lib/utils";
@@ -9,11 +9,7 @@ import { Card } from "../card";
 import { Stagger, StaggerItem } from "../motion";
 import { SectionHeader } from "../section-header";
 
-/**
- * Hva slags ressurs kortet peker på. Styrer ikon, etikett og hvordan bildet
- * beskjæres (bokomslag er stående, podkast-cover er kvadratisk, nettsider
- * er liggende).
- */
+/** Hva slags ressurs kortet peker på. Styrer ikon, etikett og handlingsord. */
 export type ResourceKind =
   | "link"
   | "file"
@@ -27,21 +23,19 @@ export type ResourceKind =
 interface KindConfig {
   label: string;
   icon: IconName;
-  /** Bildeform i rutenettet. `none` = bare ikon (filer har sjelden bilde). */
-  image: "wide" | "square" | "portrait" | "none";
   /** Handlingsordet nederst til høyre. */
   action: string;
 }
 
 export const RESOURCE_KINDS: Record<ResourceKind, KindConfig> = {
-  link: { label: "Lenke", icon: "link", image: "wide", action: "Åpne" },
-  file: { label: "Fil", icon: "file-text", image: "none", action: "Last ned" },
-  book: { label: "Bok", icon: "book", image: "portrait", action: "Se boka" },
-  podcast: { label: "Podkast", icon: "mic", image: "square", action: "Lytt" },
-  music: { label: "Musikk", icon: "music", image: "square", action: "Lytt" },
-  video: { label: "Video", icon: "play", image: "wide", action: "Se" },
-  tool: { label: "Verktøy", icon: "wrench", image: "wide", action: "Prøv" },
-  app: { label: "App", icon: "smartphone", image: "square", action: "Åpne" },
+  link: { label: "Lenke", icon: "link", action: "Åpne" },
+  file: { label: "Fil", icon: "file-text", action: "Last ned" },
+  book: { label: "Bok", icon: "book", action: "Se boka" },
+  podcast: { label: "Podkast", icon: "mic", action: "Lytt" },
+  music: { label: "Musikk", icon: "music", action: "Lytt" },
+  video: { label: "Video", icon: "play", action: "Se" },
+  tool: { label: "Verktøy", icon: "wrench", action: "Prøv" },
+  app: { label: "App", icon: "smartphone", action: "Åpne" },
 };
 
 export interface ResourceItem {
@@ -52,7 +46,7 @@ export interface ResourceItem {
   href?: string;
   /** Sant når href er en fil som skal lastes ned (ikke åpnes i ny fane). */
   download?: boolean;
-  /** Bilde/omslag (typisk et <Image>). */
+  /** Bilde/omslag (typisk et <Image>). Fyller alltid bildeflaten. */
   image?: React.ReactNode;
   /** Fri kategori — brukes til filter-brikkene («Podkast», «Fokus», …). */
   category?: string;
@@ -69,20 +63,34 @@ export interface ResourceLinkProps {
   download?: boolean;
 }
 
+/**
+ * - `grid`: kort med stort bilde og beskrivelse
+ * - `compact`: små kort i rutenett (bilde, tittel, kilde) — for lange lister
+ * - `list`: rader med beskrivelse, én kolonne
+ */
+export type ResourceLayout = "grid" | "compact" | "list";
+
 export interface ResourceGridProps {
   eyebrow?: string;
   title?: string;
   intro?: string;
   items: ResourceItem[];
-  /** `grid` = kort med bilde, `list` = kompakte rader. Default `grid`. */
-  layout?: "grid" | "list";
-  /** Kolonner på desktop i grid-layout. Default 3. */
+  /** Default `grid`. */
+  layout?: ResourceLayout;
+  /**
+   * Høyeste antall kolonner (grid/compact). Blir færre når blokken har lite
+   * plass. Default 3.
+   */
   columns?: 2 | 3 | 4;
   /**
    * Viser filter-brikker bygd av kategoriene på kortene. Default: på når
    * minst to ulike kategorier finnes.
    */
   filter?: boolean;
+  /**
+   * Fold sammen lange lister bak en fade og «Vis alle»-knapp. Default på.
+   */
+  collapse?: boolean;
   /** Etikett på «vis alle»-brikka. */
   allLabel?: string;
   /** Lenkekomponent (typisk next/link). Default: vanlig <a>. */
@@ -100,24 +108,32 @@ function hostOf(url?: string): string | null {
 }
 
 /**
- * ÉN felles bildeflate for alle korttyper, så bilder og overskrifter står på
- * linje i rutenettet uansett blanding av bøker, podkaster og lenker. Typen
- * styrer bare hvordan bildet plasseres inni flaten.
- */
-const CARD_MEDIA = "relative aspect-[16/10] overflow-hidden rounded-t-3xl";
-
-/**
- * Kolonner styres av kortets egen flate (container query), ikke skjermen —
- * blokken står både i full bredde og ved siden av en sidemeny. Kortene får
- * minst ~17rem før de brytes til færre kolonner.
+ * Kolonner styres av blokkens egen bredde (container query), ikke skjermen —
+ * blokken står både i full bredde og ved siden av en sidemeny. Hver kolonne
+ * får minst ~15rem; ellers faller den tilbake til færre kolonner.
  */
 const GRID_COLS: Record<NonNullable<ResourceGridProps["columns"]>, string> = {
-  2: "@xl:grid-cols-2",
-  3: "@xl:grid-cols-2 @5xl:grid-cols-3",
-  4: "@xl:grid-cols-2 @5xl:grid-cols-3 @7xl:grid-cols-4",
+  2: "@lg:grid-cols-2",
+  3: "@lg:grid-cols-2 @3xl:grid-cols-3",
+  4: "@lg:grid-cols-2 @3xl:grid-cols-3 @5xl:grid-cols-4",
 };
 
-/** Kompakt bilde-/ikon-rute brukt av begge layoutene. */
+/**
+ * Høyde (rem) lista foldes sammen til. Den foldes bare når innholdet er
+ * vesentlig høyere (COLLAPSE_SLACK), så vi aldri skjuler en halv rad bak en
+ * knapp.
+ */
+const COLLAPSED_REM: Record<ResourceLayout, number> = {
+  grid: 48,
+  compact: 30,
+  list: 32,
+};
+const COLLAPSE_SLACK = 1.3;
+
+/** Bildet fyller flaten og beskjæres — feil format byttes i admin. */
+const COVER_IMG =
+  "*:[img]:absolute *:[img]:inset-0 *:[img]:h-full *:[img]:w-full *:[img]:object-cover";
+
 function Thumb({
   item,
   size,
@@ -126,12 +142,13 @@ function Thumb({
   size: "row" | "card";
 }) {
   const config = RESOURCE_KINDS[item.kind];
+
   if (size === "row") {
     return (
       <span
         className={cn(
-          "relative flex shrink-0 items-center justify-center overflow-hidden rounded-xl bg-accent-1/40 text-primary",
-          "size-14 *:[img]:h-full *:[img]:w-full *:[img]:object-cover"
+          "relative flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-accent-1/40 text-primary",
+          COVER_IMG
         )}
       >
         {item.image ?? <Icon name={config.icon} className="size-6" />}
@@ -139,49 +156,25 @@ function Thumb({
     );
   }
 
-  if (config.image === "none" || !item.image) {
-    return (
-      <div
-        className={cn(
-          CARD_MEDIA,
-          "flex items-center justify-center bg-gradient-to-br from-accent-1/60 via-accent-1/25 to-background"
-        )}
-      >
+  return (
+    <div
+      className={cn(
+        "relative flex aspect-[16/10] items-center justify-center overflow-hidden rounded-t-3xl",
+        item.image
+          ? cn(
+              "bg-muted/40 *:[img]:transition-transform *:[img]:duration-500 group-hover/resource:*:[img]:scale-105",
+              COVER_IMG
+            )
+          : "bg-gradient-to-br from-accent-1/60 via-accent-1/25 to-background"
+      )}
+    >
+      {item.image ?? (
         <Icon
           name={config.icon}
           className="size-12 text-foreground/20"
           strokeWidth={1.5}
         />
-      </div>
-    );
-  }
-
-  if (config.image === "portrait") {
-    // Bokomslag: stående bilde med skygge på en rolig flate, ikke strukket
-    // til kortets bredde. Høyden er låst til flaten (ikke bildets egen), så
-    // et høyt omslag aldri gjør kortet høyere enn naboene.
-    return (
-      <div
-        className={cn(
-          CARD_MEDIA,
-          "flex items-end justify-center bg-gradient-to-br from-accent-3/60 via-accent-3/25 to-background"
-        )}
-      >
-        <div className="aspect-[2/3] h-[82%] overflow-hidden rounded-t-md shadow-xl ring-1 ring-foreground/10 transition-transform duration-500 group-hover/resource:-translate-y-1 *:[img]:h-full *:[img]:w-full *:[img]:object-cover">
-          {item.image}
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div
-      className={cn(
-        CARD_MEDIA,
-        "bg-muted/40 *:[img]:absolute *:[img]:inset-0 *:[img]:h-full *:[img]:w-full *:[img]:object-cover *:[img]:transition-transform *:[img]:duration-500 group-hover/resource:*:[img]:scale-105"
       )}
-    >
-      {item.image}
     </div>
   );
 }
@@ -198,8 +191,8 @@ function KindBadge({ kind }: { kind: ResourceKind }) {
 
 /**
  * Ett kort per ressurs — lenke, fil, bok, podkast, musikk, video, verktøy.
- * Typen styrer ikon og bildeform, så bøker ser ut som bøker og podkaster som
- * podkaster, men det er ÉTT kort med én hover og én bunnrad.
+ * Typen styrer ikon og etikett, men det er ÉTT kort med én hover og én
+ * bunnrad, i tre tettheter (se `ResourceLayout`).
  */
 export function ResourceCard({
   item,
@@ -208,7 +201,7 @@ export function ResourceCard({
   className,
 }: {
   item: ResourceItem;
-  layout?: "grid" | "list";
+  layout?: ResourceLayout;
   linkComponent?: React.ComponentType<ResourceLinkProps>;
   className?: string;
 }) {
@@ -216,6 +209,7 @@ export function ResourceCard({
   const host = hostOf(item.href);
   const external = Boolean(host) && !item.download;
   const Link = linkComponent ?? UILink;
+  const meta = [item.note, host].filter(Boolean).join(" · ");
 
   const linkProps = item.href
     ? {
@@ -228,50 +222,75 @@ export function ResourceCard({
       }
     : null;
 
+  const actionIcon = (
+    <Icon
+      name={item.download ? "download" : "arrow-right"}
+      className={cn(
+        "size-4 transition-transform duration-300",
+        item.download
+          ? "group-hover/resource:translate-y-0.5"
+          : "group-hover/resource:translate-x-1"
+      )}
+    />
+  );
+
   const action = (
     <span className="ml-auto inline-flex shrink-0 items-center gap-1.5 font-heading font-semibold text-primary text-sm">
       {config.action}
-      <Icon
-        name={item.download ? "download" : "arrow-right"}
-        className={cn(
-          "size-4 transition-transform duration-300",
-          item.download
-            ? "group-hover/resource:translate-y-0.5"
-            : "group-hover/resource:translate-x-1"
-        )}
-      />
+      {actionIcon}
     </span>
   );
 
-  if (layout === "list") {
+  if (layout === "list" || layout === "compact") {
+    const compact = layout === "compact";
     const row = (
       <>
         <Thumb item={item} size="row" />
         <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+          {compact ? (
+            <span className="line-clamp-1 font-heading font-semibold text-[0.65rem] text-muted-foreground uppercase tracking-[0.14em]">
+              {item.category ?? config.label}
+            </span>
+          ) : null}
           <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <span className="line-clamp-1 font-heading font-semibold text-foreground">
+            <span
+              className={cn(
+                "font-heading font-semibold text-foreground",
+                compact ? "line-clamp-2 text-sm leading-snug" : "line-clamp-1"
+              )}
+            >
               {item.title}
             </span>
-            <span className="rounded-full bg-muted px-2 py-0.5 font-medium text-[0.65rem] text-muted-foreground uppercase tracking-wide">
-              {config.label}
-            </span>
+            {!compact && (
+              <span className="rounded-full bg-muted px-2 py-0.5 font-medium text-[0.65rem] text-muted-foreground uppercase tracking-wide">
+                {config.label}
+              </span>
+            )}
           </span>
-          {item.description && (
+          {!compact && item.description && (
             <span className="line-clamp-2 text-muted-foreground text-sm">
               {item.description}
             </span>
           )}
-          {(item.note || host) && (
+          {meta && (
             <span className="mt-0.5 line-clamp-1 text-muted-foreground text-xs">
-              {[item.note, host].filter(Boolean).join(" · ")}
+              {meta}
             </span>
           )}
         </span>
-        {linkProps && action}
+        {linkProps &&
+          (compact ? (
+            <span className="shrink-0 self-center text-primary">
+              {actionIcon}
+            </span>
+          ) : (
+            action
+          ))}
       </>
     );
     const rowClass = cn(
-      "group/resource flex items-center gap-4 rounded-2xl bg-card p-4 ring-1 ring-foreground/10 transition-[transform,box-shadow] duration-300",
+      "group/resource flex items-center rounded-2xl bg-card ring-1 ring-foreground/10 transition-[transform,box-shadow] duration-300",
+      compact ? "h-full gap-3 p-3" : "gap-4 p-4",
       linkProps &&
         "pressable motion-safe:hover:-translate-y-0.5 hover:shadow-md",
       className
@@ -308,11 +327,7 @@ export function ResourceCard({
           </p>
         )}
         <div className="mt-auto flex items-center gap-3 pt-3 text-muted-foreground text-xs">
-          {(item.note || host) && (
-            <span className="line-clamp-1">
-              {[item.note, host].filter(Boolean).join(" · ")}
-            </span>
-          )}
+          {meta && <span className="line-clamp-1">{meta}</span>}
           {linkProps && action}
         </div>
       </div>
@@ -337,6 +352,7 @@ export function ResourceCard({
  * Rutenett (eller liste) av ressurser med valgfrie filter-brikker bygd av
  * kortenes kategorier. Filteret er rent klientside — lista er liten nok til
  * at det ikke trengs søk, og brikkene forteller samtidig hva som finnes.
+ * Lange lister foldes sammen bak en fade med «Vis alle»-knapp.
  */
 export function ResourceGrid({
   eyebrow,
@@ -346,6 +362,7 @@ export function ResourceGrid({
   layout = "grid",
   columns = 3,
   filter,
+  collapse = true,
   allLabel = "Alle",
   linkComponent,
   className,
@@ -365,10 +382,48 @@ export function ResourceGrid({
     ? items.filter((item) => item.category?.trim() === active)
     : items;
 
+  const rootRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const regionId = useId();
+  const [expanded, setExpanded] = useState(false);
+  // Starter sammenfoldet (også på serveren) så lange lister ikke hopper
+  // sammen etter hydrering; målingen under slår det av når innholdet er kort.
+  const [tooTall, setTooTall] = useState(collapse);
+  const collapsedRem = COLLAPSED_REM[layout];
+
+  useEffect(() => {
+    const el = contentRef.current;
+    if (!collapse || !el) return;
+    const measure = () => {
+      const rootPx = Number.parseFloat(
+        getComputedStyle(document.documentElement).fontSize
+      );
+      setTooTall(el.scrollHeight > collapsedRem * rootPx * COLLAPSE_SLACK);
+    };
+    measure();
+    // Innholds-diven endrer høyde både ved filterbytte og bredde-endring.
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [collapse, collapsedRem]);
+
   if (items.length === 0) return null;
 
+  const collapsed = collapse && tooTall && !expanded;
+
+  const toggle = () => {
+    setExpanded(!expanded);
+    if (!expanded) return;
+    // Lista krymper under leseren — hopp tilbake til toppen av blokken så
+    // man ikke havner midt i neste seksjon.
+    requestAnimationFrame(() => {
+      const top = rootRef.current?.getBoundingClientRect().top ?? 0;
+      if (top < 0) rootRef.current?.scrollIntoView({ block: "start" });
+    });
+  };
+
   return (
-    <div className={cn("@container", className)}>
+    <div ref={rootRef} className={cn("@container", className)}>
       <SectionHeader eyebrow={eyebrow} title={title} intro={intro} />
 
       {showFilter && categories.length > 0 && (
@@ -396,25 +451,77 @@ export function ResourceGrid({
         </fieldset>
       )}
 
-      {/* Nøkkelen på Stagger gjør at et filterbytte animerer inn på nytt. */}
-      <Stagger
-        key={active ?? "__all"}
-        className={
-          layout === "grid"
-            ? cn("grid grid-cols-1 gap-6", GRID_COLS[columns])
-            : "flex flex-col gap-3"
-        }
+      <div
+        id={regionId}
+        // Tastaturbrukere som taber inn i den skjulte delen får hele lista.
+        onFocusCapture={() => collapsed && setExpanded(true)}
+        style={collapsed ? { maxHeight: `${collapsedRem}rem` } : undefined}
+        className={cn(
+          // Luft rundt så hover-løft og skygge ikke klippes av overflow.
+          collapsed &&
+            "-m-2 overflow-hidden p-2 [mask-image:linear-gradient(to_bottom,black_55%,transparent)]"
+        )}
       >
-        {visible.map((item, i) => (
-          <StaggerItem key={`${item.title}-${i}`} className="h-full">
-            <ResourceCard
-              item={item}
-              layout={layout}
-              linkComponent={linkComponent}
+        <div ref={contentRef}>
+          {/* Nøkkelen på Stagger gjør at et filterbytte animerer inn på nytt. */}
+          <Stagger
+            key={active ?? "__all"}
+            className={
+              layout === "list"
+                ? "flex flex-col gap-3"
+                : cn(
+                    "grid grid-cols-1",
+                    layout === "compact" ? "gap-3" : "gap-6",
+                    GRID_COLS[columns]
+                  )
+            }
+          >
+            {visible.map((item, i) => (
+              <StaggerItem key={`${item.title}-${i}`} className="h-full">
+                <ResourceCard
+                  item={item}
+                  layout={layout}
+                  linkComponent={linkComponent}
+                />
+              </StaggerItem>
+            ))}
+          </Stagger>
+        </div>
+      </div>
+
+      {collapse && tooTall && (
+        <div
+          className={cn(
+            "flex justify-center",
+            // Åpen liste: knappen flyter i bunnen av skjermen mens lista er
+            // synlig (sticky innenfor blokken), og legger seg under lista
+            // når man scroller forbi — «Vis færre» er aldri langt unna.
+            collapsed
+              ? "relative -mt-6"
+              : "pointer-events-none sticky bottom-4 z-10 mt-8"
+          )}
+        >
+          <button
+            type="button"
+            onClick={toggle}
+            aria-expanded={expanded}
+            aria-controls={regionId}
+            className={cn(
+              "pressable pointer-events-auto inline-flex items-center gap-2 rounded-full bg-background px-5 py-2.5 font-heading font-semibold text-foreground text-sm ring-1 ring-foreground/15 transition-[background-color,box-shadow] duration-200 hover:bg-muted",
+              expanded ? "shadow-lg" : "shadow-sm"
+            )}
+          >
+            {expanded ? "Vis færre" : `Vis alle ${visible.length}`}
+            <Icon
+              name="chevron-down"
+              className={cn(
+                "size-4 text-primary transition-transform duration-300",
+                expanded && "rotate-180"
+              )}
             />
-          </StaggerItem>
-        ))}
-      </Stagger>
+          </button>
+        </div>
+      )}
     </div>
   );
 }

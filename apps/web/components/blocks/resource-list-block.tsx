@@ -23,9 +23,10 @@ interface ResourceListBlockProps {
   title?: string | null;
   intro?: string | null;
   items?: ResourceRow[] | null;
-  layout?: "grid" | "list" | null;
+  layout?: "grid" | "compact" | "list" | null;
   columns?: "2" | "3" | "4" | null;
   showFilter?: "auto" | "always" | "never" | null;
+  collapse?: boolean | null;
 }
 
 /** Mapper Payload-blokken `resourceList` til ResourceGrid i @poynt/ui. */
@@ -37,6 +38,7 @@ export function ResourceListBlock({
   layout,
   columns,
   showFilter,
+  collapse,
 }: ResourceListBlockProps) {
   const mapped: ResourceItem[] = (items ?? [])
     .filter((row) => row.title)
@@ -73,6 +75,7 @@ export function ResourceListBlock({
       items={mapped}
       layout={layout ?? "grid"}
       columns={cols === 2 || cols === 4 ? cols : 3}
+      collapse={collapse ?? true}
       filter={
         showFilter === "always"
           ? true

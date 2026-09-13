@@ -69,6 +69,7 @@ import * as migration_20260913_093437_book_access from './20260913_093437_book_a
 import * as migration_20260913_094816_book_store_poynt from './20260913_094816_book_store_poynt';
 import * as migration_20260913_104823_newsletter_consents from './20260913_104823_newsletter_consents';
 import * as migration_20260913_120000_orders_id_start_10000 from './20260913_120000_orders_id_start_10000';
+import * as migration_20260913_153339_resource_list_compact_collapse from './20260913_153339_resource_list_compact_collapse';
 
 export const migrations = [
   {
@@ -425,5 +426,10 @@ export const migrations = [
     up: migration_20260913_120000_orders_id_start_10000.up,
     down: migration_20260913_120000_orders_id_start_10000.down,
     name: '20260913_120000_orders_id_start_10000',
+  },
+  {
+    up: migration_20260913_153339_resource_list_compact_collapse.up,
+    down: migration_20260913_153339_resource_list_compact_collapse.down,
+    name: '20260913_153339_resource_list_compact_collapse'
   },
 ];

@@ -996,7 +996,7 @@ export interface ResourceListBlock {
          */
         file?: (number | null) | Media;
         /**
-         * Bokomslag (stående), podkast-cover (kvadrat) eller et skjermbilde (liggende). Valgfritt – uten bilde vises et ikon.
+         * Fyller hele bildeflaten på kortet og beskjæres i kantene – liggende bilder passer best. Ser det rart ut, bytt bilde. Valgfritt – uten bilde vises et ikon.
          */
         image?: (number | null) | Media;
         /**
@@ -1010,8 +1010,18 @@ export interface ResourceListBlock {
         id?: string | null;
       }[]
     | null;
-  layout?: ('grid' | 'list') | null;
+  /**
+   * Har du mange ressurser, velg «Små kort» – da får du plass til mye mer uten at leseren må scrolle langt.
+   */
+  layout?: ('grid' | 'compact' | 'list') | null;
+  /**
+   * Blir automatisk færre når det er lite plass, f.eks. på mobil.
+   */
   columns?: ('2' | '3' | '4') | null;
+  /**
+   * Viser starten av lista med en «Vis alle»-knapp når den blir lang. Korte lister vises alltid i sin helhet.
+   */
+  collapse?: boolean | null;
   showFilter?: ('auto' | 'always' | 'never') | null;
   id?: string | null;
   blockName?: string | null;
@@ -3334,6 +3344,7 @@ export interface ResourceListBlockSelect<T extends boolean = true> {
       };
   layout?: T;
   columns?: T;
+  collapse?: T;
   showFilter?: T;
   id?: T;
   blockName?: T;
