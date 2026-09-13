@@ -15,7 +15,7 @@ export const NewsletterConsents: CollectionConfig = {
   },
   admin: {
     useAsTitle: "email",
-    defaultColumns: ["email", "source", "createdAt"],
+    defaultColumns: ["email", "source", "subscribed", "createdAt"],
     group: "Kommunikasjon",
     description:
       "Registreres automatisk ved hver påmelding til nyhetsbrevet. Dokumenterer samtykket — ikke rediger. Avmeldinger håndteres i Resend. Ved krav om sletting: slett radene for e-posten her og kontakten i Resend.",

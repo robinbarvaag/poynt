@@ -124,7 +124,8 @@ export async function POST(request: NextRequest) {
           overrideAccess: true,
         });
 
-    if (newsletter) {
+    // Bare første gang — gjenbruk av samme ordrenummer skal ikke gi nye varsler.
+    if (newsletter && !previous?.newsletterOptIn) {
       // Påmeldinga skal aldri stoppe opplåsinga.
       const result = await subscribeWithConsent({
         email,

@@ -1,5 +1,4 @@
 import { NEWSLETTER_CONSENT_TEXTS } from "@/lib/newsletter-consent-texts";
-import { sendNewsletterSignupNotification } from "@poynt/email";
 import { type NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
@@ -49,20 +48,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Internt varsel til oss — aldri la det velte selve påmeldingen.
-    try {
-      const { getNotificationEmails } = await import(
-        "@/lib/notification-emails"
-      );
-      await sendNewsletterSignupNotification({
-        to: await getNotificationEmails(),
-        email,
-        source: "nyhetsbrev-skjema",
-      });
-    } catch (notifyError) {
-      console.error("Nyhetsbrev-varsel feilet:", notifyError);
-    }
-
+    // Internt varsel sendes fra subscribeWithConsent.
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Newsletter API error:", error);

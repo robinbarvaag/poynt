@@ -1,7 +1,14 @@
 import config from "@/payload.config";
-import { subscribeToNewsletter } from "@poynt/email";
+import {
+  sendNewsletterSignupNotification,
+  subscribeToNewsletter,
+} from "@poynt/email";
 import { getPayload } from "payload";
-import type { NewsletterConsentSource } from "./newsletter-consent-texts";
+import {
+  NEWSLETTER_CONSENT_SOURCES,
+  type NewsletterConsentSource,
+} from "./newsletter-consent-texts";
+import { getNotificationEmails } from "./notification-emails";
 
 /**
  * ENESTE vei inn på nyhetsbrevet: logger samtykket i «newsletter-consents»
@@ -59,6 +66,22 @@ export async function subscribeWithConsent({
       .catch((error: unknown) => {
         console.error("Kunne ikke oppdatere samtykkelogg:", error);
       });
+  }
+
+  // Internt varsel for ALLE påmeldingsveier (skjema, boktilgang, utsjekk …).
+  // Aldri la varselet velte selve påmeldingen.
+  if (result.success) {
+    try {
+      await sendNewsletterSignupNotification({
+        to: await getNotificationEmails(),
+        email: normalized,
+        source:
+          NEWSLETTER_CONSENT_SOURCES.find((s) => s.value === source)?.label ??
+          source,
+      });
+    } catch (error) {
+      console.error("Nyhetsbrev-varsel feilet:", error);
+    }
   }
 
   return result;
