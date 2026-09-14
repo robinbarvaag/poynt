@@ -233,7 +233,9 @@ Eventsjekk (sluttid, sted, frist etter start, kapasitet uten venteliste, ekstern
 - [x] Payload-migrasjon (`20260914_181616_events`, kjørt — lokalt og produksjon deler Neon-database)
 - [x] `feat/eventer` pushet (2026-09-14)
 - [x] Merget til `main` og deployet (2026-09-14, `/eventer` og `/innsjekk` svarer 200 på www.poynt.no)
-- [ ] Inngest: `event-retention` synket og prøvekjørt med `dryRun` i produksjon
+- [x] Inngest: `event-retention` synket (4 funksjoner, app-URL `https://www.poynt.no/api/inngest`) og
+      kjørt i produksjon 2026-09-14 via «Invoke»: 0 eventer å rydde, ingenting endret. NB: «Invoke» sender
+      `inngest/function.invoked`, og `dryRun` gjelder bare for `events/retention.requested`
 - [x] `lib/events/`: kodegenerator, token, kapasitet/venteliste-logikk (med tester)
 - [x] Påmeldings-API med transaksjon, rate limit og honningkrukke
 - [x] Nyhetsbrev-kilde `event` + samtykketekst
