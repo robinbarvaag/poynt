@@ -232,7 +232,7 @@ Eventsjekk (sluttid, sted, frist etter start, kapasitet uten venteliste, ekstern
 - [x] `event-registrations`-collection
 - [x] Payload-migrasjon (`20260914_181616_events`, kjørt — lokalt og produksjon deler Neon-database)
 - [x] `feat/eventer` pushet (2026-09-14)
-- [ ] Merget til `main` og deployet
+- [x] Merget til `main` og deployet (2026-09-14, `/eventer` og `/innsjekk` svarer 200 på www.poynt.no)
 - [ ] Inngest: `event-retention` synket og prøvekjørt med `dryRun` i produksjon
 - [x] `lib/events/`: kodegenerator, token, kapasitet/venteliste-logikk (med tester)
 - [x] Påmeldings-API med transaksjon, rate limit og honningkrukke
