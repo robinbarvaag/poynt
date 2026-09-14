@@ -14,6 +14,7 @@ import config from "@/payload.config";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getPayload } from "payload";
+import { Suspense } from "react";
 
 interface EventPageProps {
   params: Promise<{ slug: string }>;
@@ -36,7 +37,26 @@ export async function generateMetadata({
   });
 }
 
-export default async function EventPage({ params }: EventPageProps) {
+// Alt avhenger av `slug`, så params leses bak Suspense-grensa — da kan Next
+// servere et umiddelbart skall (Instant Navigations) og strømme inn eventet.
+export default function EventPage(props: EventPageProps) {
+  return (
+    <Suspense
+      fallback={
+        <div className="mx-auto w-full max-w-5xl animate-pulse space-y-6 px-4 py-12 sm:px-6 lg:px-8">
+          <div className="h-6 w-32 rounded-full bg-muted" />
+          <div className="h-12 w-4/5 rounded-2xl bg-muted" />
+          <div className="h-5 w-2/3 rounded-full bg-muted" />
+          <div className="aspect-video w-full rounded-3xl bg-muted" />
+        </div>
+      }
+    >
+      <EventPageContent {...props} />
+    </Suspense>
+  );
+}
+
+async function EventPageContent({ params }: EventPageProps) {
   const { slug } = await params;
   const event = await getPublishedEvent(slug);
   if (!event) notFound();
