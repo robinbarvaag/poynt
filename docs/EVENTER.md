@@ -268,7 +268,6 @@ Eventsjekk (sluttid, sted, frist etter start, kapasitet uten venteliste, ekstern
       minstebredde på spørsmålskolonner. Smal skjerm ruller tabellen sideveis
 - [ ] Nyhetsbrev-sjekk (allerede abonnent → ingen ny påmelding/varsel) og nye varseltekster: verifiser
       ved neste ekte påmelding
-- [ ] Vurder «Registrer på stedet» i innsjekk for folk uten påmelding (ikke bestemt)
 - [ ] DNS (e-post): DMARC + SPF lagt inn 2026-09-14. Google Workspace-DKIM utsatt (ikke kritisk med
       `p=none`); gjør det før DMARC strammes inn
 
@@ -277,15 +276,27 @@ Verifisert 2026-09-14 mot lokal database: 5 samtidige påmeldinger til 2 plasser
 innsjekk-utfall; sletting av event fjerner påmeldinger. Sidene, .ics, markdown og 401 på
 admin-API testet mot dev-server. E-postmalene rendret (ikke sendt).
 
+### Til slutt (utsatt av Robin 2026-09-14)
+Fyll inn lanseringsfesten og publiser · personvernteksten i admin (§ 8) · «Eventer» i menyen · QR i
+Outlook/iPhone Mail · DNS/DKIM · verifiser nyhetsbrev-sjekken (allerede abonnent) · slett testeventet
+og tmp-scriptene etter demoen.
+
 ### Fase 2
-- [ ] Påminnelse 24 t før (Inngest) + `reminderSentAt`
+- [x] Påminnelse (Inngest `event-reminders`, hver time): eventer som starter om 2–24 t, én gang per
+      påmelding (`reminderSentAt`), ikke til de som fikk billett de siste 12 t. Prøvekjørt med `dryRun`
 - [x] CSV-eksport
-- [ ] «Ta med følge» (valgfritt per event, se § 10)
+- [x] «Ta med følge»: `maxGuests` per event; hver i følget er egen rad (`guestOf`) med egen kode/QR,
+      billettene går i hovedpersonens e-post og vises på billettsiden. Hele følget får plass eller
+      venteliste sammen; ventelista rykker opp ett helt følge om gangen. Avmelding/sletting av
+      hovedpersonen tar med følget. Testet mot testeventet
+- [x] «Registrer på stedet» i `/innsjekk`: navn, e-post valgfri, sjekkes inn med en gang (`source:
+      walk_in`), varsler hvis fullt
 - [x] Automatisk sletting/anonymisering etter eventet (Inngest-cron, § 4.6) — bygget 2026-09-14,
       prøvekjørt med `dryRun`; aktiveres ved deploy
 - [x] «Slett»-knapp i «Påmeldte» for sletteforespørsler
-- [ ] MCP-verktøy `create_event_draft`
-- [ ] E-post til alle påmeldte fra admin (endringer, avlysning)
+- [x] MCP-verktøy `list_events`, `get_event`, `create_event_draft` (utkast, uten pris)
+- [x] E-post til påmeldte fra «Påmeldte»-fanen: velg med plass / venteliste / begge, se antall,
+      hver får egen e-post med billettlenke (Resend batch), svar til varslingsadressen
 
 ### Fase 3: Betalte eventer
 - [ ] Pris på event; Stripe Checkout med `price_data` (kr × 100), gjenbruk av checkout-mønsteret
@@ -309,5 +320,9 @@ admin-API testet mot dev-server. E-postmalene rendret (ikke sendt).
 | 2026-09-14 | Innsjekk i admin vs. egen side | Flyttet fra `/admin/innsjekk` (Payload-view) til egen side `/innsjekk` med admin-innlogging. Payload-rammen (meny, topplinje) var rotete på mobil i døra |
 | 2026-09-14 | Nyhetsbrev: allerede abonnent | `subscribeToNewsletter` slår opp kontakten i Resend først; aktiv abonnent → samtykket logges, men ingen ny påmelding og intet «Ny på nyhetsbrevet»-varsel (gjelder alle kilder) |
 | 2026-09-14 | Sletting: to trinn | Svar på ekstra spørsmål (kan være helseopplysninger) slettes 14 dager etter eventet; navn/e-post anonymiseres etter 6 måneder i stedet for at radene slettes, så statistikken beholdes uten migrasjon eller endring av eventet. Svar sendes ikke lenger i internvarsel-e-posten |
+| 2026-09-14 | Fase 2/3-skjema | Én migrasjon (`20260914_213636_eventer_fase2_3`) for alt i fase 2 og 3, kun tillegg, kjørt mot den delte databasen etter Robins ok. Enum-verdier med `ALTER TYPE … ADD VALUE` |
+| 2026-09-14 | Registrer på stedet | Navn påkrevd, e-post valgfri (e-post ble valgfri i databasen). Ingen kapasitetssperre, men varsel når fullt. Ingen e-post sendes |
+| 2026-09-14 | Følge | Egen rad per person (`guestOf`), billetter til hovedpersonens e-post. Ventelista rykker opp hele følger i rekkefølge og stopper ved første som ikke får plass (ingen sniking); «Gi plass» overstyrer |
+| 2026-09-14 | Betaling | Både Vipps og kort (Stripe), valgfritt per event. Plassen holdes 30 min under betaling (24 t ved opprykk fra venteliste). Betalte billetter meldes av og refunderes av admin, ikke selvbetjent |
 | 2026-09-14 | Migrasjon i produksjon | Produksjon og lokalt deler samme Neon-database, så migrasjonen var allerede kjørt. Vercel-bygget kjører ikke `payload migrate` — nye migrasjoner må kjøres manuelt før deploy |
 | 2026-09-14 | Internvarsel for eventer | Brukte kontaktskjema-malen med «Noen vil i kontakt». Malen tar nå `eyebrow`/`heading`/`intro`/`messageLabel`; eventer og bok-ventelista har egne tekster |
