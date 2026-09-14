@@ -8,13 +8,35 @@ export const REGISTRATION_STATUSES = [
   { value: "waitlisted", label: "På venteliste" },
   { value: "checked_in", label: "Møtt" },
   { value: "cancelled", label: "Avmeldt" },
+  { value: "pending_payment", label: "Venter på betaling" },
+  { value: "refunded", label: "Refundert" },
 ] as const;
 
 export type RegistrationStatus =
   (typeof REGISTRATION_STATUSES)[number]["value"];
 
-/** Statusene som tar en plass. */
-export const SEAT_STATUSES: RegistrationStatus[] = ["registered", "checked_in"];
+/**
+ * Statusene som tar en plass. `pending_payment` holder av plassen mens
+ * personen betaler (til betalingen utløper, se lib/events/payments.ts).
+ */
+export const SEAT_STATUSES: RegistrationStatus[] = [
+  "registered",
+  "checked_in",
+  "pending_payment",
+];
+
+/** Statusene som er en gyldig billett (kan sjekkes inn, får påminnelse). */
+export const TICKET_STATUSES: RegistrationStatus[] = [
+  "registered",
+  "checked_in",
+];
+
+export const REGISTRATION_SOURCES = [
+  { value: "online", label: "Påmelding på nettsiden" },
+  { value: "walk_in", label: "Registrert på stedet" },
+] as const;
+
+export type RegistrationSource = (typeof REGISTRATION_SOURCES)[number]["value"];
 
 export function statusLabel(status: string | null | undefined): string {
   return (

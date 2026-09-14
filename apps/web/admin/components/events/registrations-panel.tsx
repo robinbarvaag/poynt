@@ -41,6 +41,14 @@ const STATUS_STYLE: Record<RegistrationStatus, CSSProperties> = {
     background: "var(--theme-elevation-100)",
     color: "var(--theme-elevation-600)",
   },
+  pending_payment: {
+    background: "var(--theme-warning-100, #fef3c7)",
+    color: "var(--theme-warning-750, #b45309)",
+  },
+  refunded: {
+    background: "var(--theme-elevation-100)",
+    color: "var(--theme-elevation-600)",
+  },
 };
 
 const muted: CSSProperties = {
@@ -140,7 +148,11 @@ export function RegistrationsPanel() {
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Noe gikk galt.");
       if (action === "resend")
-        setNotice(`Billetten er sendt til ${row.email}.`);
+        setNotice(
+          row.email
+            ? `Billetten er sendt til ${row.email}.`
+            : "Billetten er sendt."
+        );
       if (action === "delete") {
         setNotice(
           json.promoted
@@ -167,7 +179,7 @@ export function RegistrationsPanel() {
     return (
       !q ||
       row.name.toLowerCase().includes(q) ||
-      row.email.toLowerCase().includes(q) ||
+      (row.email ?? "").toLowerCase().includes(q) ||
       row.code.toLowerCase().includes(q)
     );
   });
@@ -342,8 +354,13 @@ export function RegistrationsPanel() {
                       <>
                         <strong>{row.name}</strong>
                         <br />
-                        <span style={muted}>{row.email}</span>
+                        <span style={muted}>{row.email ?? "Ingen e-post"}</span>
                       </>
+                    )}
+                    {row.source === "walk_in" && (
+                      <span style={{ ...muted, display: "block" }}>
+                        Registrert på stedet
+                      </span>
                     )}
                     {row.newsletter && (
                       <span style={{ ...muted, display: "block" }}>
@@ -501,9 +518,11 @@ function RowActions({
               Angre innsjekk
             </Button>
           )}
-          <Button {...small} onClick={() => onAction("resend")}>
-            Send billett
-          </Button>
+          {row.email && (
+            <Button {...small} onClick={() => onAction("resend")}>
+              Send billett
+            </Button>
+          )}
         </div>
       )}
       <div style={line}>

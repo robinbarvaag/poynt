@@ -1,14 +1,18 @@
 import { getAdminUser } from "@/lib/events/admin-auth";
 import { extractTicketToken } from "@/lib/events/codes";
 import {
+  type CheckInResult,
+  type WalkInResult,
   checkInRegistration,
   getEventsPayload,
+  registerWalkIn,
 } from "@/lib/events/registrations";
 import { type NextRequest, NextResponse } from "next/server";
 
 /**
- * Innsjekk i døra: tar imot det skanneren leste (billettlenken fra QR-koden)
- * eller en kode tastet inn for hånd, og svarer med utfall + tellere.
+ * Innsjekk i døra: tar imot det skanneren leste (billettlenken fra QR-koden),
+ * en kode tastet inn for hånd, eller en person som registreres på stedet
+ * (`walkIn`), og svarer med utfall + tellere.
  */
 export async function POST(request: NextRequest) {
   const user = await getAdminUser(request.headers);
@@ -21,20 +25,37 @@ export async function POST(request: NextRequest) {
     scanned?: string;
     code?: string;
     force?: boolean;
+    walkIn?: { name?: string; email?: string };
   };
   const eventId = Number(body.eventId) || null;
 
-  const token = body.scanned ? extractTicketToken(body.scanned) : null;
-  const result =
-    token || body.code
-      ? await checkInRegistration({
-          token,
-          code: token ? null : body.code,
-          eventId,
-          userId: user.id as number,
-          force: body.force === true,
-        })
-      : { outcome: "unknown" as const };
+  let result: CheckInResult | WalkInResult;
+  if (body.walkIn) {
+    if (!eventId) {
+      return NextResponse.json({ error: "Velg event." }, { status: 400 });
+    }
+    result = await registerWalkIn({
+      eventId,
+      name: String(body.walkIn.name ?? ""),
+      email: body.walkIn.email ? String(body.walkIn.email) : null,
+      userId: user.id as number,
+    });
+    if (result.outcome === "invalid") {
+      return NextResponse.json({ error: result.error }, { status: 400 });
+    }
+  } else {
+    const token = body.scanned ? extractTicketToken(body.scanned) : null;
+    result =
+      token || body.code
+        ? await checkInRegistration({
+            token,
+            code: token ? null : body.code,
+            eventId,
+            userId: user.id as number,
+            force: body.force === true,
+          })
+        : { outcome: "unknown" as const };
+  }
 
   let counts: {
     checkedIn: number;

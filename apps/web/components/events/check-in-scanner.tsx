@@ -13,6 +13,7 @@ import {
   Hourglass,
   type LucideIcon,
   Undo2,
+  UserPlus,
   Volume2,
   VolumeX,
 } from "lucide-react";
@@ -38,6 +39,14 @@ interface EventOption {
 interface ScanResponse extends CheckInResult {
   counts: { checkedIn: number; seats: number; capacity: number | null } | null;
   error?: string;
+  /** Satt ved registrering på stedet når eventet allerede var fullt. */
+  overCapacity?: boolean;
+}
+
+interface CheckInRequest {
+  scanned?: string;
+  code?: string;
+  walkIn?: { name: string; email?: string };
 }
 
 interface DetectedBarcode {
@@ -137,7 +146,12 @@ function describe(result: ScanResponse): { title: string; detail?: string } {
   const r = result.registration;
   switch (result.outcome) {
     case "ok":
-      return { title: r?.name ?? "Velkommen!", detail: r?.code };
+      return {
+        title: r?.name ?? "Velkommen!",
+        detail: result.overCapacity
+          ? "Registrert på stedet. NB: eventet var allerede fullt."
+          : r?.code,
+      };
     case "already":
       return {
         title: r?.name ?? "Allerede inne",
@@ -237,7 +251,10 @@ export function CheckInScanner({
   const lastFrameAt = useRef(0);
   const busyRef = useRef(false);
   const lastScan = useRef<{ value: string; at: number } | null>(null);
-  const lastRequest = useRef<{ scanned?: string; code?: string } | null>(null);
+  const lastRequest = useRef<CheckInRequest | null>(null);
+  const [walkInOpen, setWalkInOpen] = useState(false);
+  const [walkInName, setWalkInName] = useState("");
+  const [walkInEmail, setWalkInEmail] = useState("");
   const detectorRef = useRef<BarcodeDetectorLike | null>(null);
   const audioRef = useRef<AudioContext | null>(null);
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
@@ -281,65 +298,62 @@ export function CheckInScanner({
     return () => clearInterval(timer);
   }, [eventId, refreshCounts]);
 
-  const submit = useCallback(
-    async (request: { scanned?: string; code?: string }, force = false) => {
-      busyRef.current = true;
-      setSubmitting(true);
-      lastRequest.current = request;
-      let response: ScanResponse;
-      try {
-        const res = await postCheckIn({
-          ...request,
-          eventId: eventIdRef.current,
-          force,
-        });
-        const json = (await res.json()) as ScanResponse;
-        response = res.ok
-          ? json
-          : {
-              outcome: "unknown",
-              counts: null,
-              error:
-                res.status === 401
-                  ? "Du er logget ut. Last inn siden på nytt og logg inn."
-                  : json.error,
-            };
-      } catch {
-        response = {
-          outcome: "unknown",
-          counts: null,
-          error: "Fikk ikke kontakt med serveren. Sjekk nettet.",
-        };
-      } finally {
-        busyRef.current = false;
-        setSubmitting(false);
-      }
+  const submit = useCallback(async (request: CheckInRequest, force = false) => {
+    busyRef.current = true;
+    setSubmitting(true);
+    lastRequest.current = request;
+    let response: ScanResponse;
+    try {
+      const res = await postCheckIn({
+        ...request,
+        eventId: eventIdRef.current,
+        force,
+      });
+      const json = (await res.json()) as ScanResponse;
+      response = res.ok
+        ? json
+        : {
+            outcome: "unknown",
+            counts: null,
+            error:
+              res.status === 401
+                ? "Du er logget ut. Last inn siden på nytt og logg inn."
+                : json.error,
+          };
+    } catch {
+      response = {
+        outcome: "unknown",
+        counts: null,
+        error: "Fikk ikke kontakt med serveren. Sjekk nettet.",
+      };
+    } finally {
+      busyRef.current = false;
+      setSubmitting(false);
+    }
 
-      const key = ++keyRef.current;
-      const meta = OUTCOMES[response.outcome];
-      setResult({ ...response, key });
-      if (response.counts) setCounts(response.counts);
-      navigator.vibrate?.(meta.tone === "ok" ? 150 : [90, 60, 90, 60, 90]);
-      if (soundRef.current && audioRef.current) {
-        beep(audioRef.current, meta.tone);
-      }
-      const r = response.registration;
-      setLog((previous) =>
-        [
-          {
-            key,
-            outcome: response.outcome,
-            name: r?.name,
-            code: r?.code,
-            registrationId: r?.id,
-            at: Date.now(),
-          },
-          ...previous,
-        ].slice(0, 30)
-      );
-    },
-    []
-  );
+    const key = ++keyRef.current;
+    const meta = OUTCOMES[response.outcome];
+    setResult({ ...response, key });
+    if (response.counts) setCounts(response.counts);
+    navigator.vibrate?.(meta.tone === "ok" ? 150 : [90, 60, 90, 60, 90]);
+    if (soundRef.current && audioRef.current) {
+      beep(audioRef.current, meta.tone);
+    }
+    const r = response.registration;
+    setLog((previous) =>
+      [
+        {
+          key,
+          outcome: response.outcome,
+          name: r?.name,
+          code: r?.code,
+          registrationId: r?.id,
+          at: Date.now(),
+        },
+        ...previous,
+      ].slice(0, 30)
+    );
+  }, []);
 
   // Kortet forsvinner av seg selv (ikke når det krever et valg).
   useEffect(() => {
@@ -694,6 +708,89 @@ export function CheckInScanner({
           </Button>
         </div>
       </form>
+
+      {walkInOpen ? (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!walkInName.trim()) return;
+            ensureAudio();
+            submit({
+              walkIn: {
+                name: walkInName.trim(),
+                email: walkInEmail.trim() || undefined,
+              },
+            });
+            setWalkInName("");
+            setWalkInEmail("");
+            setWalkInOpen(false);
+          }}
+          className="grid gap-3 rounded-2xl bg-card p-4 ring-1 ring-border"
+        >
+          <div>
+            <p className="font-semibold text-foreground">Registrer på stedet</p>
+            <p className="text-muted-foreground text-sm">
+              For folk uten påmelding. De sjekkes inn med en gang og teller som
+              møtt.
+            </p>
+          </div>
+          <div className="grid gap-1.5">
+            <label htmlFor="innsjekk-navn" className="font-semibold text-sm">
+              Navn
+            </label>
+            <input
+              id="innsjekk-navn"
+              value={walkInName}
+              onChange={(e) => setWalkInName(e.target.value)}
+              required
+              autoComplete="off"
+              className={fieldClass}
+            />
+          </div>
+          <div className="grid gap-1.5">
+            <label htmlFor="innsjekk-epost" className="font-semibold text-sm">
+              E-post <span className="font-normal">(valgfritt)</span>
+            </label>
+            <input
+              id="innsjekk-epost"
+              type="email"
+              value={walkInEmail}
+              onChange={(e) => setWalkInEmail(e.target.value)}
+              autoComplete="off"
+              inputMode="email"
+              className={fieldClass}
+            />
+          </div>
+          <div className="flex gap-2">
+            <Button
+              type="submit"
+              size="lg"
+              className="flex-1"
+              disabled={submitting || !walkInName.trim()}
+            >
+              Registrer og sjekk inn
+            </Button>
+            <Button
+              type="button"
+              size="lg"
+              variant="ghost"
+              onClick={() => setWalkInOpen(false)}
+            >
+              Avbryt
+            </Button>
+          </div>
+        </form>
+      ) : (
+        <Button
+          type="button"
+          variant="outline"
+          size="lg"
+          onClick={() => setWalkInOpen(true)}
+        >
+          <UserPlus className="size-5" aria-hidden />
+          Registrer på stedet
+        </Button>
+      )}
 
       {log.length > 0 && (
         <section className="grid gap-2">

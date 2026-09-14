@@ -4,6 +4,7 @@ import { sql } from "@payloadcms/db-postgres";
 import { revalidateTag } from "next/cache";
 import { type Payload, type PayloadRequest, getPayload } from "payload";
 import {
+  type RegistrationSource,
   type RegistrationStatus,
   SEAT_STATUSES,
   decideRegistrationStatus,
@@ -276,6 +277,7 @@ export async function registerForEvent(input: {
       collection: "event-registrations",
       data: {
         event: event.id,
+        source: "online",
         name,
         email,
         answers,
@@ -577,6 +579,79 @@ export async function checkInRegistration({
   return { outcome: "ok", registration: summary(updated) };
 }
 
+export type WalkInResult =
+  | (CheckInResult & { overCapacity: boolean })
+  | { outcome: "invalid"; error: string };
+
+/**
+ * Registrer noen som dukker opp i døra uten påmelding: opprettes direkte som
+ * «møtt». Ingen kapasitetssperre — de står jo der — men svaret sier fra når
+ * eventet er fullt, så døra kan bestemme. Ingen e-post sendes.
+ */
+export async function registerWalkIn({
+  eventId,
+  name: rawName,
+  email: rawEmail,
+  userId,
+}: {
+  eventId: number;
+  name: string;
+  email?: string | null;
+  userId: number;
+}): Promise<WalkInResult> {
+  const name = rawName.trim().slice(0, 200);
+  const email = rawEmail?.trim().toLowerCase() || null;
+  if (!name) return { outcome: "invalid", error: "Skriv inn navnet." };
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return { outcome: "invalid", error: "E-postadressen ser ikke riktig ut." };
+  }
+
+  const payload = await getEventsPayload();
+  const event = await payload
+    .findByID({ collection: "events", id: eventId, depth: 0 })
+    .catch(() => null);
+  if (!event) return { outcome: "invalid", error: "Fant ikke eventet." };
+
+  const { registration, seatsBefore } = await withEventLock(
+    payload,
+    eventId,
+    async (req) => {
+      const seatsBefore = await countSeats(payload, eventId, req);
+      const registration = await payload.create({
+        collection: "event-registrations",
+        data: {
+          event: eventId,
+          source: "walk_in",
+          name,
+          email,
+          status: "checked_in",
+          checkedInAt: new Date().toISOString(),
+          checkedInBy: userId,
+          code: await uniqueCode(payload, req),
+          token: generateTicketToken(),
+        },
+        req,
+      });
+      return { registration, seatsBefore };
+    }
+  );
+  revalidateEventSeats(eventId);
+
+  return {
+    outcome: "ok",
+    overCapacity: Boolean(event.capacity && seatsBefore >= event.capacity),
+    registration: {
+      id: registration.id,
+      name: registration.name,
+      code: registration.code,
+      status: registration.status,
+      checkedInAt: registration.checkedInAt,
+      eventId,
+      eventTitle: event.title,
+    },
+  };
+}
+
 /**
  * Slett en påmelding for godt, f.eks. når noen ber om å bli slettet. Er
  * eventet ikke startet og personen hadde plass, meldes påmeldingen av først,
@@ -630,8 +705,11 @@ export async function undoCheckIn(
 export interface RegistrationRow {
   id: number;
   name: string;
-  email: string;
+  email: string | null;
   status: RegistrationStatus;
+  source: RegistrationSource;
+  /** Id-en til den som meldte på, når raden er følge. */
+  guestOfId: number | null;
   code: string;
   newsletter: boolean;
   answers: RegistrationAnswers;
@@ -641,6 +719,12 @@ export interface RegistrationRow {
   cancelledAt: string | null;
   cancelledBy: string | null;
   promotedAt: string | null;
+  payment: {
+    provider: string | null;
+    amountKr: number | null;
+    paidAt: string | null;
+    refundedAt: string | null;
+  } | null;
 }
 
 export interface RegistrationOverview {
@@ -680,6 +764,8 @@ export async function getRegistrationOverview(
     waitlisted: 0,
     checked_in: 0,
     cancelled: 0,
+    pending_payment: 0,
+    refunded: 0,
   };
   for (const doc of found.docs) counts[doc.status] += 1;
 
@@ -699,8 +785,18 @@ export async function getRegistrationOverview(
     rows: found.docs.map((doc) => ({
       id: doc.id,
       name: doc.name,
-      email: doc.email,
+      email: doc.email ?? null,
       status: doc.status,
+      source: doc.source ?? "online",
+      guestOfId: relationId(doc.guestOf),
+      payment: doc.payment?.provider
+        ? {
+            provider: doc.payment.provider,
+            amountKr: doc.payment.amountKr ?? null,
+            paidAt: doc.payment.paidAt ?? null,
+            refundedAt: doc.payment.refundedAt ?? null,
+          }
+        : null,
       code: doc.code,
       newsletter: Boolean(doc.newsletter),
       answers: (doc.answers ?? {}) as RegistrationAnswers,

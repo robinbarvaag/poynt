@@ -921,7 +921,8 @@ export async function sendEventRegistrationNotification(params: {
   to?: string | string[];
   kind: "Ny påmelding" | "Ny på venteliste" | "Avmelding";
   name: string;
-  email: string;
+  /** Mangler for folk registrert på stedet. */
+  email?: string;
   eventTitle: string;
   /** «42 av 80 plasser tatt» o.l. */
   seatsText?: string;
@@ -952,12 +953,12 @@ export async function sendEventRegistrationNotification(params: {
   await sendEmail({
     from: buildFrom("Poynt"),
     to: notifyTo,
-    replyTo: params.email,
+    ...(params.email && { replyTo: params.email }),
     subject: `${params.kind}: ${params.name} (${params.eventTitle})`,
     html: await render(
       ContactNotificationEmail({
         name: params.name,
-        email: params.email,
+        email: params.email ?? "",
         eyebrow: "Eventer",
         heading: EVENT_NOTIFICATION_HEADINGS[params.kind],
         intro: `Gjelder «${params.eventTitle}».`,

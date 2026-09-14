@@ -72,8 +72,8 @@ export function retentionCutoff(now: Date = new Date()): Date {
   return new Date(now.getTime() - ANSWERS_RETENTION_DAYS * DAY_MS);
 }
 
-export function isAnonymizedEmail(email: string): boolean {
-  return email.endsWith(`@${ANONYMIZED_EMAIL_DOMAIN}`);
+export function isAnonymizedEmail(email: string | null | undefined): boolean {
+  return Boolean(email?.endsWith(`@${ANONYMIZED_EMAIL_DOMAIN}`));
 }
 
 /** Erstatningsverdier for en anonymisert påmelding (unike per rad). */

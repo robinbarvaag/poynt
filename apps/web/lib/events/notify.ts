@@ -56,7 +56,13 @@ export async function sendRegistrationEmail(
   registration: EventRegistration,
   opts: { promoted?: boolean } = {}
 ): Promise<void> {
-  if (registration.status === "cancelled" || !registration.token) return;
+  if (
+    registration.status === "cancelled" ||
+    !registration.token ||
+    !registration.email
+  ) {
+    return;
+  }
   const { sendEventTicketEmail, sendEventWaitlistEmail } = await import(
     "@poynt/email"
   );
@@ -107,6 +113,7 @@ export async function sendCancellationEmail(
   registration: EventRegistration,
   byAdmin: boolean
 ): Promise<void> {
+  if (!registration.email) return;
   const { sendEventCancelledEmail } = await import("@poynt/email");
   try {
     await sendEventCancelledEmail({
@@ -150,7 +157,7 @@ export async function notifyAdmins(
       to: await getNotificationEmails(),
       kind,
       name: registration.name,
-      email: registration.email,
+      email: registration.email ?? undefined,
       eventTitle: event.title,
       seatsText: event.capacity
         ? `${seats} av ${event.capacity} plasser tatt`
@@ -169,7 +176,7 @@ export async function subscribeFromEvent(
   event: Event,
   registration: EventRegistration
 ): Promise<void> {
-  if (!registration.newsletter) return;
+  if (!registration.newsletter || !registration.email) return;
   try {
     const { subscribeWithConsent } = await import("@/lib/newsletter-consent");
     const { NEWSLETTER_CONSENT_TEXTS } = await import(

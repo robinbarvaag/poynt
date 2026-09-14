@@ -240,6 +240,66 @@ const registrationFields: Field[] = [
     ],
   },
   {
+    name: "maxGuests",
+    type: "number",
+    label: "Kan ta med inntil (antall personer)",
+    min: 0,
+    max: 10,
+    admin: {
+      condition: isInternal,
+      description:
+        "Tom eller 0 = hver melder seg på selv. Følget får hver sin kode, og alt sendes til den som meldte på.",
+    },
+  },
+  {
+    type: "row",
+    admin: { condition: isInternal },
+    fields: [
+      {
+        name: "priceKr",
+        type: "number",
+        label: "Pris per person (kr)",
+        min: 0,
+        admin: {
+          width: "50%",
+          description: "Tom = gratis. Prisen er inkludert MVA.",
+        },
+      },
+      {
+        name: "vatRate",
+        type: "select",
+        label: "MVA-sats",
+        defaultValue: "25",
+        options: [
+          { label: "25 % (kurs, foredrag, fest med servering)", value: "25" },
+          { label: "0 % (unntatt, f.eks. rene kulturarrangement)", value: "0" },
+        ],
+        admin: {
+          width: "50%",
+          condition: (data) => Boolean(data?.priceKr),
+          description:
+            "Brukes på kvitteringen. Usikker? Avklar med regnskapsfører.",
+        },
+      },
+    ],
+  },
+  {
+    name: "paymentMethods",
+    type: "select",
+    hasMany: true,
+    label: "Betaling med",
+    defaultValue: ["vipps", "stripe"],
+    options: [
+      { label: "Vipps", value: "vipps" },
+      { label: "Kort", value: "stripe" },
+    ],
+    admin: {
+      condition: (data) => isInternal(data) && Boolean(data?.priceKr),
+      description:
+        "Plassen holdes av i 30 minutter mens personen betaler. Betalte billetter meldes av og refunderes fra «Påmeldte».",
+    },
+  },
+  {
     type: "row",
     admin: { condition: isInternal },
     fields: [

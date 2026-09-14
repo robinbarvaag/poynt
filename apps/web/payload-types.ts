@@ -2100,6 +2100,22 @@ export interface Event {
    */
   waitlistEnabled?: boolean | null;
   /**
+   * Tom eller 0 = hver melder seg på selv. Følget får hver sin kode, og alt sendes til den som meldte på.
+   */
+  maxGuests?: number | null;
+  /**
+   * Tom = gratis. Prisen er inkludert MVA.
+   */
+  priceKr?: number | null;
+  /**
+   * Brukes på kvitteringen. Usikker? Avklar med regnskapsfører.
+   */
+  vatRate?: ('25' | '0') | null;
+  /**
+   * Plassen holdes av i 30 minutter mens personen betaler. Betalte billetter meldes av og refunderes fra «Påmeldte».
+   */
+  paymentMethods?: ('vipps' | 'stripe')[] | null;
+  /**
    * Tom = åpen med en gang eventet er publisert.
    */
   registrationOpensAt?: string | null;
@@ -2200,8 +2216,10 @@ export interface EventRegistration {
   id: number;
   event: number | Event;
   name: string;
-  email: string;
-  status: 'registered' | 'waitlisted' | 'checked_in' | 'cancelled';
+  email?: string | null;
+  source: 'online' | 'walk_in';
+  guestOf?: (number | null) | EventRegistration;
+  status: 'registered' | 'waitlisted' | 'checked_in' | 'cancelled' | 'pending_payment' | 'refunded';
   code: string;
   token: string;
   answers?:
@@ -2220,6 +2238,19 @@ export interface EventRegistration {
   cancelledAt?: string | null;
   cancelledBy?: ('self' | 'admin') | null;
   promotedAt?: string | null;
+  reminderSentAt?: string | null;
+  payment?: {
+    provider?: ('vipps' | 'stripe') | null;
+    /**
+     * For hele påmeldingen, inkl. følge.
+     */
+    amountKr?: number | null;
+    reference?: string | null;
+    stripePaymentIntentId?: string | null;
+    expiresAt?: string | null;
+    paidAt?: string | null;
+    refundedAt?: string | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -3961,6 +3992,10 @@ export interface EventsSelect<T extends boolean = true> {
   externalLabel?: T;
   capacity?: T;
   waitlistEnabled?: T;
+  maxGuests?: T;
+  priceKr?: T;
+  vatRate?: T;
+  paymentMethods?: T;
   registrationOpensAt?: T;
   registrationClosesAt?: T;
   ticketsEnabled?: T;
@@ -4003,6 +4038,8 @@ export interface EventRegistrationsSelect<T extends boolean = true> {
   event?: T;
   name?: T;
   email?: T;
+  source?: T;
+  guestOf?: T;
   status?: T;
   code?: T;
   token?: T;
@@ -4014,6 +4051,18 @@ export interface EventRegistrationsSelect<T extends boolean = true> {
   cancelledAt?: T;
   cancelledBy?: T;
   promotedAt?: T;
+  reminderSentAt?: T;
+  payment?:
+    | T
+    | {
+        provider?: T;
+        amountKr?: T;
+        reference?: T;
+        stripePaymentIntentId?: T;
+        expiresAt?: T;
+        paidAt?: T;
+        refundedAt?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }

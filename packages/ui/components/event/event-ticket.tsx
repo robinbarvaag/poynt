@@ -9,7 +9,9 @@ export type EventTicketStatus =
   | "registered"
   | "waitlisted"
   | "checked_in"
-  | "cancelled";
+  | "cancelled"
+  | "pending_payment"
+  | "refunded";
 
 export interface EventTicketProps {
   eventTitle: string;
@@ -41,6 +43,11 @@ const STATUS = {
     className: "bg-primary-foreground text-primary",
   },
   cancelled: { label: "Avmeldt", className: "bg-muted text-muted-foreground" },
+  pending_payment: {
+    label: "Venter på betaling",
+    className: "bg-accent-1 text-foreground",
+  },
+  refunded: { label: "Refundert", className: "bg-muted text-muted-foreground" },
 } as const;
 
 const TEETH = 24;
@@ -88,9 +95,11 @@ export function EventTicket({
   className,
 }: EventTicketProps) {
   const statusInfo = STATUS[status];
-  const inactive = status === "cancelled";
+  const inactive = status === "cancelled" || status === "refunded";
   const torn = status === "checked_in";
-  const showQr = Boolean(qrSvg) && status !== "waitlisted" && !inactive;
+  // Ingen QR før plassen er bekreftet (venteliste, ubetalt).
+  const pending = status === "waitlisted" || status === "pending_payment";
+  const showQr = Boolean(qrSvg) && !pending && !inactive;
   const reduceMotion = useReducedMotion();
   const animate = Boolean(celebrate) && !reduceMotion;
   const edgeTransition = animate
@@ -218,7 +227,7 @@ export function EventTicket({
               dangerouslySetInnerHTML={{ __html: qrSvg }}
             />
           )}
-          {code && !inactive && status !== "waitlisted" && (
+          {code && !inactive && !pending && (
             <p className="mt-3 font-bold font-mono text-2xl text-primary tracking-[0.14em] sm:mt-4 sm:text-3xl">
               {code}
             </p>
@@ -226,6 +235,12 @@ export function EventTicket({
           {status === "waitlisted" && (
             <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
               Får du plass, dukker QR-koden opp her, og du får den på e-post.
+            </p>
+          )}
+          {status === "pending_payment" && (
+            <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
+              Plassen er holdt av. QR-koden dukker opp her når betalingen er
+              gjennomført.
             </p>
           )}
           {children && <div className="mt-4 space-y-3 sm:mt-6">{children}</div>}
@@ -255,7 +270,7 @@ export function EventTicket({
           aria-hidden="true"
           className="-rotate-12 pointer-events-none absolute top-1/3 left-1/2 z-20 -translate-x-1/2 rounded-xl border-4 border-destructive/70 px-4 py-1 font-bold font-heading text-3xl text-destructive/80 uppercase tracking-widest"
         >
-          Avmeldt
+          {status === "refunded" ? "Refundert" : "Avmeldt"}
         </span>
       )}
     </div>
