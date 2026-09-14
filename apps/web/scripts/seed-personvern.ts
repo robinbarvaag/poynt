@@ -45,6 +45,7 @@ const body: DocBlock[] = [
       "Kontaktskjema: Når du sender oss en henvendelse, bruker vi opplysningene du oppgir kun til å svare deg og følge opp dialogen. Grunnlaget er vår berettigede interesse i å besvare henvendelser (art. 6 nr. 1 f), eller at du ønsker et tilbud eller en avtale med oss (art. 6 nr. 1 b).",
       "Kjøp: Når du kjøper produkter eller medlemskap, behandler vi navn, e-post og ordreopplysninger for å levere det du har kjøpt og sende kvittering (art. 6 nr. 1 b), og for å oppfylle krav i bokføringsloven (art. 6 nr. 1 c).",
       "Bokressurser: Når du låser opp sider for bokkjøpere, lagrer vi ordrenummeret, hvor boka er kjøpt og eventuelt e-postadressen du oppgir. Ordrenummeret brukes kun til å gi deg tilgang og hindre misbruk (art. 6 nr. 1 f). E-posten brukes bare til nyhetsbrev dersom du krysser av for det.",
+      "Eventer: Når du melder deg på et event, lagrer vi navn, e-postadresse, eventuelle svar du gir i påmeldingen (for eksempel allergier), om du er sjekket inn, og når du meldte deg på eller av. Vi bruker opplysningene til å holde av plassen din, sende billett og praktisk informasjon, sjekke deg inn og gi deg plass fra ventelista (art. 6 nr. 1 b). Svar om allergier eller andre hensyn brukes bare til å tilrettelegge eventet. E-posten brukes bare til nyhetsbrev dersom du krysser av for det.",
     ],
   },
   "Der behandlingen bygger på samtykke, kan du når som helst trekke det tilbake. Det påvirker ikke lovligheten av behandlingen før du trakk samtykket. Der vi bygger på berettiget interesse, kan du protestere mot behandlingen.",
@@ -95,6 +96,7 @@ const body: DocBlock[] = [
   "En aktiv dialog defineres som at du har hatt interaksjon med Poynt AS eller representanter for oss de siste to årene via telefon, ved å besvare e-post, lastet ned materiale på nettsiden eller registrert deg via et skjema.",
   "Har du meldt deg på nyhetsbrevet, behandler vi e-postadressen din til du melder deg av. Dokumentasjonen av samtykket (tidspunkt, kilde og samtykketekst) lagrer vi i inntil to år etter avmelding, slik at vi kan vise at samtykket var gyldig.",
   "Ordreopplysninger lagres i fem år etter utgangen av regnskapsåret, som bokføringsloven krever. Henvendelser fra kontaktskjemaet slettes når dialogen er avsluttet, og senest etter to år uten kontakt.",
+  "Påmeldinger til eventer slettes senest seks måneder etter at eventet er gjennomført. Svar om allergier og andre hensyn slettes samtidig.",
   "Hvis du er ansatt i en virksomhet som er kunde hos oss, behandler vi dine opplysninger innenfor rammen for kundebehandling. For aktive kunderelasjoner behandler vi dine opplysninger inntil (1) du avslutter din stilling i virksomheten, eller at (2) virksomheten ikke lenger har en aktiv kunderelasjon med oss.",
   "Når en kunderelasjon avsluttes, går vilkårene for lagring og behandling av opplysninger over til de samme vilkårene som er beskrevet i de foregående avsnittene. Avslutter du din ansettelse i virksomheten, er du selv ansvarlig for å gi oss beskjed slik at vi kan slette dine opplysninger.",
 

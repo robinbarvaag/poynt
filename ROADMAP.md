@@ -26,6 +26,12 @@
 - **Podcast-to-Content**: lydfil-opplasting → Whisper-transkripsjon → blogginnlegg + sosiale postar + kapittelmerke (`/verktoy/podcast-til-innhald`)
 - **Admin-verktøy**: Bransje-konfigurasjon og Prompt-malar i Payload admin (`/admin/bransjar`, `/admin/prompts`)
 
+## Eventer (planlagt, se `docs/EVENTER.md`)
+
+- Fase 1 (lanseringsfesten for «Verdifull vekst», foreløpig 15. oktober 2026): event-type i admin, eventside, påmelding med kapasitet + venteliste, kode + QR på e-post, billettside med avmelding, fanen «Påmeldte», innsjekk-skanner
+- Fase 2: påminnelser, CSV, følge, sletting etter event
+- Fase 3: betalte eventer via Stripe + refusjon
+
 ## Tilgangskontroll (gjenstår)
 
 - Forfalt betaling: e-postvarsel til brukar ved `past_due` (grace period er implementert, men ingen e-post enno)
