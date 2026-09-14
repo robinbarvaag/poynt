@@ -4,16 +4,26 @@ import { sql } from "@payloadcms/db-postgres";
 import { revalidateTag } from "next/cache";
 import { type Payload, type PayloadRequest, getPayload } from "payload";
 import {
+  type RegistrationSource,
   type RegistrationStatus,
   SEAT_STATUSES,
   decideRegistrationStatus,
   registrationWindow,
+  sanitizeGuestNames,
 } from "./capacity";
 import {
   generateTicketCode,
   generateTicketToken,
   normalizeTicketCode,
 } from "./codes";
+import {
+  type PaymentProvider,
+  eventPriceKr,
+  holdExpiresAt,
+  isPaymentProvider,
+  partyAmountKr,
+  paymentMethodsFor,
+} from "./payment-rules";
 
 /**
  * All skriving av påmeldinger går hit: påmelding, avmelding, opprykk fra
@@ -194,6 +204,8 @@ export type RegisterResult =
       event: Event;
       /** Personen var allerede påmeldt — vi sender billetten på nytt. */
       alreadyRegistered: boolean;
+      /** Følget, hvis personen tok med noen. */
+      guests: EventRegistration[];
     }
   | { ok: false; error: RegisterError; message: string };
 
@@ -220,6 +232,10 @@ export async function registerForEvent(input: {
   email: string;
   answers: Record<string, unknown>;
   newsletter: boolean;
+  /** Navnene på følget (fra skjemaet, valideres her). */
+  guests?: unknown;
+  /** «vipps» eller «stripe» for betalte eventer. */
+  paymentMethod?: unknown;
 }): Promise<RegisterResult> {
   const payload = await getEventsPayload();
 
@@ -248,6 +264,17 @@ export async function registerForEvent(input: {
   if (missing.length) {
     return fail("invalid", `Svar på: ${missing.join(", ")}.`);
   }
+  const guestNames = sanitizeGuestNames(input.guests, event.maxGuests);
+  if (guestNames.error) return fail("invalid", guestNames.error);
+  const partySize = 1 + guestNames.names.length;
+
+  const priceKr = eventPriceKr(event);
+  const methods = paymentMethodsFor(event);
+  const paymentMethod: PaymentProvider =
+    isPaymentProvider(input.paymentMethod) &&
+    methods.includes(input.paymentMethod)
+      ? input.paymentMethod
+      : methods[0];
 
   const result = await withEventLock(payload, event.id, async (req) => {
     const existing = await payload.find({
@@ -255,32 +282,71 @@ export async function registerForEvent(input: {
       where: {
         event: { equals: event.id },
         email: { equals: email },
-        status: { not_equals: "cancelled" },
+        status: {
+          in: ["registered", "waitlisted", "checked_in", "pending_payment"],
+        },
       },
       limit: 1,
       depth: 0,
       req,
     });
-    if (existing.docs[0]) {
-      return { registration: existing.docs[0], alreadyRegistered: true };
+    const existingDoc = existing.docs[0];
+    if (existingDoc?.status === "pending_payment") {
+      // Påbegynt, men ikke betalt: start på nytt. Den gamle plassen (og
+      // følget) frigjøres først, så den ikke telles dobbelt.
+      const stale = await findActiveGuests(payload, existingDoc.id, req);
+      for (const doc of [existingDoc, ...stale]) {
+        await payload.update({
+          collection: "event-registrations",
+          id: doc.id,
+          data: {
+            status: "cancelled",
+            cancelledAt: new Date().toISOString(),
+            cancelledBy: "self",
+          },
+          depth: 0,
+          overrideAccess: true,
+          req,
+        });
+      }
+    } else if (existingDoc) {
+      return {
+        registration: existingDoc,
+        guests: await findActiveGuests(payload, existingDoc.id, req),
+        alreadyRegistered: true,
+      };
     }
 
     const decision = decideRegistrationStatus({
       capacity: event.capacity,
       seatsTaken: await countSeats(payload, event.id, req),
       waitlistEnabled: event.waitlistEnabled,
+      partySize,
     });
     if (decision === "full") return null;
+    // Betalt event: plassen holdes mens personen betaler. Venteliste betaler
+    // først når de får plass.
+    const status =
+      decision === "registered" && priceKr ? "pending_payment" : decision;
 
     const registration = await payload.create({
       collection: "event-registrations",
       data: {
         event: event.id,
+        source: "online",
         name,
         email,
         answers,
         newsletter: input.newsletter && Boolean(event.newsletterOptIn),
-        status: decision,
+        status,
+        payment:
+          status === "pending_payment" && priceKr
+            ? {
+                provider: paymentMethod,
+                amountKr: partyAmountKr(priceKr, partySize),
+                expiresAt: holdExpiresAt("checkout").toISOString(),
+              }
+            : undefined,
         code: await uniqueCode(payload, req),
         token: generateTicketToken(),
         waitlistPosition:
@@ -290,10 +356,38 @@ export async function registerForEvent(input: {
       },
       req,
     });
-    return { registration, alreadyRegistered: false };
+
+    // Følget: hver sin rad og kode, samme status som den som meldte på.
+    // Uten e-post — billettene sendes til hovedpersonen.
+    const guests: EventRegistration[] = [];
+    for (const guestName of guestNames.names) {
+      guests.push(
+        await payload.create({
+          collection: "event-registrations",
+          data: {
+            event: event.id,
+            source: "online",
+            guestOf: registration.id,
+            name: guestName,
+            status,
+            code: await uniqueCode(payload, req),
+            token: generateTicketToken(),
+          },
+          req,
+        })
+      );
+    }
+    return { registration, guests, alreadyRegistered: false };
   });
 
-  if (!result) return fail("full");
+  if (!result) {
+    return fail(
+      "full",
+      guestNames.names.length
+        ? "Det er ikke nok plasser til hele følget ditt. Prøv med færre personer."
+        : undefined
+    );
+  }
   revalidateEventSeats(event.id);
   return { ok: true, event, ...result };
 }
@@ -322,6 +416,33 @@ export async function findRegistrationByToken(
   return registration as EventRegistration & { event: Event };
 }
 
+/** Følget til en påmelding (ikke avmeldte), med billettnøkler. */
+export async function getActiveGuests(
+  registrationId: number
+): Promise<EventRegistration[]> {
+  return findActiveGuests(await getEventsPayload(), registrationId);
+}
+
+async function findActiveGuests(
+  payload: Payload,
+  hostId: number,
+  req: LockedReq = {}
+): Promise<EventRegistration[]> {
+  const { docs } = await payload.find({
+    collection: "event-registrations",
+    where: {
+      guestOf: { equals: hostId },
+      status: { not_equals: "cancelled" },
+    },
+    sort: "createdAt",
+    depth: 0,
+    pagination: false,
+    overrideAccess: true,
+    req,
+  });
+  return docs;
+}
+
 async function findRegistrationById(
   payload: Payload,
   id: number,
@@ -344,8 +465,13 @@ async function findRegistrationById(
 
 export interface CancelResult {
   registration: EventRegistration;
-  /** Den som rykket opp fra ventelista og nå skal ha billett. */
-  promoted: EventRegistration | null;
+  /** Følget som ble meldt av sammen med personen. */
+  cancelledGuests: EventRegistration[];
+  /**
+   * De som rykket opp fra ventelista og nå skal ha billett (hovedpersonene —
+   * følget deres rykket opp samtidig og får billettene i samme e-post).
+   */
+  promoted: EventRegistration[];
   alreadyCancelled: boolean;
 }
 
@@ -369,75 +495,161 @@ export async function cancelRegistration({
     const current = await findRegistrationById(payload, registrationId, req);
     if (!current) return null;
     if (current.status === "cancelled") {
-      return { registration: current, promoted: null, alreadyCancelled: true };
+      return {
+        registration: current,
+        cancelledGuests: [],
+        promoted: [],
+        alreadyCancelled: true,
+      };
     }
 
-    const heldSeat = SEAT_STATUSES.includes(current.status);
+    const cancelData = {
+      status: "cancelled" as const,
+      cancelledAt: new Date().toISOString(),
+      cancelledBy: by,
+      waitlistPosition: null,
+    };
     const registration = await payload.update({
       collection: "event-registrations",
       id: current.id,
-      data: {
-        status: "cancelled",
-        cancelledAt: new Date().toISOString(),
-        cancelledBy: by,
-        waitlistPosition: null,
-      },
+      data: cancelData,
       depth: 0,
       overrideAccess: true,
       req,
     });
 
-    const promoted = heldSeat
-      ? await promoteNextInLine(payload, eventId, req)
-      : null;
-    return { registration, promoted, alreadyCancelled: false };
+    // Melder hovedpersonen seg av, går følget med. Et følge kan også melde
+    // seg av alene (fra sin egen billett).
+    const guests = current.guestOf
+      ? []
+      : await findActiveGuests(payload, current.id, req);
+    const cancelledGuests: EventRegistration[] = [];
+    for (const guest of guests) {
+      cancelledGuests.push(
+        await payload.update({
+          collection: "event-registrations",
+          id: guest.id,
+          data: cancelData,
+          depth: 0,
+          overrideAccess: true,
+          req,
+        })
+      );
+    }
+
+    const freedSeat = [current, ...guests].some((doc) =>
+      SEAT_STATUSES.includes(doc.status)
+    );
+    const promoted = freedSeat
+      ? await promoteFromWaitlist(payload, eventId, req)
+      : [];
+    return {
+      registration,
+      cancelledGuests,
+      promoted,
+      alreadyCancelled: false,
+    };
   });
 
   if (result) revalidateEventSeats(eventId);
   return result;
 }
 
-async function promoteNextInLine(
+/**
+ * Flytt et følge fra venteliste til plass. Betalt event: plassen holdes i
+ * 24 t mens de betaler (beløpet for hele følget ligger på hovedpersonen).
+ */
+async function markPromoted(
+  payload: Payload,
+  { hostId, ids, event }: { hostId: number; ids: number[]; event: Event },
+  req: LockedReq
+): Promise<EventRegistration[]> {
+  const priceKr = eventPriceKr(event);
+  const promotedAt = new Date().toISOString();
+  const updated: EventRegistration[] = [];
+  for (const id of ids) {
+    updated.push(
+      await payload.update({
+        collection: "event-registrations",
+        id,
+        data: {
+          status: priceKr ? "pending_payment" : "registered",
+          promotedAt,
+          waitlistPosition: null,
+          ...(priceKr &&
+            id === hostId && {
+              payment: {
+                amountKr: partyAmountKr(priceKr, ids.length),
+                expiresAt: holdExpiresAt("promotion").toISOString(),
+              },
+            }),
+        },
+        depth: 0,
+        overrideAccess: true,
+        req,
+      })
+    );
+  }
+  return updated;
+}
+
+/**
+ * Gi plass til de første på ventelista, ett følge om gangen (personen og
+ * følget får plass samtidig), så lenge det er plass. Stopper ved det første
+ * følget som ikke får plass, så ingen sniker i køen — «Gi plass» i admin kan
+ * overstyre.
+ */
+async function promoteFromWaitlist(
   payload: Payload,
   eventId: number,
   req: LockedReq
-): Promise<EventRegistration | null> {
+): Promise<EventRegistration[]> {
   const event = await payload.findByID({
     collection: "events",
     id: eventId,
     depth: 0,
     req,
   });
-  if (!event.waitlistEnabled && !event.capacity) return null;
+  if (!event.waitlistEnabled && !event.capacity) return [];
 
-  const seatsTaken = await countSeats(payload, eventId, req);
-  if (event.capacity && seatsTaken >= event.capacity) return null;
+  const promoted: EventRegistration[] = [];
+  for (;;) {
+    const seatsTaken = await countSeats(payload, eventId, req);
+    if (event.capacity && seatsTaken >= event.capacity) break;
 
-  const next = await payload.find({
-    collection: "event-registrations",
-    where: {
-      event: { equals: eventId },
-      status: { equals: "waitlisted" },
-    },
-    sort: ["waitlistPosition", "createdAt"],
-    limit: 1,
-    depth: 0,
-    req,
-  });
-  if (!next.docs[0]) return null;
+    const next = await payload.find({
+      collection: "event-registrations",
+      where: {
+        event: { equals: eventId },
+        status: { equals: "waitlisted" },
+        guestOf: { exists: false },
+      },
+      sort: ["waitlistPosition", "createdAt"],
+      limit: 1,
+      depth: 0,
+      req,
+    });
+    const host = next.docs[0];
+    if (!host) break;
 
-  return payload.update({
-    collection: "event-registrations",
-    id: next.docs[0].id,
-    data: {
-      status: "registered",
-      promotedAt: new Date().toISOString(),
-      waitlistPosition: null,
-    },
-    depth: 0,
-    overrideAccess: true,
-    req,
-  });
+    const guests = (await findActiveGuests(payload, host.id, req)).filter(
+      (guest) => guest.status === "waitlisted"
+    );
+    if (event.capacity && seatsTaken + 1 + guests.length > event.capacity) {
+      break;
+    }
+    const [updatedHost] = await markPromoted(
+      payload,
+      {
+        hostId: host.id,
+        ids: [host.id, ...guests.map((guest) => guest.id)],
+        event,
+      },
+      req
+    );
+    promoted.push(updatedHost);
+  }
+  return promoted;
 }
 
 /**
@@ -452,22 +664,315 @@ export async function promoteRegistration(
   const eventId = relationId(initial?.event);
   if (!initial || !eventId || initial.status !== "waitlisted") return null;
 
-  const updated = await withEventLock(payload, eventId, async (req) =>
-    payload.update({
-      collection: "event-registrations",
-      id: registrationId,
-      data: {
-        status: "registered",
-        promotedAt: new Date().toISOString(),
-        waitlistPosition: null,
-      },
+  // Hele følget får plass sammen, uansett hvilken rad admin trykket på.
+  const hostId = relationId(initial.guestOf) ?? initial.id;
+  const updated = await withEventLock(payload, eventId, async (req) => {
+    const event = await payload.findByID({
+      collection: "events",
+      id: eventId,
       depth: 0,
-      overrideAccess: true,
       req,
-    })
-  );
+    });
+    const host = await findRegistrationById(payload, hostId, req);
+    const guests = (await findActiveGuests(payload, hostId, req)).filter(
+      (guest) => guest.status === "waitlisted"
+    );
+    const ids = [
+      ...(host?.status === "waitlisted" ? [hostId] : []),
+      ...guests.map((guest) => guest.id),
+    ];
+    const docs = await markPromoted(payload, { hostId, ids, event }, req);
+    return (
+      docs.find((doc) => doc.id === hostId) ??
+      (await findRegistrationById(payload, hostId, req))
+    );
+  });
   revalidateEventSeats(eventId);
   return updated;
+}
+
+/* ------------------------------------------------------------------ */
+/* Betaling (selve kallene til Stripe/Vipps ligger i payments.ts)     */
+/* ------------------------------------------------------------------ */
+
+/** Alle i følget, uansett status (også avmeldte). */
+async function findAllGuests(
+  payload: Payload,
+  hostId: number,
+  req: LockedReq
+): Promise<EventRegistration[]> {
+  const { docs } = await payload.find({
+    collection: "event-registrations",
+    where: { guestOf: { equals: hostId } },
+    depth: 0,
+    pagination: false,
+    overrideAccess: true,
+    req,
+  });
+  return docs;
+}
+
+/** Hovedpersonen med en betalingsreferanse fra Stripe (sesjon) eller Vipps. */
+export async function findRegistrationByPaymentReference(
+  reference: string
+): Promise<(EventRegistration & { event: Event }) | null> {
+  const payload = await getEventsPayload();
+  const found = await payload.find({
+    collection: "event-registrations",
+    where: { "payment.reference": { equals: reference } },
+    limit: 1,
+    depth: 1,
+    overrideAccess: true,
+  });
+  const registration = found.docs[0];
+  if (!registration || typeof registration.event !== "object") return null;
+  return registration as EventRegistration & { event: Event };
+}
+
+/** Lagre hvilken betaling hos Stripe/Vipps som hører til påmeldingen. */
+export async function setPaymentReference(
+  registrationId: number,
+  { provider, reference }: { provider: PaymentProvider; reference: string }
+): Promise<void> {
+  const payload = await getEventsPayload();
+  const current = await findRegistrationById(payload, registrationId);
+  if (!current) return;
+  await payload.update({
+    collection: "event-registrations",
+    id: registrationId,
+    data: { payment: { ...current.payment, provider, reference } },
+    depth: 0,
+    overrideAccess: true,
+  });
+}
+
+export type ConfirmOutcome = "confirmed" | "already" | "no_seat" | "not_found";
+
+/**
+ * Betalingen er gjennomført: personen og følget får billett. Tåler å kalles
+ * flere ganger samtidig (webhook, retur fra kassen og billettsiden). Kom
+ * betalingen etter fristen og plassen er frigjort, tas den tilbake hvis det
+ * fortsatt er plass — ellers `no_seat`, og kalleren betaler tilbake.
+ */
+export async function confirmRegistrationPayment({
+  registrationId,
+  stripePaymentIntentId,
+}: {
+  registrationId: number;
+  stripePaymentIntentId?: string | null;
+}): Promise<{
+  outcome: ConfirmOutcome;
+  registration: EventRegistration | null;
+}> {
+  const payload = await getEventsPayload();
+  const initial = await findRegistrationById(payload, registrationId);
+  const eventId = relationId(initial?.event);
+  if (!initial || !eventId) return { outcome: "not_found", registration: null };
+
+  const result = await withEventLock(
+    payload,
+    eventId,
+    async (
+      req
+    ): Promise<{
+      outcome: ConfirmOutcome;
+      registration: EventRegistration | null;
+    }> => {
+      const current = await findRegistrationById(payload, registrationId, req);
+      if (!current) return { outcome: "not_found", registration: null };
+      if (current.payment?.paidAt) {
+        return { outcome: "already", registration: current };
+      }
+
+      const guests = await findAllGuests(payload, current.id, req);
+      let partyIds: number[];
+      if (current.status === "pending_payment") {
+        partyIds = [
+          current.id,
+          ...guests
+            .filter((guest) => guest.status === "pending_payment")
+            .map((guest) => guest.id),
+        ];
+      } else if (current.status === "cancelled") {
+        const event = await payload.findByID({
+          collection: "events",
+          id: eventId,
+          depth: 0,
+          req,
+        });
+        const party = [
+          current,
+          ...guests.filter((guest) => guest.status === "cancelled"),
+        ];
+        const seatsTaken = await countSeats(payload, eventId, req);
+        if (event.capacity && seatsTaken + party.length > event.capacity) {
+          return { outcome: "no_seat", registration: current };
+        }
+        partyIds = party.map((doc) => doc.id);
+      } else {
+        // Venteliste eller refundert: betalingen hører ikke til en plass.
+        return { outcome: "no_seat", registration: current };
+      }
+
+      const paidAt = new Date().toISOString();
+      for (const id of partyIds) {
+        await payload.update({
+          collection: "event-registrations",
+          id,
+          data: {
+            status: "registered",
+            cancelledAt: null,
+            cancelledBy: null,
+            ...(id === current.id && {
+              payment: {
+                ...current.payment,
+                paidAt,
+                expiresAt: null,
+                ...(stripePaymentIntentId && { stripePaymentIntentId }),
+              },
+            }),
+          },
+          depth: 0,
+          overrideAccess: true,
+          req,
+        });
+      }
+      return {
+        outcome: "confirmed",
+        registration: await findRegistrationById(payload, current.id, req),
+      };
+    }
+  );
+  revalidateEventSeats(eventId);
+  return result;
+}
+
+/**
+ * Ikke betalt i tide, eller betalingen ble avbrutt: personen og følget meldes
+ * av, og ventelista rykker opp. Rører ikke noe som er betalt.
+ */
+export async function releaseUnpaidRegistration(
+  registrationId: number
+): Promise<{ released: boolean; promoted: EventRegistration[] }> {
+  const payload = await getEventsPayload();
+  const initial = await findRegistrationById(payload, registrationId);
+  const eventId = relationId(initial?.event);
+  if (!initial || !eventId || initial.status !== "pending_payment") {
+    return { released: false, promoted: [] };
+  }
+
+  const result = await withEventLock(payload, eventId, async (req) => {
+    const current = await findRegistrationById(payload, registrationId, req);
+    if (current?.status !== "pending_payment" || current.payment?.paidAt) {
+      return { released: false, promoted: [] as EventRegistration[] };
+    }
+    const guests = (await findActiveGuests(payload, current.id, req)).filter(
+      (guest) => guest.status === "pending_payment"
+    );
+    const cancelledAt = new Date().toISOString();
+    for (const doc of [current, ...guests]) {
+      await payload.update({
+        collection: "event-registrations",
+        id: doc.id,
+        data: {
+          status: "cancelled",
+          cancelledAt,
+          cancelledBy: null,
+          waitlistPosition: null,
+        },
+        depth: 0,
+        overrideAccess: true,
+        req,
+      });
+    }
+    return {
+      released: true,
+      promoted: await promoteFromWaitlist(payload, eventId, req),
+    };
+  });
+  revalidateEventSeats(eventId);
+  return result;
+}
+
+/** Ubetalte påmeldinger der fristen har gått ut (hovedpersonene). */
+export async function findExpiredUnpaid(
+  now: Date = new Date()
+): Promise<EventRegistration[]> {
+  const payload = await getEventsPayload();
+  const { docs } = await payload.find({
+    collection: "event-registrations",
+    where: {
+      status: { equals: "pending_payment" },
+      guestOf: { exists: false },
+      "payment.expiresAt": { less_than: now.toISOString() },
+    },
+    depth: 0,
+    pagination: false,
+    overrideAccess: true,
+  });
+  return docs;
+}
+
+/**
+ * Pengene er betalt tilbake: personen og følget får status «refundert». Før
+ * eventet rykker ventelista opp.
+ */
+export async function markRegistrationRefunded(
+  registrationId: number
+): Promise<{
+  registration: EventRegistration | null;
+  promoted: EventRegistration[];
+}> {
+  const payload = await getEventsPayload();
+  const initial = await findRegistrationById(payload, registrationId);
+  const eventId = relationId(initial?.event);
+  if (!initial || !eventId) return { registration: null, promoted: [] };
+
+  const result = await withEventLock(payload, eventId, async (req) => {
+    const current = await findRegistrationById(payload, registrationId, req);
+    if (!current || current.status === "refunded") {
+      return { registration: current, promoted: [] as EventRegistration[] };
+    }
+    const event = await payload.findByID({
+      collection: "events",
+      id: eventId,
+      depth: 0,
+      req,
+    });
+    const guests = await findActiveGuests(payload, current.id, req);
+    const heldSeat = [current, ...guests].some((doc) =>
+      SEAT_STATUSES.includes(doc.status)
+    );
+    const now = new Date().toISOString();
+    for (const doc of [current, ...guests]) {
+      await payload.update({
+        collection: "event-registrations",
+        id: doc.id,
+        data: {
+          status: "refunded",
+          cancelledAt: now,
+          cancelledBy: "admin",
+          waitlistPosition: null,
+          ...(doc.id === current.id && {
+            payment: { ...current.payment, refundedAt: now },
+          }),
+        },
+        depth: 0,
+        overrideAccess: true,
+        req,
+      });
+    }
+    const upcoming = new Date(event.startsAt).getTime() > Date.now();
+    return {
+      registration: await findRegistrationById(payload, current.id, req),
+      promoted:
+        heldSeat && upcoming
+          ? await promoteFromWaitlist(payload, eventId, req)
+          : [],
+    };
+  });
+  revalidateEventSeats(eventId);
+  return result;
 }
 
 /* ------------------------------------------------------------------ */
@@ -479,6 +984,7 @@ export type CheckInOutcome =
   | "already"
   | "waitlisted"
   | "cancelled"
+  | "unpaid"
   | "unknown"
   | "wrong_event";
 
@@ -553,7 +1059,11 @@ export async function checkInRegistration({
   if (registration.status !== "registered" && !force) {
     return {
       outcome:
-        registration.status === "waitlisted" ? "waitlisted" : "cancelled",
+        registration.status === "waitlisted"
+          ? "waitlisted"
+          : registration.status === "pending_payment"
+            ? "unpaid"
+            : "cancelled",
       registration: summary(registration),
     };
   }
@@ -577,6 +1087,79 @@ export async function checkInRegistration({
   return { outcome: "ok", registration: summary(updated) };
 }
 
+export type WalkInResult =
+  | (CheckInResult & { overCapacity: boolean })
+  | { outcome: "invalid"; error: string };
+
+/**
+ * Registrer noen som dukker opp i døra uten påmelding: opprettes direkte som
+ * «møtt». Ingen kapasitetssperre — de står jo der — men svaret sier fra når
+ * eventet er fullt, så døra kan bestemme. Ingen e-post sendes.
+ */
+export async function registerWalkIn({
+  eventId,
+  name: rawName,
+  email: rawEmail,
+  userId,
+}: {
+  eventId: number;
+  name: string;
+  email?: string | null;
+  userId: number;
+}): Promise<WalkInResult> {
+  const name = rawName.trim().slice(0, 200);
+  const email = rawEmail?.trim().toLowerCase() || null;
+  if (!name) return { outcome: "invalid", error: "Skriv inn navnet." };
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return { outcome: "invalid", error: "E-postadressen ser ikke riktig ut." };
+  }
+
+  const payload = await getEventsPayload();
+  const event = await payload
+    .findByID({ collection: "events", id: eventId, depth: 0 })
+    .catch(() => null);
+  if (!event) return { outcome: "invalid", error: "Fant ikke eventet." };
+
+  const { registration, seatsBefore } = await withEventLock(
+    payload,
+    eventId,
+    async (req) => {
+      const seatsBefore = await countSeats(payload, eventId, req);
+      const registration = await payload.create({
+        collection: "event-registrations",
+        data: {
+          event: eventId,
+          source: "walk_in",
+          name,
+          email,
+          status: "checked_in",
+          checkedInAt: new Date().toISOString(),
+          checkedInBy: userId,
+          code: await uniqueCode(payload, req),
+          token: generateTicketToken(),
+        },
+        req,
+      });
+      return { registration, seatsBefore };
+    }
+  );
+  revalidateEventSeats(eventId);
+
+  return {
+    outcome: "ok",
+    overCapacity: Boolean(event.capacity && seatsBefore >= event.capacity),
+    registration: {
+      id: registration.id,
+      name: registration.name,
+      code: registration.code,
+      status: registration.status,
+      checkedInAt: registration.checkedInAt,
+      eventId,
+      eventTitle: event.title,
+    },
+  };
+}
+
 /**
  * Slett en påmelding for godt, f.eks. når noen ber om å bli slettet. Er
  * eventet ikke startet og personen hadde plass, meldes påmeldingen av først,
@@ -584,10 +1167,10 @@ export async function checkInRegistration({
  */
 export async function deleteRegistration(
   registrationId: number
-): Promise<{ deleted: boolean; promoted: EventRegistration | null }> {
+): Promise<{ deleted: boolean; promoted: EventRegistration[] }> {
   const payload = await getEventsPayload();
   const current = await getRegistrationWithToken(registrationId);
-  if (!current) return { deleted: false, promoted: null };
+  if (!current) return { deleted: false, promoted: [] };
 
   const upcoming = new Date(current.event.startsAt).getTime() > Date.now();
   const cancelled =
@@ -595,13 +1178,19 @@ export async function deleteRegistration(
       ? await cancelRegistration({ registrationId, by: "admin" })
       : null;
 
+  // Følget er en del av personens påmelding og slettes sammen med den.
+  await payload.delete({
+    collection: "event-registrations",
+    where: { guestOf: { equals: registrationId } },
+    overrideAccess: true,
+  });
   await payload.delete({
     collection: "event-registrations",
     id: registrationId,
     overrideAccess: true,
   });
   revalidateEventSeats(current.event.id);
-  return { deleted: true, promoted: cancelled?.promoted ?? null };
+  return { deleted: true, promoted: cancelled?.promoted ?? [] };
 }
 
 /** Angre en innsjekk (feilskanning). */
@@ -630,8 +1219,11 @@ export async function undoCheckIn(
 export interface RegistrationRow {
   id: number;
   name: string;
-  email: string;
+  email: string | null;
   status: RegistrationStatus;
+  source: RegistrationSource;
+  /** Id-en til den som meldte på, når raden er følge. */
+  guestOfId: number | null;
   code: string;
   newsletter: boolean;
   answers: RegistrationAnswers;
@@ -641,6 +1233,13 @@ export interface RegistrationRow {
   cancelledAt: string | null;
   cancelledBy: string | null;
   promotedAt: string | null;
+  payment: {
+    provider: string | null;
+    amountKr: number | null;
+    paidAt: string | null;
+    refundedAt: string | null;
+    expiresAt: string | null;
+  } | null;
 }
 
 export interface RegistrationOverview {
@@ -649,6 +1248,8 @@ export interface RegistrationOverview {
     title: string;
     startsAt: string;
     capacity: number | null;
+    /** Pris per person, null = gratis. */
+    priceKr: number | null;
     waitlistEnabled: boolean;
     ticketsEnabled: boolean;
     questions: { name: string; label: string }[];
@@ -680,6 +1281,8 @@ export async function getRegistrationOverview(
     waitlisted: 0,
     checked_in: 0,
     cancelled: 0,
+    pending_payment: 0,
+    refunded: 0,
   };
   for (const doc of found.docs) counts[doc.status] += 1;
 
@@ -689,6 +1292,7 @@ export async function getRegistrationOverview(
       title: event.title,
       startsAt: event.startsAt,
       capacity: event.capacity ?? null,
+      priceKr: eventPriceKr(event),
       waitlistEnabled: Boolean(event.waitlistEnabled),
       ticketsEnabled: event.ticketsEnabled !== false,
       questions: (event.extraQuestions ?? [])
@@ -699,8 +1303,19 @@ export async function getRegistrationOverview(
     rows: found.docs.map((doc) => ({
       id: doc.id,
       name: doc.name,
-      email: doc.email,
+      email: doc.email ?? null,
       status: doc.status,
+      source: doc.source ?? "online",
+      guestOfId: relationId(doc.guestOf),
+      payment: doc.payment?.amountKr
+        ? {
+            provider: doc.payment.provider ?? null,
+            amountKr: doc.payment.amountKr ?? null,
+            paidAt: doc.payment.paidAt ?? null,
+            refundedAt: doc.payment.refundedAt ?? null,
+            expiresAt: doc.payment.expiresAt ?? null,
+          }
+        : null,
       code: doc.code,
       newsletter: Boolean(doc.newsletter),
       answers: (doc.answers ?? {}) as RegistrationAnswers,

@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import {
   decideRegistrationStatus,
   registrationWindow,
+  sanitizeGuestNames,
   spotsLeft,
 } from "./capacity";
 import {
@@ -98,6 +99,46 @@ describe("kapasitet", () => {
       "full"
     );
     expect(spotsLeft(80, 85)).toBe(0);
+  });
+
+  test("hele følget må få plass samtidig", () => {
+    expect(
+      decideRegistrationStatus({ capacity: 10, seatsTaken: 7, partySize: 3 })
+    ).toBe("registered");
+    expect(
+      decideRegistrationStatus({
+        capacity: 10,
+        seatsTaken: 8,
+        partySize: 3,
+        waitlistEnabled: true,
+      })
+    ).toBe("waitlisted");
+    expect(
+      decideRegistrationStatus({ capacity: 10, seatsTaken: 8, partySize: 3 })
+    ).toBe("full");
+  });
+});
+
+describe("følge", () => {
+  test("ingen følge er alltid greit", () => {
+    expect(sanitizeGuestNames(undefined, 0)).toEqual({ names: [] });
+    expect(sanitizeGuestNames([], 2)).toEqual({ names: [] });
+  });
+
+  test("navn trimmes og godtas innenfor grensa", () => {
+    expect(sanitizeGuestNames([" Ola ", "Kari"], 2)).toEqual({
+      names: ["Ola", "Kari"],
+    });
+  });
+
+  test("avvises når eventet ikke tar imot følge, navn mangler eller det er for mange", () => {
+    expect(sanitizeGuestNames(["Ola"], 0).error).toBeDefined();
+    expect(sanitizeGuestNames(["Ola", " "], 2).error).toBe(
+      "Skriv navn på alle i følget."
+    );
+    expect(sanitizeGuestNames(["Ola", "Kari"], 1).error).toBe(
+      "Du kan ta med inntil 1 person."
+    );
   });
 });
 

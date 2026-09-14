@@ -22,6 +22,10 @@ export interface EventTicketEmailProps {
   practicalInfo?: string[];
   /** Personen rykket opp fra ventelista. */
   promoted?: boolean;
+  /** Påminnelse dagen før (samme billett, annen innledning). */
+  reminder?: boolean;
+  /** Billetter til følget, som den påmeldte kan vise fram eller sende videre. */
+  guests?: { name: string; code?: string; qrSrc?: string; ticketUrl: string }[];
 }
 
 const codeBox = {
@@ -56,26 +60,34 @@ export default function EventTicketEmail({
   greeting,
   practicalInfo = [],
   promoted,
+  reminder,
+  guests = [],
 }: EventTicketEmailProps) {
-  return (
-    <EmailShell
-      preview={
-        promoted
-          ? `Det ble plass! Du er med på ${eventTitle}.`
-          : `Du er påmeldt ${eventTitle}. Her er billetten din.`
+  const intro = reminder
+    ? {
+        preview: `Snart er det tid for ${eventTitle}. Billetten ligger her.`,
+        eyebrow: "Snart er det tid",
+        text: "En liten påminnelse: vi ses snart! Billetten ligger under, så du har den klar i døra.",
       }
-    >
-      <Text style={emailStyles.eyebrow}>
-        {promoted ? "Det ble plass" : "Du er påmeldt"}
-      </Text>
+    : promoted
+      ? {
+          preview: `Det ble plass! Du er med på ${eventTitle}.`,
+          eyebrow: "Det ble plass",
+          text: "Noen meldte seg av, og du sto først på ventelista. Plassen er din!",
+        }
+      : {
+          preview: `Du er påmeldt ${eventTitle}. Her er billetten din.`,
+          eyebrow: "Du er påmeldt",
+          text: "Så fint at du vil være med. Plassen din er klar.",
+        };
+
+  return (
+    <EmailShell preview={intro.preview}>
+      <Text style={emailStyles.eyebrow}>{intro.eyebrow}</Text>
       <Text style={emailStyles.heading}>{eventTitle}</Text>
       <Text style={emailStyles.text}>Hei{name ? ` ${name}` : ""},</Text>
-      <Text style={emailStyles.text}>
-        {promoted
-          ? "Noen meldte seg av, og du sto først på ventelista. Plassen er din!"
-          : "Så fint at du vil være med. Plassen din er klar."}
-      </Text>
-      {greeting ? (
+      <Text style={emailStyles.text}>{intro.text}</Text>
+      {greeting && !reminder ? (
         <Text style={{ ...emailStyles.text, whiteSpace: "pre-line" }}>
           {greeting}
         </Text>
@@ -124,6 +136,44 @@ export default function EventTicketEmail({
           <Text style={{ ...emailStyles.text, fontSize: "14px", margin: 0 }}>
             Ta vare på denne e-posten. Vis QR-koden i døra, eller si koden.
           </Text>
+        </Section>
+      ) : null}
+
+      {guests.length ? (
+        <Section>
+          <Text style={emailStyles.label}>
+            {guests.length === 1
+              ? "Billett til den du tar med"
+              : "Billetter til dem du tar med"}
+          </Text>
+          <Text style={emailStyles.text}>
+            Hver person har sin egen billett. Vis QR-koden for dem i døra, eller
+            send lenken videre.
+          </Text>
+          {guests.map((guest) => (
+            <Section key={guest.ticketUrl} style={codeBox}>
+              <Text style={{ ...emailStyles.value, margin: 0 }}>
+                {guest.name}
+              </Text>
+              {guest.qrSrc ? (
+                <Img
+                  src={guest.qrSrc}
+                  width="160"
+                  height="160"
+                  alt={`QR-kode for billetten til ${guest.name}`}
+                  style={{ margin: "12px auto 0", display: "block" }}
+                />
+              ) : null}
+              {guest.code ? <Text style={codeText}>{guest.code}</Text> : null}
+              <Text
+                style={{ ...emailStyles.text, fontSize: "14px", margin: 0 }}
+              >
+                <a href={guest.ticketUrl} style={{ color: brand.ink }}>
+                  Billettlenke til {guest.name}
+                </a>
+              </Text>
+            </Section>
+          ))}
         </Section>
       ) : null}
 

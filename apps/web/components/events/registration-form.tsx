@@ -7,6 +7,12 @@ import {
 } from "@/lib/events/capacity";
 import { formatEventDay, formatEventTime } from "@/lib/events/format";
 import {
+  PAYMENT_PROVIDERS,
+  type PaymentProvider,
+  formatKr,
+  partyAmountKr,
+} from "@/lib/events/payment-rules";
+import {
   Button,
   Checkbox,
   ConfettiBurst,
@@ -20,9 +26,9 @@ import {
   Text,
   Textarea,
 } from "@poynt/ui";
-import { CalendarCheck, Hourglass, Ticket } from "lucide-react";
+import { CalendarCheck, Hourglass, Ticket, UserPlus, X } from "lucide-react";
 import Link from "next/link";
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
 
 export interface RegistrationQuestion {
   name: string;
@@ -45,6 +51,11 @@ export interface RegistrationFormProps {
   newsletterOptIn: boolean;
   newsletterText: string;
   questions: RegistrationQuestion[];
+  /** Hvor mange man kan ta med (0 = hver melder seg på selv). */
+  maxGuests: number;
+  /** Pris per person i kr, null = gratis. */
+  priceKr: number | null;
+  paymentMethods: PaymentProvider[];
 }
 
 interface SuccessState {
@@ -53,6 +64,7 @@ interface SuccessState {
   code?: string | null;
   ticketUrl?: string;
   waitlistPosition?: number | null;
+  guestCount?: number;
 }
 
 /**
@@ -67,6 +79,11 @@ export function RegistrationForm(props: RegistrationFormProps) {
   const [success, setSuccess] = useState<SuccessState | null>(null);
   const [answers, setAnswers] = useState<Record<string, string | boolean>>({});
   const [newsletter, setNewsletter] = useState(false);
+  const [guests, setGuests] = useState<{ id: number; name: string }[]>([]);
+  const nextGuestId = useRef(1);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentProvider>(
+    props.paymentMethods[0] ?? "vipps"
+  );
 
   useEffect(() => {
     setWindow(registrationWindow(props));
@@ -106,6 +123,12 @@ export function RegistrationForm(props: RegistrationFormProps) {
   if (full && !props.waitlistEnabled) {
     return <Notice>Det er dessverre fullt.</Notice>;
   }
+  const partySize = 1 + guests.length;
+  // Er det ikke plass til hele følget, havner alle på ventelista (eller avvises).
+  const tooFew = props.spotsLeft !== null && props.spotsLeft < partySize;
+  // Betaling bare når de faktisk får plass; ventelista betaler ved opprykk.
+  const toPayment = Boolean(props.priceKr) && !tooFew;
+  const totalKr = props.priceKr ? partyAmountKr(props.priceKr, partySize) : 0;
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -122,11 +145,19 @@ export function RegistrationForm(props: RegistrationFormProps) {
           website: data.get("website"),
           answers,
           newsletter,
+          guests: guests.map((guest) => guest.name.trim()),
+          paymentMethod: props.priceKr ? paymentMethod : undefined,
         }),
       });
       const json = await res.json();
       if (!res.ok) {
         setError(json.error ?? "Noe gikk galt. Prøv igjen.");
+        return;
+      }
+      if (json.checkoutUrl) {
+        // Til Vipps/kortbetaling. Knappen står som «Åpner betaling…» til
+        // siden bytter. (`window` er skygget av state-variabelen over.)
+        document.location.href = json.checkoutUrl;
         return;
       }
       setSuccess(json);
@@ -159,6 +190,69 @@ export function RegistrationForm(props: RegistrationFormProps) {
           Billetten kommer hit, så sjekk at adressen stemmer.
         </Text>
       </div>
+
+      {props.maxGuests > 0 && (
+        <div className="space-y-3 rounded-2xl bg-muted/50 p-4">
+          <div>
+            <p className="font-semibold text-foreground text-sm">
+              Tar du med noen?
+            </p>
+            <Text variant="muted" customStyles="text-xs">
+              Du kan ta med inntil {props.maxGuests}{" "}
+              {props.maxGuests === 1 ? "person" : "personer"}. Alle får hver sin
+              billett, og billettene kommer til deg.
+            </Text>
+          </div>
+          {guests.map((guest, index) => (
+            <div key={guest.id} className="flex items-end gap-2">
+              <div className="min-w-0 flex-1 space-y-1.5">
+                <Label htmlFor={`event-folge-${guest.id}`}>
+                  Navn, person {index + 2}
+                </Label>
+                <Input
+                  id={`event-folge-${guest.id}`}
+                  required
+                  autoComplete="off"
+                  value={guest.name}
+                  onChange={(e) =>
+                    setGuests((prev) =>
+                      prev.map((g) =>
+                        g.id === guest.id ? { ...g, name: e.target.value } : g
+                      )
+                    )
+                  }
+                />
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                aria-label={`Fjern ${guest.name || `person ${index + 2}`}`}
+                onClick={() =>
+                  setGuests((prev) => prev.filter((g) => g.id !== guest.id))
+                }
+              >
+                <X className="size-4" aria-hidden />
+              </Button>
+            </div>
+          ))}
+          {guests.length < props.maxGuests && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                setGuests((prev) => [
+                  ...prev,
+                  { id: nextGuestId.current++, name: "" },
+                ])
+              }
+            >
+              <UserPlus className="size-4" aria-hidden />
+              Legg til en person
+            </Button>
+          )}
+        </div>
+      )}
 
       {props.questions.map((q) => {
         const id = `event-q-${q.name}`;
@@ -269,6 +363,53 @@ export function RegistrationForm(props: RegistrationFormProps) {
         />
       </div>
 
+      {props.priceKr ? (
+        <div className="space-y-3 rounded-2xl bg-muted/50 p-4">
+          <div className="flex items-baseline justify-between gap-3">
+            <span className="text-foreground text-sm">
+              {partySize > 1
+                ? `${partySize} × ${formatKr(props.priceKr)}`
+                : "Pris"}
+            </span>
+            <span className="font-bold font-heading text-foreground text-lg">
+              {formatKr(totalKr)}
+            </span>
+          </div>
+          {toPayment && props.paymentMethods.length > 1 && (
+            <fieldset className="space-y-2">
+              <legend className="mb-2 font-semibold text-foreground text-sm">
+                Betal med
+              </legend>
+              <div className="grid grid-cols-2 gap-2">
+                {PAYMENT_PROVIDERS.filter((p) =>
+                  props.paymentMethods.includes(p.value)
+                ).map((provider) => (
+                  <label
+                    key={provider.value}
+                    className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-input bg-card px-3 py-2.5 font-semibold text-sm has-checked:border-primary has-checked:ring-2 has-checked:ring-primary/30"
+                  >
+                    <input
+                      type="radio"
+                      name="betalingsmate"
+                      value={provider.value}
+                      checked={paymentMethod === provider.value}
+                      onChange={() => setPaymentMethod(provider.value)}
+                      className="accent-primary"
+                    />
+                    {provider.label}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          )}
+          <Text variant="muted" customStyles="text-xs">
+            {toPayment
+              ? "Plassen holdes av i 30 minutter mens du betaler. Billetten kommer på e-post når betalingen er gjennomført."
+              : "Du betaler først hvis du får plass fra ventelista."}
+          </Text>
+        </div>
+      ) : null}
+
       {error && (
         <div
           role="alert"
@@ -286,10 +427,18 @@ export function RegistrationForm(props: RegistrationFormProps) {
           disabled={submitting}
         >
           {submitting
-            ? "Melder på…"
-            : full
-              ? "Sett meg på ventelista"
-              : "Meld meg på"}
+            ? toPayment
+              ? "Åpner betaling…"
+              : "Melder på…"
+            : toPayment
+              ? `Gå til betaling (${formatKr(totalKr)})`
+              : tooFew && props.waitlistEnabled
+                ? guests.length
+                  ? "Sett oss på ventelista"
+                  : "Sett meg på ventelista"
+                : guests.length
+                  ? `Meld på ${partySize} personer`
+                  : "Meld meg på"}
         </Button>
         <PrivacyNotice
           purpose="Vi bruker opplysningene til påmeldingen og billetten. Svar på ekstra spørsmål slettes to uker etter eventet, navn og e-post senest seks måneder etter."
@@ -315,6 +464,7 @@ function Success({
   ticketUrl,
   waitlistPosition,
   ticketsEnabled,
+  guestCount = 0,
 }: SuccessState & { ticketsEnabled: boolean }) {
   if (alreadyRegistered) {
     return (
@@ -345,8 +495,12 @@ function Success({
       </p>
       <Text variant="muted" customStyles="text-sm">
         {waitlisted
-          ? `Du er nummer ${waitlistPosition ?? "?"} i køen. Blir det plass, får du billett på e-post automatisk.`
-          : "Billetten er på vei til e-posten din."}
+          ? guestCount
+            ? `Dere er nummer ${waitlistPosition ?? "?"} i køen. Blir det plass til hele følget, får du billettene på e-post automatisk.`
+            : `Du er nummer ${waitlistPosition ?? "?"} i køen. Blir det plass, får du billett på e-post automatisk.`
+          : guestCount
+            ? `Billettene til deg og ${guestCount === 1 ? "den du tar med" : `de ${guestCount} du tar med`} er på vei til e-posten din.`
+            : "Billetten er på vei til e-posten din."}
       </Text>
       {!waitlisted && ticketsEnabled && code && (
         <p className="font-bold font-mono text-2xl text-primary tracking-[0.14em]">

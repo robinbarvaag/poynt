@@ -9,6 +9,8 @@ export interface EventCancelledEmailProps {
   eventUrl: string;
   /** Avmeldt av dere (admin), ikke av personen selv. */
   byAdmin?: boolean;
+  /** Beløpet som er betalt tilbake, når billetten var betalt. */
+  refundedKr?: number;
 }
 
 /** Kvittering på at påmeldingen er avmeldt. */
@@ -18,6 +20,7 @@ export default function EventCancelledEmail({
   when,
   eventUrl,
   byAdmin,
+  refundedKr,
 }: EventCancelledEmailProps) {
   return (
     <EmailShell preview={`Du er meldt av ${eventTitle}.`}>
@@ -29,6 +32,14 @@ export default function EventCancelledEmail({
           ? `Påmeldingen din til ${eventTitle} (${when}) er meldt av. Tror du det er en feil, er det bare å svare på denne e-posten.`
           : `Takk for at du sa fra! Du er meldt av ${eventTitle} (${when}), og plassen din går videre til noen andre. Billetten virker ikke lenger.`}
       </Text>
+      {refundedKr ? (
+        <Text style={emailStyles.text}>
+          Vi har betalt tilbake{" "}
+          {refundedKr.toLocaleString("nb-NO", { maximumFractionDigits: 2 })} kr
+          til samme betalingsmåte som du brukte. Det kan ta noen dager før
+          pengene er på plass.
+        </Text>
+      ) : null}
       <Text style={emailStyles.text}>
         Ombestemmer du deg, kan du melde deg på igjen så lenge det er plass.
       </Text>

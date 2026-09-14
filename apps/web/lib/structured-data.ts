@@ -341,9 +341,12 @@ export function eventSchema(opts: {
   validFrom?: string | null;
   /** Lenke til påmeldingen (egen side eller eksternt billettsystem). */
   offerUrl?: string | null;
+  /** Pris per person i kr (0 = gratis). Utelatt = ukjent (eksternt billettsystem). */
+  price?: number | null;
 }) {
   const imageUrl = absoluteMediaUrl(opts.image);
   const online = Boolean(opts.location?.online);
+  const knownPrice = typeof opts.price === "number" ? opts.price : null;
   const address = opts.location?.address
     ? parseNorwegianAddress(opts.location.address)
     : {};
@@ -382,10 +385,12 @@ export function eventSchema(opts: {
     organizer: { "@id": ORG_ID },
     ...(opts.availability
       ? {
-          isAccessibleForFree: true,
+          ...(knownPrice !== null
+            ? { isAccessibleForFree: knownPrice === 0 }
+            : {}),
           offers: {
             "@type": "Offer",
-            price: 0,
+            ...(knownPrice !== null ? { price: knownPrice } : {}),
             priceCurrency: "NOK",
             availability: `https://schema.org/${opts.availability}`,
             url: opts.offerUrl || opts.url,

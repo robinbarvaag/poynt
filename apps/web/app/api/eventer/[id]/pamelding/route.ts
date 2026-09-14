@@ -4,7 +4,11 @@ import {
   sendRegistrationEmail,
   subscribeFromEvent,
 } from "@/lib/events/notify";
-import { registerForEvent } from "@/lib/events/registrations";
+import { startCheckout } from "@/lib/events/payments";
+import {
+  registerForEvent,
+  releaseUnpaidRegistration,
+} from "@/lib/events/registrations";
 import { getClientIp, rateLimit } from "@/lib/rate-limit";
 import { type NextRequest, NextResponse, after } from "next/server";
 
@@ -41,6 +45,8 @@ export async function POST(
     email?: unknown;
     answers?: unknown;
     newsletter?: unknown;
+    guests?: unknown;
+    paymentMethod?: unknown;
     website?: unknown;
   } | null;
 
@@ -67,6 +73,8 @@ export async function POST(
           ? (body.answers as Record<string, unknown>)
           : {},
       newsletter: body.newsletter === true,
+      guests: body.guests,
+      paymentMethod: body.paymentMethod,
     });
 
     if (!result.ok) {
@@ -76,7 +84,31 @@ export async function POST(
       );
     }
 
-    const { event, registration, alreadyRegistered } = result;
+    const { event, registration, alreadyRegistered, guests } = result;
+
+    // Betalt event: send personen til kassen. Billett, kvittering og varsler
+    // kommer når betalingen er bekreftet (webhook eller retur til billetten).
+    if (registration.status === "pending_payment" && !alreadyRegistered) {
+      try {
+        const checkoutUrl = await startCheckout({
+          event,
+          registration,
+          provider: registration.payment?.provider ?? "vipps",
+        });
+        return NextResponse.json({
+          ok: true,
+          status: "pending_payment",
+          checkoutUrl,
+        });
+      } catch (error) {
+        console.error("Kunne ikke starte event-betaling:", error);
+        await releaseUnpaidRegistration(registration.id);
+        return NextResponse.json(
+          { error: "Kunne ikke starte betalingen. Prøv igjen om litt." },
+          { status: 502 }
+        );
+      }
+    }
 
     // Billetten til den påmeldte ventes på (så feil havner i loggen for
     // riktig forespørsel); varsel og nyhetsbrev går etter svaret.
@@ -106,6 +138,7 @@ export async function POST(
         : {
             code: event.ticketsEnabled !== false ? registration.code : null,
             ticketUrl: ticketPath(registration.token),
+            guestCount: guests.length,
           }),
     });
   } catch (error) {

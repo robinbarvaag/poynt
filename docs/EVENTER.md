@@ -67,7 +67,8 @@ Sidebar: `slug`, `eventStatus` (`scheduled` | `postponed` | `cancelled`), Kvalit
 Hooks: slug fra tittel; `extraQuestions[].name` settes én gang fra spørsmålsteksten (så en
 omformulering ikke kobler fra gamle svar); `beforeDelete` sletter påmeldingene til eventet.
 
-Pris-felt (`priceKr`, `stripe…`) legges til i fase 3.
+Fase 2/3-felt under «Påmelding»: `maxGuests` (følge), `priceKr` (tom = gratis), `vatRate`,
+`paymentMethods` (`vipps`/`stripe`).
 
 ### 3.2 `event-registrations` (`collections/event-registrations.ts`)
 
@@ -87,8 +88,12 @@ Skjult fra menyen (`group: false`); brukes via «Påmeldte»-fanen og innsjekk-s
 | `checkedInAt` / `checkedInBy` | date / → users | |
 | `cancelledAt` / `cancelledBy` | date / `self` · `admin` | |
 | `promotedAt` | date | |
-| *(fase 2)* `reminderSentAt` | date | ikke lagt til ennå |
-| *(fase 3)* `pending_payment`/`refunded` + Stripe-felt | | ikke lagt til ennå |
+| `email` | email | **valgfri** siden fase 2 (registrert på stedet, følge) |
+| `source` | select | `online` · `walk_in` |
+| `guestOf` | → event-registrations | satt på følge; billetter går til hovedpersonen |
+| `reminderSentAt` | date | påminnelse sendt |
+| `status` (tillegg) | | `pending_payment` (holder plass) · `refunded` |
+| `payment` | group | `provider`, `amountKr` (hele følget), `reference` (Vipps-ref / Stripe-sesjon, indeksert), `stripePaymentIntentId`, `expiresAt`, `paidAt`, `refundedAt` |
 
 **QR-koden inneholder** billettlenken (`/eventer/billett/<token>`). Et vanlig mobilkamera
 åpner billettsiden; skanneren trekker ut nøkkelen. Koden er reserve for manuell innsjekk.
@@ -232,8 +237,10 @@ Eventsjekk (sluttid, sted, frist etter start, kapasitet uten venteliste, ekstern
 - [x] `event-registrations`-collection
 - [x] Payload-migrasjon (`20260914_181616_events`, kjørt — lokalt og produksjon deler Neon-database)
 - [x] `feat/eventer` pushet (2026-09-14)
-- [ ] Merget til `main` og deployet
-- [ ] Inngest: `event-retention` synket og prøvekjørt med `dryRun` i produksjon
+- [x] Merget til `main` og deployet (2026-09-14, `/eventer` og `/innsjekk` svarer 200 på www.poynt.no)
+- [x] Inngest: `event-retention` synket (4 funksjoner, app-URL `https://www.poynt.no/api/inngest`) og
+      kjørt i produksjon 2026-09-14 via «Invoke»: 0 eventer å rydde, ingenting endret. NB: «Invoke» sender
+      `inngest/function.invoked`, og `dryRun` gjelder bare for `events/retention.requested`
 - [x] `lib/events/`: kodegenerator, token, kapasitet/venteliste-logikk (med tester)
 - [x] Påmeldings-API med transaksjon, rate limit og honningkrukke
 - [x] Nyhetsbrev-kilde `event` + samtykketekst
@@ -266,7 +273,6 @@ Eventsjekk (sluttid, sted, frist etter start, kapasitet uten venteliste, ekstern
       minstebredde på spørsmålskolonner. Smal skjerm ruller tabellen sideveis
 - [ ] Nyhetsbrev-sjekk (allerede abonnent → ingen ny påmelding/varsel) og nye varseltekster: verifiser
       ved neste ekte påmelding
-- [ ] Vurder «Registrer på stedet» i innsjekk for folk uten påmelding (ikke bestemt)
 - [ ] DNS (e-post): DMARC + SPF lagt inn 2026-09-14. Google Workspace-DKIM utsatt (ikke kritisk med
       `p=none`); gjør det før DMARC strammes inn
 
@@ -275,22 +281,54 @@ Verifisert 2026-09-14 mot lokal database: 5 samtidige påmeldinger til 2 plasser
 innsjekk-utfall; sletting av event fjerner påmeldinger. Sidene, .ics, markdown og 401 på
 admin-API testet mot dev-server. E-postmalene rendret (ikke sendt).
 
+### Til slutt (utsatt av Robin 2026-09-14)
+Fyll inn lanseringsfesten og publiser · personvernteksten i admin (§ 8) · «Eventer» i menyen · QR i
+Outlook/iPhone Mail · DNS/DKIM · verifiser nyhetsbrev-sjekken (allerede abonnent) · slett testeventet
+og tmp-scriptene etter demoen.
+
 ### Fase 2
-- [ ] Påminnelse 24 t før (Inngest) + `reminderSentAt`
+- [x] Påminnelse (Inngest `event-reminders`, hver time): eventer som starter om 2–24 t, én gang per
+      påmelding (`reminderSentAt`), ikke til de som fikk billett de siste 12 t. Prøvekjørt med `dryRun`
 - [x] CSV-eksport
-- [ ] «Ta med følge» (valgfritt per event, se § 10)
+- [x] «Ta med følge»: `maxGuests` per event; hver i følget er egen rad (`guestOf`) med egen kode/QR,
+      billettene går i hovedpersonens e-post og vises på billettsiden. Hele følget får plass eller
+      venteliste sammen; ventelista rykker opp ett helt følge om gangen. Avmelding/sletting av
+      hovedpersonen tar med følget. Testet mot testeventet
+- [x] «Registrer på stedet» i `/innsjekk`: navn, e-post valgfri, sjekkes inn med en gang (`source:
+      walk_in`), varsler hvis fullt
 - [x] Automatisk sletting/anonymisering etter eventet (Inngest-cron, § 4.6) — bygget 2026-09-14,
       prøvekjørt med `dryRun`; aktiveres ved deploy
 - [x] «Slett»-knapp i «Påmeldte» for sletteforespørsler
-- [ ] MCP-verktøy `create_event_draft`
-- [ ] E-post til alle påmeldte fra admin (endringer, avlysning)
+- [x] MCP-verktøy `list_events`, `get_event`, `create_event_draft` (utkast, uten pris)
+- [x] E-post til påmeldte fra «Påmeldte»-fanen: velg med plass / venteliste / begge, se antall,
+      hver får egen e-post med billettlenke (Resend batch), svar til varslingsadressen
 
-### Fase 3: Betalte eventer
-- [ ] Pris på event; Stripe Checkout med `price_data` (kr × 100), gjenbruk av checkout-mønsteret
-- [ ] `pending_payment` → `registered` via webhook; utløpte økter frigjør plassen
-- [ ] Refusjon fra fanen Påmeldte (Stripe refund) → `refunded`
-- [ ] Rabattkoder (Stripe Promotion Codes, som i nettbutikken)
-- [ ] Kvittering
+### Fase 3: Betalte eventer (bygget 2026-09-15)
+- [x] Pris per person (`priceKr`, inkl. MVA), `vatRate` og `paymentMethods` (Vipps og/eller kort) på
+      eventet. Beløpet for hele følget ligger på hovedpersonen (`payment.amountKr`)
+- [x] Påmelding til betalt event → `pending_payment`, plassen holdes 30 min
+      (`lib/events/payment-rules.ts`, testet). Stripe Checkout (`price_data`, `expires_at`) eller Vipps
+      ePayment (referanse `poynt-event-<id>-<rand>`) i `lib/events/payments.ts`
+- [x] Bekreftelse uten å være avhengig av webhook: `syncPayment` spørs fra Stripe-/Vipps-webhooken,
+      billettsiden (retur fra kassen), statusruten og opprydderen. Idempotent; Vipps capture etter at
+      plassen er bekreftet. Betalt etter fristen → tas tilbake hvis plass, ellers automatisk refusjon
+- [x] Opprydding: Inngest `event-payments` hvert 5. min frigjør utløpte plasser (sjekker hos
+      leverandøren først) og gir dem til ventelista
+- [x] Venteliste på betalt event: opprykk gir `pending_payment` med 24 t frist og «Det ble plass,
+      betal innen …»-e-post; betaling fra billettsiden (`POST /api/eventer/billett/[token]/betaling`)
+- [x] Kvittering (salgsdokument via ordrebekreftelse-malen, MVA, selgeropplysninger, angrerett § 22 m),
+      billett, internvarsel og salgsvarsel når betalingen er bekreftet
+- [x] Refusjon fra «Påmeldte» (Stripe refund / Vipps refund) → `refunded` for hele følget, e-post med
+      beløp, ventelista rykker opp. Betalte billetter kan ikke meldes av selvbetjent
+- [x] Innsjekk: «Ikke betalt»-utfall med «Slipp inn likevel». CSV har «Betalt (kr)», «Påmeldte» viser
+      betaling/frist og «Innbetalt». Event-JSON-LD har riktig pris
+- [x] Prøvekjørt mot Stripe test + Vipps test (`tmp-payment-test.ts`): holdt plass, kasse opprettet,
+      synk, utløp og frigjøring
+- [ ] Ekte betaling via tunnel: Stripe testkort 4242 4242 4242 4242 og Vipps testbruker → billett,
+      kvittering; avbryt og betal på nytt; refusjon fra «Påmeldte»
+- [ ] Stripe-dashbordet: legg til `checkout.session.expired` på webhook-endepunktet (brukes til å frigjøre
+      plass tidligere; opprydderen tar det uansett)
+- [ ] Rabattkoder (Stripe Promotion Codes, som i nettbutikken) — ikke bygget
 
 ## 10. Åpne spørsmål og beslutningslogg
 
@@ -307,5 +345,9 @@ admin-API testet mot dev-server. E-postmalene rendret (ikke sendt).
 | 2026-09-14 | Innsjekk i admin vs. egen side | Flyttet fra `/admin/innsjekk` (Payload-view) til egen side `/innsjekk` med admin-innlogging. Payload-rammen (meny, topplinje) var rotete på mobil i døra |
 | 2026-09-14 | Nyhetsbrev: allerede abonnent | `subscribeToNewsletter` slår opp kontakten i Resend først; aktiv abonnent → samtykket logges, men ingen ny påmelding og intet «Ny på nyhetsbrevet»-varsel (gjelder alle kilder) |
 | 2026-09-14 | Sletting: to trinn | Svar på ekstra spørsmål (kan være helseopplysninger) slettes 14 dager etter eventet; navn/e-post anonymiseres etter 6 måneder i stedet for at radene slettes, så statistikken beholdes uten migrasjon eller endring av eventet. Svar sendes ikke lenger i internvarsel-e-posten |
+| 2026-09-14 | Fase 2/3-skjema | Én migrasjon (`20260914_213636_eventer_fase2_3`) for alt i fase 2 og 3, kun tillegg, kjørt mot den delte databasen etter Robins ok. Enum-verdier med `ALTER TYPE … ADD VALUE` |
+| 2026-09-14 | Registrer på stedet | Navn påkrevd, e-post valgfri (e-post ble valgfri i databasen). Ingen kapasitetssperre, men varsel når fullt. Ingen e-post sendes |
+| 2026-09-14 | Følge | Egen rad per person (`guestOf`), billetter til hovedpersonens e-post. Ventelista rykker opp hele følger i rekkefølge og stopper ved første som ikke får plass (ingen sniking); «Gi plass» overstyrer |
+| 2026-09-14 | Betaling | Både Vipps og kort (Stripe), valgfritt per event. Plassen holdes 30 min under betaling (24 t ved opprykk fra venteliste). Betalte billetter meldes av og refunderes av admin, ikke selvbetjent |
 | 2026-09-14 | Migrasjon i produksjon | Produksjon og lokalt deler samme Neon-database, så migrasjonen var allerede kjørt. Vercel-bygget kjører ikke `payload migrate` — nye migrasjoner må kjøres manuelt før deploy |
 | 2026-09-14 | Internvarsel for eventer | Brukte kontaktskjema-malen med «Noen vil i kontakt». Malen tar nå `eyebrow`/`heading`/`intro`/`messageLabel`; eventer og bok-ventelista har egne tekster |

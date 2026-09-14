@@ -17,6 +17,7 @@ import {
   articleContentFromMarkdown,
   registerArticleTools,
 } from "./tools-articles";
+import { registerEventTools } from "./tools-events";
 import { registerSeoTools } from "./tools-seo";
 import { adminUrl, fail, siteUrl, text } from "./util";
 
@@ -44,6 +45,8 @@ Endre eksisterende blogginnlegg/kundehistorier: finn med list_blog_posts/list_ca
 SEO: kall get_seo_guidelines først. seo_audit gir oversikt over hele nettstedet, get_seo detaljer for ett dokument (hva Google og delingskortet faktisk viser), check_live_seo leser den publiserte siden og sjekker at og:image laster. Foreslå endringer (før → etter, med tegnantall) og vent på ja før update_seo_draft. update_media_alt endrer alt-tekst med en gang (media har ikke utkast) — kun etter ja.
 
 Bilder: search_media finner bilder som allerede er lastet opp i admin. upload_media_from_url henter et bilde fra en lenke (Drive, Dropbox, nettside) inn i mediebiblioteket. Bilder limt inn i chatten kan du IKKE laste opp — be Susanne laste dem opp i admin (Media) eller dele en lenke.
+
+Eventer: list_events/get_event for å se hva som finnes, create_event_draft for et nytt event (utkast; tekster som markdown, datoer med tidssone). Ikke finn på sted, tider, plasser eller program. Pris og publisering gjør Susanne i admin.
 
 Lese og vurdere: list_pages/get_page og list_related/get_product gir deg innholdet slik det står på nettsiden — bruk dem også når Susanne bare spør om noe (f.eks. «stemmer kjøpsbetingelsene med produktene?»), ikke bare når hun vil bygge.
 
@@ -890,6 +893,7 @@ export const mcpHandler = createMcpHandler(() => {
 
   registerArticleTools(server);
   registerSeoTools(server);
+  registerEventTools(server);
 
   return server;
 });

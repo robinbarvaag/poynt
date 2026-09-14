@@ -63,9 +63,11 @@ export async function applyRegistrationRetention({
       pagination: false,
       overrideAccess: true,
     });
+    // Rader uten e-post (registrert på stedet, følge) har fortsatt navn og
+    // kode som skal anonymiseres — kjennetegnet er koden, ikke e-posten.
     const pending = docs.filter((doc) =>
       action === "anonymize"
-        ? !isAnonymizedEmail(doc.email)
+        ? !isAnonymizedEmail(doc.email) && !doc.code.startsWith("SLETTET-")
         : hasAnswers(doc.answers)
     );
     if (pending.length === 0) continue;

@@ -1,5 +1,8 @@
 import type { CollectionConfig } from "payload";
-import { REGISTRATION_STATUSES } from "../lib/events/capacity";
+import {
+  REGISTRATION_SOURCES,
+  REGISTRATION_STATUSES,
+} from "../lib/events/capacity";
 
 /**
  * Påmeldinger til eventer. Opprettes KUN av serveren (lib/events/
@@ -48,14 +51,36 @@ export const EventRegistrations: CollectionConfig = {
           admin: { width: "50%" },
         },
         {
+          // Valgfri: folk registrert på stedet og følge kan mangle e-post.
           name: "email",
           type: "email",
-          required: true,
           index: true,
           label: "E-post",
           admin: { width: "50%" },
         },
       ],
+    },
+    {
+      name: "source",
+      type: "select",
+      required: true,
+      defaultValue: "online",
+      label: "Kilde",
+      options: REGISTRATION_SOURCES.map((s) => ({
+        label: s.label,
+        value: s.value,
+      })),
+      admin: { position: "sidebar", readOnly: true },
+    },
+    {
+      // Følge («ta med noen»): egen rad med egen kode, knyttet til den som
+      // meldte på. Billetten sendes til hovedpersonens e-post.
+      name: "guestOf",
+      type: "relationship",
+      relationTo: "event-registrations",
+      index: true,
+      label: "Følge av",
+      admin: { position: "sidebar", readOnly: true },
     },
     {
       name: "status",
@@ -159,6 +184,92 @@ export const EventRegistrations: CollectionConfig = {
             readOnly: true,
             date: { pickerAppearance: "dayAndTime" },
           },
+        },
+        {
+          name: "reminderSentAt",
+          type: "date",
+          label: "Påminnelse sendt",
+          admin: {
+            readOnly: true,
+            date: { pickerAppearance: "dayAndTime" },
+          },
+        },
+      ],
+    },
+    {
+      // Betalte eventer. Tomt for gratis påmeldinger.
+      name: "payment",
+      type: "group",
+      label: "Betaling",
+      admin: { readOnly: true },
+      fields: [
+        {
+          type: "row",
+          fields: [
+            {
+              name: "provider",
+              type: "select",
+              label: "Betalt med",
+              options: [
+                { label: "Vipps", value: "vipps" },
+                { label: "Kort (Stripe)", value: "stripe" },
+              ],
+              admin: { width: "50%" },
+            },
+            {
+              name: "amountKr",
+              type: "number",
+              label: "Beløp (kr)",
+              admin: {
+                width: "50%",
+                description: "For hele påmeldingen, inkl. følge.",
+              },
+            },
+          ],
+        },
+        {
+          // Vipps-referanse eller Stripe Checkout-sesjon.
+          name: "reference",
+          type: "text",
+          index: true,
+          label: "Referanse",
+        },
+        {
+          name: "stripePaymentIntentId",
+          type: "text",
+          label: "Stripe Payment Intent",
+        },
+        {
+          type: "row",
+          fields: [
+            {
+              name: "expiresAt",
+              type: "date",
+              label: "Plassen holdes til",
+              admin: {
+                width: "33%",
+                date: { pickerAppearance: "dayAndTime" },
+              },
+            },
+            {
+              name: "paidAt",
+              type: "date",
+              label: "Betalt",
+              admin: {
+                width: "33%",
+                date: { pickerAppearance: "dayAndTime" },
+              },
+            },
+            {
+              name: "refundedAt",
+              type: "date",
+              label: "Refundert",
+              admin: {
+                width: "33%",
+                date: { pickerAppearance: "dayAndTime" },
+              },
+            },
+          ],
         },
       ],
     },

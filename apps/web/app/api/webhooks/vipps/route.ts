@@ -1,3 +1,6 @@
+import { syncAndNotify } from "@/lib/events/payment-jobs";
+import { isEventVippsReference } from "@/lib/events/payment-rules";
+import { findRegistrationByPaymentReference } from "@/lib/events/registrations";
 import { subscribeWithConsent } from "@/lib/newsletter-consent";
 import { NEWSLETTER_CONSENT_TEXTS } from "@/lib/newsletter-consent-texts";
 import { getNotificationEmails } from "@/lib/notification-emails";
@@ -80,6 +83,29 @@ export async function POST(req: NextRequest) {
   const reference = event.reference;
 
   if (!reference) {
+    return NextResponse.json({ received: true });
+  }
+
+  // Eventbilletter har egen flyt. Den sjekker status hos Vipps og er
+  // idempotent i seg selv, så den trenger ikke claim-registeret.
+  if (isEventVippsReference(reference)) {
+    try {
+      const registration = await findRegistrationByPaymentReference(reference);
+      if (registration) {
+        const sync = await syncAndNotify(registration);
+        console.log(
+          `Vipps event-betaling ${reference} (${name}): ${sync.state}`
+        );
+      } else {
+        console.warn(`Vipps webhook: fant ingen påmelding for ${reference}`);
+      }
+    } catch (error) {
+      console.error("Feil ved Vipps-webhook for event:", error);
+      return NextResponse.json(
+        { error: "Feil ved behandling av webhook" },
+        { status: 500 }
+      );
+    }
     return NextResponse.json({ received: true });
   }
 

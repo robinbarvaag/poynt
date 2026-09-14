@@ -1,13 +1,19 @@
 import { CancelRegistration } from "@/components/events/cancel-registration";
 import { LiveTicket } from "@/components/events/live-ticket";
+import { PayForTicket } from "@/components/events/pay-for-ticket";
 import { isTicketToken, ticketPath } from "@/lib/events/codes";
 import {
   formatEventLocation,
   formatEventRange,
   formatEventTime,
 } from "@/lib/events/format";
+import { syncAndNotify } from "@/lib/events/payment-jobs";
+import { formatKr, paymentMethodsFor } from "@/lib/events/payment-rules";
 import { ticketQrSvg } from "@/lib/events/qr";
-import { findRegistrationByToken } from "@/lib/events/registrations";
+import {
+  findRegistrationByToken,
+  getActiveGuests,
+} from "@/lib/events/registrations";
 import { SITE_URL } from "@/lib/seo";
 import { Button, Container, Text } from "@poynt/ui";
 import type { Metadata } from "next";
@@ -23,18 +29,20 @@ export const metadata: Metadata = {
 
 interface TicketPageProps {
   params: Promise<{ token: string }>;
+  /** `betaling=ferdig|avbrutt` når personen kommer tilbake fra kassen. */
+  searchParams: Promise<{ betaling?: string }>;
 }
 
 /**
  * Den personlige billettsiden. Lenken (og QR-koden) er nøkkelen: den som har
  * den, ser billetten og kan melde seg av. Alltid dynamisk og aldri indeksert.
  */
-export default function TicketPage({ params }: TicketPageProps) {
+export default function TicketPage({ params, searchParams }: TicketPageProps) {
   // Billetten er runtime-data (hemmelig nøkkel i URL-en, alltid fersk status)
   // — les den bak Suspense, samme mønster som /forhandsvisning.
   return (
     <Suspense fallback={<TicketSkeleton />}>
-      <TicketContent params={params} />
+      <TicketContent params={params} searchParams={searchParams} />
     </Suspense>
   );
 }
@@ -47,13 +55,30 @@ function TicketSkeleton() {
   );
 }
 
-async function TicketContent({ params }: TicketPageProps) {
+async function TicketContent({ params, searchParams }: TicketPageProps) {
   const { token } = await params;
+  const { betaling } = await searchParams;
   await connection();
 
   if (!isTicketToken(token)) notFound();
-  const registration = await findRegistrationByToken(token);
+  let registration = await findRegistrationByToken(token);
   if (!registration) notFound();
+
+  // Venter på betaling: spør Vipps/Stripe med en gang, så billetten er klar
+  // når personen kommer tilbake fra kassen — også uten webhook.
+  if (
+    registration.status === "pending_payment" &&
+    registration.payment?.reference
+  ) {
+    try {
+      const sync = await syncAndNotify(registration);
+      if (sync.state !== "pending" && sync.state !== "none") {
+        registration = (await findRegistrationByToken(token)) ?? registration;
+      }
+    } catch (error) {
+      console.error("Betalingssjekk på billettsiden feilet:", error);
+    }
+  }
 
   const { event } = registration;
   const url = `${SITE_URL}${ticketPath(token)}`;
@@ -63,13 +88,33 @@ async function TicketContent({ params }: TicketPageProps) {
       ? await ticketQrSvg(url)
       : null;
 
+  const host =
+    typeof registration.guestOf === "object" ? registration.guestOf : null;
+  const paidPayment = registration.payment?.paidAt
+    ? registration.payment
+    : host?.payment?.paidAt
+      ? host.payment
+      : null;
+  const paid = Boolean(paidPayment && !paidPayment.refundedAt);
+
   const started = new Date(event.startsAt).getTime() <= Date.now();
   const canCancel =
     !started &&
+    !paid &&
     (registration.status === "registered" ||
-      registration.status === "waitlisted");
+      registration.status === "waitlisted" ||
+      registration.status === "pending_payment");
 
   const where = formatEventLocation(event.location);
+  // Følget: hovedpersonen ser billettene til dem hun tok med, og følget ser
+  // hvem påmeldingen tilhører.
+  const guests = registration.guestOf
+    ? []
+    : await getActiveGuests(registration.id);
+  const hostName =
+    typeof registration.guestOf === "object" && registration.guestOf
+      ? registration.guestOf.name
+      : null;
 
   return (
     <Container size="sm" padding="default">
@@ -106,6 +151,35 @@ async function TicketContent({ params }: TicketPageProps) {
               igjen, så lenge det er plass.
             </Text>
           )}
+          {registration.status === "refunded" && (
+            <Text variant="muted" customStyles="text-sm">
+              Billetten er refundert, og pengene er på vei tilbake. Billetten
+              virker ikke lenger.
+            </Text>
+          )}
+          {registration.status === "pending_payment" &&
+            !registration.guestOf &&
+            registration.payment?.amountKr && (
+              <PayForTicket
+                token={token}
+                amountKr={registration.payment.amountKr}
+                expiresAt={registration.payment.expiresAt ?? null}
+                methods={paymentMethodsFor(event)}
+                returning={betaling === "ferdig"}
+                aborted={betaling === "avbrutt"}
+              />
+            )}
+          {registration.status === "pending_payment" && host && (
+            <Text variant="muted" customStyles="text-sm">
+              Billetten blir gyldig når {host.name} har betalt.
+            </Text>
+          )}
+          {paid && paidPayment?.amountKr && !registration.guestOf && (
+            <Text variant="muted" customStyles="text-xs">
+              Betalt {formatKr(paidPayment.amountKr)}. Kan du ikke komme
+              likevel? Svar på billett-e-posten, så hjelper vi deg.
+            </Text>
+          )}
 
           <div className="flex flex-wrap justify-center gap-2">
             {registration.status !== "cancelled" && !started && (
@@ -136,10 +210,53 @@ async function TicketContent({ params }: TicketPageProps) {
             </Button>
           </div>
 
+          {guests.length > 0 && (
+            <div className="space-y-2 rounded-2xl bg-muted/50 p-4 text-left">
+              <p className="font-semibold text-foreground text-sm">
+                {guests.length === 1
+                  ? "Den du tar med"
+                  : `De ${guests.length} du tar med`}
+              </p>
+              <ul className="space-y-1.5">
+                {guests.map((guest) => (
+                  <li
+                    key={guest.id}
+                    className="flex items-center justify-between gap-3 text-sm"
+                  >
+                    <span className="min-w-0 truncate text-foreground">
+                      {guest.name}
+                      {withTicket && guest.status === "registered" && (
+                        <span className="ml-2 font-mono text-muted-foreground">
+                          {guest.code}
+                        </span>
+                      )}
+                    </span>
+                    <Link
+                      href={ticketPath(guest.token)}
+                      className="shrink-0 font-semibold text-primary underline-offset-4 hover:underline"
+                    >
+                      Billett
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              <Text variant="muted" customStyles="text-xs">
+                Hver person har sin egen billett. Send lenken videre, eller vis
+                QR-koden for dem i døra.
+              </Text>
+            </div>
+          )}
+          {hostName && (
+            <Text variant="muted" customStyles="text-sm">
+              Billetten hører til påmeldingen til {hostName}.
+            </Text>
+          )}
+
           {canCancel && (
             <CancelRegistration
               token={token}
               waitlisted={registration.status === "waitlisted"}
+              withGuests={guests.length > 0}
             />
           )}
         </LiveTicket>

@@ -8,13 +8,35 @@ export const REGISTRATION_STATUSES = [
   { value: "waitlisted", label: "På venteliste" },
   { value: "checked_in", label: "Møtt" },
   { value: "cancelled", label: "Avmeldt" },
+  { value: "pending_payment", label: "Venter på betaling" },
+  { value: "refunded", label: "Refundert" },
 ] as const;
 
 export type RegistrationStatus =
   (typeof REGISTRATION_STATUSES)[number]["value"];
 
-/** Statusene som tar en plass. */
-export const SEAT_STATUSES: RegistrationStatus[] = ["registered", "checked_in"];
+/**
+ * Statusene som tar en plass. `pending_payment` holder av plassen mens
+ * personen betaler (til betalingen utløper, se lib/events/payments.ts).
+ */
+export const SEAT_STATUSES: RegistrationStatus[] = [
+  "registered",
+  "checked_in",
+  "pending_payment",
+];
+
+/** Statusene som er en gyldig billett (kan sjekkes inn, får påminnelse). */
+export const TICKET_STATUSES: RegistrationStatus[] = [
+  "registered",
+  "checked_in",
+];
+
+export const REGISTRATION_SOURCES = [
+  { value: "online", label: "Påmelding på nettsiden" },
+  { value: "walk_in", label: "Registrert på stedet" },
+] as const;
+
+export type RegistrationSource = (typeof REGISTRATION_SOURCES)[number]["value"];
 
 export function statusLabel(status: string | null | undefined): string {
   return (
@@ -32,13 +54,50 @@ export function decideRegistrationStatus({
   capacity,
   seatsTaken,
   waitlistEnabled,
+  partySize = 1,
 }: {
   capacity?: number | null;
   seatsTaken: number;
   waitlistEnabled?: boolean | null;
+  /** Personen + følget. Hele følget får plass, eller ingen. */
+  partySize?: number;
 }): RegistrationDecision {
-  if (!capacity || capacity <= 0 || seatsTaken < capacity) return "registered";
+  if (!capacity || capacity <= 0 || seatsTaken + partySize <= capacity) {
+    return "registered";
+  }
   return waitlistEnabled ? "waitlisted" : "full";
+}
+
+/**
+ * Navnene på følget fra påmeldingsskjemaet. Tomt er alltid greit; ellers må
+ * eventet ta imot følge, alle må ha navn, og det kan ikke være for mange.
+ */
+export function sanitizeGuestNames(
+  raw: unknown,
+  maxGuests: number | null | undefined
+): { names: string[]; error?: string } {
+  if (!Array.isArray(raw) || raw.length === 0) return { names: [] };
+  const max = Math.max(0, Math.floor(maxGuests ?? 0));
+  if (max === 0) {
+    return {
+      names: [],
+      error:
+        "Dette eventet tar ikke imot følge. Hver person melder seg på selv.",
+    };
+  }
+  const names = raw.map((value) =>
+    typeof value === "string" ? value.trim().slice(0, 200) : ""
+  );
+  if (names.some((name) => !name)) {
+    return { names: [], error: "Skriv navn på alle i følget." };
+  }
+  if (names.length > max) {
+    return {
+      names: [],
+      error: `Du kan ta med inntil ${max} ${max === 1 ? "person" : "personer"}.`,
+    };
+  }
+  return { names };
 }
 
 /** Plasser igjen, eller null når eventet ikke har kapasitetsgrense. */

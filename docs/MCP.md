@@ -76,6 +76,9 @@ claude mcp add --transport http poynt-cms https://<domene>/api/mcp/<MCP_SECRET>
 | `update_seo_draft` | Meta-tittel/-beskrivelse/-bilde, noindex, canonical og FAQ som utkast (sider, blogg, kundehistorier, tjenester). Produkter og forsiden har ikke utkast og endres i admin. |
 | `check_live_seo` | Leser `<head>` på den publiserte siden (kun eget domene): title, description, canonical, robots, OG, Twitter, H1, JSON-LD — og laster og:image (status, type, størrelse). |
 | `update_media_alt` | Setter alt-tekst på et bilde. **Gjelder med en gang** (media har ikke utkast) — Claude skal få ja først. |
+| `list_events` | Alle eventer (også utkast) med dato, status, påmeldingsmodus og plasser tatt. |
+| `get_event` | Ett event: tider, sted, tekster som markdown, program, FAQ og påmeldingsoppsett. Ingen personopplysninger om påmeldte. |
+| `create_event_draft` | Nytt event som utkast (`lib/mcp/tools-events.ts`): tekster som markdown, datoer med tidssone, program, FAQ, plasser, følge og ekstra spørsmål. Pris og publisering gjøres i admin. |
 
 **Bilder fra chatten** kan Claude ikke laste opp via MCP. Flyten er: Susanne
 laster opp i admin (Media, dra og slipp) eller deler en direktelenke, så

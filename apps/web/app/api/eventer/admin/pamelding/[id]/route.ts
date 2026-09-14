@@ -3,6 +3,7 @@ import {
   sendCancellationEmail,
   sendRegistrationEmail,
 } from "@/lib/events/notify";
+import { PaymentError, refundRegistration } from "@/lib/events/payments";
 import {
   cancelRegistration,
   checkInRegistration,
@@ -19,7 +20,8 @@ type Action =
   | "check-in"
   | "undo-check-in"
   | "resend"
-  | "delete";
+  | "delete"
+  | "refund";
 
 /** Handlinger på én påmelding fra Påmeldte-fanen. */
 export async function POST(
@@ -56,14 +58,14 @@ export async function POST(
           body.notify
             ? sendCancellationEmail(event, result.registration, true)
             : Promise.resolve(),
-          result.promoted
-            ? sendRegistrationEmail(event, result.promoted, { promoted: true })
-            : Promise.resolve(),
+          ...result.promoted.map((promoted) =>
+            sendRegistrationEmail(event, promoted, { promoted: true })
+          ),
         ]);
       }
       return NextResponse.json({
         ok: true,
-        promoted: result?.promoted?.name ?? null,
+        promoted: result?.promoted.map((p) => p.name).join(", ") || null,
       });
     }
 
@@ -91,13 +93,60 @@ export async function POST(
     case "delete": {
       // Når noen ber om å bli slettet: fjernes helt, ikke bare meldt av.
       const result = await deleteRegistration(registrationId);
-      if (result.promoted) {
-        await sendRegistrationEmail(event, result.promoted, { promoted: true });
-      }
+      await Promise.all(
+        result.promoted.map((promoted) =>
+          sendRegistrationEmail(event, promoted, { promoted: true })
+        )
+      );
       return NextResponse.json({
         ok: result.deleted,
-        promoted: result.promoted?.name ?? null,
+        promoted: result.promoted.map((p) => p.name).join(", ") || null,
       });
+    }
+
+    case "refund": {
+      // Betalingen ligger på den som meldte på — refusjonen gjelder hele følget.
+      const hostId =
+        typeof current.guestOf === "object" && current.guestOf
+          ? current.guestOf.id
+          : (current.guestOf ?? current.id);
+      const host =
+        hostId === current.id
+          ? current
+          : await getRegistrationWithToken(hostId);
+      if (!host) {
+        return NextResponse.json(
+          { error: "Fant ikke påmeldingen som ble betalt." },
+          { status: 404 }
+        );
+      }
+      try {
+        const refundedKr = host.payment?.amountKr ?? undefined;
+        const result = await refundRegistration(host);
+        await Promise.all([
+          sendCancellationEmail(event, host, true, { refundedKr }),
+          ...result.promoted.map((promoted) =>
+            sendRegistrationEmail(event, promoted, { promoted: true })
+          ),
+        ]);
+        return NextResponse.json({
+          ok: true,
+          refundedKr,
+          promoted: result.promoted.map((p) => p.name).join(", ") || null,
+        });
+      } catch (error) {
+        if (error instanceof PaymentError) {
+          return NextResponse.json({ error: error.message }, { status: 409 });
+        }
+        console.error("Refusjon feilet:", error);
+        return NextResponse.json(
+          {
+            error:
+              "Refusjonen feilet hos betalingstjenesten. Sjekk i Vipps- eller Stripe-portalen før du prøver igjen.",
+          },
+          { status: 502 }
+        );
+      }
     }
 
     case "undo-check-in": {

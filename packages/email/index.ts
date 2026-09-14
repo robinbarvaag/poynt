@@ -809,8 +809,12 @@ export async function sendEventTicketEmail(params: {
   greeting?: string;
   practicalInfo?: string[];
   promoted?: boolean;
+  /** Påminnelse dagen før i stedet for bekreftelse. */
+  reminder?: boolean;
   /** QR-koden som PNG. Utelates når eventet ikke bruker billetter. */
   qrPng?: Buffer;
+  /** Billetter til følget — sendes til den som meldte på. */
+  guests?: { name: string; code?: string; ticketUrl: string; qrPng?: Buffer }[];
   /** Innholdet i .ics-fila. */
   ics?: string;
 }) {
@@ -827,6 +831,12 @@ export async function sendEventTicketEmail(params: {
       ...params,
       code: params.code,
       qrSrc: params.qrPng ? `cid:${qrContentId}` : undefined,
+      guests: params.guests?.map((guest, index) => ({
+        name: guest.name,
+        code: guest.code,
+        ticketUrl: guest.ticketUrl,
+        qrSrc: guest.qrPng ? `cid:${qrContentId}-${index + 1}` : undefined,
+      })),
     })
   );
 
@@ -837,6 +847,15 @@ export async function sendEventTicketEmail(params: {
       content: params.qrPng,
       contentType: "image/png",
       contentId: qrContentId,
+    });
+  }
+  for (const [index, guest] of (params.guests ?? []).entries()) {
+    if (!guest.qrPng) continue;
+    attachments.push({
+      filename: `billett-qr-${index + 1}.png`,
+      content: guest.qrPng,
+      contentType: "image/png",
+      contentId: `${qrContentId}-${index + 1}`,
     });
   }
   if (params.ics) {
@@ -850,9 +869,11 @@ export async function sendEventTicketEmail(params: {
   await sendEmail({
     from: buildFrom("Poynt"),
     to: params.email,
-    subject: params.promoted
-      ? `Det ble plass: ${params.eventTitle}`
-      : `Billetten din: ${params.eventTitle}`,
+    subject: params.reminder
+      ? `Snart er det tid: ${params.eventTitle}`
+      : params.promoted
+        ? `Det ble plass: ${params.eventTitle}`
+        : `Billetten din: ${params.eventTitle}`,
     html,
     ...(attachments.length && { attachments }),
   });
@@ -891,6 +912,8 @@ export async function sendEventCancelledEmail(params: {
   when: string;
   eventUrl: string;
   byAdmin?: boolean;
+  /** Beløpet som er betalt tilbake, når billetten var betalt. */
+  refundedKr?: number;
 }) {
   if (!process.env.RESEND_API_KEY) return;
 
@@ -902,7 +925,9 @@ export async function sendEventCancelledEmail(params: {
   await sendEmail({
     from: buildFrom("Poynt"),
     to: params.email,
-    subject: `Du er meldt av: ${params.eventTitle}`,
+    subject: params.refundedKr
+      ? `Billetten er refundert: ${params.eventTitle}`
+      : `Du er meldt av: ${params.eventTitle}`,
     html: await render(EventCancelledEmail(params)),
   });
 }
@@ -921,7 +946,8 @@ export async function sendEventRegistrationNotification(params: {
   to?: string | string[];
   kind: "Ny påmelding" | "Ny på venteliste" | "Avmelding";
   name: string;
-  email: string;
+  /** Mangler for folk registrert på stedet. */
+  email?: string;
   eventTitle: string;
   /** «42 av 80 plasser tatt» o.l. */
   seatsText?: string;
@@ -952,12 +978,12 @@ export async function sendEventRegistrationNotification(params: {
   await sendEmail({
     from: buildFrom("Poynt"),
     to: notifyTo,
-    replyTo: params.email,
+    ...(params.email && { replyTo: params.email }),
     subject: `${params.kind}: ${params.name} (${params.eventTitle})`,
     html: await render(
       ContactNotificationEmail({
         name: params.name,
-        email: params.email,
+        email: params.email ?? "",
         eyebrow: "Eventer",
         heading: EVENT_NOTIFICATION_HEADINGS[params.kind],
         intro: `Gjelder «${params.eventTitle}».`,
@@ -966,6 +992,67 @@ export async function sendEventRegistrationNotification(params: {
       })
     ),
   });
+}
+
+/**
+ * Beskjed fra admin til de påmeldte på et event. Hver mottaker får sin egen
+ * e-post (med egen billettlenke), sendt i puljer via Resends batch-API
+ * (maks 100 per kall). Kaster ikke: returnerer hvor mange som gikk/feilet.
+ */
+export async function sendEventMessageEmails(params: {
+  eventTitle: string;
+  when: string;
+  subject: string;
+  message: string;
+  replyTo?: string;
+  recipients: { email: string; name?: string; ticketUrl?: string }[];
+}): Promise<{ sent: number; failed: number }> {
+  if (!process.env.RESEND_API_KEY) {
+    return { sent: 0, failed: params.recipients.length };
+  }
+
+  const { render } = await import("@react-email/render");
+  const { default: EventMessageEmail } = await import(
+    "./templates/event-message"
+  );
+  const from = buildFrom("Poynt");
+  const BATCH_SIZE = 100;
+  let sent = 0;
+  let failed = 0;
+
+  for (let i = 0; i < params.recipients.length; i += BATCH_SIZE) {
+    const chunk = params.recipients.slice(i, i + BATCH_SIZE);
+    const emails = await Promise.all(
+      chunk.map(async (recipient) => ({
+        from,
+        to: recipient.email,
+        subject: params.subject,
+        ...(params.replyTo && { replyTo: params.replyTo }),
+        html: await render(
+          EventMessageEmail({
+            name: recipient.name,
+            eventTitle: params.eventTitle,
+            when: params.when,
+            message: params.message,
+            ticketUrl: recipient.ticketUrl,
+          })
+        ),
+      }))
+    );
+    try {
+      const { error } = await getResend().batch.send(emails);
+      if (error) throw new Error(error.message ?? "ukjent feil");
+      sent += chunk.length;
+    } catch (error) {
+      console.error(
+        `Beskjed til påmeldte feilet for ${chunk.length} mottakere:`,
+        error instanceof Error ? error.message : error
+      );
+      failed += chunk.length;
+    }
+  }
+
+  return { sent, failed };
 }
 
 /**

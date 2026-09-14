@@ -17,6 +17,14 @@ type Events = {
   "events/retention.requested": {
     data: { dryRun?: boolean };
   };
+  // Send påminnelser for eventer som starter innen et døgn (kjører også hver time).
+  "events/reminders.requested": {
+    data: { dryRun?: boolean };
+  };
+  // Frigjør ubetalte plasser på betalte eventer (kjører også hvert 5. minutt).
+  "events/payments.requested": {
+    data: Record<string, never>;
+  };
 };
 
 export const inngest = new Inngest({

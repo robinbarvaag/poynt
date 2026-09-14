@@ -3,6 +3,7 @@ import { JsonLd } from "@/components/json-ld";
 import { EventView } from "@/components/views/event-view";
 import { spotsLeft } from "@/lib/events/capacity";
 import { formatEventLocation } from "@/lib/events/format";
+import { eventPriceKr } from "@/lib/events/payment-rules";
 import { getEventSeatsTaken, getPublishedEvent } from "@/lib/events/public";
 import { SITE_URL, buildMetadata, notFoundMetadata } from "@/lib/seo";
 import {
@@ -84,6 +85,7 @@ async function EventPageContent({ params }: EventPageProps) {
       availability: mode === "none" ? null : left === 0 ? "SoldOut" : "InStock",
       validFrom: event.registrationOpensAt,
       offerUrl: mode === "external" ? event.externalUrl : `${url}#pamelding`,
+      price: mode === "external" ? undefined : (eventPriceKr(event) ?? 0),
     }),
     breadcrumbSchema([
       { name: "Hjem", url: SITE_URL },

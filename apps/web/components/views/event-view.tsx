@@ -9,6 +9,11 @@ import {
   formatEventLocation,
   formatEventTime,
 } from "@/lib/events/format";
+import {
+  eventPriceKr,
+  formatKr,
+  paymentMethodsFor,
+} from "@/lib/events/payment-rules";
 import { NEWSLETTER_CONSENT_TEXTS } from "@/lib/newsletter-consent-texts";
 import { resolveMedia } from "@/lib/payload";
 import { detailBreadcrumbs } from "@/lib/ui-text";
@@ -72,10 +77,16 @@ export function EventView({ event, seatsTaken }: EventViewProps) {
       href: event.location?.mapUrl || undefined,
     });
   }
+  const priceKr = eventPriceKr(event);
   facts.push({
     icon: "ticket",
     label: "Pris",
-    value: mode === "external" ? "Se billettsiden" : "Gratis",
+    value:
+      mode === "external"
+        ? "Se billettsiden"
+        : priceKr
+          ? `${formatKr(priceKr)} per person`
+          : "Gratis",
   });
 
   const program = (event.program ?? []).map((item) => ({
@@ -102,7 +113,11 @@ export function EventView({ event, seatsTaken }: EventViewProps) {
                 </Badge>
               ) : (
                 <>
-                  {mode !== "external" && <Badge variant="mint">Gratis</Badge>}
+                  {mode !== "external" && (
+                    <Badge variant="mint">
+                      {priceKr ? formatKr(priceKr) : "Gratis"}
+                    </Badge>
+                  )}
                   {left === 0 && (
                     <Badge variant="salmon">
                       {event.waitlistEnabled
@@ -295,6 +310,9 @@ export function EventView({ event, seatsTaken }: EventViewProps) {
                   ticketsEnabled={event.ticketsEnabled !== false}
                   newsletterOptIn={Boolean(event.newsletterOptIn)}
                   newsletterText={NEWSLETTER_CONSENT_TEXTS.event}
+                  maxGuests={event.maxGuests ?? 0}
+                  priceKr={priceKr}
+                  paymentMethods={paymentMethodsFor(event)}
                   questions={(event.extraQuestions ?? []).flatMap((q) =>
                     q.name
                       ? [

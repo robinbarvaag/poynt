@@ -47,6 +47,23 @@ export async function POST(
     );
   }
 
+  // Betalte billetter (også følget til den som betalte) meldes av og
+  // refunderes av Poynt, ikke selvbetjent.
+  const host =
+    typeof registration.guestOf === "object" ? registration.guestOf : null;
+  if (
+    (registration.payment?.paidAt && !registration.payment.refundedAt) ||
+    (host?.payment?.paidAt && !host.payment.refundedAt)
+  ) {
+    return NextResponse.json(
+      {
+        error:
+          "Betalte billetter kan ikke meldes av her. Svar på billett-e-posten, så hjelper vi deg.",
+      },
+      { status: 409 }
+    );
+  }
+
   try {
     const result = await cancelRegistration({
       registrationId: registration.id,
@@ -65,9 +82,9 @@ export async function POST(
         await Promise.all([
           sendCancellationEmail(event, result.registration, false),
           notifyAdmins("Avmelding", event, result.registration),
-          result.promoted
-            ? sendRegistrationEmail(event, result.promoted, { promoted: true })
-            : Promise.resolve(),
+          ...result.promoted.map((promoted) =>
+            sendRegistrationEmail(event, promoted, { promoted: true })
+          ),
         ]);
       });
     }
