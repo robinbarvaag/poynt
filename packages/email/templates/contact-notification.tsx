@@ -17,6 +17,15 @@ export interface ContactNotificationProps {
    * Felt-detaljene og svar-knappen under legges alltid på automatisk.
    */
   introHtml?: string;
+  /**
+   * Gjenbruk for andre interne varsler (eventer, venteliste): egen
+   * overskrift og intro i stedet for kontaktskjema-teksten.
+   */
+  eyebrow?: string;
+  heading?: string;
+  intro?: string;
+  /** Etikett over meldingsboksen. Standard «Melding». */
+  messageLabel?: string;
 }
 
 /** Varsel til Poynt når noen sender inn kontaktskjemaet. */
@@ -29,18 +38,20 @@ export default function ContactNotificationEmail({
   source,
   sourcePath,
   introHtml,
+  eyebrow = "Ny henvendelse",
+  heading = "Noen vil i kontakt",
+  intro = "Du har fått en ny melding via kontaktskjemaet på poynt.no.",
+  messageLabel = "Melding",
 }: ContactNotificationProps) {
   return (
-    <EmailShell preview={`Ny henvendelse fra ${name}`}>
+    <EmailShell preview={`${heading}: ${name}`}>
       {introHtml ? (
         <RichContent html={introHtml} />
       ) : (
         <>
-          <Text style={emailStyles.eyebrow}>Ny henvendelse</Text>
-          <Text style={emailStyles.heading}>Noen vil i kontakt</Text>
-          <Text style={emailStyles.text}>
-            Du har fått en ny melding via kontaktskjemaet på poynt.no.
-          </Text>
+          <Text style={emailStyles.eyebrow}>{eyebrow}</Text>
+          <Text style={emailStyles.heading}>{heading}</Text>
+          <Text style={emailStyles.text}>{intro}</Text>
         </>
       )}
 
@@ -65,7 +76,7 @@ export default function ContactNotificationEmail({
           </>
         ) : null}
 
-        <Text style={emailStyles.label}>Melding</Text>
+        <Text style={emailStyles.label}>{messageLabel}</Text>
         <Text style={emailStyles.quote}>{message}</Text>
 
         {source || sourcePath ? (

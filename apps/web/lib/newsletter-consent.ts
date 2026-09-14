@@ -51,9 +51,11 @@ export async function subscribeWithConsent({
       return null;
     });
 
-  const result = await subscribeToNewsletter(normalized).catch(
-    (error: unknown) => ({ success: false, error: String(error) })
-  );
+  const result: Awaited<ReturnType<typeof subscribeToNewsletter>> =
+    await subscribeToNewsletter(normalized).catch((error: unknown) => ({
+      success: false,
+      error: String(error),
+    }));
 
   if (result.success && logId != null) {
     await payload
@@ -68,9 +70,10 @@ export async function subscribeWithConsent({
       });
   }
 
-  // Internt varsel for ALLE påmeldingsveier (skjema, boktilgang, utsjekk …).
+  // Internt varsel for ALLE påmeldingsveier (skjema, boktilgang, utsjekk …),
+  // men ikke når adressen allerede var abonnent — det er ingen ny påmelding.
   // Aldri la varselet velte selve påmeldingen.
-  if (result.success) {
+  if (result.success && !result.alreadySubscribed) {
     try {
       await sendNewsletterSignupNotification({
         to: await getNotificationEmails(),

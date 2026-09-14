@@ -437,9 +437,12 @@ export async function resolveTemplateSubject(
 /**
  * Subscribe an email to the newsletter audience in Resend
  */
-export async function subscribeToNewsletter(
-  email: string
-): Promise<{ success: boolean; error?: string }> {
+export async function subscribeToNewsletter(email: string): Promise<{
+  success: boolean;
+  error?: string;
+  /** Adressen var allerede aktiv abonnent — ingenting ble endret. */
+  alreadySubscribed?: boolean;
+}> {
   const apiKey = process.env.RESEND_API_KEY;
   // Nyere Resend-kontoer har én innebygd audience — audienceId er da valgfri.
   // Settes RESEND_AUDIENCE_ID, brukes den eksplisitt (eldre kontoer).
@@ -450,6 +453,16 @@ export async function subscribeToNewsletter(
   }
 
   try {
+    // Står adressen allerede som aktiv abonnent, rører vi den ikke — da skal
+    // det heller ikke gå ut et «ny på nyhetsbrevet»-varsel.
+    const existing = await getResend().contacts.get({
+      ...(audienceId && { audienceId }),
+      email,
+    });
+    if (existing.data && !existing.data.unsubscribed) {
+      return { success: true, alreadySubscribed: true };
+    }
+
     const result = await getResend().contacts.create({
       ...(audienceId && { audienceId }),
       email,
@@ -755,7 +768,10 @@ export async function sendWaitlistEmails(params: {
       ContactNotificationEmail({
         name: params.name || params.email,
         email: params.email,
-        subject: "Venteliste",
+        eyebrow: "Venteliste",
+        heading: "Ny på ventelista",
+        intro: `Noen vil ha beskjed når «${params.title}» er klar.`,
+        messageLabel: "Detaljer",
         message: details,
       })
     );
@@ -891,6 +907,12 @@ export async function sendEventCancelledEmail(params: {
   });
 }
 
+const EVENT_NOTIFICATION_HEADINGS = {
+  "Ny påmelding": "Noen har meldt seg på",
+  "Ny på venteliste": "Noen står på ventelista",
+  Avmelding: "Noen har meldt seg av",
+} as const;
+
 /**
  * Internt varsel til Poynt ved ny påmelding eller avmelding. Skal aldri velte
  * påmeldingen: no-op uten mottaker/RESEND_API_KEY, og kallere svelger feil.
@@ -936,7 +958,10 @@ export async function sendEventRegistrationNotification(params: {
       ContactNotificationEmail({
         name: params.name,
         email: params.email,
-        subject: params.kind,
+        eyebrow: "Eventer",
+        heading: EVENT_NOTIFICATION_HEADINGS[params.kind],
+        intro: `Gjelder «${params.eventTitle}».`,
+        messageLabel: "Detaljer",
         message: details,
       })
     ),
