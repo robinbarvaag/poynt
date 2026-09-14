@@ -131,6 +131,11 @@ NB: rutene ligger under `/api/eventer/…` fordi `/api/events/…` er Payloads R
   Alt som avhenger av «nå» (påmeldingsvindu) regnes ut i nettleseren. `EventView` deles
   med `/forhandsvisning/eventer/[slug]`.
 - `/eventer/billett/[token]` — dynamisk, `instant = false`, `noindex`, blokkert i robots.txt.
+  `LiveTicket` spør `GET /api/eventer/billett/[token]/status` hvert 5. sekund (bare mens siden er
+  synlig, fra 48 t før til 6 t etter eventet). Blir personen skannet mens siden står åpen, **rives
+  billettstumpen av** langs perforeringen (framer-motion + animert `clip-path`), et «Sjekket inn»-stempel
+  og konfetti dukker opp, og siden hentes på nytt. Revet billett er også slutt-tilstanden ved ny
+  innlasting. Respekterer `prefers-reduced-motion`.
 
 **Komponenter i `@poynt/ui`** (`components/event/`, story: `Blokker/Eventer`):
 `EventTicket`, `SpotsMeter`, `EventProgram`, `EventFacts`, `EventDateBadge`, `ConfettiBurst`.
@@ -147,9 +152,23 @@ markdown via `/eventer/<slug>.md` og seksjon «Eventer» i `llms.txt`.
 Tellere, søk, statusfilter, tabell med svar på ekstra spørsmål, handlinger per rad,
 lenker til innsjekk og CSV.
 
-### 6.2 Innsjekk (`/admin/innsjekk`, lenke under Drift)
-Velg event (dagens først, eller `?event=`), kamera-skanner (BarcodeDetector der den finnes,
-ellers `jsqr`), store fargede resultatkort, vibrasjon, manuelt kodefelt, «X av Y har kommet».
+### 6.2 Innsjekk (`/innsjekk`, lenke under Drift og i «Påmeldte»-fanen)
+Egen mobilside utenfor Payload-rammen (`app/(innsjekk)/`, egen rot-layout, noindex, blokkert i
+robots.txt). Krever innlogget Payload-bruker; ellers videresending til
+`/admin/login?redirect=/innsjekk`. Komponent: `components/events/check-in-scanner.tsx`.
+
+Laget for kø i døra, én billett om gangen:
+- Tellerkort øverst: «X av Y har kommet» + fremdriftslinje, hentes på nytt hvert 20. sekund
+  (flere i døra ser det samme).
+- Kamera (BarcodeDetector der den finnes, ellers `jsqr`). Hvert treff gir et **fullflate farget
+  kort oppå kameraet** (ikon, status, navn, kode), lydsignal (kan slås av, huskes lokalt) og
+  vibrasjon. Skanningen pauses mens kortet vises; det forsvinner av seg selv (ok 2,2 s, feil 3,5–4 s)
+  eller med «Skann neste». Samme QR ignoreres i 8 s.
+- Venteliste/avmeldt: kortet blir stående til man velger «Slipp inn likevel» eller «Ikke slipp inn».
+- «Siste skanninger»-logg (30 siste) med «Angre» på innsjekkinger.
+- Skjermen holdes våken (Wake Lock) mens kameraet er på. Manuelt kodefelt som reserve.
+- Innsjekk oppdaterer påmeldingen (`checked_in` + tidspunkt + hvem), synlig i «Påmeldte»-fanen.
+  Folk uten påmelding kan ikke sjekkes inn herfra (se § 10).
 
 ### 6.3 Kvalitetssjekk
 `EVENT_DIMENSIONS` i `/api/ai/quality-review`, serialisering i `lib/events/serialize-event.ts`,
@@ -194,9 +213,21 @@ Eventsjekk (sluttid, sted, frist etter start, kapasitet uten venteliste, ekstern
 - [ ] Fyll inn lanseringsfesten i admin (sted, plasser, program, praktisk info, bilde) og publiser
 - [ ] Personvern: bestem slettefrist, kjør `seed-personvern.ts` (eller rediger siden i admin)
 - [ ] Legg «Eventer» inn i navigasjonen (Navigasjon-global i admin)
-- [ ] Ekte test: meld på med egen e-post → sjekk billett-e-post (QR vises?) → skann med mobil i
-      `/admin/innsjekk` → meld av → opprykk-e-post
-- [ ] Se over «Påmeldte»-fanen og innsjekk-siden visuelt i admin (ikke skjermtestet)
+- [x] Ekte test, del 1 (2026-09-14, via tunnel + iPhone): påmelding med ekte e-post → billett levert
+      (Resend: delivered, havnet i Reklame), internvarsel, skanning med mobil på `/innsjekk` → sjekket inn
+- [ ] Ekte test, del 2: venteliste-påmelding → avmelding → opprykk-e-post; åpne `.ics` i kalender;
+      QR i Outlook/iPhone Mail; skanning på Android
+- [x] Innsjekk flyttet ut av Payload til `/innsjekk` (egen mobilside, admin-innlogging)
+- [x] Tydelig skanne-feedback: fullflate farget kort oppå kameraet, lyd, vibrasjon, logg med «Angre»
+- [x] Billettsiden river av billetten live når personen skannes (+ mer kompakt billett på mobil)
+- [x] Visuell gjennomgang av eventsiden og `/eventer` (mobil + desktop): program-tider, nedtelling,
+      dobbel dato og tomt bildefelt rettet
+- [ ] Se over «Påmeldte»-fanen visuelt i admin (ikke skjermtestet)
+- [ ] Nyhetsbrev-sjekk (allerede abonnent → ingen ny påmelding/varsel) og nye varseltekster: verifiser
+      ved neste ekte påmelding
+- [ ] Vurder «Registrer på stedet» i innsjekk for folk uten påmelding (ikke bestemt)
+- [ ] DNS (e-post): DMARC + SPF lagt inn 2026-09-14. Google Workspace-DKIM utsatt (ikke kritisk med
+      `p=none`); gjør det før DMARC strammes inn
 
 Verifisert 2026-09-14 mot lokal database: 5 samtidige påmeldinger til 2 plasser ga 2 påmeldt +
 3 venteliste; duplikat gjenkjent; påkrevde svar håndhevet; opprykk ved avmelding; alle
@@ -230,3 +261,6 @@ admin-API testet mot dev-server. E-postmalene rendret (ikke sendt).
 | 2026-09-14 | Billettlenke ved duplikat | Returneres ikke fra API-et når e-posten allerede var påmeldt — billetten sendes på nytt til e-posten i stedet |
 | 2026-09-14 | Sletting av event | `beforeDelete`-hook sletter påmeldingene (FK er `set null` på en påkrevd kolonne) |
 | 2026-09-14 | Slettefrist for påmeldinger | Foreslått seks måneder i personvernteksten — må bekreftes, og automatisk sletting må bygges før teksten publiseres |
+| 2026-09-14 | Innsjekk i admin vs. egen side | Flyttet fra `/admin/innsjekk` (Payload-view) til egen side `/innsjekk` med admin-innlogging. Payload-rammen (meny, topplinje) var rotete på mobil i døra |
+| 2026-09-14 | Nyhetsbrev: allerede abonnent | `subscribeToNewsletter` slår opp kontakten i Resend først; aktiv abonnent → samtykket logges, men ingen ny påmelding og intet «Ny på nyhetsbrevet»-varsel (gjelder alle kilder) |
+| 2026-09-14 | Internvarsel for eventer | Brukte kontaktskjema-malen med «Noen vil i kontakt». Malen tar nå `eyebrow`/`heading`/`intro`/`messageLabel`; eventer og bok-ventelista har egne tekster |
