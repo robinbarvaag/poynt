@@ -67,7 +67,8 @@ Sidebar: `slug`, `eventStatus` (`scheduled` | `postponed` | `cancelled`), Kvalit
 Hooks: slug fra tittel; `extraQuestions[].name` settes én gang fra spørsmålsteksten (så en
 omformulering ikke kobler fra gamle svar); `beforeDelete` sletter påmeldingene til eventet.
 
-Pris-felt (`priceKr`, `stripe…`) legges til i fase 3.
+Fase 2/3-felt under «Påmelding»: `maxGuests` (følge), `priceKr` (tom = gratis), `vatRate`,
+`paymentMethods` (`vipps`/`stripe`).
 
 ### 3.2 `event-registrations` (`collections/event-registrations.ts`)
 
@@ -87,8 +88,12 @@ Skjult fra menyen (`group: false`); brukes via «Påmeldte»-fanen og innsjekk-s
 | `checkedInAt` / `checkedInBy` | date / → users | |
 | `cancelledAt` / `cancelledBy` | date / `self` · `admin` | |
 | `promotedAt` | date | |
-| *(fase 2)* `reminderSentAt` | date | ikke lagt til ennå |
-| *(fase 3)* `pending_payment`/`refunded` + Stripe-felt | | ikke lagt til ennå |
+| `email` | email | **valgfri** siden fase 2 (registrert på stedet, følge) |
+| `source` | select | `online` · `walk_in` |
+| `guestOf` | → event-registrations | satt på følge; billetter går til hovedpersonen |
+| `reminderSentAt` | date | påminnelse sendt |
+| `status` (tillegg) | | `pending_payment` (holder plass) · `refunded` |
+| `payment` | group | `provider`, `amountKr` (hele følget), `reference` (Vipps-ref / Stripe-sesjon, indeksert), `stripePaymentIntentId`, `expiresAt`, `paidAt`, `refundedAt` |
 
 **QR-koden inneholder** billettlenken (`/eventer/billett/<token>`). Et vanlig mobilkamera
 åpner billettsiden; skanneren trekker ut nøkkelen. Koden er reserve for manuell innsjekk.
@@ -298,12 +303,32 @@ og tmp-scriptene etter demoen.
 - [x] E-post til påmeldte fra «Påmeldte»-fanen: velg med plass / venteliste / begge, se antall,
       hver får egen e-post med billettlenke (Resend batch), svar til varslingsadressen
 
-### Fase 3: Betalte eventer
-- [ ] Pris på event; Stripe Checkout med `price_data` (kr × 100), gjenbruk av checkout-mønsteret
-- [ ] `pending_payment` → `registered` via webhook; utløpte økter frigjør plassen
-- [ ] Refusjon fra fanen Påmeldte (Stripe refund) → `refunded`
-- [ ] Rabattkoder (Stripe Promotion Codes, som i nettbutikken)
-- [ ] Kvittering
+### Fase 3: Betalte eventer (bygget 2026-09-15)
+- [x] Pris per person (`priceKr`, inkl. MVA), `vatRate` og `paymentMethods` (Vipps og/eller kort) på
+      eventet. Beløpet for hele følget ligger på hovedpersonen (`payment.amountKr`)
+- [x] Påmelding til betalt event → `pending_payment`, plassen holdes 30 min
+      (`lib/events/payment-rules.ts`, testet). Stripe Checkout (`price_data`, `expires_at`) eller Vipps
+      ePayment (referanse `poynt-event-<id>-<rand>`) i `lib/events/payments.ts`
+- [x] Bekreftelse uten å være avhengig av webhook: `syncPayment` spørs fra Stripe-/Vipps-webhooken,
+      billettsiden (retur fra kassen), statusruten og opprydderen. Idempotent; Vipps capture etter at
+      plassen er bekreftet. Betalt etter fristen → tas tilbake hvis plass, ellers automatisk refusjon
+- [x] Opprydding: Inngest `event-payments` hvert 5. min frigjør utløpte plasser (sjekker hos
+      leverandøren først) og gir dem til ventelista
+- [x] Venteliste på betalt event: opprykk gir `pending_payment` med 24 t frist og «Det ble plass,
+      betal innen …»-e-post; betaling fra billettsiden (`POST /api/eventer/billett/[token]/betaling`)
+- [x] Kvittering (salgsdokument via ordrebekreftelse-malen, MVA, selgeropplysninger, angrerett § 22 m),
+      billett, internvarsel og salgsvarsel når betalingen er bekreftet
+- [x] Refusjon fra «Påmeldte» (Stripe refund / Vipps refund) → `refunded` for hele følget, e-post med
+      beløp, ventelista rykker opp. Betalte billetter kan ikke meldes av selvbetjent
+- [x] Innsjekk: «Ikke betalt»-utfall med «Slipp inn likevel». CSV har «Betalt (kr)», «Påmeldte» viser
+      betaling/frist og «Innbetalt». Event-JSON-LD har riktig pris
+- [x] Prøvekjørt mot Stripe test + Vipps test (`tmp-payment-test.ts`): holdt plass, kasse opprettet,
+      synk, utløp og frigjøring
+- [ ] Ekte betaling via tunnel: Stripe testkort 4242 4242 4242 4242 og Vipps testbruker → billett,
+      kvittering; avbryt og betal på nytt; refusjon fra «Påmeldte»
+- [ ] Stripe-dashbordet: legg til `checkout.session.expired` på webhook-endepunktet (brukes til å frigjøre
+      plass tidligere; opprydderen tar det uansett)
+- [ ] Rabattkoder (Stripe Promotion Codes, som i nettbutikken) — ikke bygget
 
 ## 10. Åpne spørsmål og beslutningslogg
 
