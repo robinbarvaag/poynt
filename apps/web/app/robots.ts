@@ -16,6 +16,7 @@ export default function robots(): MetadataRoute.Robots {
         "/on-poynt/",
         "/forhandsvisning",
         "/eventer/billett/",
+        "/innsjekk",
       ],
     },
     sitemap: `${SITE_URL}/sitemap.xml`,

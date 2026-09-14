@@ -315,12 +315,6 @@ export default buildConfig({
           exact: true,
           meta: { title: "Kvalitetsoversikt" },
         },
-        checkIn: {
-          Component: "/admin/views/check-in/view#CheckInView",
-          path: "/innsjekk",
-          exact: true,
-          meta: { title: "Innsjekk" },
-        },
       },
     },
   },

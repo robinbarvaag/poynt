@@ -71,7 +71,6 @@ import { SetupGuideView as SetupGuideView_96e0313c105e009331fa998e13292ea0 } fro
 import { EmailOverviewView as EmailOverviewView_0216373ba096c29ed484db9830ad258d } from '../../../admin/views/email/list'
 import { ContactsListView as ContactsListView_a34bc1ca742cd359ae5f7a2c8c485a86 } from '../../../admin/views/contacts/list'
 import { QualityListView as QualityListView_832dd1e739525ad72161e259683fb8d9 } from '../../../admin/views/quality/list'
-import { CheckInView as CheckInView_f95f2972bbac7a4b43327e044e48333c } from '../../../admin/views/check-in/view'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 /** @type import('payload').ImportMap */
@@ -149,6 +148,5 @@ export const importMap = {
   "/admin/views/email/list#EmailOverviewView": EmailOverviewView_0216373ba096c29ed484db9830ad258d,
   "/admin/views/contacts/list#ContactsListView": ContactsListView_a34bc1ca742cd359ae5f7a2c8c485a86,
   "/admin/views/quality/list#QualityListView": QualityListView_832dd1e739525ad72161e259683fb8d9,
-  "/admin/views/check-in/view#CheckInView": CheckInView_f95f2972bbac7a4b43327e044e48333c,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

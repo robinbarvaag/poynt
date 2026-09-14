@@ -221,7 +221,7 @@ export function RegistrationsPanel() {
         </Button>
         <Button
           el="anchor"
-          url={`/admin/innsjekk?event=${id}`}
+          url={`/innsjekk?event=${id}`}
           buttonStyle="pill"
           size="small"
           margin={false}
