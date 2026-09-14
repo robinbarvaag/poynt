@@ -124,6 +124,22 @@ Tar skannet verdi eller kode → `ok` · `already` · `waitlisted` · `cancelled
 `GET /api/eventer/admin/[id]/csv` (semikolon + BOM for norsk Excel).
 NB: rutene ligger under `/api/eventer/…` fordi `/api/events/…` er Payloads REST-API.
 
+### 4.6 Sletting og anonymisering (personvern)
+Frister i `lib/events/retention.ts` (ren logikk, testet i `retention.test.ts`), jobb i
+`lib/events/retention-job.ts`, kjørt av Inngest-funksjonen `event-retention`
+(`lib/inngest/functions/event-retention.ts`) **hver natt kl. 03:15 norsk tid**:
+- **14 dager** etter at eventet er ferdig (sluttid, ellers starttid): `answers` tømmes.
+- **6 måneder** etter: navn, e-post, kode og billettnøkkel byttes ut (`Slettet`,
+  `pamelding-<id>@slettet.invalid`, `SLETTET-<id>`, ny nøkkel), `answers`/`newsletter`/`checkedInBy`
+  nullstilles. Radene blir stående, så tellerne i «Påmeldte» beholdes uten personopplysninger.
+  Gammel billettlenke slutter å virke.
+- Jobben tåler å kjøres flere ganger (hopper over det som er ryddet) og logger bare antall.
+  Manuell kjøring: send `events/retention.requested` (med `{ "dryRun": true }` for å se hva som ville
+  blitt ryddet) fra Inngest-dashbordet.
+- «Slett» i «Påmeldte»-fanen fjerner én påmelding helt (når noen ber om det). Er eventet ikke startet
+  og personen hadde plass, meldes den av først, så ventelista rykker opp.
+- Internvarselet på e-post inneholder ikke lenger svarene på ekstra spørsmål, bare at det finnes svar.
+
 ## 5. Frontend
 
 - `/eventer` — kommende (cachet, fornyes hver time) + tidligere eventer.
@@ -186,10 +202,27 @@ Eventsjekk (sluttid, sted, frist etter start, kapasitet uten venteliste, ekstern
 
 ## 8. Personvern
 
-- `scripts/seed-personvern.ts` har fått et avsnitt om eventer og en slettefrist (seks måneder
-  etter eventet). **Seed-scriptet er ikke kjørt** — det overskriver /personvern i databasen.
-- **Løftet om sletting er ikke automatisert ennå** (fase 2). Til da: slett påmeldingene manuelt,
-  eller utsett publisering av personvernteksten til jobben finnes.
+- **Ikke kjør `scripts/seed-personvern.ts`.** Susanne har redigert innholdet på nettsiden manuelt,
+  og scriptet overskriver hele /personvern. Det gjelder alle seed-scripts som oppdaterer noe som
+  finnes fra før. Seed brukes bare til helt nytt innhold (create-only, som `seed-launch-event.ts`).
+- Teksten om eventer legges inn **i admin** (Sider → Personvern) når slettejobben finnes. Forslag:
+  - Under behandlingsgrunnlag: «Eventer: Når du melder deg på et event, lagrer vi navn,
+    e-postadresse, eventuelle svar du gir i påmeldingen (for eksempel allergier), om du er sjekket
+    inn, og når du meldte deg på eller av. Vi bruker opplysningene til å holde av plassen din, sende
+    billett og praktisk informasjon, sjekke deg inn og gi deg plass fra ventelista (art. 6 nr. 1 b).
+    Svar om allergier eller andre hensyn brukes bare til å tilrettelegge eventet. E-posten brukes
+    bare til nyhetsbrev dersom du krysser av for det.»
+  - Under lagringstid (§ 5): «Påmeldinger til eventer: svar på spørsmål i påmeldingen (for eksempel
+    allergier) slettes to uker etter eventet. Navn og e-postadresse slettes seks måneder etter eventet.
+    Vi beholder bare antall påmeldte og hvor mange som kom, uten opplysninger om hvem.»
+  - § 2 må justeres: den sier i dag «Vi ber deg aldri oppgi sensitive personopplysninger», men
+    påmeldingen kan spørre om allergier (helseopplysninger, særlig kategori). Forslag: «Ved påmelding
+    til eventer kan vi spørre om allergier eller andre hensyn. Det er frivillig, brukes bare til å
+    tilrettelegge eventet, og slettes to uker etter.» Grunnlag for helseopplysningene er ditt
+    uttrykkelige samtykke (art. 9 nr. 2 a), som du gir ved å fylle ut feltet.
+  - Lista over formål og behandlingsgrunnlag (§ 3) får «Eventer»-avsnittet over som eget punkt.
+- Status for automatisk sletting: **bygget** (§ 4.6), aktiv når koden er deployet og Inngest har
+  synkronisert funksjonene. Teksten kan publiseres etter det.
 - Tokens er hemmelige og skal ikke logges.
 
 ## 9. Faser og sjekkliste
@@ -211,7 +244,7 @@ Eventsjekk (sluttid, sted, frist etter start, kapasitet uten venteliste, ekstern
 - [x] Kvalitetssjekk: `EVENT_DIMENSIONS`, regelsjekker, veiledning
 - [x] Seed-script for lanseringsfesten (`seed-launch-event.ts`, kjørt: utkast opprettet)
 - [ ] Fyll inn lanseringsfesten i admin (sted, plasser, program, praktisk info, bilde) og publiser
-- [ ] Personvern: bestem slettefrist, kjør `seed-personvern.ts` (eller rediger siden i admin)
+- [ ] Personvern: bestem slettefrist, legg inn teksten fra § 8 **i admin** (ikke kjør seed-scriptet)
 - [ ] Legg «Eventer» inn i navigasjonen (Navigasjon-global i admin)
 - [x] Ekte test, del 1 (2026-09-14, via tunnel + iPhone): påmelding med ekte e-post → billett levert
       (Resend: delivered, havnet i Reklame), internvarsel, skanning med mobil på `/innsjekk` → sjekket inn
@@ -238,7 +271,9 @@ admin-API testet mot dev-server. E-postmalene rendret (ikke sendt).
 - [ ] Påminnelse 24 t før (Inngest) + `reminderSentAt`
 - [x] CSV-eksport
 - [ ] «Ta med følge» (valgfritt per event, se § 10)
-- [ ] Automatisk sletting/anonymisering etter eventet (Inngest-cron) — **kreves av personvernteksten**
+- [x] Automatisk sletting/anonymisering etter eventet (Inngest-cron, § 4.6) — bygget 2026-09-14,
+      prøvekjørt med `dryRun`; aktiveres ved deploy
+- [x] «Slett»-knapp i «Påmeldte» for sletteforespørsler
 - [ ] MCP-verktøy `create_event_draft`
 - [ ] E-post til alle påmeldte fra admin (endringer, avlysning)
 
@@ -263,4 +298,5 @@ admin-API testet mot dev-server. E-postmalene rendret (ikke sendt).
 | 2026-09-14 | Slettefrist for påmeldinger | Foreslått seks måneder i personvernteksten — må bekreftes, og automatisk sletting må bygges før teksten publiseres |
 | 2026-09-14 | Innsjekk i admin vs. egen side | Flyttet fra `/admin/innsjekk` (Payload-view) til egen side `/innsjekk` med admin-innlogging. Payload-rammen (meny, topplinje) var rotete på mobil i døra |
 | 2026-09-14 | Nyhetsbrev: allerede abonnent | `subscribeToNewsletter` slår opp kontakten i Resend først; aktiv abonnent → samtykket logges, men ingen ny påmelding og intet «Ny på nyhetsbrevet»-varsel (gjelder alle kilder) |
+| 2026-09-14 | Sletting: to trinn | Svar på ekstra spørsmål (kan være helseopplysninger) slettes 14 dager etter eventet; navn/e-post anonymiseres etter 6 måneder i stedet for at radene slettes, så statistikken beholdes uten migrasjon eller endring av eventet. Svar sendes ikke lenger i internvarsel-e-posten |
 | 2026-09-14 | Internvarsel for eventer | Brukte kontaktskjema-malen med «Noen vil i kontakt». Malen tar nå `eyebrow`/`heading`/`intro`/`messageLabel`; eventer og bok-ventelista har egne tekster |
