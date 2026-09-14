@@ -230,7 +230,9 @@ Eventsjekk (sluttid, sted, frist etter start, kapasitet uten venteliste, ekstern
 ### Fase 1: Lanseringsfesten (mål: klar i god tid før 15. oktober)
 - [x] `events`-collection med faner, drafts, seoPlugin, redirects-registrering
 - [x] `event-registrations`-collection
-- [x] Payload-migrasjon (`20260914_181616_events`, kjørt lokalt)
+- [x] Payload-migrasjon (`20260914_181616_events`, kjørt — lokalt og produksjon deler Neon-database)
+- [x] Merget til `main` og deployet (2026-09-14)
+- [ ] Inngest: `event-retention` synket og prøvekjørt med `dryRun` i produksjon
 - [x] `lib/events/`: kodegenerator, token, kapasitet/venteliste-logikk (med tester)
 - [x] Påmeldings-API med transaksjon, rate limit og honningkrukke
 - [x] Nyhetsbrev-kilde `event` + samtykketekst
@@ -304,4 +306,5 @@ admin-API testet mot dev-server. E-postmalene rendret (ikke sendt).
 | 2026-09-14 | Innsjekk i admin vs. egen side | Flyttet fra `/admin/innsjekk` (Payload-view) til egen side `/innsjekk` med admin-innlogging. Payload-rammen (meny, topplinje) var rotete på mobil i døra |
 | 2026-09-14 | Nyhetsbrev: allerede abonnent | `subscribeToNewsletter` slår opp kontakten i Resend først; aktiv abonnent → samtykket logges, men ingen ny påmelding og intet «Ny på nyhetsbrevet»-varsel (gjelder alle kilder) |
 | 2026-09-14 | Sletting: to trinn | Svar på ekstra spørsmål (kan være helseopplysninger) slettes 14 dager etter eventet; navn/e-post anonymiseres etter 6 måneder i stedet for at radene slettes, så statistikken beholdes uten migrasjon eller endring av eventet. Svar sendes ikke lenger i internvarsel-e-posten |
+| 2026-09-14 | Migrasjon i produksjon | Produksjon og lokalt deler samme Neon-database, så migrasjonen var allerede kjørt. Vercel-bygget kjører ikke `payload migrate` — nye migrasjoner må kjøres manuelt før deploy |
 | 2026-09-14 | Internvarsel for eventer | Brukte kontaktskjema-malen med «Noen vil i kontakt». Malen tar nå `eyebrow`/`heading`/`intro`/`messageLabel`; eventer og bok-ventelista har egne tekster |
