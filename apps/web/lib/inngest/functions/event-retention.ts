@@ -18,8 +18,10 @@ export const eventRetention = inngest.createFunction(
     { event: "events/retention.requested" },
   ],
   async ({ event, step }) => {
+    // Gjelder både eget event og «Invoke» fra dashbordet (som sender
+    // `inngest/function.invoked` med samme data); cron har ikke feltet.
     const dryRun =
-      event.name === "events/retention.requested" && event.data.dryRun === true;
+      (event.data as { dryRun?: unknown } | undefined)?.dryRun === true;
     return step.run("rydd-pameldinger", () =>
       applyRegistrationRetention({ dryRun })
     );

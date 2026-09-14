@@ -17,6 +17,10 @@ type Events = {
   "events/retention.requested": {
     data: { dryRun?: boolean };
   };
+  // Send påminnelser for eventer som starter innen et døgn (kjører også hver time).
+  "events/reminders.requested": {
+    data: { dryRun?: boolean };
+  };
 };
 
 export const inngest = new Inngest({

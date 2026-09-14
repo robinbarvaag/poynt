@@ -1,3 +1,4 @@
+import { eventReminders } from "./event-reminders";
 import { eventRetention } from "./event-retention";
 import { inspirationFetch } from "./inspiration-fetch";
 import { radarAnalyze } from "./radar-analyze";
@@ -9,4 +10,5 @@ export const functions = [
   radarAnalyze,
   inspirationFetch,
   eventRetention,
+  eventReminders,
 ];

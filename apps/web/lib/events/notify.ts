@@ -54,7 +54,7 @@ function logError(what: string, error: unknown) {
 export async function sendRegistrationEmail(
   event: Event,
   registration: EventRegistration,
-  opts: { promoted?: boolean } = {}
+  opts: { promoted?: boolean; reminder?: boolean } = {}
 ): Promise<void> {
   if (
     registration.status === "cancelled" ||
@@ -101,6 +101,7 @@ export async function sendRegistrationEmail(
       greeting: event.confirmationMessage || undefined,
       practicalInfo: lexicalParagraphs(event.practicalInfo),
       promoted: opts.promoted,
+      reminder: opts.reminder,
       ics: eventIcs(event),
     });
   } catch (error) {

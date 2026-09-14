@@ -809,6 +809,8 @@ export async function sendEventTicketEmail(params: {
   greeting?: string;
   practicalInfo?: string[];
   promoted?: boolean;
+  /** Påminnelse dagen før i stedet for bekreftelse. */
+  reminder?: boolean;
   /** QR-koden som PNG. Utelates når eventet ikke bruker billetter. */
   qrPng?: Buffer;
   /** Innholdet i .ics-fila. */
@@ -850,9 +852,11 @@ export async function sendEventTicketEmail(params: {
   await sendEmail({
     from: buildFrom("Poynt"),
     to: params.email,
-    subject: params.promoted
-      ? `Det ble plass: ${params.eventTitle}`
-      : `Billetten din: ${params.eventTitle}`,
+    subject: params.reminder
+      ? `Snart er det tid: ${params.eventTitle}`
+      : params.promoted
+        ? `Det ble plass: ${params.eventTitle}`
+        : `Billetten din: ${params.eventTitle}`,
     html,
     ...(attachments.length && { attachments }),
   });

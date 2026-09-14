@@ -22,6 +22,8 @@ export interface EventTicketEmailProps {
   practicalInfo?: string[];
   /** Personen rykket opp fra ventelista. */
   promoted?: boolean;
+  /** Påminnelse dagen før (samme billett, annen innledning). */
+  reminder?: boolean;
 }
 
 const codeBox = {
@@ -56,26 +58,33 @@ export default function EventTicketEmail({
   greeting,
   practicalInfo = [],
   promoted,
+  reminder,
 }: EventTicketEmailProps) {
-  return (
-    <EmailShell
-      preview={
-        promoted
-          ? `Det ble plass! Du er med på ${eventTitle}.`
-          : `Du er påmeldt ${eventTitle}. Her er billetten din.`
+  const intro = reminder
+    ? {
+        preview: `Snart er det tid for ${eventTitle}. Billetten ligger her.`,
+        eyebrow: "Snart er det tid",
+        text: "En liten påminnelse: vi ses snart! Billetten ligger under, så du har den klar i døra.",
       }
-    >
-      <Text style={emailStyles.eyebrow}>
-        {promoted ? "Det ble plass" : "Du er påmeldt"}
-      </Text>
+    : promoted
+      ? {
+          preview: `Det ble plass! Du er med på ${eventTitle}.`,
+          eyebrow: "Det ble plass",
+          text: "Noen meldte seg av, og du sto først på ventelista. Plassen er din!",
+        }
+      : {
+          preview: `Du er påmeldt ${eventTitle}. Her er billetten din.`,
+          eyebrow: "Du er påmeldt",
+          text: "Så fint at du vil være med. Plassen din er klar.",
+        };
+
+  return (
+    <EmailShell preview={intro.preview}>
+      <Text style={emailStyles.eyebrow}>{intro.eyebrow}</Text>
       <Text style={emailStyles.heading}>{eventTitle}</Text>
       <Text style={emailStyles.text}>Hei{name ? ` ${name}` : ""},</Text>
-      <Text style={emailStyles.text}>
-        {promoted
-          ? "Noen meldte seg av, og du sto først på ventelista. Plassen er din!"
-          : "Så fint at du vil være med. Plassen din er klar."}
-      </Text>
-      {greeting ? (
+      <Text style={emailStyles.text}>{intro.text}</Text>
+      {greeting && !reminder ? (
         <Text style={{ ...emailStyles.text, whiteSpace: "pre-line" }}>
           {greeting}
         </Text>

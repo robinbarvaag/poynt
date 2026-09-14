@@ -323,6 +323,34 @@ export async function renderEmailPreviews(options?: {
       ),
     },
     {
+      key: "event-reminder",
+      label: "Event: påminnelse",
+      group: "Eventer",
+      description:
+        "Sendes automatisk til alle med plass omtrent et døgn før eventet, med billetten og praktisk info. Den som meldte seg på det siste døgnet, får ingen påminnelse.",
+      subject: "Snart er det tid: Lanseringsfest for «Verdifull vekst»",
+      to: "Den påmeldte",
+      editHint: {
+        label: "Skriv praktisk info på eventet",
+        href: "/admin/collections/events",
+      },
+      html: await render(
+        EventTicketEmail({
+          name: "Kari",
+          eventTitle: "Lanseringsfest for «Verdifull vekst»",
+          when: "torsdag 15. oktober 2026, kl. 18:00–21:00",
+          where: "Eksempelstedet, Eksempelveien 1, 4000 Stavanger",
+          mapUrl: "#",
+          doorsOpen: "Dørene åpner kl. 17:30",
+          code: "POY-7K3M",
+          qrSrc: SAMPLE_QR_SRC,
+          ticketUrl: "#",
+          practicalInfo: ["Det er gratis parkering rett ved inngangen."],
+          reminder: true,
+        })
+      ),
+    },
+    {
       key: "event-waitlisted",
       label: "Event: venteliste",
       group: "Eventer",
