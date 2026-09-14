@@ -11,6 +11,7 @@ export const NEWSLETTER_CONSENT_SOURCES = [
   { value: "receipt", label: "Kvitteringsside" },
   { value: "membership", label: "Medlemskap" },
   { value: "waitlist", label: "Venteliste-skjema" },
+  { value: "event", label: "Event-påmelding" },
 ] as const;
 
 export type NewsletterConsentSource =
@@ -25,4 +26,6 @@ export const NEWSLETTER_CONSENT_TEXTS = {
   receipt:
     "Vil du ha tips og tilbud fra Poynt? Meld deg på nyhetsbrevet. Du kan melde deg av når som helst.",
   waitlist: "Avkrysning for venteliste/nyhetsbrev i skjemaet",
+  event:
+    "Ja takk, send meg nyhetsbrevet fra Poynt med tips om markedsføring, AI og vekst. Du kan melde deg av når som helst.",
 } as const;
