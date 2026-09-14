@@ -2116,7 +2116,7 @@ export interface Event {
    */
   newsletterOptIn?: boolean | null;
   /**
-   * Navn og e-post er alltid med. Legg til det dere trenger å vite, f.eks. allergier. Spør bare om det dere faktisk bruker.
+   * Navn og e-post er alltid med. Spør bare om det dere faktisk bruker — svarene slettes automatisk to uker etter eventet. Allergier og andre helseopplysninger er sensitive: spør bare hvis dere trenger det (f.eks. når dere serverer mat), og la spørsmålet være frivillig.
    */
   extraQuestions?:
     | {
