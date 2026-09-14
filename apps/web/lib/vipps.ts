@@ -173,6 +173,20 @@ export async function captureVippsPayment(
   }
 }
 
+/**
+ * Frigi en reservert (ikke capturet) betaling. Brukes når betalingen ble
+ * godkjent for sent, og plassen allerede har gått til noen andre.
+ */
+export async function cancelVippsPayment(reference: string): Promise<void> {
+  const res = await vippsFetch(`/epayment/v1/payments/${reference}/cancel`, {
+    method: "POST",
+    idempotencyKey: `cancel-${reference}`,
+  });
+  if (!res.ok) {
+    throw new Error(`Vipps cancel feila: ${res.status} ${await res.text()}`);
+  }
+}
+
 export async function refundVippsPayment(
   reference: string,
   amountValue: number

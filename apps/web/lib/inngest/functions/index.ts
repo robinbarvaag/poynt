@@ -1,3 +1,4 @@
+import { eventPayments } from "./event-payments";
 import { eventReminders } from "./event-reminders";
 import { eventRetention } from "./event-retention";
 import { inspirationFetch } from "./inspiration-fetch";
@@ -11,4 +12,5 @@ export const functions = [
   inspirationFetch,
   eventRetention,
   eventReminders,
+  eventPayments,
 ];

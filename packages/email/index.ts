@@ -912,6 +912,8 @@ export async function sendEventCancelledEmail(params: {
   when: string;
   eventUrl: string;
   byAdmin?: boolean;
+  /** Beløpet som er betalt tilbake, når billetten var betalt. */
+  refundedKr?: number;
 }) {
   if (!process.env.RESEND_API_KEY) return;
 
@@ -923,7 +925,9 @@ export async function sendEventCancelledEmail(params: {
   await sendEmail({
     from: buildFrom("Poynt"),
     to: params.email,
-    subject: `Du er meldt av: ${params.eventTitle}`,
+    subject: params.refundedKr
+      ? `Billetten er refundert: ${params.eventTitle}`
+      : `Du er meldt av: ${params.eventTitle}`,
     html: await render(EventCancelledEmail(params)),
   });
 }

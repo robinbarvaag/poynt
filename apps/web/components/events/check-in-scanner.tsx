@@ -16,6 +16,7 @@ import {
   UserPlus,
   Volume2,
   VolumeX,
+  Wallet,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -120,6 +121,13 @@ const OUTCOMES: Record<
     tone: "warn",
     dismissMs: null,
   },
+  unpaid: {
+    label: "Ikke betalt",
+    icon: Wallet,
+    className: "bg-orange-500 text-white",
+    tone: "warn",
+    dismissMs: null,
+  },
   wrong_event: {
     label: "Feil event",
     icon: CircleX,
@@ -166,6 +174,12 @@ function describe(result: ScanResponse): { title: string; detail?: string } {
       return {
         title: r?.name ?? "Avmeldt",
         detail: "Billetten er ikke gyldig lenger.",
+      };
+    case "unpaid":
+      return {
+        title: r?.name ?? "Ikke betalt",
+        detail:
+          "Billetten er ikke betalt. Slipp inn hvis de har betalt på annen måte.",
       };
     case "wrong_event":
       return {
@@ -514,7 +528,9 @@ export function CheckInScanner({
   const ResultIcon = meta?.icon;
   const text = result ? describe(result) : null;
   const needsDecision =
-    result?.outcome === "waitlisted" || result?.outcome === "cancelled";
+    result?.outcome === "waitlisted" ||
+    result?.outcome === "cancelled" ||
+    result?.outcome === "unpaid";
   const percent = counts?.seats
     ? Math.min(100, Math.round((counts.checkedIn / counts.seats) * 100))
     : 0;

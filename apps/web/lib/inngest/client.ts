@@ -21,6 +21,10 @@ type Events = {
   "events/reminders.requested": {
     data: { dryRun?: boolean };
   };
+  // Frigjør ubetalte plasser på betalte eventer (kjører også hvert 5. minutt).
+  "events/payments.requested": {
+    data: Record<string, never>;
+  };
 };
 
 export const inngest = new Inngest({

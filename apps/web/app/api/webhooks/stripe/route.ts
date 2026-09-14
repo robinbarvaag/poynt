@@ -110,6 +110,26 @@ async function handleMembershipPurchase(session: Stripe.Checkout.Session) {
   }
 }
 
+/**
+ * Eventbillett (Checkout-sesjon med metadata.kind = "event"): sjekk og bekreft
+ * betalingen, send billett og kvittering. Idempotent i seg selv.
+ */
+async function handleEventCheckout(session: Stripe.Checkout.Session) {
+  const { findRegistrationByPaymentReference } = await import(
+    "@/lib/events/registrations"
+  );
+  const { syncAndNotify } = await import("@/lib/events/payment-jobs");
+  const registration = await findRegistrationByPaymentReference(session.id);
+  if (!registration) {
+    console.warn(`Stripe webhook: fant ingen påmelding for ${session.id}`);
+    return;
+  }
+  const sync = await syncAndNotify(registration);
+  console.log(
+    `Event-betaling ${session.id} (påmelding ${registration.id}): ${sync.state}`
+  );
+}
+
 /** Convert a Stripe Unix timestamp to Date, or undefined if invalid. */
 function toDate(ts: number | undefined | null): Date | undefined {
   return ts ? new Date(ts * 1000) : undefined;
@@ -645,6 +665,10 @@ export async function POST(req: NextRequest) {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
+        if (session.metadata?.kind === "event") {
+          await handleEventCheckout(session);
+          break;
+        }
         // Kortbetalinger er alltid «paid» her, men utsettes betalingsmetoder
         // (Klarna, bankoverføring) fyres eventet FØR pengene er trukket —
         // da kommer et eget async_payment_succeeded senere.
@@ -670,10 +694,21 @@ export async function POST(req: NextRequest) {
       case "checkout.session.async_payment_succeeded": {
         // Utsatte betalingsmetoder: samme håndtering når pengene faktisk kom.
         const session = event.data.object as Stripe.Checkout.Session;
-        if (session.metadata?.productType === "membership") {
+        if (session.metadata?.kind === "event") {
+          await handleEventCheckout(session);
+        } else if (session.metadata?.productType === "membership") {
           await handleMembershipPurchase(session);
         } else {
           await handleProductPurchase(session);
+        }
+        break;
+      }
+
+      case "checkout.session.expired": {
+        // Eventbillett ikke betalt i tide: plassen frigjøres (når fristen er ute).
+        const session = event.data.object as Stripe.Checkout.Session;
+        if (session.metadata?.kind === "event") {
+          await handleEventCheckout(session);
         }
         break;
       }

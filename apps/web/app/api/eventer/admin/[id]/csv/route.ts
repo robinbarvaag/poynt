@@ -44,6 +44,7 @@ export async function GET(
     "E-post",
     "Følge av",
     "Status",
+    "Betalt (kr)",
     "Kode",
     "Påmeldt",
     "Sjekket inn",
@@ -57,6 +58,9 @@ export async function GET(
       row.email,
       row.guestOfId ? nameById.get(row.guestOfId) : "",
       statusLabel(row.status),
+      row.payment?.paidAt && !row.payment.refundedAt
+        ? row.payment.amountKr
+        : "",
       row.code,
       dateTime(row.createdAt),
       dateTime(row.checkedInAt),

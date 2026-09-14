@@ -1,11 +1,14 @@
 import { CancelRegistration } from "@/components/events/cancel-registration";
 import { LiveTicket } from "@/components/events/live-ticket";
+import { PayForTicket } from "@/components/events/pay-for-ticket";
 import { isTicketToken, ticketPath } from "@/lib/events/codes";
 import {
   formatEventLocation,
   formatEventRange,
   formatEventTime,
 } from "@/lib/events/format";
+import { syncAndNotify } from "@/lib/events/payment-jobs";
+import { formatKr, paymentMethodsFor } from "@/lib/events/payment-rules";
 import { ticketQrSvg } from "@/lib/events/qr";
 import {
   findRegistrationByToken,
@@ -26,18 +29,20 @@ export const metadata: Metadata = {
 
 interface TicketPageProps {
   params: Promise<{ token: string }>;
+  /** `betaling=ferdig|avbrutt` når personen kommer tilbake fra kassen. */
+  searchParams: Promise<{ betaling?: string }>;
 }
 
 /**
  * Den personlige billettsiden. Lenken (og QR-koden) er nøkkelen: den som har
  * den, ser billetten og kan melde seg av. Alltid dynamisk og aldri indeksert.
  */
-export default function TicketPage({ params }: TicketPageProps) {
+export default function TicketPage({ params, searchParams }: TicketPageProps) {
   // Billetten er runtime-data (hemmelig nøkkel i URL-en, alltid fersk status)
   // — les den bak Suspense, samme mønster som /forhandsvisning.
   return (
     <Suspense fallback={<TicketSkeleton />}>
-      <TicketContent params={params} />
+      <TicketContent params={params} searchParams={searchParams} />
     </Suspense>
   );
 }
@@ -50,13 +55,30 @@ function TicketSkeleton() {
   );
 }
 
-async function TicketContent({ params }: TicketPageProps) {
+async function TicketContent({ params, searchParams }: TicketPageProps) {
   const { token } = await params;
+  const { betaling } = await searchParams;
   await connection();
 
   if (!isTicketToken(token)) notFound();
-  const registration = await findRegistrationByToken(token);
+  let registration = await findRegistrationByToken(token);
   if (!registration) notFound();
+
+  // Venter på betaling: spør Vipps/Stripe med en gang, så billetten er klar
+  // når personen kommer tilbake fra kassen — også uten webhook.
+  if (
+    registration.status === "pending_payment" &&
+    registration.payment?.reference
+  ) {
+    try {
+      const sync = await syncAndNotify(registration);
+      if (sync.state !== "pending" && sync.state !== "none") {
+        registration = (await findRegistrationByToken(token)) ?? registration;
+      }
+    } catch (error) {
+      console.error("Betalingssjekk på billettsiden feilet:", error);
+    }
+  }
 
   const { event } = registration;
   const url = `${SITE_URL}${ticketPath(token)}`;
@@ -66,11 +88,22 @@ async function TicketContent({ params }: TicketPageProps) {
       ? await ticketQrSvg(url)
       : null;
 
+  const host =
+    typeof registration.guestOf === "object" ? registration.guestOf : null;
+  const paidPayment = registration.payment?.paidAt
+    ? registration.payment
+    : host?.payment?.paidAt
+      ? host.payment
+      : null;
+  const paid = Boolean(paidPayment && !paidPayment.refundedAt);
+
   const started = new Date(event.startsAt).getTime() <= Date.now();
   const canCancel =
     !started &&
+    !paid &&
     (registration.status === "registered" ||
-      registration.status === "waitlisted");
+      registration.status === "waitlisted" ||
+      registration.status === "pending_payment");
 
   const where = formatEventLocation(event.location);
   // Følget: hovedpersonen ser billettene til dem hun tok med, og følget ser
@@ -116,6 +149,35 @@ async function TicketContent({ params }: TicketPageProps) {
             <Text variant="muted" customStyles="text-sm">
               Denne påmeldingen er meldt av. Vil du likevel komme? Meld deg på
               igjen, så lenge det er plass.
+            </Text>
+          )}
+          {registration.status === "refunded" && (
+            <Text variant="muted" customStyles="text-sm">
+              Billetten er refundert, og pengene er på vei tilbake. Billetten
+              virker ikke lenger.
+            </Text>
+          )}
+          {registration.status === "pending_payment" &&
+            !registration.guestOf &&
+            registration.payment?.amountKr && (
+              <PayForTicket
+                token={token}
+                amountKr={registration.payment.amountKr}
+                expiresAt={registration.payment.expiresAt ?? null}
+                methods={paymentMethodsFor(event)}
+                returning={betaling === "ferdig"}
+                aborted={betaling === "avbrutt"}
+              />
+            )}
+          {registration.status === "pending_payment" && host && (
+            <Text variant="muted" customStyles="text-sm">
+              Billetten blir gyldig når {host.name} har betalt.
+            </Text>
+          )}
+          {paid && paidPayment?.amountKr && !registration.guestOf && (
+            <Text variant="muted" customStyles="text-xs">
+              Betalt {formatKr(paidPayment.amountKr)}. Kan du ikke komme
+              likevel? Svar på billett-e-posten, så hjelper vi deg.
             </Text>
           )}
 

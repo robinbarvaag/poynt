@@ -7,6 +7,7 @@ import {
   type RegistrationStatus,
   statusLabel,
 } from "../../../lib/events/capacity";
+import { formatKr } from "../../../lib/events/payment-rules";
 import type {
   RegistrationOverview,
   RegistrationRow,
@@ -121,8 +122,22 @@ export function RegistrationsPanel() {
       | "undo-check-in"
       | "resend"
       | "delete"
+      | "refund"
   ) => {
     let notify = false;
+    if (action === "refund") {
+      const amount = row.payment?.amountKr
+        ? formatKr(row.payment.amountKr)
+        : "beløpet";
+      const guests = guestCountByHost.get(row.id) ?? 0;
+      if (
+        !window.confirm(
+          `Refundere ${amount} til ${row.name}${guests ? ` (gjelder også ${guests} i følget)` : ""}? Pengene går tilbake via ${row.payment?.provider === "vipps" ? "Vipps" : "kortet"}, billetten slutter å virke, og plassen går videre til ventelista.`
+        )
+      ) {
+        return;
+      }
+    }
     if (
       action === "delete" &&
       !window.confirm(
@@ -159,6 +174,11 @@ export function RegistrationsPanel() {
           json.promoted
             ? `Påmeldingen er slettet. ${json.promoted} rykket opp fra ventelista og har fått billett.`
             : "Påmeldingen er slettet."
+        );
+      }
+      if (action === "refund") {
+        setNotice(
+          `${formatKr(json.refundedKr ?? 0)} er refundert til ${row.name}.${json.promoted ? ` ${json.promoted} rykket opp fra ventelista.` : ""}`
         );
       }
       if (action === "cancel" && json.promoted) {
@@ -198,7 +218,16 @@ export function RegistrationsPanel() {
   }
 
   const counts = data?.counts;
-  const seats = counts ? counts.registered + counts.checked_in : 0;
+  const seats = counts
+    ? counts.registered + counts.checked_in + counts.pending_payment
+    : 0;
+  const paidTotal = (data?.rows ?? []).reduce(
+    (sum, row) =>
+      row.payment?.paidAt && !row.payment.refundedAt
+        ? sum + (row.payment.amountKr ?? 0)
+        : sum,
+    0
+  );
   const capacity = data?.event.capacity;
 
   return (
@@ -229,6 +258,9 @@ export function RegistrationsPanel() {
           <Stat label="Møtt" value={String(counts.checked_in)} />
           <Stat label="På venteliste" value={String(counts.waitlisted)} />
           <Stat label="Avmeldt" value={String(counts.cancelled)} />
+          {data?.event.priceKr ? (
+            <Stat label="Innbetalt" value={formatKr(paidTotal)} />
+          ) : null}
         </div>
       )}
 
@@ -431,6 +463,17 @@ export function RegistrationsPanel() {
                         ? ` #${row.waitlistPosition}`
                         : ""}
                     </span>
+                    {row.payment?.amountKr ? (
+                      <span style={{ ...muted, display: "block" }}>
+                        {row.payment.refundedAt
+                          ? `Refundert ${formatKr(row.payment.amountKr)}`
+                          : row.payment.paidAt
+                            ? `Betalt ${formatKr(row.payment.amountKr)} · ${row.payment.provider === "vipps" ? "Vipps" : "kort"}`
+                            : row.payment.expiresAt
+                              ? `${formatKr(row.payment.amountKr)}, frist ${formatDateTime(row.payment.expiresAt)}`
+                              : formatKr(row.payment.amountKr)}
+                      </span>
+                    ) : null}
                     {row.checkedInAt && (
                       <span style={{ ...muted, display: "block" }}>
                         {formatDateTime(row.checkedInAt)}
@@ -708,6 +751,7 @@ function RowActions({
       | "undo-check-in"
       | "resend"
       | "delete"
+      | "refund"
   ) => void;
 }) {
   if (isAnonymizedEmail(row.email)) return null;
@@ -722,7 +766,7 @@ function RowActions({
   // angres) på egen linje, med «Slett» i rødt.
   return (
     <div style={{ display: "grid", gap: "0.35rem", justifyItems: "start" }}>
-      {row.status !== "cancelled" && (
+      {row.status !== "cancelled" && row.status !== "refunded" && (
         <div style={line}>
           {row.status === "registered" && (
             <Button {...small} onClick={() => onAction("check-in")}>
@@ -747,7 +791,12 @@ function RowActions({
         </div>
       )}
       <div style={line}>
-        {row.status !== "cancelled" && (
+        {row.payment?.paidAt && !row.payment.refundedAt && (
+          <Button {...small} onClick={() => onAction("refund")}>
+            Refunder
+          </Button>
+        )}
+        {row.status !== "cancelled" && row.status !== "refunded" && (
           <Button {...small} onClick={() => onAction("cancel")}>
             Meld av
           </Button>

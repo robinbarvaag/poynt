@@ -7,6 +7,12 @@ import {
 } from "@/lib/events/capacity";
 import { formatEventDay, formatEventTime } from "@/lib/events/format";
 import {
+  PAYMENT_PROVIDERS,
+  type PaymentProvider,
+  formatKr,
+  partyAmountKr,
+} from "@/lib/events/payment-rules";
+import {
   Button,
   Checkbox,
   ConfettiBurst,
@@ -47,6 +53,9 @@ export interface RegistrationFormProps {
   questions: RegistrationQuestion[];
   /** Hvor mange man kan ta med (0 = hver melder seg på selv). */
   maxGuests: number;
+  /** Pris per person i kr, null = gratis. */
+  priceKr: number | null;
+  paymentMethods: PaymentProvider[];
 }
 
 interface SuccessState {
@@ -72,6 +81,9 @@ export function RegistrationForm(props: RegistrationFormProps) {
   const [newsletter, setNewsletter] = useState(false);
   const [guests, setGuests] = useState<{ id: number; name: string }[]>([]);
   const nextGuestId = useRef(1);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentProvider>(
+    props.paymentMethods[0] ?? "vipps"
+  );
 
   useEffect(() => {
     setWindow(registrationWindow(props));
@@ -114,6 +126,9 @@ export function RegistrationForm(props: RegistrationFormProps) {
   const partySize = 1 + guests.length;
   // Er det ikke plass til hele følget, havner alle på ventelista (eller avvises).
   const tooFew = props.spotsLeft !== null && props.spotsLeft < partySize;
+  // Betaling bare når de faktisk får plass; ventelista betaler ved opprykk.
+  const toPayment = Boolean(props.priceKr) && !tooFew;
+  const totalKr = props.priceKr ? partyAmountKr(props.priceKr, partySize) : 0;
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -131,11 +146,18 @@ export function RegistrationForm(props: RegistrationFormProps) {
           answers,
           newsletter,
           guests: guests.map((guest) => guest.name.trim()),
+          paymentMethod: props.priceKr ? paymentMethod : undefined,
         }),
       });
       const json = await res.json();
       if (!res.ok) {
         setError(json.error ?? "Noe gikk galt. Prøv igjen.");
+        return;
+      }
+      if (json.checkoutUrl) {
+        // Til Vipps/kortbetaling. Knappen står som «Åpner betaling…» til
+        // siden bytter. (`window` er skygget av state-variabelen over.)
+        document.location.href = json.checkoutUrl;
         return;
       }
       setSuccess(json);
@@ -341,6 +363,53 @@ export function RegistrationForm(props: RegistrationFormProps) {
         />
       </div>
 
+      {props.priceKr ? (
+        <div className="space-y-3 rounded-2xl bg-muted/50 p-4">
+          <div className="flex items-baseline justify-between gap-3">
+            <span className="text-foreground text-sm">
+              {partySize > 1
+                ? `${partySize} × ${formatKr(props.priceKr)}`
+                : "Pris"}
+            </span>
+            <span className="font-bold font-heading text-foreground text-lg">
+              {formatKr(totalKr)}
+            </span>
+          </div>
+          {toPayment && props.paymentMethods.length > 1 && (
+            <fieldset className="space-y-2">
+              <legend className="mb-2 font-semibold text-foreground text-sm">
+                Betal med
+              </legend>
+              <div className="grid grid-cols-2 gap-2">
+                {PAYMENT_PROVIDERS.filter((p) =>
+                  props.paymentMethods.includes(p.value)
+                ).map((provider) => (
+                  <label
+                    key={provider.value}
+                    className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-input bg-card px-3 py-2.5 font-semibold text-sm has-checked:border-primary has-checked:ring-2 has-checked:ring-primary/30"
+                  >
+                    <input
+                      type="radio"
+                      name="betalingsmate"
+                      value={provider.value}
+                      checked={paymentMethod === provider.value}
+                      onChange={() => setPaymentMethod(provider.value)}
+                      className="accent-primary"
+                    />
+                    {provider.label}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          )}
+          <Text variant="muted" customStyles="text-xs">
+            {toPayment
+              ? "Plassen holdes av i 30 minutter mens du betaler. Billetten kommer på e-post når betalingen er gjennomført."
+              : "Du betaler først hvis du får plass fra ventelista."}
+          </Text>
+        </div>
+      ) : null}
+
       {error && (
         <div
           role="alert"
@@ -358,14 +427,18 @@ export function RegistrationForm(props: RegistrationFormProps) {
           disabled={submitting}
         >
           {submitting
-            ? "Melder på…"
-            : tooFew && props.waitlistEnabled
-              ? guests.length
-                ? "Sett oss på ventelista"
-                : "Sett meg på ventelista"
-              : guests.length
-                ? `Meld på ${partySize} personer`
-                : "Meld meg på"}
+            ? toPayment
+              ? "Åpner betaling…"
+              : "Melder på…"
+            : toPayment
+              ? `Gå til betaling (${formatKr(totalKr)})`
+              : tooFew && props.waitlistEnabled
+                ? guests.length
+                  ? "Sett oss på ventelista"
+                  : "Sett meg på ventelista"
+                : guests.length
+                  ? `Meld på ${partySize} personer`
+                  : "Meld meg på"}
         </Button>
         <PrivacyNotice
           purpose="Vi bruker opplysningene til påmeldingen og billetten. Svar på ekstra spørsmål slettes to uker etter eventet, navn og e-post senest seks måneder etter."
