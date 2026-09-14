@@ -19,6 +19,7 @@ import {
   renderMarkdownDocument,
   serviceDocument,
 } from "./document-to-markdown";
+import { eventDocument } from "./event-document";
 import { markdownUrlFor } from "./negotiation";
 
 /**
@@ -92,6 +93,18 @@ async function findProducts(where: Rec = {}, depth = 2) {
     sort: ["displayOrder", "-createdAt"],
     depth,
     limit: 1000,
+  });
+  return result.docs;
+}
+
+async function findEvents(where: Rec = {}, depth = 2) {
+  const payload = await payloadClient();
+  const result = await payload.find({
+    collection: "events",
+    where: { _status: { equals: "published" }, ...where },
+    sort: "startsAt",
+    depth,
+    limit: 500,
   });
   return result.docs;
 }
@@ -301,6 +314,29 @@ export async function loadMarkdownDocument(
       });
     }
 
+    case "eventer": {
+      if (slug) {
+        // Billettsidene er personlige og har ingen markdown-versjon.
+        if (slug === "billett") return null;
+        const [event] = await findEvents({ slug: { equals: slug } });
+        return event ? eventDocument(event, ctx) : null;
+      }
+      const events = await findEvents({}, 0);
+      return indexDocument({
+        title: "Eventer",
+        description: "Lanseringer, foredrag og samlinger med Poynt.",
+        url: url("/eventer"),
+        type: "event-index",
+        items: events.map((e) => ({
+          title: e.title,
+          url: url(`/eventer/${e.slug}`),
+          meta: date(e.startsAt),
+          description: e.excerpt,
+        })),
+        emptyText: "Ingen eventer publisert akkurat nå.",
+      });
+    }
+
     case "podkast": {
       if (slug) return null;
       const payload = await payloadClient();
@@ -443,6 +479,7 @@ export async function loadLlmsTxt(): Promise<string> {
       ),
     ]);
 
+  const events = await findEvents({}, 0);
   const md = (path: string) => markdownUrlFor(SITE_URL, path);
   const indexable = <T extends { meta?: { noIndex?: boolean | null } | null }>(
     docs: T[]
@@ -469,6 +506,15 @@ export async function loadLlmsTxt(): Promise<string> {
         url: md(`/kundehistorier/${s.slug}`),
         meta: s.customer,
         description: s.excerpt,
+      })),
+    ],
+    [
+      "Eventer",
+      indexable(events).map((e) => ({
+        title: e.title,
+        url: md(`/eventer/${e.slug}`),
+        meta: date(e.startsAt),
+        description: e.excerpt,
       })),
     ],
     [

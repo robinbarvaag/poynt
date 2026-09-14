@@ -3,6 +3,7 @@ import { RefreshOnSave } from "@/components/refresh-on-save";
 import { BlogPostView } from "@/components/views/blog-post-view";
 import { CaseStudyView } from "@/components/views/case-study-view";
 import { CmsPageView } from "@/components/views/cms-page-view";
+import { EventView } from "@/components/views/event-view";
 import { ServiceView } from "@/components/views/service-view";
 import { getDraftBySlug, isDraftModeEnabled } from "@/lib/draft";
 import config from "@/payload.config";
@@ -90,6 +91,18 @@ async function PreviewContent({ params }: PreviewPageProps) {
         <RefreshOnSave />
         <PreviewBanner path={publicPath} />
         <ServiceView service={service} cta={servicesPage?.detailCta} />
+      </>
+    );
+  }
+
+  if (segments[0] === "eventer" && segments.length > 1) {
+    const event = await getDraftBySlug("events", segments.slice(1).join("/"));
+    if (!event) notFound();
+    return (
+      <>
+        <RefreshOnSave />
+        <PreviewBanner path={publicPath} />
+        <EventView event={event} seatsTaken={0} />
       </>
     );
   }

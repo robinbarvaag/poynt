@@ -19,6 +19,8 @@ export function getPublicPath(
       return `/tjenester/${slug}`;
     case "products":
       return `/produkter/${slug}`;
+    case "events":
+      return `/eventer/${slug}`;
     case "guides":
       return `/on-poynt/ressurser/${slug}`;
     case "courses":

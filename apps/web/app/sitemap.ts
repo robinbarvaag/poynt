@@ -64,6 +64,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .catch(() => null),
   ]);
 
+  const events = await payload
+    .find({
+      collection: "events",
+      where: { _status: { equals: "published" } },
+      limit: 1000,
+      depth: 0,
+    })
+    .catch(() => null);
+
   // Statiske oversiktssider.
   const staticRoutes: Entry[] = [
     { url: SITE_URL, changeFrequency: "weekly", priority: 1 },
@@ -76,6 +85,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     },
     { url: `${SITE_URL}/podkast`, changeFrequency: "weekly", priority: 0.7 },
+    { url: `${SITE_URL}/eventer`, changeFrequency: "weekly", priority: 0.7 },
     { url: `${SITE_URL}/kontakt`, changeFrequency: "monthly", priority: 0.6 },
   ];
 
@@ -125,6 +135,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }));
 
+  const eventRoutes: Entry[] = (events?.docs ?? [])
+    .filter((e) => !e.meta?.noIndex)
+    .map((e) => ({
+      url: `${SITE_URL}/eventer/${e.slug}`,
+      lastModified: e.updatedAt,
+      changeFrequency: "weekly",
+      priority: 0.7,
+    }));
+
   return [
     ...staticRoutes,
     ...pageRoutes,
@@ -132,5 +151,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...postRoutes,
     ...serviceRoutes,
     ...caseStudyRoutes,
+    ...eventRoutes,
   ];
 }

@@ -554,6 +554,26 @@ export {
   useCustomFont,
 } from "./components/brand";
 
+// Eventer: billett, plassmåler, program, faktakort, datomerke, konfetti
+export {
+  ConfettiBurst,
+  type ConfettiBurstProps,
+  EventDateBadge,
+  type EventDateBadgeProps,
+  type EventFact,
+  type EventFactIcon,
+  EventFacts,
+  type EventFactsProps,
+  EventProgram,
+  type EventProgramItem,
+  type EventProgramProps,
+  EventTicket,
+  type EventTicketProps,
+  type EventTicketStatus,
+  SpotsMeter,
+  type SpotsMeterProps,
+} from "./components/event";
+
 export { Switch };
 
 // Chat-primitiver (medlemsfellesskap) — shadcn radix-registeret

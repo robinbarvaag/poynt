@@ -16,6 +16,7 @@ export const BREADCRUMB_ROOTS = {
   podkast: { label: "Podkast", href: "/podkast" },
   tjenester: { label: "Tjenester", href: "/tjenester" },
   produkter: { label: "Produkter", href: "/produkter" },
+  eventer: { label: "Eventer", href: "/eventer" },
 } as const satisfies Record<string, BreadcrumbItem>;
 
 /**

@@ -317,6 +317,86 @@ export function productSchema(opts: {
   };
 }
 
+/**
+ * Event (arrangement). Google viser eventer med dato, sted og pris direkte i
+ * søkeresultatet, og AI-assistenter bruker det samme til å svare på «hva skjer
+ * i Stavanger i oktober?».
+ */
+export function eventSchema(opts: {
+  name: string;
+  description?: string | null;
+  image?: MediaInput | string;
+  url: string;
+  startDate: string;
+  endDate?: string | null;
+  status?: "scheduled" | "postponed" | "cancelled" | null;
+  location?: {
+    name?: string | null;
+    address?: string | null;
+    online?: boolean | null;
+  } | null;
+  /** Billetter via nettsiden: ledig, fullt (venteliste) eller ikke åpnet. */
+  availability?: "InStock" | "SoldOut" | "PreOrder" | null;
+  /** Når påmeldingen åpnet. */
+  validFrom?: string | null;
+  /** Lenke til påmeldingen (egen side eller eksternt billettsystem). */
+  offerUrl?: string | null;
+}) {
+  const imageUrl = absoluteMediaUrl(opts.image);
+  const online = Boolean(opts.location?.online);
+  const address = opts.location?.address
+    ? parseNorwegianAddress(opts.location.address)
+    : {};
+  const statusMap = {
+    scheduled: "https://schema.org/EventScheduled",
+    postponed: "https://schema.org/EventPostponed",
+    cancelled: "https://schema.org/EventCancelled",
+  } as const;
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    name: opts.name,
+    ...(opts.description ? { description: opts.description } : {}),
+    ...(imageUrl ? { image: imageUrl } : {}),
+    url: opts.url,
+    startDate: opts.startDate,
+    ...(opts.endDate ? { endDate: opts.endDate } : {}),
+    eventStatus: statusMap[opts.status ?? "scheduled"],
+    eventAttendanceMode: online
+      ? "https://schema.org/OnlineEventAttendanceMode"
+      : "https://schema.org/OfflineEventAttendanceMode",
+    location: online
+      ? { "@type": "VirtualLocation", url: opts.url }
+      : {
+          "@type": "Place",
+          ...(nonEmpty(opts.location?.name)
+            ? { name: opts.location.name }
+            : {}),
+          address: {
+            "@type": "PostalAddress",
+            ...address,
+            addressCountry: "NO",
+          },
+        },
+    organizer: { "@id": ORG_ID },
+    ...(opts.availability
+      ? {
+          isAccessibleForFree: true,
+          offers: {
+            "@type": "Offer",
+            price: 0,
+            priceCurrency: "NOK",
+            availability: `https://schema.org/${opts.availability}`,
+            url: opts.offerUrl || opts.url,
+            ...(opts.validFrom ? { validFrom: opts.validFrom } : {}),
+          },
+        }
+      : {}),
+    inLanguage: "nb-NO",
+  };
+}
+
 /** Brødsmulesti for detaljsider. */
 export function breadcrumbSchema(items: { name: string; url: string }[]) {
   return {
