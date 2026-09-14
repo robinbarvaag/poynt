@@ -70,6 +70,7 @@ import * as migration_20260913_094816_book_store_poynt from './20260913_094816_b
 import * as migration_20260913_104823_newsletter_consents from './20260913_104823_newsletter_consents';
 import * as migration_20260913_120000_orders_id_start_10000 from './20260913_120000_orders_id_start_10000';
 import * as migration_20260913_153339_resource_list_compact_collapse from './20260913_153339_resource_list_compact_collapse';
+import * as migration_20260914_181616_events from './20260914_181616_events';
 
 export const migrations = [
   {
@@ -430,6 +431,11 @@ export const migrations = [
   {
     up: migration_20260913_153339_resource_list_compact_collapse.up,
     down: migration_20260913_153339_resource_list_compact_collapse.down,
-    name: '20260913_153339_resource_list_compact_collapse'
+    name: '20260913_153339_resource_list_compact_collapse',
+  },
+  {
+    up: migration_20260914_181616_events.up,
+    down: migration_20260914_181616_events.down,
+    name: '20260914_181616_events'
   },
 ];

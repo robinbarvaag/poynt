@@ -71,6 +71,8 @@ export interface Config {
     'blog-posts': BlogPost;
     'case-studies': CaseStudy;
     services: Service;
+    events: Event;
+    'event-registrations': EventRegistration;
     categories: Category;
     media: Media;
     newsletters: Newsletter;
@@ -101,6 +103,8 @@ export interface Config {
     'blog-posts': BlogPostsSelect<false> | BlogPostsSelect<true>;
     'case-studies': CaseStudiesSelect<false> | CaseStudiesSelect<true>;
     services: ServicesSelect<false> | ServicesSelect<true>;
+    events: EventsSelect<false> | EventsSelect<true>;
+    'event-registrations': EventRegistrationsSelect<false> | EventRegistrationsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     newsletters: NewslettersSelect<false> | NewslettersSelect<true>;
@@ -1998,6 +2002,260 @@ export interface CaseStudy {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "events".
+ */
+export interface Event {
+  id: number;
+  title: string;
+  /**
+   * Én–to setninger: hva er det, og hvorfor bør man komme? Vises i oversikten, i Google og når lenken deles.
+   */
+  excerpt: string;
+  heroImage?: (number | null) | Media;
+  startsAt: string;
+  /**
+   * Valgfritt, men folk liker å vite når de er ferdige.
+   */
+  endsAt?: string | null;
+  /**
+   * Valgfritt. Vises på billetten og i praktisk info.
+   */
+  doorsOpenAt?: string | null;
+  location?: {
+    name?: string | null;
+    /**
+     * F.eks. en lenke fra Google Maps.
+     */
+    mapUrl?: string | null;
+    address?: string | null;
+    online?: boolean | null;
+  };
+  /**
+   * Hva skjer, hvem er det for, og hva sitter man igjen med? Skriv som en invitasjon, ikke en pressemelding.
+   */
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Valgfritt. Vises som en tidslinje på eventsiden.
+   */
+  program?:
+    | {
+        time?: string | null;
+        title: string;
+        description?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Parkering, mat og drikke, tilgjengelighet, hva man bør ta med. Vises på eventsiden og på billetten.
+   */
+  practicalInfo?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Spørsmål og svar som publiseres som strukturert data for søkemotorer og AI-svar. La stå tom for å hoppe over.
+   */
+  faq?:
+    | {
+        question: string;
+        answer: string;
+        id?: string | null;
+      }[]
+    | null;
+  registrationMode: 'internal' | 'external' | 'none';
+  externalUrl?: string | null;
+  externalLabel?: string | null;
+  /**
+   * La stå tom hvis det ikke er noen grense.
+   */
+  capacity?: number | null;
+  /**
+   * Melder noen seg av, får den første på ventelista plassen og billett på e-post automatisk.
+   */
+  waitlistEnabled?: boolean | null;
+  /**
+   * Tom = åpen med en gang eventet er publisert.
+   */
+  registrationOpensAt?: string | null;
+  /**
+   * Tom = åpen helt til eventet starter.
+   */
+  registrationClosesAt?: string | null;
+  /**
+   * Da kan dere skanne folk inn i døra og se hvor mange som faktisk kom.
+   */
+  ticketsEnabled?: boolean | null;
+  /**
+   * Viser en avkrysningsboks (aldri forhåndsavhuket) i skjemaet. Påmeldinger via eventet merkes med eventets navn.
+   */
+  newsletterOptIn?: boolean | null;
+  /**
+   * Navn og e-post er alltid med. Legg til det dere trenger å vite, f.eks. allergier. Spør bare om det dere faktisk bruker.
+   */
+  extraQuestions?:
+    | {
+        label: string;
+        type: 'text' | 'textarea' | 'checkbox' | 'select';
+        /**
+         * Skriv ett valg og trykk Enter.
+         */
+        options?: string[] | null;
+        required?: boolean | null;
+        /**
+         * Lages automatisk fra spørsmålet.
+         */
+        name?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Valgfritt. Kommer først i e-posten de påmeldte får, f.eks. «Så gøy at du kommer!».
+   */
+  confirmationMessage?: string | null;
+  meta?: {
+    /**
+     * Kan stå tom — da bruker Google innholdets egen tittel. Fyll ut hvis søketreffet skal si noe annet enn overskriften på siden.
+     */
+    title?: string | null;
+    /**
+     * Kan stå tom — da brukes utdraget/den korte oppsummeringen fra innholdet. (Sider har ikke utdrag, så der bør denne fylles ut.)
+     */
+    description?: string | null;
+    /**
+     * Kan stå tom — da brukes hovedbildet (eller hero-bildet på Sider), og uten det lages et automatisk Poynt-kort med tittelen.
+     */
+    image?: (number | null) | Media;
+    /**
+     * Aktivér for å hindre Google fra å indeksere denne siden
+     */
+    noIndex?: boolean | null;
+    /**
+     * Overstyr automatisk canonical URL hvis innholdet finnes på en annen URL
+     */
+    canonicalUrl?: string | null;
+    /**
+     * Brukes av sosiale medier ved deling
+     */
+    ogType?: ('website' | 'article' | 'product') | null;
+  };
+  /**
+   * Genereres automatisk fra tittelen
+   */
+  slug: string;
+  /**
+   * Avlyst eller utsatt stenger påmeldingen og vises tydelig på siden. Si også fra til de påmeldte.
+   */
+  eventStatus: 'scheduled' | 'postponed' | 'cancelled';
+  /**
+   * Settes av AI-vurderingen (0–100).
+   */
+  qualityScore?: number | null;
+  qualityReviewedAt?: string | null;
+  qualityReview?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * Påmeldinger til eventer. Enklest å jobbe med fra «Påmeldte»-fanen på selve eventet.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "event-registrations".
+ */
+export interface EventRegistration {
+  id: number;
+  event: number | Event;
+  name: string;
+  email: string;
+  status: 'registered' | 'waitlisted' | 'checked_in' | 'cancelled';
+  code: string;
+  token: string;
+  answers?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  newsletter?: boolean | null;
+  waitlistPosition?: number | null;
+  checkedInAt?: string | null;
+  checkedInBy?: (number | null) | User;
+  cancelledAt?: string | null;
+  cancelledBy?: ('self' | 'admin') | null;
+  promotedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: number;
+  firstName?: string | null;
+  lastName?: string | null;
+  avatar?: (number | null) | Media;
+  /**
+   * Kort beskrivelse som vises på blogginnlegg
+   */
+  bio?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'users';
+}
+/**
  * Skriv nyhetsbrevet her, send en test til deg selv, og send så til alle abonnenter.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2043,7 +2301,7 @@ export interface Newsletter {
 export interface NewsletterConsent {
   id: number;
   email: string;
-  source: 'newsletter-form' | 'book-access' | 'checkout' | 'receipt' | 'membership' | 'waitlist';
+  source: 'newsletter-form' | 'book-access' | 'checkout' | 'receipt' | 'membership' | 'waitlist' | 'event';
   /**
    * Teksten brukeren så og sa ja til.
    */
@@ -2717,38 +2975,6 @@ export interface BookAccess {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: number;
-  firstName?: string | null;
-  lastName?: string | null;
-  avatar?: (number | null) | Media;
-  /**
-   * Kort beskrivelse som vises på blogginnlegg
-   */
-  bio?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'users';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
 export interface Redirect {
@@ -2776,6 +3002,10 @@ export interface Redirect {
       | ({
           relationTo: 'services';
           value: number | Service;
+        } | null)
+      | ({
+          relationTo: 'events';
+          value: number | Event;
         } | null);
     url?: string | null;
   };
@@ -2841,6 +3071,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'services';
         value: number | Service;
+      } | null)
+    | ({
+        relationTo: 'events';
+        value: number | Event;
+      } | null)
+    | ({
+        relationTo: 'event-registrations';
+        value: number | EventRegistration;
       } | null)
     | ({
         relationTo: 'categories';
@@ -3681,6 +3919,103 @@ export interface ServicesSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "events_select".
+ */
+export interface EventsSelect<T extends boolean = true> {
+  title?: T;
+  excerpt?: T;
+  heroImage?: T;
+  startsAt?: T;
+  endsAt?: T;
+  doorsOpenAt?: T;
+  location?:
+    | T
+    | {
+        name?: T;
+        mapUrl?: T;
+        address?: T;
+        online?: T;
+      };
+  description?: T;
+  program?:
+    | T
+    | {
+        time?: T;
+        title?: T;
+        description?: T;
+        id?: T;
+      };
+  practicalInfo?: T;
+  faq?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  registrationMode?: T;
+  externalUrl?: T;
+  externalLabel?: T;
+  capacity?: T;
+  waitlistEnabled?: T;
+  registrationOpensAt?: T;
+  registrationClosesAt?: T;
+  ticketsEnabled?: T;
+  newsletterOptIn?: T;
+  extraQuestions?:
+    | T
+    | {
+        label?: T;
+        type?: T;
+        options?: T;
+        required?: T;
+        name?: T;
+        id?: T;
+      };
+  confirmationMessage?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+        noIndex?: T;
+        canonicalUrl?: T;
+        ogType?: T;
+      };
+  slug?: T;
+  eventStatus?: T;
+  qualityScore?: T;
+  qualityReviewedAt?: T;
+  qualityReview?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "event-registrations_select".
+ */
+export interface EventRegistrationsSelect<T extends boolean = true> {
+  event?: T;
+  name?: T;
+  email?: T;
+  status?: T;
+  code?: T;
+  token?: T;
+  answers?: T;
+  newsletter?: T;
+  waitlistPosition?: T;
+  checkedInAt?: T;
+  checkedInBy?: T;
+  cancelledAt?: T;
+  cancelledBy?: T;
+  promotedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

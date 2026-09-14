@@ -29,6 +29,8 @@ import { CaseStudies } from "./collections/case-studies";
 import { Categories } from "./collections/categories";
 import { Courses } from "./collections/courses";
 import { EmailTemplates } from "./collections/email-templates";
+import { EventRegistrations } from "./collections/event-registrations";
+import { Events } from "./collections/events";
 import { Guides } from "./collections/guides";
 import { Media } from "./collections/media";
 import { NewsletterConsents } from "./collections/newsletter-consents";
@@ -190,6 +192,8 @@ export default buildConfig({
     BlogPosts,
     CaseStudies,
     Services,
+    Events,
+    EventRegistrations,
     Categories,
     Media,
     Newsletters,
@@ -311,6 +315,12 @@ export default buildConfig({
           exact: true,
           meta: { title: "Kvalitetsoversikt" },
         },
+        checkIn: {
+          Component: "/admin/views/check-in/view#CheckInView",
+          path: "/innsjekk",
+          exact: true,
+          meta: { title: "Innsjekk" },
+        },
       },
     },
   },
@@ -342,6 +352,7 @@ export default buildConfig({
         "blog-posts",
         "case-studies",
         "services",
+        "events",
       ],
       uploadsCollection: "media",
       // «| Poynt»-suffikset legges på automatisk i frontend (title.template),
@@ -362,6 +373,9 @@ export default buildConfig({
         }
         if (collectionSlug === "services") {
           return `${siteUrl}/tjenester/${doc.slug}`;
+        }
+        if (collectionSlug === "events") {
+          return `${siteUrl}/eventer/${doc.slug}`;
         }
         return `${siteUrl}/${collectionSlug}/${doc.slug}`;
       },
@@ -458,6 +472,7 @@ export default buildConfig({
         "blog-posts",
         "case-studies",
         "services",
+        "events",
       ],
       overrides: {
         admin: {
