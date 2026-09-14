@@ -13,6 +13,10 @@ type Events = {
   "inspiration/fetch.requested": {
     data: { sourceId?: string };
   };
+  // Rydd personopplysninger fra gamle event-påmeldinger (kjører også hver natt).
+  "events/retention.requested": {
+    data: { dryRun?: boolean };
+  };
 };
 
 export const inngest = new Inngest({

@@ -577,6 +577,33 @@ export async function checkInRegistration({
   return { outcome: "ok", registration: summary(updated) };
 }
 
+/**
+ * Slett en påmelding for godt, f.eks. når noen ber om å bli slettet. Er
+ * eventet ikke startet og personen hadde plass, meldes påmeldingen av først,
+ * så den første på ventelista rykker opp (kalleren sender billetten).
+ */
+export async function deleteRegistration(
+  registrationId: number
+): Promise<{ deleted: boolean; promoted: EventRegistration | null }> {
+  const payload = await getEventsPayload();
+  const current = await getRegistrationWithToken(registrationId);
+  if (!current) return { deleted: false, promoted: null };
+
+  const upcoming = new Date(current.event.startsAt).getTime() > Date.now();
+  const cancelled =
+    upcoming && current.status !== "cancelled"
+      ? await cancelRegistration({ registrationId, by: "admin" })
+      : null;
+
+  await payload.delete({
+    collection: "event-registrations",
+    id: registrationId,
+    overrideAccess: true,
+  });
+  revalidateEventSeats(current.event.id);
+  return { deleted: true, promoted: cancelled?.promoted ?? null };
+}
+
 /** Angre en innsjekk (feilskanning). */
 export async function undoCheckIn(
   registrationId: number

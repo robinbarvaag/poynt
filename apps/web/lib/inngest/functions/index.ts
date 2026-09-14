@@ -1,6 +1,12 @@
+import { eventRetention } from "./event-retention";
 import { inspirationFetch } from "./inspiration-fetch";
 import { radarAnalyze } from "./radar-analyze";
 import { radarHeartbeat } from "./radar-heartbeat";
 
 /** Alle Inngest-funksjoner som serves på /api/inngest. */
-export const functions = [radarHeartbeat, radarAnalyze, inspirationFetch];
+export const functions = [
+  radarHeartbeat,
+  radarAnalyze,
+  inspirationFetch,
+  eventRetention,
+];

@@ -6,13 +6,20 @@ import {
 import {
   cancelRegistration,
   checkInRegistration,
+  deleteRegistration,
   getRegistrationWithToken,
   promoteRegistration,
   undoCheckIn,
 } from "@/lib/events/registrations";
 import { type NextRequest, NextResponse } from "next/server";
 
-type Action = "cancel" | "promote" | "check-in" | "undo-check-in" | "resend";
+type Action =
+  | "cancel"
+  | "promote"
+  | "check-in"
+  | "undo-check-in"
+  | "resend"
+  | "delete";
 
 /** Handlinger på én påmelding fra Påmeldte-fanen. */
 export async function POST(
@@ -79,6 +86,18 @@ export async function POST(
         force: true,
       });
       return NextResponse.json({ ok: result.outcome === "ok", ...result });
+    }
+
+    case "delete": {
+      // Når noen ber om å bli slettet: fjernes helt, ikke bare meldt av.
+      const result = await deleteRegistration(registrationId);
+      if (result.promoted) {
+        await sendRegistrationEmail(event, result.promoted, { promoted: true });
+      }
+      return NextResponse.json({
+        ok: result.deleted,
+        promoted: result.promoted?.name ?? null,
+      });
     }
 
     case "undo-check-in": {

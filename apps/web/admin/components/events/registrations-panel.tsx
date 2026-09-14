@@ -11,6 +11,11 @@ import type {
   RegistrationOverview,
   RegistrationRow,
 } from "../../../lib/events/registrations";
+import {
+  ANSWERS_RETENTION_DAYS,
+  REGISTRATION_RETENTION_MONTHS,
+  isAnonymizedEmail,
+} from "../../../lib/events/retention";
 
 /**
  * «Påmeldte»-fanen på et event: tellere, søk og filter, og handlinger per
@@ -100,9 +105,23 @@ export function RegistrationsPanel() {
 
   const act = async (
     row: RegistrationRow,
-    action: "cancel" | "promote" | "check-in" | "undo-check-in" | "resend"
+    action:
+      | "cancel"
+      | "promote"
+      | "check-in"
+      | "undo-check-in"
+      | "resend"
+      | "delete"
   ) => {
     let notify = false;
+    if (
+      action === "delete" &&
+      !window.confirm(
+        `Slette ${row.name} for godt? Navn, e-post og svar fjernes og kan ikke hentes tilbake. Bruk dette når noen ber om å bli slettet.`
+      )
+    ) {
+      return;
+    }
     if (action === "cancel") {
       if (!window.confirm(`Melde av ${row.name}?`)) return;
       notify = window.confirm(
@@ -122,6 +141,13 @@ export function RegistrationsPanel() {
       if (!res.ok) throw new Error(json.error ?? "Noe gikk galt.");
       if (action === "resend")
         setNotice(`Billetten er sendt til ${row.email}.`);
+      if (action === "delete") {
+        setNotice(
+          json.promoted
+            ? `Påmeldingen er slettet. ${json.promoted} rykket opp fra ventelista og har fått billett.`
+            : "Påmeldingen er slettet."
+        );
+      }
       if (action === "cancel" && json.promoted) {
         setNotice(
           `${row.name} er meldt av. ${json.promoted} rykket opp fra ventelista og har fått billett.`
@@ -239,6 +265,14 @@ export function RegistrationsPanel() {
         </Button>
       </div>
 
+      <p style={{ ...muted, margin: 0 }}>
+        Personvern: svar på ekstra spørsmål slettes automatisk{" "}
+        {ANSWERS_RETENTION_DAYS} dager etter eventet, og navn og e-post{" "}
+        {REGISTRATION_RETENTION_MONTHS} måneder etter (tallene beholdes). Ber
+        noen om å bli slettet før det, bruk «Slett». Nedlastede CSV-filer må
+        dere slette selv.
+      </p>
+
       {notice && (
         <output
           style={{
@@ -286,9 +320,17 @@ export function RegistrationsPanel() {
               {rows.map((row) => (
                 <tr key={row.id}>
                   <td style={cellStyle}>
-                    <strong>{row.name}</strong>
-                    <br />
-                    <span style={muted}>{row.email}</span>
+                    {isAnonymizedEmail(row.email) ? (
+                      <span style={muted}>
+                        Slettet (personopplysninger fjernet)
+                      </span>
+                    ) : (
+                      <>
+                        <strong>{row.name}</strong>
+                        <br />
+                        <span style={muted}>{row.email}</span>
+                      </>
+                    )}
                     {row.newsletter && (
                       <span style={{ ...muted, display: "block" }}>
                         ✉ Nyhetsbrev
@@ -394,9 +436,16 @@ function RowActions({
   row: RegistrationRow;
   busy: boolean;
   onAction: (
-    action: "cancel" | "promote" | "check-in" | "undo-check-in" | "resend"
+    action:
+      | "cancel"
+      | "promote"
+      | "check-in"
+      | "undo-check-in"
+      | "resend"
+      | "delete"
   ) => void;
 }) {
+  if (isAnonymizedEmail(row.email)) return null;
   const small = {
     buttonStyle: "secondary" as const,
     size: "small" as const,
@@ -430,6 +479,9 @@ function RowActions({
           </Button>
         </>
       )}
+      <Button {...small} onClick={() => onAction("delete")}>
+        Slett
+      </Button>
     </div>
   );
 }

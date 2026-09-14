@@ -11,6 +11,7 @@ import { buildIcs } from "./ics";
 import { lexicalParagraphs } from "./lexical-text";
 import { ticketQrPng } from "./qr";
 import { getEventsPayload } from "./registrations";
+import { hasAnswers } from "./retention";
 
 /**
  * E-postene rundt en påmelding. Alt her kjøres ETTER at databasen er
@@ -136,16 +137,12 @@ export async function notifyAdmins(
         status: { in: SEAT_STATUSES },
       },
     });
-    const answers = registration.answers as Record<
-      string,
-      string | boolean
-    > | null;
-    const answerLines = (event.extraQuestions ?? []).flatMap((question) => {
-      const value = question.name ? answers?.[question.name] : undefined;
-      if (value === undefined || value === "") return [];
-      const text = typeof value === "boolean" ? (value ? "ja" : "nei") : value;
-      return [`${question.label}: ${text}`];
-    });
+    // Svar på ekstra spørsmål (f.eks. allergier) sendes IKKE på e-post: i
+    // innboksen blir de liggende, mens de i databasen slettes automatisk
+    // (lib/events/retention.ts). De står i «Påmeldte»-fanen.
+    const answerLines = hasAnswers(registration.answers)
+      ? ["Har svart på ekstra spørsmål — se «Påmeldte»-fanen i admin."]
+      : [];
 
     const { sendEventRegistrationNotification } = await import("@poynt/email");
     const { getNotificationEmails } = await import("@/lib/notification-emails");

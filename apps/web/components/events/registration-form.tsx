@@ -292,7 +292,7 @@ export function RegistrationForm(props: RegistrationFormProps) {
               : "Meld meg på"}
         </Button>
         <PrivacyNotice
-          purpose="Vi bruker navn og e-post til påmeldingen og billetten, og sletter dem etter eventet."
+          purpose="Vi bruker opplysningene til påmeldingen og billetten. Svar på ekstra spørsmål slettes to uker etter eventet, navn og e-post senest seks måneder etter."
           className="text-muted-foreground"
         />
       </div>
