@@ -974,6 +974,67 @@ export async function sendEventRegistrationNotification(params: {
 }
 
 /**
+ * Beskjed fra admin til de påmeldte på et event. Hver mottaker får sin egen
+ * e-post (med egen billettlenke), sendt i puljer via Resends batch-API
+ * (maks 100 per kall). Kaster ikke: returnerer hvor mange som gikk/feilet.
+ */
+export async function sendEventMessageEmails(params: {
+  eventTitle: string;
+  when: string;
+  subject: string;
+  message: string;
+  replyTo?: string;
+  recipients: { email: string; name?: string; ticketUrl?: string }[];
+}): Promise<{ sent: number; failed: number }> {
+  if (!process.env.RESEND_API_KEY) {
+    return { sent: 0, failed: params.recipients.length };
+  }
+
+  const { render } = await import("@react-email/render");
+  const { default: EventMessageEmail } = await import(
+    "./templates/event-message"
+  );
+  const from = buildFrom("Poynt");
+  const BATCH_SIZE = 100;
+  let sent = 0;
+  let failed = 0;
+
+  for (let i = 0; i < params.recipients.length; i += BATCH_SIZE) {
+    const chunk = params.recipients.slice(i, i + BATCH_SIZE);
+    const emails = await Promise.all(
+      chunk.map(async (recipient) => ({
+        from,
+        to: recipient.email,
+        subject: params.subject,
+        ...(params.replyTo && { replyTo: params.replyTo }),
+        html: await render(
+          EventMessageEmail({
+            name: recipient.name,
+            eventTitle: params.eventTitle,
+            when: params.when,
+            message: params.message,
+            ticketUrl: recipient.ticketUrl,
+          })
+        ),
+      }))
+    );
+    try {
+      const { error } = await getResend().batch.send(emails);
+      if (error) throw new Error(error.message ?? "ukjent feil");
+      sent += chunk.length;
+    } catch (error) {
+      console.error(
+        `Beskjed til påmeldte feilet for ${chunk.length} mottakere:`,
+        error instanceof Error ? error.message : error
+      );
+      failed += chunk.length;
+    }
+  }
+
+  return { sent, failed };
+}
+
+/**
  * Send branded welcome email to new member with On Poynt onboarding link.
  * Uses React Email template for better rendering across email clients.
  */

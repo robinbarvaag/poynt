@@ -112,6 +112,7 @@ export async function renderEmailPreviews(options?: {
     { default: EventTicketEmail },
     { default: EventWaitlistedEmail },
     { default: EventCancelledEmail },
+    { default: EventMessageEmail },
   ] = await Promise.all([
     import("./templates/order-confirmation"),
     import("./templates/sale-notification"),
@@ -125,6 +126,7 @@ export async function renderEmailPreviews(options?: {
     import("./templates/event-ticket"),
     import("./templates/event-waitlisted"),
     import("./templates/event-cancelled"),
+    import("./templates/event-message"),
   ]);
 
   const tpl = (key: string) => {
@@ -383,6 +385,29 @@ export async function renderEmailPreviews(options?: {
           eventTitle: "Lanseringsfest for «Verdifull vekst»",
           when: "torsdag 15. oktober 2026, kl. 18:00–21:00",
           eventUrl: "#",
+        })
+      ),
+    },
+    {
+      key: "event-message",
+      label: "Event: beskjed til påmeldte",
+      group: "Eventer",
+      description:
+        "Beskjeden dere skriver selv i «Påmeldte»-fanen på et event (endret tidspunkt, avlysning, praktisk info). Hver person får sin egen e-post med lenke til billetten. Svar går til varslingsadressen.",
+      subject: "Nytt tidspunkt: Lanseringsfest for «Verdifull vekst»",
+      to: "De påmeldte (dere velger hvem)",
+      editHint: {
+        label: "Skriv beskjeden i «Påmeldte»-fanen på eventet",
+        href: "/admin/collections/events",
+      },
+      html: await render(
+        EventMessageEmail({
+          name: "Kari",
+          eventTitle: "Lanseringsfest for «Verdifull vekst»",
+          when: "torsdag 15. oktober 2026, kl. 18:30–21:30",
+          message:
+            "Vi har flyttet starten en halvtime, til kl. 18:30, så flere rekker å komme fra jobb.\n\nBilletten din gjelder som før.",
+          ticketUrl: "#",
         })
       ),
     },
