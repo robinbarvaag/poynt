@@ -249,7 +249,42 @@ const PRODUCT_DIMENSIONS: Dimension[] = [
   TONE_DIMENSION,
 ];
 
+const EVENT_DIMENSIONS: Dimension[] = [
+  {
+    key: "invitasjon",
+    label: "Invitasjon og løfte",
+    spm: "Skjønner en besøkende på fem sekunder hva eventet er, hvem det er for og hvorfor det er verdt å komme? En pressemelding-aktig tekst uten et tydelig «dette får du» trekker ned.",
+  },
+  {
+    key: "praktisk",
+    label: "Tid, sted og praktisk",
+    spm: "Er dato, klokkeslett (også når det slutter) og sted helt tydelig? Svarer eventet på det folk lurer på — parkering, mat, tilgjengelighet, hva man tar med? [Mangler sted], [Mangler sluttid] og [Ingen praktisk info] trekker ned.",
+  },
+  {
+    key: "program",
+    label: "Program og forventninger",
+    spm: "Vet man hva som skjer og hva man sitter igjen med? Et program (selv et enkelt) trekker opp; [Ingen program] ved lengre eventer trekker ned.",
+  },
+  {
+    key: "paamelding",
+    label: "Påmelding og neste steg",
+    spm: "Er det lett å skjønne hvordan man melder seg på, og at det haster hvis det er få plasser eller en frist? Henger påmeldingsoppsettet (plasser, venteliste, frist) sammen med teksten?",
+  },
+  {
+    key: "bilder",
+    label: "Bildebruk",
+    spm: "Har eventet et bilde med alt-tekst som gir lyst til å komme? [Mangler bilde] trekker ned.",
+  },
+  TONE_DIMENSION,
+];
+
 const CONFIGS: Record<string, CollectionReviewConfig> = {
+  events: {
+    label: "eventside",
+    rolle:
+      "Du vurderer en eventside på poynt.no — en invitasjon til et fysisk eller digitalt arrangement (f.eks. en boklansering eller et foredrag). Leseren er en travel småbedriftseier som avgjør på sekunder om dette er for dem og om tidspunktet passer. [Merkelappene] viser tid, sted, påmeldingsoppsett og hva som mangler.",
+    dimensions: EVENT_DIMENSIONS,
+  },
   guides: {
     label: "ressurs/guide",
     rolle:
@@ -460,7 +495,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           error:
-            "Mangler collection/id (guides, courses, pages, blog-posts, case-studies, services eller products) eller global (homepage).",
+            "Mangler collection/id (guides, courses, pages, blog-posts, case-studies, services, products eller events) eller global (homepage).",
         },
         { status: 400 }
       );

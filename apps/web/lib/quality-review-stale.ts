@@ -1,3 +1,4 @@
+import { serializeEventContent } from "@/lib/events/serialize-event";
 import {
   serializeBlogPostContent,
   serializeCaseStudyContent,
@@ -15,6 +16,7 @@ import type {
   BlogPost,
   CaseStudy,
   Course,
+  Event,
   Guide,
   Homepage,
   Page,
@@ -41,6 +43,7 @@ export const QUALITY_COLLECTIONS = [
   "case-studies",
   "services",
   "products",
+  "events",
 ] as const;
 
 export type QualityCollectionSlug = (typeof QUALITY_COLLECTIONS)[number];
@@ -80,6 +83,7 @@ const SERIALIZERS: Record<QualityTargetSlug, (doc: unknown) => string> = {
   "case-studies": (doc) => serializeCaseStudyContent(doc as CaseStudy),
   services: (doc) => serializeServiceContent(doc as Service),
   products: (doc) => serializeProductContent(doc as Product),
+  events: (doc) => serializeEventContent(doc as Event),
   homepage: (doc) => serializeHomepageContent(doc as Homepage),
 };
 

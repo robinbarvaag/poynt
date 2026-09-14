@@ -33,6 +33,9 @@ import { OpenOnSiteButton as OpenOnSiteButton_fb0f337f3ab45b4d6e02970dc5b51a64 }
 import { StockFieldButton as StockFieldButton_e1d51fcd745605f9c32df95d9becf02c } from '../../../admin/components/media/stock-field-button'
 import { BlocksFeatureClient as BlocksFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { TextCheck as TextCheck_4aa3d66cdcd5d7ba843b8519bee12971 } from '../../../admin/components/text-check'
+import { ProgramRowLabel as ProgramRowLabel_f0fd4bee3885f2a3c8ca119ef52b5ffe } from '../../../admin/components/row-labels'
+import { QuestionRowLabel as QuestionRowLabel_f0fd4bee3885f2a3c8ca119ef52b5ffe } from '../../../admin/components/row-labels'
+import { RegistrationsPanel as RegistrationsPanel_28045f51387e75774bbe0012eb0536ce } from '../../../admin/components/events/registrations-panel'
 import { StockMediaPicker as StockMediaPicker_7d8c930913c9c09e14d244ff8c96b4e3 } from '../../../admin/components/media/stock-picker'
 import { GenerateAltButton as GenerateAltButton_040810ca926965e5b8a67fcc6e0594ab } from '../../../admin/components/media/generate-alt-button'
 import { FolderTableCell as FolderTableCell_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
@@ -68,6 +71,7 @@ import { SetupGuideView as SetupGuideView_96e0313c105e009331fa998e13292ea0 } fro
 import { EmailOverviewView as EmailOverviewView_0216373ba096c29ed484db9830ad258d } from '../../../admin/views/email/list'
 import { ContactsListView as ContactsListView_a34bc1ca742cd359ae5f7a2c8c485a86 } from '../../../admin/views/contacts/list'
 import { QualityListView as QualityListView_832dd1e739525ad72161e259683fb8d9 } from '../../../admin/views/quality/list'
+import { CheckInView as CheckInView_f95f2972bbac7a4b43327e044e48333c } from '../../../admin/views/check-in/view'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 /** @type import('payload').ImportMap */
@@ -107,6 +111,9 @@ export const importMap = {
   "/admin/components/media/stock-field-button#StockFieldButton": StockFieldButton_e1d51fcd745605f9c32df95d9becf02c,
   "@payloadcms/richtext-lexical/client#BlocksFeatureClient": BlocksFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "/admin/components/text-check#TextCheck": TextCheck_4aa3d66cdcd5d7ba843b8519bee12971,
+  "/admin/components/row-labels#ProgramRowLabel": ProgramRowLabel_f0fd4bee3885f2a3c8ca119ef52b5ffe,
+  "/admin/components/row-labels#QuestionRowLabel": QuestionRowLabel_f0fd4bee3885f2a3c8ca119ef52b5ffe,
+  "/admin/components/events/registrations-panel#RegistrationsPanel": RegistrationsPanel_28045f51387e75774bbe0012eb0536ce,
   "/admin/components/media/stock-picker#StockMediaPicker": StockMediaPicker_7d8c930913c9c09e14d244ff8c96b4e3,
   "/admin/components/media/generate-alt-button#GenerateAltButton": GenerateAltButton_040810ca926965e5b8a67fcc6e0594ab,
   "@payloadcms/next/rsc#FolderTableCell": FolderTableCell_f9c02e79a4aed9a3924487c0cd4cafb1,
@@ -142,5 +149,6 @@ export const importMap = {
   "/admin/views/email/list#EmailOverviewView": EmailOverviewView_0216373ba096c29ed484db9830ad258d,
   "/admin/views/contacts/list#ContactsListView": ContactsListView_a34bc1ca742cd359ae5f7a2c8c485a86,
   "/admin/views/quality/list#QualityListView": QualityListView_832dd1e739525ad72161e259683fb8d9,
+  "/admin/views/check-in/view#CheckInView": CheckInView_f95f2972bbac7a4b43327e044e48333c,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

@@ -24,6 +24,7 @@ export const COLLECTION_LABELS: Record<QualityTargetSlug, string> = {
   "case-studies": "Kundehistorie",
   services: "Tjeneste",
   products: "Produkt",
+  events: "Event",
   homepage: "Forside",
 };
 
@@ -38,6 +39,7 @@ export const COLLECTION_AREAS: Record<QualityTargetSlug, QualityArea> = {
   "case-studies": "site",
   services: "site",
   products: "site",
+  events: "site",
   homepage: "site",
 };
 

@@ -461,6 +461,53 @@ const GUIDELINES: Record<string, GuidelineConfig> = {
       ...seoChecks,
     ],
   },
+  events: {
+    title: "Slik lager du en eventside folk melder seg på",
+    intro:
+      "Folk bestemmer seg på sekunder: hva er dette, er det for meg, og passer tidspunktet? Svar på det først. Program og praktisk info gjør det lett å si ja.",
+    arc: [
+      {
+        title: "Invitasjonen",
+        text: "Tittel og kort beskrivelse sier hva som skjer og hvorfor man bør komme. «Feir boklanseringen med meg» slår «Lansering av bok».",
+      },
+      {
+        title: "Det praktiske",
+        text: "Når det starter OG slutter, hvor det er, og det folk lurer på: parkering, mat, tilgjengelighet. Et enkelt program gjør det lettere å planlegge.",
+      },
+      {
+        title: "Påmeldingen",
+        text: "Sett antall plasser og slå på venteliste, så slipper du å si nei. En frist gir folk en grunn til å melde seg på nå.",
+      },
+    ],
+    checks: [
+      {
+        label: "Kort beskrivelse sier hva og hvorfor",
+        test: (f) => has(f, "excerpt"),
+      },
+      {
+        label: "Bilde er valgt",
+        test: (f) => has(f, "heroImage"),
+      },
+      {
+        label: "Start- og sluttid er satt",
+        test: (f) => has(f, "startsAt") && has(f, "endsAt"),
+      },
+      {
+        label: "Sted er fylt ut (eller eventet er digitalt)",
+        test: (f) =>
+          has(f, "location.name") || f["location.online"]?.value === true,
+      },
+      {
+        label: "«Om eventet» er skrevet",
+        test: (f) => has(f, "description"),
+      },
+      {
+        label: "Praktisk info er fylt ut",
+        test: (f) => has(f, "practicalInfo"),
+      },
+      ...seoChecks,
+    ],
+  },
   courses: {
     title: "Slik bygger du et godt kurs",
     intro:

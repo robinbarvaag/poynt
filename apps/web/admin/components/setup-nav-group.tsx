@@ -24,6 +24,11 @@ const links = [
     href: "/admin/epost",
     label: "E-post",
   },
+  // Skanning av billetter i døra på eventer (mobilvennlig).
+  {
+    href: "/admin/innsjekk",
+    label: "Innsjekk på event",
+  },
   // Dekker alt innhold (både nettsiden og On Poynt) — tverrgående verktøy,
   // derfor her og ikke i On Poynt-gruppa.
   {

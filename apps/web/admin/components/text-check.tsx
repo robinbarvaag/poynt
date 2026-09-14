@@ -291,6 +291,74 @@ const CONFIGS: Record<string, TextCheckConfig> = {
       "Svar på det folk lurer på før de kjøper: format, levering, hvem det passer for.",
     ],
   },
+  events: {
+    title: "Eventsjekk",
+    intro:
+      "Ser over eventet mens du skriver, og sier ifra hvis noe gjør det vanskeligere å melde seg på — eller å finne fram den dagen det skjer.",
+    contentPath: "description",
+    extraChecks: (fields) => {
+      const findings: Finding[] = [];
+      const value = (path: string) => fields[path]?.value;
+      const mode = String(value("registrationMode") ?? "internal");
+      const startsAt = value("startsAt")
+        ? new Date(String(value("startsAt")))
+        : null;
+      const closesAt = value("registrationClosesAt")
+        ? new Date(String(value("registrationClosesAt")))
+        : null;
+      const endsAt = value("endsAt") ? new Date(String(value("endsAt"))) : null;
+
+      if (startsAt && !endsAt) {
+        findings.push({
+          level: "tips",
+          text: "Sluttid mangler. Folk liker å vite når de er ferdige, og kalenderen gjetter ellers på to timer.",
+        });
+      }
+      if (startsAt && endsAt && endsAt <= startsAt) {
+        findings.push({
+          level: "advarsel",
+          text: "Sluttiden er før (eller lik) starttiden.",
+        });
+      }
+      if (!value("location.name") && value("location.online") !== true) {
+        findings.push({
+          level: "advarsel",
+          text: "Stedet mangler. Fyll ut stedsnavn og adresse, eller kryss av for digitalt event.",
+        });
+      }
+      if (mode === "internal") {
+        if (value("capacity") && value("waitlistEnabled") !== true) {
+          findings.push({
+            level: "tips",
+            text: "Eventet har et antall plasser, men ingen venteliste. Når det blir fullt, kan ingen flere melde seg — med venteliste får de plassen automatisk hvis noen melder seg av.",
+          });
+        }
+        if (startsAt && closesAt && closesAt > startsAt) {
+          findings.push({
+            level: "advarsel",
+            text: "Påmeldingsfristen er etter at eventet starter.",
+          });
+        }
+      }
+      if (mode === "external" && !value("externalUrl")) {
+        findings.push({
+          level: "advarsel",
+          text: "Påmeldingen skal skje et annet sted, men lenken mangler.",
+        });
+      }
+      if (value("eventStatus") === "cancelled") {
+        findings.push({
+          level: "tips",
+          text: "Eventet er markert som avlyst. Husk å si fra til de påmeldte — du finner lista i «Påmeldte»-fanen.",
+        });
+      }
+      return findings;
+    },
+    extraGuidelines: [
+      "Si hva som skjer og hvorfor man bør komme — ikke bare hva eventet heter.",
+      "Praktisk info svarer på det folk ellers sender deg spørsmål om: parkering, mat, tilgjengelighet.",
+    ],
+  },
 };
 
 export const TextCheck = () => {
