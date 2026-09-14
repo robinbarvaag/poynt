@@ -248,14 +248,19 @@ Eventsjekk (sluttid, sted, frist etter start, kapasitet uten venteliste, ekstern
 - [ ] Legg «Eventer» inn i navigasjonen (Navigasjon-global i admin)
 - [x] Ekte test, del 1 (2026-09-14, via tunnel + iPhone): påmelding med ekte e-post → billett levert
       (Resend: delivered, havnet i Reklame), internvarsel, skanning med mobil på `/innsjekk` → sjekket inn
-- [ ] Ekte test, del 2: venteliste-påmelding → avmelding → opprykk-e-post; åpne `.ics` i kalender;
-      QR i Outlook/iPhone Mail; skanning på Android
+- [x] Ekte test, del 2 (2026-09-14, via tunnel): 2 plasser → påmeldt + venteliste med egne adresser;
+      avmelding fra billettsiden → venteliste rykket opp og fikk billett på e-post; `.ics` åpnet i
+      kalender; innlogging og skanning på `/innsjekk` med Android → sjekket inn. Ingen feil i serverloggen
+- [ ] QR-koden i Outlook og iPhone Mail (innebygd PNG) — ikke sjekket ennå
 - [x] Innsjekk flyttet ut av Payload til `/innsjekk` (egen mobilside, admin-innlogging)
 - [x] Tydelig skanne-feedback: fullflate farget kort oppå kameraet, lyd, vibrasjon, logg med «Angre»
 - [x] Billettsiden river av billetten live når personen skannes (+ mer kompakt billett på mobil)
 - [x] Visuell gjennomgang av eventsiden og `/eventer` (mobil + desktop): program-tider, nedtelling,
       dobbel dato og tomt bildefelt rettet
-- [ ] Se over «Påmeldte»-fanen visuelt i admin (ikke skjermtestet)
+- [x] «Påmeldte»-fanen skjermtestet (2026-09-14, desktop/nettbrett/mobil, mørkt tema, med anonymisert
+      rad og langt svar injisert i nettleseren): handlinger på to linjer, «Slett» med rød ramme
+      (Payloads `error`-stil er usynlig i mørkt tema), «—» som kode på anonymiserte rader,
+      minstebredde på spørsmålskolonner. Smal skjerm ruller tabellen sideveis
 - [ ] Nyhetsbrev-sjekk (allerede abonnent → ingen ny påmelding/varsel) og nye varseltekster: verifiser
       ved neste ekte påmelding
 - [ ] Vurder «Registrer på stedet» i innsjekk for folk uten påmelding (ikke bestemt)
