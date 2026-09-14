@@ -69,6 +69,14 @@ function fillSample(text: string): string {
   });
 }
 
+/**
+ * Plassholder for QR-koden i forhåndsvisningen (ekte e-post bruker et
+ * innebygd PNG-vedlegg, som ikke kan vises i admin-iframen).
+ */
+const SAMPLE_QR_SRC = `data:image/svg+xml;utf8,${encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 21 21" shape-rendering="crispEdges"><rect width="21" height="21" fill="#fff"/><path fill="#004029" d="M0 0h7v7H0zM1 1v5h5V1zM2 2h3v3H2zM14 0h7v7h-7zm1 1v5h5V1zm1 1h3v3h-3zM0 14h7v7H0zm1 1v5h5v-5zm1 1h3v3H2zM9 1h1v2H9zm2 1h2v1h-2zM8 4h2v2H8zm3 1h1v3h-1zM9 8h3v1H9zM0 9h2v1H0zm3 0h3v2H3zm11 0h2v1h-2zm3 0h4v1h-4zM8 10h1v3H8zm4 1h3v1h-3zm4 1h2v2h-2zm3 0h2v1h-2zM9 14h2v2H9zm3 1h1v3h-1zm2-1h3v1h-3zm-5 3h2v3H9zm6 0h2v2h-2zm3 1h3v1h-3zm-4 2h1v1h-1zm4 0h3v1h-3z"/></svg>'
+)}`;
+
 const TEMPLATES_EDIT_HINT = {
   label: "Rediger teksten under E-postmaler",
   href: "/admin/collections/email-templates",
@@ -101,6 +109,9 @@ export async function renderEmailPreviews(options?: {
     { default: MagicLinkEmail },
     { default: WelcomeMemberEmail },
     { default: PasswordResetEmail },
+    { default: EventTicketEmail },
+    { default: EventWaitlistedEmail },
+    { default: EventCancelledEmail },
   ] = await Promise.all([
     import("./templates/order-confirmation"),
     import("./templates/sale-notification"),
@@ -111,6 +122,9 @@ export async function renderEmailPreviews(options?: {
     import("./templates/magic-link"),
     import("./templates/welcome-member"),
     import("./templates/password-reset"),
+    import("./templates/event-ticket"),
+    import("./templates/event-waitlisted"),
+    import("./templates/event-cancelled"),
   ]);
 
   const tpl = (key: string) => {
@@ -274,6 +288,73 @@ export async function renderEmailPreviews(options?: {
           source: "tjeneste:synlighet",
           sourcePath: "/tjenester/synlighet",
           introHtml: tpl("contact-notification").contentHtml,
+        })
+      ),
+    },
+    {
+      key: "event-ticket",
+      label: "Event: billett",
+      group: "Eventer",
+      description:
+        "Sendes når noen melder seg på et event (eller rykker opp fra ventelista). Har eventet «Send kode og QR-kode» på, får de koden og QR-koden de viser i døra. Kalenderfil legges ved. Egen hilsen og praktisk info skriver du på eventet.",
+      subject: "Billetten din: Lanseringsfest for «Verdifull vekst»",
+      to: "Den påmeldte",
+      editHint: {
+        label: "Skriv hilsen og praktisk info på eventet",
+        href: "/admin/collections/events",
+      },
+      html: await render(
+        EventTicketEmail({
+          name: "Kari",
+          eventTitle: "Lanseringsfest for «Verdifull vekst»",
+          when: "torsdag 15. oktober 2026, kl. 18:00–21:00",
+          where: "Eksempelstedet, Eksempelveien 1, 4000 Stavanger",
+          mapUrl: "#",
+          doorsOpen: "Dørene åpner kl. 17:30",
+          code: "POY-7K3M",
+          qrSrc: SAMPLE_QR_SRC,
+          ticketUrl: "#",
+          greeting: "Så gøy at du kommer! Boka er klar, og det er kaken også.",
+          practicalInfo: [
+            "Det er gratis parkering rett ved inngangen.",
+            "Si fra i påmeldingen hvis du har allergier.",
+          ],
+        })
+      ),
+    },
+    {
+      key: "event-waitlisted",
+      label: "Event: venteliste",
+      group: "Eventer",
+      description:
+        "Sendes når noen melder seg på et event som er fullt og har venteliste. Får de plass, sendes billetten automatisk.",
+      subject: "Du står på ventelista: Lanseringsfest for «Verdifull vekst»",
+      to: "Den påmeldte",
+      html: await render(
+        EventWaitlistedEmail({
+          name: "Kari",
+          eventTitle: "Lanseringsfest for «Verdifull vekst»",
+          when: "torsdag 15. oktober 2026, kl. 18:00–21:00",
+          where: "Eksempelstedet, Stavanger",
+          position: 3,
+          ticketUrl: "#",
+        })
+      ),
+    },
+    {
+      key: "event-cancelled",
+      label: "Event: avmeldt",
+      group: "Eventer",
+      description:
+        "Kvittering når noen melder seg av på billettsiden, eller når dere melder dem av fra «Påmeldte»-fanen.",
+      subject: "Du er meldt av: Lanseringsfest for «Verdifull vekst»",
+      to: "Den som meldte seg av",
+      html: await render(
+        EventCancelledEmail({
+          name: "Kari",
+          eventTitle: "Lanseringsfest for «Verdifull vekst»",
+          when: "torsdag 15. oktober 2026, kl. 18:00–21:00",
+          eventUrl: "#",
         })
       ),
     },

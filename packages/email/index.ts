@@ -769,6 +769,180 @@ export async function sendWaitlistEmails(params: {
   }
 }
 
+/* ------------------------------------------------------------------ */
+/* Eventer                                                            */
+/* ------------------------------------------------------------------ */
+
+export type { EventTicketEmailProps } from "./templates/event-ticket";
+
+/**
+ * Billett til en påmeldt: kode, QR-kode (innebygd bilde) og kalenderfil.
+ * Brukes både ved påmelding, ved opprykk fra venteliste og når admin sender
+ * billetten på nytt. No-op hvis RESEND_API_KEY mangler.
+ */
+export async function sendEventTicketEmail(params: {
+  email: string;
+  name?: string;
+  eventTitle: string;
+  when: string;
+  where?: string;
+  mapUrl?: string;
+  doorsOpen?: string;
+  code?: string;
+  ticketUrl: string;
+  greeting?: string;
+  practicalInfo?: string[];
+  promoted?: boolean;
+  /** QR-koden som PNG. Utelates når eventet ikke bruker billetter. */
+  qrPng?: Buffer;
+  /** Innholdet i .ics-fila. */
+  ics?: string;
+}) {
+  if (!process.env.RESEND_API_KEY) return;
+
+  const { render } = await import("@react-email/render");
+  const { default: EventTicketEmail } = await import(
+    "./templates/event-ticket"
+  );
+
+  const qrContentId = "billett-qr";
+  const html = await render(
+    EventTicketEmail({
+      ...params,
+      code: params.code,
+      qrSrc: params.qrPng ? `cid:${qrContentId}` : undefined,
+    })
+  );
+
+  const attachments: NonNullable<SendPayload["attachments"]> = [];
+  if (params.qrPng) {
+    attachments.push({
+      filename: "billett-qr.png",
+      content: params.qrPng,
+      contentType: "image/png",
+      contentId: qrContentId,
+    });
+  }
+  if (params.ics) {
+    attachments.push({
+      filename: "event.ics",
+      content: Buffer.from(params.ics, "utf8"),
+      contentType: "text/calendar; charset=utf-8; method=PUBLISH",
+    });
+  }
+
+  await sendEmail({
+    from: buildFrom("Poynt"),
+    to: params.email,
+    subject: params.promoted
+      ? `Det ble plass: ${params.eventTitle}`
+      : `Billetten din: ${params.eventTitle}`,
+    html,
+    ...(attachments.length && { attachments }),
+  });
+}
+
+/** Til den som havnet på ventelista. No-op hvis RESEND_API_KEY mangler. */
+export async function sendEventWaitlistEmail(params: {
+  email: string;
+  name?: string;
+  eventTitle: string;
+  when: string;
+  where?: string;
+  position?: number;
+  ticketUrl: string;
+}) {
+  if (!process.env.RESEND_API_KEY) return;
+
+  const { render } = await import("@react-email/render");
+  const { default: EventWaitlistedEmail } = await import(
+    "./templates/event-waitlisted"
+  );
+
+  await sendEmail({
+    from: buildFrom("Poynt"),
+    to: params.email,
+    subject: `Du står på ventelista: ${params.eventTitle}`,
+    html: await render(EventWaitlistedEmail(params)),
+  });
+}
+
+/** Kvittering på avmelding. No-op hvis RESEND_API_KEY mangler. */
+export async function sendEventCancelledEmail(params: {
+  email: string;
+  name?: string;
+  eventTitle: string;
+  when: string;
+  eventUrl: string;
+  byAdmin?: boolean;
+}) {
+  if (!process.env.RESEND_API_KEY) return;
+
+  const { render } = await import("@react-email/render");
+  const { default: EventCancelledEmail } = await import(
+    "./templates/event-cancelled"
+  );
+
+  await sendEmail({
+    from: buildFrom("Poynt"),
+    to: params.email,
+    subject: `Du er meldt av: ${params.eventTitle}`,
+    html: await render(EventCancelledEmail(params)),
+  });
+}
+
+/**
+ * Internt varsel til Poynt ved ny påmelding eller avmelding. Skal aldri velte
+ * påmeldingen: no-op uten mottaker/RESEND_API_KEY, og kallere svelger feil.
+ */
+export async function sendEventRegistrationNotification(params: {
+  to?: string | string[];
+  kind: "Ny påmelding" | "Ny på venteliste" | "Avmelding";
+  name: string;
+  email: string;
+  eventTitle: string;
+  /** «42 av 80 plasser tatt» o.l. */
+  seatsText?: string;
+  newsletter?: boolean;
+  /** Svar på ekstra spørsmål, ferdig formatert som «Spørsmål: svar». */
+  answers?: string[];
+}) {
+  if (!process.env.RESEND_API_KEY) return;
+  const notifyTo = resolveNotifyTo(params.to);
+  if (!notifyTo) return;
+
+  const { render } = await import("@react-email/render");
+  const { default: ContactNotificationEmail } = await import(
+    "./templates/contact-notification"
+  );
+
+  const details = [
+    `Event: ${params.eventTitle}`,
+    params.seatsText ?? null,
+    params.newsletter === undefined
+      ? null
+      : `Nyhetsbrev: ${params.newsletter ? "ja" : "nei"}`,
+    ...(params.answers ?? []),
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  await sendEmail({
+    from: buildFrom("Poynt"),
+    to: notifyTo,
+    replyTo: params.email,
+    subject: `${params.kind}: ${params.name} (${params.eventTitle})`,
+    html: await render(
+      ContactNotificationEmail({
+        name: params.name,
+        email: params.email,
+        subject: params.kind,
+        message: details,
+      })
+    ),
+  });
+}
+
 /**
  * Send branded welcome email to new member with On Poynt onboarding link.
  * Uses React Email template for better rendering across email clients.
