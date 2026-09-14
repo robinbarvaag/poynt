@@ -32,12 +32,25 @@ export function EventCard({ event, past }: { event: Event; past?: boolean }) {
             className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
           />
         )}
-        <EventDateBadge
-          day={day}
-          month={month}
-          tone={past ? "mint" : "saffron"}
-          className="absolute top-4 left-4 bg-card"
-        />
+        {image?.url ? (
+          <EventDateBadge
+            day={day}
+            month={month}
+            tone={past ? "mint" : "saffron"}
+            className="absolute top-4 left-4 bg-card"
+          />
+        ) : (
+          // Uten bilde: datoen fyller flaten, så kortet ikke får en tom boks.
+          <div className="flex h-full items-center justify-center">
+            <EventDateBadge
+              day={day}
+              month={month}
+              size="lg"
+              tone={past ? "mint" : "saffron"}
+              className="bg-card"
+            />
+          </div>
+        )}
         {event.eventStatus && event.eventStatus !== "scheduled" && (
           <Badge variant="destructive" className="absolute top-4 right-4">
             {event.eventStatus === "cancelled" ? "Avlyst" : "Utsatt"}

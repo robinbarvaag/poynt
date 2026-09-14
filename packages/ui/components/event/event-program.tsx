@@ -33,7 +33,9 @@ export function EventProgram({ items, className }: EventProgramProps) {
             <span
               aria-hidden="true"
               className={cn(
-                "-left-[1.72rem] absolute top-1.5 size-3 rounded-full ring-4 ring-background",
+                // Midt på linja (5.25rem): 6rem (kolonne + gap) − 1.125rem = 4.875rem
+                // venstrekant, så prikken + ringen ikke dekker klokkeslettet.
+                "-left-[1.125rem] absolute top-1.5 size-3 rounded-full ring-4 ring-background",
                 index === 0 ? "bg-accent-1" : "bg-primary"
               )}
             />

@@ -119,7 +119,8 @@ export function EventView({ event, seatsTaken }: EventViewProps) {
                 day={day}
                 month={month}
                 size="lg"
-                className="hidden sm:flex"
+                // Uten bilde viser bildeflaten allerede datoen.
+                className={image?.url ? "hidden sm:flex" : "hidden"}
               />
               <Heading
                 variant="h1"
@@ -317,7 +318,9 @@ export function EventView({ event, seatsTaken }: EventViewProps) {
                 <Countdown
                   target={event.startsAt}
                   doneLabel="Det er i dag!"
-                  className="mt-4"
+                  // Fire kolonner i den smale sidekolonnen, ellers havner
+                  // «sek» alene på en ny linje.
+                  className="mt-4 grid grid-cols-4 gap-2 sm:gap-2 [&>div]:min-w-0 [&>div]:px-1"
                 />
               </Panel>
             )}

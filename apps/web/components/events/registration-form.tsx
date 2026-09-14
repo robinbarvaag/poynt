@@ -189,7 +189,7 @@ export function RegistrationForm(props: RegistrationFormProps) {
         }
         return (
           <div key={q.name} className="space-y-2">
-            <Label htmlFor={id}>
+            <Label htmlFor={id} className="block leading-snug">
               {q.label}
               {q.required ? (
                 <span className="text-destructive">&nbsp;*</span>
