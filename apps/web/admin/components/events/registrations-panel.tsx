@@ -178,6 +178,17 @@ export function RegistrationsPanel() {
 
   return (
     <div style={{ display: "grid", gap: "1rem", marginBottom: "2rem" }}>
+      {/* Payloads `error`-stil blir ren tekst i mørkt tema — rød ramme i stedet. */}
+      <style>{`
+        .btn.registration-delete-btn {
+          color: var(--theme-error-500);
+          box-shadow: inset 0 0 0 1px var(--theme-error-500);
+        }
+        .btn.registration-delete-btn:hover:not(:disabled) {
+          background: var(--theme-error-500);
+          color: var(--theme-elevation-0);
+        }
+      `}</style>
       {counts && (
         <div
           style={{
@@ -309,7 +320,10 @@ export function RegistrationsPanel() {
                   </th>
                 ))}
                 {data?.event.questions.map((q) => (
-                  <th key={q.name} style={{ ...cellStyle, ...muted }}>
+                  <th
+                    key={q.name}
+                    style={{ ...cellStyle, ...muted, minWidth: "10rem" }}
+                  >
                     {q.label}
                   </th>
                 ))}
@@ -366,8 +380,18 @@ export function RegistrationsPanel() {
                       </span>
                     )}
                   </td>
-                  <td style={{ ...cellStyle, fontFamily: "monospace" }}>
-                    {row.code}
+                  <td
+                    style={{
+                      ...cellStyle,
+                      fontFamily: "monospace",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {isAnonymizedEmail(row.email) ? (
+                      <span style={muted}>—</span>
+                    ) : (
+                      row.code
+                    )}
                   </td>
                   <td style={{ ...cellStyle, whiteSpace: "nowrap" }}>
                     {formatDateTime(row.createdAt)}
@@ -375,7 +399,10 @@ export function RegistrationsPanel() {
                   {data?.event.questions.map((q) => {
                     const value = row.answers[q.name];
                     return (
-                      <td key={q.name} style={cellStyle}>
+                      <td
+                        key={q.name}
+                        style={{ ...cellStyle, minWidth: "10rem" }}
+                      >
                         {typeof value === "boolean"
                           ? value
                             ? "Ja"
@@ -452,36 +479,47 @@ function RowActions({
     margin: false,
     disabled: busy,
   };
+  const line: CSSProperties = { display: "flex", gap: "0.35rem" };
+  // Statushandling + billett øverst; avmelding og sletting (som ikke kan
+  // angres) på egen linje, med «Slett» i rødt.
   return (
-    <div style={{ display: "flex", gap: "0.35rem", flexWrap: "wrap" }}>
-      {row.status === "registered" && (
-        <Button {...small} onClick={() => onAction("check-in")}>
-          Sjekk inn
-        </Button>
-      )}
-      {row.status === "waitlisted" && (
-        <Button {...small} onClick={() => onAction("promote")}>
-          Gi plass
-        </Button>
-      )}
-      {row.status === "checked_in" && (
-        <Button {...small} onClick={() => onAction("undo-check-in")}>
-          Angre innsjekk
-        </Button>
-      )}
+    <div style={{ display: "grid", gap: "0.35rem", justifyItems: "start" }}>
       {row.status !== "cancelled" && (
-        <>
+        <div style={line}>
+          {row.status === "registered" && (
+            <Button {...small} onClick={() => onAction("check-in")}>
+              Sjekk inn
+            </Button>
+          )}
+          {row.status === "waitlisted" && (
+            <Button {...small} onClick={() => onAction("promote")}>
+              Gi plass
+            </Button>
+          )}
+          {row.status === "checked_in" && (
+            <Button {...small} onClick={() => onAction("undo-check-in")}>
+              Angre innsjekk
+            </Button>
+          )}
           <Button {...small} onClick={() => onAction("resend")}>
             Send billett
           </Button>
+        </div>
+      )}
+      <div style={line}>
+        {row.status !== "cancelled" && (
           <Button {...small} onClick={() => onAction("cancel")}>
             Meld av
           </Button>
-        </>
-      )}
-      <Button {...small} onClick={() => onAction("delete")}>
-        Slett
-      </Button>
+        )}
+        <Button
+          {...small}
+          className="registration-delete-btn"
+          onClick={() => onAction("delete")}
+        >
+          Slett
+        </Button>
+      </div>
     </div>
   );
 }
