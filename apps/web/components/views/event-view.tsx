@@ -295,6 +295,7 @@ export function EventView({ event, seatsTaken }: EventViewProps) {
                   ticketsEnabled={event.ticketsEnabled !== false}
                   newsletterOptIn={Boolean(event.newsletterOptIn)}
                   newsletterText={NEWSLETTER_CONSENT_TEXTS.event}
+                  maxGuests={event.maxGuests ?? 0}
                   questions={(event.extraQuestions ?? []).flatMap((q) =>
                     q.name
                       ? [

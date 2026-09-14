@@ -21,9 +21,12 @@ import { useState } from "react";
 export function CancelRegistration({
   token,
   waitlisted,
+  withGuests = false,
 }: {
   token: string;
   waitlisted: boolean;
+  /** Personen tok med noen — de meldes av samtidig. */
+  withGuests?: boolean;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -55,7 +58,13 @@ export function CancelRegistration({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="ghost" className="w-full text-muted-foreground">
-          {waitlisted ? "Meld meg av ventelista" : "Jeg kan ikke komme likevel"}
+          {waitlisted
+            ? withGuests
+              ? "Meld oss av ventelista"
+              : "Meld meg av ventelista"
+            : withGuests
+              ? "Vi kan ikke komme likevel"
+              : "Jeg kan ikke komme likevel"}
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -67,6 +76,8 @@ export function CancelRegistration({
             {waitlisted
               ? "Du mister plassen i køen. Du kan melde deg på igjen senere hvis det er plass."
               : "Plassen din går til noen andre, og billetten slutter å virke. Du kan melde deg på igjen senere hvis det fortsatt er plass."}
+            {withGuests &&
+              " De du tar med, meldes av samtidig, og billettene deres slutter også å virke."}
           </DialogDescription>
         </DialogHeader>
         {error && (

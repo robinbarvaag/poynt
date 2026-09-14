@@ -20,9 +20,9 @@ import {
   Text,
   Textarea,
 } from "@poynt/ui";
-import { CalendarCheck, Hourglass, Ticket } from "lucide-react";
+import { CalendarCheck, Hourglass, Ticket, UserPlus, X } from "lucide-react";
 import Link from "next/link";
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
 
 export interface RegistrationQuestion {
   name: string;
@@ -45,6 +45,8 @@ export interface RegistrationFormProps {
   newsletterOptIn: boolean;
   newsletterText: string;
   questions: RegistrationQuestion[];
+  /** Hvor mange man kan ta med (0 = hver melder seg på selv). */
+  maxGuests: number;
 }
 
 interface SuccessState {
@@ -53,6 +55,7 @@ interface SuccessState {
   code?: string | null;
   ticketUrl?: string;
   waitlistPosition?: number | null;
+  guestCount?: number;
 }
 
 /**
@@ -67,6 +70,8 @@ export function RegistrationForm(props: RegistrationFormProps) {
   const [success, setSuccess] = useState<SuccessState | null>(null);
   const [answers, setAnswers] = useState<Record<string, string | boolean>>({});
   const [newsletter, setNewsletter] = useState(false);
+  const [guests, setGuests] = useState<{ id: number; name: string }[]>([]);
+  const nextGuestId = useRef(1);
 
   useEffect(() => {
     setWindow(registrationWindow(props));
@@ -106,6 +111,9 @@ export function RegistrationForm(props: RegistrationFormProps) {
   if (full && !props.waitlistEnabled) {
     return <Notice>Det er dessverre fullt.</Notice>;
   }
+  const partySize = 1 + guests.length;
+  // Er det ikke plass til hele følget, havner alle på ventelista (eller avvises).
+  const tooFew = props.spotsLeft !== null && props.spotsLeft < partySize;
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -122,6 +130,7 @@ export function RegistrationForm(props: RegistrationFormProps) {
           website: data.get("website"),
           answers,
           newsletter,
+          guests: guests.map((guest) => guest.name.trim()),
         }),
       });
       const json = await res.json();
@@ -159,6 +168,69 @@ export function RegistrationForm(props: RegistrationFormProps) {
           Billetten kommer hit, så sjekk at adressen stemmer.
         </Text>
       </div>
+
+      {props.maxGuests > 0 && (
+        <div className="space-y-3 rounded-2xl bg-muted/50 p-4">
+          <div>
+            <p className="font-semibold text-foreground text-sm">
+              Tar du med noen?
+            </p>
+            <Text variant="muted" customStyles="text-xs">
+              Du kan ta med inntil {props.maxGuests}{" "}
+              {props.maxGuests === 1 ? "person" : "personer"}. Alle får hver sin
+              billett, og billettene kommer til deg.
+            </Text>
+          </div>
+          {guests.map((guest, index) => (
+            <div key={guest.id} className="flex items-end gap-2">
+              <div className="min-w-0 flex-1 space-y-1.5">
+                <Label htmlFor={`event-folge-${guest.id}`}>
+                  Navn, person {index + 2}
+                </Label>
+                <Input
+                  id={`event-folge-${guest.id}`}
+                  required
+                  autoComplete="off"
+                  value={guest.name}
+                  onChange={(e) =>
+                    setGuests((prev) =>
+                      prev.map((g) =>
+                        g.id === guest.id ? { ...g, name: e.target.value } : g
+                      )
+                    )
+                  }
+                />
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                aria-label={`Fjern ${guest.name || `person ${index + 2}`}`}
+                onClick={() =>
+                  setGuests((prev) => prev.filter((g) => g.id !== guest.id))
+                }
+              >
+                <X className="size-4" aria-hidden />
+              </Button>
+            </div>
+          ))}
+          {guests.length < props.maxGuests && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                setGuests((prev) => [
+                  ...prev,
+                  { id: nextGuestId.current++, name: "" },
+                ])
+              }
+            >
+              <UserPlus className="size-4" aria-hidden />
+              Legg til en person
+            </Button>
+          )}
+        </div>
+      )}
 
       {props.questions.map((q) => {
         const id = `event-q-${q.name}`;
@@ -287,9 +359,13 @@ export function RegistrationForm(props: RegistrationFormProps) {
         >
           {submitting
             ? "Melder på…"
-            : full
-              ? "Sett meg på ventelista"
-              : "Meld meg på"}
+            : tooFew && props.waitlistEnabled
+              ? guests.length
+                ? "Sett oss på ventelista"
+                : "Sett meg på ventelista"
+              : guests.length
+                ? `Meld på ${partySize} personer`
+                : "Meld meg på"}
         </Button>
         <PrivacyNotice
           purpose="Vi bruker opplysningene til påmeldingen og billetten. Svar på ekstra spørsmål slettes to uker etter eventet, navn og e-post senest seks måneder etter."
@@ -315,6 +391,7 @@ function Success({
   ticketUrl,
   waitlistPosition,
   ticketsEnabled,
+  guestCount = 0,
 }: SuccessState & { ticketsEnabled: boolean }) {
   if (alreadyRegistered) {
     return (
@@ -345,8 +422,12 @@ function Success({
       </p>
       <Text variant="muted" customStyles="text-sm">
         {waitlisted
-          ? `Du er nummer ${waitlistPosition ?? "?"} i køen. Blir det plass, får du billett på e-post automatisk.`
-          : "Billetten er på vei til e-posten din."}
+          ? guestCount
+            ? `Dere er nummer ${waitlistPosition ?? "?"} i køen. Blir det plass til hele følget, får du billettene på e-post automatisk.`
+            : `Du er nummer ${waitlistPosition ?? "?"} i køen. Blir det plass, får du billett på e-post automatisk.`
+          : guestCount
+            ? `Billettene til deg og ${guestCount === 1 ? "den du tar med" : `de ${guestCount} du tar med`} er på vei til e-posten din.`
+            : "Billetten er på vei til e-posten din."}
       </Text>
       {!waitlisted && ticketsEnabled && code && (
         <p className="font-bold font-mono text-2xl text-primary tracking-[0.14em]">

@@ -185,6 +185,18 @@ export function RegistrationsPanel() {
     );
   });
 
+  // Følge: vis hvem de hører til, og hvor mange hver person tok med.
+  const nameById = new Map((data?.rows ?? []).map((row) => [row.id, row.name]));
+  const guestCountByHost = new Map<number, number>();
+  for (const row of data?.rows ?? []) {
+    if (row.guestOfId && row.status !== "cancelled") {
+      guestCountByHost.set(
+        row.guestOfId,
+        (guestCountByHost.get(row.guestOfId) ?? 0) + 1
+      );
+    }
+  }
+
   const counts = data?.counts;
   const seats = counts ? counts.registered + counts.checked_in : 0;
   const capacity = data?.event.capacity;
@@ -374,9 +386,23 @@ export function RegistrationsPanel() {
                       <>
                         <strong>{row.name}</strong>
                         <br />
-                        <span style={muted}>{row.email ?? "Ingen e-post"}</span>
+                        {row.guestOfId ? (
+                          <span style={muted}>
+                            Følge av{" "}
+                            {nameById.get(row.guestOfId) ?? "(slettet)"}
+                          </span>
+                        ) : (
+                          <span style={muted}>
+                            {row.email ?? "Ingen e-post"}
+                          </span>
+                        )}
                       </>
                     )}
+                    {guestCountByHost.get(row.id) ? (
+                      <span style={{ ...muted, display: "block" }}>
+                        Tar med {guestCountByHost.get(row.id)}
+                      </span>
+                    ) : null}
                     {row.source === "walk_in" && (
                       <span style={{ ...muted, display: "block" }}>
                         Registrert på stedet

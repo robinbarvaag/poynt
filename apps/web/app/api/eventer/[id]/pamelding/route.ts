@@ -41,6 +41,7 @@ export async function POST(
     email?: unknown;
     answers?: unknown;
     newsletter?: unknown;
+    guests?: unknown;
     website?: unknown;
   } | null;
 
@@ -67,6 +68,7 @@ export async function POST(
           ? (body.answers as Record<string, unknown>)
           : {},
       newsletter: body.newsletter === true,
+      guests: body.guests,
     });
 
     if (!result.ok) {
@@ -76,7 +78,7 @@ export async function POST(
       );
     }
 
-    const { event, registration, alreadyRegistered } = result;
+    const { event, registration, alreadyRegistered, guests } = result;
 
     // Billetten til den påmeldte ventes på (så feil havner i loggen for
     // riktig forespørsel); varsel og nyhetsbrev går etter svaret.
@@ -106,6 +108,7 @@ export async function POST(
         : {
             code: event.ticketsEnabled !== false ? registration.code : null,
             ticketUrl: ticketPath(registration.token),
+            guestCount: guests.length,
           }),
     });
   } catch (error) {

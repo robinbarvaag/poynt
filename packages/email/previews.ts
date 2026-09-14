@@ -317,6 +317,14 @@ export async function renderEmailPreviews(options?: {
           qrSrc: SAMPLE_QR_SRC,
           ticketUrl: "#",
           greeting: "Så gøy at du kommer! Boka er klar, og det er kaken også.",
+          guests: [
+            {
+              name: "Ola Nordmann",
+              code: "POY-9RTX",
+              qrSrc: SAMPLE_QR_SRC,
+              ticketUrl: "#",
+            },
+          ],
           practicalInfo: [
             "Det er gratis parkering rett ved inngangen.",
             "Si fra i påmeldingen hvis du har allergier.",

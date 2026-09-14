@@ -38,9 +38,11 @@ export async function GET(
   }
 
   const { questions } = overview.event;
+  const nameById = new Map(overview.rows.map((row) => [row.id, row.name]));
   const header = [
     "Navn",
     "E-post",
+    "Følge av",
     "Status",
     "Kode",
     "Påmeldt",
@@ -53,6 +55,7 @@ export async function GET(
     [
       row.name,
       row.email,
+      row.guestOfId ? nameById.get(row.guestOfId) : "",
       statusLabel(row.status),
       row.code,
       dateTime(row.createdAt),

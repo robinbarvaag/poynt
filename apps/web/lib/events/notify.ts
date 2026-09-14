@@ -10,7 +10,7 @@ import {
 import { buildIcs } from "./ics";
 import { lexicalParagraphs } from "./lexical-text";
 import { ticketQrPng } from "./qr";
-import { getEventsPayload } from "./registrations";
+import { getActiveGuests, getEventsPayload } from "./registrations";
 import { hasAnswers } from "./retention";
 
 /**
@@ -56,10 +56,12 @@ export async function sendRegistrationEmail(
   registration: EventRegistration,
   opts: { promoted?: boolean; reminder?: boolean } = {}
 ): Promise<void> {
+  // Følget har ingen e-post; billettene deres går med hovedpersonens e-post.
   if (
     registration.status === "cancelled" ||
     !registration.token ||
-    !registration.email
+    !registration.email ||
+    registration.guestOf
   ) {
     return;
   }
@@ -85,7 +87,19 @@ export async function sendRegistrationEmail(
     }
 
     const withTicket = event.ticketsEnabled !== false;
+    const guests = await getActiveGuests(registration.id);
     await sendEventTicketEmail({
+      guests: await Promise.all(
+        guests.map(async (guest) => {
+          const guestUrl = ticketUrl(guest.token);
+          return {
+            name: guest.name,
+            code: withTicket ? guest.code : undefined,
+            ticketUrl: guestUrl,
+            qrPng: withTicket ? await ticketQrPng(guestUrl) : undefined,
+          };
+        })
+      ),
       email: registration.email,
       name: registration.name,
       eventTitle: event.title,
@@ -138,13 +152,24 @@ export async function notifyAdmins(
 ): Promise<void> {
   try {
     const payload = await getEventsPayload();
-    const { totalDocs: seats } = await payload.count({
-      collection: "event-registrations",
-      where: {
-        event: { equals: event.id },
-        status: { in: SEAT_STATUSES },
-      },
-    });
+    const [{ totalDocs: seats }, { totalDocs: guestCount }] = await Promise.all(
+      [
+        payload.count({
+          collection: "event-registrations",
+          where: {
+            event: { equals: event.id },
+            status: { in: SEAT_STATUSES },
+          },
+        }),
+        payload.count({
+          collection: "event-registrations",
+          where: {
+            guestOf: { equals: registration.id },
+            status: { not_equals: "cancelled" },
+          },
+        }),
+      ]
+    );
     // Svar på ekstra spørsmål (f.eks. allergier) sendes IKKE på e-post: i
     // innboksen blir de liggende, mens de i databasen slettes automatisk
     // (lib/events/retention.ts). De står i «Påmeldte»-fanen.
@@ -157,7 +182,9 @@ export async function notifyAdmins(
     await sendEventRegistrationNotification({
       to: await getNotificationEmails(),
       kind,
-      name: registration.name,
+      name: guestCount
+        ? `${registration.name} (+${guestCount} følge)`
+        : registration.name,
       email: registration.email ?? undefined,
       eventTitle: event.title,
       seatsText: event.capacity

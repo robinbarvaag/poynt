@@ -65,9 +65,9 @@ export async function POST(
         await Promise.all([
           sendCancellationEmail(event, result.registration, false),
           notifyAdmins("Avmelding", event, result.registration),
-          result.promoted
-            ? sendRegistrationEmail(event, result.promoted, { promoted: true })
-            : Promise.resolve(),
+          ...result.promoted.map((promoted) =>
+            sendRegistrationEmail(event, promoted, { promoted: true })
+          ),
         ]);
       });
     }

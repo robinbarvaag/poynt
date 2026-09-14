@@ -24,6 +24,8 @@ export interface EventTicketEmailProps {
   promoted?: boolean;
   /** Påminnelse dagen før (samme billett, annen innledning). */
   reminder?: boolean;
+  /** Billetter til følget, som den påmeldte kan vise fram eller sende videre. */
+  guests?: { name: string; code?: string; qrSrc?: string; ticketUrl: string }[];
 }
 
 const codeBox = {
@@ -59,6 +61,7 @@ export default function EventTicketEmail({
   practicalInfo = [],
   promoted,
   reminder,
+  guests = [],
 }: EventTicketEmailProps) {
   const intro = reminder
     ? {
@@ -133,6 +136,44 @@ export default function EventTicketEmail({
           <Text style={{ ...emailStyles.text, fontSize: "14px", margin: 0 }}>
             Ta vare på denne e-posten. Vis QR-koden i døra, eller si koden.
           </Text>
+        </Section>
+      ) : null}
+
+      {guests.length ? (
+        <Section>
+          <Text style={emailStyles.label}>
+            {guests.length === 1
+              ? "Billett til den du tar med"
+              : "Billetter til dem du tar med"}
+          </Text>
+          <Text style={emailStyles.text}>
+            Hver person har sin egen billett. Vis QR-koden for dem i døra, eller
+            send lenken videre.
+          </Text>
+          {guests.map((guest) => (
+            <Section key={guest.ticketUrl} style={codeBox}>
+              <Text style={{ ...emailStyles.value, margin: 0 }}>
+                {guest.name}
+              </Text>
+              {guest.qrSrc ? (
+                <Img
+                  src={guest.qrSrc}
+                  width="160"
+                  height="160"
+                  alt={`QR-kode for billetten til ${guest.name}`}
+                  style={{ margin: "12px auto 0", display: "block" }}
+                />
+              ) : null}
+              {guest.code ? <Text style={codeText}>{guest.code}</Text> : null}
+              <Text
+                style={{ ...emailStyles.text, fontSize: "14px", margin: 0 }}
+              >
+                <a href={guest.ticketUrl} style={{ color: brand.ink }}>
+                  Billettlenke til {guest.name}
+                </a>
+              </Text>
+            </Section>
+          ))}
         </Section>
       ) : null}
 

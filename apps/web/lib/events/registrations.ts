@@ -9,6 +9,7 @@ import {
   SEAT_STATUSES,
   decideRegistrationStatus,
   registrationWindow,
+  sanitizeGuestNames,
 } from "./capacity";
 import {
   generateTicketCode,
@@ -195,6 +196,8 @@ export type RegisterResult =
       event: Event;
       /** Personen var allerede påmeldt — vi sender billetten på nytt. */
       alreadyRegistered: boolean;
+      /** Følget, hvis personen tok med noen. */
+      guests: EventRegistration[];
     }
   | { ok: false; error: RegisterError; message: string };
 
@@ -221,6 +224,8 @@ export async function registerForEvent(input: {
   email: string;
   answers: Record<string, unknown>;
   newsletter: boolean;
+  /** Navnene på følget (fra skjemaet, valideres her). */
+  guests?: unknown;
 }): Promise<RegisterResult> {
   const payload = await getEventsPayload();
 
@@ -249,6 +254,8 @@ export async function registerForEvent(input: {
   if (missing.length) {
     return fail("invalid", `Svar på: ${missing.join(", ")}.`);
   }
+  const guestNames = sanitizeGuestNames(input.guests, event.maxGuests);
+  if (guestNames.error) return fail("invalid", guestNames.error);
 
   const result = await withEventLock(payload, event.id, async (req) => {
     const existing = await payload.find({
@@ -263,13 +270,18 @@ export async function registerForEvent(input: {
       req,
     });
     if (existing.docs[0]) {
-      return { registration: existing.docs[0], alreadyRegistered: true };
+      return {
+        registration: existing.docs[0],
+        guests: await findActiveGuests(payload, existing.docs[0].id, req),
+        alreadyRegistered: true,
+      };
     }
 
     const decision = decideRegistrationStatus({
       capacity: event.capacity,
       seatsTaken: await countSeats(payload, event.id, req),
       waitlistEnabled: event.waitlistEnabled,
+      partySize: 1 + guestNames.names.length,
     });
     if (decision === "full") return null;
 
@@ -292,10 +304,38 @@ export async function registerForEvent(input: {
       },
       req,
     });
-    return { registration, alreadyRegistered: false };
+
+    // Følget: hver sin rad og kode, samme status som den som meldte på.
+    // Uten e-post — billettene sendes til hovedpersonen.
+    const guests: EventRegistration[] = [];
+    for (const guestName of guestNames.names) {
+      guests.push(
+        await payload.create({
+          collection: "event-registrations",
+          data: {
+            event: event.id,
+            source: "online",
+            guestOf: registration.id,
+            name: guestName,
+            status: decision,
+            code: await uniqueCode(payload, req),
+            token: generateTicketToken(),
+          },
+          req,
+        })
+      );
+    }
+    return { registration, guests, alreadyRegistered: false };
   });
 
-  if (!result) return fail("full");
+  if (!result) {
+    return fail(
+      "full",
+      guestNames.names.length
+        ? "Det er ikke nok plasser til hele følget ditt. Prøv med færre personer."
+        : undefined
+    );
+  }
   revalidateEventSeats(event.id);
   return { ok: true, event, ...result };
 }
@@ -324,6 +364,33 @@ export async function findRegistrationByToken(
   return registration as EventRegistration & { event: Event };
 }
 
+/** Følget til en påmelding (ikke avmeldte), med billettnøkler. */
+export async function getActiveGuests(
+  registrationId: number
+): Promise<EventRegistration[]> {
+  return findActiveGuests(await getEventsPayload(), registrationId);
+}
+
+async function findActiveGuests(
+  payload: Payload,
+  hostId: number,
+  req: LockedReq = {}
+): Promise<EventRegistration[]> {
+  const { docs } = await payload.find({
+    collection: "event-registrations",
+    where: {
+      guestOf: { equals: hostId },
+      status: { not_equals: "cancelled" },
+    },
+    sort: "createdAt",
+    depth: 0,
+    pagination: false,
+    overrideAccess: true,
+    req,
+  });
+  return docs;
+}
+
 async function findRegistrationById(
   payload: Payload,
   id: number,
@@ -346,8 +413,13 @@ async function findRegistrationById(
 
 export interface CancelResult {
   registration: EventRegistration;
-  /** Den som rykket opp fra ventelista og nå skal ha billett. */
-  promoted: EventRegistration | null;
+  /** Følget som ble meldt av sammen med personen. */
+  cancelledGuests: EventRegistration[];
+  /**
+   * De som rykket opp fra ventelista og nå skal ha billett (hovedpersonene —
+   * følget deres rykket opp samtidig og får billettene i samme e-post).
+   */
+  promoted: EventRegistration[];
   alreadyCancelled: boolean;
 }
 
@@ -371,75 +443,145 @@ export async function cancelRegistration({
     const current = await findRegistrationById(payload, registrationId, req);
     if (!current) return null;
     if (current.status === "cancelled") {
-      return { registration: current, promoted: null, alreadyCancelled: true };
+      return {
+        registration: current,
+        cancelledGuests: [],
+        promoted: [],
+        alreadyCancelled: true,
+      };
     }
 
-    const heldSeat = SEAT_STATUSES.includes(current.status);
+    const cancelData = {
+      status: "cancelled" as const,
+      cancelledAt: new Date().toISOString(),
+      cancelledBy: by,
+      waitlistPosition: null,
+    };
     const registration = await payload.update({
       collection: "event-registrations",
       id: current.id,
-      data: {
-        status: "cancelled",
-        cancelledAt: new Date().toISOString(),
-        cancelledBy: by,
-        waitlistPosition: null,
-      },
+      data: cancelData,
       depth: 0,
       overrideAccess: true,
       req,
     });
 
-    const promoted = heldSeat
-      ? await promoteNextInLine(payload, eventId, req)
-      : null;
-    return { registration, promoted, alreadyCancelled: false };
+    // Melder hovedpersonen seg av, går følget med. Et følge kan også melde
+    // seg av alene (fra sin egen billett).
+    const guests = current.guestOf
+      ? []
+      : await findActiveGuests(payload, current.id, req);
+    const cancelledGuests: EventRegistration[] = [];
+    for (const guest of guests) {
+      cancelledGuests.push(
+        await payload.update({
+          collection: "event-registrations",
+          id: guest.id,
+          data: cancelData,
+          depth: 0,
+          overrideAccess: true,
+          req,
+        })
+      );
+    }
+
+    const freedSeat = [current, ...guests].some((doc) =>
+      SEAT_STATUSES.includes(doc.status)
+    );
+    const promoted = freedSeat
+      ? await promoteFromWaitlist(payload, eventId, req)
+      : [];
+    return {
+      registration,
+      cancelledGuests,
+      promoted,
+      alreadyCancelled: false,
+    };
   });
 
   if (result) revalidateEventSeats(eventId);
   return result;
 }
 
-async function promoteNextInLine(
+/** Flytt påmeldinger fra venteliste til plass. Returnerer de oppdaterte. */
+async function markPromoted(
+  payload: Payload,
+  ids: number[],
+  req: LockedReq
+): Promise<EventRegistration[]> {
+  const updated: EventRegistration[] = [];
+  for (const id of ids) {
+    updated.push(
+      await payload.update({
+        collection: "event-registrations",
+        id,
+        data: {
+          status: "registered",
+          promotedAt: new Date().toISOString(),
+          waitlistPosition: null,
+        },
+        depth: 0,
+        overrideAccess: true,
+        req,
+      })
+    );
+  }
+  return updated;
+}
+
+/**
+ * Gi plass til de første på ventelista, ett følge om gangen (personen og
+ * følget får plass samtidig), så lenge det er plass. Stopper ved det første
+ * følget som ikke får plass, så ingen sniker i køen — «Gi plass» i admin kan
+ * overstyre.
+ */
+async function promoteFromWaitlist(
   payload: Payload,
   eventId: number,
   req: LockedReq
-): Promise<EventRegistration | null> {
+): Promise<EventRegistration[]> {
   const event = await payload.findByID({
     collection: "events",
     id: eventId,
     depth: 0,
     req,
   });
-  if (!event.waitlistEnabled && !event.capacity) return null;
+  if (!event.waitlistEnabled && !event.capacity) return [];
 
-  const seatsTaken = await countSeats(payload, eventId, req);
-  if (event.capacity && seatsTaken >= event.capacity) return null;
+  const promoted: EventRegistration[] = [];
+  for (;;) {
+    const seatsTaken = await countSeats(payload, eventId, req);
+    if (event.capacity && seatsTaken >= event.capacity) break;
 
-  const next = await payload.find({
-    collection: "event-registrations",
-    where: {
-      event: { equals: eventId },
-      status: { equals: "waitlisted" },
-    },
-    sort: ["waitlistPosition", "createdAt"],
-    limit: 1,
-    depth: 0,
-    req,
-  });
-  if (!next.docs[0]) return null;
+    const next = await payload.find({
+      collection: "event-registrations",
+      where: {
+        event: { equals: eventId },
+        status: { equals: "waitlisted" },
+        guestOf: { exists: false },
+      },
+      sort: ["waitlistPosition", "createdAt"],
+      limit: 1,
+      depth: 0,
+      req,
+    });
+    const host = next.docs[0];
+    if (!host) break;
 
-  return payload.update({
-    collection: "event-registrations",
-    id: next.docs[0].id,
-    data: {
-      status: "registered",
-      promotedAt: new Date().toISOString(),
-      waitlistPosition: null,
-    },
-    depth: 0,
-    overrideAccess: true,
-    req,
-  });
+    const guests = (await findActiveGuests(payload, host.id, req)).filter(
+      (guest) => guest.status === "waitlisted"
+    );
+    if (event.capacity && seatsTaken + 1 + guests.length > event.capacity) {
+      break;
+    }
+    const [updatedHost] = await markPromoted(
+      payload,
+      [host.id, ...guests.map((guest) => guest.id)],
+      req
+    );
+    promoted.push(updatedHost);
+  }
+  return promoted;
 }
 
 /**
@@ -454,20 +596,23 @@ export async function promoteRegistration(
   const eventId = relationId(initial?.event);
   if (!initial || !eventId || initial.status !== "waitlisted") return null;
 
-  const updated = await withEventLock(payload, eventId, async (req) =>
-    payload.update({
-      collection: "event-registrations",
-      id: registrationId,
-      data: {
-        status: "registered",
-        promotedAt: new Date().toISOString(),
-        waitlistPosition: null,
-      },
-      depth: 0,
-      overrideAccess: true,
-      req,
-    })
-  );
+  // Hele følget får plass sammen, uansett hvilken rad admin trykket på.
+  const hostId = relationId(initial.guestOf) ?? initial.id;
+  const updated = await withEventLock(payload, eventId, async (req) => {
+    const host = await findRegistrationById(payload, hostId, req);
+    const guests = (await findActiveGuests(payload, hostId, req)).filter(
+      (guest) => guest.status === "waitlisted"
+    );
+    const ids = [
+      ...(host?.status === "waitlisted" ? [hostId] : []),
+      ...guests.map((guest) => guest.id),
+    ];
+    const docs = await markPromoted(payload, ids, req);
+    return (
+      docs.find((doc) => doc.id === hostId) ??
+      (await findRegistrationById(payload, hostId, req))
+    );
+  });
   revalidateEventSeats(eventId);
   return updated;
 }
@@ -659,10 +804,10 @@ export async function registerWalkIn({
  */
 export async function deleteRegistration(
   registrationId: number
-): Promise<{ deleted: boolean; promoted: EventRegistration | null }> {
+): Promise<{ deleted: boolean; promoted: EventRegistration[] }> {
   const payload = await getEventsPayload();
   const current = await getRegistrationWithToken(registrationId);
-  if (!current) return { deleted: false, promoted: null };
+  if (!current) return { deleted: false, promoted: [] };
 
   const upcoming = new Date(current.event.startsAt).getTime() > Date.now();
   const cancelled =
@@ -670,13 +815,19 @@ export async function deleteRegistration(
       ? await cancelRegistration({ registrationId, by: "admin" })
       : null;
 
+  // Følget er en del av personens påmelding og slettes sammen med den.
+  await payload.delete({
+    collection: "event-registrations",
+    where: { guestOf: { equals: registrationId } },
+    overrideAccess: true,
+  });
   await payload.delete({
     collection: "event-registrations",
     id: registrationId,
     overrideAccess: true,
   });
   revalidateEventSeats(current.event.id);
-  return { deleted: true, promoted: cancelled?.promoted ?? null };
+  return { deleted: true, promoted: cancelled?.promoted ?? [] };
 }
 
 /** Angre en innsjekk (feilskanning). */

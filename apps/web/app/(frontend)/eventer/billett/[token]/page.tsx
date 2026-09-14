@@ -7,7 +7,10 @@ import {
   formatEventTime,
 } from "@/lib/events/format";
 import { ticketQrSvg } from "@/lib/events/qr";
-import { findRegistrationByToken } from "@/lib/events/registrations";
+import {
+  findRegistrationByToken,
+  getActiveGuests,
+} from "@/lib/events/registrations";
 import { SITE_URL } from "@/lib/seo";
 import { Button, Container, Text } from "@poynt/ui";
 import type { Metadata } from "next";
@@ -70,6 +73,15 @@ async function TicketContent({ params }: TicketPageProps) {
       registration.status === "waitlisted");
 
   const where = formatEventLocation(event.location);
+  // Følget: hovedpersonen ser billettene til dem hun tok med, og følget ser
+  // hvem påmeldingen tilhører.
+  const guests = registration.guestOf
+    ? []
+    : await getActiveGuests(registration.id);
+  const hostName =
+    typeof registration.guestOf === "object" && registration.guestOf
+      ? registration.guestOf.name
+      : null;
 
   return (
     <Container size="sm" padding="default">
@@ -136,10 +148,53 @@ async function TicketContent({ params }: TicketPageProps) {
             </Button>
           </div>
 
+          {guests.length > 0 && (
+            <div className="space-y-2 rounded-2xl bg-muted/50 p-4 text-left">
+              <p className="font-semibold text-foreground text-sm">
+                {guests.length === 1
+                  ? "Den du tar med"
+                  : `De ${guests.length} du tar med`}
+              </p>
+              <ul className="space-y-1.5">
+                {guests.map((guest) => (
+                  <li
+                    key={guest.id}
+                    className="flex items-center justify-between gap-3 text-sm"
+                  >
+                    <span className="min-w-0 truncate text-foreground">
+                      {guest.name}
+                      {withTicket && guest.status === "registered" && (
+                        <span className="ml-2 font-mono text-muted-foreground">
+                          {guest.code}
+                        </span>
+                      )}
+                    </span>
+                    <Link
+                      href={ticketPath(guest.token)}
+                      className="shrink-0 font-semibold text-primary underline-offset-4 hover:underline"
+                    >
+                      Billett
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              <Text variant="muted" customStyles="text-xs">
+                Hver person har sin egen billett. Send lenken videre, eller vis
+                QR-koden for dem i døra.
+              </Text>
+            </div>
+          )}
+          {hostName && (
+            <Text variant="muted" customStyles="text-sm">
+              Billetten hører til påmeldingen til {hostName}.
+            </Text>
+          )}
+
           {canCancel && (
             <CancelRegistration
               token={token}
               waitlisted={registration.status === "waitlisted"}
+              withGuests={guests.length > 0}
             />
           )}
         </LiveTicket>

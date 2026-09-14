@@ -813,6 +813,8 @@ export async function sendEventTicketEmail(params: {
   reminder?: boolean;
   /** QR-koden som PNG. Utelates når eventet ikke bruker billetter. */
   qrPng?: Buffer;
+  /** Billetter til følget — sendes til den som meldte på. */
+  guests?: { name: string; code?: string; ticketUrl: string; qrPng?: Buffer }[];
   /** Innholdet i .ics-fila. */
   ics?: string;
 }) {
@@ -829,6 +831,12 @@ export async function sendEventTicketEmail(params: {
       ...params,
       code: params.code,
       qrSrc: params.qrPng ? `cid:${qrContentId}` : undefined,
+      guests: params.guests?.map((guest, index) => ({
+        name: guest.name,
+        code: guest.code,
+        ticketUrl: guest.ticketUrl,
+        qrSrc: guest.qrPng ? `cid:${qrContentId}-${index + 1}` : undefined,
+      })),
     })
   );
 
@@ -839,6 +847,15 @@ export async function sendEventTicketEmail(params: {
       content: params.qrPng,
       contentType: "image/png",
       contentId: qrContentId,
+    });
+  }
+  for (const [index, guest] of (params.guests ?? []).entries()) {
+    if (!guest.qrPng) continue;
+    attachments.push({
+      filename: `billett-qr-${index + 1}.png`,
+      content: guest.qrPng,
+      contentType: "image/png",
+      contentId: `${qrContentId}-${index + 1}`,
     });
   }
   if (params.ics) {

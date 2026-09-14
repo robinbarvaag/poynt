@@ -56,14 +56,14 @@ export async function POST(
           body.notify
             ? sendCancellationEmail(event, result.registration, true)
             : Promise.resolve(),
-          result.promoted
-            ? sendRegistrationEmail(event, result.promoted, { promoted: true })
-            : Promise.resolve(),
+          ...result.promoted.map((promoted) =>
+            sendRegistrationEmail(event, promoted, { promoted: true })
+          ),
         ]);
       }
       return NextResponse.json({
         ok: true,
-        promoted: result?.promoted?.name ?? null,
+        promoted: result?.promoted.map((p) => p.name).join(", ") || null,
       });
     }
 
@@ -91,12 +91,14 @@ export async function POST(
     case "delete": {
       // Når noen ber om å bli slettet: fjernes helt, ikke bare meldt av.
       const result = await deleteRegistration(registrationId);
-      if (result.promoted) {
-        await sendRegistrationEmail(event, result.promoted, { promoted: true });
-      }
+      await Promise.all(
+        result.promoted.map((promoted) =>
+          sendRegistrationEmail(event, promoted, { promoted: true })
+        )
+      );
       return NextResponse.json({
         ok: result.deleted,
-        promoted: result.promoted?.name ?? null,
+        promoted: result.promoted.map((p) => p.name).join(", ") || null,
       });
     }
 
