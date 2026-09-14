@@ -1,4 +1,5 @@
 import { CancelRegistration } from "@/components/events/cancel-registration";
+import { LiveTicket } from "@/components/events/live-ticket";
 import { isTicketToken, ticketPath } from "@/lib/events/codes";
 import {
   formatEventLocation,
@@ -8,7 +9,7 @@ import {
 import { ticketQrSvg } from "@/lib/events/qr";
 import { findRegistrationByToken } from "@/lib/events/registrations";
 import { SITE_URL } from "@/lib/seo";
-import { Button, Container, EventTicket, Text } from "@poynt/ui";
+import { Button, Container, Text } from "@poynt/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -71,9 +72,12 @@ async function TicketContent({ params }: TicketPageProps) {
   const where = formatEventLocation(event.location);
 
   return (
-    <Container size="sm" padding="lg">
+    <Container size="sm" padding="default">
       <div className="mx-auto max-w-md">
-        <EventTicket
+        <LiveTicket
+          token={token}
+          startsAt={event.startsAt}
+          endsAt={event.endsAt}
           eventTitle={event.title}
           when={formatEventRange(event.startsAt, event.endsAt)}
           where={where || undefined}
@@ -103,7 +107,7 @@ async function TicketContent({ params }: TicketPageProps) {
             </Text>
           )}
 
-          <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
+          <div className="flex flex-wrap justify-center gap-2">
             {registration.status !== "cancelled" && !started && (
               <Button asChild variant="outline">
                 <a href={`/api/eventer/${event.id}/kalender`}>
@@ -138,9 +142,9 @@ async function TicketContent({ params }: TicketPageProps) {
               waitlisted={registration.status === "waitlisted"}
             />
           )}
-        </EventTicket>
+        </LiveTicket>
 
-        <Text variant="muted" customStyles="mt-8 text-center text-xs">
+        <Text variant="muted" customStyles="mt-6 text-center text-xs">
           Tips: legg til denne siden på hjemskjermen, så har du billetten klar i
           døra. Ikke del lenken, den er personlig.
         </Text>

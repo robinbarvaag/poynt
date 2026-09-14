@@ -7,6 +7,7 @@ import {
   SpotsMeter,
 } from "@poynt/ui";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { useState } from "react";
 
 const meta: Meta = {
   title: "Blokker/Eventer",
@@ -48,6 +49,33 @@ export const BillettVenteliste: Story = {
 
 export const BillettSjekketInn: Story = {
   render: () => <EventTicket {...ticketBase} status="checked_in" />,
+};
+
+function TearDemo() {
+  const [checkedIn, setCheckedIn] = useState(false);
+  return (
+    <div className="space-y-6 pt-6">
+      <EventTicket
+        {...ticketBase}
+        status={checkedIn ? "checked_in" : "registered"}
+        celebrate={checkedIn}
+      />
+      <div className="text-center">
+        <button
+          type="button"
+          onClick={() => setCheckedIn((value) => !value)}
+          className="rounded-full bg-primary px-5 py-2 font-semibold text-primary-foreground"
+        >
+          {checkedIn ? "Tilbakestill" : "Skann billetten"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/** Slik ser det ut når billettsiden står åpen i det personen skannes i døra. */
+export const BillettRivesAv: Story = {
+  render: () => <TearDemo />,
 };
 
 export const BillettAvmeldt: Story = {
