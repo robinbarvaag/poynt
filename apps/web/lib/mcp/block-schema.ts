@@ -151,6 +151,18 @@ function serializeFields(fields: Field[], prefix: string, richText: string[]) {
         .join(" ");
     }
 
+    // Standardverdier som funksjon (f.eks. bokinnholdet i vekst-blokkene)
+    // blir ikke med i JSON-en, så Claude får vite det i beskrivelsen.
+    // layout-convert kaller funksjonen når feltet utelates.
+    if (typeof f.defaultValue === "function") {
+      schema.description = [
+        schema.description,
+        "Har standardinnhold: utelat feltet for å bruke det.",
+      ]
+        .filter(Boolean)
+        .join(" ");
+    }
+
     // Dropp tomme nøkler så skjemaet blir kort.
     for (const key of Object.keys(schema) as (keyof FieldSchema)[]) {
       if (schema[key] === undefined) delete schema[key];
@@ -163,8 +175,17 @@ function serializeFields(fields: Field[], prefix: string, richText: string[]) {
 function serializeBlock(block: Block): BlockSchema {
   const richTextPaths: string[] = [];
   const fields = serializeFields(block.fields, "", richTextPaths);
+  // Payload har ikke `description` på blokker; vi bruker `admin.custom`.
+  const admin = (
+    block as Block & {
+      admin?: {
+        description?: Labelish;
+        custom?: { description?: Labelish };
+      };
+    }
+  ).admin;
   const description = labelText(
-    (block as Block & { admin?: { description?: Labelish } }).admin?.description
+    admin?.custom?.description ?? admin?.description
   );
   return {
     blockType: block.slug,

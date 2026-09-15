@@ -9,6 +9,12 @@ import { vekstAppearance, vekstHeaderFields } from "./vekst-fields";
 export const ChapterPortal: Block = {
   slug: "chapterPortal",
   interfaceName: "ChapterPortalBlock",
+  admin: {
+    custom: {
+      description:
+        "Kapittelportal: én dør per bokstav i VEKST som lenker til verktøyene på siden via #ankre. Utelat doors for standardoppsettet.",
+    },
+  },
   labels: {
     singular: "Kapittelportal (Verdifull vekst)",
     plural: "Kapittelportaler (Verdifull vekst)",

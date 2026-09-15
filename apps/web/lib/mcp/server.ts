@@ -46,6 +46,10 @@ SEO: kall get_seo_guidelines først. seo_audit gir oversikt over hele nettstedet
 
 Bilder: search_media finner bilder som allerede er lastet opp i admin. upload_media_from_url henter et bilde fra en lenke (Drive, Dropbox, nettside) inn i mediebiblioteket. Bilder limt inn i chatten kan du IKKE laste opp — be Susanne laste dem opp i admin (Media) eller dele en lenke.
 
+Legge til seksjoner på en side som finnes (f.eks. Susannes ressursside): add_blocks_to_page_draft. Den bevarer alt som står der fra før. update_page_draft med layout erstatter hele blokk-lista, så bruk den bare når eksisterende blokker faktisk skal endres.
+
+Verdifull vekst-blokkene (chapterPortal, vekstCheck, changeWheel, growthCalculator, mythCards, aiWorkflow, salesRitual) er interaktive verktøy fra Susannes bok. Utelatte felt fylles med bokinnholdet, så det holder ofte å sende blockType, blockName og eyebrow/title/intro (og calculator for growthCalculator). Lenkene i bokinnholdet peker på ankrene #vekst-sjekken, #endringshjulet, #lonnsomhet, #arbeidsflyter-med-ki og #omsetnings-onsdag, så gi blokkene blokk-navnene «VEKST-sjekken», «Endringshjulet», «Lønnsomhet», «Arbeidsflyter med KI» og «Omsetnings-onsdag». På boksidene skrives «KI», ikke «AI».
+
 Eventer: list_events/get_event for å se hva som finnes, create_event_draft for et nytt event (utkast; tekster som markdown, datoer med tidssone). Ikke finn på sted, tider, plasser eller program. Pris og publisering gjør Susanne i admin.
 
 Lese og vurdere: list_pages/get_page og list_related/get_product gir deg innholdet slik det står på nettsiden — bruk dem også når Susanne bare spør om noe (f.eks. «stemmer kjøpsbetingelsene med produktene?»), ikke bare når hun vil bygge.
@@ -55,7 +59,7 @@ Regler: alt lagres som utkast, aldri publisert. Skriv på bokmål i Poynts tone.
 const layoutSchema = z
   .array(z.record(z.string(), z.unknown()))
   .describe(
-    "Liste av seksjoner i rekkefølge. Hver seksjon har blockType + feltene fra get_block_schema."
+    "Liste av seksjoner i rekkefølge. Hver seksjon har blockType + feltene fra get_block_schema, og gjerne blockName (blir #anker og menypunkt på oversiktssider)."
   );
 
 async function findPage(
@@ -260,7 +264,12 @@ export const mcpHandler = createMcpHandler(() => {
           .string()
           .regex(/^[a-z0-9-]+$/, "Kun små bokstaver, tall og bindestrek")
           .optional(),
-        pageType: z.enum(["standard", "landing"]).default("standard"),
+        pageType: z
+          .enum(["standard", "landing", "hub"])
+          .default("standard")
+          .describe(
+            "hub = oversiktsside med sidemeny; hver blokk med blockName blir et menypunkt"
+          ),
         metaTitle: z.string().max(70).optional().describe("SEO-tittel"),
         metaDescription: z
           .string()
@@ -327,7 +336,7 @@ export const mcpHandler = createMcpHandler(() => {
       inputSchema: z.object({
         idOrSlug: z.string(),
         title: z.string().min(1).optional(),
-        pageType: z.enum(["standard", "landing"]).optional(),
+        pageType: z.enum(["standard", "landing", "hub"]).optional(),
         metaTitle: z.string().max(70).optional(),
         metaDescription: z.string().max(160).optional(),
         layout: layoutSchema.optional(),
@@ -378,6 +387,100 @@ export const mcpHandler = createMcpHandler(() => {
             compositionFindings: layout
               ? analyseComposition(blocksFromLayout(layout))
               : undefined,
+          })
+        );
+      } catch (err) {
+        return fail(
+          `Payload avviste endringen: ${err instanceof Error ? err.message : String(err)}`
+        );
+      }
+    }
+  );
+
+  server.registerTool(
+    "add_blocks_to_page_draft",
+    {
+      title: "Legg til seksjoner (utkast)",
+      description:
+        "Setter inn nye blokker på en eksisterende side og lagrer som UTKAST. Alt som står på siden fra før (tekst, formatering, bilder, blokk-navn) røres ikke, og den publiserte versjonen er urørt. Bruk denne i stedet for update_page_draft når du bare skal legge til noe.",
+      inputSchema: z.object({
+        idOrSlug: z.string().describe("Side-ID eller slug"),
+        blocks: layoutSchema.min(1),
+        position: z
+          .enum(["end", "start", "after"])
+          .default("end")
+          .describe("Hvor blokkene settes inn. «after» krever afterBlockName."),
+        afterBlockName: z
+          .string()
+          .optional()
+          .describe(
+            "Blokk-navnet (blockName) de nye blokkene skal komme rett etter. Se get_page."
+          ),
+      }),
+      annotations: { destructiveHint: false },
+    },
+    async ({ idOrSlug, blocks, position, afterBlockName }) => {
+      let newBlocks: ReturnType<typeof toPayloadLayout>;
+      try {
+        newBlocks = toPayloadLayout(blocks);
+      } catch (err) {
+        return fail(err instanceof LayoutError ? err.message : String(err));
+      }
+      const payload = await getPayload({ config });
+      const doc = await findPage(payload, idOrSlug);
+      if (!doc) return fail(`Fant ingen side «${idOrSlug}».`);
+
+      // Eksisterende blokker sendes tilbake nøyaktig slik Payload ga dem
+      // (Lexical, id-er, blokk-navn), aldri via markdown-konverteringen.
+      const existing = (doc.layout ?? []) as unknown as Record<
+        string,
+        unknown
+      >[];
+      let insertAt = position === "start" ? 0 : existing.length;
+      if (position === "after") {
+        if (!afterBlockName) {
+          return fail("position «after» krever afterBlockName.");
+        }
+        const wanted = afterBlockName.trim().toLowerCase();
+        const index = existing.findIndex(
+          (b) =>
+            typeof b.blockName === "string" &&
+            b.blockName.trim().toLowerCase() === wanted
+        );
+        if (index === -1) {
+          const names = existing
+            .map((b) => b.blockName)
+            .filter((n): n is string => typeof n === "string" && n !== "");
+          return fail(
+            `Fant ingen blokk med navnet «${afterBlockName}». Blokk-navn på siden: ${names.length ? names.join(", ") : "(ingen)"}.`
+          );
+        }
+        insertAt = index + 1;
+      }
+      const layout = [
+        ...existing.slice(0, insertAt),
+        ...newBlocks,
+        ...existing.slice(insertAt),
+      ];
+
+      try {
+        const updated = await payload.update({
+          collection: "pages",
+          id: doc.id,
+          draft: true,
+          depth: 0,
+          data: { layout, _status: "draft" } as never,
+        });
+        return text(
+          pageResult(updated, {
+            inserted: newBlocks.length,
+            insertedFromPosition: insertAt + 1,
+            layout: layout.map((b) => ({
+              blockType: b.blockType,
+              blockName: b.blockName ?? null,
+            })),
+            compositionFindings: analyseComposition(blocksFromLayout(layout)),
+            next: "Send admin-lenken til Susanne. Endringen er et utkast til hun publiserer.",
           })
         );
       } catch (err) {

@@ -17,6 +17,12 @@ import {
 export const GrowthCalculator: Block = {
   slug: "growthCalculator",
   interfaceName: "GrowthCalculatorBlock",
+  admin: {
+    custom: {
+      description:
+        "Interaktiv kalkulator fra boka «Verdifull vekst»: lønnsomhet (med Gudruns komler), timepris eller spåkula for salg. Velg med «calculator». Leseren regner på egne tall i nettleseren.",
+    },
+  },
   labels: {
     singular: "Kalkulator (Verdifull vekst)",
     plural: "Kalkulatorer (Verdifull vekst)",

@@ -10,6 +10,12 @@ import { vekstAppearance, vekstHeaderFields } from "./vekst-fields";
 export const AiWorkflow: Block = {
   slug: "aiWorkflow",
   interfaceName: "AiWorkflowBlock",
+  admin: {
+    custom: {
+      description:
+        "Arbeidsflyter med KI (input → prompt → resultat) med animert eksempelsvar og knapper for «Åpne i ChatGPT/Claude». Utelat workflows for bokas fire (gå-tur-strategi, fiktivt styre, endringshjulet med KI, salgsliste).",
+    },
+  },
   labels: {
     singular: "Arbeidsflyter med KI (Verdifull vekst)",
     plural: "Arbeidsflyter med KI (Verdifull vekst)",

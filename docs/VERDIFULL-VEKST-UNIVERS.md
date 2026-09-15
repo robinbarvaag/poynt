@@ -52,6 +52,10 @@ samme, ellers må lenkene justeres i admin.
 3. På sin egen ressursside bruker hun «Legg til blokk» og velger blokkene hun vil ha. De kommer
    ferdig utfylt med bokinnholdet. Hun gir blokken et «Blokk-navn» (blir ankeret og menypunktet).
 
+**Via Claude (MCP):** «Legg Endringshjulet og Omsetnings-onsdag inn på ressurssiden min etter
+Prompter» → Claude bruker `add_blocks_to_page_draft`. Blokkene fylles med bokinnholdet, alt som
+står på siden fra før bevares, og endringen blir et utkast Susanne publiserer selv.
+
 ## 5. Teknisk
 
 - **UI:** `packages/ui/components/vekst/` (eksportert fra `@poynt/ui`). Rene regnefunksjoner i

@@ -16,6 +16,12 @@ import {
 export const ChangeWheel: Block = {
   slug: "changeWheel",
   interfaceName: "ChangeWheelBlock",
+  admin: {
+    custom: {
+      description:
+        "Endringshjulet fra «Verdifull vekst»: fire områder med tre ja/nei-spørsmål hver. Hjulet farges rosa/gult/grønt og peker ut hvor leseren bør starte. Utelat areas og aiPrompt for bokas innhold.",
+    },
+  },
   labels: {
     singular: "Endringshjulet (Verdifull vekst)",
     plural: "Endringshjul (Verdifull vekst)",

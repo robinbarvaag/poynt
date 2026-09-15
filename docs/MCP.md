@@ -59,7 +59,8 @@ claude mcp add --transport http poynt-cms https://<domene>/api/mcp/<MCP_SECRET>
 | `get_page` | Én side i MCP-format — kan brukes rett som mal. |
 | `check_layout` | Validerer uten å lagre: ukjente blokker, manglende påkrevde felt, komposisjonsregler. |
 | `create_page_draft` | Oppretter ny side som utkast. Returnerer admin-lenke + komposisjonsfunn. |
-| `update_page_draft` | Nytt utkast på eksisterende side (publisert versjon urørt). |
+| `update_page_draft` | Nytt utkast på eksisterende side (publisert versjon urørt). Sendes `layout`, erstattes hele blokk-lista. |
+| `add_blocks_to_page_draft` | Setter inn nye blokker (først, sist eller etter et blokk-navn) som utkast. Eksisterende blokker sendes tilbake urørt, uten markdown-rundtur, så formatering og blokk-navn bevares. |
 | `create_case_study_draft` | Kundehistorie som utkast: tittel, kunde, historie (markdown), resultater i tall, sitat, hovedbilde. |
 | `create_blog_post_draft` | Blogginnlegg som utkast: tittel, ingress, innhold (markdown), hovedbilde, kategorier. |
 | `list_categories` | Bloggkategorier → ID. |
@@ -88,7 +89,13 @@ finner Claude bildet med `search_media` eller henter det med
 Blokk-skjemaene genereres **automatisk** fra blokk-configene i `apps/web/blocks/`
 (`lib/mcp/block-schema.ts`). Ny blokk i `layoutBlocks` dukker opp for Claude
 uten videre — gode `label` og `admin.description` på feltene er det som gjør
-at Claude fyller dem riktig.
+at Claude fyller dem riktig. Beskrivelsen av selve blokken (i `list_blocks`)
+settes i `admin.custom.description`, siden Payload ikke har `description` på blokker.
+
+Utelatte felt fylles med feltets `defaultValue` før validering
+(`layout-convert.ts`). Er standardverdien en funksjon (som bokinnholdet i
+vekst-blokkene), står «Har standardinnhold» i feltbeskrivelsen, og Claude kan
+sende bare `blockType`. `blockName` er med i begge retninger.
 
 ## MCP-format vs. Payload-format
 

@@ -11,6 +11,12 @@ const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
 export const SalesRitual: Block = {
   slug: "salesRitual",
   interfaceName: "SalesRitualBlock",
+  admin: {
+    custom: {
+      description:
+        "Fast salgsøkt i uka (Omsetnings-onsdag fra boka): kalenderblad som rives av, sjekkliste som huskes i nettleseren og «Legg i kalenderen» (.ics). Alle felt har standardinnhold.",
+    },
+  },
   labels: {
     singular: "Fast salgsøkt (Verdifull vekst)",
     plural: "Faste salgsøkter (Verdifull vekst)",

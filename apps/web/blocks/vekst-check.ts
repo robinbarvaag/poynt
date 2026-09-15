@@ -13,6 +13,12 @@ import {
 export const VekstCheck: Block = {
   slug: "vekstCheck",
   interfaceName: "VekstCheckBlock",
+  admin: {
+    custom: {
+      description:
+        "VEKST-sjekken fra «Verdifull vekst»: ja/nei-spørsmål ett om gangen, bokstavene V-E-K-S-T fylles opp og leseren får vite hvor de bør starte. Utelat pillars for bokas 15 spørsmål.",
+    },
+  },
   labels: {
     singular: "VEKST-sjekken (Verdifull vekst)",
     plural: "VEKST-sjekker (Verdifull vekst)",

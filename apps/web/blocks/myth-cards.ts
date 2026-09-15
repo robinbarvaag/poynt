@@ -10,6 +10,12 @@ import {
 export const MythCards: Block = {
   slug: "mythCards",
   interfaceName: "MythCardsBlock",
+  admin: {
+    custom: {
+      description:
+        "Vendekort med «Ti løgner som kan hindre vekst» fra boka: løgnen foran, sannheten bak, teller og konfetti når alle er snudd. Utelat myths for bokas ti.",
+    },
+  },
   labels: {
     singular: "Løgner som vendekort (Verdifull vekst)",
     plural: "Løgner som vendekort (Verdifull vekst)",
