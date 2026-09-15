@@ -88,6 +88,35 @@ export const blockPreviews: Record<string, BlockPreview> = {
     story: "Blokker/PromptLibrary",
     alt: "Prompter i kort med kopier-knapp",
   },
+  // Verdifull vekst
+  chapterPortal: {
+    story: "Vekst/Kapittelportalen",
+    alt: "Fem buede dører med bokstavene V, E, K, S og T",
+  },
+  vekstCheck: {
+    story: "Vekst/VEKST-sjekken",
+    alt: "Bokstavklosser som fylles opp, med et ja/nei-spørsmål under",
+  },
+  changeWheel: {
+    story: "Vekst/Endringshjulet",
+    alt: "Et hjul med fire områder og ja/nei-spørsmål ved siden av",
+  },
+  growthCalculator: {
+    story: "Vekst/Kalkulator",
+    alt: "Kalkulator med en måler i rosa, gult og grønt",
+  },
+  mythCards: {
+    story: "Vekst/Ti løgner",
+    alt: "Vendekort med stempelet «Løgn» og en teller over",
+  },
+  aiWorkflow: {
+    story: "Vekst/Arbeidsflyter med KI",
+    alt: "Tre bokser koblet sammen: input, prompt og resultat",
+  },
+  salesRitual: {
+    story: "Vekst/Omsetnings-onsdag",
+    alt: "Kalenderblad for onsdag ved siden av en sjekkliste",
+  },
 };
 
 /** Public-stien bildet havner på, eller `undefined` når blokken ikke har story. */

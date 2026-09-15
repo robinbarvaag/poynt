@@ -574,6 +574,36 @@ export {
   type SpotsMeterProps,
 } from "./components/event";
 
+// Vekst-familien: interaktive blokker fra «Verdifull vekst»
+export {
+  AiWorkflow,
+  type AiWorkflowProps,
+  type CalculatorKind,
+  ChangeWheel,
+  type ChangeWheelProps,
+  ChapterPortal,
+  type ChapterPortalProps,
+  GrowthCalculator,
+  type GrowthCalculatorProps,
+  type HourlyRateCalculatorProps,
+  type Myth,
+  MythCards,
+  type MythCardsProps,
+  type PortalDoor,
+  type ProfitCalculatorProps,
+  type ProfitExample,
+  type SalesForecastProps,
+  SalesRitual,
+  type SalesRitualProps,
+  VekstCheck,
+  type VekstCheckProps,
+  type VekstLink,
+  type VekstPillar,
+  type WheelArea,
+  type Workflow,
+  type WorkflowIcon,
+} from "./components/vekst";
+
 export { Switch };
 
 // Chat-primitiver (medlemsfellesskap) — shadcn radix-registeret

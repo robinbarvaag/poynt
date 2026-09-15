@@ -72,6 +72,7 @@ import * as migration_20260913_120000_orders_id_start_10000 from './20260913_120
 import * as migration_20260913_153339_resource_list_compact_collapse from './20260913_153339_resource_list_compact_collapse';
 import * as migration_20260914_181616_events from './20260914_181616_events';
 import * as migration_20260914_213636_eventer_fase2_3 from './20260914_213636_eventer_fase2_3';
+import * as migration_20260915_193733_vekst_blocks from './20260915_193733_vekst_blocks';
 
 export const migrations = [
   {
@@ -442,6 +443,11 @@ export const migrations = [
   {
     up: migration_20260914_213636_eventer_fase2_3.up,
     down: migration_20260914_213636_eventer_fase2_3.down,
-    name: '20260914_213636_eventer_fase2_3'
+    name: '20260914_213636_eventer_fase2_3',
+  },
+  {
+    up: migration_20260915_193733_vekst_blocks.up,
+    down: migration_20260915_193733_vekst_blocks.down,
+    name: '20260915_193733_vekst_blocks'
   },
 ];

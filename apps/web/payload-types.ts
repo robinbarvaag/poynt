@@ -211,6 +211,13 @@ export interface Page {
         | MediaBlock
         | ResourceListBlock
         | PromptLibraryBlock
+        | ChapterPortalBlock
+        | VekstCheckBlock
+        | ChangeWheelBlock
+        | GrowthCalculatorBlock
+        | MythCardsBlock
+        | AiWorkflowBlock
+        | SalesRitualBlock
         | PathCardsBlock
         | CarouselBlock
         | TestimonialsBlock
@@ -1065,6 +1072,240 @@ export interface PromptLibraryBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'promptLibrary';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ChapterPortalBlock".
+ */
+export interface ChapterPortalBlock {
+  eyebrow?: string | null;
+  title?: string | null;
+  intro?: string | null;
+  doors?:
+    | {
+        /**
+         * Tom = første bokstav i tittelen.
+         */
+        letter?: string | null;
+        title: string;
+        text?: string | null;
+        linkLabel?: string | null;
+        /**
+         * Et anker på siden (f.eks. #vekst-sjekken) eller en adresse.
+         */
+        href?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  palette?: ('book' | 'poynt') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'chapterPortal';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "VekstCheckBlock".
+ */
+export interface VekstCheckBlock {
+  eyebrow?: string | null;
+  title?: string | null;
+  intro?: string | null;
+  pillars?:
+    | {
+        /**
+         * Tom = første bokstav i navnet.
+         */
+        letter?: string | null;
+        name: string;
+        questions?:
+          | {
+              question: string;
+              id?: string | null;
+            }[]
+          | null;
+        advice?: string | null;
+        linkLabel?: string | null;
+        /**
+         * Et anker på siden (f.eks. #lonnsomhet) eller en adresse (f.eks. /kontakt).
+         */
+        linkUrl?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  palette?: ('book' | 'poynt') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'vekstCheck';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ChangeWheelBlock".
+ */
+export interface ChangeWheelBlock {
+  eyebrow?: string | null;
+  title?: string | null;
+  intro?: string | null;
+  /**
+   * Boka har fire områder med tre spørsmål hver. 0–1 ja blir rosa, 2 ja gult og 3 ja grønt.
+   */
+  areas?:
+    | {
+        name: string;
+        questions?:
+          | {
+              question: string;
+              id?: string | null;
+            }[]
+          | null;
+        advice?: string | null;
+        linkLabel?: string | null;
+        /**
+         * Et anker på siden (f.eks. #lonnsomhet) eller en adresse (f.eks. /kontakt).
+         */
+        linkUrl?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * {resultat} byttes ut med svarene til leseren. La feltet stå tomt for å skjule knappen.
+   */
+  aiPrompt?: string | null;
+  palette?: ('book' | 'poynt') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'changeWheel';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GrowthCalculatorBlock".
+ */
+export interface GrowthCalculatorBlock {
+  calculator: 'profit' | 'hourly' | 'forecast';
+  eyebrow?: string | null;
+  title?: string | null;
+  intro?: string | null;
+  /**
+   * Lastes inn med én knapp. La knappeteksten stå tom for å skjule eksempelet.
+   */
+  profitExample?: {
+    label?: string | null;
+    price?: number | null;
+    cost?: number | null;
+    costLabel?: string | null;
+    note?: string | null;
+  };
+  /**
+   * Tommelfingerregelen i boka er lønn × 1,5 for AS.
+   */
+  multiplier?: number | null;
+  /**
+   * Hagesenteret i boka må ha inn 127 000 kr i måneden. Leseren bytter selv til sine egne tall.
+   */
+  monthlyNeed?: number | null;
+  /**
+   * F.eks. «Tallene er veiledende».
+   */
+  footnote?: string | null;
+  linkLabel?: string | null;
+  /**
+   * Et anker på siden (f.eks. #lonnsomhet) eller en adresse (f.eks. /kontakt).
+   */
+  linkUrl?: string | null;
+  palette?: ('book' | 'poynt') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'growthCalculator';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MythCardsBlock".
+ */
+export interface MythCardsBlock {
+  eyebrow?: string | null;
+  title?: string | null;
+  intro?: string | null;
+  myths?:
+    | {
+        lie: string;
+        truth: string;
+        id?: string | null;
+      }[]
+    | null;
+  linkLabel?: string | null;
+  /**
+   * Vises når leseren har snudd alle kortene.
+   */
+  linkUrl?: string | null;
+  palette?: ('book' | 'poynt') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'mythCards';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "AiWorkflowBlock".
+ */
+export interface AiWorkflowBlock {
+  eyebrow?: string | null;
+  title?: string | null;
+  intro?: string | null;
+  workflows?:
+    | {
+        title: string;
+        description?: string | null;
+        /**
+         * F.eks. «Talememo fra turen».
+         */
+        inputLabel?: string | null;
+        inputIcon?: ('mic' | 'file-text' | 'users' | 'search' | 'image' | 'lightbulb') | null;
+        /**
+         * F.eks. «Tre prioriteringer».
+         */
+        outputLabel?: string | null;
+        /**
+         * Akkurat slik den skal limes inn. Bruk [klammer] for det leseren skal bytte ut.
+         */
+        prompt: string;
+        /**
+         * Vises og «skrives ut» når leseren trykker «Kjør eksempelet». Ingen KI kalles på siden.
+         */
+        exampleOutput?: string | null;
+        style?: ('standard' | 'board') | null;
+        id?: string | null;
+      }[]
+    | null;
+  palette?: ('book' | 'poynt') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'aiWorkflow';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SalesRitualBlock".
+ */
+export interface SalesRitualBlock {
+  eyebrow?: string | null;
+  title?: string | null;
+  intro?: string | null;
+  /**
+   * Blir også navnet på avtalen i kalenderen.
+   */
+  ritualName: string;
+  weekday: 'MO' | 'TU' | 'WE' | 'TH' | 'FR' | 'SA' | 'SU';
+  startTime: string;
+  durationMinutes: number;
+  quote?: string | null;
+  checklist?:
+    | {
+        item: string;
+        id?: string | null;
+      }[]
+    | null;
+  calendarDescription?: string | null;
+  palette?: ('book' | 'poynt') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'salesRitual';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3238,6 +3479,13 @@ export interface PagesSelect<T extends boolean = true> {
         media?: T | MediaBlockSelect<T>;
         resourceList?: T | ResourceListBlockSelect<T>;
         promptLibrary?: T | PromptLibraryBlockSelect<T>;
+        chapterPortal?: T | ChapterPortalBlockSelect<T>;
+        vekstCheck?: T | VekstCheckBlockSelect<T>;
+        changeWheel?: T | ChangeWheelBlockSelect<T>;
+        growthCalculator?: T | GrowthCalculatorBlockSelect<T>;
+        mythCards?: T | MythCardsBlockSelect<T>;
+        aiWorkflow?: T | AiWorkflowBlockSelect<T>;
+        salesRitual?: T | SalesRitualBlockSelect<T>;
         pathCards?: T | PathCardsBlockSelect<T>;
         carousel?: T | CarouselBlockSelect<T>;
         testimonials?: T | TestimonialsBlockSelect<T>;
@@ -3637,6 +3885,181 @@ export interface PromptLibraryBlockSelect<T extends boolean = true> {
         id?: T;
       };
   columns?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ChapterPortalBlock_select".
+ */
+export interface ChapterPortalBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  title?: T;
+  intro?: T;
+  doors?:
+    | T
+    | {
+        letter?: T;
+        title?: T;
+        text?: T;
+        linkLabel?: T;
+        href?: T;
+        id?: T;
+      };
+  palette?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "VekstCheckBlock_select".
+ */
+export interface VekstCheckBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  title?: T;
+  intro?: T;
+  pillars?:
+    | T
+    | {
+        letter?: T;
+        name?: T;
+        questions?:
+          | T
+          | {
+              question?: T;
+              id?: T;
+            };
+        advice?: T;
+        linkLabel?: T;
+        linkUrl?: T;
+        id?: T;
+      };
+  palette?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ChangeWheelBlock_select".
+ */
+export interface ChangeWheelBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  title?: T;
+  intro?: T;
+  areas?:
+    | T
+    | {
+        name?: T;
+        questions?:
+          | T
+          | {
+              question?: T;
+              id?: T;
+            };
+        advice?: T;
+        linkLabel?: T;
+        linkUrl?: T;
+        id?: T;
+      };
+  aiPrompt?: T;
+  palette?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GrowthCalculatorBlock_select".
+ */
+export interface GrowthCalculatorBlockSelect<T extends boolean = true> {
+  calculator?: T;
+  eyebrow?: T;
+  title?: T;
+  intro?: T;
+  profitExample?:
+    | T
+    | {
+        label?: T;
+        price?: T;
+        cost?: T;
+        costLabel?: T;
+        note?: T;
+      };
+  multiplier?: T;
+  monthlyNeed?: T;
+  footnote?: T;
+  linkLabel?: T;
+  linkUrl?: T;
+  palette?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MythCardsBlock_select".
+ */
+export interface MythCardsBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  title?: T;
+  intro?: T;
+  myths?:
+    | T
+    | {
+        lie?: T;
+        truth?: T;
+        id?: T;
+      };
+  linkLabel?: T;
+  linkUrl?: T;
+  palette?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "AiWorkflowBlock_select".
+ */
+export interface AiWorkflowBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  title?: T;
+  intro?: T;
+  workflows?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        inputLabel?: T;
+        inputIcon?: T;
+        outputLabel?: T;
+        prompt?: T;
+        exampleOutput?: T;
+        style?: T;
+        id?: T;
+      };
+  palette?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SalesRitualBlock_select".
+ */
+export interface SalesRitualBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  title?: T;
+  intro?: T;
+  ritualName?: T;
+  weekday?: T;
+  startTime?: T;
+  durationMinutes?: T;
+  quote?: T;
+  checklist?:
+    | T
+    | {
+        item?: T;
+        id?: T;
+      };
+  calendarDescription?: T;
+  palette?: T;
   id?: T;
   blockName?: T;
 }
@@ -4922,6 +5345,13 @@ export interface Homepage {
         | MediaBlock
         | ResourceListBlock
         | PromptLibraryBlock
+        | ChapterPortalBlock
+        | VekstCheckBlock
+        | ChangeWheelBlock
+        | GrowthCalculatorBlock
+        | MythCardsBlock
+        | AiWorkflowBlock
+        | SalesRitualBlock
         | PathCardsBlock
         | CarouselBlock
         | TestimonialsBlock
@@ -5502,6 +5932,13 @@ export interface HomepageSelect<T extends boolean = true> {
         media?: T | MediaBlockSelect<T>;
         resourceList?: T | ResourceListBlockSelect<T>;
         promptLibrary?: T | PromptLibraryBlockSelect<T>;
+        chapterPortal?: T | ChapterPortalBlockSelect<T>;
+        vekstCheck?: T | VekstCheckBlockSelect<T>;
+        changeWheel?: T | ChangeWheelBlockSelect<T>;
+        growthCalculator?: T | GrowthCalculatorBlockSelect<T>;
+        mythCards?: T | MythCardsBlockSelect<T>;
+        aiWorkflow?: T | AiWorkflowBlockSelect<T>;
+        salesRitual?: T | SalesRitualBlockSelect<T>;
         pathCards?: T | PathCardsBlockSelect<T>;
         carousel?: T | CarouselBlockSelect<T>;
         testimonials?: T | TestimonialsBlockSelect<T>;
