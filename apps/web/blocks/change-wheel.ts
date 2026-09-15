@@ -1,0 +1,75 @@
+import type { Block } from "payload";
+import {
+  CHANGE_WHEEL_AI_PROMPT,
+  changeWheelAreasCms,
+} from "../lib/vekst/book-content";
+import {
+  vekstAppearance,
+  vekstHeaderFields,
+  vekstLinkFields,
+} from "./vekst-fields";
+
+/**
+ * Endringshjulet fra boka: områder med ja/nei-spørsmål. Hvert område fylles i
+ * rosa, gult eller grønt, og hjulet peker ut hvor leseren bør starte.
+ */
+export const ChangeWheel: Block = {
+  slug: "changeWheel",
+  interfaceName: "ChangeWheelBlock",
+  labels: {
+    singular: "Endringshjulet (Verdifull vekst)",
+    plural: "Endringshjul (Verdifull vekst)",
+  },
+  fields: [
+    ...vekstHeaderFields,
+    {
+      name: "areas",
+      type: "array",
+      label: "Områder",
+      labels: { singular: "Område", plural: "Områder" },
+      minRows: 2,
+      maxRows: 8,
+      defaultValue: changeWheelAreasCms,
+      admin: {
+        description:
+          "Boka har fire områder med tre spørsmål hver. 0–1 ja blir rosa, 2 ja gult og 3 ja grønt.",
+      },
+      fields: [
+        { name: "name", type: "text", required: true, label: "Område" },
+        {
+          name: "questions",
+          type: "array",
+          label: "Ja/nei-spørsmål",
+          labels: { singular: "Spørsmål", plural: "Spørsmål" },
+          minRows: 1,
+          fields: [
+            {
+              name: "question",
+              type: "text",
+              required: true,
+              label: "Spørsmål",
+            },
+          ],
+        },
+        {
+          name: "advice",
+          type: "textarea",
+          label: "Råd når dette er det svakeste området",
+        },
+        vekstLinkFields(),
+      ],
+    },
+    {
+      name: "aiPrompt",
+      type: "textarea",
+      label: "Prompt til «Kopier resultatet til KI»",
+      defaultValue: CHANGE_WHEEL_AI_PROMPT,
+      admin: {
+        rows: 8,
+        description:
+          "{resultat} byttes ut med svarene til leseren. La feltet stå tomt for å skjule knappen.",
+      },
+    },
+    vekstAppearance(),
+  ],
+};

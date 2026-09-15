@@ -36,6 +36,13 @@ export const BLOCK_LABELS: Record<string, string> = {
   bookHero: "Objekt-hero",
   resourceList: "Ressursliste",
   promptLibrary: "Prompt-bibliotek",
+  chapterPortal: "Kapittelportal",
+  vekstCheck: "VEKST-sjekken",
+  changeWheel: "Endringshjulet",
+  growthCalculator: "Kalkulator",
+  mythCards: "Løgner som vendekort",
+  aiWorkflow: "Arbeidsflyter med KI",
+  salesRitual: "Fast salgsøkt",
 };
 
 export function blockLabel(blockType: string): string {

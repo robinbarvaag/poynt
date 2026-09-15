@@ -2,8 +2,11 @@ import { slugifyAnchor } from "@/lib/format";
 import type { Page } from "@/payload-types";
 import { BlockSection } from "@poynt/ui";
 import { type ComponentProps, Fragment, type ReactNode } from "react";
+import { AiWorkflowBlock } from "./blocks/ai-workflow-block";
 import { BookHeroBlock } from "./blocks/book-hero-block";
 import { CarouselBlock } from "./blocks/carousel-block";
+import { ChangeWheelBlock } from "./blocks/change-wheel-block";
+import { ChapterPortalBlock } from "./blocks/chapter-portal-block";
 import { ContentBlock } from "./blocks/content-block";
 import { ContentMediaBlock } from "./blocks/content-media-block";
 import { CountdownBlockComponent } from "./blocks/countdown-block";
@@ -11,10 +14,12 @@ import { CtaSectionBlock } from "./blocks/cta-section-block";
 import { FaqBlock } from "./blocks/faq-block";
 import { FeatureGridBlock } from "./blocks/feature-grid-block";
 import { FormBlockComponent } from "./blocks/form-block";
+import { GrowthCalculatorBlock } from "./blocks/growth-calculator-block";
 import { HeroBlock } from "./blocks/hero-block";
 import { LogoCloudBlock } from "./blocks/logo-cloud-block";
 import { MarqueeBlockComponent } from "./blocks/marquee-block";
 import { MediaBlockComponent } from "./blocks/media-block";
+import { MythCardsBlock } from "./blocks/myth-cards-block";
 import { NewsletterBlock } from "./blocks/newsletter-block";
 import { PathCardsBlock } from "./blocks/path-cards-block";
 import { PodcastArchiveBlock } from "./blocks/podcast-archive-block";
@@ -23,11 +28,13 @@ import { ProductArchiveBlock } from "./blocks/product-archive-block";
 import { ProductSpotlightBlock } from "./blocks/product-spotlight-block";
 import { PromptLibraryBlock } from "./blocks/prompt-library-block";
 import { ResourceListBlock } from "./blocks/resource-list-block";
+import { SalesRitualBlock } from "./blocks/sales-ritual-block";
 import { ServicesArchiveBlock } from "./blocks/services-archive-block";
 import { SpotifyEmbedBlock } from "./blocks/spotify-embed-block";
 import { StatsBandBlock } from "./blocks/stats-band-block";
 import { StepsBlock } from "./blocks/steps-block";
 import { TestimonialsBlock } from "./blocks/testimonials-block";
+import { VekstCheckBlock } from "./blocks/vekst-check-block";
 
 type Block = NonNullable<Page["layout"]>[number];
 
@@ -74,6 +81,13 @@ const SELF_REVEAL_BLOCK_TYPES = new Set([
   "countdown",
   "resourceList",
   "promptLibrary",
+  "chapterPortal",
+  "vekstCheck",
+  "changeWheel",
+  "growthCalculator",
+  "mythCards",
+  "aiWorkflow",
+  "salesRitual",
 ]);
 
 function renderBlock(block: Block): ReactNode {
@@ -230,6 +244,50 @@ function renderBlock(block: Block): ReactNode {
       return (
         <PromptLibraryBlock
           {...(block as unknown as ComponentProps<typeof PromptLibraryBlock>)}
+        />
+      );
+    case "chapterPortal":
+      return (
+        <ChapterPortalBlock
+          {...(block as unknown as ComponentProps<typeof ChapterPortalBlock>)}
+        />
+      );
+    case "vekstCheck":
+      return (
+        <VekstCheckBlock
+          {...(block as unknown as ComponentProps<typeof VekstCheckBlock>)}
+        />
+      );
+    case "changeWheel":
+      return (
+        <ChangeWheelBlock
+          {...(block as unknown as ComponentProps<typeof ChangeWheelBlock>)}
+        />
+      );
+    case "growthCalculator":
+      return (
+        <GrowthCalculatorBlock
+          {...(block as unknown as ComponentProps<
+            typeof GrowthCalculatorBlock
+          >)}
+        />
+      );
+    case "mythCards":
+      return (
+        <MythCardsBlock
+          {...(block as unknown as ComponentProps<typeof MythCardsBlock>)}
+        />
+      );
+    case "aiWorkflow":
+      return (
+        <AiWorkflowBlock
+          {...(block as unknown as ComponentProps<typeof AiWorkflowBlock>)}
+        />
+      );
+    case "salesRitual":
+      return (
+        <SalesRitualBlock
+          {...(block as unknown as ComponentProps<typeof SalesRitualBlock>)}
         />
       );
     case "formBlock":

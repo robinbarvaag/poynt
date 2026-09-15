@@ -1,7 +1,10 @@
 import type { Block } from "payload";
+import { AiWorkflow } from "./ai-workflow";
 import { blockPreviewUrl, blockPreviews } from "./block-previews";
 import { BookHero } from "./book-hero";
 import { Carousel } from "./carousel";
+import { ChangeWheel } from "./change-wheel";
+import { ChapterPortal } from "./chapter-portal";
 import { Content } from "./content";
 import { ContentMedia } from "./content-media";
 import { CountdownBlock } from "./countdown";
@@ -9,10 +12,12 @@ import { CtaSection } from "./cta-section";
 import { Faq } from "./faq";
 import { FeatureGrid } from "./feature-grid";
 import { FormBlock } from "./form";
+import { GrowthCalculator } from "./growth-calculator";
 import { Hero } from "./hero";
 import { LogoCloud } from "./logo-cloud";
 import { MarqueeBlock } from "./marquee";
 import { MediaBlock } from "./media";
+import { MythCards } from "./myth-cards";
 import { Newsletter } from "./newsletter";
 import { PathCards } from "./path-cards";
 import { PodcastArchive } from "./podcast-archive";
@@ -21,11 +26,13 @@ import { ProductArchive } from "./product-archive";
 import { ProductSpotlight } from "./product-spotlight";
 import { PromptLibrary } from "./prompt-library";
 import { ResourceList } from "./resource-list";
+import { SalesRitual } from "./sales-ritual";
 import { ServicesArchive } from "./services-archive";
 import { SpotifyEmbed } from "./spotify-embed";
 import { StatsBand } from "./stats-band";
 import { Steps } from "./steps";
 import { Testimonials } from "./testimonials";
+import { VekstCheck } from "./vekst-check";
 
 /**
  * Fester Storybook-skjermbildet på blokken når den har ett (se
@@ -60,6 +67,14 @@ export const layoutBlocks: Block[] = [
   // Ressurssider: lenker/filer/bøker og kopierbare prompter.
   ResourceList,
   PromptLibrary,
+  // Verdifull vekst: interaktive verktøy fra boka.
+  ChapterPortal,
+  VekstCheck,
+  ChangeWheel,
+  GrowthCalculator,
+  MythCards,
+  AiWorkflow,
+  SalesRitual,
   PathCards,
   Carousel,
   Testimonials,

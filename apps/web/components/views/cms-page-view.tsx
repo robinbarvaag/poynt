@@ -39,6 +39,13 @@ const HUB_ICONS: Record<string, IconName> = {
   form: "pencil",
   countdown: "timer",
   media: "image",
+  chapterPortal: "compass",
+  vekstCheck: "target",
+  changeWheel: "refresh",
+  growthCalculator: "wallet",
+  mythCards: "lightbulb",
+  aiWorkflow: "zap",
+  salesRitual: "calendar-days",
 };
 
 /**
@@ -55,6 +62,14 @@ const HUB_COUNTS: Record<string, { field: string; one: string; many: string }> =
     pathCards: { field: "paths", one: "vei", many: "veier" },
     pricing: { field: "tiers", one: "pakke", many: "pakker" },
     testimonials: { field: "testimonials", one: "sitat", many: "sitater" },
+    mythCards: { field: "myths", one: "løgn", many: "løgner" },
+    aiWorkflow: {
+      field: "workflows",
+      one: "arbeidsflyt",
+      many: "arbeidsflyter",
+    },
+    changeWheel: { field: "areas", one: "område", many: "områder" },
+    salesRitual: { field: "checklist", one: "punkt", many: "punkter" },
   };
 
 function hubMeta(block: Block): string | undefined {
