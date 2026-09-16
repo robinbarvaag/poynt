@@ -2,6 +2,7 @@
 
 import type { InputHTMLAttributes } from "react";
 import { cn } from "../../lib/utils";
+import { formatInput } from "./logic";
 
 /** Felles stil for tallfeltene i kalkulatorene. */
 export const numberInputClass =
@@ -27,6 +28,7 @@ export function NumberField({
   unit,
   hint,
   className,
+  onBlur,
   ...props
 }: NumberFieldProps) {
   return (
@@ -42,6 +44,11 @@ export function NumberField({
           autoComplete="off"
           value={value}
           onChange={(event) => onValueChange(event.target.value)}
+          onBlur={(event) => {
+            const formatted = formatInput(event.target.value);
+            if (formatted !== event.target.value) onValueChange(formatted);
+            onBlur?.(event);
+          }}
           className={cn(numberInputClass, unit && "pr-12")}
           {...props}
         />

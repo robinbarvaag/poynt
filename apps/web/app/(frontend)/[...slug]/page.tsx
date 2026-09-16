@@ -3,6 +3,7 @@ import { CmsPageView } from "@/components/views/cms-page-view";
 import { bookCookieName, verifyBookCookie } from "@/lib/book-access";
 import { getPublicPath } from "@/lib/public-path";
 import { buildMetadata, firstHeroImage, notFoundMetadata } from "@/lib/seo";
+import { UNIVERSE } from "@/lib/universe";
 import config from "@/payload.config";
 import type { Metadata } from "next";
 import { cacheLife, cacheTag } from "next/cache";
@@ -187,6 +188,9 @@ export async function generateStaticParams() {
       // /kontakt eies av en dedikert rute (app/(frontend)/kontakt) for å pare med
       // intercepting-modalet — ikke generer den her, ellers kolliderer rutene.
       .filter((page) => page.slug !== "kontakt")
+      // Universet eies av app/(univers) — det har sin egen ramme (rolig header
+      // som peker innover i universet) og må ikke også genereres her.
+      .filter((page) => page.slug !== UNIVERSE.slug)
       .map((page) => ({
         slug: page.slug === "forside" ? [] : page.slug.split("/"),
       }))

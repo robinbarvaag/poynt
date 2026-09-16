@@ -135,6 +135,7 @@ export interface Config {
     podcastpage: Podcastpage;
     productspage: Productspage;
     servicespage: Servicespage;
+    universe: Universe;
     header: Header;
     footer: Footer;
     'site-settings': SiteSetting;
@@ -148,6 +149,7 @@ export interface Config {
     podcastpage: PodcastpageSelect<false> | PodcastpageSelect<true>;
     productspage: ProductspageSelect<false> | ProductspageSelect<true>;
     servicespage: ServicespageSelect<false> | ServicespageSelect<true>;
+    universe: UniverseSelect<false> | UniverseSelect<true>;
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
@@ -5589,6 +5591,60 @@ export interface Servicespage {
   createdAt?: string | null;
 }
 /**
+ * Toppen og bunnen av universet. Selve innholdet redigerer du på sida «Verdifull vekst-universet» under Sider.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "universe".
+ */
+export interface Universe {
+  id: number;
+  /**
+   * Universet har ingen vanlig meny i toppen — det er meningen. Da blir folk værende i det de holder på med, i stedet for å bli dratt ut i nettstedet midtveis.
+   */
+  header?: {
+    /**
+     * Sier hvor man er. Hold det kort — to–tre ord. Tomt felt gjemmer navnet, så bare logoen står igjen.
+     */
+    label?: string | null;
+    /**
+     * En liten lenke øverst til høyre. Skrur du den av, er bunnteksten eneste vei videre.
+     */
+    showExit?: boolean | null;
+    exitLabel?: string | null;
+  };
+  /**
+   * Møtet med Poynt, rett over bunnteksten. Den står her og ikke i toppen fordi folk er mye mer nysgjerrige på hvem som står bak etter at de har fått det de kom for.
+   */
+  outro?: {
+    enabled?: boolean | null;
+    /**
+     * Den lille teksten over overskriften.
+     */
+    eyebrow?: string | null;
+    title?: string | null;
+    /**
+     * Én–to setninger om hva dere gjør.
+     */
+    intro?: string | null;
+    primaryCta?: {
+      text?: string | null;
+      /**
+       * F.eks. «/» for forsiden eller «/tjenester».
+       */
+      url?: string | null;
+    };
+    /**
+     * La knappeteksten stå tom for å droppe knappen.
+     */
+    secondaryCta?: {
+      text?: string | null;
+      url?: string | null;
+    };
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header".
  */
@@ -6071,6 +6127,42 @@ export interface ServicespageSelect<T extends boolean = true> {
         description?: T;
         image?: T;
         noIndex?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "universe_select".
+ */
+export interface UniverseSelect<T extends boolean = true> {
+  header?:
+    | T
+    | {
+        label?: T;
+        showExit?: T;
+        exitLabel?: T;
+      };
+  outro?:
+    | T
+    | {
+        enabled?: T;
+        eyebrow?: T;
+        title?: T;
+        intro?: T;
+        primaryCta?:
+          | T
+          | {
+              text?: T;
+              url?: T;
+            };
+        secondaryCta?:
+          | T
+          | {
+              text?: T;
+              url?: T;
+            };
       };
   updatedAt?: T;
   createdAt?: T;

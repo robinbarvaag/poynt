@@ -9,3 +9,4 @@ export { BlogPage } from "./blogpage";
 export { PodcastPage } from "./podcastpage";
 export { ProductsPage } from "./productspage";
 export { ServicesPage } from "./servicespage";
+export { Universe } from "./universe";

@@ -12,14 +12,12 @@ import { JsonLd } from "@/components/json-ld";
 import { SiteAnalytics } from "@/components/site-analytics";
 import { SocialFab, normalizeSocialLinks } from "@/components/social";
 import { UILinkProvider } from "@/components/ui-link-provider";
+import { getSiteGlobals } from "@/lib/site-globals";
 import { organizationSchema, websiteSchema } from "@/lib/structured-data";
-import config from "@payload-config";
 import { Grain, cn } from "@poynt/ui";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
-import { cacheLife, cacheTag } from "next/cache";
 import { Bricolage_Grotesque, Poppins } from "next/font/google";
-import { getPayload } from "payload";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -68,26 +66,6 @@ export const metadata: Metadata = {
   },
 };
 
-async function getGlobals() {
-  "use cache";
-  cacheTag("globals");
-  cacheLife("max");
-
-  const payload = await getPayload({ config });
-
-  const [siteSettings, header, footer, shopSettings] = await Promise.all([
-    payload.findGlobal({ slug: "site-settings" }).catch(() => null),
-    payload.findGlobal({ slug: "header" }).catch(() => null),
-    payload.findGlobal({ slug: "footer" }).catch(() => null),
-    // Samtykketekstene i kassen (handlekurv, kurv-skuff, produktside).
-    payload
-      .findGlobal({ slug: "shop-settings", depth: 0 })
-      .catch(() => null),
-  ]);
-
-  return { siteSettings, header, footer, shopSettings };
-}
-
 export default async function FrontendLayout({
   children,
   modal,
@@ -95,7 +73,7 @@ export default async function FrontendLayout({
   children: React.ReactNode;
   modal: React.ReactNode;
 }) {
-  const { siteSettings, header, footer, shopSettings } = await getGlobals();
+  const { siteSettings, header, footer, shopSettings } = await getSiteGlobals();
   const socialLinks = normalizeSocialLinks(siteSettings?.socialLinks);
   const consentTexts = shopSettings
     ? {

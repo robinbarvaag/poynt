@@ -1,8 +1,8 @@
 import { CheckInScanner } from "@/components/events/check-in-scanner";
 import config from "@/payload.config";
 import { headers } from "next/headers";
-import { connection } from "next/server";
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 import { getPayload } from "payload";
 import { Suspense } from "react";
 

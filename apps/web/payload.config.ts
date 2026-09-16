@@ -54,6 +54,7 @@ import {
   ServicesPage,
   ShopSettings,
   SiteSettings,
+  Universe,
 } from "./globals";
 
 const siteUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
@@ -216,6 +217,7 @@ export default buildConfig({
     PodcastPage,
     ProductsPage,
     ServicesPage,
+    Universe,
     // Innstillinger
     Header,
     Footer,

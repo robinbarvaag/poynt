@@ -73,6 +73,7 @@ import * as migration_20260913_153339_resource_list_compact_collapse from './202
 import * as migration_20260914_181616_events from './20260914_181616_events';
 import * as migration_20260914_213636_eventer_fase2_3 from './20260914_213636_eventer_fase2_3';
 import * as migration_20260915_193733_vekst_blocks from './20260915_193733_vekst_blocks';
+import * as migration_20260916_205348 from './20260916_205348';
 
 export const migrations = [
   {
@@ -448,6 +449,11 @@ export const migrations = [
   {
     up: migration_20260915_193733_vekst_blocks.up,
     down: migration_20260915_193733_vekst_blocks.down,
-    name: '20260915_193733_vekst_blocks'
+    name: '20260915_193733_vekst_blocks',
+  },
+  {
+    up: migration_20260916_205348.up,
+    down: migration_20260916_205348.down,
+    name: '20260916_205348'
   },
 ];

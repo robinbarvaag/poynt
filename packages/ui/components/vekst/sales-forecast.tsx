@@ -2,11 +2,13 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import { useId } from "react";
+import { Icon } from "../../icons";
 import { cn } from "../../lib/utils";
 import { Button } from "../button";
 import { NumberField, numberInputClass } from "./field";
 import {
   type MonthStatus,
+  formatInput,
   formatKr,
   formatNumber,
   monthStatus,
@@ -36,41 +38,114 @@ const MONTHS = [
   "Des",
 ];
 
-interface MonthInput {
-  sure: string;
-  likely: string;
+/** Grønt = vet at kommer, gult = antar kommer. */
+type Certainty = "sure" | "likely";
+
+interface Category {
+  id: string;
+  label: string;
+  certainty: Certainty;
+  /** Ett felt per måned, slik det er skrevet. */
+  values: string[];
 }
 
 interface ForecastState {
   need: string;
-  months: MonthInput[];
+  categories: Category[];
 }
+
+const CERTAINTY: Record<
+  Certainty,
+  { short: string; swatch: string; fill: string }
+> = {
+  sure: {
+    short: "Vet at kommer",
+    swatch: "bg-[var(--vk-gronn)]",
+    fill: "var(--vk-gronn)",
+  },
+  likely: {
+    short: "Antar kommer",
+    swatch: "bg-[var(--vk-gul)]",
+    fill: "var(--vk-gul)",
+  },
+};
 
 /** Hagesenteret i boka: januar–april. */
 const BOOK_EXAMPLE_SURE = [40_000, 3_000, 98_000, 152_000];
 const BOOK_EXAMPLE_NEED = 127_000;
 
+const emptyValues = () => MONTHS.map(() => "");
+
+function newId() {
+  return `k${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+}
+
 function exampleState(need: number, sure: number[]): ForecastState {
   return {
     need: formatNumber(need),
-    months: MONTHS.map((_, i) => ({
-      sure: sure[i] ? formatNumber(sure[i]) : "",
-      likely: "",
-    })),
+    categories: [
+      {
+        id: "sure",
+        label: "Vet at kommer",
+        certainty: "sure",
+        values: MONTHS.map((_, i) => (sure[i] ? formatNumber(sure[i]) : "")),
+      },
+      {
+        id: "likely",
+        label: "Antar kommer",
+        certainty: "likely",
+        values: emptyValues(),
+      },
+    ],
   };
 }
 
+const isValues = (values: unknown): values is string[] =>
+  Array.isArray(values) &&
+  values.length === MONTHS.length &&
+  values.every((v) => typeof v === "string");
+
 function parseState(raw: unknown): ForecastState | null {
   if (!raw || typeof raw !== "object") return null;
-  const state = raw as Partial<ForecastState>;
-  if (typeof state.need !== "string" || !Array.isArray(state.months)) {
-    return null;
+  const state = raw as Record<string, unknown>;
+  if (typeof state.need !== "string") return null;
+
+  if (Array.isArray(state.categories)) {
+    const categories = state.categories.filter(
+      (c): c is Category =>
+        !!c &&
+        typeof c.id === "string" &&
+        typeof c.label === "string" &&
+        (c.certainty === "sure" || c.certainty === "likely") &&
+        isValues(c.values)
+    );
+    return categories.length > 0 ? { need: state.need, categories } : null;
   }
-  if (state.months.length !== MONTHS.length) return null;
-  const valid = state.months.every(
-    (m) => m && typeof m.sure === "string" && typeof m.likely === "string"
-  );
-  return valid ? (state as ForecastState) : null;
+
+  // Eldre format (før egne kategorier): én rad sikkert og én rad antatt.
+  if (Array.isArray(state.months) && state.months.length === MONTHS.length) {
+    const months = state.months as { sure?: unknown; likely?: unknown }[];
+    const pick = (key: "sure" | "likely") =>
+      months.map((m) => (typeof m?.[key] === "string" ? m[key] : ""));
+    return {
+      need: state.need,
+      categories: [
+        {
+          id: "sure",
+          label: "Vet at kommer",
+          certainty: "sure",
+          values: pick("sure"),
+        },
+        {
+          id: "likely",
+          label: "Antar kommer",
+          certainty: "likely",
+          values: pick("likely"),
+        },
+      ],
+    };
+  }
+  return null;
 }
 
 const STATUS_TEXT: Record<MonthStatus, string> = {
@@ -90,10 +165,14 @@ const PAD_BOTTOM = 30;
 const SLOT = (W - PAD_LEFT - PAD_RIGHT) / MONTHS.length;
 const BAR = 30;
 
+const cellInputClass = cn(numberInputClass, "h-10 px-3 text-right");
+
 /**
  * Spåkula for salg: inntekter du vet kommer (grønt) og antar kommer (gult),
- * måned for måned, mot det du må ha inn for å gå i null. Kula gløder sterkere
- * jo flere måneder som er dekket.
+ * måned for måned, mot det du må ha inn for å gå i null. Leseren kan dele
+ * inntektene i egne kategorier (f.eks. «Kurs» eller «Faste avtaler») og
+ * merke hver av dem som sikker eller antatt. Kula gløder sterkere jo flere
+ * måneder som er dekket.
  */
 export function SalesForecast({
   monthlyNeed = BOOK_EXAMPLE_NEED,
@@ -109,10 +188,16 @@ export function SalesForecast({
   );
 
   const need = parseNumber(state.need);
-  const months = state.months.map((m) => ({
-    sure: parseNumber(m.sure),
-    likely: parseNumber(m.likely),
-  }));
+  const months = MONTHS.map((_, i) => {
+    let sure = 0;
+    let likely = 0;
+    for (const category of state.categories) {
+      const value = parseNumber(category.values[i] ?? "");
+      if (category.certainty === "sure") sure += value;
+      else likely += value;
+    }
+    return { sure, likely };
+  });
   const statuses = months.map((m) => monthStatus(m, need));
   const filled = statuses.filter((s) => s !== "tomt").length;
   const under = statuses.filter((s) => s === "under").length;
@@ -125,10 +210,45 @@ export function SalesForecast({
     PAD_TOP + (1 - value / maxValue) * (H - PAD_TOP - PAD_BOTTOM);
   const base = y(0);
 
-  function updateMonth(index: number, patch: Partial<MonthInput>) {
+  function updateCategory(categoryId: string, patch: Partial<Category>) {
     setState((s) => ({
       ...s,
-      months: s.months.map((m, i) => (i === index ? { ...m, ...patch } : m)),
+      categories: s.categories.map((c) =>
+        c.id === categoryId ? { ...c, ...patch } : c
+      ),
+    }));
+  }
+
+  function updateValue(categoryId: string, month: number, value: string) {
+    setState((s) => ({
+      ...s,
+      categories: s.categories.map((c) =>
+        c.id === categoryId
+          ? { ...c, values: c.values.map((v, i) => (i === month ? value : v)) }
+          : c
+      ),
+    }));
+  }
+
+  function addCategory() {
+    setState((s) => ({
+      ...s,
+      categories: [
+        ...s.categories,
+        {
+          id: newId(),
+          label: "",
+          certainty: "likely",
+          values: emptyValues(),
+        },
+      ],
+    }));
+  }
+
+  function removeCategory(categoryId: string) {
+    setState((s) => ({
+      ...s,
+      categories: s.categories.filter((c) => c.id !== categoryId),
     }));
   }
 
@@ -215,7 +335,7 @@ export function SalesForecast({
                   x={x}
                   width={BAR}
                   rx={4}
-                  fill="var(--vk-gul)"
+                  fill={CERTAINTY.likely.fill}
                   initial={false}
                   animate={{ y: totalTop, height: base - totalTop }}
                   transition={transition}
@@ -224,7 +344,7 @@ export function SalesForecast({
                   x={x}
                   width={BAR}
                   rx={4}
-                  fill="var(--vk-gronn)"
+                  fill={CERTAINTY.sure.fill}
                   initial={false}
                   animate={{ y: sureTop, height: base - sureTop }}
                   transition={transition}
@@ -288,70 +408,155 @@ export function SalesForecast({
       </div>
 
       <details className="group rounded-2xl ring-1 ring-foreground/10">
-        <summary className="cursor-pointer select-none list-none rounded-2xl px-4 py-3 font-heading font-semibold text-sm transition-colors hover:bg-muted/50">
+        <summary className="flex cursor-pointer select-none list-none items-center gap-2 rounded-2xl px-4 py-3 font-heading font-semibold text-sm transition-colors hover:bg-muted/50 [&::-webkit-details-marker]:hidden">
+          <Icon
+            name="chevron-right"
+            className="size-4 transition-transform group-open:rotate-90"
+          />
           <span className="group-open:hidden">Fyll inn dine egne tall</span>
           <span className="hidden group-open:inline">Skjul tabellen</span>
         </summary>
-        <div className="overflow-x-auto px-4 pb-4">
-          <table className="w-full min-w-[56rem] border-separate border-spacing-1 text-sm">
-            <thead>
-              <tr>
-                <th className="w-32 text-left font-medium text-muted-foreground">
-                  <span className="sr-only">Type</span>
-                </th>
-                {MONTHS.map((month) => (
+        <div className="flex flex-col gap-4 px-4 pb-4">
+          <p className="text-muted-foreground text-sm">
+            Del gjerne inntektene i kategorier, f.eks. «Faste avtaler» eller
+            «Kurs», og velg om hver av dem er noe du vet eller antar kommer.
+          </p>
+          <div className="-mx-4 overflow-x-auto px-4">
+            <table className="w-full border-separate border-spacing-x-2 border-spacing-y-1.5 text-sm">
+              <thead>
+                <tr className="align-bottom">
                   <th
-                    key={month}
                     scope="col"
-                    className="font-medium text-muted-foreground"
+                    className="w-14 pb-1 text-left font-medium text-muted-foreground"
                   >
-                    {month}
+                    Måned
                   </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {(
-                [
-                  ["sure", "Vet at kommer", "bg-[var(--vk-gronn)]"],
-                  ["likely", "Antar kommer", "bg-[var(--vk-gul)]"],
-                ] as const
-              ).map(([field, label, swatch]) => (
-                <tr key={field}>
-                  <th scope="row" className="text-left font-medium">
-                    <span className="inline-flex items-center gap-2">
-                      <span
-                        aria-hidden="true"
-                        className={cn("size-3 rounded-sm", swatch)}
-                      />
-                      {label}
-                    </span>
+                  {state.categories.map((category, index) => {
+                    const certainty = CERTAINTY[category.certainty];
+                    const name = category.label || `Kategori ${index + 1}`;
+                    return (
+                      <th
+                        key={category.id}
+                        scope="col"
+                        className="min-w-40 pb-1 text-left font-normal"
+                      >
+                        <div className="flex flex-col gap-1.5">
+                          <input
+                            aria-label={`Navn på kategori ${index + 1}`}
+                            placeholder={`Kategori ${index + 1}`}
+                            value={category.label}
+                            onChange={(event) =>
+                              updateCategory(category.id, {
+                                label: event.target.value,
+                              })
+                            }
+                            className={cn(
+                              numberInputClass,
+                              "h-10 px-3 font-medium text-sm"
+                            )}
+                          />
+                          <div className="flex items-center justify-between gap-1">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                updateCategory(category.id, {
+                                  certainty:
+                                    category.certainty === "sure"
+                                      ? "likely"
+                                      : "sure",
+                                })
+                              }
+                              aria-label={`${name}: ${certainty.short.toLowerCase()}. Trykk for å bytte.`}
+                              className="inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-muted-foreground text-xs transition-colors hover:bg-muted hover:text-foreground"
+                            >
+                              <span
+                                aria-hidden="true"
+                                className={cn(
+                                  "size-3 rounded-sm",
+                                  certainty.swatch
+                                )}
+                              />
+                              {certainty.short}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => removeCategory(category.id)}
+                              disabled={state.categories.length === 1}
+                              aria-label={`Fjern ${name}`}
+                              className="grid size-7 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-30"
+                            >
+                              <Icon name="trash" className="size-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      </th>
+                    );
+                  })}
+                  <th
+                    scope="col"
+                    className="min-w-28 pb-1 text-right font-medium text-muted-foreground"
+                  >
+                    Sum
                   </th>
-                  {state.months.map((month, i) => (
-                    <td key={MONTHS[i]}>
-                      <input
-                        aria-label={`${label}, ${MONTHS[i]}`}
-                        inputMode="decimal"
-                        autoComplete="off"
-                        value={month[field]}
-                        onChange={(event) =>
-                          updateMonth(i, { [field]: event.target.value })
-                        }
-                        className={cn(
-                          numberInputClass,
-                          "h-9 px-2 text-right text-sm"
-                        )}
-                      />
-                    </td>
-                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-            <p className="text-muted-foreground text-xs">
-              Tallene huskes i nettleseren din. Ingenting sendes noe sted.
-            </p>
+              </thead>
+              <tbody>
+                {MONTHS.map((month, i) => {
+                  const total = months[i].sure + months[i].likely;
+                  const status = statuses[i];
+                  return (
+                    <tr key={month}>
+                      <th
+                        scope="row"
+                        className="text-left font-medium text-muted-foreground"
+                      >
+                        {month}
+                      </th>
+                      {state.categories.map((category, index) => (
+                        <td key={category.id}>
+                          <input
+                            aria-label={`${category.label || `Kategori ${index + 1}`}, ${month}`}
+                            inputMode="decimal"
+                            autoComplete="off"
+                            value={category.values[i]}
+                            onChange={(event) =>
+                              updateValue(category.id, i, event.target.value)
+                            }
+                            onBlur={(event) => {
+                              const formatted = formatInput(event.target.value);
+                              if (formatted !== event.target.value) {
+                                updateValue(category.id, i, formatted);
+                              }
+                            }}
+                            className={cellInputClass}
+                          />
+                        </td>
+                      ))}
+                      <td
+                        className={cn(
+                          "whitespace-nowrap text-right tabular-nums",
+                          status === "tomt" && "text-muted-foreground",
+                          status === "under" && "font-semibold text-[#b3264f]"
+                        )}
+                      >
+                        <span className="sr-only">{STATUS_TEXT[status]}: </span>
+                        {status === "tomt" ? "–" : formatKr(total)}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <button
+              type="button"
+              onClick={addCategory}
+              className="inline-flex items-center gap-1.5 rounded-full px-1 py-1 font-heading font-semibold text-sm transition-colors hover:text-primary"
+            >
+              <Icon name="plus" className="size-4" />
+              Legg til kategori
+            </button>
             <Button
               type="button"
               variant="ghost"
@@ -362,6 +567,9 @@ export function SalesForecast({
               Tilbake til eksempelet fra boka
             </Button>
           </div>
+          <p className="text-muted-foreground text-xs">
+            Tallene huskes i nettleseren din. Ingenting sendes noe sted.
+          </p>
         </div>
       </details>
     </div>

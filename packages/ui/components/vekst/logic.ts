@@ -180,6 +180,22 @@ export function formatNumber(value: number): string {
   return nokFormat.format(Math.round(value));
 }
 
+const inputFormat = new Intl.NumberFormat("nb-NO", {
+  maximumFractionDigits: 2,
+});
+
+/**
+ * Pynter på det som er skrevet i et tallfelt: «40000» → «40 000», «37.5» →
+ * «37,5». Tomt blir tomt, og alt som ikke er et rent, positivt tall står
+ * urørt, så vi aldri sletter noe leseren har skrevet.
+ */
+export function formatInput(raw: string): string {
+  const cleaned = raw.replace(/\s/g, "").replace(",", ".");
+  if (cleaned === "") return "";
+  if (!/^\d+(\.\d+)?$/.test(cleaned)) return raw;
+  return inputFormat.format(Number(cleaned));
+}
+
 /** Tolker et tall skrevet med komma eller mellomrom («1 250,5»). */
 export function parseNumber(raw: string): number {
   const cleaned = raw.replace(/[\s ]/g, "").replace(",", ".");

@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import {
   billableHours,
   countYes,
+  formatInput,
   formatKr,
   hourlyRate,
   isoWeekKey,
@@ -110,5 +111,17 @@ describe("diverse", () => {
     expect(parseNumber("1 250,5")).toBe(1250.5);
     expect(parseNumber("abc")).toBe(0);
     expect(formatKr(1250).replace(/\s/g, " ")).toBe("1 250 kr");
+  });
+
+  test("pynter på tallfelt uten å slette noe", () => {
+    const plain = (raw: string) => formatInput(raw).replace(/\s/g, " ");
+    expect(plain("40000")).toBe("40 000");
+    expect(plain("152 00")).toBe("15 200");
+    expect(plain("37.5")).toBe("37,5");
+    expect(plain("37,5")).toBe("37,5");
+    expect(formatInput("  ")).toBe("");
+    expect(formatInput("ca 40")).toBe("ca 40");
+    expect(formatInput("-5")).toBe("-5");
+    expect(parseNumber(formatInput("1250,75"))).toBe(1250.75);
   });
 });

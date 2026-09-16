@@ -7,6 +7,7 @@ import { Button } from "../button";
 import { NumberField, numberInputClass } from "./field";
 import {
   type ProfitVerdict,
+  formatInput,
   formatKr,
   parseNumber,
   profitPercent,
@@ -36,7 +37,7 @@ interface CostRow {
   amount: string;
 }
 
-const START_PRICE = "1000";
+const START_PRICE = "1 000";
 const START_COSTS: CostRow[] = [
   { id: 1, label: "Materialer og innkjøp", amount: "300" },
   { id: 2, label: "Frakt og emballasje", amount: "80" },
@@ -114,12 +115,12 @@ export function ProfitCalculator({ example }: ProfitCalculatorProps) {
 
   function loadExample() {
     if (!example) return;
-    setPrice(String(example.price));
+    setPrice(formatInput(String(example.price)));
     setCosts([
       {
         id: nextId,
         label: example.costLabel ?? "Kostnad per stykk",
-        amount: String(example.cost),
+        amount: formatInput(String(example.cost)),
       },
     ]);
     setNextId((n) => n + 1);
@@ -156,10 +157,7 @@ export function ProfitCalculator({ example }: ProfitCalculatorProps) {
                 onChange={(event) =>
                   updateCost(row.id, { label: event.target.value })
                 }
-                className={cn(
-                  numberInputClass,
-                  "min-w-0 flex-[3] tabular-nums"
-                )}
+                className={cn(numberInputClass, "min-w-0 flex-[3]")}
               />
               <div className="relative min-w-0 flex-[2]">
                 <input
@@ -170,6 +168,12 @@ export function ProfitCalculator({ example }: ProfitCalculatorProps) {
                   onChange={(event) =>
                     updateCost(row.id, { amount: event.target.value })
                   }
+                  onBlur={(event) => {
+                    const formatted = formatInput(event.target.value);
+                    if (formatted !== event.target.value) {
+                      updateCost(row.id, { amount: formatted });
+                    }
+                  }}
                   className={cn(numberInputClass, "pr-9 text-right")}
                 />
                 <span className="pointer-events-none absolute inset-y-0 right-3 grid place-items-center text-muted-foreground text-sm">
