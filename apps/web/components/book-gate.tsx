@@ -1,6 +1,10 @@
 "use client";
 
-import { BOOK_STORES, type BookStore } from "@/lib/book-stores";
+import {
+  BOOK_STORES_DISPLAY,
+  type BookStore,
+  DEFAULT_BOOK_STORE,
+} from "@/lib/book-stores";
 import { NEWSLETTER_CONSENT_TEXTS } from "@/lib/newsletter-consent-texts";
 import { Button, Checkbox, Input, Label } from "@poynt/ui";
 import { BookOpen, Loader2, Lock } from "lucide-react";
@@ -15,7 +19,7 @@ import { PrivacyNotice } from "./privacy-notice";
  */
 export function BookGate({ pageId, title }: { pageId: number; title: string }) {
   const router = useRouter();
-  const [store, setStore] = useState<BookStore>("ark");
+  const [store, setStore] = useState<BookStore>(DEFAULT_BOOK_STORE);
   const [orderNumber, setOrderNumber] = useState("");
   const [email, setEmail] = useState("");
   const [newsletter, setNewsletter] = useState(false);
@@ -61,7 +65,7 @@ export function BookGate({ pageId, title }: { pageId: number; title: string }) {
           <fieldset className="flex flex-col gap-2" disabled={loading}>
             <legend className="mb-2 font-medium text-sm">Kjøpt hos</legend>
             <div className="grid grid-cols-3 gap-2">
-              {BOOK_STORES.map((s) => (
+              {BOOK_STORES_DISPLAY.map((s) => (
                 <button
                   key={s.value}
                   type="button"

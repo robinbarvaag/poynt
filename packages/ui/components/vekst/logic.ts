@@ -94,6 +94,40 @@ export function zoneForYes(yes: number, total: number): Zone {
   return "rosa";
 }
 
+/** Endringshjulet har tre ringer per område, som i boka. */
+export const WHEEL_RING_COUNT = 3;
+
+/**
+ * Hvor mange av ringene i endringshjulet som er fylt. Med bokas tre spørsmål
+ * tegner hvert ja én ring til, utenfra og inn. Med andre antall spørsmål
+ * fordeles ringene jevnt, og alle ja må til for å nå helt inn i midten.
+ */
+export function ringsForYes(
+  yes: number,
+  total: number,
+  rings = WHEEL_RING_COUNT
+): number {
+  if (total <= 0 || yes <= 0) return 0;
+  if (yes >= total) return rings;
+  return Math.min(rings - 1, Math.floor((yes / total) * rings));
+}
+
+/**
+ * Minste antall ja som trengs for å tegne ring nummer `ring` (1 = ytterst).
+ * Brukes i forklaringen: «1 ja», «2 ja», «3 ja». `null` utenfor skalaen.
+ */
+export function yesForRing(
+  ring: number,
+  total: number,
+  rings = WHEEL_RING_COUNT
+): number | null {
+  if (total <= 0 || ring < 1 || ring > rings) return null;
+  for (let yes = 1; yes <= total; yes++) {
+    if (ringsForYes(yes, total, rings) >= ring) return yes;
+  }
+  return null;
+}
+
 export interface YesScore {
   yes: number;
   total: number;

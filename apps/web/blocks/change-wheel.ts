@@ -60,9 +60,22 @@ export const ChangeWheel: Block = {
         {
           name: "advice",
           type: "textarea",
-          label: "Råd når dette er det svakeste området",
+          label: "Råd: hva bør leseren gjøre med dette området?",
+          admin: {
+            description:
+              "Vises i planen til slutt, uansett hvor sterkt området er. Det svakeste området får «Start her».",
+          },
         },
         vekstLinkFields(),
+        {
+          name: "linkPending",
+          type: "checkbox",
+          label: "Avvent lenken (verktøyet er ikke klart)",
+          admin: {
+            description:
+              "Rådet vises som vanlig, men lenken byttes ut med «Verktøyet kommer snart». Skru av når verktøyet er klart, så slipper du å skrive lenken på nytt.",
+          },
+        },
       ],
     },
     {

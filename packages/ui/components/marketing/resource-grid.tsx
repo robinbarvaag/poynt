@@ -6,6 +6,7 @@ import { Icon, type IconName } from "../../icons";
 import { UILink } from "../../lib/link";
 import { cn } from "../../lib/utils";
 import { Card } from "../card";
+import { ExpandableText } from "../expandable-text";
 import { Stagger, StaggerItem } from "../motion";
 import { SectionHeader } from "../section-header";
 
@@ -241,56 +242,35 @@ export function ResourceCard({
     </span>
   );
 
-  if (layout === "list" || layout === "compact") {
-    const compact = layout === "compact";
+  const kindPill =
+    "rounded-full bg-muted px-2 py-0.5 font-medium text-[0.65rem] text-muted-foreground uppercase tracking-wide";
+
+  if (layout === "compact") {
     const row = (
       <>
         <Thumb item={item} size="row" />
         <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-          {compact ? (
-            <span className="line-clamp-1 font-heading font-semibold text-[0.65rem] text-muted-foreground uppercase tracking-[0.14em]">
-              {item.category ?? config.label}
-            </span>
-          ) : null}
-          <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <span
-              className={cn(
-                "font-heading font-semibold text-foreground",
-                compact ? "line-clamp-2 text-sm leading-snug" : "line-clamp-1"
-              )}
-            >
-              {item.title}
-            </span>
-            {!compact && (
-              <span className="rounded-full bg-muted px-2 py-0.5 font-medium text-[0.65rem] text-muted-foreground uppercase tracking-wide">
-                {config.label}
-              </span>
-            )}
+          <span className="line-clamp-1 font-heading font-semibold text-[0.65rem] text-muted-foreground uppercase tracking-[0.14em]">
+            {item.category ?? config.label}
           </span>
-          {!compact && item.description && (
-            <span className="line-clamp-2 text-muted-foreground text-sm">
-              {item.description}
-            </span>
-          )}
+          <span className="line-clamp-2 font-heading font-semibold text-foreground text-sm leading-snug">
+            {item.title}
+          </span>
           {meta && (
             <span className="mt-0.5 line-clamp-1 text-muted-foreground text-xs">
               {meta}
             </span>
           )}
         </span>
-        {linkProps &&
-          (compact ? (
-            <span className="shrink-0 self-center text-primary">
-              {actionIcon}
-            </span>
-          ) : (
-            action
-          ))}
+        {linkProps && (
+          <span className="shrink-0 self-center text-primary">
+            {actionIcon}
+          </span>
+        )}
       </>
     );
     const rowClass = cn(
-      "group/resource flex items-center rounded-2xl bg-card ring-1 ring-foreground/10 transition-[transform,box-shadow] duration-300",
-      compact ? "h-full gap-3 p-3" : "gap-4 p-4",
+      "group/resource flex h-full items-center gap-3 rounded-2xl bg-card p-3 ring-1 ring-foreground/10 transition-[transform,box-shadow] duration-300",
       linkProps &&
         "pressable motion-safe:hover:-translate-y-0.5 hover:shadow-md",
       className
@@ -301,6 +281,81 @@ export function ResourceCard({
       </Link>
     ) : (
       <div className={rowClass}>{row}</div>
+    );
+  }
+
+  if (layout === "list") {
+    const rowClass = cn(
+      // Kortet er en div, ikke én stor lenke: tittelen bærer lenka og strekker
+      // seg over hele kortet (`after:inset-0`). Da kan «Vis mer» ligge inni
+      // kortet — en knapp inni en <a> er hverken gyldig eller klikkbar.
+      // Miniatyren toppstilles mot tittelen; sentrert flyter den i lufta når
+      // teksten går over flere linjer.
+      "group/resource relative flex flex-wrap items-start gap-x-4 gap-y-3 rounded-2xl bg-card p-4 ring-1 ring-foreground/10 transition-[transform,box-shadow] duration-300",
+      linkProps &&
+        "pressable motion-safe:hover:-translate-y-0.5 hover:shadow-md has-[a:focus-visible]:ring-2 has-[a:focus-visible]:ring-primary",
+      className
+    );
+    return (
+      <div className={rowClass}>
+        <Thumb item={item} size="row" />
+        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            {/* Smal blokk: tittelen får to linjer i stedet for å bli kuttet
+                etter noen få ord. Klippingen må ligge INNI lenka — line-clamp
+                er overflow:hidden, og klipper ellers bort det strukne
+                overlegget så resten av kortet ikke er klikkbart. */}
+            <p className="min-w-0 font-heading font-semibold text-foreground">
+              {linkProps ? (
+                <Link
+                  {...linkProps}
+                  className="after:absolute after:inset-0 after:z-[1] after:rounded-2xl"
+                >
+                  <span className="line-clamp-2 @lg:line-clamp-1">
+                    {item.title}
+                  </span>
+                </Link>
+              ) : (
+                <span className="line-clamp-2 @lg:line-clamp-1">
+                  {item.title}
+                </span>
+              )}
+            </p>
+            {/* Når raden har en handling, flytter etiketten ned til
+                handlingslinja på smale bredder. */}
+            <span
+              className={cn(kindPill, linkProps && "hidden @lg:inline-block")}
+            >
+              {config.label}
+            </span>
+          </div>
+          {item.description && (
+            <ExpandableText
+              className="text-muted-foreground text-sm"
+              // Over den strukne lenka, ellers treffer trykket kortet.
+              buttonClassName="relative z-10"
+            >
+              {item.description}
+            </ExpandableText>
+          )}
+          {meta && (
+            <p className="mt-0.5 line-clamp-1 text-muted-foreground text-xs">
+              {meta}
+            </p>
+          )}
+        </div>
+        {linkProps && (
+          // Smal blokk: egen linje under teksten — etikett til venstre,
+          // handlingen til høyre. Bred blokk: samme rad, helt til høyre.
+          <div className="flex w-full items-center gap-3 border-foreground/10 border-t pt-3 @lg:ml-auto @lg:w-auto @lg:self-center @lg:border-t-0 @lg:pt-0">
+            <span className={cn(kindPill, "@lg:hidden")}>{config.label}</span>
+            <span className="ml-auto inline-flex shrink-0 items-center gap-1.5 font-heading font-semibold text-primary text-sm">
+              {config.action}
+              {actionIcon}
+            </span>
+          </div>
+        )}
+      </div>
     );
   }
 

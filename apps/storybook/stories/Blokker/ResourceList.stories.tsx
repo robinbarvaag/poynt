@@ -142,3 +142,41 @@ export const KompaktListe: Story = {
     filter: false,
   },
 };
+
+const long =
+  "Noe av det som ikke fikk plass i boken. Nyttige tips til deg som vil komme i gang med innhold uten å bruke hele uka på det – og en sjekkliste du kan skrive ut og henge på veggen. Den siste siden er en oversikt over verktøyene jeg bruker selv.";
+
+export const ListeMedLangTekst: Story = {
+  name: "Liste med lang tekst (vis mer)",
+  render: (args) => (
+    <Section spacing="lg">
+      <div className="mx-auto max-w-3xl px-4">
+        <ResourceGrid {...args} />
+      </div>
+    </Section>
+  ),
+  args: {
+    eyebrow: "Filer",
+    title: "Nyttige filer til deg",
+    items: [
+      {
+        title: "Tekst som ikke ble med i boken",
+        kind: "file",
+        description: long,
+        href: "#",
+        download: true,
+        note: "PDF",
+      },
+      {
+        title: "Månedlig sjekkliste for Instagram",
+        kind: "file",
+        description: "Sjekk disse tingene hver måned. Print den ut.",
+        href: "#",
+        download: true,
+        note: "PDF",
+      },
+    ],
+    layout: "list",
+    filter: false,
+  },
+};

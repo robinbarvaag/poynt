@@ -1159,12 +1159,19 @@ export interface ChangeWheelBlock {
               id?: string | null;
             }[]
           | null;
+        /**
+         * Vises i planen til slutt, uansett hvor sterkt området er. Det svakeste området får «Start her».
+         */
         advice?: string | null;
         linkLabel?: string | null;
         /**
          * Et anker på siden (f.eks. #lonnsomhet) eller en adresse (f.eks. /kontakt).
          */
         linkUrl?: string | null;
+        /**
+         * Rådet vises som vanlig, men lenken byttes ut med «Verktøyet kommer snart». Skru av når verktøyet er klart, så slipper du å skrive lenken på nytt.
+         */
+        linkPending?: boolean | null;
         id?: string | null;
       }[]
     | null;
@@ -3961,6 +3968,7 @@ export interface ChangeWheelBlockSelect<T extends boolean = true> {
         advice?: T;
         linkLabel?: T;
         linkUrl?: T;
+        linkPending?: T;
         id?: T;
       };
   aiPrompt?: T;

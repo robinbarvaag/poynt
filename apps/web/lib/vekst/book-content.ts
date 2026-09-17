@@ -64,6 +64,9 @@ export const CHANGE_WHEEL_AREAS: WheelArea[] = [
     advice:
       "Regn ut lønnsomheten på hovedproduktet ditt. Har du ikke justert prisene på to år, er det sannsynligvis på tide.",
     link: { label: "Regn på lønnsomheten", href: "#lonnsomhet" },
+    // Lønnsomhetsverktøyet er ikke tatt i bruk ennå: lenken ligger klar, men
+    // holdes tilbake til Susanne skrur den på.
+    linkPending: true,
   },
   {
     name: "Kunder og målgruppe",
@@ -378,6 +381,7 @@ export const changeWheelAreasCms = () =>
     questions: area.questions.map((question) => ({ question })),
     advice: area.advice,
     ...linkFields(area.link),
+    linkPending: area.linkPending ?? false,
   }));
 
 export const vekstPillarsCms = () =>

@@ -32,7 +32,7 @@ QR-koder i boka (boka er allerede i trykken).
 | Blokk (slug) | Hva leseren gjør | Krydder |
 |---|---|---|
 | **Kalkulator** (`growthCalculator`) | Velg variant i admin: *Lønnsomhet*, *Timepris* eller *Spåkula for salg* | Måler med nål som svinger inn i fargesonene, stempel («Taper penger»), «Prøv Gudruns komler», dinglende prislapp, glødende spåkule med stolper mot nullpunktet |
-| **Endringshjulet** (`changeWheel`) | Svarer ja/nei på bokas 12 spørsmål (4 områder × 3) | Hjulet fylles i fargesoner og roterer så det svakeste området havner øverst. «Kopier resultatet til KI» |
+| **Endringshjulet** (`changeWheel`) | Svarer ja/nei på bokas 12 spørsmål, ett område om gangen. Neste område åpner seg selv | Hjulet er tegnet som i boka: fire områder, tre ringer hver. Hvert ja tegner én ring til, utenfra og inn (lilla → gult → grønt i midten). Hjulet står klistret øverst på mobil. Til slutt en prioritert plan, svakeste område først, og «Kopier resultatet til KI» |
 | **VEKST-sjekken** (`vekstCheck`) | 15 ja/nei-spørsmål, ett om gangen | Bokstavklossene V-E-K-S-T fylles som glass, den sterkeste løftes, konfetti hvis alt er ja |
 | **Løgner som vendekort** (`mythCards`) | Snur kortene med bokas ti løgner | 3D-vending, stempel «Løgn #3», teller og konfetti når alle er avslørt |
 | **Arbeidsflyter med KI** (`aiWorkflow`) | Velger arbeidsflyt, kjører eksempelet, kopierer eller åpner prompten | Input → prompt → resultat med prikker langs ledningene, skrivemaskin, eller chatbobler for «Ditt fiktive styre». Åpne i ChatGPT/Claude |
@@ -64,6 +64,10 @@ står på siden fra før bevares, og endringen blir et utkast Susanne publiserer
   felles felt i `vekst-fields.ts`. Registrert i `layout-blocks.ts`.
 - **Adaptere:** `apps/web/components/blocks/*-block.tsx` + `vekst-palette.ts`. Registrert i `render-blocks.tsx`.
 - **Bokinnhold:** `apps/web/lib/vekst/book-content.ts` er den ene kilden for standardverdier, seed og Storybook.
+- **Endringshjulet:** selve tegningen ligger i `vekst/wheel-chart.tsx`, ringfargene og ringtekstene i
+  `vekst/palette.ts` (`WHEEL_RINGS`), og regnestykket «hvor mange ringer» i `logic.ts` (`ringsForYes`).
+  Hvert område kan sette av lenken sin med «Avvent lenken» (`linkPending`) når verktøyet den peker
+  på ikke er klart ennå — rådet vises som vanlig, lenken byttes ut med «Verktøyet kommer snart».
 - **Kalender:** `apps/web/lib/vekst/ics.ts` (testet: Oslo-tid, VTIMEZONE, linjebretting) og `app/api/kalender/route.ts`.
 - **Admin:** etiketter i `lib/composition-rules.ts`, ikoner/antall i `components/views/cms-page-view.tsx`,
   forhåndsbilder i `blocks/block-previews.ts` (stories under `apps/storybook/stories/Vekst/`).

@@ -66,6 +66,11 @@ export {
 export { BlockSection } from "./components/block-section";
 
 export {
+  ExpandableText,
+  type ExpandableTextProps,
+} from "./components/expandable-text";
+
+export {
   SectionHeader,
   type SectionHeaderProps,
 } from "./components/section-header";

@@ -16,6 +16,7 @@ interface ChangeWheelBlockProps extends VekstHeaderProps {
         advice?: string | null;
         linkLabel?: string | null;
         linkUrl?: string | null;
+        linkPending?: boolean | null;
         id?: string | null;
       }[]
     | null;
@@ -30,6 +31,7 @@ export function ChangeWheelBlock(props: ChangeWheelBlockProps) {
       questions: questionList(area.questions),
       advice: text(area.advice),
       link: vekstLink(area.linkLabel, area.linkUrl),
+      linkPending: area.linkPending ?? false,
     }))
     .filter((area) => area.name && area.questions.length > 0);
 

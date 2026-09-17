@@ -14,8 +14,10 @@ const meta: Meta<typeof ChangeWheel> = {
     docs: {
       description: {
         component:
-          "Endringshjulet fra boka: fire områder med tre ja/nei-spørsmål hver. " +
-          "Når alt er besvart roterer hjulet så det svakeste området står øverst.",
+          "Endringshjulet fra boka, tegnet som en blink. Fire områder med tre " +
+          "ja/nei-spørsmål hver. Du svarer på ett område om gangen mens blinken " +
+          "står synlig, og hvert område fylles fra ytterkanten og innover: alle " +
+          "ja tar det helt inn i blinken. Til slutt får du en prioritert plan.",
       },
     },
   },
@@ -36,9 +38,46 @@ export const Standard: Story = {
     eyebrow: "Endring",
     title: "Hvor bør du starte?",
     intro:
-      "Svar ja eller nei på tolv spørsmål. 0–1 ja blir rosa, 2 ja gult og 3 ja grønt.",
+      "Svar ja eller nei på tolv spørsmål, så ser du hvilket område du bør ta tak i først.",
     areas: CHANGE_WHEEL_AREAS,
     aiPrompt: CHANGE_WHEEL_AI_PROMPT,
+    palette: BOOK_PALETTE,
+  },
+};
+
+/** Mobilbredde: blinken klistrer seg øverst mens du svarer. */
+export const Mobil: Story = {
+  ...Standard,
+  parameters: { viewport: { defaultViewport: "mobile1" } },
+};
+
+/** To områder med fire spørsmål hver, uten lenker. */
+export const ToOmrader: Story = {
+  args: {
+    title: "Er du klar for vekst?",
+    areas: [
+      {
+        name: "Salg",
+        questions: [
+          "Har du fast tid til salg i kalenderen?",
+          "Vet du hvor de siste kundene kom fra?",
+          "Følger du opp tilbudene du sender?",
+          "Selger du hele året?",
+        ],
+        advice: "Sett av én halv dag i uka til salg, og kall den noe.",
+      },
+      {
+        name: "Tall",
+        questions: [
+          "Vet du lønnsomheten på hovedproduktet?",
+          "Vet du hva du må ha inn hver måned?",
+          "Sjekker du regnskapet hver uke?",
+          "Har du en buffer?",
+        ],
+        advice:
+          "Start med å regne ut hva du må ha inn hver måned for å gå i null.",
+      },
+    ],
     palette: BOOK_PALETTE,
   },
 };

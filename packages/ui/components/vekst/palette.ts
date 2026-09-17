@@ -20,6 +20,29 @@ export const ZONE_LABELS: Record<Zone, string> = {
 };
 
 /**
+ * Ringene i endringshjulet, som i boka: hvert område er delt i tre ringer.
+ * Ett ja tegner den ytterste (lilla), to ja den gule, tre ja den grønne i
+ * midten. Rekkefølgen er utenfra og inn, og fargene er faste uansett palett –
+ * de betyr noe, akkurat som sonene.
+ */
+export interface WheelRing {
+  color: string;
+  /** Hva det betyr å ha kommet hit. */
+  label: string;
+}
+
+export const WHEEL_RINGS: WheelRing[] = [
+  { color: "#cdc1da", label: "Her bør du starte" },
+  { color: "#f2ecab", label: "Kunne vært bedre" },
+  { color: "#cae0b7", label: "Her er du god" },
+];
+
+/** Ringen et område har nådd. 0 fylte ringer leses som «start her». */
+export function wheelRing(rings: number): WheelRing {
+  return WHEEL_RINGS[Math.min(WHEEL_RINGS.length, Math.max(1, rings)) - 1];
+}
+
+/**
  * Paletten som CSS-variabler på blokkens rot. Komponentene bruker bare
  * variablene (`bg-[var(--vk-surface)]`), så samme blokk kan stå i bokas lilla
  * og oliven eller i Poynt-grønt uten egne varianter.

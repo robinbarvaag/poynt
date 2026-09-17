@@ -11,8 +11,10 @@ import {
   profitPercent,
   profitVerdict,
   profitZone,
+  ringsForYes,
   strongestIndex,
   weakestIndex,
+  yesForRing,
   zoneForYes,
 } from "./logic";
 
@@ -71,6 +73,30 @@ describe("ja/nei-sjekker", () => {
     expect(zoneForYes(2, 3)).toBe("gul");
     expect(zoneForYes(3, 3)).toBe("gronn");
     expect(zoneForYes(0, 0)).toBe("rosa");
+  });
+
+  test("hvert ja tegner én ring til i endringshjulet", () => {
+    expect(ringsForYes(0, 3)).toBe(0);
+    expect(ringsForYes(1, 3)).toBe(1);
+    expect(ringsForYes(2, 3)).toBe(2);
+    expect(ringsForYes(3, 3)).toBe(3);
+    expect(ringsForYes(0, 0)).toBe(0);
+  });
+
+  test("midtringen krever alle ja, uansett antall spørsmål", () => {
+    expect(ringsForYes(3, 4)).toBe(2);
+    expect(ringsForYes(4, 4)).toBe(3);
+    expect(ringsForYes(5, 6)).toBe(2);
+    expect(ringsForYes(6, 6)).toBe(3);
+  });
+
+  test("forklaringen viser hvor mange ja hver ring krever", () => {
+    expect(yesForRing(1, 3)).toBe(1);
+    expect(yesForRing(2, 3)).toBe(2);
+    expect(yesForRing(3, 3)).toBe(3);
+    expect(yesForRing(1, 4)).toBe(2);
+    expect(yesForRing(3, 4)).toBe(4);
+    expect(yesForRing(4, 3)).toBeNull();
   });
 
   test("svakeste og sterkeste tar første ved likt", () => {

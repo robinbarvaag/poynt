@@ -173,6 +173,33 @@ function HubBar({
 }) {
   const scrollerRef = useRef<HTMLUListElement | null>(null);
   const chipRefs = useRef(new Map<string, HTMLLIElement>());
+  const barRef = useRef<HTMLDivElement | null>(null);
+
+  // Baren er `fixed` og legger seg oppå innholdet, akkurat som headeren.
+  // Derfor publiserer den høyden sin på samme måte som `SiteHeader` gjør med
+  // `--site-header-offset`: da kan klistrede ting lenger nede på siden feste
+  // seg under BEGGE to i stedet for å havne bak brikkene. 0 når baren er
+  // skjult eller vi er på stor skjerm (da er den `lg:hidden`).
+  useEffect(() => {
+    const root = document.documentElement;
+    const node = barRef.current;
+    const publish = () => {
+      const height = visible ? (node?.offsetHeight ?? 0) : 0;
+      root.style.setProperty("--hub-bar-offset", `${Math.round(height)}px`);
+    };
+    publish();
+    // Baren skifter høyde når brikkene brytes til to linjer, og blir 0 når
+    // `lg:hidden` slår inn. ResizeObserver fanger begge deler.
+    if (!node || typeof ResizeObserver === "undefined") {
+      return () => root.style.removeProperty("--hub-bar-offset");
+    }
+    const observer = new ResizeObserver(publish);
+    observer.observe(node);
+    return () => {
+      observer.disconnect();
+      root.style.removeProperty("--hub-bar-offset");
+    };
+  }, [visible]);
 
   const registerChip = useCallback(
     (id: string) => (node: HTMLLIElement | null) => {
@@ -198,6 +225,7 @@ function HubBar({
 
   return (
     <div
+      ref={barRef}
       // Fester seg rett under sidens header når den finnes: `SiteHeader`
       // publiserer sin høyde som `--site-header-offset` (4rem synlig, 0 når
       // den har skjult seg ved scroll nedover). Baren følger med i samme
