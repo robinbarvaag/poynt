@@ -22,8 +22,8 @@ const meta: Meta = {
         component:
           "«Oversiktsside med sidemeny» (Sidetype på Sider): heroen i full bredde, " +
           "resten i én kolonne med en sticky meny til venstre på desktop og en " +
-          "fast brikkelinje under headeren på mobil, og et kortrutenett øverst " +
-          "som viser alle seksjonene på én gang. Menypunktene er blokkenes " +
+          "fast brikkelinje under headeren på mobil. Innholdet starter med en " +
+          "gang — menyen er kartet. Menypunktene er blokkenes " +
           "«Blokk-navn» — samme tekst blir #ankeret på seksjonen. Laget for " +
           "ressurssider (QR-kode-sider) med mye innhold som ikke ligger i menyen.",
       },
@@ -39,35 +39,30 @@ const nav = [
     id: "ki-tips",
     label: "KI-tips",
     icon: "sparkles" as const,
-    description: "Fire vaner som gjør svarene brukbare med en gang.",
     meta: "4 tips",
   },
   {
     id: "prompter",
     label: "Prompter",
     icon: "bot" as const,
-    description: "Ferdige tekster du kopierer rett inn i ChatGPT.",
     meta: "6 prompter",
   },
   {
     id: "arbeidsflyter",
     label: "Arbeidsflyter",
     icon: "layers" as const,
-    description: "Slik henger stegene sammen fra idé til publisert.",
     meta: "5 steg",
   },
   {
     id: "boker",
     label: "Bøker",
     icon: "book" as const,
-    description: "Bøkene jeg selv anbefaler, med hvorfor.",
     meta: "8 ressurser",
   },
   {
     id: "filer",
     label: "Filer",
     icon: "download" as const,
-    description: "Maler og sjekklister til nedlasting.",
     meta: "5 ressurser",
   },
 ];

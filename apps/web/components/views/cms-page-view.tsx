@@ -12,8 +12,8 @@ import type { IconName } from "@poynt/ui/icons";
 type Block = NonNullable<Page["layout"]>[number];
 
 /**
- * Ikon per blokktype — menyen og oversiktskortene skal kunne skilles fra
- * hverandre på en halv blikk, uten at redaktøren må velge noe i admin.
+ * Ikon per blokktype — menypunktene skal kunne skilles fra hverandre på et
+ * halvt blikk, uten at redaktøren må velge noe i admin.
  */
 const HUB_ICONS: Record<string, IconName> = {
   promptLibrary: "bot",
@@ -80,16 +80,6 @@ function hubMeta(block: Block): string | undefined {
   return `${value.length} ${value.length === 1 ? spec.one : spec.many}`;
 }
 
-/** Første ingress-lignende felt på blokka, som beskrivelse på oversiktskortet. */
-function hubDescription(block: Block): string | undefined {
-  const record = block as unknown as Record<string, unknown>;
-  for (const key of ["intro", "subtitle", "description"]) {
-    const value = record[key];
-    if (typeof value === "string" && value.trim()) return value.trim();
-  }
-  return undefined;
-}
-
 /**
  * Menypunktene på en oversiktsside: hver blokk med et «Blokk-navn» i admin.
  * Samme slugify som RenderBlocks bruker til #ankeret, så menyen og seksjonen
@@ -102,7 +92,6 @@ function hubNavFrom(blocks: Block[]): HubNavItem[] {
       id: slugifyAnchor(block.blockName as string),
       label: block.blockName as string,
       icon: HUB_ICONS[block.blockType],
-      description: hubDescription(block),
       meta: hubMeta(block),
     }));
 }

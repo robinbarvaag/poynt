@@ -313,7 +313,6 @@ export {
 } from "./components/landing-canvas";
 
 export {
-  HubIndex,
   HubLayout,
   type HubLayoutProps,
   type HubNavItem,
