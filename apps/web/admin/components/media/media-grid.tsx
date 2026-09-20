@@ -8,6 +8,8 @@ import {
 } from "@payloadcms/ui";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { getUnusedMediaIds } from "../../actions/media-insights";
+import { MediaDuplicatesPanel } from "./media-duplicates-panel";
 
 /**
  * Rutenett-visning for Media-lista, montert som `beforeListTable`.
@@ -56,9 +58,11 @@ function previewSrc(doc: MediaDoc): null | string {
 const MediaCard = ({
   doc,
   onSaved,
+  unused,
 }: {
   doc: MediaDoc;
   onSaved: () => void;
+  unused: boolean;
 }) => {
   const [DocumentDrawer, , { openDrawer }] = useDocumentDrawer({
     collectionSlug: "media",
@@ -95,6 +99,15 @@ const MediaCard = ({
           onChange={() => setSelection(doc.id)}
         />
       </div>
+
+      {unused && (
+        <span
+          className="poynt-media-card__unused"
+          title="Står ikke på noen side"
+        >
+          Ikke i bruk
+        </span>
+      )}
 
       <button
         type="button"
@@ -134,6 +147,7 @@ export const MediaGrid = () => {
   const { data } = useListQuery();
   const router = useRouter();
   const [view, setView] = useState<View>("grid");
+  const [unusedIds, setUnusedIds] = useState<Set<number>>(new Set());
 
   // Lesing av lagret valg skjer etter montering, ellers spriker server- og
   // klient-render.
@@ -155,6 +169,24 @@ export const MediaGrid = () => {
   };
 
   const docs = (data?.docs ?? []) as MediaDoc[];
+  const idKey = docs.map((doc) => doc.id).join(",");
+
+  // Hvilke av bildene på denne siden som ikke står noe sted. Ett oppslag for
+  // hele siden, ikke ett per kort. `idKey` er den stabile nøkkelen for docs.
+  useEffect(() => {
+    if (!idKey) {
+      setUnusedIds(new Set());
+      return;
+    }
+    let active = true;
+    getUnusedMediaIds(idKey.split(",").map(Number)).then((res) => {
+      if (active && res.ok) setUnusedIds(new Set(res.unusedIds));
+    });
+    return () => {
+      active = false;
+    };
+  }, [idKey]);
+
   if (docs.length === 0) return null;
 
   const missingAltCount = docs.filter(
@@ -216,6 +248,18 @@ export const MediaGrid = () => {
           border-radius: var(--style-radius-s, 4px);
           background: var(--theme-elevation-0);
           box-shadow: 0 0 0 1px var(--theme-elevation-150);
+        }
+        .poynt-media-card__unused {
+          position: absolute;
+          top: 0.45rem;
+          right: 0.45rem;
+          z-index: 1;
+          padding: 0.1rem 0.35rem;
+          border-radius: var(--style-radius-s, 4px);
+          font-size: 0.66rem;
+          font-weight: 600;
+          color: var(--theme-elevation-0);
+          background: var(--theme-elevation-700);
         }
         .poynt-media-card__open {
           display: block;
@@ -292,6 +336,7 @@ export const MediaGrid = () => {
         >
           Tabell
         </Button>
+        <MediaDuplicatesPanel />
         {view === "grid" && (
           <p className="poynt-media__hint">
             {missingAltCount > 0
@@ -311,6 +356,7 @@ export const MediaGrid = () => {
                 key={doc.id}
                 doc={doc}
                 onSaved={() => router.refresh()}
+                unused={unusedIds.has(doc.id)}
               />
             ))}
           </div>

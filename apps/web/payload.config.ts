@@ -23,6 +23,7 @@ import {
 } from "./lib/revalidate-cms";
 import {
   HONEYPOT_FIELD,
+  describeSubmission,
   isHoneypotFilled,
   looksLikeGibberish,
 } from "./lib/spam-heuristics";
@@ -722,8 +723,20 @@ export default buildConfig({
                   names.includes((entry.field ?? "").toLowerCase())
                 )?.value;
 
+              // Hele innsendingen logges ved avvisning — den lagres aldri, så
+              // logglinja er eneste sjanse til å se om filteret tok riktig.
+              const beskrivelse = () =>
+                describeSubmission(
+                  Object.fromEntries(
+                    entries.map((entry) => [entry.field ?? "?", entry.value])
+                  ),
+                  req.headers
+                );
+
               if (isHoneypotFilled(fieldValue([HONEYPOT_FIELD]))) {
-                console.warn("[spam] avviste innsending: honningkrukke fylt");
+                console.warn(
+                  `[spam] avviste innsending: honningkrukke fylt — ${beskrivelse()}`
+                );
                 throw new APIError(
                   "Innsendingen kunne ikke behandles.",
                   403,
@@ -735,7 +748,7 @@ export default buildConfig({
               const name = fieldValue(["navn", "fulltnavn", "name"]);
               if (name && looksLikeGibberish(name)) {
                 console.warn(
-                  `[spam] avviste innsending: navnet ser ut som tastaturmos («${name}»)`
+                  `[spam] avviste innsending: navnet ser ut som tastaturmos («${name}») — ${beskrivelse()}`
                 );
                 throw new APIError(
                   "Innsendingen kunne ikke behandles.",

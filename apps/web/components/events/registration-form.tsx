@@ -1,5 +1,6 @@
 "use client";
 
+import { Honeypot } from "@/components/honeypot";
 import { PrivacyNotice } from "@/components/privacy-notice";
 import {
   RecaptchaNotice,
@@ -17,6 +18,7 @@ import {
   formatKr,
   partyAmountKr,
 } from "@/lib/events/payment-rules";
+import { HONEYPOT_FIELD } from "@/lib/spam-heuristics";
 import {
   Button,
   Checkbox,
@@ -152,7 +154,7 @@ export function RegistrationForm(props: RegistrationFormProps) {
         body: JSON.stringify({
           name: data.get("navn"),
           email: data.get("epost"),
-          website: data.get("website"),
+          [HONEYPOT_FIELD]: data.get(HONEYPOT_FIELD),
           answers,
           newsletter,
           guests: guests.map((guest) => guest.name.trim()),
@@ -359,19 +361,7 @@ export function RegistrationForm(props: RegistrationFormProps) {
         </div>
       )}
 
-      {/* Honningkrukke for roboter — skjult for mennesker og skjermlesere. */}
-      <div
-        aria-hidden="true"
-        className="absolute left-[-9999px] h-0 overflow-hidden"
-      >
-        <label htmlFor="event-website">Nettside</label>
-        <input
-          id="event-website"
-          name="website"
-          tabIndex={-1}
-          autoComplete="off"
-        />
-      </div>
+      <Honeypot idPrefix="event" />
 
       {props.priceKr ? (
         <div className="space-y-3 rounded-2xl bg-muted/50 p-4">

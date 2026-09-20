@@ -114,6 +114,30 @@ Sideblokker bruker i stedet `productSpotlight`-blokken.
 Komposisjonsreglene (`lib/composition-rules.ts`) er de samme som Sidesjekk-
 panelet i admin bruker. Ny regel der gjelder begge steder.
 
+## Abonnementsstrømmer og Vercel-timeouts
+
+MCP-protokollen har `subscriptions/listen`: klienten ber om en SSE-strøm som
+serveren holder åpen for å kunne varsle om endringer (f.eks. «verktøylista er
+endret»). På Vercel er en åpen strøm det samme som en funksjon som kjører, så
+hver strøm levde til `maxDuration` og la igjen en
+`Vercel Runtime Timeout Error: Task timed out after 60 seconds` i loggen — én
+per minutt så lenge en klient var tilkoblet, selv om vi aldri sender varsler.
+
+To grep, begge i koden nå:
+
+1. Serveren annonserer `capabilities: { tools: { listChanged: false } }`, så en
+   veloppdragen klient ikke har noe å abonnere på. (SDK-en setter
+   `listChanged: true` som standard når du registrerer verktøy.)
+2. Ruta fanger opp `subscriptions/listen` før SDK-en og svarer med et tomt,
+   umiddelbart lukket abonnement.
+
+Får vi noe å varsle om senere (dynamiske verktøy), må punkt 2 vekk — og da bør
+strømmen uansett lukkes selv et godt stykke før `maxDuration`.
+
+Verktøy som henter fra internett må ha tidsavbrudd av samme grunn: uten det
+holder en treg vert hele funksjonen til den drepes. `upload_media_from_url`
+bruker 20 s, SEO-verktøyene 10 s.
+
 ## Filer
 
 - `apps/web/app/api/mcp/[secret]/route.ts` — auth + HTTP-inngang

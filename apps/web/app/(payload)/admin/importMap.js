@@ -38,6 +38,7 @@ import { QuestionRowLabel as QuestionRowLabel_f0fd4bee3885f2a3c8ca119ef52b5ffe }
 import { RegistrationsPanel as RegistrationsPanel_28045f51387e75774bbe0012eb0536ce } from '../../../admin/components/events/registrations-panel'
 import { StockMediaPicker as StockMediaPicker_7d8c930913c9c09e14d244ff8c96b4e3 } from '../../../admin/components/media/stock-picker'
 import { GenerateAltButton as GenerateAltButton_040810ca926965e5b8a67fcc6e0594ab } from '../../../admin/components/media/generate-alt-button'
+import { MediaUsagePanel as MediaUsagePanel_d323a1552f7e696d533ba7f1b0e9b00a } from '../../../admin/components/media/media-usage-panel'
 import { FolderTableCell as FolderTableCell_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 import { FolderField as FolderField_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 import { MediaGrid as MediaGrid_4d358dd7a2279418b0f1ab6d4d5dc013 } from '../../../admin/components/media/media-grid'
@@ -116,6 +117,7 @@ export const importMap = {
   "/admin/components/events/registrations-panel#RegistrationsPanel": RegistrationsPanel_28045f51387e75774bbe0012eb0536ce,
   "/admin/components/media/stock-picker#StockMediaPicker": StockMediaPicker_7d8c930913c9c09e14d244ff8c96b4e3,
   "/admin/components/media/generate-alt-button#GenerateAltButton": GenerateAltButton_040810ca926965e5b8a67fcc6e0594ab,
+  "/admin/components/media/media-usage-panel#MediaUsagePanel": MediaUsagePanel_d323a1552f7e696d533ba7f1b0e9b00a,
   "@payloadcms/next/rsc#FolderTableCell": FolderTableCell_f9c02e79a4aed9a3924487c0cd4cafb1,
   "@payloadcms/next/rsc#FolderField": FolderField_f9c02e79a4aed9a3924487c0cd4cafb1,
   "/admin/components/media/media-grid#MediaGrid": MediaGrid_4d358dd7a2279418b0f1ab6d4d5dc013,

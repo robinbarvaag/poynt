@@ -1,6 +1,7 @@
 "use client";
 
-import { HONEYPOT_FIELD } from "@/lib/spam-heuristics";
+import { Honeypot } from "@/components/honeypot";
+import { useSiteContactEmail } from "@/lib/site-contact";
 import {
   Button,
   Checkbox,
@@ -106,6 +107,8 @@ export function FormBlockComponent({
   // blir brukeren stående nederst på en lang skjema-side uten å se bekreftelsen.
   const successRef = useRef<HTMLDivElement>(null);
   const getRecaptchaToken = useRecaptcha("kontaktskjema");
+  // Utvei hvis skjemaet nekter å gå gjennom (spamfilter, nettverk).
+  const contactEmail = useSiteContactEmail();
 
   useEffect(() => {
     const sp = new URLSearchParams(window.location.search);
@@ -404,21 +407,9 @@ export function FormBlockComponent({
             })}
         </div>
 
-        {/* Honningkrukke for roboter — skjult for mennesker og skjermlesere.
-            Verdien plukkes opp av FormData sammen med de ekte feltene og
+        {/* Verdien plukkes opp av FormData sammen med de ekte feltene og
             sjekkes i beforeValidate-hooken (payload.config.ts). */}
-        <div
-          aria-hidden="true"
-          className="absolute left-[-9999px] h-0 overflow-hidden"
-        >
-          <label htmlFor={`form-${HONEYPOT_FIELD}`}>Nettside</label>
-          <input
-            id={`form-${HONEYPOT_FIELD}`}
-            name={HONEYPOT_FIELD}
-            tabIndex={-1}
-            autoComplete="off"
-          />
-        </div>
+        <Honeypot idPrefix="form" />
 
         {error && (
           <div
@@ -426,6 +417,21 @@ export function FormBlockComponent({
             className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm"
           >
             {error}
+            {/* Spamfilteret kan ta feil. Da skal ingen stå fast i en blindvei
+                — e-postadressen er utveien som alltid virker. */}
+            {contactEmail && (
+              <>
+                {" "}
+                Får du det fortsatt ikke til, send oss en e-post på{" "}
+                <a
+                  href={`mailto:${contactEmail}`}
+                  className="font-medium underline underline-offset-2"
+                >
+                  {contactEmail}
+                </a>
+                .
+              </>
+            )}
           </div>
         )}
 

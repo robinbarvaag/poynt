@@ -129,9 +129,18 @@ ekte token.
 
 Derfor står det to lag til bak reCAPTCHA, i `lib/spam-heuristics.ts`:
 
-- **Honningkrukke** (`HONEYPOT_FIELD`, feltnavn `website`): et skjult felt
-  mennesker aldri ser, men roboter fyller ut fordi de bare leser HTML-en.
-  Ligger på kontaktskjemaene, nyhetsbrevet og eventpåmeldingen.
+- **Honningkrukke** (`HONEYPOT_FIELD`, feltnavn `kontaktmetode_2`): et skjult
+  felt mennesker aldri ser, men roboter fyller ut fordi de bare leser HTML-en.
+  Ligger på kontaktskjemaene, nyhetsbrevet og eventpåmeldingen — alle tre
+  rendrer `<Honeypot>` (`components/honeypot.tsx`), så markup og feltnavn
+  finnes ett sted.
+  **Feltnavnet er viktig.** Det het `website` med label «Nettside» fram til
+  20.09.2026, og det er nettopp det passordbehandlere og nettleser-autofyll
+  fyller ut av seg selv — da blir et ekte menneske avvist som robot.
+  `autoComplete="off"` alene holder ikke, så komponenten sender også
+  `data-1p-ignore`, `data-lpignore`, `data-bwignore` og
+  `data-form-type="other"`. Skal navnet endres igjen: velg noe autofyll
+  aldri har hørt om.
 - **`looksLikeGibberish()`**: kjenner igjen tastaturmos som
   «TsPGxDXqnGBjjEtgnZ». Teller store bokstaver midt i et ord, rett etter en
   liten — et ekte navn har null, «McDonald» har én, tre eller flere er
@@ -141,7 +150,29 @@ Derfor står det to lag til bak reCAPTCHA, i `lib/spam-heuristics.ts`:
   mot både ekte spam og en liste ekte navn.
 
 Begge logger med prefikset `[spam]`, så du kan søke på det i Vercel ved siden
-av `[recaptcha]`.
+av `[recaptcha]`. Logglinja inneholder **hele den avviste innsendingen** —
+feltene med verdi (kuttet til 120 tegn), pluss IP, referer og user-agent:
+
+```
+[spam] avviste innsending: honningkrukke fylt — navn="Ola" epost="ola@example.no"
+melding="…" kontaktmetode_2="https://spam.example" — ip=203.0.113.10
+referer="https://www.poynt.no/kontakt" ua="Mozilla/5.0 …"
+```
+
+Det er med vilje: en avvist innsending **lagres aldri**, så uten logglinja er
+det umulig å si i ettertid om filteret tok en robot eller et ekte menneske.
+User-agenten avgjør som regel saken. Bygges av `describeSubmission()`.
+
+## Når filteret tar feil
+
+Ingen av lagene er ufeilbarlige, og et menneske som blir avvist skal ikke stå
+fast. Feilmeldinga i skjemaet (`components/blocks/form-block.tsx`) viser derfor
+kontakt-e-posten som utvei: «Får du det fortsatt ikke til, send oss en e-post
+på …».
+
+Adressen kommer fra Nettsted-innstillinger → «Kontakt», med bunntekstens
+e-post som reserve, og deles ut av `SiteContactProvider` i rot-layouten
+(`lib/site-contact.tsx`). Er ingen av dem fylt ut, vises linja ikke.
 
 ## Justere terskelen
 

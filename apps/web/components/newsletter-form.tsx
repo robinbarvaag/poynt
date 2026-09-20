@@ -1,5 +1,6 @@
 "use client";
 
+import { Honeypot } from "@/components/honeypot";
 import { HONEYPOT_FIELD } from "@/lib/spam-heuristics";
 import { Button, Input } from "@poynt/ui";
 import { CheckCircle, Loader2 } from "lucide-react";
@@ -99,21 +100,7 @@ export function NewsletterForm({
         </Button>
       </div>
 
-      {/* Honningkrukke — skjult for mennesker og skjermlesere. */}
-      <div
-        aria-hidden="true"
-        className="absolute left-[-9999px] h-0 overflow-hidden"
-      >
-        <label htmlFor={`newsletter-${HONEYPOT_FIELD}`}>Nettside</label>
-        <input
-          id={`newsletter-${HONEYPOT_FIELD}`}
-          name={HONEYPOT_FIELD}
-          value={website}
-          onChange={(e) => setWebsite(e.target.value)}
-          tabIndex={-1}
-          autoComplete="off"
-        />
-      </div>
+      <Honeypot idPrefix="newsletter" value={website} onChange={setWebsite} />
       {status === "error" && (
         <p role="alert" className="swap-in mt-2 text-destructive text-sm">
           {errorMessage}

@@ -349,10 +349,12 @@ export interface HeroBlock {
 export interface Media {
   id: number;
   /**
-   * Beskrivelse av bildet for skjermlesere og SEO. Bruk «Generer alt-tekst» for et AI-forslag du kan justere.
+   * Beskrivelse av bildet for skjermlesere og SEO. Fylles ut automatisk når du laster opp et nytt bilde — les gjerne over og juster. Trykk «Foreslå alt-tekst» for et nytt forslag.
    */
   alt?: string | null;
   blurDataURL?: string | null;
+  contentHash?: string | null;
+  perceptualHash?: string | null;
   /**
    * Skjules i offentlige lister og søk. NB: selve bildefila kan fortsatt åpnes av alle som har direktelenken — ikke last opp noe konfidensielt.
    */
@@ -4529,6 +4531,8 @@ export interface CategoriesSelect<T extends boolean = true> {
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   blurDataURL?: T;
+  contentHash?: T;
+  perceptualHash?: T;
   isPrivate?: T;
   source?: T;
   creditLine?: T;

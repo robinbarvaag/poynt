@@ -1,4 +1,5 @@
 import { CheckoutConsentProvider } from "@/lib/checkout-consent";
+import { SiteContactProvider } from "@/lib/site-contact";
 import "../globals.css";
 import {
   ConsentProvider,
@@ -113,28 +114,34 @@ export default async function FrontendLayout({
           {/* Kobler designsystemets interne lenker til next/link, så kort og
             knapper i @poynt/ui navigerer på klienten (instant navigation). */}
           <UILinkProvider>
-            <CheckoutConsentProvider texts={consentTexts}>
-              <Header
-                siteName={siteSettings?.siteName || "Poynt"}
-                logo={
-                  siteSettings?.logo as { url: string; alt?: string } | null
-                }
-                ctaButton={header?.ctaButton as HeaderProps["ctaButton"]}
-                navItems={
-                  header?.navItems as unknown as HeaderProps["navItems"]
-                }
-              />
-              {/* `overflow-x-clip` (ikke `hidden`): dekor som stikker ut av
+            {/* Kontakt-fanen i Nettsted-innstillinger først, ellers adressen
+                som allerede står i bunnteksten — så utveien finnes uansett. */}
+            <SiteContactProvider
+              email={siteSettings?.email || footer?.legal?.email}
+            >
+              <CheckoutConsentProvider texts={consentTexts}>
+                <Header
+                  siteName={siteSettings?.siteName || "Poynt"}
+                  logo={
+                    siteSettings?.logo as { url: string; alt?: string } | null
+                  }
+                  ctaButton={header?.ctaButton as HeaderProps["ctaButton"]}
+                  navItems={
+                    header?.navItems as unknown as HeaderProps["navItems"]
+                  }
+                />
+                {/* `overflow-x-clip` (ikke `hidden`): dekor som stikker ut av
                 kolonnene (DecoBlob bak produktbildet, roterte kort) skal ikke
                 gi sidescroll på mobil. `clip` lager – i motsetning til
                 `hidden` – ingen scroll-container, så `position: sticky`
                 (galleriet) fungerer fortsatt inne i main. */}
-              <main className="min-h-screen overflow-x-clip pt-16">
-                {children}
-              </main>
-              {/* Parallel-route slot for intercepting-modaler (f.eks. /kontakt). */}
-              {modal}
-            </CheckoutConsentProvider>
+                <main className="min-h-screen overflow-x-clip pt-16">
+                  {children}
+                </main>
+                {/* Parallel-route slot for intercepting-modaler (f.eks. /kontakt). */}
+                {modal}
+              </CheckoutConsentProvider>
+            </SiteContactProvider>
             <Footer
               siteName={siteSettings?.siteName || "Poynt"}
               logo={siteSettings?.logo as { url: string; alt?: string } | null}

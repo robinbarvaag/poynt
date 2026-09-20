@@ -51,7 +51,7 @@ export async function POST(
     newsletter?: unknown;
     guests?: unknown;
     paymentMethod?: unknown;
-    website?: unknown;
+    [key: string]: unknown;
   } | null;
 
   if (!body || !Number.isInteger(eventId)) {
@@ -63,7 +63,21 @@ export async function POST(
 
   // Honningkrukke: et skjult felt bare roboter fyller ut. Vi later som alt
   // gikk bra, så de ikke prøver seg videre.
-  if (typeof body.website === "string" && body.website.trim()) {
+  const { HONEYPOT_FIELD, describeSubmission, isHoneypotFilled } = await import(
+    "@/lib/spam-heuristics"
+  );
+  if (isHoneypotFilled(body[HONEYPOT_FIELD])) {
+    console.warn(
+      `[spam] avviste påmelding: honningkrukke fylt — ${describeSubmission(
+        {
+          event: eventId,
+          navn: body.name,
+          epost: body.email,
+          [HONEYPOT_FIELD]: body[HONEYPOT_FIELD],
+        },
+        request.headers
+      )}`
+    );
     return NextResponse.json({ ok: true, status: "registered" });
   }
 

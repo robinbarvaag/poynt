@@ -3,6 +3,7 @@ import {
   generateBlurDataURL,
   supportsBlurPlaceholder,
 } from "@/lib/blur-data-url";
+import { contentHash, perceptualHash, supportsHashing } from "@/lib/media-hash";
 import { MAX_UPLOAD_BYTES, MAX_UPLOAD_LABEL } from "@/lib/media-limits";
 import { toRelativeMediaUrl } from "@/lib/media-url";
 import { APIError, type CollectionConfig } from "payload";
@@ -62,6 +63,18 @@ export const Media: CollectionConfig = {
         }
         const blurDataURL = await generateBlurDataURL(file.data);
         return blurDataURL ? { ...data, blurDataURL } : data;
+      },
+      // Fingeravtrykk for duplikatsøket. Beregnes her fordi bytene allerede er
+      // i minnet — å hente dem tilbake fra Blob senere ville kostet en runde
+      // nedlasting per bilde.
+      async ({ data, req }) => {
+        const file = req.file;
+        if (!file?.data || !supportsHashing(file.mimetype)) return data;
+        return {
+          ...data,
+          contentHash: contentHash(file.data),
+          perceptualHash: await perceptualHash(file.data),
+        };
       },
       // Fyller alt-teksten automatisk når et nytt bilde lastes opp uten en.
       // Bevisst i `beforeChange` og ikke som en etterpå-oppdatering: da blir
@@ -230,6 +243,31 @@ export const Media: CollectionConfig = {
       type: "text",
       admin: {
         hidden: true,
+      },
+    },
+    // Fingeravtrykk for duplikatsøket (lib/media-hash.ts). Skjult — de er bare
+    // interessante for maskinen. Indeksert, siden duplikatpanelet grupperer på
+    // contentHash.
+    {
+      name: "contentHash",
+      type: "text",
+      index: true,
+      admin: { hidden: true },
+    },
+    {
+      name: "perceptualHash",
+      type: "text",
+      admin: { hidden: true },
+    },
+    // Viser «Brukt på»-panelet i sidestolpen (lib/media-usage.ts).
+    {
+      name: "usage",
+      type: "ui",
+      admin: {
+        position: "sidebar",
+        components: {
+          Field: "/admin/components/media/media-usage-panel#MediaUsagePanel",
+        },
       },
     },
     {
