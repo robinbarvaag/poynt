@@ -38,8 +38,16 @@ async function fetchProduct(id: number): Promise<Product | null> {
 
 async function resolveProduct(ref: ProductRef | null | undefined) {
   if (ref == null) return null;
-  if (typeof ref === "object")
-    return ref.active && !ref.testProduct ? ref : null;
+  if (typeof ref === "object") {
+    if (!ref.active || ref.testProduct) return null;
+    // Relasjoner inne i rik tekst populeres med sidas `depth`: på `depth: 1`
+    // kommer produktet som objekt, mens `featuredImage` fortsatt bare er en id
+    // — da ble kortet stående med plassholder i stedet for produktbildet.
+    // Hent produktet på nytt (cachet) når bildet ikke er populert.
+    return typeof ref.featuredImage === "number"
+      ? ((await fetchProduct(ref.id)) ?? ref)
+      : ref;
+  }
   const id = typeof ref === "string" ? Number(ref) : ref;
   return Number.isFinite(id) ? fetchProduct(id) : null;
 }
