@@ -11,6 +11,10 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const { guardRecaptcha } = await import("@/lib/recaptcha");
+  const blocked = await guardRecaptcha(request, "nyhetsbrev");
+  if (blocked) return blocked;
+
   try {
     const body = (await request.json()) as { email?: unknown; path?: unknown };
     const email =

@@ -18,6 +18,7 @@ import {
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import type { Form as PayloadForm } from "../../payload-types";
 import { PrivacyNotice } from "../privacy-notice";
+import { RecaptchaNotice, recaptchaHeader, useRecaptcha } from "../recaptcha";
 
 interface FormBlockProps {
   form: PayloadForm | string;
@@ -103,6 +104,7 @@ export function FormBlockComponent({
   // Kvitterings-kortet rulles inn i visning når innsendingen lykkes – ellers
   // blir brukeren stående nederst på en lang skjema-side uten å se bekreftelsen.
   const successRef = useRef<HTMLDivElement>(null);
+  const getRecaptchaToken = useRecaptcha("kontaktskjema");
 
   useEffect(() => {
     const sp = new URLSearchParams(window.location.search);
@@ -174,10 +176,12 @@ export function FormBlockComponent({
     if (ctx.sti) submissionData.push({ field: "sti", value: ctx.sti });
 
     try {
+      const token = await getRecaptchaToken();
       const response = await fetch("/api/form-submissions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...recaptchaHeader(token),
         },
         body: JSON.stringify({
           form: formData.id,
@@ -186,12 +190,22 @@ export function FormBlockComponent({
       });
 
       if (!response.ok) {
-        throw new Error("Kunne ikke sende skjema");
+        // 403 = stoppet av reCAPTCHA eller rate-limit; da er «prøv igjen»
+        // feil råd, og brukeren trenger å vite at det var spamfilteret.
+        throw new Error(
+          response.status === 403
+            ? "Innsendingen ble stoppet av spamfilteret vårt. Last siden på nytt og prøv igjen."
+            : "Kunne ikke sende skjema"
+        );
       }
 
       setIsSubmitted(true);
     } catch (err) {
-      setError("Noe gikk galt. Vennligst prøv igjen.");
+      setError(
+        err instanceof Error && err.message.includes("spamfilteret")
+          ? err.message
+          : "Noe gikk galt. Vennligst prøv igjen."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -412,6 +426,7 @@ export function FormBlockComponent({
             purpose="Vi bruker opplysningene kun til å svare på henvendelsen din."
             className="text-muted-foreground"
           />
+          <RecaptchaNotice className="text-muted-foreground" />
         </div>
       </form>
     </div>

@@ -11,6 +11,7 @@ import { BookOpen, Loader2, Lock } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { PrivacyNotice } from "./privacy-notice";
+import { RecaptchaNotice, recaptchaHeader, useRecaptcha } from "./recaptcha";
 
 /**
  * Døra foran en side som krever bokkjøp. Ordrenummer + butikk er alt som
@@ -25,6 +26,7 @@ export function BookGate({ pageId, title }: { pageId: number; title: string }) {
   const [newsletter, setNewsletter] = useState(false);
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [error, setError] = useState("");
+  const getRecaptchaToken = useRecaptcha("boktilgang");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,9 +34,13 @@ export function BookGate({ pageId, title }: { pageId: number; title: string }) {
     setError("");
 
     try {
+      const token = await getRecaptchaToken();
       const response = await fetch("/api/book-access", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...recaptchaHeader(token),
+        },
         body: JSON.stringify({ pageId, orderNumber, store, email, newsletter }),
       });
       const data = (await response.json()) as { error?: string };
@@ -133,6 +139,7 @@ export function BookGate({ pageId, title }: { pageId: number; title: string }) {
             purpose="Ordrenummeret brukes bare til å gi deg tilgang. E-posten brukes kun til nyhetsbrevet hvis du krysser av, og du kan melde deg av når som helst."
             className="text-muted-foreground"
           />
+          <RecaptchaNotice className="text-muted-foreground" />
 
           {status === "error" && (
             <p role="alert" className="swap-in text-destructive text-sm">

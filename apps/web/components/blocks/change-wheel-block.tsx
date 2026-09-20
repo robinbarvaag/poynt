@@ -1,4 +1,4 @@
-import { ChangeWheel, type WheelArea } from "@poynt/ui";
+import { ChangeWheel, type WheelArea, type WheelPlanLayout } from "@poynt/ui";
 import {
   type QuestionRow,
   type VekstHeaderProps,
@@ -21,6 +21,8 @@ interface ChangeWheelBlockProps extends VekstHeaderProps {
       }[]
     | null;
   aiPrompt?: string | null;
+  planLayout?: ("collapsed" | "all" | "focus") | null;
+  strongNote?: string | null;
 }
 
 /** Mapper Payload-blokken `changeWheel` til ChangeWheel i @poynt/ui. */
@@ -42,6 +44,10 @@ export function ChangeWheelBlock(props: ChangeWheelBlockProps) {
       {...headerProps(props)}
       areas={areas}
       aiPrompt={text(props.aiPrompt)}
+      planLayout={(props.planLayout ?? "collapsed") as WheelPlanLayout}
+      // Tomt felt betyr «vis rådet som vanlig», så null må bli tom streng her
+      // – ellers slår komponentens standardtekst inn igjen.
+      strongNote={text(props.strongNote) ?? ""}
     />
   );
 }

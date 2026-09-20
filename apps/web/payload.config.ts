@@ -619,16 +619,41 @@ export default buildConfig({
         // Pluginens standard er create: () => true (nødvendig — skjemaene er
         // offentlige), men helt uten brems kan endepunktet spammes: hver
         // innsending sender e-post via Resend og kan speiles til medlemssøknad.
+        // To lag: rate-limit per IP + reCAPTCHA v3-token fra skjemaet
+        // (components/blocks/form-block.tsx sender det som header).
         access: {
-          create: ({ req }) => {
+          create: async ({ req }) => {
             const ip =
               req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
               req.headers.get("x-real-ip") ??
               "ukjent";
-            return rateLimit("form-submission", ip, {
-              limit: 5,
-              windowMs: 10 * 60_000,
-            });
+            if (
+              !rateLimit("form-submission", ip, {
+                limit: 5,
+                windowMs: 10 * 60_000,
+              })
+            ) {
+              return false;
+            }
+
+            // Innlogget admin (og lokale API-kall, som uansett kjører med
+            // overrideAccess) skal ikke måtte ha et token.
+            if (req.user) return true;
+
+            const { RECAPTCHA_HEADER, verifyRecaptcha } = await import(
+              "@poynt/utils/recaptcha"
+            );
+            const result = await verifyRecaptcha(
+              req.headers.get(RECAPTCHA_HEADER),
+              { action: "kontaktskjema", remoteIp: ip }
+            );
+            if (!result.ok) {
+              console.warn(
+                `[recaptcha] avviste skjemainnsending: ${result.reason}`,
+                result.score !== undefined ? `score=${result.score}` : ""
+              );
+            }
+            return result.ok;
           },
         },
         admin: {

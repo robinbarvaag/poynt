@@ -9,7 +9,9 @@ export {
 export {
   ChangeWheel,
   type ChangeWheelProps,
+  WHEEL_STRONG_NOTE,
   type WheelArea,
+  type WheelPlanLayout,
 } from "./change-wheel";
 export {
   ChapterPortal,

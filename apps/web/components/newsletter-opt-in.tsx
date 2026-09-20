@@ -4,6 +4,7 @@ import { Button, Text } from "@poynt/ui";
 import { Mail } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { RecaptchaNotice, recaptchaHeader, useRecaptcha } from "./recaptcha";
 
 /**
  * Nyhetsbrev-påmelding på kvitteringssiden — for Vipps-hurtigkassen, som ikke
@@ -21,12 +22,18 @@ export function NewsletterOptIn({
     "idle"
   );
 
+  const getRecaptchaToken = useRecaptcha("nyhetsbrev_ordre");
+
   const subscribe = async () => {
     setState("loading");
     try {
+      const token = await getRecaptchaToken();
       const res = await fetch("/api/newsletter/order-opt-in", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...recaptchaHeader(token),
+        },
         body: JSON.stringify({ reference }),
       });
       setState(res.ok ? "done" : "error");
@@ -80,6 +87,7 @@ export function NewsletterOptIn({
               Noe gikk galt — prøv igjen om et lite øyeblikk.
             </Text>
           )}
+          <RecaptchaNotice className="mt-3 text-muted-foreground" />
         </div>
       </div>
     </div>

@@ -91,3 +91,18 @@ html body[data-scroll-locked] {
     font-style: italic;
   }
 }
+
+/**
+ * Google reCAPTCHA v3: skjul badgen nede i høyre hjørne.
+ *
+ * Google tillater dette så lenge teksten «Beskyttet av reCAPTCHA …» med
+ * lenker til personvernerklæring og vilkår står synlig ved skjemaet — se
+ * components/recaptcha.tsx (<RecaptchaNotice>). Fjernes badgen uten den
+ * teksten, bryter vi vilkårene.
+ *
+ * `visibility: hidden` (ikke `display: none`): widgeten må fortsatt kunne
+ * måle seg selv for at grecaptcha.execute skal virke.
+ */
+.grecaptcha-badge {
+  visibility: hidden;
+}

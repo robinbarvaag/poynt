@@ -75,6 +75,7 @@ import * as migration_20260914_213636_eventer_fase2_3 from './20260914_213636_ev
 import * as migration_20260915_193733_vekst_blocks from './20260915_193733_vekst_blocks';
 import * as migration_20260916_205348 from './20260916_205348';
 import * as migration_20260917_212658_linkPending from './20260917_212658_linkPending';
+import * as migration_20260920_104703_changewheel_plan from './20260920_104703_changewheel_plan';
 
 export const migrations = [
   {
@@ -460,6 +461,11 @@ export const migrations = [
   {
     up: migration_20260917_212658_linkPending.up,
     down: migration_20260917_212658_linkPending.down,
-    name: '20260917_212658_linkPending'
+    name: '20260917_212658_linkPending',
+  },
+  {
+    up: migration_20260920_104703_changewheel_plan.up,
+    down: migration_20260920_104703_changewheel_plan.down,
+    name: '20260920_104703_changewheel_plan'
   },
 ];

@@ -10,6 +10,7 @@ import {
   releaseUnpaidRegistration,
 } from "@/lib/events/registrations";
 import { getClientIp, rateLimit } from "@/lib/rate-limit";
+import { guardRecaptcha } from "@/lib/recaptcha";
 import { type NextRequest, NextResponse, after } from "next/server";
 
 const ERROR_STATUS: Record<string, number> = {
@@ -37,6 +38,9 @@ export async function POST(
       { status: 429 }
     );
   }
+
+  const blocked = await guardRecaptcha(request, "paamelding");
+  if (blocked) return blocked;
 
   const { id } = await params;
   const eventId = Number(id);

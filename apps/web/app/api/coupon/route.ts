@@ -17,6 +17,16 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Kodefeltet er ellers et gratis orakel for å gjette seg fram til gyldige
+  // rabattkoder. Svaret får `valid: false` i tillegg til `error`, slik at
+  // handlekurven viser meldingen på vanlig måte.
+  const { guardRecaptcha } = await import("@/lib/recaptcha");
+  const blocked = await guardRecaptcha(req, "rabattkode");
+  if (blocked) {
+    const { error } = (await blocked.json()) as { error: string };
+    return NextResponse.json({ valid: false, error }, { status: 403 });
+  }
+
   try {
     const { code, subtotal } = (await req.json()) as {
       code?: string;

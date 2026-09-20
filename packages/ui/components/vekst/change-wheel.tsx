@@ -28,6 +28,17 @@ export interface WheelArea {
   linkPending?: boolean;
 }
 
+/**
+ * Hvor mye av planen som står framme når alle områdene er besvart.
+ * `collapsed`: bare «Start her» er åpent, resten kan klikkes opp.
+ * `all`: alle områdene står åpne (slik blokken alltid har gjort).
+ * `focus`: områdene der leseren svarte ja på alt tas helt ut av lista.
+ */
+export type WheelPlanLayout = "collapsed" | "all" | "focus";
+
+/** Standardteksten for et område der alt er ja. */
+export const WHEEL_STRONG_NOTE = "Her har du ikke mye å gå på.";
+
 export interface ChangeWheelProps {
   eyebrow?: string;
   title?: string;
@@ -38,6 +49,13 @@ export interface ChangeWheelProps {
    * svarene; uten plassholder legges resultatet til på slutten.
    */
   aiPrompt?: string;
+  /** Hvor mye av planen som står åpen til slutt. Standard: `collapsed`. */
+  planLayout?: WheelPlanLayout;
+  /**
+   * Vises i stedet for rådet når leseren svarte ja på alt i et område. Tom
+   * streng gir rådet som vanlig.
+   */
+  strongNote?: string;
   palette?: ChapterPalette;
   className?: string;
 }
@@ -55,6 +73,8 @@ export function ChangeWheel({
   intro,
   areas,
   aiPrompt,
+  planLayout = "collapsed",
+  strongNote = WHEEL_STRONG_NOTE,
   palette = POYNT_CHAPTER_PALETTE,
   className,
 }: ChangeWheelProps) {
@@ -63,6 +83,7 @@ export function ChangeWheel({
     areas.map((area) => area.questions.map((): boolean | null => null));
   const [answers, setAnswers] = useState(emptyAnswers);
   const [step, setStep] = useState(0);
+  const [openPlanRows, setOpenPlanRows] = useState<number[]>([]);
   const [copied, setCopied] = useState(false);
   const stepRefs = useRef<(HTMLLIElement | null)[]>([]);
   const autoAdvanced = useRef(false);
@@ -133,7 +154,14 @@ export function ChangeWheel({
 
   function restart() {
     setAnswers(emptyAnswers());
+    setOpenPlanRows([]);
     setStep(0);
+  }
+
+  function togglePlanRow(index: number) {
+    setOpenPlanRows((open) =>
+      open.includes(index) ? open.filter((i) => i !== index) : [...open, index]
+    );
   }
 
   async function copyToAi() {
@@ -164,6 +192,17 @@ export function ChangeWheel({
           scores[b.i].yes / scores[b.i].total || a.i - b.i
     );
 
+  /** Alt er ja: området er helt inne i midten av hjulet. */
+  const isStrong = (i: number) =>
+    scores[i].total > 0 && scores[i].yes >= scores[i].total;
+
+  // «Start her» står alltid i lista. I fokusmodus tas de ferdige områdene ut.
+  const planRows = plan.filter(
+    ({ i }, rank) => rank === 0 || planLayout !== "focus" || !isStrong(i)
+  );
+  const hiddenStrong = plan.length - planRows.length;
+  const allStrong = allComplete && areas.every((_, i) => isStrong(i));
+
   /** Fargebrikke med ringnavn og poengsum, brukt både i lista og i planen. */
   const ringChip = (i: number, withScore: boolean) => {
     const ring = wheelRing(rings[i]);
@@ -183,12 +222,9 @@ export function ChangeWheel({
   return (
     <div style={vekstVars(palette)} className={className}>
       <SectionHeader eyebrow={eyebrow} title={title} intro={intro} />
-
-      {/* Forklaringen: hva én, to og tre ja gjør med hjulet. Uten ramme, så
-          den leses som en bildetekst og ikke som enda et kort. */}
       <div className="mt-1 mb-6 flex flex-col gap-x-8 gap-y-3 lg:flex-row lg:items-center">
         <p className="max-w-sm font-semibold text-sm leading-snug">
-          Hvert ja tegner én ring til, fra ytterkanten og inn mot midten:
+          For hvert ja rykker du inn mot midten
         </p>
         <ul className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-x-7">
           {WHEEL_RINGS.map((ring, k) => (
@@ -207,16 +243,7 @@ export function ChangeWheel({
         </ul>
       </div>
 
-      {/* Flex på mobil, rutenett på store skjermer: begge gir hjulet plass til
-          å henge med nedover siden mens du svarer. */}
       <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-start lg:gap-5">
-        {/* Fester seg under alt som ligger fast øverst på siden: `SiteHeader`
-            publiserer høyden sin som `--site-header-offset`, og brikkemenyen i
-            `HubLayout` sin som `--hub-bar-offset`. Begge er 0 når de ikke er
-            der (Storybook, sider uten hub), og kortet følger dem i samme tempo.
-            Kortet har samme størrelse hele veien: bytter det størrelse når det
-            fester seg, endrer det sidens høyde, som flytter scrollen, som
-            fester/løsner det igjen – en evig løkke. */}
         <div
           className="sticky z-20 transition-[top] duration-300 ease-drawer motion-reduce:transition-none"
           style={{
@@ -233,9 +260,11 @@ export function ChangeWheel({
               activeIndex={step < areas.length ? step : -1}
               focusIndex={weakest}
               label={
-                allComplete && weakest >= 0
-                  ? `Endringshjulet. Svakeste område: ${areas[weakest].name}.`
-                  : `Endringshjulet. ${answered} av ${totalQuestions} spørsmål besvart.`
+                allStrong
+                  ? "Endringshjulet. Alle områdene er grønne hele veien inn."
+                  : allComplete && weakest >= 0
+                    ? `Endringshjulet. Svakeste område: ${areas[weakest].name}.`
+                    : `Endringshjulet. ${answered} av ${totalQuestions} spørsmål besvart.`
               }
               className="w-36 shrink-0 sm:w-44 lg:w-full lg:max-w-[24rem]"
             />
@@ -247,11 +276,17 @@ export function ChangeWheel({
               <p className="font-semibold text-muted-foreground text-xs uppercase tracking-[0.18em]">
                 {activeArea
                   ? `Steg ${step + 1} av ${areas.length}`
-                  : "Start med"}
+                  : allStrong
+                    ? "Ferdig"
+                    : "Start med"}
               </p>
               <p className="text-balance font-bold font-heading leading-tight lg:text-xl">
                 {activeArea?.name ??
-                  (weakest >= 0 ? areas[weakest].name : "Ferdig")}
+                  (allStrong
+                    ? "Alt er grønt"
+                    : weakest >= 0
+                      ? areas[weakest].name
+                      : "Ferdig")}
               </p>
               <div className="mt-1 flex w-full flex-col gap-1.5">
                 <div className="h-1.5 overflow-hidden rounded-full bg-foreground/10">
@@ -275,13 +310,18 @@ export function ChangeWheel({
           {allComplete && (
             <div className="flex flex-col gap-4 rounded-3xl bg-card p-5 ring-1 ring-foreground/10 motion-safe:fade-in motion-safe:slide-in-from-top-2 motion-safe:animate-in motion-safe:duration-500 md:p-6">
               <h3 className="font-bold font-heading text-xl leading-tight">
-                Slik står du – og her begynner du
+                Sånn står det til hos deg
               </h3>
               <ol className="flex flex-col divide-y divide-foreground/10">
-                {plan.map(({ area, i }, rank) => (
-                  <li key={area.name} className="flex flex-col gap-2 py-4">
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-                      {rank === 0 && (
+                {planRows.map(({ area, i }, rank) => {
+                  // Et ferdig område får kortversjonen: ingenting å slå opp.
+                  const note = isStrong(i) ? strongNote : "";
+                  const foldable =
+                    planLayout === "collapsed" && rank > 0 && !note;
+                  const open = !foldable || openPlanRows.includes(i);
+                  const header = (
+                    <span className="flex w-full flex-wrap items-center gap-x-3 gap-y-2">
+                      {rank === 0 && !note && (
                         <span className="rounded-full bg-foreground px-2.5 py-1 font-heading font-semibold text-background text-xs">
                           Start her
                         </span>
@@ -290,24 +330,82 @@ export function ChangeWheel({
                         {area.name}
                       </span>
                       {ringChip(i, true)}
-                    </div>
-                    {area.advice && (
-                      <p className="text-muted-foreground leading-relaxed">
-                        {area.advice}
-                      </p>
-                    )}
-                    {area.link &&
-                      (area.linkPending ? (
-                        <p className="inline-flex items-center gap-1.5 text-muted-foreground text-sm">
-                          <Icon name="clock" className="size-4" />
-                          Verktøyet kommer snart.
-                        </p>
+                      {foldable && (
+                        <Icon
+                          name="chevron-down"
+                          aria-hidden="true"
+                          className={cn(
+                            "ml-auto size-5 shrink-0 text-muted-foreground transition-transform",
+                            open && "rotate-180"
+                          )}
+                        />
+                      )}
+                    </span>
+                  );
+                  return (
+                    <li key={area.name} className="flex flex-col py-4">
+                      {foldable ? (
+                        <button
+                          type="button"
+                          onClick={() => togglePlanRow(i)}
+                          aria-expanded={open}
+                          className="flex w-full text-left"
+                        >
+                          {header}
+                        </button>
                       ) : (
-                        <VekstFooterLink link={area.link} />
-                      ))}
-                  </li>
-                ))}
+                        header
+                      )}
+                      {/* Samme rutenett-triks som stegene: høyden animerer
+                          uten at vi måler noe. */}
+                      <div
+                        className={cn(
+                          "grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none",
+                          open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+                        )}
+                      >
+                        <div className="overflow-hidden">
+                          <div
+                            inert={!open}
+                            className="flex flex-col gap-2 pt-2"
+                          >
+                            {note ? (
+                              <p className="text-muted-foreground leading-relaxed">
+                                {note}
+                              </p>
+                            ) : (
+                              <>
+                                {area.advice && (
+                                  <p className="text-muted-foreground leading-relaxed">
+                                    {area.advice}
+                                  </p>
+                                )}
+                                {area.link &&
+                                  (area.linkPending ? (
+                                    <p className="inline-flex items-center gap-1.5 text-muted-foreground text-sm">
+                                      <Icon name="clock" className="size-4" />
+                                      Verktøyet kommer snart.
+                                    </p>
+                                  ) : (
+                                    <VekstFooterLink link={area.link} />
+                                  ))}
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </li>
+                  );
+                })}
               </ol>
+              {hiddenStrong > 0 && (
+                <p className="text-muted-foreground text-sm">
+                  {hiddenStrong === 1
+                    ? "Ett område til er grønt hele veien inn"
+                    : `${hiddenStrong} områder til er grønne hele veien inn`}
+                  {" – de er ikke med i lista. Du ser dem i hjulet."}
+                </p>
+              )}
               <div className="flex flex-wrap gap-2">
                 {aiPrompt !== undefined && (
                   <Button

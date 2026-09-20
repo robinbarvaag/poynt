@@ -81,3 +81,21 @@ export const ToOmrader: Story = {
     palette: BOOK_PALETTE,
   },
 };
+
+/**
+ * Alle områdene åpne til slutt, slik blokken gjorde før planen ble
+ * konfigurerbar.
+ */
+export const AlleApne: Story = {
+  ...Standard,
+  args: { ...Standard.args, planLayout: "all" },
+};
+
+/**
+ * Fokusmodus: områdene leseren svarte ja på alt i tas ut av lista. «Start her»
+ * står alltid igjen.
+ */
+export const BareDetSomGjenstar: Story = {
+  ...Standard,
+  args: { ...Standard.args, planLayout: "focus" },
+};

@@ -1,6 +1,11 @@
 "use client";
 
 import { CheckoutConsentCheckbox } from "@/components/checkout-consent-checkbox";
+import {
+  RecaptchaNotice,
+  recaptchaHeader,
+  useRecaptcha,
+} from "@/components/recaptcha";
 import { VippsButton } from "@/components/vipps-button";
 import { formatPrice } from "@/lib/format";
 import { NEWSLETTER_CONSENT_TEXTS } from "@/lib/newsletter-consent-texts";
@@ -73,6 +78,7 @@ export default function CartPage() {
   const [couponInput, setCouponInput] = useState("");
   const [couponError, setCouponError] = useState<string | null>(null);
   const [couponLoading, setCouponLoading] = useState(false);
+  const getRecaptchaToken = useRecaptcha("rabattkode");
 
   // Tom til klienten har montert — server og første render må være like.
   const cartItems = ready ? items : [];
@@ -85,9 +91,13 @@ export default function CartPage() {
     setCouponLoading(true);
     setCouponError(null);
     try {
+      const token = await getRecaptchaToken();
       const res = await fetch("/api/coupon", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...recaptchaHeader(token),
+        },
         body: JSON.stringify({ code, subtotal: total() }),
       });
       const data = await res.json();
@@ -364,6 +374,7 @@ export default function CartPage() {
                       {couponError}
                     </p>
                   )}
+                  <RecaptchaNotice className="mt-2 text-muted-foreground" />
                 </form>
               )}
 

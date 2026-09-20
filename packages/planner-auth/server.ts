@@ -1,8 +1,14 @@
 import { sendMagicLinkEmail } from "@poynt/email";
 import { db } from "@poynt/planner-db";
 import * as schema from "@poynt/planner-db/schema";
+import {
+  RECAPTCHA_HEADER,
+  recaptchaErrorMessage,
+  verifyRecaptcha,
+} from "@poynt/utils/recaptcha";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { APIError, createAuthMiddleware } from "better-auth/api";
 import { magicLink } from "better-auth/plugins";
 
 export const auth = betterAuth({
@@ -42,6 +48,37 @@ export const auth = betterAuth({
       enabled: true,
       maxAge: 60 * 60, // 1-hour cookie cache
     },
+  },
+
+  hooks: {
+    /**
+     * reCAPTCHA v3 foran magic link-innsendingen: uten den kan hvem som helst
+     * be oss sende innloggings-e-post til vilkårlige adresser i løkke (både
+     * spam for mottakeren og Resend-kvote for oss). Google-innlogging går via
+     * OAuth-redirect og trenger ingen sjekk.
+     *
+     * Tokenet sendes som header fra innloggingssida. Uten
+     * RECAPTCHA_SECRET_KEY slipper alt gjennom (se @poynt/utils/recaptcha).
+     */
+    before: createAuthMiddleware(async (ctx) => {
+      if (ctx.path !== "/sign-in/magic-link") return;
+
+      const headers = ctx.headers ?? new Headers();
+      const result = await verifyRecaptcha(headers.get(RECAPTCHA_HEADER), {
+        action: "innlogging",
+        remoteIp: headers.get("x-forwarded-for")?.split(",")[0]?.trim(),
+      });
+
+      if (!result.ok) {
+        console.warn(
+          `[recaptcha] avviste magic link: ${result.reason}`,
+          result.score !== undefined ? `score=${result.score}` : ""
+        );
+        throw new APIError("FORBIDDEN", {
+          message: recaptchaErrorMessage(result.reason),
+        });
+      }
+    }),
   },
 
   // Plugins

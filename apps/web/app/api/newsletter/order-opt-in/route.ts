@@ -19,6 +19,10 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const { guardRecaptcha } = await import("@/lib/recaptcha");
+  const blocked = await guardRecaptcha(req, "nyhetsbrev_ordre");
+  if (blocked) return blocked;
+
   try {
     const { reference } = await req.json();
     if (typeof reference !== "string" || !reference.startsWith("poynt-")) {

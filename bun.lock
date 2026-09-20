@@ -164,6 +164,7 @@
         "@better-fetch/fetch": "^1.1.12",
         "@poynt/email": "workspace:*",
         "@poynt/planner-db": "workspace:*",
+        "@poynt/utils": "workspace:*",
         "better-auth": "^1.2.5",
         "zod": "^4.4.3",
       },

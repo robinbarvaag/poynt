@@ -4,6 +4,7 @@ import { Button, Input } from "@poynt/ui";
 import { CheckCircle, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { PrivacyNotice } from "./privacy-notice";
+import { RecaptchaNotice, recaptchaHeader, useRecaptcha } from "./recaptcha";
 
 interface NewsletterFormProps {
   buttonText?: string;
@@ -17,6 +18,7 @@ export function NewsletterForm({
     "idle" | "loading" | "success" | "error"
   >("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  const getRecaptchaToken = useRecaptcha("nyhetsbrev");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,10 +29,12 @@ export function NewsletterForm({
     setErrorMessage("");
 
     try {
+      const token = await getRecaptchaToken();
       const response = await fetch("/api/newsletter", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...recaptchaHeader(token),
         },
         // Stien dokumenteres i samtykkeloggen (hvor påmeldingen skjedde).
         body: JSON.stringify({ email, path: window.location.pathname }),
@@ -96,6 +100,7 @@ export function NewsletterForm({
         purpose="Vi bruker e-posten kun til nyhetsbrevet, og du kan melde deg av når som helst."
         className="mt-3"
       />
+      <RecaptchaNotice className="mt-1" />
     </form>
   );
 }

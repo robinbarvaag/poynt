@@ -26,6 +26,10 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const { guardRecaptcha } = await import("@/lib/recaptcha");
+  const blocked = await guardRecaptcha(request, "boktilgang");
+  if (blocked) return blocked;
+
   try {
     const body = (await request.json()) as {
       pageId?: unknown;

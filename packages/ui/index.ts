@@ -603,7 +603,9 @@ export {
   type VekstCheckProps,
   type VekstLink,
   type VekstPillar,
+  WHEEL_STRONG_NOTE,
   type WheelArea,
+  type WheelPlanLayout,
   type Workflow,
   type WorkflowIcon,
 } from "./components/vekst";

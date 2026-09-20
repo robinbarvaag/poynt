@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  RecaptchaNotice,
+  recaptchaHeader,
+  useRecaptcha,
+} from "@/components/recaptcha";
 import { authClient } from "@poynt/planner-auth/client";
 import {
   Button,
@@ -21,6 +26,7 @@ export default function PlannerLoginPage() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [magicLinkSent, setMagicLinkSent] = useState(false);
+  const getRecaptchaToken = useRecaptcha("innlogging");
 
   const handleGoogleLogin = async () => {
     setError("");
@@ -43,10 +49,22 @@ export default function PlannerLoginPage() {
     setIsLoading(true);
 
     try {
-      await authClient.signIn.magicLink({
+      const token = await getRecaptchaToken();
+      // Better Auth kaster ikke på feilsvar — den returnerer { data, error }.
+      // Uten denne sjekken hadde et avvist forsøk vist «Sjekk e-posten din»
+      // for en e-post som aldri ble sendt.
+      const { error: authError } = await authClient.signIn.magicLink({
         email,
         callbackURL: "/on-poynt/oversikt",
+        fetchOptions: { headers: recaptchaHeader(token) },
       });
+
+      if (authError) {
+        setError(
+          authError.message || "Kunne ikke sende innloggingslenke. Prøv igjen."
+        );
+        return;
+      }
 
       setMagicLinkSent(true);
     } catch {
@@ -134,6 +152,8 @@ export default function PlannerLoginPage() {
             >
               {isLoading ? "Sender..." : "Send innloggingslenke"}
             </Button>
+
+            <RecaptchaNotice className="text-muted-foreground" />
           </form>
 
           <p className="border-t pt-4 text-center text-sm text-muted-foreground">

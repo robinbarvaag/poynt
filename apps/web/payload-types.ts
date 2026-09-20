@@ -1176,6 +1176,14 @@ export interface ChangeWheelBlock {
       }[]
     | null;
   /**
+   * Området leseren bør starte med står alltid øverst og åpent. De andre kan stå sammenslått, eller tas helt ut av lista når leseren svarte ja på alt.
+   */
+  planLayout?: ('collapsed' | 'all' | 'focus') | null;
+  /**
+   * Erstatter rådet for områdene som er grønne hele veien inn. Tøm feltet hvis rådet skal stå der som vanlig.
+   */
+  strongNote?: string | null;
+  /**
    * {resultat} byttes ut med svarene til leseren. La feltet stå tomt for å skjule knappen.
    */
   aiPrompt?: string | null;
@@ -3971,6 +3979,8 @@ export interface ChangeWheelBlockSelect<T extends boolean = true> {
         linkPending?: T;
         id?: T;
       };
+  planLayout?: T;
+  strongNote?: T;
   aiPrompt?: T;
   palette?: T;
   id?: T;

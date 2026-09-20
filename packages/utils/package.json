@@ -10,7 +10,8 @@
     "./generate-slug": "./generate-slug.ts",
     "./email-normalize": "./email-normalize.ts",
     "./color-utils": "./color-utils.ts",
-    "./format": "./format.ts"
+    "./format": "./format.ts",
+    "./recaptcha": "./recaptcha.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"

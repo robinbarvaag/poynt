@@ -79,6 +79,44 @@ export const ChangeWheel: Block = {
       ],
     },
     {
+      type: "collapsible",
+      label: "Resultatet til slutt",
+      admin: { initCollapsed: true },
+      fields: [
+        {
+          name: "planLayout",
+          type: "select",
+          label: "Hva vises i lista når alt er besvart?",
+          defaultValue: "collapsed",
+          options: [
+            {
+              label: "«Start her» åpent, resten kan klikkes opp",
+              value: "collapsed",
+            },
+            { label: "Alle områdene åpne", value: "all" },
+            {
+              label: "Bare områdene leseren har noe å hente på",
+              value: "focus",
+            },
+          ],
+          admin: {
+            description:
+              "Området leseren bør starte med står alltid øverst og åpent. De andre kan stå sammenslått, eller tas helt ut av lista når leseren svarte ja på alt.",
+          },
+        },
+        {
+          name: "strongNote",
+          type: "text",
+          label: "Tekst når leseren svarer ja på alt i et område",
+          defaultValue: "Her har du ikke mye å gå på.",
+          admin: {
+            description:
+              "Erstatter rådet for områdene som er grønne hele veien inn. Tøm feltet hvis rådet skal stå der som vanlig.",
+          },
+        },
+      ],
+    },
+    {
       name: "aiPrompt",
       type: "textarea",
       label: "Prompt til «Kopier resultatet til KI»",

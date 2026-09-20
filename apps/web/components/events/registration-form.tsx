@@ -2,6 +2,11 @@
 
 import { PrivacyNotice } from "@/components/privacy-notice";
 import {
+  RecaptchaNotice,
+  recaptchaHeader,
+  useRecaptcha,
+} from "@/components/recaptcha";
+import {
   type RegistrationWindow,
   registrationWindow,
 } from "@/lib/events/capacity";
@@ -84,6 +89,7 @@ export function RegistrationForm(props: RegistrationFormProps) {
   const [paymentMethod, setPaymentMethod] = useState<PaymentProvider>(
     props.paymentMethods[0] ?? "vipps"
   );
+  const getRecaptchaToken = useRecaptcha("paamelding");
 
   useEffect(() => {
     setWindow(registrationWindow(props));
@@ -136,9 +142,13 @@ export function RegistrationForm(props: RegistrationFormProps) {
     setError(null);
     const data = new FormData(e.currentTarget);
     try {
+      const token = await getRecaptchaToken();
       const res = await fetch(`/api/eventer/${props.eventId}/pamelding`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...recaptchaHeader(token),
+        },
         body: JSON.stringify({
           name: data.get("navn"),
           email: data.get("epost"),
@@ -444,6 +454,7 @@ export function RegistrationForm(props: RegistrationFormProps) {
           purpose="Vi bruker opplysningene til påmeldingen og billetten. Svar på ekstra spørsmål slettes to uker etter eventet, navn og e-post senest seks måneder etter."
           className="text-muted-foreground"
         />
+        <RecaptchaNotice className="text-muted-foreground" />
       </div>
     </form>
   );
