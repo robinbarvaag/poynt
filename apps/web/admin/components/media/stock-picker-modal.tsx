@@ -44,7 +44,11 @@ const tabs: {
 
 export type StockPickerDrawerProps = {
   drawerSlug: string;
-  onImported: (res: { id: string | number; filename: string }) => void;
+  onImported: (res: {
+    id: string | number;
+    filename: string;
+    alt: string;
+  }) => void;
   mode: "library" | "select";
 };
 
@@ -63,7 +67,13 @@ export const StockPickerDrawer = ({
   const [error, setError] = useState<string | null>(null);
   const [importingId, setImportingId] = useState<string | null>(null);
   const [importedIds, setImportedIds] = useState<Set<string>>(new Set());
-  const [notice, setNotice] = useState<string | null>(null);
+  // Siste import — brukes til kvitteringen med «Åpne bildet»-lenka, så man
+  // slipper å lete opp bildet i lista etterpå for å skrive alt-tekst.
+  const [lastImport, setLastImport] = useState<{
+    id: string | number;
+    filename: string;
+    alt: string;
+  } | null>(null);
 
   const runSearch = useCallback(
     async (nextPage: number, append: boolean) => {
@@ -99,7 +109,7 @@ export const StockPickerDrawer = ({
   const onImport = async (image: StockImage) => {
     setImportingId(image.id);
     setError(null);
-    setNotice(null);
+    setLastImport(null);
     const result = await importStockImage(image);
     setImportingId(null);
     if (!result.ok) {
@@ -107,11 +117,11 @@ export const StockPickerDrawer = ({
       return;
     }
     setImportedIds((prev) => new Set(prev).add(image.id));
-    setNotice(
-      mode === "select"
-        ? `«${result.filename}» er valgt ✓`
-        : `Importert «${result.filename}» til Media.`
-    );
+    setLastImport({
+      id: result.id,
+      filename: result.filename,
+      alt: result.alt,
+    });
     onImported(result);
     if (mode === "select") {
       closeModal(drawerSlug);
@@ -189,22 +199,44 @@ export const StockPickerDrawer = ({
             {error}
           </p>
         )}
-        {notice && (
-          <p
+        {/* Kvittering etter import. I library-modus er dette utgangen ut av
+            skuffa: uten en lenke videre blir man stående i søket og må lete
+            opp bildet i lista for å skrive alt-tekst. */}
+        {lastImport && (
+          <div
             style={{
               margin: 0,
-              padding: "0.6rem 0.85rem",
+              padding: "0.7rem 0.85rem",
               borderRadius: "var(--style-radius-s, 4px)",
               background: "var(--theme-success-100)",
               color: "var(--theme-success-700)",
               fontSize: "0.88em",
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "center",
+              gap: "0.6rem",
             }}
           >
-            {notice}
-            {mode === "library"
-              ? " Oppdater siden for å se det i lista, eller velg det direkte i et bildefelt."
-              : ""}
-          </p>
+            <span style={{ flex: "1 1 18rem" }}>
+              «{lastImport.filename}» ligger nå i Media. Alt-tekst er fylt inn
+              automatisk: «{lastImport.alt}» — åpne bildet hvis du vil justere
+              den.
+            </span>
+            {mode === "library" && (
+              // Bevisst `el="anchor"` (full navigering), ikke `el="link"`:
+              // Buttons klikk-håndterer kaller preventDefault når den får en
+              // onClick, og en klient-navigering ville latt skuffa henge igjen.
+              <Button
+                el="anchor"
+                url={`/admin/collections/media/${lastImport.id}`}
+                buttonStyle="primary"
+                size="small"
+                margin={false}
+              >
+                Åpne bildet
+              </Button>
+            )}
+          </div>
         )}
 
         {/* Results */}

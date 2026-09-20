@@ -2,12 +2,19 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { changeMemberTier, deactivateMember } from "../../actions/members";
+import {
+  changeMemberTier,
+  endMembership,
+  setMemberStatus,
+} from "../../actions/members";
+import { MemberDeleteButton } from "./member-delete-button";
 
 type MembershipTier = "none" | "community" | "community_ai" | "agency";
 
 type Props = {
   userId: string;
+  email: string;
+  name: string;
   currentTier: string;
   currentStatus: string;
   hasSubscription: boolean;
@@ -20,56 +27,88 @@ const tiers: { value: MembershipTier; label: string }[] = [
   { value: "agency", label: "Byrå" },
 ];
 
+const labelStyle: React.CSSProperties = {
+  display: "block",
+  fontSize: "0.75rem",
+  fontWeight: 600,
+  textTransform: "uppercase",
+  letterSpacing: "0.5px",
+  color: "var(--theme-elevation-400)",
+  marginBottom: "0.5rem",
+};
+
+const hintStyle: React.CSSProperties = {
+  margin: "0.4rem 0 0",
+  fontSize: "0.8rem",
+  color: "var(--theme-elevation-500)",
+  lineHeight: 1.5,
+};
+
+const sectionStyle: React.CSSProperties = {
+  paddingTop: "1rem",
+  borderTop: "1px solid var(--theme-elevation-150)",
+};
+
 export const MemberActions = ({
   userId,
+  email,
+  name,
   currentTier,
   currentStatus,
   hasSubscription,
 }: Props) => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
 
-  const handleTierChange = async (newTier: MembershipTier) => {
-    if (newTier === currentTier) return;
+  // Handlingene returnerer enten { success } eller { success, error } —
+  // sistnevnte når noe var i veien uten at det er en feil å kaste.
+  const run = async (
+    action: () => Promise<{ success: boolean; error?: string }>
+  ) => {
     setLoading(true);
+    setMessage(null);
     try {
-      await changeMemberTier(userId, newTier);
+      const result = await action();
+      if (result.error) {
+        setMessage(result.error);
+        return;
+      }
       router.refresh();
     } catch (err) {
-      console.error("Feil ved endring av tier:", err);
+      console.error("Handlingen feilet:", err);
+      setMessage("Handlingen feilet. Prøv igjen.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDeactivate = async () => {
+  const handleTierChange = (newTier: MembershipTier) => {
+    if (newTier === currentTier) return;
+    run(() => changeMemberTier(userId, newTier));
+  };
+
+  const isPaused = currentStatus === "inactive";
+
+  const handleTogglePause = () =>
+    run(() => setMemberStatus(userId, isPaused ? "active" : "inactive"));
+
+  const handleEndMembership = () => {
     if (
       !window.confirm(
-        "Er du sikker på at du vil deaktivere dette medlemskapet? Stripe-abonnementet vert kansellert."
+        "Avslutte medlemskapet? Stripe-abonnementet kanselleres og nivået settes til «ingen». Skal personen bare stoppes midlertidig, bruk «Sett på pause» i stedet."
       )
     )
       return;
-    setLoading(true);
-    try {
-      await deactivateMember(userId);
-      router.refresh();
-    } catch (err) {
-      console.error("Feil ved deaktivering:", err);
-    } finally {
-      setLoading(false);
-    }
+    run(() => endMembership(userId));
   };
 
   return (
     <section style={{ marginTop: "2rem" }}>
       <h2
-        style={{
-          fontSize: "1rem",
-          fontWeight: 600,
-          marginBottom: "0.75rem",
-        }}
+        style={{ fontSize: "1rem", fontWeight: 600, marginBottom: "0.75rem" }}
       >
-        Handlingar
+        Handlinger
       </h2>
       <div
         style={{
@@ -82,21 +121,8 @@ export const MemberActions = ({
           gap: "1rem",
         }}
       >
-        {/* Tier change */}
         <div>
-          <span
-            style={{
-              display: "block",
-              fontSize: "0.75rem",
-              fontWeight: 600,
-              textTransform: "uppercase",
-              letterSpacing: "0.5px",
-              color: "var(--theme-elevation-400)",
-              marginBottom: "0.5rem",
-            }}
-          >
-            Endre tier
-          </span>
+          <span style={labelStyle}>Endre nivå</span>
           <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
             {tiers.map((tier) => (
               <button
@@ -124,24 +150,52 @@ export const MemberActions = ({
                 }}
               >
                 {tier.label}
-                {tier.value === currentTier && " (noverande)"}
+                {tier.value === currentTier && " (nåværende)"}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Deactivate */}
-        {hasSubscription && currentStatus !== "canceled" && (
-          <div
+        {/* Pause: reversibel. Stripe og nivået står urørt, så ett klikk
+            setter personen tilbake der hen var. */}
+        <div style={sectionStyle}>
+          <span style={labelStyle}>Tilgang</span>
+          <button
+            type="button"
+            disabled={loading || !hasSubscription}
+            onClick={handleTogglePause}
             style={{
-              paddingTop: "1rem",
-              borderTop: "1px solid var(--theme-elevation-150)",
+              padding: "0.5rem 1rem",
+              border: "1px solid var(--theme-elevation-200)",
+              borderRadius: "var(--style-radius-s)",
+              background: isPaused
+                ? "var(--theme-success-500, #16a34a)"
+                : "var(--theme-elevation-0)",
+              color: isPaused ? "#fff" : "var(--theme-text)",
+              cursor: loading || !hasSubscription ? "default" : "pointer",
+              opacity: loading || !hasSubscription ? 0.6 : 1,
+              fontSize: "0.875rem",
+              fontWeight: 500,
             }}
           >
+            {isPaused ? "Gi tilgang igjen" : "Sett på pause"}
+          </button>
+          <p style={hintStyle}>
+            {!hasSubscription
+              ? "Personen har ikke noe medlemskap ennå, så det er ingen tilgang å pause."
+              : isPaused
+                ? "Tilgangen er satt på pause. Nivået og Stripe-abonnementet står urørt, så du kan slippe personen inn igjen når som helst."
+                : "Stenger tilgangen til On Poynt uten å røre Stripe eller nivået. Kan skrus på igjen."}
+          </p>
+        </div>
+
+        {hasSubscription && currentStatus !== "canceled" && (
+          <div style={sectionStyle}>
+            <span style={labelStyle}>Avslutt</span>
             <button
               type="button"
               disabled={loading}
-              onClick={handleDeactivate}
+              onClick={handleEndMembership}
               style={{
                 padding: "0.5rem 1rem",
                 border: "1px solid var(--theme-error-500, #dc3545)",
@@ -154,9 +208,38 @@ export const MemberActions = ({
                 fontWeight: 500,
               }}
             >
-              {loading ? "Behandlar..." : "Deaktiver medlemskap"}
+              {loading ? "Behandler…" : "Avslutt medlemskap"}
             </button>
+            <p style={hintStyle}>
+              Kansellerer Stripe-abonnementet og setter nivået til «ingen».
+              Kontoen består, men medlemskapet er over.
+            </p>
           </div>
+        )}
+
+        <div style={sectionStyle}>
+          <span style={labelStyle}>Slett</span>
+          <MemberDeleteButton
+            userId={userId}
+            label={name || email}
+            redirectTo="/admin/medlemmer"
+          />
+          <p style={hintStyle}>
+            Fjerner personen og alt som henger på kontoen. Kan ikke angres.
+          </p>
+        </div>
+
+        {message && (
+          <p
+            role="alert"
+            style={{
+              margin: 0,
+              color: "var(--theme-error-500, #dc3545)",
+              fontSize: "0.85rem",
+            }}
+          >
+            {message}
+          </p>
         )}
       </div>
     </section>

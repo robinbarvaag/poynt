@@ -40,6 +40,7 @@ import { StockMediaPicker as StockMediaPicker_7d8c930913c9c09e14d244ff8c96b4e3 }
 import { GenerateAltButton as GenerateAltButton_040810ca926965e5b8a67fcc6e0594ab } from '../../../admin/components/media/generate-alt-button'
 import { FolderTableCell as FolderTableCell_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 import { FolderField as FolderField_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
+import { MediaGrid as MediaGrid_4d358dd7a2279418b0f1ab6d4d5dc013 } from '../../../admin/components/media/media-grid'
 import { NewsletterPreview as NewsletterPreview_34919c8e80fce11b54833d79b19e2329 } from '../../../admin/components/newsletters/newsletter-preview'
 import { SendNewsletterPanel as SendNewsletterPanel_75d3fa918eb52ceef0f5f7d7e08ab991 } from '../../../admin/components/newsletters/send-newsletter-panel'
 import { NewsletterIntro as NewsletterIntro_e9d62145d2e1672a2188efe4769c5893 } from '../../../admin/components/newsletters/newsletter-intro'
@@ -117,6 +118,7 @@ export const importMap = {
   "/admin/components/media/generate-alt-button#GenerateAltButton": GenerateAltButton_040810ca926965e5b8a67fcc6e0594ab,
   "@payloadcms/next/rsc#FolderTableCell": FolderTableCell_f9c02e79a4aed9a3924487c0cd4cafb1,
   "@payloadcms/next/rsc#FolderField": FolderField_f9c02e79a4aed9a3924487c0cd4cafb1,
+  "/admin/components/media/media-grid#MediaGrid": MediaGrid_4d358dd7a2279418b0f1ab6d4d5dc013,
   "/admin/components/newsletters/newsletter-preview#NewsletterPreview": NewsletterPreview_34919c8e80fce11b54833d79b19e2329,
   "/admin/components/newsletters/send-newsletter-panel#SendNewsletterPanel": SendNewsletterPanel_75d3fa918eb52ceef0f5f7d7e08ab991,
   "/admin/components/newsletters/newsletter-intro#NewsletterIntro": NewsletterIntro_e9d62145d2e1672a2188efe4769c5893,

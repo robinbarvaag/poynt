@@ -15,6 +15,46 @@ import { useEffect, useState } from "react";
  *   først – noe som ellers lukker «Opprett ny»-modalet.
  * - Ellers sendes dokumentets id, og endepunktet henter den lagrede fila.
  */
+
+/** Lengste kant vi sender. Modellen leser motiv og plakattekst fint på dette. */
+const MAX_EDGE = 1400;
+
+/**
+ * Krymper bildet i nettleseren før det sendes. Uten dette blir et vanlig
+ * skjermbilde eller telefonfoto fort større enn grensa for én forespørsel, og
+ * svaret kommer tilbake som ren tekst («Request Entity Too Large») i stedet for
+ * JSON. Klarer ikke nettleseren å dekode fila, sendes originalen som før.
+ */
+async function shrinkForUpload(file: File): Promise<Blob> {
+  try {
+    const bitmap = await createImageBitmap(file);
+    const scale = Math.min(1, MAX_EDGE / Math.max(bitmap.width, bitmap.height));
+    const width = Math.max(1, Math.round(bitmap.width * scale));
+    const height = Math.max(1, Math.round(bitmap.height * scale));
+
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      bitmap.close();
+      return file;
+    }
+    // Hvitt bak gjennomsiktige png-er, ellers blir motivet svart på svart.
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, width, height);
+    ctx.drawImage(bitmap, 0, 0, width, height);
+    bitmap.close();
+
+    const blob = await new Promise<Blob | null>((resolve) => {
+      canvas.toBlob(resolve, "image/jpeg", 0.8);
+    });
+    return blob ?? file;
+  } catch {
+    return file;
+  }
+}
+
 export const GenerateAltButton = () => {
   const { id } = useDocumentInfo();
   const { setValue, value } = useField<string>({ path: "alt" });
@@ -56,7 +96,12 @@ export const GenerateAltButton = () => {
       let res: Response;
       if (hasPendingFile) {
         const form = new FormData();
-        form.append("file", pendingFile);
+        const shrunk = await shrinkForUpload(pendingFile);
+        form.append(
+          "file",
+          shrunk,
+          shrunk === pendingFile ? pendingFile.name : "opplasting.jpg"
+        );
         res = await fetch("/api/ai/alt-text", { method: "POST", body: form });
       } else {
         res = await fetch("/api/ai/alt-text", {
@@ -65,9 +110,23 @@ export const GenerateAltButton = () => {
           body: JSON.stringify({ mediaId: id }),
         });
       }
-      const data = (await res.json()) as { alt?: string; error?: string };
+      // Ikke `res.json()` rått: går noe galt i laget foran ruta (f.eks. for
+      // stor forespørsel) kommer svaret som ren tekst, og da sto brukeren
+      // igjen med «Unexpected token 'R'» i stedet for en forklaring.
+      const raw = await res.text();
+      let data: { alt?: string; error?: string } = {};
+      try {
+        data = JSON.parse(raw) as { alt?: string; error?: string };
+      } catch {
+        // Ikke JSON – vi faller tilbake på statuskoden under.
+      }
       if (!res.ok || !data.alt) {
-        throw new Error(data.error || "Kunne ikke lage et forslag.");
+        throw new Error(
+          data.error ||
+            (res.status === 413
+              ? "Bildet var for stort til å sendes. Lagre bildet først, og trykk «Foreslå alt-tekst» på nytt."
+              : `Kunne ikke lage et forslag (serveren svarte ${res.status}).`)
+        );
       }
       setValue(data.alt);
     } catch (e) {

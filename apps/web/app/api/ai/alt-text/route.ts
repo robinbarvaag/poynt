@@ -1,5 +1,5 @@
+import { generateAltText, supportsAltTextGeneration } from "@/lib/ai/alt-text";
 import config from "@/payload.config";
-import { gateway, generateText } from "ai";
 import { type NextRequest, NextResponse } from "next/server";
 import { getPayload } from "payload";
 
@@ -11,16 +11,9 @@ import { getPayload } from "payload";
  *
  * Selve kallet går via Vercel AI Gateway (samme oppsett som de andre
  * AI-verktøyene, se packages/planner-api/lib/models.ts). Modellen må kunne
- * lese bilder — claude-sonnet-4-6 gjør det.
+ * lese bilder — claude-sonnet-4-6 gjør det. Selve modell-kallet ligger i
+ * `lib/ai/alt-text.ts`, delt med `beforeChange`-hooken på Media.
  */
-
-const ALT_SYSTEM = `Du skriver alt-tekst for bilder på et norsk nettsted.
-Returner KUN selve alt-teksten – ingen anførselstegn, ingen forklaring, ingen «Alt-tekst:».
-Skriv på norsk bokmål, i én konsis og konkret setning (sikt mot maks ~125 tegn).
-Ikke begynn med «Bilde av», «Et bilde som viser» e.l. – beskriv motivet direkte.
-Beskriv det viktigste motivet, eventuell handling og stemning. Tar bildet med tydelig tekst (f.eks. en plakat), ta med den viktige teksten.`;
-
-const altModel = gateway("anthropic/claude-sonnet-4-6");
 
 /** Henter bildebytes fra en URL (absolutt eller Payload-relativ). */
 async function fetchImageBytes(
@@ -101,34 +94,14 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    if (!mediaType.startsWith("image/")) {
+    if (!supportsAltTextGeneration(mediaType)) {
       return NextResponse.json(
-        { error: "Alt-tekst kan kun genereres for bilder." },
+        { error: "Alt-tekst kan kun genereres for bilder (ikke svg)." },
         { status: 400 }
       );
     }
 
-    const { text } = await generateText({
-      model: altModel,
-      system: ALT_SYSTEM,
-      messages: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "text",
-              text: "Skriv alt-tekst for dette bildet.",
-            },
-            { type: "image", image: bytes, mediaType },
-          ],
-        },
-      ],
-    });
-
-    const alt = text
-      .trim()
-      .replace(/^["«»]+|["«»]+$/g, "")
-      .trim();
+    const alt = await generateAltText({ bytes, mediaType });
     if (!alt) {
       return NextResponse.json(
         { error: "Modellen returnerte tom alt-tekst. Prøv igjen." },

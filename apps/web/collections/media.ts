@@ -1,3 +1,4 @@
+import { generateAltText, supportsAltTextGeneration } from "@/lib/ai/alt-text";
 import {
   generateBlurDataURL,
   supportsBlurPlaceholder,
@@ -9,6 +10,26 @@ import {
   revalidateCmsAfterChange,
   revalidateCmsAfterDelete,
 } from "../lib/revalidate-cms";
+
+/**
+ * Taket på hvor lenge en opplasting får vente på alt-teksten. Vision-kallet tar
+ * normalt 5–15 s; går det lenger, lagrer vi heller bildet uten og lar
+ * redaktøren trykke «Foreslå alt-tekst» selv.
+ */
+const AUTO_ALT_TIMEOUT_MS = 20_000;
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  let timer: ReturnType<typeof setTimeout>;
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) => {
+      timer = setTimeout(
+        () => reject(new Error(`Tidsavbrudd etter ${ms} ms`)),
+        ms
+      );
+    }),
+  ]).finally(() => clearTimeout(timer));
+}
 
 export const Media: CollectionConfig = {
   slug: "media",
@@ -42,6 +63,39 @@ export const Media: CollectionConfig = {
         const blurDataURL = await generateBlurDataURL(file.data);
         return blurDataURL ? { ...data, blurDataURL } : data;
       },
+      // Fyller alt-teksten automatisk når et nytt bilde lastes opp uten en.
+      // Bevisst i `beforeChange` og ikke som en etterpå-oppdatering: da blir
+      // det én skriving, og vi unngår at Payload laster ned og skriver over
+      // blob-fila på nytt (payloadcms/payload#13182). Redaktøren kan alltid
+      // overskrive forslaget — har feltet allerede tekst, rører vi det ikke.
+      async ({ data, req, operation }) => {
+        if (operation !== "create") return data;
+        const file = req.file;
+        if (!file?.data || !supportsAltTextGeneration(file.mimetype)) {
+          return data;
+        }
+        if (typeof data?.alt === "string" && data.alt.trim()) return data;
+
+        try {
+          const alt = await withTimeout(
+            generateAltText({
+              bytes: new Uint8Array(file.data),
+              mediaType: file.mimetype,
+            }),
+            AUTO_ALT_TIMEOUT_MS
+          );
+          return alt ? { ...data, alt } : data;
+        } catch (err) {
+          // Alt-tekst skal aldri velte en opplasting — feltet blir bare stående
+          // tomt, og «Foreslå alt-tekst»-knappen virker fortsatt.
+          req.payload.logger.warn(
+            `Automatisk alt-tekst feilet for «${file.name}»: ${
+              err instanceof Error ? err.message : String(err)
+            }`
+          );
+          return data;
+        }
+      },
     ],
     // Blob-pluginen lagrer absolutte URL-er med serverURL fra opplastings-
     // øyeblikket (lokalt = http://localhost:3000). Admin bruker verdien rått,
@@ -72,8 +126,11 @@ export const Media: CollectionConfig = {
     group: "Innhold",
     components: {
       // «Finn bilde»-knapp over media-lista: søk i Unsplash/Giphy og importér.
+      // Deretter rutenett-visningen, som skjuler Payloads egen tabell når den
+      // er aktiv (se media-grid.tsx).
       beforeListTable: [
         "/admin/components/media/stock-picker#StockMediaPicker",
+        "/admin/components/media/media-grid#MediaGrid",
       ],
     },
   },
@@ -158,7 +215,7 @@ export const Media: CollectionConfig = {
       label: "Alt-tekst",
       admin: {
         description:
-          "Beskrivelse av bildet for skjermlesere og SEO. Bruk «Generer alt-tekst» for et AI-forslag du kan justere.",
+          "Beskrivelse av bildet for skjermlesere og SEO. Fylles ut automatisk når du laster opp et nytt bilde — les gjerne over og juster. Trykk «Foreslå alt-tekst» for et nytt forslag.",
         components: {
           afterInput: [
             "/admin/components/media/generate-alt-button#GenerateAltButton",

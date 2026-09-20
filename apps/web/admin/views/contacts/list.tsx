@@ -39,7 +39,8 @@ export const ContactsListView = async (props: AdminViewServerProps) => {
           >
             Alle som har handlet, tatt kontakt, meldt seg på noe eller blitt
             medlem — samlet på ett sted. Én rad per person, uansett hvor mange
-            steder de finnes.
+            steder de finnes. <strong>Klikk på et merke</strong> for å gå til
+            kilden — bestillingen, innsendingen eller medlemskapet.
             {!newsletterAvailable &&
               " (Nyhetsbrevlista kunne ikke hentes fra Resend akkurat nå.)"}
           </p>

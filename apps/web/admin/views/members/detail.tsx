@@ -151,6 +151,8 @@ export const MemberDetailView = async (props: AdminViewServerProps) => {
           />
           <MemberActions
             userId={member.user.id}
+            email={member.user.email}
+            name={member.user.name}
             currentTier={member.subscription?.tier ?? "none"}
             currentStatus={member.subscription?.status ?? "inactive"}
             hasSubscription={!!member.subscription}

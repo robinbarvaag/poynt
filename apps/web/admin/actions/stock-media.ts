@@ -45,7 +45,7 @@ export type StockSearchResult =
   | { ok: false; error: string };
 
 export type StockImportResult =
-  | { ok: true; id: string | number; filename: string }
+  | { ok: true; id: string | number; filename: string; alt: string }
   | { ok: false; error: string };
 
 const PER_PAGE = 24;
@@ -245,7 +245,7 @@ export async function importStockImage(
       },
     });
 
-    return { ok: true, id: created.id, filename };
+    return { ok: true, id: created.id, filename, alt: image.alt };
   } catch (err) {
     return {
       ok: false,

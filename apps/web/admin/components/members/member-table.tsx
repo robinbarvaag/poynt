@@ -3,6 +3,7 @@
 import { Pill } from "@payloadcms/ui";
 import Link from "next/link";
 import type { MemberListItem } from "../../views/members/list";
+import { MemberDeleteButton } from "./member-delete-button";
 type PillStyle = "success" | "error" | "warning" | "light" | "dark";
 
 const tierLabels: Record<string, string> = {
@@ -58,12 +59,13 @@ export const MemberTable = ({ members }: { members: MemberListItem[] }) => {
               textAlign: "left",
             }}
           >
-            <th style={thStyle}>Namn</th>
+            <th style={thStyle}>Navn</th>
             <th style={thStyle}>E-post</th>
             <th style={thStyle}>Tier</th>
             <th style={thStyle}>Status</th>
             <th style={thStyle}>Registrert</th>
             <th style={thStyle}>Siste innlogging</th>
+            <th style={thStyle} aria-label="Handlinger" />
           </tr>
         </thead>
         <tbody>
@@ -98,7 +100,7 @@ export const MemberTable = ({ members }: { members: MemberListItem[] }) => {
                       fontStyle: "italic",
                     }}
                   >
-                    (vist som namn)
+                    (vist som navn)
                   </span>
                 )}
               </td>
@@ -117,12 +119,19 @@ export const MemberTable = ({ members }: { members: MemberListItem[] }) => {
               </td>
               <td style={tdStyle}>{formatDate(member.createdAt)}</td>
               <td style={tdStyle}>{formatDate(member.lastLogin)}</td>
+              <td style={{ ...tdStyle, textAlign: "right" }}>
+                <MemberDeleteButton
+                  userId={member.id}
+                  label={member.name || member.email}
+                  compact
+                />
+              </td>
             </tr>
           ))}
           {members.length === 0 && (
             <tr>
-              <td colSpan={6} style={{ ...tdStyle, textAlign: "center" }}>
-                Ingen medlemmer funne
+              <td colSpan={7} style={{ ...tdStyle, textAlign: "center" }}>
+                Ingen medlemmer funnet
               </td>
             </tr>
           )}

@@ -175,6 +175,11 @@ function Badges({ row }: { row: ContactRow }) {
             style={{ ...badgeStyle(badge.bg), textDecoration: "none" }}
           >
             {badge.label}
+            {/* Liten vinkel som røper at merket er en lenke. Uten den ser
+                merkene helt like ut om de er klikkbare eller ikke. */}
+            <span aria-hidden="true" style={{ opacity: 0.5 }}>
+              {" ›"}
+            </span>
           </a>
         ) : (
           <span
