@@ -13,11 +13,11 @@ import type { CollectionSlug, Payload } from "payload";
  *  2. Bygg en foreldre-kobling fra `_parent_id` / `parent_id`, slik at en rad i
  *     f.eks. `pages_blocks_carousel_slides` kan følges opp til `pages`.
  *  3. Slå alt sammen til ÉN union-spørring, så oppslaget er én tur til
- *     databasen og ikke hundre.
+ *     databasen — også når rutenettet spør om 24 bilder samtidig.
  *
  * Bonus av (2): versjonstabellene (`_pages_v…`) ender også i `pages`, så bilder
  * som bare er brukt i en upublisert kladd blir med — uten å dukke opp som
- * hundre separate treff.
+ * hundre separate treff. Slike treff merkes `isCurrent: false`.
  *
  * Nye blokker og nye bildefelt fanges opp automatisk, siden alt leses fra
  * skjemaet ved oppstart.
@@ -164,7 +164,10 @@ function loadMediaRefs(payload: Payload): Promise<MediaRef[]> {
   return cachedRefs;
 }
 
-/** `SELECT <rot> FROM <tabell> JOIN … WHERE <kolonne> = $1` for én referanse. */
+/**
+ * Én gren av union-spørringen: hvilket bilde, hvilket dokument, og om treffet
+ * kommer fra gjeldende utgave eller fra historikken.
+ */
 function buildUsageSelect(ref: MediaRef): string {
   const joins = ref.hops
     .map(
@@ -175,9 +178,16 @@ function buildUsageSelect(ref: MediaRef): string {
     )
     .join(" ");
   const rootAlias = `t${ref.hops.length}`;
-  return `SELECT '${ref.rootTable}' AS root_table, ${ref.fromVersion} AS from_version, ${rootAlias}."id" AS doc_id FROM ${quoteIdent(
-    ref.table
-  )} t0 ${joins} WHERE t0.${quoteIdent(ref.column)} = $1`;
+  const columns = [
+    `t0.${quoteIdent(ref.column)} AS media_id`,
+    `'${ref.rootTable}' AS root_table`,
+    `${ref.fromVersion} AS from_version`,
+    `${rootAlias}."id" AS doc_id`,
+  ].join(", ");
+
+  return `SELECT ${columns} FROM ${quoteIdent(ref.table)} t0 ${joins} WHERE t0.${quoteIdent(
+    ref.column
+  )} = ANY($1)`;
 }
 
 /** Tabellnavn → collection-/global-slug. Payload bruker snake_case av slug. */
@@ -206,96 +216,16 @@ function labelOf(value: unknown, fallback: string): string {
   return fallback;
 }
 
-/**
- * Finner alle dokumenter og globale sideoppsett som bruker et gitt bilde.
- * Treff dedupliseres, så et bilde brukt tre steder på samme side gir ett treff.
- */
-export async function findMediaUsage(
-  payload: Payload,
-  mediaId: number
-): Promise<MediaUsage[]> {
-  const refs = await loadMediaRefs(payload);
-  if (refs.length === 0) return [];
+/** Ett sted et bilde er brukt, før vi har slått opp tittelen. */
+type Hit = {
+  docId: null | number;
+  isCurrent: boolean;
+  slug: string;
+  type: "collection" | "global";
+};
 
-  const sql = refs.map(buildUsageSelect).join(" UNION ");
-  const { rows } = await getPool(payload).query(sql, [mediaId]);
-
-  const { collections, globals } = buildEntityMap(payload);
-
-  // Samle treff per collection, så vi kan hente titlene i én spørring hver.
-  // Per treff holder vi styr på om bildet står i den gjeldende utgaven, eller
-  // bare i historikken. Uten det skillet ville et bilde som ble fjernet fra en
-  // side for et år siden se ut som om det fortsatt står der.
-  const byCollection = new Map<CollectionSlug, Map<number, boolean>>();
-  const globalHits = new Map<string, boolean>();
-
-  for (const row of rows) {
-    const table = String(row.root_table);
-    const isCurrent = row.from_version !== true;
-
-    const globalSlug = globals.get(table);
-    if (globalSlug) {
-      globalHits.set(
-        globalSlug,
-        (globalHits.get(globalSlug) ?? false) || isCurrent
-      );
-      continue;
-    }
-
-    const collectionSlug = collections.get(table);
-    if (!collectionSlug) continue;
-    const docId = Number(row.doc_id);
-    if (!Number.isFinite(docId)) continue;
-
-    const docs = byCollection.get(collectionSlug) ?? new Map<number, boolean>();
-    docs.set(docId, (docs.get(docId) ?? false) || isCurrent);
-    byCollection.set(collectionSlug, docs);
-  }
-
-  const usage: MediaUsage[] = [];
-
-  for (const [globalSlug, isCurrent] of globalHits) {
-    const config = payload.config.globals.find((g) => g.slug === globalSlug);
-    usage.push({
-      global: globalSlug,
-      isCurrent,
-      label: isCurrent ? "Sideoppsett" : "Sideoppsett · tidligere versjon",
-      title: labelOf(config?.label, globalSlug),
-      url: `/admin/globals/${globalSlug}`,
-    });
-  }
-
-  for (const [collectionSlug, ids] of byCollection) {
-    const collection = payload.collections[collectionSlug]?.config;
-    const titleField = collection?.admin?.useAsTitle ?? "id";
-    const label = labelOf(collection?.labels?.singular, collectionSlug);
-
-    const { docs } = await payload.find({
-      collection: collectionSlug,
-      depth: 0,
-      limit: ids.size,
-      pagination: false,
-      where: { id: { in: [...ids.keys()] } },
-    });
-
-    for (const doc of docs as unknown as Record<string, unknown>[]) {
-      const rawTitle = doc[titleField];
-      const isCurrent = ids.get(Number(doc.id)) === true;
-      usage.push({
-        collection: collectionSlug,
-        id: Number(doc.id),
-        isCurrent,
-        label: isCurrent ? label : `${label} · tidligere versjon`,
-        title:
-          typeof rawTitle === "string" && rawTitle.trim()
-            ? rawTitle
-            : `Uten tittel (${doc.id})`,
-        url: `/admin/collections/${collectionSlug}/${doc.id}`,
-      });
-    }
-  }
-
-  // Gjeldende bruk først — det er den som avgjør om bildet kan slettes.
+/** Gjeldende bruk først — det er den som avgjør om bildet kan slettes. */
+function sortUsage(usage: MediaUsage[]): MediaUsage[] {
   return usage.sort((a, b) => {
     if (a.isCurrent !== b.isCurrent) return a.isCurrent ? -1 : 1;
     return a.title.localeCompare(b.title, "nb");
@@ -303,31 +233,131 @@ export async function findMediaUsage(
 }
 
 /**
- * Hvilke av de oppgitte bildene er i bruk et sted? Brukes av rutenettet til å
- * merke ubrukte bilder, så det holder å vite ja/nei — ikke hvor.
+ * Slår opp bruken for flere bilder på én gang. Ett kall mot databasen for
+ * treffene, og deretter én spørring per collection for å hente titlene.
  */
-export async function findUsedMediaIds(
+export async function findMediaUsageForMany(
   payload: Payload,
   mediaIds: number[]
-): Promise<Set<number>> {
-  if (mediaIds.length === 0) return new Set();
+): Promise<Map<number, MediaUsage[]>> {
+  const result = new Map<number, MediaUsage[]>();
+  for (const id of mediaIds) result.set(id, []);
+  if (mediaIds.length === 0) return result;
+
   const refs = await loadMediaRefs(payload);
-  if (refs.length === 0) return new Set();
+  if (refs.length === 0) return result;
 
-  const sql = refs
-    .map(
-      (ref) =>
-        `SELECT ${quoteIdent(ref.column)} AS media_id FROM ${quoteIdent(
-          ref.table
-        )} WHERE ${quoteIdent(ref.column)} = ANY($1)`
-    )
-    .join(" UNION ");
-
+  const sql = refs.map(buildUsageSelect).join(" UNION ");
   const { rows } = await getPool(payload).query(sql, [mediaIds]);
-  const used = new Set<number>();
+
+  const { collections, globals } = buildEntityMap(payload);
+
+  // Samme bilde kan peke på samme side fra flere blokker — nøkkelen samler
+  // dem til ett treff, og «gjeldende» vinner over «historikk».
+  const perMedia = new Map<number, Map<string, Hit>>();
+  const neededTitles = new Map<CollectionSlug, Set<number>>();
+
   for (const row of rows) {
-    const id = Number(row.media_id);
-    if (Number.isFinite(id)) used.add(id);
+    const mediaId = Number(row.media_id);
+    if (!result.has(mediaId)) continue;
+
+    const table = String(row.root_table);
+    const isCurrent = row.from_version !== true;
+    const globalSlug = globals.get(table);
+    const collectionSlug = globalSlug ? undefined : collections.get(table);
+    if (!globalSlug && !collectionSlug) continue;
+
+    let docId: null | number = null;
+    if (collectionSlug) {
+      docId = Number(row.doc_id);
+      if (!Number.isFinite(docId)) continue;
+      const set = neededTitles.get(collectionSlug) ?? new Set<number>();
+      set.add(docId);
+      neededTitles.set(collectionSlug, set);
+    }
+
+    const key = globalSlug ? `g:${globalSlug}` : `c:${collectionSlug}:${docId}`;
+    const bucket = perMedia.get(mediaId) ?? new Map<string, Hit>();
+    bucket.set(key, {
+      docId,
+      isCurrent: (bucket.get(key)?.isCurrent ?? false) || isCurrent,
+      slug: (globalSlug ?? collectionSlug) as string,
+      type: globalSlug ? "global" : "collection",
+    });
+    perMedia.set(mediaId, bucket);
   }
-  return used;
+
+  // Titler og etiketter, én spørring per collection uansett antall bilder.
+  const titles = new Map<string, string>();
+  const labels = new Map<string, string>();
+  for (const [slug, ids] of neededTitles) {
+    const collection = payload.collections[slug]?.config;
+    const titleField = collection?.admin?.useAsTitle ?? "id";
+    labels.set(slug, labelOf(collection?.labels?.singular, slug));
+
+    const { docs } = await payload.find({
+      collection: slug,
+      depth: 0,
+      limit: ids.size,
+      pagination: false,
+      where: { id: { in: [...ids] } },
+    });
+
+    for (const doc of docs as unknown as Record<string, unknown>[]) {
+      const rawTitle = doc[titleField];
+      titles.set(
+        `${slug}:${doc.id}`,
+        typeof rawTitle === "string" && rawTitle.trim()
+          ? rawTitle
+          : `Uten tittel (${doc.id})`
+      );
+    }
+  }
+
+  for (const [mediaId, bucket] of perMedia) {
+    const usage: MediaUsage[] = [];
+
+    for (const hit of bucket.values()) {
+      if (hit.type === "global") {
+        const config = payload.config.globals.find((g) => g.slug === hit.slug);
+        usage.push({
+          global: hit.slug,
+          isCurrent: hit.isCurrent,
+          label: hit.isCurrent
+            ? "Sideoppsett"
+            : "Sideoppsett · tidligere versjon",
+          title: labelOf(config?.label, hit.slug),
+          url: `/admin/globals/${hit.slug}`,
+        });
+        continue;
+      }
+
+      const title = titles.get(`${hit.slug}:${hit.docId}`);
+      // Dokumentet kan ha blitt slettet mellom de to spørringene.
+      if (!title) continue;
+      const label = labels.get(hit.slug) ?? hit.slug;
+
+      usage.push({
+        collection: hit.slug,
+        id: hit.docId as number,
+        isCurrent: hit.isCurrent,
+        label: hit.isCurrent ? label : `${label} · tidligere versjon`,
+        title,
+        url: `/admin/collections/${hit.slug}/${hit.docId}`,
+      });
+    }
+
+    result.set(mediaId, sortUsage(usage));
+  }
+
+  return result;
+}
+
+/** Bruken for ett bilde. */
+export async function findMediaUsage(
+  payload: Payload,
+  mediaId: number
+): Promise<MediaUsage[]> {
+  const byMedia = await findMediaUsageForMany(payload, [mediaId]);
+  return byMedia.get(mediaId) ?? [];
 }

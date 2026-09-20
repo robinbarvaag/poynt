@@ -8,7 +8,8 @@ import {
 } from "@payloadcms/ui";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { getUnusedMediaIds } from "../../actions/media-insights";
+import type { MediaUsage } from "../../../lib/media-usage";
+import { getMediaUsageForList } from "../../actions/media-insights";
 import { MediaDuplicatesPanel } from "./media-duplicates-panel";
 
 /**
@@ -55,14 +56,42 @@ function previewSrc(doc: MediaDoc): null | string {
   return doc.thumbnailURL || doc.sizes?.thumbnail?.url || doc.url || null;
 }
 
+/** «Brukt på Forsiden», «Brukt 3 steder», eller ingenting mens vi sjekker. */
+function usageSummary(usage: MediaUsage[]): string {
+  const current = usage.filter((item) => item.isCurrent);
+  const shown = current.length > 0 ? current : usage;
+  if (shown.length === 0) return "";
+  if (shown.length === 1) {
+    const only = shown[0] as MediaUsage;
+    return only.isCurrent ? `Brukt: ${only.title}` : "Kun i historikk";
+  }
+  return `Brukt ${shown.length} steder`;
+}
+
+/** Oppsummeringen over rutenettet — bare det som faktisk trenger oppmerksomhet. */
+function summaryHint(
+  total: number,
+  missingAlt: number,
+  unused: null | number
+): string {
+  const notes: string[] = [];
+  if (missingAlt > 0) notes.push(`${missingAlt} mangler alt-tekst`);
+  if (unused && unused > 0) notes.push(`${unused} er ikke i bruk`);
+  if (notes.length === 0) {
+    return "Klikk på et bilde for å redigere det uten å forlate lista.";
+  }
+  return `Av ${total} filer på denne siden: ${notes.join(" og ")}.`;
+}
+
 const MediaCard = ({
   doc,
   onSaved,
-  unused,
+  usage,
 }: {
   doc: MediaDoc;
   onSaved: () => void;
-  unused: boolean;
+  /** `null` mens oppslaget pågår — da viser vi verken bruk eller advarsel. */
+  usage: MediaUsage[] | null;
 }) => {
   const [DocumentDrawer, , { openDrawer }] = useDocumentDrawer({
     collectionSlug: "media",
@@ -100,7 +129,7 @@ const MediaCard = ({
         />
       </div>
 
-      {unused && (
+      {usage?.length === 0 && (
         <span
           className="poynt-media-card__unused"
           title="Står ikke på noen side"
@@ -135,6 +164,18 @@ const MediaCard = ({
               {doc.alt?.trim() || " "}
             </span>
           )}
+          <span
+            className="poynt-media-card__usage"
+            title={
+              usage && usage.length > 0
+                ? usage
+                    .map((item) => `${item.title} (${item.label})`)
+                    .join("\n")
+                : undefined
+            }
+          >
+            {usage ? usageSummary(usage) || " " : " "}
+          </span>
         </span>
       </button>
 
@@ -147,7 +188,10 @@ export const MediaGrid = () => {
   const { data } = useListQuery();
   const router = useRouter();
   const [view, setView] = useState<View>("grid");
-  const [unusedIds, setUnusedIds] = useState<Set<number>>(new Set());
+  const [usageById, setUsageById] = useState<Record<
+    string,
+    MediaUsage[]
+  > | null>(null);
 
   // Lesing av lagret valg skjer etter montering, ellers spriker server- og
   // klient-render.
@@ -171,16 +215,17 @@ export const MediaGrid = () => {
   const docs = (data?.docs ?? []) as MediaDoc[];
   const idKey = docs.map((doc) => doc.id).join(",");
 
-  // Hvilke av bildene på denne siden som ikke står noe sted. Ett oppslag for
-  // hele siden, ikke ett per kort. `idKey` er den stabile nøkkelen for docs.
+  // Hvor bildene på denne siden er brukt. Ett oppslag for hele siden, ikke ett
+  // per kort. `idKey` er den stabile nøkkelen for docs.
   useEffect(() => {
     if (!idKey) {
-      setUnusedIds(new Set());
+      setUsageById({});
       return;
     }
     let active = true;
-    getUnusedMediaIds(idKey.split(",").map(Number)).then((res) => {
-      if (active && res.ok) setUnusedIds(new Set(res.unusedIds));
+    setUsageById(null);
+    getMediaUsageForList(idKey.split(",").map(Number)).then((res) => {
+      if (active && res.ok) setUsageById(res.usageById);
     });
     return () => {
       active = false;
@@ -192,6 +237,11 @@ export const MediaGrid = () => {
   const missingAltCount = docs.filter(
     (doc) => doc.mimeType?.startsWith("image/") && !doc.alt?.trim()
   ).length;
+  // `null` så lenge bruksoppslaget pågår — da nevner vi det ikke i hintet.
+  const unusedCount = usageById
+    ? docs.filter((doc) => (usageById[String(doc.id)] ?? []).length === 0)
+        .length
+    : null;
 
   return (
     <div className="poynt-media">
@@ -299,6 +349,7 @@ export const MediaGrid = () => {
         }
         .poynt-media-card__name,
         .poynt-media-card__alt,
+        .poynt-media-card__usage,
         .poynt-media-card__warning {
           overflow: hidden;
           text-overflow: ellipsis;
@@ -316,6 +367,10 @@ export const MediaGrid = () => {
           font-size: 0.72rem;
           font-weight: 600;
           color: var(--theme-warning-500, #b58100);
+        }
+        .poynt-media-card__usage {
+          font-size: 0.7rem;
+          color: var(--theme-elevation-450, var(--theme-elevation-500));
         }
       `}</style>
 
@@ -339,9 +394,7 @@ export const MediaGrid = () => {
         <MediaDuplicatesPanel />
         {view === "grid" && (
           <p className="poynt-media__hint">
-            {missingAltCount > 0
-              ? `${missingAltCount} av ${docs.length} bilder på denne siden mangler alt-tekst. Klikk på et bilde for å fylle den inn.`
-              : "Klikk på et bilde for å redigere det uten å forlate lista."}
+            {summaryHint(docs.length, missingAltCount, unusedCount)}
           </p>
         )}
       </div>
@@ -356,7 +409,7 @@ export const MediaGrid = () => {
                 key={doc.id}
                 doc={doc}
                 onSaved={() => router.refresh()}
-                unused={unusedIds.has(doc.id)}
+                usage={usageById ? (usageById[String(doc.id)] ?? []) : null}
               />
             ))}
           </div>

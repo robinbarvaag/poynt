@@ -7,7 +7,7 @@ import {
 import {
   type MediaUsage,
   findMediaUsage,
-  findUsedMediaIds,
+  findMediaUsageForMany,
 } from "@/lib/media-usage";
 import config from "@/payload.config";
 import { headers as nextHeaders } from "next/headers";
@@ -47,20 +47,26 @@ export async function getMediaUsage(
   }
 }
 
-export type UnusedMediaResult =
+export type MediaUsageListResult =
   | { ok: false; error: string }
-  | { ok: true; unusedIds: number[] };
+  | { ok: true; usageById: Record<string, MediaUsage[]> };
 
-/** Hvilke av bildene på denne siden i lista som ikke er brukt noe sted. */
-export async function getUnusedMediaIds(
+/**
+ * Bruken for alle bildene på én side i lista, i ett oppslag. Returneres som et
+ * enkelt objekt fordi det er en server-handling — en Map hadde blitt tyngre å
+ * serialisere enn den er verdt her.
+ */
+export async function getMediaUsageForList(
   mediaIds: number[]
-): Promise<UnusedMediaResult> {
+): Promise<MediaUsageListResult> {
   const { error, payload } = await requireAdmin();
   if (error) return { ok: false, error };
 
   try {
-    const used = await findUsedMediaIds(payload, mediaIds);
-    return { ok: true, unusedIds: mediaIds.filter((id) => !used.has(id)) };
+    const byMedia = await findMediaUsageForMany(payload, mediaIds);
+    const usageById: Record<string, MediaUsage[]> = {};
+    for (const [id, usage] of byMedia) usageById[String(id)] = usage;
+    return { ok: true, usageById };
   } catch (err) {
     return {
       ok: false,
