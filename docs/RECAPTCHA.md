@@ -120,6 +120,43 @@ Google-innlogging går via OAuth-redirect og trenger ingen sjekk. Skjemaene
 inne i On Poynt (verktøy, bedriftsprofil, invitasjoner) krever innlogging og er
 holdt utenfor med vilje — reCAPTCHA hører hjemme foran åpne dører.
 
+## reCAPTCHA er ikke nok alene
+
+**20.09.2026:** to spam-innsendinger kom gjennom *med gyldig token og score over
+0.5*, mens filteret var påslått og beviselig avviste token-løse kall samme
+time. v3 er en score, ikke en vegg — en bot som kjører en ekte nettleser får et
+ekte token.
+
+Derfor står det to lag til bak reCAPTCHA, i `lib/spam-heuristics.ts`:
+
+- **Honningkrukke** (`HONEYPOT_FIELD`, feltnavn `website`): et skjult felt
+  mennesker aldri ser, men roboter fyller ut fordi de bare leser HTML-en.
+  Ligger på kontaktskjemaene, nyhetsbrevet og eventpåmeldingen.
+- **`looksLikeGibberish()`**: kjenner igjen tastaturmos som
+  «TsPGxDXqnGBjjEtgnZ». Teller store bokstaver midt i et ord, rett etter en
+  liten — et ekte navn har null, «McDonald» har én, tre eller flere er
+  praktisk talt umulig. Bevisst *ikke* basert på lengde eller vokalandel:
+  norske sammensatte ord («arbeidsmiljøutvalget») er lange og vokalfattige,
+  men har ingen store bokstaver inni. Testet i `lib/spam-heuristics.test.ts`
+  mot både ekte spam og en liste ekte navn.
+
+Begge logger med prefikset `[spam]`, så du kan søke på det i Vercel ved siden
+av `[recaptcha]`.
+
+## Justere terskelen
+
+Koden logger **både** avvisninger og godkjenninger med score:
+
+```
+[recaptcha] slapp gjennom «kontaktskjema»: score=0.9
+[recaptcha] avvist «nyhetsbrev»: low-score score=0.3
+```
+
+Det er med vilje: ser du bare avvisningene, vet du aldri hvor nære de som kom
+*inn* lå, og da justerer du terskelen i blinde. Søk på `[recaptcha]` i Vercel
+over noen dager, se hvor spammen lander, og sett `RECAPTCHA_MIN_SCORE`
+deretter.
+
 ## Nytt skjema?
 
 1. I komponenten:

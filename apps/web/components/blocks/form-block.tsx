@@ -1,5 +1,6 @@
 "use client";
 
+import { HONEYPOT_FIELD } from "@/lib/spam-heuristics";
 import {
   Button,
   Checkbox,
@@ -401,6 +402,22 @@ export function FormBlockComponent({
                 </div>
               );
             })}
+        </div>
+
+        {/* Honningkrukke for roboter — skjult for mennesker og skjermlesere.
+            Verdien plukkes opp av FormData sammen med de ekte feltene og
+            sjekkes i beforeValidate-hooken (payload.config.ts). */}
+        <div
+          aria-hidden="true"
+          className="absolute left-[-9999px] h-0 overflow-hidden"
+        >
+          <label htmlFor={`form-${HONEYPOT_FIELD}`}>Nettside</label>
+          <input
+            id={`form-${HONEYPOT_FIELD}`}
+            name={HONEYPOT_FIELD}
+            tabIndex={-1}
+            autoComplete="off"
+          />
         </div>
 
         {error && (

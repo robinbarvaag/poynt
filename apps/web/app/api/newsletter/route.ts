@@ -16,7 +16,22 @@ export async function POST(request: NextRequest) {
   if (blocked) return blocked;
 
   try {
-    const body = (await request.json()) as { email?: unknown; path?: unknown };
+    const body = (await request.json()) as {
+      email?: unknown;
+      path?: unknown;
+      website?: unknown;
+    };
+
+    // Honningkrukke: et skjult felt bare roboter fyller ut. Vi later som alt
+    // gikk bra, så de ikke prøver seg videre med en annen taktikk.
+    const { HONEYPOT_FIELD, isHoneypotFilled } = await import(
+      "@/lib/spam-heuristics"
+    );
+    if (isHoneypotFilled(body[HONEYPOT_FIELD])) {
+      console.warn("[spam] avviste nyhetsbrev-påmelding: honningkrukke fylt");
+      return NextResponse.json({ success: true });
+    }
+
     const email =
       typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
 

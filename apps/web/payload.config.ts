@@ -5,7 +5,7 @@ import { resendAdapter } from "@payloadcms/email-resend";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
 import { vercelBlobStorage } from "@payloadcms/storage-vercel-blob";
 import { nb } from "@payloadcms/translations/languages/nb";
-import { buildConfig } from "payload";
+import { APIError, buildConfig } from "payload";
 import sharp from "sharp";
 import { withPoyntLinks } from "./lib/lexical/link-feature";
 
@@ -21,6 +21,11 @@ import {
   revalidateCmsAfterChange,
   revalidateCmsAfterDelete,
 } from "./lib/revalidate-cms";
+import {
+  HONEYPOT_FIELD,
+  isHoneypotFilled,
+  looksLikeGibberish,
+} from "./lib/spam-heuristics";
 
 // Collections
 import { BlogPosts } from "./collections/blog-posts";
@@ -652,6 +657,12 @@ export default buildConfig({
                 `[recaptcha] avviste skjemainnsending: ${result.reason}`,
                 result.score !== undefined ? `score=${result.score}` : ""
               );
+            } else if (result.score !== undefined) {
+              // Logg også det som slipper gjennom: uten scorene på godkjente
+              // innsendinger er det umulig å vite hvor terskelen bør ligge.
+              console.log(
+                `[recaptcha] slapp gjennom skjemainnsending: score=${result.score}`
+              );
             }
             return result.ok;
           },
@@ -692,6 +703,58 @@ export default buildConfig({
           ),
         ],
         hooks: {
+          // Lag to og tre etter reCAPTCHA: honningkrukke + tastaturmos-sjekk.
+          // reCAPTCHA v3 er en score, og en bot med ekte nettleser kan score
+          // høyt nok til å slippe inn — det skjedde 20.09.2026. Disse to
+          // sjekkene bryr seg ikke om hvor «menneskelig» trafikken ser ut.
+          beforeValidate: [
+            ({ data, req, operation }) => {
+              if (operation !== "create" || !data) return data;
+              // Innlogget admin skriver ikke spam til seg selv.
+              if (req.user) return data;
+
+              const entries = (data.submissionData ?? []) as {
+                field?: string;
+                value?: string;
+              }[];
+              const fieldValue = (names: string[]) =>
+                entries.find((entry) =>
+                  names.includes((entry.field ?? "").toLowerCase())
+                )?.value;
+
+              if (isHoneypotFilled(fieldValue([HONEYPOT_FIELD]))) {
+                console.warn("[spam] avviste innsending: honningkrukke fylt");
+                throw new APIError(
+                  "Innsendingen kunne ikke behandles.",
+                  403,
+                  undefined,
+                  true
+                );
+              }
+
+              const name = fieldValue(["navn", "fulltnavn", "name"]);
+              if (name && looksLikeGibberish(name)) {
+                console.warn(
+                  `[spam] avviste innsending: navnet ser ut som tastaturmos («${name}»)`
+                );
+                throw new APIError(
+                  "Innsendingen kunne ikke behandles.",
+                  403,
+                  undefined,
+                  true
+                );
+              }
+
+              // Honningkrukka skal ikke lagres — den er ikke et ekte svar.
+              return {
+                ...data,
+                submissionData: entries.filter(
+                  (entry) =>
+                    (entry.field ?? "").toLowerCase() !== HONEYPOT_FIELD
+                ),
+              };
+            },
+          ],
           afterChange: [
             async ({ doc, operation, req }) => {
               if (operation !== "create") return doc;

@@ -63,20 +63,52 @@ const badgeStyle = (bg: string): React.CSSProperties => ({
   whiteSpace: "nowrap",
 });
 
-function Badges({ row }: { row: ContactRow }) {
-  const badges: { label: string; bg: string; title?: string }[] = [];
+interface Badge {
+  label: string;
+  bg: string;
+  title?: string;
+  /** Hvor merket peker. Uten href rendres det som ren tekst. */
+  href?: string;
+  /** Åpne i ny fane (brukes for Resend, som ligger utenfor admin). */
+  external?: boolean;
+}
+
+/** «2 henvendelser» → tooltip som forklarer at lenka går til den nyeste. */
+function manyTitle(count: number, what: string): string | undefined {
+  return count > 1 ? `Åpner den nyeste av ${count} ${what}` : undefined;
+}
+
+function buildBadges(row: ContactRow): Badge[] {
+  const badges: Badge[] = [];
+
   if (row.orders.count > 0) {
     badges.push({
       label: `Kunde · ${row.orders.count} kjøp (${Math.round(row.orders.totalKr)} kr)`,
       bg: "var(--theme-success-100)",
+      href: row.orders.latestId
+        ? `/admin/collections/orders/${row.orders.latestId}`
+        : "/admin/collections/orders",
+      title: manyTitle(row.orders.count, "bestillinger"),
     });
   }
+
   if (row.member && row.member.tier !== "none") {
     badges.push({
       label: `Medlem · ${row.member.tier === "community_ai" ? "Community + AI" : "Community"}${row.member.status !== "active" ? ` (${row.member.status})` : ""}`,
       bg: "var(--theme-warning-100)",
+      href: `/admin/medlemmer/${row.member.userId}`,
+    });
+  } else if (row.member) {
+    // Har konto, men ingen medlemskap. Uten dette merket dukker personen opp
+    // i lista helt uten forklaring på hvorfor hen er der.
+    badges.push({
+      label: "Bruker · uten medlemskap",
+      bg: "var(--theme-elevation-100)",
+      href: `/admin/medlemmer/${row.member.userId}`,
+      title: "Har logget inn på On Poynt, men har ikke medlemskap",
     });
   }
+
   if (row.application) {
     const status =
       row.application.status === "pending"
@@ -88,31 +120,72 @@ function Badges({ row }: { row: ContactRow }) {
       label: `Søknad · ${status}`,
       bg: "var(--theme-elevation-100)",
       title: row.application.companyName,
+      href: `/admin/soknader/${row.application.id}`,
     });
   }
+
   if (row.newsletter) {
-    badges.push({ label: "Nyhetsbrev", bg: "var(--theme-elevation-100)" });
+    // Nyhetsbrevlista bor i Resend, ikke hos oss — derfor ut av admin.
+    badges.push({
+      label: "Nyhetsbrev",
+      bg: "var(--theme-elevation-100)",
+      href: "https://resend.com/audiences",
+      external: true,
+      title: "Nyhetsbrevlista ligger i Resend — åpnes i ny fane",
+    });
   }
+
   if (row.waitlist) {
-    badges.push({ label: "Venteliste", bg: "var(--theme-elevation-100)" });
+    badges.push({
+      label: "Venteliste",
+      bg: "var(--theme-elevation-100)",
+      href: row.waitlistLatestId
+        ? `/admin/collections/form-submissions/${row.waitlistLatestId}`
+        : "/admin/collections/form-submissions",
+    });
   }
+
   if (row.submissions.count > 0) {
     badges.push({
       label: `Henvendelser · ${row.submissions.count}`,
       bg: "var(--theme-elevation-100)",
+      href: row.submissions.latestId
+        ? `/admin/collections/form-submissions/${row.submissions.latestId}`
+        : "/admin/collections/form-submissions",
+      title: manyTitle(row.submissions.count, "henvendelser"),
     });
   }
+
+  return badges;
+}
+
+function Badges({ row }: { row: ContactRow }) {
   return (
     <span style={{ display: "flex", gap: "0.35rem", flexWrap: "wrap" }}>
-      {badges.map((badge) => (
-        <span
-          key={badge.label}
-          style={badgeStyle(badge.bg)}
-          title={badge.title}
-        >
-          {badge.label}
-        </span>
-      ))}
+      {buildBadges(row).map((badge) =>
+        badge.href ? (
+          <a
+            key={badge.label}
+            className="contact-badge-link"
+            href={badge.href}
+            title={badge.title}
+            {...(badge.external
+              ? { target: "_blank", rel: "noopener noreferrer" }
+              : {})}
+            style={{ ...badgeStyle(badge.bg), textDecoration: "none" }}
+          >
+            {badge.label}
+          </a>
+        ) : (
+          <span
+            key={badge.label}
+            style={badgeStyle(badge.bg)}
+            title={badge.title}
+          >
+            {badge.label}
+          </span>
+        )
+      )}
     </span>
   );
 }
@@ -135,6 +208,15 @@ export function ContactsBoard({ rows }: { rows: ContactRow[] }) {
 
   return (
     <div>
+      {/* Merkene er inline-stylet som resten av brettet, men :hover og
+          :focus-visible kan ikke uttrykkes inline. */}
+      <style>{`
+        .contact-badge-link:hover { text-decoration: underline; }
+        .contact-badge-link:focus-visible {
+          outline: 2px solid var(--theme-elevation-800);
+          outline-offset: 1px;
+        }
+      `}</style>
       <div
         style={{
           display: "flex",

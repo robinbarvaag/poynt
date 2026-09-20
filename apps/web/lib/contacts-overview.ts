@@ -16,6 +16,11 @@ import type { Payload } from "payload";
  * Kun lesing; hver kilde eier fortsatt sine egne data.
  */
 
+/**
+ * ID-ene gjør merkene i tabellen klikkbare: hver kilde eier fortsatt sine egne
+ * data, så oversikten kan ikke rydde selv — den kan bare peke deg dit. Har en
+ * person flere bestillinger eller henvendelser, peker vi på den nyeste.
+ */
 export interface ContactRow {
   /** Normalisert e-post — nøkkelen radene er slått sammen på. */
   canonicalEmail: string;
@@ -23,16 +28,26 @@ export interface ContactRow {
   email: string;
   name?: string;
   /** Betalte bestillinger. */
-  orders: { count: number; totalKr: number; lastAt?: string };
+  orders: {
+    count: number;
+    totalKr: number;
+    lastAt?: string;
+    latestId?: IdType;
+  };
   /** Kontakt-/skjemahenvendelser (uten venteliste). */
-  submissions: { count: number; lastAt?: string };
+  submissions: { count: number; lastAt?: string; latestId?: IdType };
   waitlist: boolean;
+  /** Nyeste venteliste-innsending (samme collection som henvendelsene). */
+  waitlistLatestId?: IdType;
   newsletter: boolean;
-  member?: { tier: string; status: string };
-  application?: { status: string; companyName?: string };
+  member?: { tier: string; status: string; userId: string };
+  application?: { status: string; companyName?: string; id: string };
   /** Nyeste aktivitet på tvers av kildene — brukes til sortering. */
   lastActivity?: string;
 }
+
+/** Payload bruker number-id-er på Postgres, Drizzle bruker tekst-id-er. */
+type IdType = string | number;
 
 export interface ContactsOverview {
   rows: ContactRow[];
@@ -44,6 +59,13 @@ function later(a: string | undefined, b: string | undefined) {
   if (!a) return b;
   if (!b) return a;
   return a > b ? a : b;
+}
+
+/** Er `candidate` nyere enn det vi har fra før? (Tom verdi = ja.) */
+function isNewer(current: string | undefined, candidate?: string | null) {
+  if (!current) return true;
+  if (!candidate) return false;
+  return candidate > current;
 }
 
 export async function getContactsOverview(
@@ -87,6 +109,9 @@ export async function getContactsOverview(
     if (!row) continue;
     row.orders.count += 1;
     row.orders.totalKr += order.total ?? 0;
+    if (isNewer(row.orders.lastAt, order.createdAt)) {
+      row.orders.latestId = order.id;
+    }
     row.orders.lastAt = later(row.orders.lastAt, order.createdAt);
     row.lastActivity = later(row.lastActivity, order.createdAt);
   }
@@ -117,9 +142,14 @@ export async function getContactsOverview(
     const formTitle =
       typeof submission.form === "object" ? (submission.form?.title ?? "") : "";
     if (formTitle.startsWith("Venteliste")) {
+      // Innsendingene er sortert nyest først, så den første vi ser er nyest.
+      if (!row.waitlist) row.waitlistLatestId = submission.id;
       row.waitlist = true;
     } else {
       row.submissions.count += 1;
+      if (isNewer(row.submissions.lastAt, submission.createdAt)) {
+        row.submissions.latestId = submission.id;
+      }
       row.submissions.lastAt = later(
         row.submissions.lastAt,
         submission.createdAt
@@ -131,6 +161,7 @@ export async function getContactsOverview(
   // 3) On Poynt-medlemmer (Better Auth + abonnement).
   const members = await db
     .select({
+      id: plannerUser.id,
       email: plannerUser.email,
       name: plannerUser.name,
       createdAt: plannerUser.createdAt,
@@ -149,6 +180,7 @@ export async function getContactsOverview(
     row.member = {
       tier: member.tier ?? "none",
       status: member.status ?? "inactive",
+      userId: member.id,
     };
     row.lastActivity = later(row.lastActivity, member.createdAt.toISOString());
   }
@@ -156,6 +188,7 @@ export async function getContactsOverview(
   // 4) Medlemssøknader.
   const applications = await db
     .select({
+      id: plannerMembershipApplication.id,
       email: plannerMembershipApplication.email,
       fullName: plannerMembershipApplication.fullName,
       status: plannerMembershipApplication.status,
@@ -170,6 +203,7 @@ export async function getContactsOverview(
     row.application = {
       status: application.status,
       companyName: application.companyName ?? undefined,
+      id: application.id,
     };
     row.lastActivity = later(
       row.lastActivity,

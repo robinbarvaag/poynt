@@ -43,7 +43,17 @@ export async function guardRecaptcha(
     minScore: options.minScore,
   });
 
-  if (result.ok) return null;
+  if (result.ok) {
+    // Logg også det som slipper gjennom. Uten scorene på de godkjente er det
+    // umulig å vite om terskelen står riktig — vi ser bare det vi stoppet,
+    // aldri hvor nære de som kom inn lå.
+    if (result.score !== undefined) {
+      console.log(
+        `[recaptcha] slapp gjennom «${action}»: score=${result.score}`
+      );
+    }
+    return null;
+  }
 
   console.warn(
     `[recaptcha] avvist «${action}»: ${result.reason}`,
