@@ -92,8 +92,10 @@ export const BookSales: CollectionConfig = {
           options: [...SALE_SOURCE_OPTIONS],
           admin: {
             width: "50%",
-            description:
-              "Kanalen ved siden av avgjør hva du sitter igjen med. Typen styrer to ting: «Innkjøp fra bokhandel» er det bokhandelen kan returnere fra, og «Retur fra bokhandel» trekkes fra i stedet for å legges til.",
+            components: {
+              // Forklaring per valg — se admin/components/sale-source-help.tsx.
+              Description: "/admin/components/sale-source-help#SaleSourceHelp",
+            },
           },
         },
       ],

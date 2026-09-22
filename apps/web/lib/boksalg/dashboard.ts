@@ -119,7 +119,15 @@ export interface StoreRow {
   followUpStatus: FollowUpStatus;
   followUpAt: string | null;
   notes: string | null;
+  /** Bøker ut av hylla i denne butikken de siste sju dagene (estimat). */
+  recentSales: number;
+  lastSaleAt: string | null;
 }
+
+/** Nylig salgsaktivitet per butikk, nøkkel `${sourceKey}:${storeId}`. */
+type RecentActivity = Map<string, { recentSales: number; lastSaleAt: string }>;
+
+const RECENT_DAYS = 7;
 
 /** Fylkesvis oppsummering — «hvor står boka, og hvor selger den». */
 export interface RegionSummary {
@@ -231,10 +239,13 @@ function readChannels(economy: BookEconomy): Channel[] {
     }));
 }
 
-function toStoreRow(doc: BookStore): StoreRow {
+function toStoreRow(doc: BookStore, recent: RecentActivity): StoreRow {
   const currentQty = doc.currentQty ?? 0;
   const maxQty = doc.maxQty ?? 0;
+  const activity = recent.get(`${doc.sourceKey}:${doc.storeId}`);
   return {
+    recentSales: activity?.recentSales ?? 0,
+    lastSaleAt: activity?.lastSaleAt ?? null,
     id: doc.id,
     sourceKey: doc.sourceKey,
     storeId: doc.storeId,
@@ -434,6 +445,9 @@ export async function getBookDashboard(
 
   const sellThroughBySource = new Map<string, number>();
   const sellThroughByDay = new Map<string, number>();
+  // Hvilke butikker det har skjedd noe i nylig — de får «lys» på kartet.
+  const recentActivity: RecentActivity = new Map();
+  const recentCutoff = Date.now() - RECENT_DAYS * 24 * 60 * 60 * 1000;
 
   for (const doc of saleEvents.docs as BookStockEvent[]) {
     const day = dayKey(doc.occurredAt);
@@ -443,6 +457,16 @@ export async function getBookDashboard(
       (sellThroughBySource.get(doc.sourceKey) ?? 0) + delta
     );
     sellThroughByDay.set(day, (sellThroughByDay.get(day) ?? 0) + delta);
+
+    if (doc.storeId && new Date(doc.occurredAt).getTime() >= recentCutoff) {
+      const key = `${doc.sourceKey}:${doc.storeId}`;
+      const existing = recentActivity.get(key);
+      recentActivity.set(key, {
+        recentSales: (existing?.recentSales ?? 0) + delta,
+        // Hendelsene er sortert nyeste først, så den første vi ser er siste.
+        lastSaleAt: existing?.lastSaleAt ?? doc.occurredAt,
+      });
+    }
   }
 
   // ---- Sett det sammen per kanal -----------------------------------------
@@ -557,7 +581,9 @@ export async function getBookDashboard(
     pagination: false,
     sort: "name",
   });
-  const stores = (storeDocs.docs as BookStore[]).map(toStoreRow);
+  const stores = (storeDocs.docs as BookStore[]).map((doc) =>
+    toStoreRow(doc, recentActivity)
+  );
   const regions = summarizeRegions(stores);
 
   if (stock.length > 0 && stock.every((entry) => entry.fetchedAt === null)) {

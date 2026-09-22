@@ -299,13 +299,30 @@ SVG-sti, generert fra Natural Earth-data (public domain, via
 må begge regenereres. Den avrunder til én desimal med vilje (hydrering: `Math.tan`
 gir ulik 16. desimal på server og klient).
 
-**Zoom** er en CSS-transform på en `<g>` rundt sti og prikker, ikke en ny
-viewBox — da kan den animeres. Velges et fylke, regnes utsnittet fra
-butikkenes bbox (`viewForRegion`); pluss/minus zoomer videre rundt samme punkt
-og gjelder bare for det fylket. Prikkenes radius og streker deles på skalaen så
-de holder synlig størrelse (radius vokser med √skala). Fokusrammen på sirklene
-er slått av og erstattet med strek — nettleserens outline tegnes som en boks og
-skaleres med transformen. Genereringsscriptet ligger ikke i repoet; det er ~60
+**Zoom og panorering.** En SVG-`transform` på en `<g>` rundt sti og prikker,
+animert med `requestAnimationFrame` (logaritmisk på skalaen). *Ikke*
+CSS-transition: Chrome rasteriserer et CSS-transformert lag i lav oppløsning
+mens det beveger seg, og ved 40× blir kartet grøt. Velges et fylke, regnes
+utsnittet fra butikkenes bbox (`viewForRegion`, maks 12×). Hjul zoomer rundt
+pekeren (ikke-passiv lytter, så siden ikke scroller), pluss/minus rundt
+midten, dra flytter; alt manuelt gjelder bare for det valgte fylket. Maks 80×
+— nok til å skille Oslo-butikkene. Prikkene deles på skalaen så de holder
+synlig størrelse (vokser med √skala, tak 1,8×). Fokusrammen på sirklene er
+slått av og erstattet med strek — nettleserens outline tegnes som en boks og
+skaleres med transformen. Pointer capture er med vilje IKKE brukt: da går
+`click` til svg-en og prikkene slutter å reagere.
+
+**Navn og «lys».** Fra 10× tones omrisset ned og butikknavnene tegnes i et
+eget `<g>` utenfor zoom-gruppa, i skjermenheter, med enkel grådig
+kollisjonshåndtering (`placeLabels`: høyre, venstre, under, over, ellers
+skjult). Butikker med `recentSales > 0` (salgshendelser siste sju dager, fra
+`book-stock-events` per `sourceKey:storeId`) får en pulserende SMIL-ring og
+egen legende «Solgt siste uke».
+
+Kartet er egenbygd i stedet for Leaflet med vilje: ingen tile-leverandør,
+ingen ekstra avhengighet, og butikkene er punkter uten behov for gater.
+Trengs gatekart senere, er Leaflet + OpenStreetMap et alternativ — men
+punktene, zoom-tilstanden og fylkesvalget kan gjenbrukes som de er. Genereringsscriptet ligger ikke i repoet; det er ~60
 linjer Node som leser GeoJSON-en, filtrerer bort Svalbard/Jan Mayen/Bouvetøya
 (`lat > 55 && lat < 71.5 && lon > 3` — Bouvetøya på 54°S sniker seg ellers
 gjennom), projiserer, forenkler i piksler og skriver fila.

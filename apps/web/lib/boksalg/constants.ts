@@ -127,6 +127,24 @@ export const SALE_SOURCE_OPTIONS = [
 
 export type SaleSource = (typeof SALE_SOURCE_OPTIONS)[number]["value"];
 
+/**
+ * Forklaring per salgstype, i hverdagsspråk. Vises under feltet i admin
+ * (`admin/components/sale-source-help.tsx`) — hold dem her sammen med lista,
+ * så en ny type ikke kan mangle forklaring.
+ */
+export const SALE_SOURCE_HELP: Record<SaleSource, string> = {
+  innkjop:
+    "Norli eller ARK har bestilt et antall bøker. Dette er bøkene de kan sende tilbake.",
+  forhandssalg:
+    "Kunder bestilte boka før lansering, og bokhandelen bestilte ekstra for dem. Kommer ikke i retur.",
+  avregning:
+    "Oppgjøret fra Forlagsentralen. Bruk bare hvis du ikke har ført innkjøpene enkeltvis — ellers telles bøkene to ganger.",
+  foredrag: "Bøker du solgte selv på foredrag eller kurs.",
+  direkte: "Solgt rett til en bedrift eller person, utenom nettbutikken.",
+  retur: "Bøker som kom tilbake fra bokhandelen. Trekkes fra.",
+  annet: "Alt som ikke passer over. Skriv hva det var i referansefeltet.",
+};
+
 /** Salgstypen som trekkes fra i stedet for å legges til. */
 export const RETURN_SOURCE: SaleSource = "retur";
 

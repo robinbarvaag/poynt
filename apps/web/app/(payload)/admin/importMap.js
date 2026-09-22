@@ -48,6 +48,7 @@ import { NewsletterIntro as NewsletterIntro_e9d62145d2e1672a2188efe4769c5893 } f
 import { EmailTemplatePreview as EmailTemplatePreview_3c8f61e6f3f8a73cafef53b9dcdb32b6 } from '../../../admin/components/email-templates/email-template-preview'
 import { BookmarkOgFetch as BookmarkOgFetch_62526a99516db3c8451d3b97a5d7d286 } from '../../../admin/components/guides/bookmark-og-fetch'
 import { LinkToDoc as LinkToDoc_2e9be70cd13299dd4a11a5bd739a5a3c } from '@payloadcms/plugin-stripe/client'
+import { SaleSourceHelp as SaleSourceHelp_daff38f9ee60bda81473c13a6c39a564 } from '../../../admin/components/sale-source-help'
 import { FormEmailsPreview as FormEmailsPreview_f70347317f04cd1ed95d2f261d6772ce } from '../../../admin/components/email/form-emails-preview'
 import { SubmissionView as SubmissionView_215eee700df82efc4fc6a7bab7c3add4 } from '../../../admin/components/submission-view'
 import { FolderTypeField as FolderTypeField_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
@@ -129,6 +130,7 @@ export const importMap = {
   "/admin/components/email-templates/email-template-preview#EmailTemplatePreview": EmailTemplatePreview_3c8f61e6f3f8a73cafef53b9dcdb32b6,
   "/admin/components/guides/bookmark-og-fetch#BookmarkOgFetch": BookmarkOgFetch_62526a99516db3c8451d3b97a5d7d286,
   "@payloadcms/plugin-stripe/client#LinkToDoc": LinkToDoc_2e9be70cd13299dd4a11a5bd739a5a3c,
+  "/admin/components/sale-source-help#SaleSourceHelp": SaleSourceHelp_daff38f9ee60bda81473c13a6c39a564,
   "/admin/components/email/form-emails-preview#FormEmailsPreview": FormEmailsPreview_f70347317f04cd1ed95d2f261d6772ce,
   "/admin/components/submission-view#SubmissionView": SubmissionView_215eee700df82efc4fc6a7bab7c3add4,
   "@payloadcms/next/client#FolderTypeField": FolderTypeField_2b8867833a34864a02ddf429b0728a40,

@@ -3329,9 +3329,6 @@ export interface BookSale {
    * Avgjør hvilke kutt som trekkes fra.
    */
   channel: 'norli' | 'ark' | 'egen' | 'foredrag' | 'direkte' | 'annet';
-  /**
-   * Kanalen ved siden av avgjør hva du sitter igjen med. Typen styrer to ting: «Innkjøp fra bokhandel» er det bokhandelen kan returnere fra, og «Retur fra bokhandel» trekkes fra i stedet for å legges til.
-   */
   saleSource: 'innkjop' | 'forhandssalg' | 'avregning' | 'foredrag' | 'direkte' | 'retur' | 'annet';
   /**
    * La stå tom for å bruke utsalgsprisen fra Bokøkonomi. Fyll ut ved rabatt, f.eks. et samlet kjøp til en bedrift.
