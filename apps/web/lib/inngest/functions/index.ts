@@ -1,3 +1,4 @@
+import { bookStockSnapshot } from "./book-stock";
 import { eventPayments } from "./event-payments";
 import { eventReminders } from "./event-reminders";
 import { eventRetention } from "./event-retention";
@@ -13,4 +14,5 @@ export const functions = [
   eventRetention,
   eventReminders,
   eventPayments,
+  bookStockSnapshot,
 ];

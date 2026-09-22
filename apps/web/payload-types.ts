@@ -83,6 +83,11 @@ export interface Config {
     products: Product;
     orders: Order;
     'book-access': BookAccess;
+    'book-expenses': BookExpense;
+    'book-sales': BookSale;
+    'book-stock-snapshots': BookStockSnapshot;
+    'book-stock-events': BookStockEvent;
+    'book-stores': BookStore;
     users: User;
     redirects: Redirect;
     forms: Form;
@@ -115,6 +120,11 @@ export interface Config {
     products: ProductsSelect<false> | ProductsSelect<true>;
     orders: OrdersSelect<false> | OrdersSelect<true>;
     'book-access': BookAccessSelect<false> | BookAccessSelect<true>;
+    'book-expenses': BookExpensesSelect<false> | BookExpensesSelect<true>;
+    'book-sales': BookSalesSelect<false> | BookSalesSelect<true>;
+    'book-stock-snapshots': BookStockSnapshotsSelect<false> | BookStockSnapshotsSelect<true>;
+    'book-stock-events': BookStockEventsSelect<false> | BookStockEventsSelect<true>;
+    'book-stores': BookStoresSelect<false> | BookStoresSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
@@ -142,6 +152,7 @@ export interface Config {
     'checkout-settings': CheckoutSetting;
     'shop-settings': ShopSetting;
     'on-poynt-features': OnPoyntFeature;
+    'book-economy': BookEconomy;
   };
   globalsSelect: {
     homepage: HomepageSelect<false> | HomepageSelect<true>;
@@ -156,6 +167,7 @@ export interface Config {
     'checkout-settings': CheckoutSettingsSelect<false> | CheckoutSettingsSelect<true>;
     'shop-settings': ShopSettingsSelect<false> | ShopSettingsSelect<true>;
     'on-poynt-features': OnPoyntFeaturesSelect<false> | OnPoyntFeaturesSelect<true>;
+    'book-economy': BookEconomySelect<false> | BookEconomySelect<true>;
   };
   locale: null;
   widgets: {
@@ -3265,6 +3277,173 @@ export interface BookAccess {
   createdAt: string;
 }
 /**
+ * Utgiftene til «Verdifull vekst». Summen avgjør hvor mange bøker som må selges før boka går i null.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "book-expenses".
+ */
+export interface BookExpense {
+  id: number;
+  /**
+   * F.eks. «Omslagsdesign, andre faktura».
+   */
+  description: string;
+  amount: number;
+  date: string;
+  category:
+    | 'design'
+    | 'redaktor'
+    | 'oversetter'
+    | 'trykkeri'
+    | 'bokbasen'
+    | 'forlagsentralen'
+    | 'markedsforing'
+    | 'lansering'
+    | 'annet';
+  supplier?: string | null;
+  /**
+   * Valgfritt, men greit å ha samlet ett sted.
+   */
+  attachment?: (number | null) | Media;
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Salg som føres for hånd: bokhandlernes innkjøp, avregninger fra distributør, foredragssalg og direktesalg. Nettbutikken telles automatisk.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "book-sales".
+ */
+export interface BookSale {
+  id: number;
+  /**
+   * Når salget skjedde — ikke når du fører det inn.
+   */
+  date: string;
+  /**
+   * Alltid et positivt tall — også for en retur. Da er det «Hva slags salg» som gjør at den trekkes fra.
+   */
+  copies: number;
+  /**
+   * Avgjør hvilke kutt som trekkes fra.
+   */
+  channel: 'norli' | 'ark' | 'egen' | 'foredrag' | 'direkte' | 'annet';
+  /**
+   * Kanalen ved siden av avgjør hva du sitter igjen med. Typen styrer to ting: «Innkjøp fra bokhandel» er det bokhandelen kan returnere fra, og «Retur fra bokhandel» trekkes fra i stedet for å legges til.
+   */
+  saleSource: 'innkjop' | 'forhandssalg' | 'avregning' | 'foredrag' | 'direkte' | 'retur' | 'annet';
+  /**
+   * La stå tom for å bruke utsalgsprisen fra Bokøkonomi. Fyll ut ved rabatt, f.eks. et samlet kjøp til en bedrift.
+   */
+  unitPrice?: number | null;
+  /**
+   * F.eks. ordrenummer, avregningsnummer eller «Lansering Bergen». Gjør det lettere å finne igjen raden senere.
+   */
+  reference?: string | null;
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Rådata fra den automatiske hentingen. Kun til oppslag — endringene ligger i Lagerendringer.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "book-stock-snapshots".
+ */
+export interface BookStockSnapshot {
+  id: number;
+  sourceKey: 'norli' | 'ark';
+  fetchedAt: string;
+  online: 'unknown' | 'not_listed' | 'preorder' | 'in_stock' | 'out_of_stock';
+  /**
+   * Til kontroll mot vår egen utsalgspris.
+   */
+  price?: number | null;
+  storeCount?: number | null;
+  storesWithStock?: number | null;
+  totalCopies?: number | null;
+  externalId?: string | null;
+  note?: string | null;
+  /**
+   * Hele butikklista slik den så ut ved hentingen. Brukes til å regne ut endringer.
+   */
+  stores?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Hva som har skjedd i butikkene, dag for dag. Skrives automatisk ved hver henting.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "book-stock-events".
+ */
+export interface BookStockEvent {
+  id: number;
+  occurredAt: string;
+  type: 'sale' | 'restock' | 'listed' | 'delisted' | 'sold_out' | 'availability';
+  sourceKey: 'norli' | 'ark';
+  /**
+   * Alltid positivt — typen sier hvilken vei det gikk.
+   */
+  delta?: number | null;
+  storeName?: string | null;
+  city?: string | null;
+  region?: string | null;
+  fromQty?: number | null;
+  toQty?: number | null;
+  storeId?: string | null;
+  note?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Alle butikkene hos Norli (og etter hvert ARK) med kontaktinfo og lagerstatus. Bruk oppfølgingsfeltene til å holde orden på hvem du har snakket med.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "book-stores".
+ */
+export interface BookStore {
+  id: number;
+  followUpStatus?: ('ingen' | 'kontaktet' | 'ja' | 'nei' | 'purr') | null;
+  followUpAt?: string | null;
+  /**
+   * Hvem du snakket med, hva de sa, når du skal ringe igjen.
+   */
+  notes?: string | null;
+  name: string;
+  sourceKey: 'norli' | 'ark';
+  city?: string | null;
+  region?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  postcode?: string | null;
+  schedule?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  currentQty?: number | null;
+  /**
+   * 0 her betyr at butikken aldri har hatt boka.
+   */
+  maxQty?: number | null;
+  soldEstimate?: number | null;
+  restockedEstimate?: number | null;
+  firstStockedAt?: string | null;
+  lastSeenAt?: string | null;
+  storeId: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
@@ -3410,6 +3589,26 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'book-access';
         value: number | BookAccess;
+      } | null)
+    | ({
+        relationTo: 'book-expenses';
+        value: number | BookExpense;
+      } | null)
+    | ({
+        relationTo: 'book-sales';
+        value: number | BookSale;
+      } | null)
+    | ({
+        relationTo: 'book-stock-snapshots';
+        value: number | BookStockSnapshot;
+      } | null)
+    | ({
+        relationTo: 'book-stock-events';
+        value: number | BookStockEvent;
+      } | null)
+    | ({
+        relationTo: 'book-stores';
+        value: number | BookStore;
       } | null)
     | ({
         relationTo: 'users';
@@ -5101,6 +5300,102 @@ export interface BookAccessSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "book-expenses_select".
+ */
+export interface BookExpensesSelect<T extends boolean = true> {
+  description?: T;
+  amount?: T;
+  date?: T;
+  category?: T;
+  supplier?: T;
+  attachment?: T;
+  notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "book-sales_select".
+ */
+export interface BookSalesSelect<T extends boolean = true> {
+  date?: T;
+  copies?: T;
+  channel?: T;
+  saleSource?: T;
+  unitPrice?: T;
+  reference?: T;
+  notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "book-stock-snapshots_select".
+ */
+export interface BookStockSnapshotsSelect<T extends boolean = true> {
+  sourceKey?: T;
+  fetchedAt?: T;
+  online?: T;
+  price?: T;
+  storeCount?: T;
+  storesWithStock?: T;
+  totalCopies?: T;
+  externalId?: T;
+  note?: T;
+  stores?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "book-stock-events_select".
+ */
+export interface BookStockEventsSelect<T extends boolean = true> {
+  occurredAt?: T;
+  type?: T;
+  sourceKey?: T;
+  delta?: T;
+  storeName?: T;
+  city?: T;
+  region?: T;
+  fromQty?: T;
+  toQty?: T;
+  storeId?: T;
+  note?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "book-stores_select".
+ */
+export interface BookStoresSelect<T extends boolean = true> {
+  followUpStatus?: T;
+  followUpAt?: T;
+  notes?: T;
+  name?: T;
+  sourceKey?: T;
+  city?: T;
+  region?: T;
+  email?: T;
+  phone?: T;
+  address?: T;
+  postcode?: T;
+  schedule?: T;
+  latitude?: T;
+  longitude?: T;
+  currentQty?: T;
+  maxQty?: T;
+  soldEstimate?: T;
+  restockedEstimate?: T;
+  firstStockedAt?: T;
+  lastSeenAt?: T;
+  storeId?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -5987,6 +6282,86 @@ export interface OnPoyntFeature {
   createdAt?: string | null;
 }
 /**
+ * Pris, kutt og utgiftsgrunnlag for «Verdifull vekst». Styrer alle tall i boksalg-dashbordet.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "book-economy".
+ */
+export interface BookEconomy {
+  id: number;
+  title: string;
+  /**
+   * Brukes til å slå opp boka hos Norli og ARK. Ny utgave eller pocket har egen ISBN.
+   */
+  isbn: string;
+  /**
+   * Før denne datoen er det forhåndssalg, og tomme butikkhyller er forventet.
+   */
+  releaseDate?: string | null;
+  /**
+   * Samme pris overalt. Bøker har 0 % mva, så dette er både brutto og netto.
+   */
+  listPrice: number;
+  /**
+   * Valgfritt. Brukes til å vise hvor mye av opplaget som er solgt. Selve trykkefakturaen føres som en utgift under Bokutgifter — boka trykkes i opplag, så trykk er en engangskostnad og ikke et fradrag per solgte bok.
+   */
+  printRun?: number | null;
+  /**
+   * Knytt til produktet på poynt.no. Da telles faktiske bestillinger med i dashbordet — de er eksakte, i motsetning til butikk-estimatene.
+   */
+  shopProduct?: (number | null) | Product;
+  editorPercent: number;
+  /**
+   * På et salg i bokhandel er forskjellen ca. 20 kr per bok: 39,90 mot 19,95. I egen nettbutikk er de to like, siden ingen forhandler tar noe først.
+   */
+  editorBasis: 'brutto' | 'netto';
+  channels?:
+    | {
+        key: 'norli' | 'ark' | 'egen' | 'foredrag' | 'direkte' | 'annet';
+        label: string;
+        active?: boolean | null;
+        /**
+         * Kanaler uten kilde får salgstall fra det som føres manuelt under «Boksalg».
+         */
+        stockSource?: ('none' | 'norli' | 'ark') | null;
+        /**
+         * Norli og ARK: 50.
+         */
+        retailerPercent?: number | null;
+        /**
+         * Forlagsentralen o.l.
+         */
+        distributionPercent?: number | null;
+        /**
+         * Plukk og pakk.
+         */
+        distributionPerCopy?: number | null;
+        /**
+         * Stripe: 1,4.
+         */
+        transactionPercent?: number | null;
+        /**
+         * Stripe: 2.
+         */
+        transactionPerCopy?: number | null;
+        /**
+         * Hvor stor del av innkjøpet bokhandelen kan sende tilbake. Norli og ARK: 50. Dashbordet viser hvor mye av det du har tjent som kan forsvinne igjen. Faktiske returer føres som «Retur fra bokhandel» under Boksalg.
+         */
+        maxReturnPercent?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  sources?:
+    | {
+        sourceKey: 'norli' | 'ark';
+        active?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "homepage_select".
  */
@@ -6393,6 +6768,45 @@ export interface OnPoyntFeaturesSelect<T extends boolean = true> {
   minBedrift?: T;
   minStrategi?: T;
   tilbakemelding?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "book-economy_select".
+ */
+export interface BookEconomySelect<T extends boolean = true> {
+  title?: T;
+  isbn?: T;
+  releaseDate?: T;
+  listPrice?: T;
+  printRun?: T;
+  shopProduct?: T;
+  editorPercent?: T;
+  editorBasis?: T;
+  channels?:
+    | T
+    | {
+        key?: T;
+        label?: T;
+        active?: T;
+        stockSource?: T;
+        retailerPercent?: T;
+        distributionPercent?: T;
+        distributionPerCopy?: T;
+        transactionPercent?: T;
+        transactionPerCopy?: T;
+        maxReturnPercent?: T;
+        id?: T;
+      };
+  sources?:
+    | T
+    | {
+        sourceKey?: T;
+        active?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

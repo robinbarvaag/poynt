@@ -17,6 +17,7 @@ export default function robots(): MetadataRoute.Robots {
         "/forhandsvisning",
         "/eventer/billett/",
         "/innsjekk",
+        "/intern",
       ],
     },
     sitemap: `${SITE_URL}/sitemap.xml`,

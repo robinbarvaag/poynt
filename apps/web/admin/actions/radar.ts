@@ -6,18 +6,28 @@ import {
   getBindersWidgetData,
 } from "@/lib/radar/widget-data";
 import { requireAdmin } from "@/lib/require-admin";
+import config from "@/payload.config";
 import { db, eq } from "@poynt/planner-db";
 import {
   type ContentSuggestionStatus,
   plannerContentSuggestion,
 } from "@poynt/planner-db/schema";
+import { headers } from "next/headers";
+import { getPayload } from "payload";
 
 /**
  * Data til den flytende Bindersen-assistenten (klienthentet). Dashbord-
  * varianten henter det samme direkte i serverkomponenten.
+ *
+ * Returnerer `null` i stedet for å kaste når ingen er innlogget: widgeten
+ * ligger i admin-providern og kaller dette også på innloggingssiden, og et
+ * kast der ble logget som en 500 («⨯ Error: Ikke autorisert») ved hver
+ * innlogging selv om klienten fanget den.
  */
-export async function getBindersData(): Promise<BindersData> {
-  await requireAdmin();
+export async function getBindersData(): Promise<BindersData | null> {
+  const payload = await getPayload({ config });
+  const { user } = await payload.auth({ headers: await headers() });
+  if (!user) return null;
   return getBindersWidgetData();
 }
 

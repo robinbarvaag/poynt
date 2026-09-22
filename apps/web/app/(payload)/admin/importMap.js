@@ -54,8 +54,10 @@ import { FolderTypeField as FolderTypeField_2b8867833a34864a02ddf429b0728a40 } f
 import { LinkRowLabel as LinkRowLabel_f0fd4bee3885f2a3c8ca119ef52b5ffe } from '../../../admin/components/row-labels'
 import { ColumnRowLabel as ColumnRowLabel_f0fd4bee3885f2a3c8ca119ef52b5ffe } from '../../../admin/components/row-labels'
 import { OrderEmailPreview as OrderEmailPreview_da3d7bdfc79ddf11f937fbc6775a965d } from '../../../admin/components/email/order-email-preview'
+import { ChannelRowLabel as ChannelRowLabel_f0fd4bee3885f2a3c8ca119ef52b5ffe } from '../../../admin/components/row-labels'
 import { OnPoyntNavGroup as OnPoyntNavGroup_cbdd0274d832c585cca0ce893b25cc1e } from '../../../admin/components/on-poynt-nav-group'
 import { ContactsNavGroup as ContactsNavGroup_eaa602077b61895f57de2f69a860ec84 } from '../../../admin/components/contacts-nav-group'
+import { BookNavGroup as BookNavGroup_445051926e054b13afb9b0923331f6fe } from '../../../admin/components/book-nav-group'
 import { SetupNavGroup as SetupNavGroup_49db99829140aef9ec2dd6ea8d7e6d7f } from '../../../admin/components/setup-nav-group'
 import { RadarWidget as RadarWidget_5b7947cd224091d66f29a1ea95235d6d } from '../../../admin/components/dashboard/radar-widget'
 import { BindersProvider as BindersProvider_f3c69e9301ea436c7ba85a5e33ded302 } from '../../../admin/components/binders-provider'
@@ -133,8 +135,10 @@ export const importMap = {
   "/admin/components/row-labels#LinkRowLabel": LinkRowLabel_f0fd4bee3885f2a3c8ca119ef52b5ffe,
   "/admin/components/row-labels#ColumnRowLabel": ColumnRowLabel_f0fd4bee3885f2a3c8ca119ef52b5ffe,
   "/admin/components/email/order-email-preview#OrderEmailPreview": OrderEmailPreview_da3d7bdfc79ddf11f937fbc6775a965d,
+  "/admin/components/row-labels#ChannelRowLabel": ChannelRowLabel_f0fd4bee3885f2a3c8ca119ef52b5ffe,
   "/admin/components/on-poynt-nav-group#OnPoyntNavGroup": OnPoyntNavGroup_cbdd0274d832c585cca0ce893b25cc1e,
   "/admin/components/contacts-nav-group#ContactsNavGroup": ContactsNavGroup_eaa602077b61895f57de2f69a860ec84,
+  "/admin/components/book-nav-group#BookNavGroup": BookNavGroup_445051926e054b13afb9b0923331f6fe,
   "/admin/components/setup-nav-group#SetupNavGroup": SetupNavGroup_49db99829140aef9ec2dd6ea8d7e6d7f,
   "/admin/components/dashboard/radar-widget#RadarWidget": RadarWidget_5b7947cd224091d66f29a1ea95235d6d,
   "/admin/components/binders-provider#BindersProvider": BindersProvider_f3c69e9301ea436c7ba85a5e33ded302,

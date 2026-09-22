@@ -160,6 +160,42 @@ export { Textarea } from "./components/form/textarea";
 export { Label } from "./components/form/label";
 export { Progress } from "./components/progress";
 
+// Tabell-primitiver + datatabell (sortering, søk, filter, paginering, radvalg)
+export {
+  Table,
+  TableHeader,
+  TableBody,
+  TableFooter,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableCaption,
+} from "./components/table";
+export {
+  DataTable,
+  DataTableColumnHeader,
+  DataTableFacetedFilter,
+  dataTableSelectionColumn,
+  createDataTableColumnHelper,
+  dataTableFeatures,
+  type DataTableProps,
+  type DataTableColumnDef,
+  type DataTableInstance,
+  type DataTableFeatures,
+  type ColumnFiltersState,
+} from "./components/data-table";
+
+// Graf-primitiver (Recharts): container med fargeconfig, tooltip og legende
+export {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+  ChartStyle,
+  type ChartConfig,
+} from "./components/chart";
+
 export {
   Tooltip,
   TooltipTrigger,

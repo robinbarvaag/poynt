@@ -1,0 +1,43 @@
+import { Meta, Canvas } from "@storybook/addon-docs/blocks";
+import * as TableStories from "./Table.stories";
+
+<Meta of={TableStories} />
+
+# Table
+
+Rene tabell-primitiver over semantisk HTML: `Table`, `TableHeader`, `TableBody`,
+`TableFooter`, `TableRow`, `TableHead`, `TableCell` og `TableCaption`. Konsistent
+typografi, radskiller og hover — og vannrett rulling på smale skjermer, så en bred
+tabell aldri sprenger sidebredden.
+
+## Når brukes den
+
+- Små, statiske tabeller der innholdet er kjent på forhånd (satser, sammenligninger).
+- Som byggeklosser inne i **DataTable**, som legger på sortering, søk og paginering.
+
+## Når IKKE
+
+- Lister med mange rader som skal søkes i, sorteres eller pagineres — bruk **DataTable**.
+- Nøkkeltall side om side — bruk **Card** eller stat-fliser; en tabell med én rad er
+  feil form.
+- Layout. Aldri `<table>` for å plassere ting.
+
+## Standard
+
+Bruk `tabular-nums` på tallkolonner og høyrejuster dem, så sifrene står under
+hverandre. Forklarende tekst går i `TableCaption`, ikke i en ekstra rad.
+
+<Canvas of={TableStories.Standard} />
+
+## Bunnlinje
+
+`TableFooter` for summer. Den får dempet flate, så den skiller seg fra dataradene.
+
+<Canvas of={TableStories.MedBunnlinje} />
+
+## Valgt rad
+
+`data-state="selected"` på `TableRow` gir markert flate. DataTable setter den
+automatisk ved radvalg.
+
+<Canvas of={TableStories.ValgtRad} />

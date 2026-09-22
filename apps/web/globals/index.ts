@@ -2,6 +2,7 @@ export { CheckoutSettings } from "./checkout-settings";
 export { ShopSettings } from "./shop-settings";
 export { OnPoyntFeatures } from "./on-poynt-features";
 export { SiteSettings } from "./site-settings";
+export { BookEconomy } from "./book-economy";
 export { Header } from "./header";
 export { Footer } from "./footer";
 export { Homepage } from "./homepage";

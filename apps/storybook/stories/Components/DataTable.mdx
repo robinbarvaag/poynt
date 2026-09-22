@@ -1,0 +1,65 @@
+import { Meta, Canvas } from "@storybook/addon-docs/blocks";
+import * as DataTableStories from "./DataTable.stories";
+
+<Meta of={DataTableStories} />
+
+# DataTable
+
+Datatabell over [TanStack Table v9](https://tanstack.com/table) med ett fast
+funksjonssett: sortering, fritekstsøk, fasetterte kolonnefiltre, paginering,
+radvalg og kolonnevisning. Alle tabeller i appen oppfører seg likt.
+
+## Når brukes den
+
+- Lister med mange rader som skal søkes i, sorteres eller filtreres — butikker,
+  bestillinger, kontakter.
+- Når brukeren skal velge rader og gjøre noe med dem («kopier e-postadresser»).
+
+## Når IKKE
+
+- Små, statiske tabeller — bruk **Table**-primitivene direkte.
+- Nøkkeltall — bruk stat-fliser eller **Card**.
+
+## Slik bygges kolonner
+
+```tsx
+const helper = createDataTableColumnHelper<Butikk>();
+
+const columns = [
+  dataTableSelectionColumn<Butikk>(),
+  helper.accessor("navn", {
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Butikk" />,
+    sortFn: "text",
+  }),
+  helper.accessor("fylke", { header: "Fylke", filterFn: "oneOf" }),
+];
+
+<DataTable columns={columns} data={butikker} searchPlaceholder="Søk …" />
+```
+
+`createDataTableColumnHelper` binder tabellens funksjonssett, så `sortFn`
+og `filterFn` er typet til de som faktisk er registrert (`text`, `basic`,
+`alphanumeric`, `datetime` · `includesString`, `equalsString`, `oneOf`, `arrIncludesSome`).
+
+## Standard
+
+Søk går på alle tekstkolonner som ikke har `enableGlobalFilter: false`. En
+kolonne som kombinerer flere felt (navn + by) gjør at søket treffer begge.
+
+<Canvas of={DataTableStories.Standard} />
+
+## Fasetterte filtre
+
+`DataTableFacetedFilter` lister kolonnens faktiske verdier med antall, og
+kolonnen må ha `filterFn: "oneOf"`. Legges i `toolbar`.
+
+<Canvas of={DataTableStories.MedFiltre} />
+
+## Styrt utenfra
+
+Send `columnFilters` + `onColumnFiltersChange` for å eie filtrene i forelderen —
+slik kartet i boksalg-dashbordet styrer fylkesfilteret i lista under.
+
+## Tom
+
+<Canvas of={DataTableStories.Tom} />

@@ -1,0 +1,54 @@
+import { Meta, Canvas } from "@storybook/addon-docs/blocks";
+import * as ChartStories from "./Chart.stories";
+
+<Meta of={ChartStories} />
+
+# Chart
+
+Tynne primitiver over [Recharts](https://recharts.org): `ChartContainer`,
+`ChartTooltip` + `ChartTooltipContent`, `ChartLegend` + `ChartLegendContent`.
+Selve grafen (`BarChart`, `Line`, `XAxis` …) importeres fra `recharts` og legges
+inne i containeren.
+
+`config` gir hver serie en etikett og en farge. Fargen blir CSS-variabelen
+`--color-<nøkkel>` inne i grafen, så Recharts-elementene skriver
+`fill="var(--color-solgt)"` — og tooltip og legende leser samme config. Da kan
+etiketten aldri peke på feil farge.
+
+## Når brukes den
+
+- Endring over tid (søyler per dag, linje for beholdning).
+- Sammenligning av få serier — én til fire. Flere enn det: del opp i små multipler.
+
+## Når IKKE
+
+- Ett enkelt tall — bruk en stat-flis eller **Progress**. En graf med ett punkt
+  er ikke en graf.
+- To y-akser. Aldri. To størrelser i ulik skala er to grafer.
+- Kakediagram for mer enn tre andeler — bruk vannrette søyler.
+
+## Regler for datafarger
+
+Merkevarefargene (`#29664f`, `#eac435`, `#ff99ad`, `#abe3e3`) er flate- og
+aksentfarger. Som datamerker faller de på lyshetsbånd, kromafloor og kontrast mot
+hvit. Bruk datafarger som består palettvalidatoren — i boksalg-dashbordet er det
+`#00794e` (eksakte tall) og `#b07d06` (estimater). Estimater skraveres i tillegg,
+så usikkerheten leses uten farge.
+
+## Én serie
+
+Ingen legende: tittelen navngir serien.
+
+<Canvas of={ChartStories.Søyler} />
+
+## To serier
+
+Fra to serier og oppover er legenden alltid med.
+
+<Canvas of={ChartStories.ToSerierMedLegende} />
+
+## Linje
+
+2 px strek, ingen punkter i ro — punktet dukker opp ved hover.
+
+<Canvas of={ChartStories.Linje} />

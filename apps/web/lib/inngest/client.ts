@@ -25,6 +25,10 @@ type Events = {
   "events/payments.requested": {
     data: Record<string, never>;
   };
+  // Hent lagerstatus for boka hos Norli/ARK (kjører også hver morgen).
+  "boksalg/snapshot.requested": {
+    data: { sourceKey?: string };
+  };
 };
 
 export const inngest = new Inngest({

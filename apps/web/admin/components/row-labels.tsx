@@ -27,3 +27,25 @@ export function ColumnRowLabel() {
   const { data, rowNumber } = useRowLabel<{ title?: string }>();
   return <span>{data?.title || `Kolonne ${(rowNumber ?? 0) + 1}`}</span>;
 }
+
+/**
+ * Salgskanal i «Bokøkonomi». Viser hva kanalen faktisk koster i lukket
+ * tilstand, så man ser at bokhandel tar 50 % uten å åpne raden.
+ */
+export function ChannelRowLabel() {
+  const { data, rowNumber } = useRowLabel<{
+    label?: string;
+    retailerPercent?: number;
+    active?: boolean;
+  }>();
+  const name = data?.label || `Kanal ${(rowNumber ?? 0) + 1}`;
+  const cut = data?.retailerPercent
+    ? `${data.retailerPercent} % til forhandler`
+    : "ingen forhandler";
+  return (
+    <span>
+      {name} · {cut}
+      {data?.active === false ? " · inaktiv" : ""}
+    </span>
+  );
+}

@@ -31,6 +31,11 @@ import {
 // Collections
 import { BlogPosts } from "./collections/blog-posts";
 import { BookAccess } from "./collections/book-access";
+import { BookExpenses } from "./collections/book-expenses";
+import { BookSales } from "./collections/book-sales";
+import { BookStockEvents } from "./collections/book-stock-events";
+import { BookStockSnapshots } from "./collections/book-stock-snapshots";
+import { BookStores } from "./collections/book-stores";
 import { CaseStudies } from "./collections/case-studies";
 import { Categories } from "./collections/categories";
 import { Courses } from "./collections/courses";
@@ -50,6 +55,7 @@ import { Users } from "./collections/users";
 // Globals
 import {
   BlogPage,
+  BookEconomy,
   CheckoutSettings,
   Footer,
   Header,
@@ -213,6 +219,12 @@ export default buildConfig({
     Products,
     Orders,
     BookAccess,
+    // Boka («Verdifull vekst») — vises i den egenbygde «Boka»-nav-gruppen
+    BookExpenses,
+    BookSales,
+    BookStockSnapshots,
+    BookStockEvents,
+    BookStores,
     // Hidden
     Users,
   ],
@@ -231,6 +243,7 @@ export default buildConfig({
     CheckoutSettings,
     ShopSettings,
     OnPoyntFeatures,
+    BookEconomy,
   ],
   admin: {
     user: "users",
@@ -238,6 +251,7 @@ export default buildConfig({
       afterNavLinks: [
         "/admin/components/on-poynt-nav-group#OnPoyntNavGroup",
         "/admin/components/contacts-nav-group#ContactsNavGroup",
+        "/admin/components/book-nav-group#BookNavGroup",
         "/admin/components/setup-nav-group#SetupNavGroup",
       ],
       beforeDashboard: ["/admin/components/dashboard/radar-widget#RadarWidget"],
