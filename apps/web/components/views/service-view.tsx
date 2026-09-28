@@ -6,7 +6,7 @@ import { resolveMedia } from "@/lib/payload";
 import { formatServicePrice } from "@/lib/service";
 import { detailBreadcrumbs } from "@/lib/ui-text";
 import type { Service, Servicespage } from "@/payload-types";
-import { Breadcrumbs, Container, Heading, Text } from "@poynt/ui";
+import { Breadcrumbs, Container, Faq, Heading, Text } from "@poynt/ui";
 
 interface ServiceViewProps {
   service: Service;
@@ -20,6 +20,7 @@ interface ServiceViewProps {
  */
 export function ServiceView({ service, cta }: ServiceViewProps) {
   const image = resolveMedia(service.image);
+  const faq = (service.faq ?? []).filter((f) => f.question && f.answer);
 
   return (
     <>
@@ -65,6 +66,17 @@ export function ServiceView({ service, cta }: ServiceViewProps) {
             <div className="prose prose-lg max-w-none prose-headings:text-foreground prose-p:text-foreground prose-a:text-primary prose-strong:text-foreground mb-10">
               <RichText data={service.content} />
             </div>
+          )}
+
+          {/* FAQ-en fra SEO-fanen vises synlig — FAQPage-JSON-LD-en som
+              sendes for siden skal speile innhold folk faktisk kan lese. */}
+          {faq.length > 0 && (
+            <section className="mt-14">
+              <Heading variant="h2" customStyles="mb-6">
+                Det folk lurer på
+              </Heading>
+              <Faq bare items={faq} />
+            </section>
           )}
         </article>
       </Container>

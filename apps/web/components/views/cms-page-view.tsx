@@ -6,7 +6,14 @@ import { slugifyAnchor } from "@/lib/format";
 import { isHeroBlockType } from "@/lib/kontakt-page";
 import { faqSchema } from "@/lib/structured-data";
 import type { Page } from "@/payload-types";
-import { HubLayout, type HubNavItem, LandingCanvas } from "@poynt/ui";
+import {
+  Container,
+  Faq,
+  Heading,
+  HubLayout,
+  type HubNavItem,
+  LandingCanvas,
+} from "@poynt/ui";
 import type { IconName } from "@poynt/ui/icons";
 
 type Block = NonNullable<Page["layout"]>[number];
@@ -106,7 +113,25 @@ export function CmsPageView({ page }: { page: Page }) {
   const firstBlock = page.layout?.[0];
   const hasHeroBlock = isHeroBlockType(firstBlock?.blockType);
 
-  const faqLd = faqSchema(page.faq);
+  // FAQPage-JSON-LD fra både SEO-fanens FAQ-felt og FAQ-blokker i layouten,
+  // så sider der FAQ-en er lagt inn som blokk også får strukturerte data.
+  const layoutFaq = (page.layout ?? []).flatMap((block) =>
+    block.blockType === "faq" ? (block.items ?? []) : []
+  );
+  const faqLd = faqSchema([...(page.faq ?? []), ...layoutFaq]);
+
+  // FAQ-en fra SEO-fanen vises synlig nederst — FAQPage-JSON-LD-en skal speile
+  // innhold folk faktisk kan lese, ellers er den bare støy for søkemotorene.
+  const seoFaq = (page.faq ?? []).filter((f) => f.question && f.answer);
+  const seoFaqSection =
+    seoFaq.length > 0 ? (
+      <Container size="sm" padding="lg">
+        <Heading variant="h2" customStyles="mb-6">
+          Det folk lurer på
+        </Heading>
+        <Faq bare items={seoFaq} />
+      </Container>
+    ) : null;
 
   let body: React.ReactNode;
 
@@ -126,6 +151,7 @@ export function CmsPageView({ page }: { page: Page }) {
         <HubLayout nav={hubNavFrom(rest)}>
           <RenderBlocks blocks={rest} spacing="md" />
         </HubLayout>
+        {seoFaqSection}
       </>
     );
   } else {
@@ -133,6 +159,7 @@ export function CmsPageView({ page }: { page: Page }) {
       <>
         {!hasHeroBlock && <PageHero title={page.title} size="large" />}
         {page.layout && <RenderBlocks blocks={page.layout} />}
+        {seoFaqSection}
       </>
     );
   }

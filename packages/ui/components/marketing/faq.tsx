@@ -21,15 +21,29 @@ export interface FaqProps {
   items: FaqItem[];
   /** Indeks som er åpent i utgangspunktet. Default ingen. */
   defaultOpen?: number;
+  /**
+   * Dropp Container-wrapperen (bredde + sidepadding) — for FAQ inne i en
+   * kolonne som allerede eier bredden, f.eks. eventsiden.
+   */
+  bare?: boolean;
 }
 
 /**
  * FAQ-blokk bygget på Accordion-en, med den ikon-frie +/−-markøren. Innholds-
- * only; én åpen om gangen (collapsible).
+ * only; én åpen om gangen (collapsible). Svarene ligger i DOM-en også når de
+ * er lukket (Accordion-en bruker `hidden="until-found"`), så de indekseres.
  */
-export function Faq({ eyebrow, title, intro, items, defaultOpen }: FaqProps) {
+export function Faq({
+  eyebrow,
+  title,
+  intro,
+  items,
+  defaultOpen,
+  bare = false,
+}: FaqProps) {
+  const Wrap = bare ? BareWrap : SizedContainer;
   return (
-    <Container size="sm" padding="none">
+    <Wrap>
       {(eyebrow || title || intro) && (
         <Reveal>
           <div className="mb-12 max-w-2xl">
@@ -75,6 +89,18 @@ export function Faq({ eyebrow, title, intro, items, defaultOpen }: FaqProps) {
           ))}
         </Accordion>
       </Reveal>
+    </Wrap>
+  );
+}
+
+function SizedContainer({ children }: { children: React.ReactNode }) {
+  return (
+    <Container size="sm" padding="none">
+      {children}
     </Container>
   );
+}
+
+function BareWrap({ children }: { children: React.ReactNode }) {
+  return <>{children}</>;
 }

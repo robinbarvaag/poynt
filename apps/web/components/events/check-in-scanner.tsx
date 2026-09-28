@@ -1,7 +1,7 @@
 "use client";
 
 import type { CheckInOutcome, CheckInResult } from "@/lib/events/registrations";
-import { Button, cn } from "@poynt/ui";
+import { Button, cn, sanitizeEmailInput } from "@poynt/ui";
 import jsQR from "jsqr";
 import {
   Ban,
@@ -771,7 +771,9 @@ export function CheckInScanner({
               id="innsjekk-epost"
               type="email"
               value={walkInEmail}
-              onChange={(e) => setWalkInEmail(e.target.value)}
+              onChange={(e) =>
+                setWalkInEmail(sanitizeEmailInput(e.target.value))
+              }
               autoComplete="off"
               inputMode="email"
               className={fieldClass}

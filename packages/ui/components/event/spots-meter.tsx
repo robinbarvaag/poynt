@@ -12,7 +12,8 @@ export interface SpotsMeterProps {
 /**
  * «23 av 80 plasser igjen» med en fyllingsstripe. Fargen skifter når det
  * begynner å bli trangt (saffron) og når det er fullt (salmon) — ærlig
- * knapphet, ikke kunstig.
+ * knapphet, ikke kunstig. Teksten sier alt som trengs; stripa er bare et
+ * visuelt ekko av den.
  */
 export function SpotsMeter({
   capacity,
@@ -37,14 +38,7 @@ export function SpotsMeter({
 
   return (
     <div className={cn("space-y-2", className)}>
-      <div className="flex items-baseline justify-between gap-3 text-sm">
-        <span className="font-semibold text-foreground">{label}</span>
-        {!full && (
-          <span className="text-muted-foreground tabular-nums">
-            {taken}/{capacity}
-          </span>
-        )}
-      </div>
+      <p className="font-semibold text-foreground text-sm">{label}</p>
       <div
         className="h-2.5 overflow-hidden rounded-full bg-muted"
         role="meter"

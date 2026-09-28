@@ -37,5 +37,6 @@ export function canonicalizeEmail(email: string): string {
  */
 export const emailSchema = z
   .string()
+  .trim()
   .email()
   .transform((email) => canonicalizeEmail(email));

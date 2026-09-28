@@ -16,6 +16,7 @@ import {
   SelectValue,
   Text,
   cn,
+  sanitizeEmailInput,
 } from "@poynt/ui";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import type { Form as PayloadForm } from "../../payload-types";
@@ -166,8 +167,10 @@ export function FormBlockComponent({
     const data = new FormData(formElement);
     const values: Record<string, string> = {};
 
+    // Luft foran/bak fjernes for alle felt — en e-post med ledende mellomrom
+    // ble avvist av serveren tidligere.
     data.forEach((value, key) => {
-      values[key] = value.toString();
+      values[key] = value.toString().trim();
     });
 
     const submissionData = Object.entries(values).map(([field, value]) => ({
@@ -318,6 +321,10 @@ export function FormBlockComponent({
                       id={inputId}
                       name={fieldName}
                       required={isRequired}
+                      autoComplete="email"
+                      onChange={(e) => {
+                        e.target.value = sanitizeEmailInput(e.target.value);
+                      }}
                       className={fieldControlClasses}
                     />
                   )}

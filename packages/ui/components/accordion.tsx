@@ -1,13 +1,69 @@
-import * as AccordionPrimitive from "@radix-ui/react-accordion";
+"use client";
+
+import { Accordion as AccordionPrimitive } from "@base-ui/react/accordion";
 import { ChevronDownIcon } from "lucide-react";
 import type * as React from "react";
 
 import { cn } from "@poynt/ui/lib/utils";
 
+/**
+ * Accordion bygget på Base UI (ikke Radix) — av én grunn: `hiddenUntilFound`.
+ * Lukkede paneler blir liggende i DOM-en med `hidden="until-found"`, så
+ * svarene finnes i server-HTML-en (søkemotorer og AI-crawlere ser dem), og
+ * Ctrl+F i nettleseren åpner panelet med treff. Radix monterer bare det
+ * åpne panelet.
+ *
+ * API-et er holdt likt shadcn/Radix-varianten (`type="single" collapsible`,
+ * `defaultValue="item-1"`) så eksisterende brukere ikke trenger endring.
+ */
+
+type RootPrimitiveProps = React.ComponentProps<typeof AccordionPrimitive.Root>;
+
+export interface AccordionProps
+  extends Omit<
+    RootPrimitiveProps,
+    "value" | "defaultValue" | "onValueChange" | "multiple"
+  > {
+  /** «single» = ett panel åpent om gangen (default), «multiple» = fritt. */
+  type?: "single" | "multiple";
+  /** Beholdt for kompatibilitet; Base UI lar alltid et åpent panel lukkes. */
+  collapsible?: boolean;
+  value?: string | string[];
+  defaultValue?: string | string[];
+  onValueChange?: (value: string | string[]) => void;
+}
+
+const toArray = (value: string | string[] | undefined) =>
+  value === undefined ? undefined : Array.isArray(value) ? value : [value];
+
 function Accordion({
+  type = "single",
+  collapsible: _collapsible,
+  value,
+  defaultValue,
+  onValueChange,
+  hiddenUntilFound = true,
   ...props
-}: React.ComponentProps<typeof AccordionPrimitive.Root>) {
-  return <AccordionPrimitive.Root data-slot="accordion" {...props} />;
+}: AccordionProps) {
+  const multiple = type === "multiple";
+  return (
+    <AccordionPrimitive.Root
+      data-slot="accordion"
+      multiple={multiple}
+      value={toArray(value)}
+      defaultValue={toArray(defaultValue)}
+      onValueChange={
+        onValueChange
+          ? (next: unknown[]) => {
+              const values = next.map(String);
+              onValueChange(multiple ? values : (values[0] ?? ""));
+            }
+          : undefined
+      }
+      hiddenUntilFound={hiddenUntilFound}
+      {...props}
+    />
+  );
 }
 
 function AccordionItem({
@@ -37,7 +93,7 @@ function AccordionTrigger({
       <AccordionPrimitive.Trigger
         data-slot="accordion-trigger"
         className={cn(
-          "focus-visible:border-ring focus-visible:ring-ring/50 flex flex-1 items-start justify-between gap-4 rounded-md py-4 text-left text-sm font-medium transition-all outline-none hover:underline focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50 [&[data-state=open]>svg]:rotate-180 [&[data-state=open]_.accordion-plus-v]:scale-y-0",
+          "focus-visible:border-ring focus-visible:ring-ring/50 flex flex-1 items-start justify-between gap-4 rounded-md py-4 text-left text-sm font-medium transition-all outline-none hover:underline focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50 [&[data-panel-open]>svg]:rotate-180 [&[data-panel-open]_.accordion-plus-v]:scale-y-0",
           className
         )}
         {...props}
@@ -61,15 +117,15 @@ function AccordionContent({
   className,
   children,
   ...props
-}: React.ComponentProps<typeof AccordionPrimitive.Content>) {
+}: React.ComponentProps<typeof AccordionPrimitive.Panel>) {
   return (
-    <AccordionPrimitive.Content
+    <AccordionPrimitive.Panel
       data-slot="accordion-content"
-      className="data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down overflow-hidden text-sm"
+      className="overflow-hidden text-sm data-closed:animate-accordion-up data-open:animate-accordion-down"
       {...props}
     >
       <div className={cn("pt-0 pb-4", className)}>{children}</div>
-    </AccordionPrimitive.Content>
+    </AccordionPrimitive.Panel>
   );
 }
 

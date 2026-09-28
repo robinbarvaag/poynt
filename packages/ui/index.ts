@@ -150,7 +150,11 @@ export {
 
 export { Skeleton } from "./components/skeleton";
 export { Separator } from "./components/separator";
-export { Input, type InputProps } from "./components/form/input";
+export {
+  Input,
+  type InputProps,
+  sanitizeEmailInput,
+} from "./components/form/input";
 export {
   controlSizeVariants,
   CONTROL_HEIGHTS,

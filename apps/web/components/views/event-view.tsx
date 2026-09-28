@@ -29,6 +29,7 @@ import {
   EventFacts,
   EventProgram,
   Eyebrow,
+  Faq,
   Heading,
   Panel,
   SpotsMeter,
@@ -130,13 +131,15 @@ export function EventView({ event, seatsTaken }: EventViewProps) {
             </div>
 
             <div className="mt-5 flex items-start gap-5">
-              <EventDateBadge
-                day={day}
-                month={month}
-                size="lg"
-                // Uten bilde viser bildeflaten allerede datoen.
-                className={image?.url ? "hidden sm:flex" : "hidden"}
-              />
+              {/* Uten bilde viser bildeflaten allerede datoen. Rammen har
+                  samme skriftstørrelse som tittelen, så `1lh` = høyden på
+                  første tittellinje — kalenderbladet sentreres på den, i
+                  stedet for å henge fra toppen av tekstboksen. */}
+              {image?.url && (
+                <div className="hidden h-lh items-center text-heading-one-mobile sm:flex md:text-heading-one-desktop">
+                  <EventDateBadge day={day} month={month} size="lg" />
+                </div>
+              )}
               <Heading
                 variant="h1"
                 color="foreground"
@@ -257,24 +260,15 @@ export function EventView({ event, seatsTaken }: EventViewProps) {
                 <Heading variant="h2" customStyles="mb-6">
                   Det folk lurer på
                 </Heading>
-                <div className="divide-y divide-border rounded-3xl ring-1 ring-border">
-                  {faq.map((item) => (
-                    <details key={item.question} className="group px-6 py-5">
-                      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold text-foreground">
-                        {item.question}
-                        <span
-                          aria-hidden
-                          className="text-primary text-xl transition-transform group-open:rotate-45"
-                        >
-                          +
-                        </span>
-                      </summary>
-                      <p className="mt-3 text-muted-foreground leading-relaxed">
-                        {item.answer}
-                      </p>
-                    </details>
-                  ))}
-                </div>
+                {/* Samme FAQ som blokken på vanlige sider; `bare` fordi
+                    kolonnen her eier bredden. */}
+                <Faq
+                  bare
+                  items={faq.map((item) => ({
+                    question: item.question ?? "",
+                    answer: item.answer ?? "",
+                  }))}
+                />
               </section>
             )}
           </div>

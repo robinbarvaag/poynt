@@ -71,9 +71,11 @@ export function seoMetaField(opts?: {
 }
 
 /**
- * Valgfri FAQ-seksjon. Når den er fylt ut, brukes den til å bygge
- * `FAQPage`-strukturert data (JSON-LD) – et sterkt signal for både Google og
- * generative søkemotorer (GEO/AI). Synlig under SEO-fanen.
+ * Valgfri FAQ-seksjon. Når den er fylt ut, vises den nederst på siden som
+ * «Det folk lurer på» OG brukes til `FAQPage`-strukturert data (JSON-LD) – et
+ * sterkt signal for både Google og generative søkemotorer (GEO/AI). Google
+ * krever at FAQ-data speiler synlig innhold, derfor begge deler. Ligger under
+ * SEO-fanen.
  */
 export function seoFaqField(): Field {
   return {
@@ -82,7 +84,7 @@ export function seoFaqField(): Field {
     label: "Ofte stilte spørsmål (FAQ)",
     admin: {
       description:
-        "Spørsmål og svar som publiseres som strukturert data for søkemotorer og AI-svar. La stå tom for å hoppe over.",
+        "Vises nederst på siden som «Det folk lurer på», og sendes som strukturert data til søkemotorer og AI-svar. La stå tom for å hoppe over.",
     },
     fields: [
       {
