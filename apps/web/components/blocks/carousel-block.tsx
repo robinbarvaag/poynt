@@ -2,6 +2,7 @@ import { BlockLink } from "@/components/block-link";
 import {
   type MediaResource,
   PayloadImage,
+  pickImageSource,
   resolveMediaUrl,
 } from "@/components/payload-image";
 import {
@@ -61,16 +62,20 @@ const SLIDE_SIZES: Record<number, string> = {
  * Logoene vises maks ~200 CSS-px brede (se `LogoSlide`). Med fast bredde lager
  * next/image en 1x/2x-srcset gjennom bildeoptimaliseringen, i stedet for at
  * originalen (som kan være flere tusen piksler) lastes rått.
+ *
+ * Kilden er `sizes.large` (maks 2400 px), ikke originalen: Vercels
+ * bildeoptimalisering gir opp på gigantiske kilder (f.eks. en 13959 px bred
+ * logo-PNG) og sender originalen urørt med 60 s cache.
  */
 const LOGO_WIDTH = 220;
 
 function logoImageProps(image: MediaResource | null) {
-  const src = resolveMediaUrl(image);
-  if (!src) return {};
+  const source = image ? pickImageSource(image) : null;
+  if (!source) return {};
   const ratio =
     image?.width && image?.height ? image.width / image.height : undefined;
   const { props } = getImageProps({
-    src,
+    src: source.src,
     alt: "",
     width: LOGO_WIDTH,
     height: Math.round(LOGO_WIDTH / (ratio ?? 3)),

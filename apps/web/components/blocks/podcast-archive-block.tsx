@@ -161,10 +161,11 @@ function EpisodeCaption({
       </Text>
 
       <Heading
-        variant="h4"
+        variant="h2"
+        size={"h4"}
         color="foreground"
         weight="medium"
-        customStyles="line-clamp-2 leading-snug transition-colors group-hover:text-primary"
+        customStyles="line-clamp-2 transition-colors group-hover:text-primary"
       >
         {episode.title}
       </Heading>

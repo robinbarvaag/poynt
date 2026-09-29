@@ -68,6 +68,8 @@ export function toProductGridItem(product: Product): ProductGridItem {
         media={media}
         alt={media.alt || product.name}
         fill
+        // Speiler ProductGrid (1 → 2 → 3 kolonner, container ≈ 1152 px).
+        sizes="(min-width: 1024px) 380px, (min-width: 640px) 50vw, 90vw"
         className="object-cover"
       />
     ) : undefined,
