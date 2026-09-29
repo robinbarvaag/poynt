@@ -7,6 +7,7 @@ import {
   recaptchaHeader,
   useRecaptcha,
 } from "@/components/recaptcha";
+import { trackEvent } from "@/lib/analytics";
 import {
   type RegistrationWindow,
   registrationWindow,
@@ -166,6 +167,13 @@ export function RegistrationForm(props: RegistrationFormProps) {
         setError(json.error ?? "Noe gikk galt. Prøv igjen.");
         return;
       }
+      // registered | waitlisted | pending_payment (betaling gjenstår)
+      trackEvent("event_signup", {
+        status: json.status,
+        party_size: partySize,
+        value: toPayment ? totalKr : undefined,
+        currency: toPayment ? "NOK" : undefined,
+      });
       if (json.checkoutUrl) {
         // Til Vipps/kortbetaling. Knappen står som «Åpner betaling…» til
         // siden bytter. (`window` er skygget av state-variabelen over.)

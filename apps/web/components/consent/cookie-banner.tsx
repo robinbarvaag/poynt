@@ -14,7 +14,9 @@ import { useConsent } from "./consent-provider";
  *  - Ingen forhåndsavkryssede valg utover nødvendige.
  *  - Valget kan endres senere (lenke i footer åpner dette på nytt).
  *  - Ingen sporing før valget er tatt (GoogleAnalytics/MetaPixel venter på
- *    consent).
+ *    consent). Unntak: Vercel Web Analytics (cookieløs, ingen persondata,
+ *    berettiget interesse) — den er opplyst om i teksten og i
+ *    personvernerklæringen.
  *
  * Banneret blokkerer ikke siden — det er et ikke-modalt dialog-kort nederst.
  */
@@ -60,9 +62,10 @@ export function CookieBanner() {
           </h2>
           <p id={descId} className="mt-1 text-sm text-muted-foreground">
             Vi bruker nødvendige informasjonskapsler for at handlekurv og
-            innlogging skal virke. Med ditt samtykke bruker vi også Google
-            Analytics for å forstå hvordan siden brukes, og Meta Pixel for å
-            måle annonser på Facebook og Instagram.{" "}
+            innlogging skal virke, og teller besøk og klikk anonymt, uten
+            informasjonskapsler, for å se hva som er nyttig. Med ditt samtykke
+            bruker vi også Google Analytics for å forstå hvordan siden brukes,
+            og Meta Pixel for å måle annonser på Facebook og Instagram.{" "}
             <Link
               href="/personvern"
               className="underline underline-offset-4 hover:text-foreground"
@@ -126,7 +129,8 @@ export function CookieBanner() {
               </label>
               <Text variant="muted" customStyles="text-xs">
                 Meta Pixel. Måler om annonser på Facebook og Instagram fører til
-                kjøp, og kan brukes til å vise deg relevante annonser der.
+                kjøp, påmeldinger og henvendelser, og kan brukes til å vise deg
+                relevante annonser der.
               </Text>
             </div>
             <Switch

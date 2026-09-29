@@ -22,20 +22,23 @@ import { Bricolage_Grotesque, Poppins } from "next/font/google";
 
 const poppins = Poppins({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
+  // Kun vektene som faktisk brukes (font-normal/medium/semibold/bold).
+  weight: ["400", "500", "600", "700"],
   variable: "--font-poppins",
   display: "swap",
 });
 
 const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
-  weight: ["200", "300", "400", "500", "600", "700", "800"],
+  // Variabel font: én fil dekker alle vekter 200–800 (Next anbefaler
+  // variabel framfor en liste med statiske vekter).
   variable: "--font-bricolage",
   display: "swap",
 });
 
 const siteName = "Poynt";
-const siteDescription = "Din læringsplattform for kurs og opplæring";
+const siteDescription =
+  "Poynt drives av Susanne Todnem. Foredrag, rådgivning og medlemskap som gjør deg mer synlig, tryggere på markedsføring og smartere med AI.";
 const siteUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
 
 export const metadata: Metadata = {

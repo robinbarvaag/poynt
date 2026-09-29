@@ -1,6 +1,7 @@
 "use client";
 
 import { Honeypot } from "@/components/honeypot";
+import { trackEvent } from "@/lib/analytics";
 import { useSiteContactEmail } from "@/lib/site-contact";
 import {
   Button,
@@ -206,6 +207,11 @@ export function FormBlockComponent({
         );
       }
 
+      // Skjemaets navn i admin (stabilt), ikke overskriften på siden.
+      trackEvent("form_submit", {
+        form: formData.title,
+        source: ctx.kilde,
+      });
       setIsSubmitted(true);
     } catch (err) {
       setError(

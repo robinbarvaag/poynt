@@ -70,7 +70,15 @@ export function HeroBlock({
       duotone={imageDuotone ?? false}
       media={
         image?.url ? (
-          <PayloadImage media={image} fill className="object-cover" priority />
+          <PayloadImage
+            media={image}
+            fill
+            className="object-cover"
+            priority
+            // Følger bilderammen i <Hero> (max-w-[18rem] sm:max-w-sm lg:max-w-md).
+            // Uten dette antar Next 100vw og henter et skjermbredt bilde.
+            sizes="(min-width: 1024px) 448px, (min-width: 640px) 384px, 288px"
+          />
         ) : undefined
       }
     />

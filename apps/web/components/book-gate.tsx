@@ -1,5 +1,6 @@
 "use client";
 
+import { trackEvent } from "@/lib/analytics";
 import {
   BOOK_STORES_DISPLAY,
   type BookStore,
@@ -45,6 +46,7 @@ export function BookGate({ pageId, title }: { pageId: number; title: string }) {
       });
       const data = (await response.json()) as { error?: string };
       if (!response.ok) throw new Error(data.error || "Noe gikk galt");
+      trackEvent("book_unlock", { store });
       router.refresh();
     } catch (err) {
       setStatus("error");

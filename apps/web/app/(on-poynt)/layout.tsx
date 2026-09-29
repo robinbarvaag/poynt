@@ -7,14 +7,16 @@ import { Bricolage_Grotesque, Poppins } from "next/font/google";
 
 const poppins = Poppins({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
+  // Kun vektene som faktisk brukes (font-normal/medium/semibold/bold).
+  weight: ["400", "500", "600", "700"],
   variable: "--font-poppins",
   display: "swap",
 });
 
 const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
-  weight: ["200", "300", "400", "500", "600", "700", "800"],
+  // Variabel font: én fil dekker alle vekter 200–800 (Next anbefaler
+  // variabel framfor en liste med statiske vekter).
   variable: "--font-bricolage",
   display: "swap",
 });

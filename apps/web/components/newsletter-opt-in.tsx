@@ -1,5 +1,6 @@
 "use client";
 
+import { trackEvent } from "@/lib/analytics";
 import { Button, Text } from "@poynt/ui";
 import { Mail } from "lucide-react";
 import Link from "next/link";
@@ -36,6 +37,7 @@ export function NewsletterOptIn({
         },
         body: JSON.stringify({ reference }),
       });
+      if (res.ok) trackEvent("newsletter_signup", { source: "kvittering" });
       setState(res.ok ? "done" : "error");
     } catch {
       setState("error");
@@ -53,7 +55,10 @@ export function NewsletterOptIn({
   }
 
   return (
-    <div className="mx-auto mt-8 max-w-md rounded-2xl border border-border bg-accent-3/20 px-6 py-5 text-left">
+    <div
+      data-recaptcha
+      className="mx-auto mt-8 max-w-md rounded-2xl border border-border bg-accent-3/20 px-6 py-5 text-left"
+    >
       <div className="flex items-start gap-3">
         <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
           <Mail className="size-4" />

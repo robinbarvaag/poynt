@@ -1,6 +1,7 @@
 "use client";
 
 import { Honeypot } from "@/components/honeypot";
+import { trackEvent } from "@/lib/analytics";
 import { HONEYPOT_FIELD } from "@/lib/spam-heuristics";
 import { Button, Input } from "@poynt/ui";
 import { CheckCircle, Loader2 } from "lucide-react";
@@ -54,6 +55,7 @@ export function NewsletterForm({
         throw new Error(data.error || "Noe gikk galt");
       }
 
+      trackEvent("newsletter_signup", { source: "skjema" });
       setStatus("success");
       setEmail("");
     } catch (error) {
@@ -106,11 +108,13 @@ export function NewsletterForm({
           {errorMessage}
         </p>
       )}
-      <PrivacyNotice
-        purpose="Vi bruker e-posten kun til nyhetsbrevet, og du kan melde deg av når som helst."
-        className="mt-3"
-      />
-      <RecaptchaNotice className="mt-1" />
+      {/* Småteksten er én samlet blokk: balansert bryting så sentrerte linjer
+          ikke ender med et foreldreløst ord, og reCAPTCHA-linja litt svakere
+          så den leses som en fotnote til personvernlinja. */}
+      <div className="mx-auto mt-4 max-w-sm space-y-1 text-balance">
+        <PrivacyNotice purpose="Vi bruker e-posten kun til nyhetsbrevet, og du kan melde deg av når som helst." />
+        <RecaptchaNotice className="opacity-60!" />
+      </div>
     </form>
   );
 }

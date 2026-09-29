@@ -101,6 +101,8 @@ Linting and formatting are handled entirely by **Biome** (`biome.json` at root) 
 
 **Spamvern på skjemaer**: Google reCAPTCHA v3 på alle offentlige skjemaer. Badgen er skjult (`app/globals.css`) — derfor MÅ `<RecaptchaNotice>` stå synlig ved hvert skjema som henter et token, ellers brytes Googles vilkår. Klient: `useRecaptcha(action)` + `recaptchaHeader(token)` (`components/recaptcha.tsx`), server: `guardRecaptcha(request, action)` (`lib/recaptcha.ts`) rett etter rate-limit. Tokenet går som header `x-recaptcha-token`. Uten `RECAPTCHA_SECRET_KEY` slipper alt gjennom. Nytt skjema → nytt `action`-navn begge steder (kun bokstaver/tall/understrek). **reCAPTCHA alene er ikke nok** — spam kom gjennom med gyldig token 20.09.2026, så `lib/spam-heuristics.ts` legger på honningkrukke (`HONEYPOT_FIELD`) + `looksLikeGibberish()` på navnefeltet; begge logger med prefiks `[spam]`. Se `docs/RECAPTCHA.md`.
 
+**Sporing (analytics)**: Én `trackEvent(name, params)` i `apps/web/lib/analytics.ts` sender til Vercel Web Analytics (alltid, cookieløs — Pro tillater bare 2 egenskaper, valgt i `VERCEL_PROPS`), GA4 (statistikk-samtykke) og Meta Pixel (markedsførings-samtykke). Knapp-lenker (`<Button asChild>` → `data-slot="button"`), utgående lenker og mailto/tel spores automatisk av en global klikklytter i `components/site-analytics.tsx`; `data-track="navn"` / `data-no-track` overstyrer. Ny hendelse → legg til i `TrackedEvent` + `VERCEL_PROPS`. Aldri persondata i parametrene.
+
 **Cart constraint**: Digital products limited to 1 per item in cart. Cart state persists to localStorage as "poynt-cart".
 
 **Stripe sync**: Products and prices automatically sync to Stripe via Payload plugin. Stripe IDs stored on Product and User documents.

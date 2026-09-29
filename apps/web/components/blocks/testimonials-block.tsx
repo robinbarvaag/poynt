@@ -55,6 +55,8 @@ export function TestimonialsBlock({
           media={logo}
           alt={logo.alt || t.company || "Logo"}
           fill
+          // Rammene i <Testimonials>: logo h-12 w-40, avatar size-16.
+          sizes="160px"
           className="object-contain object-left"
         />
       ) : undefined,
@@ -63,6 +65,7 @@ export function TestimonialsBlock({
           media={avatar}
           alt={avatar.alt || t.author}
           fill
+          sizes="64px"
           className="object-cover"
         />
       ) : undefined,

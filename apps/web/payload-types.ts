@@ -245,7 +245,7 @@ export interface Page {
       )[]
     | null;
   /**
-   * Spørsmål og svar som publiseres som strukturert data for søkemotorer og AI-svar. La stå tom for å hoppe over.
+   * Vises nederst på siden som «Det folk lurer på», og sendes som strukturert data til søkemotorer og AI-svar. La stå tom for å hoppe over.
    */
   faq?:
     | {
@@ -1962,7 +1962,7 @@ export interface Service {
   price?: number | null;
   includesVat?: boolean | null;
   /**
-   * Spørsmål og svar som publiseres som strukturert data for søkemotorer og AI-svar. La stå tom for å hoppe over.
+   * Vises nederst på siden som «Det folk lurer på», og sendes som strukturert data til søkemotorer og AI-svar. La stå tom for å hoppe over.
    */
   faq?:
     | {
@@ -2351,7 +2351,7 @@ export interface Event {
     [k: string]: unknown;
   } | null;
   /**
-   * Spørsmål og svar som publiseres som strukturert data for søkemotorer og AI-svar. La stå tom for å hoppe over.
+   * Vises nederst på siden som «Det folk lurer på», og sendes som strukturert data til søkemotorer og AI-svar. La stå tom for å hoppe over.
    */
   faq?:
     | {

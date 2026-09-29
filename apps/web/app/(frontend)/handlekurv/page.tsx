@@ -7,6 +7,7 @@ import {
   useRecaptcha,
 } from "@/components/recaptcha";
 import { VippsButton } from "@/components/vipps-button";
+import { toGaItems, trackEvent } from "@/lib/analytics";
 import { formatPrice } from "@/lib/format";
 import { NEWSLETTER_CONSENT_TEXTS } from "@/lib/newsletter-consent-texts";
 import { useCartReady } from "@/lib/use-cart-ready";
@@ -131,6 +132,12 @@ export default function CartPage() {
     if (!requireTerms()) return;
     setIsLoading(true);
     setCheckoutError(null);
+    trackEvent("begin_checkout", {
+      method: "kort",
+      currency: "NOK",
+      value: Math.max(0, total() - couponDiscount(coupon, total())),
+      items: toGaItems(items),
+    });
     try {
       const response = await fetch("/api/checkout", {
         method: "POST",

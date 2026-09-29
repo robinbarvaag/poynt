@@ -1,4 +1,5 @@
 import type { CartItem } from "@poynt/cart";
+import { toGaItems, trackEvent } from "./analytics";
 
 /** Kassefeil med nok kontekst til at klienten kan rydde kurven. */
 export class CheckoutRequestError extends Error {
@@ -27,6 +28,13 @@ export async function startVippsCheckout(
   // huka av.
   termsAccepted = false
 ): Promise<void> {
+  trackEvent("begin_checkout", {
+    method: "vipps",
+    currency: "NOK",
+    // Før eventuell rabatt — den regnes ut på serveren.
+    value: items.reduce((sum, item) => sum + item.price * item.quantity, 0),
+    items: toGaItems(items),
+  });
   await postVippsCheckout(
     items.map((item) => ({
       id: item.id,
@@ -51,6 +59,7 @@ export async function startVippsBuyNow(
   },
   termsAccepted: boolean
 ): Promise<void> {
+  trackEvent("begin_checkout", { method: "vipps_kjop_na" });
   await postVippsCheckout([item], termsAccepted);
 }
 

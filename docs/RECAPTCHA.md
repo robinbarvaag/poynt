@@ -101,8 +101,13 @@ Tokenet sendes som HTTP-header `x-recaptcha-token`, ikke i JSON-kroppen — da
 slipper endepunkter som sender kroppen videre til Payload eller Stripe å plukke
 ut et ekstra felt.
 
-Scriptet fra Google lastes **først når et skjema vises**, ikke på hver side. En
-side uten skjema betaler ingenting.
+Scriptet fra Google lastes **først når noen tar i et skjema** (fokus eller trykk
+inni et `<form>` eller et element med `data-recaptcha`), ikke når skjemaet vises.
+Nyhetsbrevet står i bunnteksten på hver side, så «når skjemaet vises» betydde i
+praksis alltid — med ~200 KB JS og tredjeparts-cookies fra google.com som
+Lighthouse trekker for. Rekker ikke scriptet å laste før «Send», laster
+tokenhentingen det selv. Skjemaløse knapper som trenger token, pakkes i en
+container med `data-recaptcha`.
 
 ## Hvilke skjemaer er beskyttet
 

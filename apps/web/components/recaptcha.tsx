@@ -9,8 +9,9 @@ import { useCallback, useEffect } from "react";
  *
  * v3 spør aldri brukeren om noe — nettleseren henter et token i bakgrunnen
  * som serveren sjekker (packages/utils/recaptcha.ts). Scriptet lastes først
- * når et skjema faktisk vises, ikke på hver eneste side, slik at forsida ikke
- * betaler for et skjema den ikke har.
+ * når noen tar i et skjema (fokus/trykk), ikke når skjemaet vises — nyhetsbrevet
+ * står i bunnteksten på hver side, og scriptet drar med seg ~200 KB JS og en
+ * haug tredjeparts-cookies fra google.com som Lighthouse straffer.
  *
  * Badgen nede i høyre hjørne er skjult i globals.css. Google tillater det så
  * lenge teksten står ved skjemaet i stedet — det er det <RecaptchaNotice>
@@ -80,6 +81,41 @@ function loadRecaptcha(): Promise<Grecaptcha | null> {
 }
 
 /**
+ * Skjemaer som skal varme opp scriptet. Skjemaløse knapper (f.eks. påmelding
+ * på kvitteringen) merkes med `data-recaptcha` på en omsluttende container.
+ */
+const INTENT_SELECTOR = "form, [data-recaptcha]";
+
+let listeningForIntent = false;
+
+/**
+ * Laster scriptet ved første fokus eller trykk inni et skjema. Én felles
+ * lytter per side, uansett hvor mange skjemaer som er montert.
+ */
+function loadOnFormIntent() {
+  if (typeof window === "undefined" || !SITE_KEY) return;
+  if (listeningForIntent || loader) return;
+  listeningForIntent = true;
+
+  const onIntent = (event: Event) => {
+    const target = event.target;
+    if (!(target instanceof Element && target.closest(INTENT_SELECTOR))) {
+      return;
+    }
+    document.removeEventListener("focusin", onIntent, true);
+    document.removeEventListener("pointerdown", onIntent, true);
+    listeningForIntent = false;
+    void loadRecaptcha();
+  };
+
+  document.addEventListener("focusin", onIntent, true);
+  document.addEventListener("pointerdown", onIntent, {
+    capture: true,
+    passive: true,
+  });
+}
+
+/**
  * Henter et ferskt reCAPTCHA-token for en handling.
  *
  * `action` er navnet Google knytter til tokenet, og serveren sjekker at det
@@ -89,10 +125,11 @@ function loadRecaptcha(): Promise<Grecaptcha | null> {
  * Returnerer null når reCAPTCHA ikke er satt opp eller ikke lot seg laste.
  */
 export function useRecaptcha(action: string) {
-  // Varm opp scriptet med en gang skjemaet vises — tokenet skal ikke koste
-  // brukeren en ekstra runde nedlasting i det hen trykker «Send».
+  // Varm opp scriptet når brukeren begynner å fylle ut — da er det lastet
+  // lenge før hen trykker «Send». Rekker det ikke, laster tokenhentingen
+  // under selv.
   useEffect(() => {
-    void loadRecaptcha();
+    loadOnFormIntent();
   }, []);
 
   return useCallback(async (): Promise<string | null> => {
