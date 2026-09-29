@@ -107,7 +107,7 @@ export function NotificationBell() {
         >
           <Icon name="bell" className="size-4" />
           {count > 0 && (
-            <span className="-right-0.5 -top-0.5 absolute flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 font-semibold text-[10px] text-primary-foreground">
+            <span className="-right-0.5 -top-0.5 absolute flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 font-semibold text-primary-foreground text-xs leading-none">
               {count > 9 ? "9+" : count}
             </span>
           )}
@@ -139,7 +139,7 @@ export function NotificationBell() {
               >
                 <Avatar className="mt-0.5 size-7 shrink-0">
                   {n.actor?.image && <AvatarImage src={n.actor.image} />}
-                  <AvatarFallback className="text-[10px]">
+                  <AvatarFallback className="text-xs">
                     {initials(n.actor?.name ?? "?")}
                   </AvatarFallback>
                 </Avatar>

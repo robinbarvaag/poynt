@@ -114,7 +114,7 @@ export function Lightbox({
             className="relative max-h-[88vh] max-w-full rounded-xl object-contain shadow-2xl"
           />
           {caption && (
-            <p className="relative max-w-2xl text-center text-background/80 text-sm">
+            <p className="relative max-w-2xl text-center text-background text-sm">
               {caption}
             </p>
           )}

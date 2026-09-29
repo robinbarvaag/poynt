@@ -28,6 +28,7 @@ import { Container } from "../container";
 import { Reveal } from "../motion";
 import { SectionHeader } from "../section-header";
 import { Heading, Text } from "../typography";
+import { CarouselDots } from "./carousel-dots";
 import {
   type CarouselEffect,
   applyCarouselTween,
@@ -62,6 +63,11 @@ export interface CarouselItem {
   media?: ReactNode;
   /** Bilde-/video-URL når du ikke sender inn en ferdig `media`-node. */
   src?: string;
+  /**
+   * Valgfri `srcSet` for bilde-`src` (typisk fra next/image `getImageProps`),
+   * så logoer ikke lastes i originalstørrelse.
+   */
+  srcSet?: string;
   /** Plakatbilde for `kind: "video"`. */
   poster?: string;
   alt?: string;
@@ -444,6 +450,7 @@ export function Carousel({
                         : cn(basis, "pl-4 md:pl-6"),
                       dimNeighbours &&
                         "transition-opacity duration-500 ease-out",
+                      // design-unntak: dimming av inaktive slides
                       dimNeighbours && index !== selectedIndex && "opacity-40"
                     )}
                     linkComponent={LinkComp}
@@ -454,24 +461,11 @@ export function Carousel({
           </RailBleed>
 
           {withDots && (
-            <div className="flex items-center justify-center gap-2">
-              {Array.from({ length: snapCount }, (_, index) => (
-                <button
-                  // biome-ignore lint/suspicious/noArrayIndexKey: prikkene ER indekser
-                  key={index}
-                  type="button"
-                  onClick={() => scrollTo(index)}
-                  aria-label={`Gå til ${index + 1}`}
-                  aria-current={index === selectedIndex}
-                  className={cn(
-                    "h-2 rounded-full transition-all duration-300 ease-out",
-                    index === selectedIndex
-                      ? "w-8 bg-primary"
-                      : "w-2 bg-foreground/20 hover:bg-foreground/40"
-                  )}
-                />
-              ))}
-            </div>
+            <CarouselDots
+              count={snapCount}
+              selectedIndex={selectedIndex}
+              onSelect={scrollTo}
+            />
           )}
         </div>
       </Reveal>
@@ -688,7 +682,7 @@ function OverlaySlide({
       {(item.eyebrow || item.title) && (
         <div className="absolute inset-x-0 bottom-0 rounded-b-3xl bg-gradient-to-t from-foreground/90 via-foreground/50 to-transparent p-5 pt-16 text-background">
           {item.eyebrow && (
-            <span className="block truncate font-heading font-semibold text-background/75 text-xs uppercase tracking-[0.2em]">
+            <span className="block truncate font-heading font-semibold text-background text-xs uppercase tracking-[0.2em]">
               {item.eyebrow}
             </span>
           )}
@@ -759,7 +753,7 @@ function ContentSlide({ item, index }: { item: CarouselItem; index: number }) {
       className="h-full gap-0 rounded-3xl p-8 transition-transform duration-300 group-hover/card:-translate-y-1"
     >
       {item.eyebrow && (
-        <span className="font-heading font-semibold text-current/70 text-xs uppercase tracking-[0.2em]">
+        <span className="font-heading font-semibold text-xs uppercase tracking-[0.2em]">
           {item.eyebrow}
         </span>
       )}
@@ -775,7 +769,7 @@ function ContentSlide({ item, index }: { item: CarouselItem; index: number }) {
         </Heading>
       )}
       {item.text && (
-        <Text color="inherit" customStyles="mt-4 text-current/80">
+        <Text color="inherit" customStyles="mt-4">
           {item.text}
         </Text>
       )}
@@ -811,15 +805,18 @@ function LogoSlide({ item }: { item: CarouselItem }) {
         (item.src ? (
           <img
             src={item.src}
+            srcSet={item.srcSet}
             alt={label}
+            decoding="async"
             style={{ height: `calc(var(--logo-h) * ${scale})` }}
+            // design-unntak: logo-grayscale-effekt, dempet til hover
             className="w-auto max-w-full object-contain opacity-60 grayscale transition-all duration-300 hover:opacity-100 hover:grayscale-0"
           />
         ) : (
           // Wordmark-fallbacken må holdes på ÉN linje: to linjer i en fast-høyde
           // tile flyter over kantene og kolliderer med naboene i stripa.
           // Lange navn skaleres ned i stedet for å brytes.
-          <span className="block max-w-full truncate whitespace-nowrap font-bold font-heading text-foreground/35 text-lg leading-none transition-colors duration-300 hover:text-foreground/70 md:text-xl">
+          <span className="block max-w-full truncate whitespace-nowrap font-bold font-heading text-muted-foreground text-lg leading-none transition-colors duration-300 hover:text-foreground md:text-xl">
             {label}
           </span>
         ))}

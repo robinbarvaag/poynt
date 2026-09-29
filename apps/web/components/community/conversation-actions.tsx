@@ -196,7 +196,7 @@ function MembersDialog({
               >
                 <Avatar className="size-7">
                   {m.user.image && <AvatarImage src={m.user.image} />}
-                  <AvatarFallback className="text-[10px]">
+                  <AvatarFallback className="text-xs">
                     {initials(m.user.name)}
                   </AvatarFallback>
                 </Avatar>

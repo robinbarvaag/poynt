@@ -99,7 +99,7 @@ export function LessonList({
                       "truncate text-sm leading-snug",
                       isActive
                         ? "font-semibold text-foreground"
-                        : "text-foreground/80"
+                        : "text-foreground"
                     )}
                   >
                     {item.title}

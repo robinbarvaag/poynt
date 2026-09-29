@@ -137,7 +137,7 @@ function HubRail({
                   {item.label}
                 </span>
                 {item.meta && (
-                  <span className="shrink-0 text-[0.7rem] text-muted-foreground tabular-nums">
+                  <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
                     {item.meta}
                   </span>
                 )}
@@ -255,7 +255,7 @@ function HubBar({
                     aria-current={active ? "location" : undefined}
                     tabIndex={visible ? undefined : -1}
                     className={cn(
-                      "flex items-center gap-1.5 whitespace-nowrap rounded-full border px-3 py-1.5 font-heading font-semibold text-[0.8rem] transition-colors duration-200",
+                      "flex items-center gap-1.5 whitespace-nowrap rounded-full border px-3 py-1.5 font-heading font-semibold text-xs transition-colors duration-200",
                       active
                         ? "border-primary bg-primary text-primary-foreground"
                         : "border-foreground/12 bg-foreground/[0.03] text-muted-foreground"

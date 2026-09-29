@@ -89,6 +89,7 @@ export function Hero({
         variant="grid"
         size={40}
         fade
+        // design-unntak: dekorativt bakgrunnsrutenett, ikke tekst
         className="text-foreground/6"
       />
 
@@ -132,7 +133,7 @@ export function Hero({
                 type="div"
                 variant="lead"
                 customStyles={cn(
-                  "text-foreground/70",
+                  "text-muted-foreground",
                   split ? "max-w-md" : "mx-auto max-w-xl"
                 )}
               >

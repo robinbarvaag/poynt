@@ -74,7 +74,7 @@ export function ColorSwatch({
         aria-label={hideCopy ? hex : `Kopier ${hex}`}
       >
         {role && (
-          <span className="font-medium text-[0.65rem] uppercase tracking-[0.14em] opacity-80">
+          <span className="font-medium text-xs uppercase tracking-[0.14em]">
             {role}
           </span>
         )}

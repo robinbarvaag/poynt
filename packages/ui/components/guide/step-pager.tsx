@@ -76,7 +76,7 @@ export function StepPager({
           href={next.href}
           onClick={next.onClick}
           type={next.href ? undefined : "button"}
-          className="inline-flex items-center gap-2 font-semibold text-primary text-sm transition-colors hover:text-primary/80"
+          className="inline-flex items-center gap-2 font-semibold text-primary text-sm transition-colors hover:text-foreground"
         >
           {next.label}
           <Icon name="chevron-right" className="size-4" />

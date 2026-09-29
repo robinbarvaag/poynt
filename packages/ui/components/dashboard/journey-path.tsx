@@ -95,8 +95,7 @@ export function JourneyPath({ eyebrow, title, stages }: JourneyPathProps) {
               <Card
                 className={cn(
                   "relative flex h-full flex-col overflow-hidden p-5 transition-all",
-                  isActive && cn("ring-2 ring-offset-2", s.ring),
-                  isUpcoming && "opacity-65"
+                  isActive && cn("ring-2 ring-offset-2", s.ring)
                 )}
               >
                 {/* Fargekapp på toppen — spekteret som leses på tvers av raden. */}
@@ -104,6 +103,7 @@ export function JourneyPath({ eyebrow, title, stages }: JourneyPathProps) {
                   className={cn(
                     "absolute inset-x-0 top-0 h-1.5",
                     s.cap,
+                    // design-unntak: dekorativ fargekapp uten tekst, dempet for kommende fase
                     isUpcoming && "opacity-50"
                   )}
                 />

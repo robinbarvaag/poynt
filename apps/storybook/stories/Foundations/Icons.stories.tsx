@@ -24,7 +24,7 @@ export const AlleIkoner: Story = {
             className="flex flex-col items-center gap-2 rounded-lg border border-border bg-card p-4 text-card-foreground"
           >
             <Icon name={name} className="size-6 text-primary" />
-            <code className="text-center text-[10px] leading-tight text-muted-foreground">
+            <code className="text-center text-xs leading-tight text-muted-foreground">
               {name}
             </code>
           </div>

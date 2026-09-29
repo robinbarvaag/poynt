@@ -57,7 +57,7 @@ function NavItemLink({
           {locked && (
             <Icon
               name="sparkles"
-              className="ml-auto h-3 w-3 text-muted-foreground/60"
+              className="ml-auto h-3 w-3 text-muted-foreground"
             />
           )}
         </Link>

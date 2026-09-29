@@ -23,7 +23,7 @@ export function ReadingMeta({ items, className }: ReadingMetaProps) {
       {items.map((item) => (
         <span
           key={item.label}
-          className="inline-flex items-center gap-2 rounded-full bg-background/80 px-4 py-2 font-medium text-foreground/80 text-sm ring-1 ring-foreground/10 backdrop-blur"
+          className="inline-flex items-center gap-2 rounded-full bg-background/80 px-4 py-2 font-medium text-foreground text-sm ring-1 ring-foreground/10 backdrop-blur"
         >
           {item.icon && (
             <Icon name={item.icon} className="size-4 text-primary" />

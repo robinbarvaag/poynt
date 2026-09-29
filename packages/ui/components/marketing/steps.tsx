@@ -86,7 +86,7 @@ export function Steps({ eyebrow, title, intro, steps }: StepsProps) {
                 >
                   <span
                     className={cn(
-                      "font-heading font-bold text-7xl leading-none tracking-tighter md:text-[9rem]",
+                      "font-heading font-bold text-7xl leading-none tracking-tighter md:text-9xl",
                       accent.text
                     )}
                   >

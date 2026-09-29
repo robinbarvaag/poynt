@@ -38,7 +38,7 @@ export function LogoCloud({
       <Reveal>
         {label && (
           <div className="mb-10 text-center">
-            <Eyebrow className={cn(contrast && "text-background/70")}>
+            <Eyebrow className={cn(contrast && "text-background")}>
               {label}
             </Eyebrow>
           </div>
@@ -55,6 +55,7 @@ export function LogoCloud({
                   alt={logo.name}
                   className={cn(
                     "max-h-full w-auto max-w-[120px] object-contain transition-all duration-300",
+                    // design-unntak: logo-bilder dempes til hover (grayscale-effekt)
                     contrast
                       ? "opacity-80 hover:opacity-100"
                       : "opacity-60 grayscale hover:opacity-100 hover:grayscale-0"
@@ -65,8 +66,8 @@ export function LogoCloud({
                   className={cn(
                     "font-bold font-heading text-2xl transition-colors duration-300 md:text-3xl",
                     contrast
-                      ? "text-background/60 hover:text-background"
-                      : "text-foreground/35 hover:text-foreground/70"
+                      ? "text-background"
+                      : "text-muted-foreground hover:text-foreground"
                   )}
                 >
                   {logo.name}

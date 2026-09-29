@@ -9,6 +9,7 @@ interface FloatingShapesProps {
 // opacity, slik at formene faktisk leser som former (jf. INSPO/shapes) og ikke
 // bare en svak fargeskygge.
 const variantMap = {
+  // design-unntak: dekorative, blurrede fargeflekker (aria-hidden)
   subtle: { opacity: "opacity-15", blur: "blur-3xl" },
   default: { opacity: "opacity-25", blur: "blur-3xl" },
   vibrant: { opacity: "opacity-45", blur: "blur-2xl" },

@@ -2,7 +2,7 @@ import type * as React from "react";
 import { Icon, type IconName } from "../../icons";
 import { UILink } from "../../lib/link";
 import { cn } from "../../lib/utils";
-import { Card } from "../card";
+import { Card, cardMutedText } from "../card";
 
 export type ContentFormat = "guide" | "artikkel" | "kurs" | "podkast";
 
@@ -112,9 +112,11 @@ export function ContentCard({
                 config.fallback
               )}
             >
+              {/* design-unntak: dekorativt format-ikon i tom cover (aria-hidden) */}
               <Icon
                 name={config.icon}
                 className="size-14 text-foreground/15"
+                aria-hidden="true"
                 strokeWidth={1.5}
               />
             </div>
@@ -137,7 +139,12 @@ export function ContentCard({
           </h3>
 
           {lede && (
-            <p className="line-clamp-2 text-current/70 text-sm leading-relaxed">
+            <p
+              className={cn(
+                "line-clamp-2 text-sm leading-relaxed",
+                cardMutedText[surface]
+              )}
+            >
               {lede}
             </p>
           )}
@@ -145,7 +152,12 @@ export function ContentCard({
           {/* Bunnrad forankret med mt-auto: absorberer høydeforskjellen i et
               likt-høyde-rutenett, så strekket leses som en bevisst footer i
               stedet for dødplass. Meta til venstre, «Les mer» alltid til høyre. */}
-          <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 pt-3 text-current/60 text-xs">
+          <div
+            className={cn(
+              "mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 pt-3 text-xs",
+              cardMutedText[surface]
+            )}
+          >
             {meta?.map((item) => (
               <span key={item.label} className="inline-flex items-center gap-1">
                 {item.icon && <Icon name={item.icon} className="size-3.5" />}

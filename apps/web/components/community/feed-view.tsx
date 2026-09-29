@@ -140,7 +140,7 @@ export function FeedView({
           </div>
         ) : posts.length === 0 ? (
           <Card className="flex flex-col items-center gap-2 p-10 text-center text-muted-foreground">
-            <Icon name="megaphone" className="size-8 opacity-40" />
+            <Icon name="megaphone" className="size-8 text-muted-foreground" />
             <p className="font-medium text-foreground">Ingen innlegg ennå</p>
             <p className="text-sm">Bli den første som deler noe! 🎉</p>
           </Card>
@@ -386,7 +386,7 @@ function CommentRow({
       <Avatar className="mt-0.5 size-7">
         {c.author.image && <AvatarImage src={c.author.image} />}
         <AvatarFallback
-          className={cn("font-semibold text-[10px]", avatarColor(c.author.id))}
+          className={cn("font-semibold text-xs", avatarColor(c.author.id))}
         >
           {initials(c.author.name)}
         </AvatarFallback>
@@ -400,7 +400,7 @@ function CommentRow({
             </p>
           )}
         </div>
-        <span className="px-2 text-[11px] text-muted-foreground">
+        <span className="px-2 text-muted-foreground text-xs">
           {relativeTime(c.createdAt)}
         </span>
       </div>
@@ -449,10 +449,7 @@ function CommentInput({
       <Avatar className="size-7">
         {currentUser.image && <AvatarImage src={currentUser.image} />}
         <AvatarFallback
-          className={cn(
-            "font-semibold text-[10px]",
-            avatarColor(currentUser.id)
-          )}
+          className={cn("font-semibold text-xs", avatarColor(currentUser.id))}
         >
           {initials(currentUser.name)}
         </AvatarFallback>

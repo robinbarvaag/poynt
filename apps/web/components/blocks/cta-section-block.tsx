@@ -54,7 +54,7 @@ export function CtaSectionBlock({
         <p
           className={cn(
             "text-lg mb-8",
-            onDark ? "text-white/90" : "text-muted-foreground"
+            onDark ? "text-white" : "text-muted-foreground"
           )}
         >
           {description}
@@ -121,6 +121,7 @@ export function CtaSectionBlock({
         <Panel surface="primary">
           {/* Signaturflørt: organiske former bak innholdet — kun her, jf. docs/COMPOSITION.md §3 */}
           <GridPattern
+            // design-unntak: dekorativt prikkmønster i bakgrunnen, ikke tekst
             variant="dots"
             fade
             className="text-primary-foreground/15"

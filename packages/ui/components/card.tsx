@@ -32,6 +32,20 @@ const cardVariants = cva(
   }
 );
 
+type CardSurface = NonNullable<VariantProps<typeof cardVariants>["surface"]>;
+
+// Dempet sekundærtekst (utdrag/meta) per flate, som hel farge — aldri alfa.
+// muted-foreground holder ≥ 4,5:1 på de lyse flatene (kort/cream/rosa/mint);
+// på de mørke flatene arves kortets egen tekstfarge.
+const cardMutedText: Record<CardSurface, string> = {
+  default: "text-muted-foreground",
+  saffron: "text-muted-foreground",
+  salmon: "text-muted-foreground",
+  mint: "text-muted-foreground",
+  primary: "text-current",
+  ink: "text-current",
+};
+
 function Card({
   className,
   size = "default",
@@ -147,6 +161,8 @@ function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
 export {
   Card,
   cardVariants,
+  cardMutedText,
+  type CardSurface,
   CardHeader,
   CardFooter,
   CardTitle,

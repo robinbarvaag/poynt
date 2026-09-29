@@ -41,7 +41,7 @@ const innhold = (onDark: boolean) => (
     <p
       className={
         onDark
-          ? "mb-8 text-lg text-white/90"
+          ? "mb-8 text-lg text-primary-foreground"
           : "mb-8 text-lg text-muted-foreground"
       }
     >
@@ -75,6 +75,7 @@ export const Farget: Story = {
           <GridPattern
             variant="dots"
             fade
+            // design-unntak: dekorativ tekstur, GridPattern er aria-hidden
             className="text-primary-foreground/15"
           />
           <div className="relative z-10">{innhold(true)}</div>

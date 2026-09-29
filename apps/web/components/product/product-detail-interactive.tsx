@@ -210,7 +210,7 @@ function VariantPicker({
                 <span
                   className={`ml-1.5 text-xs ${
                     checked
-                      ? "text-primary-foreground/80"
+                      ? "text-primary-foreground"
                       : "text-muted-foreground"
                   }`}
                 >

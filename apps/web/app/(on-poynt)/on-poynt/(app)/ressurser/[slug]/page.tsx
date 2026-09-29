@@ -182,7 +182,8 @@ export default async function GuidePage({ params }: GuidePageProps) {
                 media={cover}
                 alt={cover.alt || guide.title}
                 fill
-                priority
+                loading="eager"
+                fetchPriority="high"
               />
               <MediaCredit media={cover} />
             </>

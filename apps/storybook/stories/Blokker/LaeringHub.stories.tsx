@@ -42,7 +42,7 @@ export const Hub: Story = {
           <h1 className="text-balance font-bold font-heading text-4xl leading-[1.05] tracking-tight md:text-5xl">
             Lær det du trenger, akkurat når du trenger det
           </h1>
-          <p className="text-foreground/70 text-lg leading-relaxed">
+          <p className="text-muted-foreground text-lg leading-relaxed">
             Korte guider, dypere kurs og artikler som inspirerer – plukket ut
             for små bedrifter som vil videre uten å drukne i teori.
           </p>
@@ -56,7 +56,7 @@ export const Hub: Story = {
               className={
                 f.active
                   ? "inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 font-medium text-primary-foreground text-sm"
-                  : "inline-flex items-center gap-1.5 rounded-full bg-foreground/[0.04] px-4 py-2 font-medium text-foreground/70 text-sm ring-1 ring-foreground/10 transition-colors hover:bg-foreground/[0.07]"
+                  : "inline-flex items-center gap-1.5 rounded-full bg-foreground/[0.04] px-4 py-2 font-medium text-muted-foreground text-sm ring-1 ring-foreground/10 transition-colors hover:bg-foreground/[0.07]"
               }
             >
               {f.label}

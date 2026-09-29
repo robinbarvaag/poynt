@@ -45,6 +45,7 @@ function ProductGallery({
         {/* Lekent blob-pek bak bildet (INSPO/Steady-signaturen) —
             form/hjørne varierer per produkt, samme seed som kortet */}
         <DecoBlob
+          // design-unntak: dekorativ blob bak bildet, ikke tekst
           seed={seed}
           size={132}
           className={`absolute bg-accent-1 opacity-70 blur-[2px] ${
@@ -65,7 +66,8 @@ function ProductGallery({
                 alt={currentImage.media.alt || productName}
                 fill
                 className="object-cover"
-                priority
+                loading="eager"
+                fetchPriority="high"
               />
             </Lightbox>
           ) : (

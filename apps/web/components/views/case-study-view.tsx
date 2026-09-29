@@ -85,6 +85,7 @@ export function CaseStudyView({ story }: { story: CaseStudy }) {
             <DecoBlob
               seed={`/kundehistorier/${story.slug}`}
               size={132}
+              // design-unntak: dekorativ blob bak bildet, ikke tekst
               className="-top-5 -left-5 absolute bg-accent-3 opacity-70 blur-[2px]"
             />
             <div className="relative z-10 aspect-video w-full overflow-hidden rounded-3xl bg-muted shadow-sm">
@@ -93,7 +94,8 @@ export function CaseStudyView({ story }: { story: CaseStudy }) {
                 alt={featuredImage.alt || story.title}
                 fill
                 className="object-cover"
-                priority
+                loading="eager"
+                fetchPriority="high"
               />
               <MediaCredit media={featuredImage} />
             </div>

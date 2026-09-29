@@ -47,7 +47,7 @@ export function SectionHeader({
     >
       {eyebrow && (
         <Eyebrow
-          className={onDark ? "text-primary-foreground/70" : "text-primary"}
+          className={onDark ? "text-primary-foreground" : "text-primary"}
         >
           {eyebrow}
         </Eyebrow>
@@ -64,7 +64,7 @@ export function SectionHeader({
       {intro && (
         <Text
           variant="lead"
-          customStyles={cn("mt-4", onDark && "text-primary-foreground/80")}
+          customStyles={cn("mt-4", onDark && "text-primary-foreground")}
         >
           {intro}
         </Text>

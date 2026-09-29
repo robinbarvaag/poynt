@@ -597,13 +597,11 @@ export function CheckInScanner({
         )}
         {!cameraOn && !result && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-6 text-center text-white">
-            <Camera className="size-12 opacity-80" aria-hidden />
+            <Camera className="size-12" aria-hidden />
             <Button size="lg" onClick={startCamera}>
               Start kamera
             </Button>
-            <p className="text-sm text-white/70">
-              Eller skriv inn koden under.
-            </p>
+            <p className="text-sm text-white">Eller skriv inn koden under.</p>
           </div>
         )}
         {result && meta && ResultIcon && text && (
@@ -616,14 +614,14 @@ export function CheckInScanner({
             )}
           >
             <ResultIcon className="size-24" strokeWidth={2.5} aria-hidden />
-            <p className="mt-2 font-bold text-sm uppercase tracking-[0.16em] opacity-90">
+            <p className="mt-2 font-bold text-sm uppercase tracking-[0.16em]">
               {meta.label}
             </p>
             <p className="text-balance font-bold font-heading text-3xl leading-tight">
               {text.title}
             </p>
             {text.detail && (
-              <p className="text-balance text-lg opacity-90">{text.detail}</p>
+              <p className="text-balance text-lg">{text.detail}</p>
             )}
             {needsDecision ? (
               <div className="mt-3 flex flex-wrap justify-center gap-2">
@@ -836,6 +834,7 @@ export function CheckInScanner({
                     <p
                       className={cn(
                         "truncate font-semibold text-foreground",
+                        // design-unntak: angret innsjekk, overstrøket logg-rad
                         entry.undone && "line-through opacity-60"
                       )}
                     >

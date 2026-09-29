@@ -199,6 +199,7 @@ export function ChapterRotator({
           aria-hidden="true"
           className={cn(
             "-bottom-10 -right-6 pointer-events-none absolute select-none font-bold font-heading text-[var(--chapter-ghost)] leading-none",
+            // design-unntak: dekorativ bakgrunnsglyf, større enn skalaen
             markers === "numbers" ? "text-[11rem]" : "text-[14rem]"
           )}
         >

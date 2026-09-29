@@ -120,7 +120,7 @@ function EpisodeCover({
       {episode.cover ?? (
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="flex size-12 items-center justify-center rounded-full bg-muted-foreground/10">
-            <Play className="ml-0.5 size-5 text-muted-foreground/40" />
+            <Play className="ml-0.5 size-5 text-muted-foreground" />
           </div>
         </div>
       )}

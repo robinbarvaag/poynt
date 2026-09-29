@@ -40,9 +40,9 @@ export function GuideToggle({ items, className }: GuideToggleProps) {
           <AccordionTrigger indicator="plus" className="font-heading text-base">
             {item.title}
           </AccordionTrigger>
-          <AccordionContent className="text-current/80 leading-relaxed [&_a]:underline [&_p+p]:mt-3 [&_ul]:mt-2 [&_ul]:list-disc [&_ul]:pl-5">
+          <AccordionContent className="text-current leading-relaxed [&_a]:underline [&_p+p]:mt-3 [&_ul]:mt-2 [&_ul]:list-disc [&_ul]:pl-5">
             {item.content ?? (
-              <span className="text-current/50 italic">
+              <span className="text-muted-foreground italic">
                 Innhold kommer snart.
               </span>
             )}

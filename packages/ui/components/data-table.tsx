@@ -534,7 +534,7 @@ export function DataTableFacetedFilter({
                   "border-primary flex size-4 shrink-0 items-center justify-center rounded-[4px] border",
                   isSelected
                     ? "bg-primary text-primary-foreground"
-                    : "opacity-50 [&_svg]:invisible"
+                    : "[&_svg]:invisible"
                 )}
                 aria-hidden
               >

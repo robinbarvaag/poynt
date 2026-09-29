@@ -243,6 +243,7 @@ export default async function ReceiptPage({ searchParams }: Props) {
       )}
       <div className="relative w-full max-w-2xl overflow-hidden rounded-3xl border border-border bg-card px-6 py-16 text-center shadow-sm sm:px-12">
         <FloatingShapes variant={aborted ? "subtle" : "default"} />
+        {/* design-unntak: dekorativt rutemønster i bakgrunnen, ikke tekst */}
         <GridPattern fade className="text-primary/10" />
 
         <div className="relative z-10">

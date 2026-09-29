@@ -76,11 +76,11 @@ export function ReadingNav({ items, partLabel, className }: ReadingNavProps) {
           className="flex w-full items-center gap-3 px-4 py-3 text-left"
           aria-expanded={open}
         >
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary font-heading font-semibold text-[0.7rem] text-primary-foreground">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary font-heading font-semibold text-primary-foreground text-xs">
             {String(currentStep).padStart(2, "0")}
           </span>
           <span className="flex min-w-0 flex-1 flex-col">
-            <span className="font-heading text-[0.65rem] text-muted-foreground uppercase tracking-[0.16em]">
+            <span className="font-heading text-muted-foreground text-xs uppercase tracking-[0.16em]">
               {label}
             </span>
             <span className="truncate font-semibold text-foreground text-sm">
@@ -135,7 +135,7 @@ export function ReadingNav({ items, partLabel, className }: ReadingNavProps) {
                       ) : (
                         <span
                           className={cn(
-                            "flex size-6 shrink-0 items-center justify-center rounded-full font-heading font-semibold text-[0.65rem]",
+                            "flex size-6 shrink-0 items-center justify-center rounded-full font-heading font-semibold text-xs",
                             isActive
                               ? "bg-primary text-primary-foreground"
                               : isDone
@@ -152,7 +152,7 @@ export function ReadingNav({ items, partLabel, className }: ReadingNavProps) {
                       )}
                       <span
                         className={cn(
-                          isSub ? "text-[0.8rem]" : "text-sm",
+                          isSub ? "text-xs" : "text-sm",
                           isActive
                             ? "font-semibold text-foreground"
                             : "text-muted-foreground"

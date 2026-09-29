@@ -120,6 +120,7 @@ function ImageFrame({
           // Ingen blur her: bloben morpher border-radius hver frame, og et filter oppå
           // gjør hele kortet til en repaint under hover-løftet.
           // På nøytral flate bærer bloben fargen alene – litt kraftigere.
+          // design-unntak: dekorativ blob-form
           surface === "default" ? "opacity-90" : "opacity-70",
           blobCorners[hashSeed(seed) % blobCorners.length],
           surface === "default" && accent
@@ -146,6 +147,7 @@ function ImageFrame({
             <DecoBlob
               seed={`${seed}-plassholder`}
               size={64}
+              // design-unntak: dekorativ plassholder-blob
               className="bg-foreground/15 opacity-40"
             />
           </div>
@@ -241,7 +243,7 @@ export function ProductCard({
             {shortDescription && (
               <p
                 className={cn(
-                  "text-current/70 text-sm leading-relaxed",
+                  "text-muted-foreground text-sm leading-relaxed",
                   featured ? "line-clamp-3" : "line-clamp-2"
                 )}
               >
@@ -265,7 +267,7 @@ export function ProductCard({
                   {priceText}
                 </span>
                 {discount && compareAtPrice != null && (
-                  <span className="text-current/60 text-sm line-through">
+                  <span className="text-muted-foreground text-sm line-through">
                     {formatPrice(compareAtPrice)}
                   </span>
                 )}

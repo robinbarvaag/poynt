@@ -50,7 +50,7 @@ export const SeksjonsVarianter: Story = {
       {(["default", "muted", "primary", "accent"] as const).map((variant) => (
         <Section key={variant} variant={variant}>
           <Container padding="lg">
-            <code className="text-xs opacity-70">
+            <code className="text-xs">
               {`<Section variant="${variant}" />`}
             </code>
           </Container>
@@ -103,7 +103,7 @@ export const Monster: Story = {
           <Heading variant="h2" color="foreground">
             En seksjon med innhold
           </Heading>
-          <Text variant="lead" customStyles="max-w-md text-foreground/70">
+          <Text variant="lead" customStyles="max-w-md text-muted-foreground">
             Bakgrunnen strekker seg edge-to-edge, mens teksten holder seg innen
             en behagelig lesebredde.
           </Text>

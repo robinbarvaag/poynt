@@ -63,7 +63,7 @@ export function Pricing({ eyebrow, title, intro, tiers }: PricingProps) {
         {tiers.map((tier) => {
           const { featured } = tier;
           const muted = featured
-            ? "text-primary-foreground/75"
+            ? "text-primary-foreground"
             : "text-muted-foreground";
           const marker = featured ? "bg-accent-1" : "bg-primary";
           return (
@@ -80,6 +80,7 @@ export function Pricing({ eyebrow, title, intro, tiers }: PricingProps) {
                   <GridPattern
                     variant="dots"
                     fade
+                    // design-unntak: dekorativt prikkmønster, ikke tekst
                     className="text-primary-foreground/15"
                   />
                 )}

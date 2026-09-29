@@ -54,7 +54,7 @@ export function DownloadCard({
           <span className="line-clamp-1 font-heading font-semibold text-foreground">
             {title}
           </span>
-          <span className="rounded-full bg-muted px-2 py-0.5 font-medium text-[0.65rem] text-muted-foreground uppercase tracking-wide">
+          <span className="rounded-full bg-muted px-2 py-0.5 font-medium text-muted-foreground text-xs uppercase tracking-wide">
             {meta.label}
           </span>
         </span>

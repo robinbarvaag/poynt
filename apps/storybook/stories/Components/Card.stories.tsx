@@ -113,7 +113,7 @@ export const Surfaces: Story = {
 
           <CardSeparator />
 
-          <CardContent className="opacity-80">{card.body}</CardContent>
+          <CardContent>{card.body}</CardContent>
 
           <CardContent className="mt-auto">
             {card.footer.type === "link" ? (
@@ -140,9 +140,7 @@ export const Surfaces: Story = {
                 >
                   {card.footer.value}
                 </div>
-                <div className="mt-1 text-sm opacity-75">
-                  {card.footer.label}
-                </div>
+                <div className="mt-1 text-sm">{card.footer.label}</div>
               </div>
             )}
           </CardContent>

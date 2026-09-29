@@ -110,7 +110,7 @@ export function EventTicket({
     <div
       className={cn(
         "relative mx-auto w-full max-w-md",
-        inactive && "opacity-70 grayscale",
+        inactive && "grayscale",
         className
       )}
     >
@@ -153,7 +153,7 @@ export function EventTicket({
           }}
         >
           <div className="flex items-center justify-between gap-3">
-            <span className="font-semibold text-primary-foreground/70 text-xs uppercase tracking-[0.16em]">
+            <span className="font-semibold text-primary-foreground text-xs uppercase tracking-[0.16em]">
               Billett
             </span>
             <span
@@ -171,7 +171,7 @@ export function EventTicket({
           <p className="mt-3 text-balance font-bold font-heading text-xl leading-tight sm:mt-4 sm:text-2xl">
             {eventTitle}
           </p>
-          <p className="mt-2 text-primary-foreground/85 text-sm leading-relaxed sm:mt-3">
+          <p className="mt-2 text-primary-foreground text-sm leading-relaxed sm:mt-3">
             {when}
             {where ? (
               <>
@@ -219,6 +219,7 @@ export function EventTicket({
             <div
               className={cn(
                 "mx-auto mt-3 aspect-square w-44 rounded-2xl bg-white p-2 transition-opacity duration-700 sm:mt-4 sm:w-52 [&>svg]:h-full [&>svg]:w-full",
+                // design-unntak: QR-bildet dimmes når billetten er brukt
                 torn && "opacity-40"
               )}
               role="img"
@@ -268,7 +269,7 @@ export function EventTicket({
       {inactive && (
         <span
           aria-hidden="true"
-          className="-rotate-12 pointer-events-none absolute top-1/3 left-1/2 z-20 -translate-x-1/2 rounded-xl border-4 border-destructive/70 px-4 py-1 font-bold font-heading text-3xl text-destructive/80 uppercase tracking-widest"
+          className="-rotate-12 pointer-events-none absolute top-1/3 left-1/2 z-20 -translate-x-1/2 rounded-xl border-4 border-destructive/70 px-4 py-1 font-bold font-heading text-3xl text-destructive uppercase tracking-widest"
         >
           {status === "refunded" ? "Refundert" : "Avmeldt"}
         </span>

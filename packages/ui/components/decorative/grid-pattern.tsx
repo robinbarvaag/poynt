@@ -16,6 +16,7 @@ interface GridPatternProps {
 
 /**
  * Subtil dot-/grid-tekstur (jf. Caide-INSPO — «noen kort har en grid-bakgrunn»).
+ * design-unntak: dekorativ tekstur (aria-hidden), alfa styrer synligheten.
  * Tar farge fra `currentColor`, så styr farge + synlighet med className
  * (f.eks. `text-foreground/10` eller `text-primary-foreground/25`). Legg i en
  * `relative`-container og gi innholdet `relative z-10` over. Rent dekorativ
@@ -49,6 +50,7 @@ export function GridPattern({
     <div
       aria-hidden="true"
       className={cn(
+        // design-unntak: dekorativ tekstur (aria-hidden), ikke lesbar tekst
         "pointer-events-none absolute inset-0 text-foreground/7",
         className
       )}

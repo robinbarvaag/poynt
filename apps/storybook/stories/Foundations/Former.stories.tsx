@@ -149,6 +149,7 @@ export const GridTekstur: Story = {
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {/* Dots på lyst kort */}
         <div className="relative h-48 overflow-hidden rounded-3xl bg-card ring-1 ring-foreground/10">
+          {/* design-unntak: dekorativ tekstur, GridPattern er aria-hidden */}
           <GridPattern variant="dots" className="text-foreground/10" />
           <div className="relative z-10 flex h-full items-end p-5">
             <code className="text-muted-foreground text-xs">dots · lyst</code>
@@ -156,16 +157,18 @@ export const GridTekstur: Story = {
         </div>
         {/* Grid på saffron */}
         <div className="relative h-48 overflow-hidden rounded-3xl bg-accent-1">
+          {/* design-unntak: dekorativ tekstur, GridPattern er aria-hidden */}
           <GridPattern variant="grid" className="text-foreground/12" />
           <div className="relative z-10 flex h-full items-end p-5">
-            <code className="text-foreground/70 text-xs">grid · saffron</code>
+            <code className="text-foreground text-xs">grid · saffron</code>
           </div>
         </div>
         {/* Dots på primary */}
         <div className="relative h-48 overflow-hidden rounded-3xl bg-primary">
+          {/* design-unntak: dekorativ tekstur, GridPattern er aria-hidden */}
           <GridPattern variant="dots" className="text-primary-foreground/25" />
           <div className="relative z-10 flex h-full items-end p-5">
-            <code className="text-primary-foreground/80 text-xs">
+            <code className="text-primary-foreground text-xs">
               dots · primary
             </code>
           </div>
@@ -187,13 +190,14 @@ export const GridIBruk: Story = {
       <div className="grid gap-6 md:grid-cols-2">
         {/* 1 — bak et farget kort */}
         <Card surface="saffron" className="relative">
+          {/* design-unntak: dekorativ tekstur, GridPattern er aria-hidden */}
           <GridPattern variant="grid" className="text-foreground/10" />
           <CardContent className="relative z-10">
             <Eyebrow className="text-primary">Kort</Eyebrow>
             <Heading variant="h3" color="inherit" customStyles="mt-2">
               Grid bak innhold
             </Heading>
-            <Text color="inherit" customStyles="mt-2 text-foreground/70">
+            <Text color="inherit" customStyles="mt-2 text-foreground">
               Teksturen gir kortet en taktil flate uten å ta fokus.
             </Text>
           </CardContent>
@@ -201,6 +205,7 @@ export const GridIBruk: Story = {
 
         {/* 2 — fade som krydder */}
         <Card surface="default" className="relative">
+          {/* design-unntak: dekorativ tekstur, GridPattern er aria-hidden */}
           <GridPattern variant="dots" fade className="text-primary/35" />
           <CardContent className="relative z-10">
             <Eyebrow className="text-primary">Aksent (fade)</Eyebrow>
@@ -220,14 +225,15 @@ export const GridIBruk: Story = {
         <GridPattern
           variant="dots"
           fade
+          // design-unntak: dekorativ tekstur, GridPattern er aria-hidden
           className="text-primary-foreground/25"
         />
         <div className="relative z-10 max-w-lg">
-          <Eyebrow className="text-primary-foreground/70">Seksjon</Eyebrow>
+          <Eyebrow className="text-primary-foreground">Seksjon</Eyebrow>
           <Heading variant="h2" color="white" customStyles="mt-3">
             Full-bredde med tekstur
           </Heading>
-          <Text color="white" customStyles="mt-3 text-primary-foreground/80">
+          <Text color="white" customStyles="mt-3 text-primary-foreground">
             På en mettet flate løfter en svak grid frem dybden — fin som CTA-
             eller hero-bånd.
           </Text>

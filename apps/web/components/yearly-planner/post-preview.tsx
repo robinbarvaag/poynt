@@ -62,7 +62,7 @@ export function PostPreview({
   ) : (
     <div
       className={cn(
-        "flex size-9 shrink-0 items-center justify-center rounded-full font-semibold text-[11px] text-white",
+        "flex size-9 shrink-0 items-center justify-center rounded-full font-semibold text-white text-xs",
         meta.dot
       )}
     >
@@ -86,7 +86,7 @@ export function PostPreview({
         </div>
         <div className="relative flex aspect-square items-center justify-center bg-linear-to-br from-muted to-muted/40 px-6 text-center">
           <div className="space-y-2 text-muted-foreground">
-            <Icon name="image" className="mx-auto size-8 opacity-60" />
+            <Icon name="image" className="mx-auto size-8" />
             {imageTip && <p className="text-xs leading-snug">{imageTip}</p>}
           </div>
         </div>
@@ -169,7 +169,7 @@ function Frame({
     <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
       <div
         className={cn(
-          "flex items-center gap-1.5 px-3 py-1.5 text-[11px] text-white",
+          "flex items-center gap-1.5 px-3 py-1.5 text-white text-xs",
           meta.dot
         )}
       >

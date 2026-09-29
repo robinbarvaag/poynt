@@ -51,7 +51,11 @@ export function Marquee({
           className="flex shrink-0 items-center gap-8 pr-8 font-heading font-semibold text-xl tracking-tight md:text-2xl"
         >
           {item}
-          <span className="size-1.5 shrink-0 rounded-full bg-current opacity-50" />
+          {/* design-unntak: dekorativ skilletegn-prikk */}
+          <span
+            aria-hidden="true"
+            className="size-1.5 shrink-0 rounded-full bg-current opacity-50"
+          />
         </span>
       ))}
     </div>

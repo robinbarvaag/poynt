@@ -58,9 +58,11 @@ export function CourseHero({
           </div>
         ) : (
           <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-accent-2/60 via-accent-2/25 to-background">
+            {/* design-unntak: dekorativt kursikon i tom cover (aria-hidden) */}
             <Icon
               name="graduation-cap"
               className="size-20 text-foreground/15"
+              aria-hidden="true"
               strokeWidth={1.5}
             />
           </div>
@@ -73,18 +75,18 @@ export function CourseHero({
             <Icon name="graduation-cap" className="size-3.5 text-primary" />
             {eyebrow}
           </span>
-          <h1 className="text-balance font-bold font-heading text-3xl leading-[1.1] tracking-tight md:text-[2.5rem]">
+          <h1 className="text-balance font-bold font-heading text-3xl leading-[1.1] tracking-tight md:text-4xl">
             {title}
           </h1>
           {lede && (
-            <p className="text-base text-foreground/75 leading-relaxed md:text-lg">
+            <p className="text-base text-foreground leading-relaxed md:text-lg">
               {lede}
             </p>
           )}
         </div>
 
         {meta && meta.length > 0 && (
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-foreground/60 text-sm">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-foreground text-sm">
             {meta.map((item) => (
               <span
                 key={item.label}
@@ -108,7 +110,7 @@ export function CourseHero({
                   <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">
                     <Icon name="check" className="size-3.5" />
                   </span>
-                  <span className="text-foreground/80 text-sm leading-relaxed">
+                  <span className="text-foreground text-sm leading-relaxed">
                     {point}
                   </span>
                 </li>

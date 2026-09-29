@@ -158,13 +158,13 @@ export function RecaptchaNotice({ className = "" }: { className?: string }) {
   if (!SITE_KEY) return null;
 
   return (
-    <p className={`text-xs leading-relaxed opacity-75 ${className}`}>
+    <p className={`text-xs leading-relaxed ${className}`}>
       Beskyttet av reCAPTCHA. Googles{" "}
       <Link
         href="https://policies.google.com/privacy"
         target="_blank"
         rel="noopener noreferrer"
-        className="underline underline-offset-2 hover:opacity-100"
+        className="underline underline-offset-2 hover:decoration-2"
       >
         personvernerklæring
       </Link>{" "}
@@ -173,7 +173,7 @@ export function RecaptchaNotice({ className = "" }: { className?: string }) {
         href="https://policies.google.com/terms"
         target="_blank"
         rel="noopener noreferrer"
-        className="underline underline-offset-2 hover:opacity-100"
+        className="underline underline-offset-2 hover:decoration-2"
       >
         vilkår
       </Link>{" "}

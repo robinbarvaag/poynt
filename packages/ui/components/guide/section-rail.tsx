@@ -100,7 +100,7 @@ export function SectionRail({
                 ) : (
                   <span
                     className={cn(
-                      "flex size-7 shrink-0 items-center justify-center rounded-full font-heading font-semibold text-[0.7rem] ring-1 transition-colors",
+                      "flex size-7 shrink-0 items-center justify-center rounded-full font-heading font-semibold text-xs ring-1 transition-colors",
                       isActive
                         ? "bg-primary text-primary-foreground ring-primary"
                         : isDone
@@ -118,7 +118,7 @@ export function SectionRail({
                 <span
                   className={cn(
                     "leading-snug transition-colors",
-                    isSub ? "text-[0.8rem]" : "text-sm",
+                    isSub ? "text-xs" : "text-sm",
                     isActive
                       ? "font-semibold text-foreground"
                       : "text-muted-foreground group-hover:text-foreground"

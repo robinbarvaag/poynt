@@ -108,6 +108,10 @@ export function Header({
       alt={logo.alt || siteName}
       width={120}
       height={40}
+      // Logoen står i toppen av hver side: last den med en gang, og uten
+      // blur-plassholder — en uskarp flekk før en liten logo ser bare rart ut.
+      loading="eager"
+      placeholder="empty"
       className="h-8 w-auto"
     />
   ) : (

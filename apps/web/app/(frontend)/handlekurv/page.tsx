@@ -305,6 +305,7 @@ export default function CartPage() {
         {/* Sammendrag */}
         <aside className="w-full lg:sticky lg:top-24">
           <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-6 shadow-sm">
+            {/* design-unntak: dekorativt rutemønster i bakgrunnen, ikke tekst */}
             <GridPattern fade className="text-primary/10" />
             <div className="relative z-10">
               <Heading

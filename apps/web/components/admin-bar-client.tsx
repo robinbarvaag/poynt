@@ -112,7 +112,7 @@ export function AdminBarClient(props: AdminBarProps) {
   return (
     <div className="fixed right-6 bottom-[calc(1.5rem+var(--sticky-bar-height,0px))] z-50 print:hidden">
       <div className="flex items-center gap-1 rounded-full bg-foreground p-1 pl-3 text-background shadow-lg ring-1 ring-black/10 backdrop-blur">
-        <span className="pr-1 pl-1 font-medium text-background/70 text-xs">
+        <span className="pr-1 pl-1 font-medium text-background text-xs">
           Admin
         </span>
 
@@ -129,7 +129,7 @@ export function AdminBarClient(props: AdminBarProps) {
         <DropdownMenu>
           <DropdownMenuTrigger
             aria-label="Flere admin-valg"
-            className="flex size-8 items-center justify-center rounded-full text-background/80 transition hover:bg-background/10 hover:text-background"
+            className="flex size-8 items-center justify-center rounded-full text-background transition hover:bg-background/10 hover:text-background"
           >
             <MoreHorizontal className="size-4" />
           </DropdownMenuTrigger>
@@ -168,7 +168,7 @@ export function AdminBarClient(props: AdminBarProps) {
           type="button"
           onClick={() => setCollapsedPersisted(true)}
           aria-label="Skjul admin-verktøy"
-          className="flex size-8 items-center justify-center rounded-full text-background/60 transition hover:bg-background/10 hover:text-background"
+          className="flex size-8 items-center justify-center rounded-full text-background transition hover:bg-background/10 hover:text-background"
         >
           <X className="size-4" />
         </button>

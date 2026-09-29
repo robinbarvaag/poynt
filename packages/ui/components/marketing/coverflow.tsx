@@ -18,6 +18,7 @@ import {
 } from "react";
 import { UILink } from "../../lib/link";
 import { cn } from "../../lib/utils";
+import { CarouselDots } from "./carousel-dots";
 
 export interface CoverflowItem {
   id: string | number;
@@ -297,6 +298,7 @@ export function Coverflow({
                   // på naboene så det aktive fortsatt står fram.
                   reduceMotion &&
                     "transition-transform duration-300 ease-out motion-reduce:transition-none",
+                  // design-unntak: dimming av inaktive coverflow-slides
                   reduceMotion && !active && "scale-90 opacity-70"
                 )}
               >
@@ -408,24 +410,11 @@ export function Coverflow({
       )}
 
       {withDots && (
-        <div className="flex items-center justify-center gap-2">
-          {Array.from({ length: snapCount }, (_, index) => (
-            <button
-              // biome-ignore lint/suspicious/noArrayIndexKey: prikkene ER indekser
-              key={index}
-              type="button"
-              onClick={() => scrollTo(index)}
-              aria-label={`Gå til ${index + 1}`}
-              aria-current={index === selectedIndex}
-              className={cn(
-                "h-2 rounded-full transition-all duration-300 ease-out",
-                index === selectedIndex
-                  ? "w-8 bg-primary"
-                  : "w-2 bg-foreground/20 hover:bg-foreground/40"
-              )}
-            />
-          ))}
-        </div>
+        <CarouselDots
+          count={snapCount}
+          selectedIndex={selectedIndex}
+          onSelect={scrollTo}
+        />
       )}
     </div>
   );

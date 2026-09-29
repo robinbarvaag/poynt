@@ -75,7 +75,7 @@ export function UniverseHeader({
             aria-hidden
             className="hidden h-5 w-px shrink-0 bg-foreground/15 sm:block"
           />
-          <span className="hidden whitespace-nowrap font-heading font-semibold text-[0.95rem] text-foreground/70 tracking-tight sm:inline">
+          <span className="hidden whitespace-nowrap font-heading font-semibold text-muted-foreground text-sm tracking-tight sm:inline">
             {label}
           </span>
         </>
@@ -95,7 +95,7 @@ export function UniverseHeader({
             asChild
             variant="ghost"
             size="sm"
-            className="rounded-full text-foreground/60 hover:text-foreground"
+            className="rounded-full text-muted-foreground hover:text-foreground"
           >
             <Link href="/">
               {exitLabel}

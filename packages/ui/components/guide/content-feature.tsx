@@ -69,9 +69,11 @@ export function ContentFeature({
               config.fallback
             )}
           >
+            {/* design-unntak: dekorativt format-ikon i tom cover (aria-hidden) */}
             <Icon
               name={config.icon}
               className="size-20 text-foreground/15"
+              aria-hidden="true"
               strokeWidth={1.5}
             />
           </div>
@@ -91,18 +93,18 @@ export function ContentFeature({
           )}
         </div>
 
-        <h2 className="text-balance font-bold font-heading text-3xl leading-[1.1] tracking-tight md:text-[2.5rem]">
+        <h2 className="text-balance font-bold font-heading text-3xl leading-[1.1] tracking-tight md:text-4xl">
           {title}
         </h2>
 
         {lede && (
-          <p className="text-base text-foreground/75 leading-relaxed md:text-lg">
+          <p className="text-base text-foreground leading-relaxed md:text-lg">
             {lede}
           </p>
         )}
 
         {meta && meta.length > 0 && (
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-foreground/60 text-sm">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-foreground text-sm">
             {meta.map((item) => (
               <span
                 key={item.label}

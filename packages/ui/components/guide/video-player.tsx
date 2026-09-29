@@ -309,7 +309,7 @@ export function VideoPlayer({
           </div>
         )}
       </div>
-      {caption && <p className="text-current/70 text-sm">{caption}</p>}
+      {caption && <p className="text-current text-sm">{caption}</p>}
     </Reveal>
   );
 }

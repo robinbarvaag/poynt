@@ -444,7 +444,10 @@ export function CommunityClient({ currentUser }: { currentUser: CurrentUser }) {
         className="bg-background"
         empty={
           <ListDetailEmpty>
-            <Icon name="message-square" className="size-10 opacity-40" />
+            <Icon
+              name="message-square"
+              className="size-10 text-muted-foreground"
+            />
             <p className="font-medium">Velg en samtale</p>
             <p className="text-sm">Bli med i praten med de andre medlemmene.</p>
           </ListDetailEmpty>
@@ -512,7 +515,7 @@ export function CommunityClient({ currentUser }: { currentUser: CurrentUser }) {
                           <div className="flex flex-1 flex-col items-center justify-center gap-1 text-center text-muted-foreground">
                             <Icon
                               name="megaphone"
-                              className="size-8 opacity-40"
+                              className="size-8 text-muted-foreground"
                             />
                             <p className="text-sm">
                               Ingen meldinger ennå — vær den første!
@@ -707,7 +710,7 @@ function ConversationSection({
                   {c.type === "channel" ? `# ${c.name}` : c.name}
                 </span>
                 {c.unread > 0 && (
-                  <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 font-semibold text-[11px] text-primary-foreground">
+                  <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 font-semibold text-primary-foreground text-xs">
                     {c.unread}
                   </span>
                 )}
@@ -776,10 +779,7 @@ function MessageRow({
           <Avatar className="size-8 ring-2 ring-card">
             {m.author.image && <AvatarImage src={m.author.image} />}
             <AvatarFallback
-              className={cn(
-                "font-semibold text-[11px]",
-                avatarColor(m.author.id)
-              )}
+              className={cn("font-semibold text-xs", avatarColor(m.author.id))}
             >
               {initials(m.author.name)}
             </AvatarFallback>

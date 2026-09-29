@@ -105,7 +105,10 @@ export const Reise: Story = {
               <Heading variant="h2" color="foreground" align="center">
                 Klar til å begynne?
               </Heading>
-              <Text align="center" customStyles="max-w-md text-foreground/70">
+              <Text
+                align="center"
+                customStyles="max-w-md text-muted-foreground"
+              >
                 Bli medlem i dag og få tilgang til alt — kurs, verktøy og
                 fellesskap.
               </Text>

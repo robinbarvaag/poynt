@@ -199,7 +199,8 @@ export function EventView({ event, seatsTaken }: EventViewProps) {
                     media={image}
                     alt={image.alt || event.title}
                     fill
-                    priority
+                    loading="eager"
+                    fetchPriority="high"
                     className="object-cover"
                   />
                   <MediaCredit media={image} />

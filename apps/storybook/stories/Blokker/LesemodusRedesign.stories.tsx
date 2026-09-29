@@ -36,9 +36,7 @@ const SECTIONS: SectionRailItem[] = [
 ];
 
 function Body({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="text-foreground/80 text-lg leading-relaxed">{children}</p>
-  );
+  return <p className="text-foreground text-lg leading-relaxed">{children}</p>;
 }
 
 function SectionTitle({
@@ -47,7 +45,11 @@ function SectionTitle({
 }: { index: number; children: string }) {
   return (
     <div className="flex items-baseline gap-3">
-      <span className="font-bold font-heading text-3xl text-primary/35 tabular-nums">
+      {/* design-unntak: dekorativt seksjonsnummer, skjult for skjermlesere */}
+      <span
+        aria-hidden="true"
+        className="font-bold font-heading text-3xl text-primary/35 tabular-nums"
+      >
         {String(index).padStart(2, "0")}
       </span>
       <Heading variant="h2">{children}</Heading>
@@ -180,7 +182,7 @@ export const Lesemodus: Story = {
                     <kbd className="rounded-lg bg-background px-2.5 py-1 font-heading font-semibold text-foreground text-sm ring-1 ring-foreground/15">
                       {key}
                     </kbd>
-                    <span className="text-foreground/80">{what}</span>
+                    <span className="text-foreground">{what}</span>
                   </li>
                 ))}
               </ul>
@@ -204,7 +206,7 @@ export const Lesemodus: Story = {
               <Heading variant="h3" color="white">
                 Ferdig med denne?
               </Heading>
-              <p className="text-primary-foreground/85">
+              <p className="text-primary-foreground">
                 Marker som lest, så foreslår vi neste guide i serien – «Lag en
                 innholdskalender du faktisk klarer å følge».
               </p>

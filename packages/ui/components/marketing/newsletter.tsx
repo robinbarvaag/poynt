@@ -22,26 +22,29 @@ export interface NewsletterProps {
   form?: ReactNode;
 }
 
+// Tekst på fargede bånd bruker hele flatens tekstfarge — aldri alfa/opacity.
+// Gjennomskinnelig tekst på saffron/salmon faller under WCAG-kontrastkravet;
+// hierarkiet kommer fra størrelse, vekt og versaler i stedet.
 const themes = {
   primary: {
     surface: "primary",
-    eyebrow: "text-primary-foreground/70",
+    eyebrow: "text-primary-foreground",
     heading: "white",
-    description: "text-primary-foreground/80",
+    description: "text-primary-foreground",
     button: "saffron",
   },
   saffron: {
     surface: "saffron",
-    eyebrow: "text-foreground/60",
+    eyebrow: "text-foreground",
     heading: "foreground",
-    description: "text-foreground/75",
+    description: "text-foreground",
     button: "ink",
   },
   salmon: {
     surface: "salmon",
-    eyebrow: "text-foreground/60",
+    eyebrow: "text-foreground",
     heading: "foreground",
-    description: "text-foreground/75",
+    description: "text-foreground",
     button: "ink",
   },
 } as const;

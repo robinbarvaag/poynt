@@ -46,19 +46,19 @@ const themes = [
   {
     surface: "saffron",
     rule: "border-foreground/15",
-    muted: "text-foreground/70",
+    muted: "text-foreground",
     accent: "text-primary",
   },
   {
     surface: "salmon",
     rule: "border-foreground/15",
-    muted: "text-foreground/75",
+    muted: "text-foreground",
     accent: "text-primary",
   },
   {
     surface: "primary",
     rule: "border-primary-foreground/25",
-    muted: "text-primary-foreground/75",
+    muted: "text-primary-foreground",
     accent: "text-accent-1",
   },
 ] as const;

@@ -72,6 +72,7 @@ export function VippsButton({
   return (
     <div
       className={`${stretched ? "w-full" : ""} ${
+        // design-unntak: deaktivert knapp (disabled-tilstand)
         disabled ? "pointer-events-none opacity-50" : ""
       } ${className ?? ""}`.trim()}
       aria-disabled={disabled || undefined}

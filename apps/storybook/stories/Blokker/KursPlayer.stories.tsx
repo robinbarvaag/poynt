@@ -168,7 +168,7 @@ function CoursePlayer() {
 
             {activeId === "maler" && (
               <div className="flex flex-col gap-4">
-                <p className="text-foreground/80 text-lg leading-relaxed">
+                <p className="text-foreground text-lg leading-relaxed">
                   Her er malene vi har laget til medlemmene. Last ned, åpne i
                   Canva, og bytt ut tekst og bilder.
                 </p>

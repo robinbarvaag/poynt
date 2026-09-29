@@ -14,12 +14,12 @@ export function PrivacyNotice({
   className?: string;
 }) {
   return (
-    <p className={`text-xs leading-relaxed opacity-75 ${className}`}>
+    <p className={`text-xs leading-relaxed ${className}`}>
       {purpose} Les mer i{" "}
       <Link
         href="/personvern"
         target="_blank"
-        className="underline underline-offset-2 hover:opacity-100"
+        className="underline underline-offset-2 hover:decoration-2"
       >
         personvernerklæringen
       </Link>

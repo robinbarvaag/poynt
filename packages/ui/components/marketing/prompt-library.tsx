@@ -87,7 +87,7 @@ export function PromptCard({
           {item.tags?.map((tag) => (
             <span
               key={tag}
-              className="rounded-full bg-muted px-2.5 py-1 font-medium text-[0.7rem] text-muted-foreground uppercase tracking-wide"
+              className="rounded-full bg-muted px-2.5 py-1 font-medium text-muted-foreground text-xs uppercase tracking-wide"
             >
               {tag}
             </span>
@@ -106,7 +106,7 @@ export function PromptCard({
       <div className="relative">
         <pre
           className={cn(
-            "overflow-hidden whitespace-pre-wrap break-words rounded-2xl bg-muted/60 p-4 font-mono text-[0.8rem] text-foreground/90 leading-relaxed ring-1 ring-foreground/5",
+            "overflow-hidden whitespace-pre-wrap break-words rounded-2xl bg-muted/60 p-4 font-mono text-foreground text-sm leading-relaxed ring-1 ring-foreground/5",
             !open && "max-h-44"
           )}
         >

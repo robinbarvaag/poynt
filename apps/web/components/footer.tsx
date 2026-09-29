@@ -121,6 +121,7 @@ export async function Footer({
                   alt={logo.alt || siteName}
                   width={120}
                   height={40}
+                  placeholder="empty"
                   className="h-8 w-auto"
                 />
               ) : (
@@ -156,7 +157,7 @@ export async function Footer({
                       rel={
                         link.openInNewTab ? "noopener noreferrer" : undefined
                       }
-                      className="inline-block py-1.5 text-base text-muted-foreground transition-colors hover:text-foreground md:py-1 md:text-[15px]"
+                      className="inline-block py-1.5 text-base text-muted-foreground transition-colors hover:text-foreground md:py-1 md:text-sm"
                     >
                       {link.label}
                     </Link>
@@ -170,7 +171,7 @@ export async function Footer({
         {/* Bunnlinje: firma/org.nr på én rad, kontaktinfo på neste, merknad
             under — og informasjonskapsler til høyre. Ingen fri tekst her;
             hvert felt rendres på sin faste plass. */}
-        <div className="mt-12 flex flex-col gap-6 border-border border-t pt-8 text-[15px] text-muted-foreground md:flex-row md:items-end md:justify-between">
+        <div className="mt-12 flex flex-col gap-6 border-border border-t pt-8 text-muted-foreground text-sm md:flex-row md:items-end md:justify-between">
           <div className="flex flex-col gap-3 md:gap-2">
             <p className="text-foreground">
               © {currentYear} {companyName}
@@ -205,13 +206,11 @@ export async function Footer({
               </ul>
             )}
             {disclaimer && (
-              <p className="text-muted-foreground/80 text-[13px]">
-                {disclaimer}
-              </p>
+              <p className="text-muted-foreground text-xs">{disclaimer}</p>
             )}
           </div>
           {/* Lovpålagt: samtykket skal kunne endres like lett som det ble gitt. */}
-          <CookieSettingsButton className="-my-2 shrink-0 self-start py-2 text-[15px] text-muted-foreground transition-colors hover:text-foreground md:self-end" />
+          <CookieSettingsButton className="-my-2 shrink-0 self-start py-2 text-muted-foreground text-sm transition-colors hover:text-foreground md:self-end" />
         </div>
       </div>
     </footer>

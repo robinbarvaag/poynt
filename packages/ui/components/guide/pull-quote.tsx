@@ -37,7 +37,7 @@ export function PullQuote({
           className={cn("w-1.5 shrink-0 rounded-full", barByAccent[accent])}
         />
         <div className="flex flex-col gap-3">
-          <blockquote className="text-balance font-bold font-heading text-2xl text-foreground leading-[1.15] tracking-tight md:text-[1.9rem]">
+          <blockquote className="text-balance font-bold font-heading text-2xl text-foreground leading-[1.15] tracking-tight md:text-3xl">
             {children}
           </blockquote>
           {cite && (

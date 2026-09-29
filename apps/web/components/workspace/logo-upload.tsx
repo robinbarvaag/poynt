@@ -169,6 +169,7 @@ export function LogoUpload({
             "flex w-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed px-4 py-8 text-center transition-colors",
             "border-input bg-muted/30 hover:border-primary/40 hover:bg-muted/50",
             dragging && "border-primary/60 bg-primary/5",
+            // design-unntak: deaktivert opplasting (disabled-tilstand)
             (disabled || uploading) && "cursor-not-allowed opacity-60"
           )}
         >

@@ -108,12 +108,15 @@ export function NewsletterForm({
           {errorMessage}
         </p>
       )}
-      {/* Småteksten er én samlet blokk: balansert bryting så sentrerte linjer
-          ikke ender med et foreldreløst ord, og reCAPTCHA-linja litt svakere
-          så den leses som en fotnote til personvernlinja. */}
-      <div className="mx-auto mt-4 max-w-sm space-y-1 text-balance">
+      {/* Småteksten får hele skjemabredden: personvernlinja brytes balansert
+          over to linjer, og reCAPTCHA-linja står alene på én linje nederst
+          som en fotnote (på mobil brytes den naturlig). Ingen smal max-w her —
+          den presset begge inn i en sentrert klump på fire linjer. Full
+          tekstfarge fra flaten — dempet/gjennomskinnelig tekst feiler
+          kontrastkravet. */}
+      <div className="mt-4 text-balance">
         <PrivacyNotice purpose="Vi bruker e-posten kun til nyhetsbrevet, og du kan melde deg av når som helst." />
-        <RecaptchaNotice className="opacity-60!" />
+        <RecaptchaNotice className="mt-3" />
       </div>
     </form>
   );

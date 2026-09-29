@@ -285,7 +285,7 @@ export function SiteHeader({
                       "relative flex items-center gap-1 rounded-full px-4 py-2 font-medium text-sm transition-colors",
                       isActive(item)
                         ? "text-foreground"
-                        : "text-foreground/65 hover:bg-foreground/5 hover:text-foreground",
+                        : "text-muted-foreground hover:bg-foreground/5 hover:text-foreground",
                       openDropdown === index &&
                         "bg-foreground/5 text-foreground"
                     )}
@@ -412,7 +412,7 @@ export function SiteHeader({
                     "block rounded-2xl px-4 py-3.5 font-heading font-semibold text-xl transition-colors",
                     isActive(item)
                       ? "bg-foreground/8 text-foreground"
-                      : "text-foreground/80 hover:bg-foreground/5 hover:text-foreground"
+                      : "text-muted-foreground hover:bg-foreground/5 hover:text-foreground"
                   )}
                 >
                   {item.label}

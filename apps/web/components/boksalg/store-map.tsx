@@ -595,7 +595,7 @@ export function StoreMap({
           </Button>
         </div>
 
-        <p className="text-muted-foreground pointer-events-none absolute bottom-2 left-2 text-[10px]">
+        <p className="text-muted-foreground pointer-events-none absolute bottom-2 left-2 text-xs">
           Hjul for å zoome · dra for å flytte
         </p>
 

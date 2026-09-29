@@ -59,7 +59,7 @@ export function ContentFilterBar({
               "inline-flex items-center gap-1.5 rounded-full px-4 py-2 font-medium text-sm transition-colors",
               isActive
                 ? "bg-primary text-primary-foreground"
-                : "bg-foreground/[0.04] text-foreground/70 ring-1 ring-foreground/10 hover:bg-foreground/[0.07]"
+                : "bg-foreground/[0.04] text-muted-foreground ring-1 ring-foreground/10 hover:bg-foreground/[0.07]"
             )}
           >
             {option.dot ? (

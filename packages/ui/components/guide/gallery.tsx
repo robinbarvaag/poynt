@@ -42,7 +42,7 @@ function Figure({ item }: { item: GalleryItem }) {
         <div className={imageClass}>{item.node}</div>
       )}
       {item.caption && (
-        <figcaption className="px-3 py-2 text-current/70 text-sm">
+        <figcaption className="px-3 py-2 text-current text-sm">
           {item.caption}
         </figcaption>
       )}
@@ -72,7 +72,7 @@ export function Gallery({
           ))}
         </div>
         {caption && (
-          <p className="text-center text-current/70 text-sm">{caption}</p>
+          <p className="text-center text-current text-sm">{caption}</p>
         )}
       </div>
     );
@@ -91,9 +91,7 @@ export function Gallery({
           </StaggerItem>
         ))}
       </Stagger>
-      {caption && (
-        <p className="text-center text-current/70 text-sm">{caption}</p>
-      )}
+      {caption && <p className="text-center text-current text-sm">{caption}</p>}
     </div>
   );
 }

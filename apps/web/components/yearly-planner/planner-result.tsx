@@ -346,7 +346,7 @@ export function PlannerResult({
                   style={{ left: `${x}%`, top: `${y}%` }}
                   title="Ikke planlagt"
                 >
-                  <div className="flex size-20 flex-col items-center justify-center rounded-full border-2 border-border border-dashed bg-muted/30 text-muted-foreground/40 sm:size-24">
+                  <div className="flex size-20 flex-col items-center justify-center rounded-full border-2 border-border border-dashed bg-muted/30 text-muted-foreground sm:size-24">
                     <span className="font-bold text-lg sm:text-xl">
                       {label}
                     </span>
@@ -388,7 +388,7 @@ export function PlannerResult({
                   )}
                 >
                   {count > 0 && (
-                    <span className="absolute top-1 right-1 flex size-5 items-center justify-center rounded-full bg-primary font-bold text-[10px] text-primary-foreground shadow ring-2 ring-background">
+                    <span className="absolute top-1 right-1 flex size-5 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground text-xs shadow ring-2 ring-background">
                       {count}
                     </span>
                   )}

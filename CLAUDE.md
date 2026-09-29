@@ -112,6 +112,7 @@ Linting and formatting are handled entirely by **Biome** (`biome.json` at root) 
 - Use `for...of` instead of `.forEach()` — Biome rule `noForEach`
 - Avoid `any` — use proper types or `unknown`
 - All buttons inside forms need explicit `type` attribute
+- **Tekst: kun skalaen og hele farger** — ingen `text-[13px]`/`text-[0.8rem]` (bruk `text-xs/sm/base/…`), ingen gjennomskinnelig tekst (`text-foreground/70`, `opacity-60`). Hierarki kommer fra størrelse/vekt, ikke gjennomsiktighet; `text-muted-foreground` feiler kontrast på saffron/salmon — bruk `text-foreground` der. Håndheves av `bun run check:tokens` (del av `check:ci`); bevisste unntak (dekorative former, bilder, deaktiverte kontroller) merkes `design-unntak: <grunn>` i en kommentar på linja eller inntil 3 linjer over.
 
 ## Important Files
 

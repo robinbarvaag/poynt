@@ -82,7 +82,7 @@ export function DeviceFrame({
             <span className="size-3 rounded-full bg-accent-3" />
           </div>
           {url && (
-            <div className="ml-1 flex-1 truncate rounded-full bg-background px-3 py-1 text-center text-foreground/45 text-xs ring-1 ring-foreground/10">
+            <div className="ml-1 flex-1 truncate rounded-full bg-background px-3 py-1 text-center text-muted-foreground text-xs ring-1 ring-foreground/10">
               {url}
             </div>
           )}

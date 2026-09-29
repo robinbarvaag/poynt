@@ -111,7 +111,7 @@ export function Countdown({
           <span
             className={cn(
               "mt-1.5 block text-xs uppercase tracking-[0.14em]",
-              onPrimary ? "text-primary-foreground/70" : "text-muted-foreground"
+              onPrimary ? "text-primary-foreground" : "text-muted-foreground"
             )}
           >
             {label}

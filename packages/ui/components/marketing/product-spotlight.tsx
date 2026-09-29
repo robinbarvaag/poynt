@@ -108,6 +108,7 @@ export function ProductSpotlight({
             seed={href}
             size={96}
             className={cn(
+              // design-unntak: dekorativ blob-form
               "absolute opacity-90 blur-[2px]",
               blobCorners[seed % blobCorners.length],
               blobByAccent[resolvedAccent]
@@ -123,6 +124,7 @@ export function ProductSpotlight({
                 <DecoBlob
                   seed={`${href}-plassholder`}
                   size={56}
+                  // design-unntak: dekorativ plassholder-blob
                   className="bg-foreground/15 opacity-40"
                 />
               </div>

@@ -321,7 +321,7 @@ export function PlannerCalendar({
                   >
                     {day}
                   </span>
-                  <span className="flex items-center gap-0.5 text-[9px] text-primary opacity-0 transition-opacity group-hover:opacity-100">
+                  <span className="flex items-center gap-0.5 text-primary opacity-0 transition-opacity group-hover:opacity-100">
                     <Icon name="plus" className="size-3" />
                   </span>
                 </div>
@@ -339,7 +339,7 @@ export function PlannerCalendar({
                           openDetail(post);
                         }}
                         className={cn(
-                          "flex w-full items-start gap-1 rounded border px-1 py-0.5 text-left text-[10px] leading-tight transition hover:brightness-95",
+                          "flex w-full items-start gap-1 rounded border px-1 py-0.5 text-left text-xs leading-tight transition hover:brightness-95",
                           meta.chip
                         )}
                         title={`${post.result?.channel ?? ""} — trykk for å se, kopiere eller slette`}
@@ -376,12 +376,12 @@ export function PlannerCalendar({
                           deriveISODate(calYear, monthNum, idea.week)
                         );
                       }}
-                      className="flex w-full items-start gap-1 rounded border border-dashed border-muted-foreground/30 bg-background/60 px-1 py-0.5 text-left text-[10px] text-muted-foreground leading-tight transition-colors hover:border-primary/50 hover:bg-primary/5 hover:text-foreground"
+                      className="flex w-full items-start gap-1 rounded border border-dashed border-muted-foreground/30 bg-background/60 px-1 py-0.5 text-left text-muted-foreground text-xs leading-tight transition-colors hover:border-primary/50 hover:bg-primary/5 hover:text-foreground"
                       title={`Forslag · ${idea.channel}: ${idea.idea} — trykk for å lage innlegget`}
                     >
                       <Icon
                         name="sparkles"
-                        className="mt-px size-2.5 shrink-0 text-primary/70"
+                        className="mt-px size-2.5 shrink-0 text-primary"
                       />
                       <span className="line-clamp-2">{idea.idea}</span>
                     </button>
@@ -406,7 +406,7 @@ export function PlannerCalendar({
             </span>
           ))}
           <span className="flex items-center gap-1.5">
-            <Icon name="sparkles" className="size-3 text-primary/70" />
+            <Icon name="sparkles" className="size-3 text-primary" />
             Forslag fra årshjulet
           </span>
         </div>

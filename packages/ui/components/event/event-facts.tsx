@@ -72,6 +72,7 @@ export function EventFacts({ items, className }: EventFactsProps) {
             <span
               aria-hidden
               className={cn(
+                // design-unntak: dekorativ fargeflekk (aria-hidden)
                 "absolute -top-8 -right-8 size-28 rounded-full opacity-40 motion-safe:transition-transform motion-safe:duration-500 group-hover:scale-110",
                 tone.blob
               )}

@@ -192,7 +192,7 @@ export const Bruk: Story = {
       <Heading variant="h2" color="foreground" customStyles="max-w-md">
         Lær av folk som har gått veien før deg
       </Heading>
-      <Text variant="lead" customStyles="text-foreground/70">
+      <Text variant="lead" customStyles="text-muted-foreground">
         Bli en del av et fellesskap der du får tilbakemelding, inspirasjon og
         konkrete verktøy.
       </Text>

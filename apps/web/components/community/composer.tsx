@@ -254,7 +254,7 @@ export function Composer({
             >
               <Avatar className="size-6">
                 {m.image && <AvatarImage src={m.image} />}
-                <AvatarFallback className="text-[10px]">
+                <AvatarFallback className="text-xs">
                   {initials(m.name)}
                 </AvatarFallback>
               </Avatar>

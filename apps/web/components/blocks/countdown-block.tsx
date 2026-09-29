@@ -28,8 +28,9 @@ const themes = {
   primary: {
     surface: "primary",
     heading: "white",
-    eyebrow: "text-primary-foreground/70",
-    description: "text-primary-foreground/80",
+    eyebrow: "text-primary-foreground",
+    description: "text-primary-foreground",
+    // design-unntak: dekorativt prikkmønster i bakgrunnen, ikke tekst
     grid: "text-primary-foreground/20",
     button: "saffron",
     tone: "onPrimary",
@@ -37,8 +38,9 @@ const themes = {
   saffron: {
     surface: "saffron",
     heading: "foreground",
-    eyebrow: "text-foreground/60",
-    description: "text-foreground/75",
+    eyebrow: "text-foreground",
+    description: "text-foreground",
+    // design-unntak: dekorativt prikkmønster i bakgrunnen, ikke tekst
     grid: "text-foreground/10",
     button: "ink",
     tone: "default",
@@ -46,8 +48,9 @@ const themes = {
   salmon: {
     surface: "salmon",
     heading: "foreground",
-    eyebrow: "text-foreground/60",
-    description: "text-foreground/75",
+    eyebrow: "text-foreground",
+    description: "text-foreground",
+    // design-unntak: dekorativt prikkmønster i bakgrunnen, ikke tekst
     grid: "text-foreground/10",
     button: "ink",
     tone: "default",

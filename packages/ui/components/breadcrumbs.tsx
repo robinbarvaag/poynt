@@ -46,10 +46,7 @@ export function Breadcrumbs({ items, className }: BreadcrumbsProps) {
                 </span>
               )}
               {!isLast && (
-                <ChevronRight
-                  aria-hidden="true"
-                  className="size-3.5 opacity-60"
-                />
+                <ChevronRight aria-hidden="true" className="size-3.5" />
               )}
             </li>
           );

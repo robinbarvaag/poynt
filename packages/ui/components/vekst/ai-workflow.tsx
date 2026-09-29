@@ -367,7 +367,7 @@ export function AiWorkflow({
               className="size-4 transition-transform group-open:rotate-180"
             />
           </summary>
-          <pre className="max-h-72 overflow-auto whitespace-pre-wrap break-words px-4 pb-4 font-mono text-[0.8rem] text-foreground/90 leading-relaxed">
+          <pre className="max-h-72 overflow-auto whitespace-pre-wrap break-words px-4 pb-4 font-mono text-foreground text-xs leading-relaxed">
             {workflow.prompt}
           </pre>
         </details>

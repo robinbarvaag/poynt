@@ -143,7 +143,8 @@ export default async function KursDetailPage({
                     media={cover}
                     alt={cover.alt || course.title}
                     fill
-                    priority
+                    loading="eager"
+                    fetchPriority="high"
                   />
                   <MediaCredit media={cover} />
                 </>

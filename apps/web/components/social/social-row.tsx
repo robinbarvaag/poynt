@@ -53,7 +53,7 @@ export function SocialRow({ links, className }: SocialRowProps) {
               <span
                 aria-hidden="true"
                 className={cn(
-                  "pointer-events-none absolute bottom-full mb-2 hidden whitespace-nowrap rounded-md bg-foreground px-2 py-1 font-medium text-[11px] text-background opacity-0 shadow-sm transition-opacity duration-200 sm:block",
+                  "pointer-events-none absolute bottom-full mb-2 hidden whitespace-nowrap rounded-md bg-foreground px-2 py-1 font-medium text-background text-xs opacity-0 shadow-sm transition-opacity duration-200 sm:block",
                   "group-hover:opacity-100 group-focus-visible:opacity-100"
                 )}
               >

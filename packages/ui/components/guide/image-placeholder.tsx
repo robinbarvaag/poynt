@@ -30,11 +30,11 @@ export function ImagePlaceholder({
       <Icon
         name="image"
         aria-hidden="true"
-        className="size-7 text-foreground/40"
+        className="size-7 text-muted-foreground"
         strokeWidth={1.5}
       />
       {label && (
-        <span className="max-w-xs text-balance text-foreground/60 text-xs leading-snug">
+        <span className="max-w-xs text-balance text-muted-foreground text-xs leading-snug">
           {label}
         </span>
       )}

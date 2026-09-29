@@ -71,6 +71,7 @@ export function GuideHero({
         // … ellers en merkevare-tro gradient + stort, svakt emoji-vannmerke.
         <div className={cn("absolute inset-0 -z-10", backdropByAccent[accent])}>
           {icon && (
+            // design-unntak: stort, svakt emoji-vannmerke (aria-hidden), større enn skalaen
             <span
               aria-hidden="true"
               className="pointer-events-none absolute right-4 bottom-0 select-none text-[10rem] opacity-10 md:text-[16rem]"
@@ -109,7 +110,7 @@ export function GuideHero({
         <Reveal delay={0.05}>
           <div className="flex flex-col gap-3">
             {eyebrow && (
-              <span className="font-heading font-semibold text-sm uppercase tracking-[0.18em] opacity-90">
+              <span className="font-heading font-semibold text-sm uppercase tracking-[0.18em]">
                 {eyebrow}
               </span>
             )}
@@ -117,7 +118,7 @@ export function GuideHero({
               {title}
             </h1>
             {lede && (
-              <p className="max-w-2xl text-lg leading-relaxed opacity-90 md:text-xl">
+              <p className="max-w-2xl text-lg leading-relaxed md:text-xl">
                 {lede}
               </p>
             )}

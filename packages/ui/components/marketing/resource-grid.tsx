@@ -172,6 +172,8 @@ function Thumb({
       {item.image ?? (
         <Icon
           name={config.icon}
+          aria-hidden="true"
+          // design-unntak: dekorativt plassholder-ikon
           className="size-12 text-foreground/20"
           strokeWidth={1.5}
         />
@@ -243,14 +245,14 @@ export function ResourceCard({
   );
 
   const kindPill =
-    "rounded-full bg-muted px-2 py-0.5 font-medium text-[0.65rem] text-muted-foreground uppercase tracking-wide";
+    "rounded-full bg-muted px-2 py-0.5 font-medium text-muted-foreground text-xs uppercase tracking-wide";
 
   if (layout === "compact") {
     const row = (
       <>
         <Thumb item={item} size="row" />
         <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <span className="line-clamp-1 font-heading font-semibold text-[0.65rem] text-muted-foreground uppercase tracking-[0.14em]">
+          <span className="line-clamp-1 font-heading font-semibold text-muted-foreground text-xs uppercase tracking-[0.14em]">
             {item.category ?? config.label}
           </span>
           <span className="line-clamp-2 font-heading font-semibold text-foreground text-sm leading-snug">

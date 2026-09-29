@@ -172,7 +172,7 @@ export function SearchCommand() {
       >
         <Icon name="search" className="size-4 shrink-0" />
         <span className="hidden sm:inline">Søk …</span>
-        <kbd className="hidden h-5 select-none items-center rounded border border-foreground/10 bg-background px-1.5 font-medium text-[11px] text-muted-foreground leading-none sm:inline-flex">
+        <kbd className="hidden h-5 select-none items-center rounded border border-foreground/10 bg-background px-1.5 font-medium text-muted-foreground text-xs leading-none sm:inline-flex">
           {isMac ? "⌘K" : "Ctrl K"}
         </kbd>
       </button>
@@ -213,7 +213,7 @@ export function SearchCommand() {
 
             {groups.map((group) => (
               <div key={group.label} className="mb-1 last:mb-0">
-                <p className="px-3 pt-2 pb-1 font-medium text-[11px] text-muted-foreground uppercase tracking-[0.12em]">
+                <p className="px-3 pt-2 pb-1 font-medium text-muted-foreground text-xs uppercase tracking-[0.12em]">
                   {group.label}
                 </p>
                 {group.items.map((hit) => {
@@ -245,7 +245,7 @@ export function SearchCommand() {
             ))}
           </div>
 
-          <div className="flex items-center gap-3 border-foreground/10 border-t px-3 py-2 text-[11px] text-muted-foreground">
+          <div className="flex items-center gap-3 border-foreground/10 border-t px-3 py-2 text-muted-foreground text-xs">
             <span>↑↓ naviger</span>
             <span>↵ gå dit</span>
             <span>esc lukk</span>

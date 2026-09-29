@@ -7,6 +7,7 @@ import type React from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { cn } from "../../lib/utils";
 import { Button } from "../button";
+import { CarouselDots } from "./carousel-dots";
 import { type ProductAccent, ProductCard } from "./product-card";
 import type { ProductGridItem } from "./product-grid";
 import { RailBleed } from "./rail-bleed";
@@ -178,24 +179,12 @@ export function ProductCarousel({
       {/* Prikker bare på mobil, der pilene er skjult — på desktop viser pilene
           allerede hvor i raden man er. */}
       {scrollable && (
-        <div className="flex items-center justify-center gap-2 md:hidden">
-          {Array.from({ length: snapCount }, (_, index) => (
-            <button
-              // biome-ignore lint/suspicious/noArrayIndexKey: prikkene ER indekser
-              key={index}
-              type="button"
-              onClick={() => scrollTo(index)}
-              aria-label={`Gå til ${index + 1}`}
-              aria-current={index === selectedIndex}
-              className={cn(
-                "h-2 rounded-full transition-all duration-300 ease-out",
-                index === selectedIndex
-                  ? "w-8 bg-primary"
-                  : "w-2 bg-foreground/20 hover:bg-foreground/40"
-              )}
-            />
-          ))}
-        </div>
+        <CarouselDots
+          count={snapCount}
+          selectedIndex={selectedIndex}
+          onSelect={scrollTo}
+          className="md:hidden"
+        />
       )}
     </div>
   );

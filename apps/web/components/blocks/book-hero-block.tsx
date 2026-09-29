@@ -120,7 +120,8 @@ export function BookHeroBlock({
         <PayloadImage
           media={cover}
           // Omslaget er hovedbildet i heroen — last det med en gang.
-          priority
+          loading="eager"
+          fetchPriority="high"
           sizes="(min-width: 1024px) 24rem, 19rem"
           className="h-full w-full object-cover"
         />

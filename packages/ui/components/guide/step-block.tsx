@@ -44,7 +44,7 @@ export function StepBlock({
         </h3>
 
         {children && (
-          <div className="flex flex-col gap-4 text-foreground/80 leading-relaxed">
+          <div className="flex flex-col gap-4 text-foreground leading-relaxed">
             {children}
           </div>
         )}
@@ -57,10 +57,10 @@ export function StepBlock({
                 key={i}
                 className="flex items-start gap-3 rounded-2xl bg-foreground/[0.03] px-4 py-3 ring-1 ring-foreground/10"
               >
-                <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/15 font-heading font-semibold text-[0.7rem] text-primary tabular-nums">
+                <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/15 font-heading font-semibold text-primary text-xs tabular-nums">
                   {i + 1}
                 </span>
-                <span className="text-foreground/80 text-sm leading-relaxed">
+                <span className="text-foreground text-sm leading-relaxed">
                   {step}
                 </span>
               </li>

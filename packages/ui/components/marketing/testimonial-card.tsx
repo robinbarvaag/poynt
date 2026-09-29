@@ -105,7 +105,8 @@ export function TestimonialCard({
   className,
 }: TestimonialCardProps) {
   const tinted = surface !== "default";
-  const mutedClass = tinted ? "text-current/70" : "text-muted-foreground";
+  const mutedClass = tinted ? "text-current" : "text-muted-foreground";
+  // design-unntak: tomme stjerner og sitatmerke er dekorative (aria-hidden)
   const emptyStarClass = tinted ? "text-current/30" : "text-foreground/15";
   const glyphClass = tinted ? "text-current/25" : "text-primary/20";
 

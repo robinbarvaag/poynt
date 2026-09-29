@@ -63,7 +63,11 @@ export function Testimonials({
                 {featured.logo}
               </div>
             ) : (
-              <span className="font-heading text-6xl text-primary/20 leading-none">
+              // design-unntak: dekorativt sitatmerke
+              <span
+                aria-hidden="true"
+                className="font-heading text-6xl text-primary/20 leading-none"
+              >
                 &ldquo;
               </span>
             )}

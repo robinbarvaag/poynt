@@ -18,10 +18,7 @@ export function EventCard({ event, past }: { event: Event; past?: boolean }) {
   return (
     <Link
       href={`/eventer/${event.slug}`}
-      className={cn(
-        "group flex h-full flex-col overflow-hidden rounded-3xl bg-card ring-1 ring-border transition-shadow hover:shadow-lg",
-        past && "opacity-75"
-      )}
+      className="group flex h-full flex-col overflow-hidden rounded-3xl bg-card ring-1 ring-border transition-shadow hover:shadow-lg"
     >
       <div className="relative aspect-[16/10] overflow-hidden bg-accent-3/40">
         {image?.url && (
@@ -29,7 +26,10 @@ export function EventCard({ event, past }: { event: Event; past?: boolean }) {
             media={image}
             alt={image.alt || event.title}
             fill
-            className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+            className={cn(
+              "object-cover transition-transform duration-500 group-hover:scale-[1.03]",
+              past && "grayscale"
+            )}
           />
         )}
         {image?.url ? (

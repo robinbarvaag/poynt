@@ -132,7 +132,7 @@ export function UpcomingPostsCard() {
                       <span className="font-bold text-base leading-none">
                         {d.day}
                       </span>
-                      <span className="text-[11px] text-muted-foreground uppercase">
+                      <span className="text-muted-foreground text-xs uppercase">
                         {d.month}
                       </span>
                     </div>

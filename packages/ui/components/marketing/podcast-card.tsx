@@ -125,14 +125,14 @@ export function PodcastCard({
     >
       <Meta episodeNumber={episodeNumber} duration={duration} date={date} />
 
-      <h3
+      <h2
         className={cn(
           "font-bold font-heading text-foreground leading-snug tracking-tight transition-colors group-hover/podcast:text-primary",
           featured ? "text-2xl md:text-3xl" : "line-clamp-2 text-lg"
         )}
       >
         {title}
-      </h3>
+      </h2>
 
       {description && (
         <p

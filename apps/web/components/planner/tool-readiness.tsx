@@ -51,7 +51,7 @@ export function ToolReadiness({
                   name={known ? "check-circle" : "circle-off"}
                   className={cn(
                     "mt-0.5 size-4 shrink-0",
-                    known ? "text-primary" : "text-muted-foreground/50"
+                    known ? "text-primary" : "text-muted-foreground"
                   )}
                 />
                 <div className="min-w-0">

@@ -52,7 +52,7 @@ export function MediaCredit({ media, variant = "overlay" }: MediaCreditProps) {
   }
 
   return (
-    <span className="pointer-events-none absolute right-1.5 bottom-1.5 z-10 rounded bg-black/55 px-1.5 py-0.5 text-[10px] text-white/90 leading-tight [&_a]:pointer-events-auto">
+    <span className="pointer-events-none absolute right-1.5 bottom-1.5 z-10 rounded bg-black/55 px-1.5 py-0.5 text-white text-xs leading-tight [&_a]:pointer-events-auto">
       {label}
     </span>
   );

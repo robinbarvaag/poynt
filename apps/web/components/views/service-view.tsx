@@ -56,7 +56,8 @@ export function ServiceView({ service, cta }: ServiceViewProps) {
                 alt={image.alt || service.name}
                 fill
                 className="object-cover"
-                priority
+                loading="eager"
+                fetchPriority="high"
               />
               <MediaCredit media={image} />
             </div>

@@ -74,7 +74,7 @@ export function PathCard({
   className,
 }: PathCardProps) {
   const tinted = surface !== "default";
-  const mutedClass = tinted ? "text-current/75" : "text-muted-foreground";
+  const mutedClass = tinted ? "text-current" : "text-muted-foreground";
   const accentClass = tinted ? "text-current" : "text-primary";
 
   return (
@@ -112,9 +112,9 @@ export function PathCard({
           </div>
         )}
 
-        <h3 className="font-bold font-heading text-2xl leading-tight tracking-tight sm:text-3xl md:text-4xl">
+        <h2 className="font-bold font-heading text-2xl leading-tight tracking-tight sm:text-3xl md:text-4xl">
           {title}
-        </h3>
+        </h2>
 
         {description && (
           <p

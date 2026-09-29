@@ -2,7 +2,7 @@ import type * as React from "react";
 import { UILink } from "../../lib/link";
 import { cn } from "../../lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "../avatar";
-import { Card } from "../card";
+import { Card, cardMutedText } from "../card";
 
 export type BlogSurface =
   | "default"
@@ -63,12 +63,20 @@ function Meta({
   authorName,
   authorAvatarUrl,
   date,
-}: Pick<BlogCardProps, "authorName" | "authorAvatarUrl" | "date">) {
+  surface,
+}: Pick<BlogCardProps, "authorName" | "authorAvatarUrl" | "date"> & {
+  surface: BlogSurface;
+}) {
   if (!(authorName || date)) {
     return null;
   }
   return (
-    <div className="mt-auto flex items-center gap-2 pt-5 text-current/70 text-sm">
+    <div
+      className={cn(
+        "mt-auto flex items-center gap-2 pt-5 text-sm",
+        cardMutedText[surface]
+      )}
+    >
       {authorName && (
         <Avatar className="size-6 ring-1 ring-current/10">
           {authorAvatarUrl && (
@@ -83,6 +91,7 @@ function Meta({
         <span className="font-medium text-current">{authorName}</span>
       )}
       {authorName && date && (
+        // design-unntak: dekorativ skilletegn-prikk
         <span aria-hidden="true" className="opacity-50">
           ·
         </span>
@@ -131,7 +140,8 @@ export function BlogCard({
       {excerpt && (
         <p
           className={cn(
-            "text-current/75 leading-relaxed",
+            "leading-relaxed",
+            cardMutedText[surface],
             featured ? "line-clamp-3 md:text-lg" : "line-clamp-3",
             !image && !featured && "line-clamp-5"
           )}
@@ -144,6 +154,7 @@ export function BlogCard({
         authorName={authorName}
         authorAvatarUrl={authorAvatarUrl}
         date={date}
+        surface={surface}
       />
     </div>
   );

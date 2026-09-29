@@ -61,6 +61,7 @@ export function BrandHeader({
             className="size-full object-contain p-2"
           />
         ) : (
+          // design-unntak: dekorativt plassholderikon uten tekst
           <Icon name="image" className="size-8 opacity-40" />
         )}
       </div>
@@ -69,12 +70,7 @@ export function BrandHeader({
           {name}
         </h2>
         {tagline && (
-          <p
-            className={cn(
-              "text-lg",
-              onDark ? "opacity-90" : "text-muted-foreground"
-            )}
-          >
+          <p className={cn("text-lg", !onDark && "text-muted-foreground")}>
             {tagline}
           </p>
         )}

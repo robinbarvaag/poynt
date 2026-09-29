@@ -1,7 +1,7 @@
 import type * as React from "react";
 import { UILink } from "../../lib/link";
 import { cn } from "../../lib/utils";
-import { Card } from "../card";
+import { Card, cardMutedText } from "../card";
 
 export type GuideCardSurface =
   | "default"
@@ -83,14 +83,19 @@ export function GuideCard({
           </h3>
 
           {lede && (
-            <p className="line-clamp-3 text-current/75 leading-relaxed">
+            <p
+              className={cn(
+                "line-clamp-3 leading-relaxed",
+                cardMutedText[surface]
+              )}
+            >
               {lede}
             </p>
           )}
 
           <span
             aria-hidden="true"
-            className="mt-auto inline-flex items-center gap-1 pt-2 font-medium text-sm opacity-70 transition-opacity group-hover/guide:opacity-100"
+            className="mt-auto inline-flex items-center gap-1 pt-2 font-medium text-sm"
           >
             Les guide
             <span className="transition-transform duration-300 group-hover/guide:translate-x-1">

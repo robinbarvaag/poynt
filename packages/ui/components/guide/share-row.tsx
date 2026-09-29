@@ -41,7 +41,7 @@ export function ShareRow({ actions, iconOnly, className }: ShareRowProps) {
             type={action.href ? undefined : "button"}
             aria-label={iconOnly ? action.label : undefined}
             className={cn(
-              "inline-flex items-center gap-2 rounded-full bg-foreground/[0.04] font-medium text-foreground/70 text-sm ring-1 ring-foreground/10 transition-colors hover:bg-foreground/[0.07] hover:text-foreground",
+              "inline-flex items-center gap-2 rounded-full bg-foreground/[0.04] font-medium text-muted-foreground text-sm ring-1 ring-foreground/10 transition-colors hover:bg-foreground/[0.07] hover:text-foreground",
               iconOnly ? "size-9 justify-center" : "px-4 py-2"
             )}
           >
