@@ -19,8 +19,10 @@ export const Newsletters: CollectionConfig = {
     description:
       "Skriv nyhetsbrevet her, send en test til deg selv, og send så til alle abonnenter.",
     components: {
-      // Intro-boks over lista: hvordan skrive, teste og sende.
+      // Over lista: abonnent-statistikk (Resend + samtykkeloggen) og en
+      // intro-boks om hvordan skrive, teste og sende.
       beforeListTable: [
+        "/admin/components/newsletters/newsletter-stats#NewsletterStats",
         "/admin/components/newsletters/newsletter-intro#NewsletterIntro",
       ],
     },

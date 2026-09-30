@@ -126,6 +126,7 @@ export {
   type ServiceShowcaseItem,
   type ServiceShowcaseLinkProps,
   ServiceShowcaseModal,
+  ServiceShowcasePanelBody,
   type ServiceShowcaseModalProps,
   type ServiceShowcaseProps,
 } from "./service-showcase";

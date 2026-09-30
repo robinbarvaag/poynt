@@ -330,6 +330,7 @@ async function handleProductPurchase(session: Stripe.Checkout.Session) {
       consentText: NEWSLETTER_CONSENT_TEXTS.checkout,
       path: "/handlekurv",
       reference: session.id,
+      name: session.customer_details?.name,
     });
     if (!result.success) {
       console.error("Nyhetsbrev-påmelding feilet:", result.error);

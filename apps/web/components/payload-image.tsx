@@ -27,6 +27,12 @@ export type MediaResource = {
   /** Lenke til kilden (fotografprofil / Giphy-side) for krediteringen. */
   sourceUrl?: string | null;
   /**
+   * Redaktørens valg «Vis hele bildet»: grafikk/logo/bilde med tekst som
+   * aldri skal beskjæres. `<PayloadImage>` bytter da `object-cover` med
+   * `object-contain`, så alle rammer (kort, modal, hero) viser hele bildet.
+   */
+  showWhole?: boolean | null;
+  /**
    * Genererte bildestørrelser fra Payload (`upload.imageSizes`). `large`
    * (maks 2400 px bred, webp) foretrekkes som `src` av `<PayloadImage>`; `og`
    * (1200×630-beskjæring) brukes til delingskort. Nevnte nøkler holder typen
@@ -119,6 +125,7 @@ export function PayloadImage({
   fill,
   width,
   height,
+  className,
   ...rest
 }: PayloadImageProps) {
   const resource = asResource(media);
@@ -130,10 +137,18 @@ export function PayloadImage({
 
   const resolvedAlt = alt ?? resource.alt ?? "";
 
-  // Fokuspunkt → object-position. Slår kun inn med object-cover/contain, men er
+  // «Vis hele bildet» (grafikk/logo/tekst): aldri beskjær. Kallstedene ber om
+  // `object-cover` — vi bytter til `object-contain` med litt luft, sentrert,
+  // så valget gjelder i alle rammer uten at hvert kallsted må vite om det.
+  const showWhole = resource.showWhole === true;
+  const resolvedClassName = showWhole
+    ? `${(className ?? "").replace(/\bobject-cover\b/g, "object-contain")} p-3`
+    : className;
+
+  // Fokuspunkt → object-position. Slår kun inn med object-cover, men er
   // ufarlig ellers. Kallstedets egen `style` vinner ved konflikt.
   const mergedStyle =
-    resource.focalX != null && resource.focalY != null
+    !showWhole && resource.focalX != null && resource.focalY != null
       ? {
           objectPosition: `${resource.focalX}% ${resource.focalY}%`,
           ...style,
@@ -157,6 +172,7 @@ export function PayloadImage({
     <NextImage
       src={src}
       alt={resolvedAlt}
+      className={resolvedClassName}
       style={mergedStyle}
       {...blur}
       {...dimensionProps}

@@ -44,6 +44,7 @@ import { FolderField as FolderField_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@pa
 import { MediaGrid as MediaGrid_4d358dd7a2279418b0f1ab6d4d5dc013 } from '../../../admin/components/media/media-grid'
 import { NewsletterPreview as NewsletterPreview_34919c8e80fce11b54833d79b19e2329 } from '../../../admin/components/newsletters/newsletter-preview'
 import { SendNewsletterPanel as SendNewsletterPanel_75d3fa918eb52ceef0f5f7d7e08ab991 } from '../../../admin/components/newsletters/send-newsletter-panel'
+import { NewsletterStats as NewsletterStats_f7959b0d568cee8c0c34aa29b017b839 } from '../../../admin/components/newsletters/newsletter-stats'
 import { NewsletterIntro as NewsletterIntro_e9d62145d2e1672a2188efe4769c5893 } from '../../../admin/components/newsletters/newsletter-intro'
 import { EmailTemplatePreview as EmailTemplatePreview_3c8f61e6f3f8a73cafef53b9dcdb32b6 } from '../../../admin/components/email-templates/email-template-preview'
 import { BookmarkOgFetch as BookmarkOgFetch_62526a99516db3c8451d3b97a5d7d286 } from '../../../admin/components/guides/bookmark-og-fetch'
@@ -127,6 +128,7 @@ export const importMap = {
   "/admin/components/media/media-grid#MediaGrid": MediaGrid_4d358dd7a2279418b0f1ab6d4d5dc013,
   "/admin/components/newsletters/newsletter-preview#NewsletterPreview": NewsletterPreview_34919c8e80fce11b54833d79b19e2329,
   "/admin/components/newsletters/send-newsletter-panel#SendNewsletterPanel": SendNewsletterPanel_75d3fa918eb52ceef0f5f7d7e08ab991,
+  "/admin/components/newsletters/newsletter-stats#NewsletterStats": NewsletterStats_f7959b0d568cee8c0c34aa29b017b839,
   "/admin/components/newsletters/newsletter-intro#NewsletterIntro": NewsletterIntro_e9d62145d2e1672a2188efe4769c5893,
   "/admin/components/email-templates/email-template-preview#EmailTemplatePreview": EmailTemplatePreview_3c8f61e6f3f8a73cafef53b9dcdb32b6,
   "/admin/components/guides/bookmark-og-fetch#BookmarkOgFetch": BookmarkOgFetch_62526a99516db3c8451d3b97a5d7d286,

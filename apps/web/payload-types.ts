@@ -364,6 +364,10 @@ export interface Media {
    * Beskrivelse av bildet for skjermlesere og SEO. Fylles ut automatisk når du laster opp et nytt bilde — les gjerne over og juster. Trykk «Foreslå alt-tekst» for et nytt forslag.
    */
   alt?: string | null;
+  /**
+   * Slå på for grafikk, logoer og bilder med tekst i. Da vises hele bildet med luft rundt i stedet for å bli beskåret til rammen. Vanlige foto lar du stå av — de beskjæres pent rundt fokuspunktet du setter i bildet.
+   */
+  showWhole?: boolean | null;
   blurDataURL?: string | null;
   contentHash?: string | null;
   perceptualHash?: string | null;
@@ -2596,7 +2600,7 @@ export interface Newsletter {
   createdAt: string;
 }
 /**
- * Registreres automatisk ved hver påmelding til nyhetsbrevet. Dokumenterer samtykket — ikke rediger. Avmeldinger håndteres i Resend. Ved krav om sletting: slett radene for e-posten her og kontakten i Resend.
+ * Loggen over alle påmeldinger til nyhetsbrevet — hvem, når, hvor og hvilken tekst de sa ja til. Fylles automatisk; ikke rediger. Avmeldinger håndteres i Resend. Ved krav om sletting: slett radene for e-posten her og kontakten i Resend.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "newsletter-consents".
@@ -4734,6 +4738,7 @@ export interface CategoriesSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  showWhole?: T;
   blurDataURL?: T;
   contentHash?: T;
   perceptualHash?: T;

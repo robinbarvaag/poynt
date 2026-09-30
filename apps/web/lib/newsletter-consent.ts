@@ -22,15 +22,20 @@ export async function subscribeWithConsent({
   consentText,
   path,
   reference,
+  name,
 }: {
   email: string;
   source: NewsletterConsentSource;
   consentText: string;
   path?: string;
   reference?: string | number;
+  /** Fullt navn når vi har det (utsjekk, event, venteliste) — lagres i Resend. */
+  name?: string | null;
 }): Promise<{ success: boolean; error?: string }> {
   const normalized = email.trim().toLowerCase();
   const payload = await getPayload({ config });
+  const sourceLabel =
+    NEWSLETTER_CONSENT_SOURCES.find((s) => s.value === source)?.label ?? source;
 
   const logId = await payload
     .create({
@@ -51,8 +56,17 @@ export async function subscribeWithConsent({
       return null;
     });
 
+  // Navn deles i fornavn/etternavn slik Resend lagrer det.
+  const [firstName, ...rest] = (name ?? "").trim().split(/\s+/).filter(Boolean);
+  const lastName = rest.join(" ") || undefined;
+
   const result: Awaited<ReturnType<typeof subscribeToNewsletter>> =
-    await subscribeToNewsletter(normalized).catch((error: unknown) => ({
+    await subscribeToNewsletter(normalized, {
+      source: sourceLabel,
+      path,
+      firstName,
+      lastName,
+    }).catch((error: unknown) => ({
       success: false,
       error: String(error),
     }));
@@ -78,9 +92,7 @@ export async function subscribeWithConsent({
       await sendNewsletterSignupNotification({
         to: await getNotificationEmails(),
         email: normalized,
-        source:
-          NEWSLETTER_CONSENT_SOURCES.find((s) => s.value === source)?.label ??
-          source,
+        source: sourceLabel,
       });
     } catch (error) {
       console.error("Nyhetsbrev-varsel feilet:", error);

@@ -1,4 +1,4 @@
-import { getResend } from "@poynt/email";
+import { listAllNewsletterContacts } from "@poynt/email";
 import { db, eq } from "@poynt/planner-db";
 import {
   plannerMembershipApplication,
@@ -211,27 +211,23 @@ export async function getContactsOverview(
     );
   }
 
-  // 5) Nyhetsbrevlista i Resend — første gang den er synlig i admin.
+  // 5) Nyhetsbrevlista i Resend — hele lista, paginert (standard-kallet gir
+  //    bare 20 kontakter).
   let newsletterAvailable = false;
   if (process.env.RESEND_API_KEY) {
     try {
-      const audienceId = process.env.RESEND_AUDIENCE_ID;
-      const result = await getResend().contacts.list(
-        audienceId ? { audienceId } : undefined
-      );
-      if (!result.error) {
-        newsletterAvailable = true;
-        for (const contact of result.data?.data ?? []) {
-          if (contact.unsubscribed) continue;
-          const row = rowFor(
-            contact.email,
-            [contact.first_name, contact.last_name].filter(Boolean).join(" ") ||
-              undefined
-          );
-          if (!row) continue;
-          row.newsletter = true;
-          row.lastActivity = later(row.lastActivity, contact.created_at);
-        }
+      const contacts = await listAllNewsletterContacts();
+      newsletterAvailable = true;
+      for (const contact of contacts) {
+        if (contact.unsubscribed) continue;
+        const row = rowFor(
+          contact.email,
+          [contact.firstName, contact.lastName].filter(Boolean).join(" ") ||
+            undefined
+        );
+        if (!row) continue;
+        row.newsletter = true;
+        row.lastActivity = later(row.lastActivity, contact.createdAt);
       }
     } catch (error) {
       console.error("Kontakter: klarte ikke hente Resend-lista:", error);

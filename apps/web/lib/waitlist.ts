@@ -84,6 +84,7 @@ export async function handleWaitlistSubmission({
       source: "waitlist",
       consentText: `${NEWSLETTER_CONSENT_TEXTS.waitlist}: «${formTitle}»`,
       reference: formId,
+      name,
     });
     if (!result.success) {
       req.payload.logger.error(

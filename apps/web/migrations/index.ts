@@ -84,6 +84,7 @@ import * as migration_20260922_200457 from './20260922_200457';
 import * as migration_20260922_203059 from './20260922_203059';
 import * as migration_20260922_212025 from './20260922_212025';
 import * as migration_20260930_171853_norli_presale from './20260930_171853_norli_presale';
+import * as migration_20260930_205838_media_show_whole from './20260930_205838_media_show_whole';
 
 export const migrations = [
   {
@@ -514,6 +515,11 @@ export const migrations = [
   {
     up: migration_20260930_171853_norli_presale.up,
     down: migration_20260930_171853_norli_presale.down,
-    name: '20260930_171853_norli_presale'
+    name: '20260930_171853_norli_presale',
+  },
+  {
+    up: migration_20260930_205838_media_show_whole.up,
+    down: migration_20260930_205838_media_show_whole.down,
+    name: '20260930_205838_media_show_whole'
   },
 ];

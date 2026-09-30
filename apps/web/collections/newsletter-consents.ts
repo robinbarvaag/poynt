@@ -16,9 +16,11 @@ export const NewsletterConsents: CollectionConfig = {
   admin: {
     useAsTitle: "email",
     defaultColumns: ["email", "source", "subscribed", "createdAt"],
-    group: "Kommunikasjon",
+    // Ikke i sidemenyen — nås via statistikkpanelet på Nyhetsbrev (samme
+    // mønster som On Poynt-samlingene: group: false + egne lenker).
+    group: false,
     description:
-      "Registreres automatisk ved hver påmelding til nyhetsbrevet. Dokumenterer samtykket — ikke rediger. Avmeldinger håndteres i Resend. Ved krav om sletting: slett radene for e-posten her og kontakten i Resend.",
+      "Loggen over alle påmeldinger til nyhetsbrevet — hvem, når, hvor og hvilken tekst de sa ja til. Fylles automatisk; ikke rediger. Avmeldinger håndteres i Resend. Ved krav om sletting: slett radene for e-posten her og kontakten i Resend.",
   },
   access: {
     create: () => false,

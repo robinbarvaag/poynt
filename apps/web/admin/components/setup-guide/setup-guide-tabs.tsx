@@ -568,8 +568,13 @@ const ChecklistTab = ({ env }: { env: EnvStatus }) => (
             retur-URL-er og webhook-registrering bygges av denne
           </li>
           <li>
-            Verifiser Resend-domenet og sett riktig avsenderadresse, ellers
-            havner kvitteringer i søppelpost (eller sendes ikke)
+            Verifiser Resend-domenet og sett riktig avsenderadresse (
+            <code>EMAIL_FROM</code>), ellers havner kvitteringer i søppelpost
+            (eller sendes ikke). Bruk en adresse noen leser, ikke «no-reply» —
+            innboksene stoler mindre på enveis-adresser. Når nyhetsbrevlista
+            vokser: send nyhetsbrev fra et eget underdomene (f.eks.{" "}
+            <code>nyhetsbrev.poynt.no</code>) så eventuelle spam-klager ikke
+            rammer kvitteringer og billetter
           </li>
           <li>Gjør et ekte kjøp med lite beløp som siste sjekk</li>
         </ol>

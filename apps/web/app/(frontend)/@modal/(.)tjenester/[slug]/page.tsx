@@ -1,5 +1,6 @@
 import { RichText } from "@/components/rich-text";
 import { ServiceModal } from "@/components/service-modal";
+import { ServiceModalPreview } from "@/components/service-modal-preview";
 import { resolveMedia } from "@/lib/payload";
 import { formatServicePrice, withContactSource } from "@/lib/service";
 import config from "@/payload.config";
@@ -13,9 +14,9 @@ interface ModalPageProps {
 
 /**
  * Intercepting-route: fanger opp klient-navigasjon til /tjenester/[slug] og
- * viser tjenesten i et modal oppå siden brukeren står på (med delt
- * layout-animasjon fra kortet der det finnes). Ved refresh/direktelenke — og
- * for crawlere — faller man gjennom til den fulle tjenestesiden i stedet.
+ * viser tjenesten i et modal oppå siden brukeren står på. Ved
+ * refresh/direktelenke — og for crawlere — faller man gjennom til den fulle
+ * tjenestesiden i stedet.
  */
 async function getService(slug: string) {
   "use cache";
@@ -41,8 +42,11 @@ async function getService(slug: string) {
 export default function InterceptedServicePage({ params }: ModalPageProps) {
   // params er runtime-data i en intercepting-route (ingen statiske params) —
   // les dem bak en Suspense-grense slik at navigasjonen forblir instant.
+  // Fallbacken er selve modal-skallet med kortets data (fra klient-cachen),
+  // så brukeren får respons i samme øyeblikk som klikket — ikke først når
+  // serveren har svart.
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<ServiceModalPreview />}>
       <ServiceModalLoader params={params} />
     </Suspense>
   );
@@ -66,6 +70,7 @@ async function ServiceModalLoader({
 
   return (
     <ServiceModal
+      slug={slug}
       service={{
         id: service.id,
         name: service.name,

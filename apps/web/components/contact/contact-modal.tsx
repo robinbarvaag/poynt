@@ -29,6 +29,7 @@ export function ContactModal({ form, subject, image }: ContactModalProps) {
   return (
     <ShowcaseModal
       onClosed={() => router.back()}
+      onDeferredNavigate={(href) => router.push(href, { scroll: false })}
       ariaLabel={heading}
       imageClassName="aspect-[21/9]"
       image={

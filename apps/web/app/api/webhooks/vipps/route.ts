@@ -250,7 +250,9 @@ export async function POST(req: NextRequest) {
             email,
             source: "checkout",
             consentText: NEWSLETTER_CONSENT_TEXTS.checkout,
+            path: "/handlekurv",
             reference: order.id,
+            name: order.customerName,
           });
           if (!result.success) {
             console.error("Nyhetsbrev-påmelding feilet:", result.error);

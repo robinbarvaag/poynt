@@ -236,6 +236,16 @@ export const Media: CollectionConfig = {
         },
       },
     },
+    {
+      name: "showWhole",
+      type: "checkbox",
+      label: "Vis hele bildet (ikke beskjær)",
+      defaultValue: false,
+      admin: {
+        description:
+          "Slå på for grafikk, logoer og bilder med tekst i. Da vises hele bildet med luft rundt i stedet for å bli beskåret til rammen. Vanlige foto lar du stå av — de beskjæres pent rundt fokuspunktet du setter i bildet.",
+      },
+    },
     // Base64 LQIP generert av beforeChange-hooken over. Leses av
     // `<PayloadImage>` (placeholder="blur"). Skjult i admin — ren base64-grøt.
     {

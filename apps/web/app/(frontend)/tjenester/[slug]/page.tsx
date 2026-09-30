@@ -26,7 +26,7 @@ async function getServicePageData(slug: string) {
 
   const payload = await getPayload({ config });
 
-  const [services, servicesPage] = await Promise.all([
+  const [services, servicesPage, others] = await Promise.all([
     payload.find({
       collection: "services",
       where: {
@@ -38,9 +38,25 @@ async function getServicePageData(slug: string) {
       limit: 1,
     }),
     payload.findGlobal({ slug: "servicespage" }),
+    // «Andre tjenester» nederst: de neste i partnerens rekkefølge.
+    payload.find({
+      collection: "services",
+      where: {
+        slug: { not_equals: slug },
+        active: { equals: true },
+        _status: { equals: "published" },
+      },
+      sort: "sortOrder",
+      depth: 1,
+      limit: 3,
+    }),
   ]);
 
-  return { service: services.docs[0] || null, servicesPage };
+  return {
+    service: services.docs[0] || null,
+    servicesPage,
+    related: others.docs,
+  };
 }
 
 export async function generateMetadata({
@@ -65,7 +81,7 @@ export async function generateMetadata({
 
 export default async function ServiceDetailPage({ params }: ServicePageProps) {
   const { slug } = await params;
-  const { service, servicesPage } = await getServicePageData(slug);
+  const { service, servicesPage, related } = await getServicePageData(slug);
   if (!service) {
     notFound();
   }
@@ -95,7 +111,11 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
         singular="tjeneste"
       />
       <JsonLd data={jsonLd} />
-      <ServiceView service={service} cta={servicesPage?.detailCta} />
+      <ServiceView
+        service={service}
+        cta={servicesPage?.detailCta}
+        related={related}
+      />
     </>
   );
 }

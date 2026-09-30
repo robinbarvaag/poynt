@@ -127,11 +127,20 @@ function CardBody({
   );
 }
 
+/**
+ * Kortflaten. Kun `transform` og `box-shadow` animeres, og kortet svarer på
+ * trykk med et lite skaleringsdytt — så brukeren ser at klikket ble hørt selv
+ * om innholdet bruker et øyeblikk på å komme.
+ */
 const cardShellClasses =
-  "group flex h-full w-full cursor-pointer flex-col overflow-hidden rounded-3xl bg-card text-left shadow-sm ring-1 ring-foreground/10 transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary";
+  "group flex h-full w-full cursor-pointer flex-col overflow-hidden rounded-3xl bg-card text-left shadow-sm ring-1 ring-foreground/10 transition-[transform,box-shadow] duration-200 ease-out hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-safe:active:scale-[0.98]";
 
-/** Tekst- og CTA-innholdet i det åpne panelet — delt mellom variantene. */
-function PanelBody({
+/**
+ * Tekst- og CTA-innholdet i det åpne panelet — delt mellom variantene, og
+ * eksportert så en forhåndsvisning (Suspense-fallback) kan vise nøyaktig
+ * samme innhold mens det ekte panelet laster.
+ */
+export function ServiceShowcasePanelBody({
   service,
   ctaLinkComponent: CtaLink,
 }: {
@@ -191,10 +200,12 @@ export interface ServiceShowcaseGridProps {
 
 /**
  * Rute-drevet variant av tjeneste-oversikten: hvert kort er en ekte lenke
- * (crawlbar, delbar) i stedet for en knapp med lokal stat. Kortene bærer samme
- * `layoutId` som `ServiceShowcaseModal`, så når lenken fanges av en
- * intercepting-route og modalet monteres, «zoomer» kortet åpent via delt
- * layout-animasjon — samme lekenhet som den stat-drevne `ServiceShowcase`.
+ * (crawlbar, delbar) i stedet for en knapp med lokal stat. Klient-navigasjon
+ * fanges av en intercepting-route som monterer `ServiceShowcaseModal`.
+ *
+ * Kortene har bevisst ingen delt layout-morph mot modalet: framer-motion
+ * måtte da måle og projisere alle kortene på hovedtråden i samme øyeblikk som
+ * Next laster rute-innholdet, og det droppet bilder (tydeligst i Safari).
  */
 export function ServiceShowcaseGrid({
   services,
@@ -224,16 +235,7 @@ export function ServiceShowcaseGrid({
             key={service.id}
             className={cn("h-full", isFeatured && "sm:col-span-2")}
           >
-            <motion.div
-              layoutId={`service-${service.id}`}
-              className="h-full overflow-hidden rounded-3xl"
-            >
-              {LinkComp ? (
-                <LinkComp {...linkProps} />
-              ) : (
-                <UILink {...linkProps} />
-              )}
-            </motion.div>
+            {LinkComp ? <LinkComp {...linkProps} /> : <UILink {...linkProps} />}
           </li>
         );
       })}
@@ -249,26 +251,36 @@ export interface ServiceShowcaseModalProps {
    */
   onClosed: () => void;
   ctaLinkComponent?: React.ComponentType<ServiceShowcaseLinkProps>;
+  /** Se `ShowcaseModal`: hopp over inn-animasjonen (skallet står alt der). */
+  skipEnter?: boolean;
+  /** Se `ShowcaseModal`: utsatt navigasjon for klikk under lukking. */
+  onDeferredNavigate?: (href: string) => void;
 }
 
 /**
  * Det åpne tjenestepanelet som frittstående modal, ment for en
- * intercepting-route (`@modal/(.)tjenester/[slug]`). Deler `layoutId` med
- * kortene i `ServiceShowcaseGrid` — se `ShowcaseModal` for skall-oppførselen.
+ * intercepting-route (`@modal/(.)tjenester/[slug]`). Se `ShowcaseModal` for
+ * skall-oppførselen.
  */
 export function ServiceShowcaseModal({
   service,
   onClosed,
   ctaLinkComponent,
+  skipEnter,
+  onDeferredNavigate,
 }: ServiceShowcaseModalProps) {
   return (
     <ShowcaseModal
       onClosed={onClosed}
       ariaLabel={service.name}
       image={service.image}
-      layoutId={`service-${service.id}`}
+      skipEnter={skipEnter}
+      onDeferredNavigate={onDeferredNavigate}
     >
-      <PanelBody service={service} ctaLinkComponent={ctaLinkComponent} />
+      <ServiceShowcasePanelBody
+        service={service}
+        ctaLinkComponent={ctaLinkComponent}
+      />
     </ShowcaseModal>
   );
 }
@@ -356,7 +368,7 @@ export function ServiceShowcase({
               </button>
 
               <PanelFade>
-                <PanelBody
+                <ServiceShowcasePanelBody
                   service={active}
                   ctaLinkComponent={ctaLinkComponent}
                 />

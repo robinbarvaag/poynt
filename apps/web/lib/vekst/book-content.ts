@@ -152,54 +152,50 @@ export const VEKST_PILLARS: VekstPillar[] = [
 
 export const MYTHS: Myth[] = [
   {
-    lie: "Det er kult å være travel",
+    lie: "Du er kul hvis du er travel",
     truth:
-      "Tiden er den viktigste valutaen din. Å være travel betyr ikke at du skaper verdifull vekst.",
+      "Det er ikke kult å være travel. Tiden din er det mest verdifulle du har.",
   },
   {
     lie: "Du må ta flere kurs",
     truth:
-      "Du kan sannsynligvis nok til å komme i gang. Bruk tida på å gjennomføre det du allerede kan.",
+      "Du har allerede mye kunnskap og erfaring, du trenger ikke enda et kurs.",
   },
   {
     lie: "Du må bare tenke positivt",
-    truth:
-      "Positiv tenkning holder ikke alene. Den må kombineres med handling, tall og vilje til å se ting som de er.",
+    truth: "Pågangsmot og gjennomføringsevne er viktig for suksess.",
   },
   {
     lie: "Du må alltid vite hva konkurrentene dine gjør",
     truth:
-      "Bruk energien på din egen visjon og din egen vekst, ikke på å følge med på alle andre.",
+      "Det kan bremse veksten din om du bruker for mye tid på konkurrenter.",
   },
   {
-    lie: "Et hull i markedet er et rødt flagg",
-    truth:
-      "Et hull i markedet kan være en mulighet, så lenge det er lønnsomt og passer med visjonen din.",
+    lie: "Du må passe deg for hull i markedet",
+    truth: "Et hull i markedet kan ofte være en mulighet og en invitasjon.",
   },
   {
-    lie: "Alle kan mer om KI enn deg",
-    truth:
-      "Nysgjerrighet betyr mer enn å være ekspert. Start med å prøve én ting denne uka.",
+    lie: "Du henger bakpå med KI",
+    truth: "Du henger ikke bakpå. Du sammenligner deg med feil folk.",
   },
   {
-    lie: "Du må jobbe gratis",
+    lie: "Du burde jobbe gratis",
     truth:
-      "Tida di har verdi. Å gi bort arbeid for å være snill er ikke bærekraftig, verken for deg eller bedriften.",
+      "Du skal ikke jobbe gratis, og du skal heller ikke få andre til å jobbe gratis for deg.",
   },
   {
-    lie: "Vi er likestilte i Norge",
+    lie: "Du må gjøre alt helt ferdig",
     truth:
-      "Likestilling i arbeidslivet kommer ikke av seg selv. Ofte må du være bevisst og aktiv for å få den.",
+      "Det er bedre å lansere noe som mangler en liten detalj, enn å ha et produkt som er 99 % ferdig, liggende i en skuff.",
   },
   {
-    lie: "Det er ingen som hjelper deg",
+    lie: "Du må klare deg selv",
     truth:
-      "Det finnes mentorer, nettverk og folk som gjerne hjelper. Men du må ofte spørre først.",
+      "Folk har lyst til å hjelpe, men de kan ikke hjelpe deg hvis de ikke vet at du trenger hjelp.",
   },
   {
-    lie: "Det er umulig å ta ferie",
-    truth:
-      "Med planlegging og delegering kan du ta ferie uten at bedriften faller sammen. Jeg hadde fri hver fredag i ti år.",
+    lie: "Du kan aldri ta ferie",
+    truth: "Ferie er nødvendig og kan være lønnsomt.",
   },
 ];
 

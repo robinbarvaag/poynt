@@ -249,6 +249,7 @@ export async function subscribeFromEvent(
       consentText: `${NEWSLETTER_CONSENT_TEXTS.event} (Påmelding til event: «${event.title}»)`,
       path: `/eventer/${event.slug}`,
       reference: `event:${event.id}`,
+      name: registration.name,
     });
     if (!result.success) {
       console.error(`Nyhetsbrev fra event feilet: ${result.error}`);

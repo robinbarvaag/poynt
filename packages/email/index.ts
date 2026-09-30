@@ -435,9 +435,83 @@ export async function resolveTemplateSubject(
 }
 
 /**
- * Subscribe an email to the newsletter audience in Resend
+ * Egenskapene vi lagrer på hver kontakt i Resend, i tillegg til e-post og navn.
+ * Gjør at partneren kan se i Resend-dashbordet hvor folk meldte seg på, og
+ * kan brukes som flettefelt i broadcasts ({{{contact.kilde}}}). Resend krever
+ * at egenskapene er opprettet før de brukes på en kontakt — se
+ * ensureContactProperties().
  */
-export async function subscribeToNewsletter(email: string): Promise<{
+export const NEWSLETTER_CONTACT_PROPERTIES = [
+  { key: "kilde", type: "string" },
+  { key: "side", type: "string" },
+  { key: "pameldt", type: "string" },
+] as const;
+
+export interface NewsletterContactMeta {
+  /** Lesbar kilde, f.eks. «Kvitteringsside». */
+  source?: string;
+  /** Sti på nettstedet der påmeldingen skjedde. */
+  path?: string;
+  firstName?: string;
+  lastName?: string;
+}
+
+let contactPropertiesReady: Promise<boolean> | null = null;
+
+/**
+ * Opprett kontaktegenskapene i Resend hvis de mangler. Kjøres én gang per
+ * prosess og huskes; feiler den, sender vi kontakten uten egenskaper heller
+ * enn å velte påmeldingen.
+ */
+export function ensureContactProperties(): Promise<boolean> {
+  if (!contactPropertiesReady) {
+    contactPropertiesReady = (async () => {
+      const resend = getResend();
+      const existing = await resend.contactProperties.list({ limit: 100 });
+      if (existing.error) throw new Error(existing.error.message);
+      const keys = new Set(existing.data?.data.map((p) => p.key) ?? []);
+      for (const property of NEWSLETTER_CONTACT_PROPERTIES) {
+        if (keys.has(property.key)) continue;
+        const created = await resend.contactProperties.create({
+          key: property.key,
+          type: property.type,
+        });
+        if (created.error && !created.error.message?.includes("already")) {
+          throw new Error(created.error.message);
+        }
+      }
+      return true;
+    })().catch((error: unknown) => {
+      console.error("Kunne ikke opprette kontaktegenskaper i Resend:", error);
+      contactPropertiesReady = null;
+      return false;
+    });
+  }
+  return contactPropertiesReady;
+}
+
+/** Bygg `properties`-objektet for create/update, kun med felt som har verdi. */
+async function contactPropertiesFor(
+  meta: NewsletterContactMeta | undefined
+): Promise<Record<string, string> | undefined> {
+  if (!meta?.source && !meta?.path) return undefined;
+  if (!(await ensureContactProperties())) return undefined;
+  const properties: Record<string, string> = {
+    pameldt: new Date().toISOString().slice(0, 10),
+  };
+  if (meta.source) properties.kilde = meta.source.slice(0, 200);
+  if (meta.path) properties.side = meta.path.slice(0, 200);
+  return properties;
+}
+
+/**
+ * Subscribe an email to the newsletter audience in Resend. `meta` (kilde, side,
+ * navn) legges på kontakten så den er synlig og filtrerbar i Resend.
+ */
+export async function subscribeToNewsletter(
+  email: string,
+  meta?: NewsletterContactMeta
+): Promise<{
   success: boolean;
   error?: string;
   /** Adressen var allerede aktiv abonnent — ingenting ble endret. */
@@ -463,10 +537,18 @@ export async function subscribeToNewsletter(email: string): Promise<{
       return { success: true, alreadySubscribed: true };
     }
 
+    const properties = await contactPropertiesFor(meta);
+    const names = {
+      ...(meta?.firstName && { firstName: meta.firstName.slice(0, 100) }),
+      ...(meta?.lastName && { lastName: meta.lastName.slice(0, 100) }),
+    };
+
     const result = await getResend().contacts.create({
       ...(audienceId && { audienceId }),
       email,
       unsubscribed: false,
+      ...names,
+      ...(properties && { properties }),
     });
 
     if (result.error) {
@@ -477,6 +559,8 @@ export async function subscribeToNewsletter(email: string): Promise<{
           ...(audienceId && { audienceId }),
           email,
           unsubscribed: false,
+          ...names,
+          ...(properties && { properties }),
         });
         if (update.error) {
           return { success: false, error: update.error.message };
@@ -494,6 +578,84 @@ export async function subscribeToNewsletter(email: string): Promise<{
       error: error instanceof Error ? error.message : "Ukjent feil",
     };
   }
+}
+
+export interface NewsletterContact {
+  id: string;
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
+  unsubscribed: boolean;
+  createdAt: string;
+}
+
+/**
+ * Hent HELE kontaktlista fra Resend. API-et gir maks 100 per side (standard
+ * 20!), så vi blar gjennom alle sidene. Kaster ved API-feil.
+ */
+export async function listAllNewsletterContacts(): Promise<
+  NewsletterContact[]
+> {
+  const audienceId = process.env.RESEND_AUDIENCE_ID;
+  const contacts: NewsletterContact[] = [];
+  let after: string | undefined;
+
+  // Sikkerhetsgrense: 200 sider à 100 = 20 000 kontakter.
+  for (let page = 0; page < 200; page += 1) {
+    const result = await getResend().contacts.list({
+      ...(audienceId && { audienceId }),
+      limit: 100,
+      ...(after && { after }),
+    });
+    if (result.error) throw new Error(result.error.message);
+    const batch = result.data?.data ?? [];
+    for (const contact of batch) {
+      contacts.push({
+        id: contact.id,
+        email: contact.email,
+        firstName: contact.first_name,
+        lastName: contact.last_name,
+        unsubscribed: contact.unsubscribed,
+        createdAt: contact.created_at,
+      });
+    }
+    const last = batch.at(-1);
+    if (!result.data?.has_more || !last) break;
+    after = last.id;
+  }
+
+  return contacts;
+}
+
+export interface NewsletterAudienceStats {
+  total: number;
+  subscribed: number;
+  unsubscribed: number;
+  /** Nye kontakter (opprettet) siste 7 / 30 dager. */
+  newLast7Days: number;
+  newLast30Days: number;
+}
+
+/** Tell opp kontaktlista i Resend. Kaster ved API-feil. */
+export async function getNewsletterAudienceStats(): Promise<NewsletterAudienceStats> {
+  const contacts = await listAllNewsletterContacts();
+  const now = Date.now();
+  const day = 24 * 60 * 60 * 1000;
+  const stats: NewsletterAudienceStats = {
+    total: contacts.length,
+    subscribed: 0,
+    unsubscribed: 0,
+    newLast7Days: 0,
+    newLast30Days: 0,
+  };
+  for (const contact of contacts) {
+    if (contact.unsubscribed) stats.unsubscribed += 1;
+    else stats.subscribed += 1;
+    const age = now - new Date(contact.createdAt).getTime();
+    if (age <= 7 * day) stats.newLast7Days += 1;
+    if (age <= 30 * day) stats.newLast30Days += 1;
+  }
+  return stats;
 }
 
 /**
@@ -561,15 +723,62 @@ export async function resolveBroadcastTarget(): Promise<
 > {
   const configured = process.env.RESEND_AUDIENCE_ID;
   if (configured) return { audienceId: configured };
+  if (process.env.RESEND_SEGMENT_ID) {
+    return { segmentId: process.env.RESEND_SEGMENT_ID };
+  }
 
   try {
     const segments = await getResend().segments.list();
-    const first = segments.data?.data?.[0];
-    return first ? { segmentId: first.id } : null;
+    // Test-segmentet (bare oss selv) skal ALDRI være mål for den ekte
+    // utsendingen, uansett rekkefølge fra API-et.
+    const candidates = (segments.data?.data ?? []).filter(
+      (s) => s.name !== NEWSLETTER_TEST_SEGMENT_NAME
+    );
+    if (candidates.length === 1) return { segmentId: candidates[0].id };
+    // Flere segmenter: bruk Resends standard («General»), ellers må målet
+    // pekes ut eksplisitt med RESEND_SEGMENT_ID.
+    const general = candidates.find((s) => s.name === "General");
+    if (general) return { segmentId: general.id };
+    if (candidates.length > 1) {
+      console.error(
+        `Flere Resend-segmenter (${candidates.map((s) => s.name).join(", ")}) — sett RESEND_SEGMENT_ID`
+      );
+    }
+    return null;
   } catch (error) {
     console.error("Klarte ikke hente Resend-segmenter:", error);
     return null;
   }
+}
+
+/** Opprett en broadcast med ferdig HTML og send den med én gang. */
+async function createAndSendBroadcast(params: {
+  target: { audienceId: string } | { segmentId: string };
+  subject: string;
+  name: string;
+  html: string;
+}): Promise<{ broadcastId: string }> {
+  const created = await getResend().broadcasts.create({
+    ...params.target,
+    from: buildFrom("Poynt"),
+    subject: params.subject,
+    html: params.html,
+    name: params.name,
+  });
+  if (created.error || !created.data) {
+    throw new Error(
+      `Kunne ikke opprette broadcast: ${created.error?.message ?? "ukjent feil"}`
+    );
+  }
+
+  const sent = await getResend().broadcasts.send(created.data.id);
+  if (sent.error) {
+    throw new Error(
+      `Kunne ikke sende broadcast: ${sent.error.message ?? "ukjent feil"}`
+    );
+  }
+
+  return { broadcastId: created.data.id };
 }
 
 /**
@@ -586,7 +795,7 @@ export async function sendNewsletterBroadcast(params: {
   const target = await resolveBroadcastTarget();
   if (!target) {
     throw new Error(
-      "Fant ingen mottakerliste i Resend — sjekk at kontoen har et segment (eller sett RESEND_AUDIENCE_ID)"
+      "Fant ingen mottakerliste i Resend — sjekk at kontoen har et segment (eller sett RESEND_SEGMENT_ID)"
     );
   }
 
@@ -596,27 +805,99 @@ export async function sendNewsletterBroadcast(params: {
     unsubscribeUrl: "{{{RESEND_UNSUBSCRIBE_URL}}}",
   });
 
-  const created = await getResend().broadcasts.create({
-    ...target,
-    from: buildFrom("Poynt"),
+  return createAndSendBroadcast({
+    target,
     subject: params.subject,
-    html,
     name: params.subject,
+    html,
   });
-  if (created.error || !created.data) {
+}
+
+/**
+ * Segmentet i Resend som bare inneholder oss selv, for å teste ekte
+ * broadcasts (avmeldingslenke, flettefelt, Resend-statistikk) uten å nå
+ * abonnentene. Opprettes automatisk ved første test-broadcast.
+ */
+export const NEWSLETTER_TEST_SEGMENT_NAME = "Test – kun oss";
+
+/**
+ * Send nyhetsbrevet som en EKTE Resend Broadcast, men bare til én adresse:
+ * kontakten legges i test-segmentet (opprettes ved behov) og broadcasten
+ * sendes dit. Adressen må være kontakt i Resend — er den ikke det fra før,
+ * opprettes den. En avmeldt kontakt får ikke e-post fra Resend uansett, så da
+ * stopper vi med en forklaring i stedet for å sende i blinde.
+ */
+export async function sendNewsletterTestBroadcast(params: {
+  to: string;
+  subject: string;
+  preview: string;
+  contentHtml: string;
+}): Promise<{ broadcastId: string }> {
+  const resend = getResend();
+  const email = params.to.trim().toLowerCase();
+
+  // 1) Kontakten.
+  let contactId: string | undefined;
+  const existing = await resend.contacts.get({ email });
+  if (existing.data) {
+    if (existing.data.unsubscribed) {
+      throw new Error(
+        `${email} står som avmeldt i Resend, så Resend vil ikke levere til den. Meld adressen på igjen i Resend (Contacts) og prøv på nytt.`
+      );
+    }
+    contactId = existing.data.id;
+  } else {
+    const created = await resend.contacts.create({
+      email,
+      unsubscribed: false,
+    });
+    if (created.error || !created.data) {
+      throw new Error(
+        `Kunne ikke legge ${email} inn som kontakt i Resend: ${created.error?.message ?? "ukjent feil"}`
+      );
+    }
+    contactId = created.data.id;
+  }
+
+  // 2) Test-segmentet.
+  const segments = await resend.segments.list();
+  if (segments.error) throw new Error(segments.error.message);
+  let segmentId = segments.data?.data.find(
+    (s) => s.name === NEWSLETTER_TEST_SEGMENT_NAME
+  )?.id;
+  if (!segmentId) {
+    const created = await resend.segments.create({
+      name: NEWSLETTER_TEST_SEGMENT_NAME,
+    });
+    if (created.error || !created.data) {
+      throw new Error(
+        `Kunne ikke opprette test-segmentet i Resend: ${created.error?.message ?? "ukjent feil"}`
+      );
+    }
+    segmentId = created.data.id;
+  }
+
+  // 3) Kontakten inn i segmentet (idempotent — «finnes fra før» er greit).
+  const added = await resend.contacts.segments.add({ contactId, segmentId });
+  if (added.error && !/already|exists/i.test(added.error.message ?? "")) {
     throw new Error(
-      `Kunne ikke opprette broadcast: ${created.error?.message ?? "ukjent feil"}`
+      `Kunne ikke legge kontakten i test-segmentet: ${added.error.message}`
     );
   }
 
-  const sent = await getResend().broadcasts.send(created.data.id);
-  if (sent.error) {
-    throw new Error(
-      `Kunne ikke sende broadcast: ${sent.error.message ?? "ukjent feil"}`
-    );
-  }
+  // 4) Broadcasten — merket [TEST] både i emnet og i Resend-lista.
+  const html = await renderNewsletterHtml({
+    preview: params.preview,
+    contentHtml: params.contentHtml,
+    unsubscribeUrl: "{{{RESEND_UNSUBSCRIBE_URL}}}",
+  });
 
-  return { broadcastId: created.data.id };
+  return createAndSendBroadcast({
+    target: { segmentId },
+    subject: `[TEST] ${params.subject}`,
+    name: `[TEST] ${params.subject}`,
+    html,
+  });
 }
 
 /**

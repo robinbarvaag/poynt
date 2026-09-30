@@ -72,16 +72,25 @@ export const NewsletterIntro = () => {
             I sidepanelet til høyre, under <strong>Utsending</strong>, trykker
             du «Send test til meg». Testen går bare til e-postadressen du er
             logget inn med, og emnet starter med [TEST]. Sjekk gjerne både på
-            mobil og PC. Du kan sende så mange tester du vil. (Avmeldingslenken
-            virker ikke i testen — den fungerer bare i den ekte utsendingen.)
+            mobil og PC. Du kan sende så mange tester du vil. Avmeldingslenken
+            virker ikke i denne testen.
+          </p>
+          <p style={text}>
+            Vil du se nøyaktig det mottakerne får, trykk «Send ekte
+            test-broadcast til meg». Da går den samme veien som den ekte
+            utsendingen (via Resend), men bare til deg. Avmeldingslenken og
+            flettefelt som {"{{{contact.first_name|der}}}"} virker, og
+            broadcasten dukker opp i Resend merket [TEST]. Ikke trykk på
+            avmeldingslenken i testen — da melder du deg faktisk av.
           </p>
 
           <p style={heading}>4. Send til alle</p>
           <p style={text}>
             Når alt ser riktig ut: lagre, og trykk «Send til alle abonnenter».
-            Du får et spørsmål om å bekrefte.{" "}
-            <strong>Dette kan ikke angres</strong> — e-posten går ut med én
-            gang.
+            Knappen er sperret til alt er lagret. Du får så en bekreftelse i
+            panelet som viser emnet og hvor mange som får e-posten, og må skrive
+            SEND før den går ut. <strong>Dette kan ikke angres</strong> —
+            e-posten går ut med én gang.
           </p>
 
           <p style={heading}>Etter utsending</p>
@@ -89,7 +98,24 @@ export const NewsletterIntro = () => {
             Nyhetsbrevet får status <strong>Sendt</strong> med dato og kan ikke
             sendes på nytt. Neste gang lager du et nytt nyhetsbrev. Mottakerne
             kan melde seg av via lenken nederst i e-posten — det håndteres
-            automatisk.
+            automatisk. Hvor mange som åpnet og klikket i hvert nyhetsbrev ser
+            du i Resend under «Broadcasts» — tallene øverst på denne siden viser
+            hvor mange som er påmeldt og hvor de meldte seg på.
+          </p>
+
+          <p style={heading}>Verdt å tenke på når lista vokser</p>
+          <p style={text}>
+            Resend anbefaler å sende nyhetsbrev fra et eget underdomene, for
+            eksempel <code>nyhetsbrev.poynt.no</code>, i stedet for rett fra
+            poynt.no. Grunnen: markerer noen nyhetsbrevet som søppelpost, går
+            det ut over omdømmet til domenet det ble sendt fra — og da kan
+            kvitteringer og billetter fra samme domene også begynne å havne i
+            søppelpost. Et underdomene holder de to fra hverandre. Med en liten
+            liste er risikoen lav, så dette kan vente, men det er lurt å gjøre
+            før lista blir stor. Det krever nye DNS-poster i Resend og en liten
+            kodeendring, så si fra til utvikler når det er aktuelt. Uansett bør
+            avsenderen være en adresse noen faktisk leser — ikke «no-reply» — så
+            folk kan svare på nyhetsbrevet.
           </p>
         </div>
       )}

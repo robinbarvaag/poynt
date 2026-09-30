@@ -7,6 +7,8 @@ import {
   type ServiceShowcaseLinkProps,
 } from "@poynt/ui";
 import Link from "next/link";
+import { useEffect } from "react";
+import { rememberServices } from "./service-modal-cache";
 
 /**
  * Klient-lenke for kortene: vanlig klientnavigasjon til /tjenester/[slug],
@@ -39,6 +41,13 @@ export function ServiceExplorer({
 }: {
   services: ServiceExplorerItem[];
 }) {
+  // Gjør kortdataene tilgjengelige for modal-forhåndsvisningen
+  // (`ServiceModalPreview`), så modalet kan åpne med riktig innhold før
+  // serveren har svart.
+  useEffect(() => {
+    rememberServices(services);
+  }, [services]);
+
   const items: ServiceShowcaseItem[] = services.map((s) => ({
     id: s.id,
     name: s.name,
