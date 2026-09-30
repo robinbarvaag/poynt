@@ -96,22 +96,81 @@ egen nettbutikk). Velg den ut fra *hvem som betalte deg*.
   positivt; typen gjør resten. Den senker både «solgt inn» og grunnlaget
   bokhandelen kan returnere fra.
 
-Et forhåndssalg er et vanlig salg med `saleSource = forhandssalg` — men still
+Et forhåndssalg er et salg med `saleSource = forhandssalg` — men still
 kontrollspørsmålet først: har bokhandelen kjøpt bøkene av deg, eller har kunder
 bare reservert dem hos bokhandelen? Bare det første er omsetning. Det andre blir
 omsetning den dagen bokhandelen faktisk bestiller, og føres da. Kanaltabellen
 viser fordelingen under «Solgt inn» («400 innkjøp · 57 forhåndssalg»), så det
 er synlig hva som er ført som hva.
 
+### Forhåndssalg via Norli (og kickback)
+
+Norli har et eget forhåndssalgsprogram for forfatterne sine: kundene bestiller
+via én bestemt lenke (`bok.norli.no/verdifull-vekst`), og de salgene har
+**andre vilkår enn innkjøpet**. Skrivet fra Norli (høsten 2026) koker ned til
+dette, og det er slik dashbordet modellerer det:
+
+| | Innkjøp (de 400 + 300) | Forhåndssalg via lenka |
+| --- | --- | --- |
+| Hvem har kjøpt | Norli/ARK, til lager | En kunde, og Norli bestiller ekstra |
+| Teller | som før | **i tillegg** til innkjøpet |
+| Norlis andel | 50 % | **45 %** |
+| Returrett | 50 % | ingen — boka er solgt |
+| Kickback | nei | **ja**, over 50 bøker |
+
+**Kickback** er en ekstra prosent av *fullpris*, regnet av **alle**
+forhåndssalgene så snart antallet passerer et trinn — ikke bare de over
+terskelen. 60 bøker gir altså 5 % av 399 × 60, ikke av 10. Trappa høsten 2026:
+50 → 5 %, 200 → 7 %, 500 → 8 %, 1000 → 9 %. Norli regner den ut selv etter
+forhåndssalget og trekker fra salg som kom via betalte kanaler (Google-annonser
+o.l.), så tallet i dashbordet er et **øvre anslag**. Avtalen varer som regel ut
+lanseringsuka; salg på selve lanseringsfesten teller på bestselgerlista, men
+ikke i kickbacken. Over 500 forhåndssalg utløses en markedspakke i butikk
+(plakat verdt 17 000 kr, vindu i Universitetsgata, Meta-annonser, nyhetsbrev,
+forsida på norli.no).
+
+Vilkårene ligger i *Bokøkonomi → Kanaler → Norli → Forhåndssalg og kickback*
+(`ChannelRates.presale`, typen `PresaleTerms`): sats, trapp, frist og
+markedspakke-terskel. Ingenting av det er hardkodet, men `NORLI_PRESALE` i
+`constants.ts` er standardverdiene. I regnestykket:
+
+- `presaleRates(channel)` gir kanalen med forhåndssalgssatsen og uten
+  returrett. `totals()` tar forhåndssalg som et eget volum (`extras.presale`),
+  så de aldri prises til 50 % ved en feil.
+- `kickback(settings, terms, copies)` gir trinn, prosent, beløp og hvor langt
+  det er til neste trinn. Beløpet legges i `Totals.kickback` og er med i
+  `Totals.net` — men holdes utenfor snittet per bok i `coverage()`, for det er
+  en bonus på toppen, ikke noe hver neste bok tar med seg.
+- Bare forhåndssalg datert til og med fristen (`kickbackUntil`) teller i
+  grunnlaget; senere rader teller i salget, men ikke i kickbacken.
+
+**Signert og personlig signert.** Kundene kan krysse av for signert eller
+personlig signert, og det er *kun* de eksemplarene som bestilles inn til
+signering i butikk — og dermed kun de som kan tas med på lanseringsfesten.
+Forhåndssalg-raden i *Boksalg* har derfor feltene «Hvorav signert» og «Hvorav
+personlig signert»; dashbordet summerer dem til «Til signering» og sier fra om
+rader som mangler tallet. De som glemte å velge signert får boka i posten.
+
+Kortet «Forhåndssalg via Norli» (`components/boksalg/presale-card.tsx`) ligger
+øverst i dashbordet fram til lansering: antall, kickback-trinn og beløp, dager
+igjen av avtalen, til signering, trappa med markører og markedspakka. Hvert
+trinn og markedspakka er også milepæler.
+
+> Salg ført på en kanal som ikke finnes under *Kanaler* i Bokøkonomi (f.eks.
+> «Annet») kan ikke prises og holdes utenfor totalene. Dashbordet varsler om
+> det øverst, med antall — endre kanalen på salget, eller legg til kanalen.
+
 ### Returrisiko
 
 Bokhandlene kjøper inn med returrett — Norli og ARK kan sende tilbake inntil
 50 % av det de kjøpte. Et innkjøp er derfor inntekt, men ikke *sikret* inntekt
-før returfristen er ute. «Veien til null» viser tre segmenter: sikret,
-kan forsvinne ved retur (skravert), og igjen. Slideren under
-(`components/boksalg/return-simulator.tsx`) lar en se hva X % retur gjør med
-dekningen og antall bøker igjen; standard er full returrett, altså verst
-tenkelig.
+før returfristen er ute. Slideren «Hva om bøkene kommer i retur?» ligger
+**øverst** i dashbordet (`components/boksalg/return-scenario.tsx`) og styrer
+alle tallene i seksjonen under: solgt inn, av opplaget, netto, resultat og
+«Veien til null» (tre segmenter: sikret, kan forsvinne ved retur (skravert),
+og igjen). Standard er full returrett, altså verst tenkelig — det er tallet
+Susanne bør planlegge etter. Kanaltabellen og milepælene lenger ned viser
+faktisk ført salg og påvirkes ikke av slideren.
 
 Returretten per kanal ligger i *Bokøkonomi → Kanaler → Returrett (%)* og bor på
 `ChannelRates.maxReturnPercent`. Regnestykket er `returnRisk()` i
@@ -258,7 +317,7 @@ bun test apps/web/lib/boksalg
 | `collections/book-stores.ts` | Butikker med kontaktinfo og oppfølging |
 | `lib/boksalg/stores.ts` | Synk av butikkrader; rører aldri oppfølgingsfeltene. Testet |
 | `app/(intern)/intern/boksalg/` | Dashbordet + server actions (hent nå, oppfølging) |
-| `components/boksalg/` | Grafer (Recharts), kart m/ zoom, butikkliste (DataTable), miks- og retur-simulator, milepæler, lagerfaner |
+| `components/boksalg/` | Grafer (Recharts), kart m/ zoom, butikkliste (DataTable), returscenario (slider + nøkkeltall + veien til null), forhåndssalgskort, miks-simulator, milepæler, lagerfaner |
 | `lib/boksalg/milestones.ts` | Milepælene («500 bøker», «boka i alle fylker», «i null») — ren regning på dashbord-tallene, testet |
 | `packages/ui/components/{table,data-table,chart}.tsx` | Primitivene, gjenbrukbare i hele appen |
 

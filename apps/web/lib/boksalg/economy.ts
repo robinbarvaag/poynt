@@ -47,6 +47,36 @@ export interface ChannelRates {
    * ARK: 50. Påvirker ikke prisen per bok — bare hvor sikker inntekten er.
    */
   maxReturnPercent?: number;
+  /**
+   * Bokhandelens forhåndssalgsprogram (Norli: bok.norli.no/<slug>). Forhånds-
+   * salg der prises annerledes enn innkjøpet og gir kickback — se
+   * `PresaleTerms`. Uten dette prises forhåndssalg som et vanlig salg i kanalen.
+   */
+  presale?: PresaleTerms | null;
+}
+
+/** Ett trinn i kickback-trappa: fra og med `copies` bøker gis `percent`. */
+export interface KickbackTier {
+  copies: number;
+  percent: number;
+}
+
+/**
+ * Vilkårene for forhåndssalg via bokhandelens eget program. Norli høsten 2026:
+ * bokhandelen kjøper til 45 % (ikke 50 %), bøkene kommer i tillegg til det
+ * ordinære innkjøpet og kan ikke returneres — og over 50 solgte gis kickback
+ * på 5–9 % av fullpris, regnet av alle forhåndssalg (ikke bare de over
+ * terskelen), fram til lanseringsuka er over.
+ */
+export interface PresaleTerms {
+  /** Bokhandelens andel av utsalgsprisen for forhåndssalg. Norli: 45. */
+  retailerPercent: number;
+  /** Trappa, i stigende rekkefølge. Tom liste = ingen kickback. */
+  kickbackTiers: KickbackTier[];
+  /** Siste dag forhåndssalg teller i kickback-grunnlaget (ISO-dato), eller null. */
+  kickbackUntil: string | null;
+  /** Antall forhåndssalg som utløser markedspakka i butikk. Norli: 500. */
+  marketingPackageAt: number | null;
 }
 
 /** Hva ett solgt eksemplar i én kanal er verdt, krone for krone. */
@@ -95,24 +125,93 @@ export function unitEconomics(
   };
 }
 
+/**
+ * Kanalen slik den ser ut for et forhåndssalg: samme distribusjon og gebyr,
+ * men bokhandelens andel fra forhåndssalgsavtalen — og ingen returrett, for
+ * bøkene er solgt til en kunde. Uten forhåndssalgsvilkår er det kanalen selv.
+ */
+export function presaleRates(channel: ChannelRates): ChannelRates {
+  if (!channel.presale) return channel;
+  return {
+    ...channel,
+    retailerPercent: channel.presale.retailerPercent,
+    maxReturnPercent: 0,
+    presale: null,
+  };
+}
+
+export interface Kickback {
+  /** Forhåndssalg i kickback-perioden — grunnlaget. */
+  copies: number;
+  /** Prosenten trinnet gir, 0 under første terskel. */
+  percent: number;
+  /** Trinnet som gjelder nå, eller null under første terskel. */
+  tier: KickbackTier | null;
+  /** Kickback i kroner: copies × listPrice × percent. */
+  amount: number;
+  /** Neste trinn og hvor mange bøker det er dit, eller null på toppen. */
+  next: (KickbackTier & { copiesToGo: number }) | null;
+}
+
+/**
+ * Kickback: en ekstra prosent av fullpris, regnet av ALLE forhåndssalg så
+ * snart antallet passerer et trinn. 60 bøker → 5 % av 399 × 60, ikke av de
+ * 10 over terskelen. Bokhandelen regner det ut selv og trekker fra salg via
+ * betalte kanaler, så dette er et øvre anslag — ikke fasit.
+ */
+export function kickback(
+  settings: EconomySettings,
+  terms: PresaleTerms | null | undefined,
+  copies: number
+): Kickback {
+  const tiers = [...(terms?.kickbackTiers ?? [])].sort(
+    (a, b) => a.copies - b.copies
+  );
+  const tier = tiers.filter((candidate) => copies >= candidate.copies).at(-1);
+  const nextTier = tiers.find((candidate) => copies < candidate.copies);
+  const percent = tier?.percent ?? 0;
+  return {
+    copies,
+    percent,
+    tier: tier ?? null,
+    amount: round(copies * settings.listPrice * (percent / 100)),
+    next: nextTier
+      ? { ...nextTier, copiesToGo: nextTier.copies - copies }
+      : null,
+  };
+}
+
 /** Antall solgte bøker per kanal. */
 export type ChannelVolumes = Record<string, number>;
 
 export interface Totals {
   copies: number;
   revenue: number;
-  /** Sum netto til Susanne. */
+  /** Sum netto til Susanne — per bok, pluss kickback. */
   net: number;
   retailerCut: number;
   editorCut: number;
   distributionCut: number;
   transactionFee: number;
+  /** Kickback fra forhåndssalgsprogram, sum over kanalene. Er med i `net`. */
+  kickback: number;
+}
+
+export interface TotalsExtras {
+  /**
+   * Forhåndssalg per kanal, prises med `presaleRates`. Kommer i TILLEGG til
+   * `volumes` — legg dem ikke begge steder.
+   */
+  presale?: ChannelVolumes;
+  /** Kickback i kroner, allerede regnet ut med `kickback()`. */
+  kickback?: number;
 }
 
 export function totals(
   settings: EconomySettings,
   channels: ChannelRates[],
-  volumes: ChannelVolumes
+  volumes: ChannelVolumes,
+  extras: TotalsExtras = {}
 ): Totals {
   const sum: Totals = {
     copies: 0,
@@ -122,12 +221,12 @@ export function totals(
     editorCut: 0,
     distributionCut: 0,
     transactionFee: 0,
+    kickback: 0,
   };
 
-  for (const channel of channels) {
-    const copies = volumes[channel.key] ?? 0;
-    if (copies === 0) continue;
-    const unit = unitEconomics(settings, channel);
+  const add = (rates: ChannelRates, copies: number) => {
+    if (copies === 0) return;
+    const unit = unitEconomics(settings, rates);
     sum.copies += copies;
     sum.revenue += unit.listPrice * copies;
     sum.net += unit.net * copies;
@@ -135,7 +234,15 @@ export function totals(
     sum.editorCut += unit.editorCut * copies;
     sum.distributionCut += unit.distributionCut * copies;
     sum.transactionFee += unit.transactionFee * copies;
+  };
+
+  for (const channel of channels) {
+    add(channel, volumes[channel.key] ?? 0);
+    add(presaleRates(channel), extras.presale?.[channel.key] ?? 0);
   }
+
+  sum.kickback = extras.kickback ?? 0;
+  sum.net += sum.kickback;
 
   for (const key of Object.keys(sum) as (keyof Totals)[]) {
     sum[key] = round(sum[key]);
@@ -182,8 +289,12 @@ export interface Coverage {
 }
 
 export function coverage(earned: Totals, totalExpenses: number): Coverage {
+  // Snittet per bok holdes fritt for kickback: den er en bonus på toppen, ikke
+  // noe hver neste bok tar med seg — ellers ville «bøker igjen» blitt for lavt.
   const averageNetPerCopy =
-    earned.copies > 0 ? round(earned.net / earned.copies) : null;
+    earned.copies > 0
+      ? round((earned.net - earned.kickback) / earned.copies)
+      : null;
   const missing = totalExpenses - earned.net;
 
   return {

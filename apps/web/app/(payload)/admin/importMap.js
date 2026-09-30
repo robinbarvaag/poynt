@@ -55,6 +55,7 @@ import { FolderTypeField as FolderTypeField_2b8867833a34864a02ddf429b0728a40 } f
 import { LinkRowLabel as LinkRowLabel_f0fd4bee3885f2a3c8ca119ef52b5ffe } from '../../../admin/components/row-labels'
 import { ColumnRowLabel as ColumnRowLabel_f0fd4bee3885f2a3c8ca119ef52b5ffe } from '../../../admin/components/row-labels'
 import { OrderEmailPreview as OrderEmailPreview_da3d7bdfc79ddf11f937fbc6775a965d } from '../../../admin/components/email/order-email-preview'
+import { KickbackTierRowLabel as KickbackTierRowLabel_f0fd4bee3885f2a3c8ca119ef52b5ffe } from '../../../admin/components/row-labels'
 import { ChannelRowLabel as ChannelRowLabel_f0fd4bee3885f2a3c8ca119ef52b5ffe } from '../../../admin/components/row-labels'
 import { OnPoyntNavGroup as OnPoyntNavGroup_cbdd0274d832c585cca0ce893b25cc1e } from '../../../admin/components/on-poynt-nav-group'
 import { ContactsNavGroup as ContactsNavGroup_eaa602077b61895f57de2f69a860ec84 } from '../../../admin/components/contacts-nav-group'
@@ -137,6 +138,7 @@ export const importMap = {
   "/admin/components/row-labels#LinkRowLabel": LinkRowLabel_f0fd4bee3885f2a3c8ca119ef52b5ffe,
   "/admin/components/row-labels#ColumnRowLabel": ColumnRowLabel_f0fd4bee3885f2a3c8ca119ef52b5ffe,
   "/admin/components/email/order-email-preview#OrderEmailPreview": OrderEmailPreview_da3d7bdfc79ddf11f937fbc6775a965d,
+  "/admin/components/row-labels#KickbackTierRowLabel": KickbackTierRowLabel_f0fd4bee3885f2a3c8ca119ef52b5ffe,
   "/admin/components/row-labels#ChannelRowLabel": ChannelRowLabel_f0fd4bee3885f2a3c8ca119ef52b5ffe,
   "/admin/components/on-poynt-nav-group#OnPoyntNavGroup": OnPoyntNavGroup_cbdd0274d832c585cca0ce893b25cc1e,
   "/admin/components/contacts-nav-group#ContactsNavGroup": ContactsNavGroup_eaa602077b61895f57de2f69a860ec84,

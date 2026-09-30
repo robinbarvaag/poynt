@@ -37,15 +37,34 @@ export function ChannelRowLabel() {
     label?: string;
     retailerPercent?: number;
     active?: boolean;
+    presale?: { enabled?: boolean; retailerPercent?: number };
   }>();
   const name = data?.label || `Kanal ${(rowNumber ?? 0) + 1}`;
   const cut = data?.retailerPercent
     ? `${data.retailerPercent} % til forhandler`
     : "ingen forhandler";
+  const presale = data?.presale?.enabled
+    ? ` · forhåndssalg ${data.presale.retailerPercent ?? 0} % + kickback`
+    : "";
   return (
     <span>
       {name} · {cut}
+      {presale}
       {data?.active === false ? " · inaktiv" : ""}
+    </span>
+  );
+}
+
+/** Ett trinn i kickback-trappa: «fra 50 bøker: 5 %». */
+export function KickbackTierRowLabel() {
+  const { data, rowNumber } = useRowLabel<{
+    copies?: number;
+    percent?: number;
+  }>();
+  if (!data?.copies) return <span>Trinn {(rowNumber ?? 0) + 1}</span>;
+  return (
+    <span>
+      Fra {data.copies} bøker: {data.percent ?? 0} %
     </span>
   );
 }

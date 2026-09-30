@@ -2,9 +2,12 @@ import { describe, expect, test } from "bun:test";
 import {
   type ChannelRates,
   type EconomySettings,
+  type PresaleTerms,
   breakEven,
   coverage,
+  kickback,
   maxReturnPercent,
+  presaleRates,
   returnRisk,
   totals,
   unitEconomics,
@@ -99,6 +102,106 @@ describe("totals", () => {
 
   test("kanaler uten salg påvirker ingenting", () => {
     expect(totals(base, [bokhandel, egen], { norli: 0 }).net).toBe(0);
+    expect(totals(base, [bokhandel], {}).kickback).toBe(0);
+  });
+
+  test("forhåndssalg prises til programmets sats og legges oppå innkjøpet", () => {
+    const sum = totals(
+      base,
+      [norliMedProgram],
+      { norli: 400 },
+      { presale: { norli: 60 }, kickback: 1197 }
+    );
+    // 400 innkjøp × 159,60 + 60 forhåndssalg × 179,55 + kickback.
+    expect(sum.copies).toBe(460);
+    expect(sum.retailerCut).toBe(400 * 199.5 + 60 * 179.55);
+    expect(sum.kickback).toBe(1197);
+    expect(sum.net).toBe(63840 + 10773 + 1197);
+  });
+});
+
+/**
+ * Norlis forhåndssalgsprogram høsten 2026: 45 % til Norli (ikke 50), kickback
+ * 5/7/8/9 % av fullpris fra 50/200/500/1000 bøker — på alle forhåndssalg.
+ */
+const norliVilkar: PresaleTerms = {
+  retailerPercent: 45,
+  kickbackTiers: [
+    { copies: 50, percent: 5 },
+    { copies: 200, percent: 7 },
+    { copies: 500, percent: 8 },
+    { copies: 1000, percent: 9 },
+  ],
+  kickbackUntil: "2026-10-18",
+  marketingPackageAt: 500,
+};
+
+const norliMedProgram: ChannelRates = {
+  ...bokhandel,
+  maxReturnPercent: 50,
+  presale: norliVilkar,
+};
+
+describe("presaleRates", () => {
+  test("bytter bare forhandlerens andel — og fjerner returretten", () => {
+    const rates = presaleRates(norliMedProgram);
+    expect(rates.retailerPercent).toBe(45);
+    expect(rates.maxReturnPercent).toBe(0);
+    expect(rates.presale).toBeNull();
+    // 399 − 179,55 − 39,90
+    expect(unitEconomics(base, rates).net).toBe(179.55);
+  });
+
+  test("kanal uten program er seg selv", () => {
+    expect(presaleRates(bokhandel)).toBe(bokhandel);
+  });
+});
+
+describe("kickback", () => {
+  const terms = norliVilkar;
+
+  test("eksempelet fra Norli: 60 bøker gir 5 % av fullpris på alle 60", () => {
+    const reward = kickback(base, terms, 60);
+    expect(reward.percent).toBe(5);
+    expect(reward.tier?.copies).toBe(50);
+    // 60 × 399 × 5 %
+    expect(reward.amount).toBe(1197);
+    expect(reward.next).toEqual({ copies: 200, percent: 7, copiesToGo: 140 });
+  });
+
+  test("under første terskel: ingenting, men neste trinn er synlig", () => {
+    const reward = kickback(base, terms, 49);
+    expect(reward.percent).toBe(0);
+    expect(reward.tier).toBeNull();
+    expect(reward.amount).toBe(0);
+    expect(reward.next?.copiesToGo).toBe(1);
+  });
+
+  test("nøyaktig på terskelen teller som nådd", () => {
+    expect(kickback(base, terms, 200).percent).toBe(7);
+  });
+
+  test("øverste trinn har ingen neste", () => {
+    const reward = kickback(base, terms, 1200);
+    expect(reward.percent).toBe(9);
+    expect(reward.next).toBeNull();
+  });
+
+  test("trappa sorteres, så rekkefølgen i admin ikke spiller noen rolle", () => {
+    const reward = kickback(
+      base,
+      {
+        ...terms,
+        kickbackTiers: [...terms.kickbackTiers].reverse(),
+      },
+      210
+    );
+    expect(reward.percent).toBe(7);
+    expect(reward.next?.copies).toBe(500);
+  });
+
+  test("uten vilkår: alltid 0", () => {
+    expect(kickback(base, null, 500).amount).toBe(0);
   });
 });
 
@@ -150,6 +253,22 @@ describe("coverage", () => {
   test("i pluss: ingenting gjenstår", () => {
     const earned = totals(base, [egen], { egen: 1000 });
     expect(coverage(earned, 276169).remainingAtCurrentMix).toBe(0);
+  });
+
+  test("kickback teller i dekningen, men ikke i snittet per bok", () => {
+    const utenKickback = totals(base, [bokhandel], { norli: 100 });
+    const medKickback = totals(
+      base,
+      [bokhandel],
+      { norli: 100 },
+      { kickback: 1000 }
+    );
+    expect(coverage(medKickback, 276169).netEarned).toBe(
+      coverage(utenKickback, 276169).netEarned + 1000
+    );
+    expect(coverage(medKickback, 276169).averageNetPerCopy).toBe(
+      coverage(utenKickback, 276169).averageNetPerCopy
+    );
   });
 });
 

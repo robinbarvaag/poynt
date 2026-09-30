@@ -9,6 +9,7 @@ import type {
 } from "@/payload-types";
 import type { Payload } from "payload";
 import {
+  CHANNEL_OPTIONS,
   EXPENSE_CATEGORIES,
   type FollowUpStatus,
   RETURNABLE_SOURCES,
@@ -24,14 +25,22 @@ import {
   type ChannelVolumes,
   type Coverage,
   type EconomySettings,
+  type Kickback,
+  type PresaleTerms,
   type Totals,
   type UnitEconomics,
   breakEven,
   coverage,
+  kickback,
+  presaleRates,
   totals,
   unitEconomics,
 } from "./economy";
-import { type Milestone, milestones } from "./milestones";
+import {
+  type Milestone,
+  type PresaleMilestoneInput,
+  milestones,
+} from "./milestones";
 import type { Availability, StoreStock } from "./types";
 
 /**
@@ -71,6 +80,41 @@ export interface ChannelSummary {
   /** Innkjøp minus ført retur — det bokhandelen fortsatt kan sende tilbake. */
   returnable: number;
   maxReturnPercent: number;
+  /** Forhåndssalgsprogrammet i kanalen, når den har ett. */
+  presale: PresaleSummary | null;
+}
+
+/**
+ * Forhåndssalg via bokhandelens eget program (Norlis bok.norli.no-lenke).
+ * Bøkene kommer i TILLEGG til innkjøpet, prises til programmets sats og kan
+ * ikke returneres. Over trinnene i trappa gis kickback på fullpris.
+ */
+export interface PresaleSummary {
+  channelKey: string;
+  channelLabel: string;
+  terms: PresaleTerms;
+  link: string | null;
+  /** Hva ett forhåndssalg er verdt for Susanne (45 % til Norli, ikke 50). */
+  unit: UnitEconomics;
+  /** Alle forhåndssalg ført på kanalen. */
+  copies: number;
+  /** Forhåndssalg til og med kickback-fristen — grunnlaget. */
+  kickbackCopies: number;
+  /** Ført etter fristen: teller i salget, men ikke i kickbacken. */
+  copiesAfterDeadline: number;
+  kickback: Kickback;
+  /** Dager igjen av kickback-perioden; null uten frist, negativt når den er ute. */
+  daysLeft: number | null;
+  /** Hvor mange som er bestilt signert / personlig signert — de som skal signeres i butikk. */
+  signedCopies: number;
+  personallySignedCopies: number;
+  /** Forhåndssalg som mangler signert-tall, så «til signering» kan være for lavt. */
+  rowsWithoutSigning: number;
+  marketingPackage: {
+    at: number;
+    reached: boolean;
+    copiesToGo: number;
+  } | null;
 }
 
 /** Eksemplarer ute i butikk, dag for dag — utrullingen og påfyllene. */
@@ -179,6 +223,8 @@ export interface BookDashboardData {
   coverage: Coverage;
   /** Per kanal: bøker bokhandelen fortsatt kan returnere. Mates til retur-slideren. */
   returnable: ChannelVolumes;
+  /** Forhåndssalgsprogrammene — i praksis Norli. Tom liste uten vilkår. */
+  presales: PresaleSummary[];
   milestones: Milestone[];
   expenses: {
     total: number;
@@ -216,10 +262,27 @@ const SALE_SOURCE_SHORT: Record<SaleSource, string> = {
 type Channel = ChannelRates & {
   stockSource: "none" | SourceKey;
   active: boolean;
+  presaleLink: string | null;
 };
 
 function dayKey(value: string): string {
   return new Date(value).toISOString().slice(0, 10);
+}
+
+type ChannelRow = NonNullable<BookEconomy["channels"]>[number];
+
+/** Forhåndssalgsvilkårene på en kanal-rad, eller null når programmet er av. */
+function readPresale(row: ChannelRow): PresaleTerms | null {
+  const presale = row.presale;
+  if (!presale?.enabled) return null;
+  return {
+    retailerPercent: presale.retailerPercent ?? row.retailerPercent ?? 0,
+    kickbackTiers: (presale.kickbackTiers ?? [])
+      .map((tier) => ({ copies: tier.copies, percent: tier.percent }))
+      .sort((a, b) => a.copies - b.copies),
+    kickbackUntil: presale.kickbackUntil ?? null,
+    marketingPackageAt: presale.marketingPackageAt ?? null,
+  };
 }
 
 function readChannels(economy: BookEconomy): Channel[] {
@@ -234,9 +297,17 @@ function readChannels(economy: BookEconomy): Channel[] {
       transactionPercent: row.transactionPercent ?? 0,
       transactionPerCopy: row.transactionPerCopy ?? 0,
       maxReturnPercent: row.maxReturnPercent ?? 0,
+      presale: readPresale(row),
+      presaleLink: row.presale?.link ?? null,
       stockSource: row.stockSource ?? "none",
       active: true,
     }));
+}
+
+/** Siste dag i kickback-perioden er med — sammenlign på dato, ikke klokkeslett. */
+function countsForKickback(date: string, until: string | null): boolean {
+  if (!until) return true;
+  return dayKey(date) <= dayKey(until);
 }
 
 function toStoreRow(doc: BookStore, recent: RecentActivity): StoreRow {
@@ -360,6 +431,22 @@ export async function getBookDashboard(
   const bySourceByChannel = new Map<string, Map<SaleSource, number>>();
   const returnableByChannel = new Map<string, number>();
   const soldInByDay = new Map<string, number>();
+  // Forhåndssalg via bokhandelens program holdes utenfor `manualByChannel`:
+  // de prises til programmets sats (Norli 45 %, ikke 50) og gir kickback.
+  const presaleByChannel = new Map<
+    string,
+    {
+      copies: number;
+      kickbackCopies: number;
+      signed: number;
+      personallySigned: number;
+      rowsWithoutSigning: number;
+    }
+  >();
+  const channelByKey = new Map(
+    channels.map((channel) => [channel.key, channel])
+  );
+  const unknownChannels = new Map<string, number>();
 
   for (const doc of manualDocs.docs as BookSale[]) {
     const source = doc.saleSource as SaleSource;
@@ -367,6 +454,41 @@ export async function getBookDashboard(
     // returrett. Forhåndssalg og avregninger er bøker som har gått til en
     // kunde og kommer ikke tilbake.
     const signed = source === RETURN_SOURCE ? -doc.copies : doc.copies;
+
+    // Salg på en kanal som ikke finnes i Bokøkonomi kan ikke prises, og
+    // holdes utenfor både totalene og tidslinja — de varsles om i stedet.
+    const channel = channelByKey.get(doc.channel);
+    if (!channel) {
+      unknownChannels.set(
+        doc.channel,
+        (unknownChannels.get(doc.channel) ?? 0) + signed
+      );
+      continue;
+    }
+
+    const day = dayKey(doc.date);
+    soldInByDay.set(day, (soldInByDay.get(day) ?? 0) + signed);
+
+    if (source === "forhandssalg" && channel?.presale) {
+      const entry = presaleByChannel.get(doc.channel) ?? {
+        copies: 0,
+        kickbackCopies: 0,
+        signed: 0,
+        personallySigned: 0,
+        rowsWithoutSigning: 0,
+      };
+      entry.copies += doc.copies;
+      if (countsForKickback(doc.date, channel.presale.kickbackUntil)) {
+        entry.kickbackCopies += doc.copies;
+      }
+      const hasSigning =
+        doc.signedCopies != null || doc.personallySignedCopies != null;
+      entry.signed += doc.signedCopies ?? 0;
+      entry.personallySigned += doc.personallySignedCopies ?? 0;
+      if (!hasSigning) entry.rowsWithoutSigning += 1;
+      presaleByChannel.set(doc.channel, entry);
+      continue;
+    }
 
     manualByChannel.set(
       doc.channel,
@@ -384,9 +506,12 @@ export async function getBookDashboard(
         (returnableByChannel.get(doc.channel) ?? 0) + signed
       );
     }
+  }
 
-    const day = dayKey(doc.date);
-    soldInByDay.set(day, (soldInByDay.get(day) ?? 0) + signed);
+  for (const [key, copies] of unknownChannels) {
+    warnings.push(
+      `${copies} bøker er ført på kanalen «${labelFor(CHANNEL_OPTIONS, key)}», som ikke finnes under Kanaler i Bokøkonomi. De telles ikke med — endre kanalen på salget, eller legg til kanalen.`
+    );
   }
 
   // ---- Faktiske bestillinger i egen nettbutikk ----------------------------
@@ -475,12 +600,22 @@ export async function getBookDashboard(
   // innkjøp) og bestillinger i egen nettbutikk. Butikk-estimatene holdes
   // utenfor med vilje — se blokken over.
   const volumes: Record<string, number> = {};
+  const presaleVolumes: ChannelVolumes = {};
   const returnable: ChannelVolumes = {};
+  const presales: PresaleSummary[] = [];
+  let kickbackTotal = 0;
+  const today = dayKey(new Date().toISOString());
+
   const channelSummaries: ChannelSummary[] = channels.map((channel) => {
     const manual = manualByChannel.get(channel.key) ?? 0;
     const shop = channel.key === "egen" ? shopCopies : 0;
-    const copies = manual + shop;
-    volumes[channel.key] = copies;
+    const presaleEntry = presaleByChannel.get(channel.key);
+    const presaleCopies = presaleEntry?.copies ?? 0;
+    const copies = manual + shop + presaleCopies;
+    // Forhåndssalg via programmet prises for seg (presaleRates) — de skal
+    // ikke inn i `volumes`, ellers får de kanalens vanlige 50 %.
+    volumes[channel.key] = manual + shop;
+    presaleVolumes[channel.key] = presaleCopies;
     returnable[channel.key] = Math.max(
       0,
       returnableByChannel.get(channel.key) ?? 0
@@ -493,12 +628,59 @@ export async function getBookDashboard(
         label: SALE_SOURCE_SHORT[source as SaleSource] ?? source,
         copies: count as number,
       }));
+    if (presaleCopies > 0) {
+      bySource.push({
+        source: "forhandssalg",
+        label: SALE_SOURCE_SHORT.forhandssalg,
+        copies: presaleCopies,
+      });
+    }
     if (shop > 0) {
       bySource.push({
         source: "nettbutikk",
         label: "nettbutikken",
         copies: shop,
       });
+    }
+
+    let presale: PresaleSummary | null = null;
+    if (channel.presale) {
+      const terms = channel.presale;
+      const kickbackCopies = presaleEntry?.kickbackCopies ?? 0;
+      const reward = kickback(settings, terms, kickbackCopies);
+      kickbackTotal += reward.amount;
+      const daysLeft = terms.kickbackUntil
+        ? Math.round(
+            (new Date(dayKey(terms.kickbackUntil)).getTime() -
+              new Date(today).getTime()) /
+              (1000 * 60 * 60 * 24)
+          )
+        : null;
+      const marketingAt = terms.marketingPackageAt;
+      presale = {
+        channelKey: channel.key,
+        channelLabel: channel.label,
+        terms,
+        link: channel.presaleLink,
+        unit: unitEconomics(settings, presaleRates(channel)),
+        copies: presaleCopies,
+        kickbackCopies,
+        copiesAfterDeadline: presaleCopies - kickbackCopies,
+        kickback: reward,
+        daysLeft,
+        signedCopies: presaleEntry?.signed ?? 0,
+        personallySignedCopies: presaleEntry?.personallySigned ?? 0,
+        rowsWithoutSigning: presaleEntry?.rowsWithoutSigning ?? 0,
+        marketingPackage:
+          marketingAt !== null && marketingAt > 0
+            ? {
+                at: marketingAt,
+                reached: kickbackCopies >= marketingAt,
+                copiesToGo: Math.max(0, marketingAt - kickbackCopies),
+              }
+            : null,
+      };
+      presales.push(presale);
     }
 
     return {
@@ -515,10 +697,14 @@ export async function getBookDashboard(
       bySource,
       returnable: returnable[channel.key],
       maxReturnPercent: channel.maxReturnPercent ?? 0,
+      presale,
     };
   });
 
-  const summed = totals(settings, channels, volumes);
+  const summed = totals(settings, channels, volumes, {
+    presale: presaleVolumes,
+    kickback: kickbackTotal,
+  });
 
   // ---- Lagerbilde per kilde ----------------------------------------------
   const sourceKeys = [
@@ -651,6 +837,15 @@ export async function getBookDashboard(
     regionsWithBook: regions.filter((region) => region.withStock > 0).length,
     regionsTotal: regions.filter((region) => region.region !== "Ukjent").length,
     sellThrough: sellThroughTotal,
+    presales: presales.map(
+      (presale): PresaleMilestoneInput => ({
+        key: presale.channelKey,
+        label: presale.channelLabel,
+        copies: presale.kickbackCopies,
+        tiers: presale.terms.kickbackTiers,
+        marketingPackageAt: presale.terms.marketingPackageAt,
+      })
+    ),
   });
 
   return {
@@ -668,6 +863,7 @@ export async function getBookDashboard(
     totals: summed,
     coverage: coverage(summed, expenseTotal),
     returnable,
+    presales,
     milestones: reached,
     expenses: {
       total: expenseTotal,

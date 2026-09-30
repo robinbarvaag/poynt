@@ -273,6 +273,129 @@ export const BookEconomy: GlobalConfig = {
                       "Hvor stor del av innkjøpet bokhandelen kan sende tilbake. Norli og ARK: 50. Dashbordet viser hvor mye av det du har tjent som kan forsvinne igjen. Faktiske returer føres som «Retur fra bokhandel» under Boksalg.",
                   },
                 },
+                {
+                  type: "collapsible",
+                  label: "Forhåndssalg og kickback",
+                  admin: {
+                    initCollapsed: true,
+                    description:
+                      "Bokhandelens eget forhåndssalgsprogram, som Norlis bok.norli.no-lenke. Salg ført som «Forhåndssalg» på denne kanalen får disse vilkårene i stedet for de vanlige — og teller i tillegg til innkjøpet.",
+                  },
+                  fields: [
+                    {
+                      name: "presale",
+                      type: "group",
+                      label: false,
+                      fields: [
+                        {
+                          name: "enabled",
+                          type: "checkbox",
+                          label: "Kanalen har et forhåndssalgsprogram",
+                          defaultValue: false,
+                        },
+                        {
+                          name: "link",
+                          type: "text",
+                          label: "Forhåndssalgslenke",
+                          admin: {
+                            condition: (_, siblingData) =>
+                              siblingData?.enabled === true,
+                            description:
+                              "Lenka kundene MÅ bruke for at salget skal telle, f.eks. https://bok.norli.no/verdifull-vekst.",
+                          },
+                        },
+                        {
+                          type: "row",
+                          admin: {
+                            condition: (_, siblingData) =>
+                              siblingData?.enabled === true,
+                          },
+                          fields: [
+                            {
+                              name: "retailerPercent",
+                              type: "number",
+                              label: "Forhandlerens andel ved forhåndssalg (%)",
+                              defaultValue: 45,
+                              min: 0,
+                              max: 100,
+                              admin: {
+                                width: "50%",
+                                description: "Norli høsten 2026: 45.",
+                              },
+                            },
+                            {
+                              name: "marketingPackageAt",
+                              type: "number",
+                              label: "Markedspakke fra (antall bøker)",
+                              defaultValue: 500,
+                              min: 0,
+                              admin: {
+                                width: "50%",
+                                description:
+                                  "Norli: 500. Da kommer plakat i butikk, vindu i Universitetsgata, Meta-annonser og nyhetsbrev.",
+                              },
+                            },
+                          ],
+                        },
+                        {
+                          name: "kickbackUntil",
+                          type: "date",
+                          label: "Kickback teller til og med",
+                          admin: {
+                            condition: (_, siblingData) =>
+                              siblingData?.enabled === true,
+                            date: {
+                              pickerAppearance: "dayOnly",
+                              displayFormat: "d. MMMM yyyy",
+                            },
+                            description:
+                              "Som regel ut lanseringsuka. Salg på selve lanseringsfesten teller ikke. La stå tom hvis alt skal telle.",
+                          },
+                        },
+                        {
+                          name: "kickbackTiers",
+                          type: "array",
+                          label: "Kickback-trapp",
+                          labels: { singular: "Trinn", plural: "Trinn" },
+                          admin: {
+                            condition: (_, siblingData) =>
+                              siblingData?.enabled === true,
+                            description:
+                              "Fra og med antallet gis prosenten av fullpris — på ALLE forhåndssalg, ikke bare de over terskelen. Bokhandelen regner det ut og trekker fra salg via betalte kanaler.",
+                            components: {
+                              RowLabel:
+                                "/admin/components/row-labels#KickbackTierRowLabel",
+                            },
+                          },
+                          fields: [
+                            {
+                              type: "row",
+                              fields: [
+                                {
+                                  name: "copies",
+                                  type: "number",
+                                  label: "Fra antall bøker",
+                                  required: true,
+                                  min: 1,
+                                  admin: { width: "50%" },
+                                },
+                                {
+                                  name: "percent",
+                                  type: "number",
+                                  label: "Kickback (%)",
+                                  required: true,
+                                  min: 0,
+                                  max: 100,
+                                  admin: { width: "50%" },
+                                },
+                              ],
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
               ],
             },
           ],

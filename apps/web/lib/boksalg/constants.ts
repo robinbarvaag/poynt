@@ -27,6 +27,29 @@ export const CHANNEL_OPTIONS: { label: string; value: ChannelKey }[] = [
 ];
 
 /**
+ * Norlis forhåndssalgsprogram høsten 2026 (bok.norli.no/verdifull-vekst):
+ * Norli kjøper forhåndssalg til 45 % (ikke 50 %), bøkene kommer i TILLEGG til
+ * det ordinære innkjøpet og kan ikke returneres, og over 50 solgte gis
+ * kickback på fullpris av alle forhåndssalg — ut lanseringsuka. Over 500
+ * utløses en markedspakke i butikk (plakat, vindu i Universitetsgata,
+ * Meta-annonser, nyhetsbrev, forsida på norli.no).
+ */
+export const NORLI_PRESALE = {
+  enabled: true,
+  link: "https://bok.norli.no/verdifull-vekst",
+  retailerPercent: 45,
+  kickbackTiers: [
+    { copies: 50, percent: 5 },
+    { copies: 200, percent: 7 },
+    { copies: 500, percent: 8 },
+    { copies: 1000, percent: 9 },
+  ],
+  // Lansering 15. oktober 2026 (torsdag) — avtalen varer ut den uka.
+  kickbackUntil: "2026-10-18T00:00:00.000Z",
+  marketingPackageAt: 500,
+};
+
+/**
  * Standardoppsettet, som «Bokøkonomi» fylles med første gang. Norli og ARK tar
  * 50 %; egen nettbutikk har ingen forhandler, men Stripe tar 1,4 % + 2 kr.
  */
@@ -41,6 +64,7 @@ export const DEFAULT_CHANNELS = [
     transactionPercent: 0,
     transactionPerCopy: 0,
     maxReturnPercent: 50,
+    presale: NORLI_PRESALE,
     active: true,
   },
   {
@@ -136,7 +160,7 @@ export const SALE_SOURCE_HELP: Record<SaleSource, string> = {
   innkjop:
     "Norli eller ARK har bestilt et antall bøker. Dette er bøkene de kan sende tilbake.",
   forhandssalg:
-    "Kunder bestilte boka før lansering, og bokhandelen bestilte ekstra for dem. Kommer ikke i retur.",
+    "Kunder bestilte via bokhandelens forhåndssalgslenke (bok.norli.no). Bokhandelen bestiller disse i tillegg til innkjøpet, så de kommer oppå de 400/300 — og kommer ikke i retur. Hos Norli tar de 45 % i stedet for 50 %, og over 50 bøker gir kickback. Fyll inn hvor mange som er signert: bare de bestilles til signering i butikk.",
   avregning:
     "Oppgjøret fra Forlagsentralen. Bruk bare hvis du ikke har ført innkjøpene enkeltvis — ellers telles bøkene to ganger.",
   foredrag: "Bøker du solgte selv på foredrag eller kurs.",

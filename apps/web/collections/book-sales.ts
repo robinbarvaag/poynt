@@ -101,6 +101,36 @@ export const BookSales: CollectionConfig = {
       ],
     },
     {
+      type: "row",
+      admin: {
+        condition: (data) => data?.saleSource === "forhandssalg",
+      },
+      fields: [
+        {
+          name: "signedCopies",
+          type: "number",
+          label: "Hvorav signert",
+          min: 0,
+          admin: {
+            width: "50%",
+            description:
+              "Kunder som krysset av for «signert». Bare disse bestilles inn til signering i butikk — og bare disse kan du ta med på lanseringsfesten.",
+          },
+        },
+        {
+          name: "personallySignedCopies",
+          type: "number",
+          label: "Hvorav personlig signert",
+          min: 0,
+          admin: {
+            width: "50%",
+            description:
+              "Med navn. Ha gjestelista med når du signerer, så riktig bok går til riktig person.",
+          },
+        },
+      ],
+    },
+    {
       name: "unitPrice",
       type: "number",
       label: "Pris per bok (kr)",

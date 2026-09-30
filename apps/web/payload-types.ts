@@ -3331,6 +3331,14 @@ export interface BookSale {
   channel: 'norli' | 'ark' | 'egen' | 'foredrag' | 'direkte' | 'annet';
   saleSource: 'innkjop' | 'forhandssalg' | 'avregning' | 'foredrag' | 'direkte' | 'retur' | 'annet';
   /**
+   * Kunder som krysset av for «signert». Bare disse bestilles inn til signering i butikk — og bare disse kan du ta med på lanseringsfesten.
+   */
+  signedCopies?: number | null;
+  /**
+   * Med navn. Ha gjestelista med når du signerer, så riktig bok går til riktig person.
+   */
+  personallySignedCopies?: number | null;
+  /**
    * La stå tom for å bruke utsalgsprisen fra Bokøkonomi. Fyll ut ved rabatt, f.eks. et samlet kjøp til en bedrift.
    */
   unitPrice?: number | null;
@@ -5319,6 +5327,8 @@ export interface BookSalesSelect<T extends boolean = true> {
   copies?: T;
   channel?: T;
   saleSource?: T;
+  signedCopies?: T;
+  personallySignedCopies?: T;
   unitPrice?: T;
   reference?: T;
   notes?: T;
@@ -6345,6 +6355,35 @@ export interface BookEconomy {
          * Hvor stor del av innkjøpet bokhandelen kan sende tilbake. Norli og ARK: 50. Dashbordet viser hvor mye av det du har tjent som kan forsvinne igjen. Faktiske returer føres som «Retur fra bokhandel» under Boksalg.
          */
         maxReturnPercent?: number | null;
+        presale?: {
+          enabled?: boolean | null;
+          /**
+           * Lenka kundene MÅ bruke for at salget skal telle, f.eks. https://bok.norli.no/verdifull-vekst.
+           */
+          link?: string | null;
+          /**
+           * Norli høsten 2026: 45.
+           */
+          retailerPercent?: number | null;
+          /**
+           * Norli: 500. Da kommer plakat i butikk, vindu i Universitetsgata, Meta-annonser og nyhetsbrev.
+           */
+          marketingPackageAt?: number | null;
+          /**
+           * Som regel ut lanseringsuka. Salg på selve lanseringsfesten teller ikke. La stå tom hvis alt skal telle.
+           */
+          kickbackUntil?: string | null;
+          /**
+           * Fra og med antallet gis prosenten av fullpris — på ALLE forhåndssalg, ikke bare de over terskelen. Bokhandelen regner det ut og trekker fra salg via betalte kanaler.
+           */
+          kickbackTiers?:
+            | {
+                copies: number;
+                percent: number;
+                id?: string | null;
+              }[]
+            | null;
+        };
         id?: string | null;
       }[]
     | null;
@@ -6795,6 +6834,22 @@ export interface BookEconomySelect<T extends boolean = true> {
         transactionPercent?: T;
         transactionPerCopy?: T;
         maxReturnPercent?: T;
+        presale?:
+          | T
+          | {
+              enabled?: T;
+              link?: T;
+              retailerPercent?: T;
+              marketingPackageAt?: T;
+              kickbackUntil?: T;
+              kickbackTiers?:
+                | T
+                | {
+                    copies?: T;
+                    percent?: T;
+                    id?: T;
+                  };
+            };
         id?: T;
       };
   sources?:

@@ -60,4 +60,34 @@ describe("milestones", () => {
     expect(m["break-even"].reached).toBe(true);
     expect(m["break-even"].detail).toBe("I pluss!");
   });
+
+  test("forhåndssalg via Norli: hvert kickback-trinn og markedspakka er milepæler", () => {
+    const m = byKey({
+      ...now,
+      presales: [
+        {
+          key: "norli",
+          label: "Norli",
+          copies: 75,
+          tiers: [
+            { copies: 500, percent: 8 },
+            { copies: 50, percent: 5 },
+            { copies: 200, percent: 7 },
+          ],
+          marketingPackageAt: 500,
+        },
+      ],
+    });
+    expect(m["norli-kickback-50"].reached).toBe(true);
+    expect(m["norli-kickback-50"].label).toBe("5 % kickback fra Norli");
+    expect(m["norli-kickback-200"].reached).toBe(false);
+    expect(m["norli-kickback-200"].detail).toBe("75 av 200 forhåndssalg");
+    expect(m["norli-marketing-package"].label).toBe(
+      "Markedspakke i Norli-butikkene"
+    );
+    expect(m["norli-marketing-package"].reached).toBe(false);
+    // Trappa sorteres stigende uansett rekkefølge i admin.
+    const keys = milestones({ ...now, presales: [] }).map((item) => item.key);
+    expect(keys).not.toContain("norli-kickback-50");
+  });
 });

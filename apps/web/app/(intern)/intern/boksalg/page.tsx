@@ -9,8 +9,9 @@ import {
 import { HorizontalBars } from "@/components/boksalg/horizontal-bars";
 import { Milestones } from "@/components/boksalg/milestones";
 import { MixSimulator } from "@/components/boksalg/mix-simulator";
+import { PresaleCard } from "@/components/boksalg/presale-card";
 import { RefreshButton } from "@/components/boksalg/refresh-button";
-import { ReturnSimulator } from "@/components/boksalg/return-simulator";
+import { ReturnScenario } from "@/components/boksalg/return-scenario";
 import { SalesChart } from "@/components/boksalg/sales-chart";
 import { StockTabs } from "@/components/boksalg/stock-tabs";
 import { StoresSection } from "@/components/boksalg/stores-section";
@@ -143,63 +144,30 @@ async function BookSalesContent() {
         </Card>
       )}
 
-      {/* ---- Nøkkeltall ---------------------------------------------- */}
-      <section
-        className={cn(
-          "grid gap-4 sm:grid-cols-2",
-          book.printRun ? "lg:grid-cols-5" : "lg:grid-cols-4"
-        )}
-      >
-        <StatTile
-          label="Solgt inn"
-          value={antall(totals.copies)}
-          hint="bøker du har fått betalt for"
-        />
-        {book.printRun && (
-          <StatTile
-            label="Av opplaget"
-            value={`${Math.round((totals.copies / book.printRun) * 100)} %`}
-            hint={`${antall(totals.copies)} av ${antall(book.printRun)} trykte`}
-          />
-        )}
-        <StatTile
-          label="Netto til Susanne"
-          value={kr(totals.net)}
-          hint={`av ${kr(totals.revenue)} i omsetning`}
-        />
-        <StatTile label="Utgifter" value={kr(expenses.total)} hint="til nå" />
-        <StatTile
-          label="Resultat"
-          value={kr(coverage.result)}
-          hint={
-            coverage.result >= 0 ? "boka har gått i pluss" : "igjen å dekke"
+      {/* ---- Forhåndssalg via bokhandelens program (Norli) ----------- */}
+      {data.presales.map((presale) => (
+        <PresaleCard
+          key={presale.channelKey}
+          presale={presale}
+          purchasedCopies={
+            channels
+              .find((channel) => channel.key === presale.channelKey)
+              ?.bySource.find((part) => part.source === "innkjop")?.copies ?? 0
           }
-          tone={coverage.result >= 0 ? "good" : "neutral"}
         />
-      </section>
+      ))}
 
-      {/* ---- Break-even ---------------------------------------------- */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Veien til null</CardTitle>
-          <CardDescription>
-            Hvor mye av de {kr(expenses.total)} i utgifter som er tjent inn — og
-            hvor mye av det bokhandlene fortsatt kan sende tilbake. Et innkjøp
-            med returrett er inntekt, men ikke sikret inntekt før returfristen
-            er ute.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ReturnSimulator
-            settings={data.settings}
-            channels={channels.map((channel) => channel.rates)}
-            returnable={data.returnable}
-            earned={totals}
-            coverage={coverage}
-            totalExpenses={expenses.total}
-          />
-        </CardContent>
-      </Card>
+      {/* ---- Returscenario + nøkkeltall + veien til null ------------- */}
+      {/* Slideren øverst styrer alle tallene i denne seksjonen. */}
+      <ReturnScenario
+        settings={data.settings}
+        channels={channels.map((channel) => channel.rates)}
+        returnable={data.returnable}
+        earned={totals}
+        coverage={coverage}
+        totalExpenses={expenses.total}
+        printRun={book.printRun}
+      />
 
       {/* ---- Milepæler ----------------------------------------------- */}
       <Card>
@@ -252,11 +220,22 @@ async function BookSalesContent() {
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
           <HorizontalBars
-            rows={channels.map((channel) => ({
-              label: channel.label,
-              value: channel.unit.net,
-              display: kr(channel.unit.net, 2),
-            }))}
+            rows={channels.flatMap((channel) => [
+              {
+                label: channel.label,
+                value: channel.unit.net,
+                display: kr(channel.unit.net, 2),
+              },
+              ...(channel.presale
+                ? [
+                    {
+                      label: `${channel.label} forhåndssalg`,
+                      value: channel.presale.unit.net,
+                      display: kr(channel.presale.unit.net, 2),
+                    },
+                  ]
+                : []),
+            ])}
           />
 
           <div className="border-border overflow-hidden rounded-xl border">
@@ -276,7 +255,7 @@ async function BookSalesContent() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {channels.map((channel) => (
+                {channels.flatMap((channel) => [
                   <TableRow key={channel.key}>
                     <TableCell className="font-medium">
                       {channel.label}
@@ -318,8 +297,49 @@ async function BookSalesContent() {
                         </span>
                       )}
                     </TableCell>
-                  </TableRow>
-                ))}
+                  </TableRow>,
+                  // Forhåndssalg via bokhandelens program: samme kanal, men
+                  // egen sats (Norli 45 %) — vises som egen linje under.
+                  ...(channel.presale
+                    ? [
+                        <TableRow
+                          key={`${channel.key}-presale`}
+                          className="bg-muted/30"
+                        >
+                          <TableCell className="text-muted-foreground pl-6 text-sm">
+                            {channel.label} forhåndssalg (
+                            {channel.presale.terms.retailerPercent} %)
+                          </TableCell>
+                          <TableCell className="text-right tabular-nums">
+                            {kr(channel.presale.unit.listPrice)}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground text-right tabular-nums">
+                            −{kr(channel.presale.unit.retailerCut, 2)}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground text-right tabular-nums">
+                            −{kr(channel.presale.unit.editorCut, 2)}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground text-right tabular-nums">
+                            −
+                            {kr(
+                              channel.presale.unit.distributionCut +
+                                channel.presale.unit.transactionFee,
+                              2
+                            )}
+                          </TableCell>
+                          <TableCell className="text-right font-semibold tabular-nums">
+                            {kr(channel.presale.unit.net, 2)}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground text-right text-xs">
+                            + kickback
+                          </TableCell>
+                          <TableCell className="text-right tabular-nums">
+                            {antall(channel.presale.copies)}
+                          </TableCell>
+                        </TableRow>,
+                      ]
+                    : []),
+                ])}
               </TableBody>
             </Table>
           </div>
@@ -435,33 +455,5 @@ async function BookSalesContent() {
         </CardContent>
       </Card>
     </main>
-  );
-}
-
-function StatTile({
-  label,
-  value,
-  hint,
-  tone = "neutral",
-}: {
-  label: string;
-  value: string;
-  hint?: string;
-  tone?: "neutral" | "good";
-}) {
-  return (
-    <Card>
-      <CardContent className="flex flex-col gap-1 py-6">
-        <p className="text-muted-foreground text-sm">{label}</p>
-        <p
-          className={`font-display text-3xl font-bold tabular-nums ${
-            tone === "good" ? "text-primary" : ""
-          }`}
-        >
-          {value}
-        </p>
-        {hint && <p className="text-muted-foreground text-xs">{hint}</p>}
-      </CardContent>
-    </Card>
   );
 }

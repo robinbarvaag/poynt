@@ -30,6 +30,21 @@ export interface MilestoneInput {
   regionsTotal: number;
   /** Bøker ut av butikkhyllene (estimat). */
   sellThrough: number;
+  /**
+   * Forhåndssalg via bokhandelens program (Norli), én per kanal med vilkår.
+   * Gir kickback-trinnene og markedspakka som milepæler.
+   */
+  presales?: PresaleMilestoneInput[];
+}
+
+export interface PresaleMilestoneInput {
+  key: string;
+  /** Kanalens navn, «Norli». */
+  label: string;
+  /** Forhåndssalg som teller i kickback-grunnlaget. */
+  copies: number;
+  tiers: { copies: number; percent: number }[];
+  marketingPackageAt: number | null;
 }
 
 const antall = (value: number) => value.toLocaleString("nb-NO");
@@ -82,6 +97,34 @@ export function milestones(input: MilestoneInput): Milestone[] {
         "trykte"
       )
     );
+  }
+
+  // Forhåndssalgsprogrammet: hvert kickback-trinn er en liten seier, og
+  // markedspakka (plakat, vindu, annonser) er en stor en.
+  for (const presale of input.presales ?? []) {
+    const tiers = [...presale.tiers].sort((a, b) => a.copies - b.copies);
+    for (const tier of tiers) {
+      list.push(
+        countMilestone(
+          `${presale.key}-kickback-${tier.copies}`,
+          `${tier.percent} % kickback fra ${presale.label}`,
+          presale.copies,
+          tier.copies,
+          "forhåndssalg"
+        )
+      );
+    }
+    if (presale.marketingPackageAt !== null && presale.marketingPackageAt > 0) {
+      list.push(
+        countMilestone(
+          `${presale.key}-marketing-package`,
+          `Markedspakke i ${presale.label}-butikkene`,
+          presale.copies,
+          presale.marketingPackageAt,
+          "forhåndssalg"
+        )
+      );
+    }
   }
 
   list.push({

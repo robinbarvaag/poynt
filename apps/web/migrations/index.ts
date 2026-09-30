@@ -83,6 +83,7 @@ import * as migration_20260922_195240 from './20260922_195240';
 import * as migration_20260922_200457 from './20260922_200457';
 import * as migration_20260922_203059 from './20260922_203059';
 import * as migration_20260922_212025 from './20260922_212025';
+import * as migration_20260930_171853_norli_presale from './20260930_171853_norli_presale';
 
 export const migrations = [
   {
@@ -508,6 +509,11 @@ export const migrations = [
   {
     up: migration_20260922_212025.up,
     down: migration_20260922_212025.down,
-    name: '20260922_212025'
+    name: '20260922_212025',
+  },
+  {
+    up: migration_20260930_171853_norli_presale.up,
+    down: migration_20260930_171853_norli_presale.down,
+    name: '20260930_171853_norli_presale'
   },
 ];

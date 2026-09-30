@@ -60,50 +60,50 @@ export function EventFacts({ items, className }: EventFactsProps) {
         const tone = TONES[item.icon];
         const external = item.href?.startsWith("http");
         return (
+          // En <dl>-gruppe kan pakkes i én <div>, men den må bare inneholde
+          // <dt>/<dd> direkte — derfor bor ikon og fargeflekk inne i <dt>.
           <div
             key={item.label}
             className={cn(
-              "group relative flex flex-col gap-4 overflow-hidden rounded-3xl bg-card p-5 shadow-sm ring-1 ring-border",
+              "group relative flex flex-col overflow-hidden rounded-3xl bg-card p-5 shadow-sm ring-1 ring-border",
               item.href &&
                 "motion-safe:transition-transform motion-safe:hover:-translate-y-0.5"
             )}
           >
-            {/* Myk fargeflekk i hjørnet — samme grep som heroens skjeve bakplate. */}
-            <span
-              aria-hidden
-              className={cn(
-                // design-unntak: dekorativ fargeflekk (aria-hidden)
-                "absolute -top-8 -right-8 size-28 rounded-full opacity-40 motion-safe:transition-transform motion-safe:duration-500 group-hover:scale-110",
-                tone.blob
-              )}
-            />
-            <span
-              className={cn(
-                "relative flex size-11 shrink-0 items-center justify-center rounded-2xl shadow-sm",
-                tone.tile
-              )}
-            >
-              <Icon className="size-5" aria-hidden="true" />
-            </span>
-            <div className="relative min-w-0">
-              <dt className="font-semibold text-muted-foreground text-xs uppercase tracking-[0.12em]">
-                {item.label}
-              </dt>
-              <dd className="mt-1 font-bold font-heading text-foreground text-lg leading-snug">
-                {item.href ? (
-                  <a
-                    href={item.href}
-                    className="underline decoration-primary/30 decoration-2 underline-offset-4 hover:decoration-primary"
-                    target={external ? "_blank" : undefined}
-                    rel={external ? "noopener noreferrer" : undefined}
-                  >
-                    {item.value}
-                  </a>
-                ) : (
-                  item.value
+            <dt className="flex flex-col gap-4 font-semibold text-muted-foreground text-xs uppercase tracking-[0.12em]">
+              {/* Myk fargeflekk i hjørnet — samme grep som heroens skjeve bakplate. */}
+              <span
+                aria-hidden
+                className={cn(
+                  // design-unntak: dekorativ fargeflekk (aria-hidden)
+                  "absolute -top-8 -right-8 size-28 rounded-full opacity-40 motion-safe:transition-transform motion-safe:duration-500 group-hover:scale-110",
+                  tone.blob
                 )}
-              </dd>
-            </div>
+              />
+              <span
+                className={cn(
+                  "relative flex size-11 shrink-0 items-center justify-center rounded-2xl shadow-sm",
+                  tone.tile
+                )}
+              >
+                <Icon className="size-5" aria-hidden="true" />
+              </span>
+              <span className="relative">{item.label}</span>
+            </dt>
+            <dd className="relative mt-1 min-w-0 font-bold font-heading text-foreground text-lg leading-snug">
+              {item.href ? (
+                <a
+                  href={item.href}
+                  className="underline decoration-primary/30 decoration-2 underline-offset-4 hover:decoration-primary"
+                  target={external ? "_blank" : undefined}
+                  rel={external ? "noopener noreferrer" : undefined}
+                >
+                  {item.value}
+                </a>
+              ) : (
+                item.value
+              )}
+            </dd>
           </div>
         );
       })}
