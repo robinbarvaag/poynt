@@ -5,8 +5,8 @@ import {
   type ScheduledPost,
   channelMeta,
   parseISODate,
-} from "@/lib/planner/scheduled-posts";
-import { trpc } from "@/lib/planner/trpc";
+} from "@/lib/on-poynt/scheduled-posts";
+import { trpc } from "@/lib/on-poynt/trpc";
 import {
   Badge,
   Button,

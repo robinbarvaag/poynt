@@ -1,5 +1,5 @@
-import { appRouter } from "@poynt/planner-api";
-import { auth } from "@poynt/planner-auth/server";
+import { appRouter } from "@poynt/on-poynt-api";
+import { auth } from "@poynt/on-poynt-auth/server";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { headers } from "next/headers";
 

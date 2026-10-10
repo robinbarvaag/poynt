@@ -1,6 +1,6 @@
 import { requireFeature } from "@/lib/features/server";
-import { createServerCaller } from "@/lib/planner/trpc-server";
-import type { BrandBrief, BrandIdentity } from "@poynt/planner-validators";
+import { createServerCaller } from "@/lib/on-poynt/trpc-server";
+import type { BrandBrief, BrandIdentity } from "@poynt/on-poynt-validators";
 import {
   type MarketingPlan,
   mainGoalLabels,
@@ -8,7 +8,7 @@ import {
   profileCompanySizeLabels,
   strengthLabels,
   weeklyTimeLabels,
-} from "@poynt/planner-validators";
+} from "@poynt/on-poynt-validators";
 import {
   BrandHeader,
   Button,

@@ -1,9 +1,9 @@
-import { db, eq } from "@poynt/planner-db";
-import { plannerContentSuggestion } from "@poynt/planner-db/schema";
+import { db, eq } from "@poynt/on-poynt-db";
+import { onPoyntContentSuggestion } from "@poynt/on-poynt-db/schema";
 import type {
   ContentRadarOutput,
   RadarSignalInput,
-} from "@poynt/planner-validators";
+} from "@poynt/on-poynt-validators";
 
 export interface PersistStats {
   created: number;
@@ -45,11 +45,11 @@ export async function persistSuggestions(
 
     const [existing] = await db
       .select({
-        id: plannerContentSuggestion.id,
-        status: plannerContentSuggestion.status,
+        id: onPoyntContentSuggestion.id,
+        status: onPoyntContentSuggestion.status,
       })
-      .from(plannerContentSuggestion)
-      .where(eq(plannerContentSuggestion.dedupKey, dedupKey))
+      .from(onPoyntContentSuggestion)
+      .where(eq(onPoyntContentSuggestion.dedupKey, dedupKey))
       .limit(1);
 
     if (existing) {
@@ -58,7 +58,7 @@ export async function persistSuggestions(
         continue;
       }
       await db
-        .update(plannerContentSuggestion)
+        .update(onPoyntContentSuggestion)
         .set({
           type: s.type,
           title: s.title,
@@ -71,10 +71,10 @@ export async function persistSuggestions(
           source: "radar",
           runId,
         })
-        .where(eq(plannerContentSuggestion.id, existing.id));
+        .where(eq(onPoyntContentSuggestion.id, existing.id));
       updated += 1;
     } else {
-      await db.insert(plannerContentSuggestion).values({
+      await db.insert(onPoyntContentSuggestion).values({
         dedupKey,
         type: s.type,
         title: s.title,

@@ -1,4 +1,4 @@
-import { hasAiTools } from "@poynt/planner-validators";
+import { hasAiTools } from "@poynt/on-poynt-validators";
 import type { MembershipInfo } from "../membership";
 
 /**
@@ -6,8 +6,8 @@ import type { MembershipInfo } from "../membership";
  * Community AI, så all AI-gating skal sjekke begge — bruk denne i stedet for
  * `tier === "community_ai"` (som ville stengt byrå-kunder ute).
  *
- * Selve definisjonen bor nå i `@poynt/planner-validators` (delt med
- * `packages/planner-api`); re-eksporteres her for eksisterende importerere.
+ * Selve definisjonen bor nå i `@poynt/on-poynt-validators` (delt med
+ * `packages/on-poynt-api`); re-eksporteres her for eksisterende importerere.
  */
 export { hasAiTools };
 

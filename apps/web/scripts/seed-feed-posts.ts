@@ -9,12 +9,12 @@ import {
   db,
   eq,
   inArray,
-  plannerConversation,
-  plannerMessage,
-  plannerMessageAttachment,
-  plannerMessageReaction,
-  plannerUser,
-} from "@poynt/planner-db";
+  onPoyntConversation,
+  onPoyntMessage,
+  onPoyntMessageAttachment,
+  onPoyntMessageReaction,
+  onPoyntUser,
+} from "@poynt/on-poynt-db";
 
 const DAY = 86_400_000;
 const MIN = 60_000;
@@ -103,13 +103,13 @@ const POSTS: SeedPost[] = [
 
 async function ensurePerson(key: PersonKey) {
   const p = PEOPLE[key];
-  const existing = await db.query.plannerUser.findFirst({
-    where: eq(plannerUser.email, p.email),
+  const existing = await db.query.onPoyntUser.findFirst({
+    where: eq(onPoyntUser.email, p.email),
   });
   const image = `https://i.pravatar.cc/200?u=${encodeURIComponent(p.email)}`;
   if (existing) return existing.id;
   const id = crypto.randomUUID();
-  await db.insert(plannerUser).values({
+  await db.insert(onPoyntUser).values({
     id,
     name: p.name,
     email: p.email,
@@ -128,12 +128,12 @@ async function run() {
   }
 
   // Feed-samtalen (opprett hvis den ikke finnes — samme logikk som getFeed).
-  let feed = await db.query.plannerConversation.findFirst({
-    where: eq(plannerConversation.type, "feed"),
+  let feed = await db.query.onPoyntConversation.findFirst({
+    where: eq(onPoyntConversation.type, "feed"),
   });
   if (!feed) {
     await db
-      .insert(plannerConversation)
+      .insert(onPoyntConversation)
       .values({
         id: crypto.randomUUID(),
         type: "feed",
@@ -141,30 +141,30 @@ async function run() {
         slug: "innlegg",
         description: "Fellesskapets vegg — del, spør og feir.",
       })
-      .onConflictDoNothing({ target: plannerConversation.slug });
-    feed = await db.query.plannerConversation.findFirst({
-      where: eq(plannerConversation.type, "feed"),
+      .onConflictDoNothing({ target: onPoyntConversation.slug });
+    feed = await db.query.onPoyntConversation.findFirst({
+      where: eq(onPoyntConversation.type, "feed"),
     });
   }
   if (!feed) throw new Error("Kunne ikke opprette feed-samtalen");
 
   // Rydd seed-brukernes gamle innlegg i feeden (cascade tar kommentarer m.m.)
-  const old = await db.query.plannerMessage.findMany({
-    where: eq(plannerMessage.conversationId, feed.id),
+  const old = await db.query.onPoyntMessage.findMany({
+    where: eq(onPoyntMessage.conversationId, feed.id),
     columns: { id: true, authorId: true },
   });
   const oldIds = old
     .filter((m) => Object.values(ids).includes(m.authorId))
     .map((m) => m.id);
   if (oldIds.length) {
-    await db.delete(plannerMessage).where(inArray(plannerMessage.id, oldIds));
+    await db.delete(onPoyntMessage).where(inArray(onPoyntMessage.id, oldIds));
   }
 
   const now = Date.now();
   for (const post of POSTS) {
     const postId = crypto.randomUUID();
     const createdAt = new Date(now - post.daysAgo * DAY - post.minsAgo * MIN);
-    await db.insert(plannerMessage).values({
+    await db.insert(onPoyntMessage).values({
       id: postId,
       conversationId: feed.id,
       authorId: ids[post.who],
@@ -173,7 +173,7 @@ async function run() {
     });
 
     for (const seed of post.images ?? []) {
-      await db.insert(plannerMessageAttachment).values({
+      await db.insert(onPoyntMessageAttachment).values({
         id: crypto.randomUUID(),
         messageId: postId,
         url: `https://picsum.photos/seed/${seed}/900/650`,
@@ -185,7 +185,7 @@ async function run() {
       });
     }
     for (const r of post.reactions ?? []) {
-      await db.insert(plannerMessageReaction).values({
+      await db.insert(onPoyntMessageReaction).values({
         id: crypto.randomUUID(),
         messageId: postId,
         userId: ids[r.who],
@@ -193,7 +193,7 @@ async function run() {
       });
     }
     for (const c of post.comments ?? []) {
-      await db.insert(plannerMessage).values({
+      await db.insert(onPoyntMessage).values({
         id: crypto.randomUUID(),
         conversationId: feed.id,
         authorId: ids[c.who],

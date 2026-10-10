@@ -1,6 +1,6 @@
-import { TierGate } from "@/components/planner/tier-gate";
+import { TierGate } from "@/components/on-poynt/tier-gate";
 import { requireFeature } from "@/lib/features/server";
-import { createServerCaller } from "@/lib/planner/trpc-server";
+import { createServerCaller } from "@/lib/on-poynt/trpc-server";
 import { DeclineGeneratorClient } from "./decline-generator-client";
 
 interface SavedResult {

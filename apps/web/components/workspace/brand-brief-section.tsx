@@ -1,9 +1,9 @@
 "use client";
 
-import { brandBriefStreamAction } from "@/lib/planner/actions/brand-brief";
-import { trpc } from "@/lib/planner/trpc";
+import { brandBriefStreamAction } from "@/lib/on-poynt/actions/brand-brief";
+import { trpc } from "@/lib/on-poynt/trpc";
 import { readStreamableValue } from "@ai-sdk/rsc";
-import type { BrandBrief } from "@poynt/planner-validators";
+import type { BrandBrief } from "@poynt/on-poynt-validators";
 import { Badge, Button, Input, Skeleton, Textarea, toast } from "@poynt/ui";
 import { Icon } from "@poynt/ui/icons";
 import { useCallback, useEffect, useState } from "react";

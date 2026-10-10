@@ -1,6 +1,6 @@
-import { getPlaygroundSession } from "@/lib/planner/playground-access";
-import { PLAYGROUND_MODELS } from "@poynt/planner-api/lib/models";
-import { getPlaygroundTools } from "@poynt/planner-api/lib/playground";
+import { getPlaygroundSession } from "@/lib/on-poynt/playground-access";
+import { PLAYGROUND_MODELS } from "@poynt/on-poynt-api/lib/models";
+import { getPlaygroundTools } from "@poynt/on-poynt-api/lib/playground";
 import { redirect } from "next/navigation";
 import { PlaygroundClient } from "./playground-client";
 

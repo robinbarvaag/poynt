@@ -1,14 +1,15 @@
-import { auth } from "@poynt/planner-auth/server";
-import { and, db, desc, eq } from "@poynt/planner-db";
+import { getSessionWithMembership } from "@/lib/membership";
+import { hasActiveAccess } from "@/lib/membership/has-active-access";
+import { and, db, desc, eq } from "@poynt/on-poynt-db";
 import {
-  plannerIndustry,
-  plannerMembershipApplication,
-  plannerUser,
-  plannerUserPreferences,
-  plannerWorkspace,
-  plannerWorkspaceMember,
-  plannerWorkspaceProfile,
-} from "@poynt/planner-db/schema";
+  onPoyntIndustry,
+  onPoyntMembershipApplication,
+  onPoyntUser,
+  onPoyntUserPreferences,
+  onPoyntWorkspace,
+  onPoyntWorkspaceMember,
+  onPoyntWorkspaceProfile,
+} from "@poynt/on-poynt-db/schema";
 import { type NextRequest, NextResponse } from "next/server";
 
 function slugify(name: string): string {
@@ -20,18 +21,37 @@ function slugify(name: string): string {
     .replace(/^-|-$/g, "");
 }
 
+/**
+ * Onboarding er steget ETTER tilgang: innlogget uten aktivt medlemskap skal
+ * ikke kunne opprette workspace her (app-layouten stopper dem i UI-et, men
+ * ruta må holde samme linje).
+ */
+async function requireMemberSession(req: NextRequest) {
+  const session = await getSessionWithMembership(req);
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!hasActiveAccess(session.membership)) {
+    return NextResponse.json(
+      { error: "Krever aktivt medlemskap" },
+      { status: 403 }
+    );
+  }
+  return session;
+}
+
 /** Hent den nyeste godkjente søknaden for brukeren (om noen). */
 async function getApprovedApplication(userId: string) {
   const [application] = await db
     .select()
-    .from(plannerMembershipApplication)
+    .from(onPoyntMembershipApplication)
     .where(
       and(
-        eq(plannerMembershipApplication.userId, userId),
-        eq(plannerMembershipApplication.status, "approved")
+        eq(onPoyntMembershipApplication.userId, userId),
+        eq(onPoyntMembershipApplication.status, "approved")
       )
     )
-    .orderBy(desc(plannerMembershipApplication.reviewedAt))
+    .orderBy(desc(onPoyntMembershipApplication.reviewedAt))
     .limit(1);
   return application ?? null;
 }
@@ -41,10 +61,8 @@ async function getApprovedApplication(userId: string) {
  * medlemmet slipper å skrive bedriftsnavnet på nytt.
  */
 export async function GET(req: NextRequest) {
-  const session = await auth.api.getSession({ headers: req.headers });
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const session = await requireMemberSession(req);
+  if (session instanceof NextResponse) return session;
 
   const application = await getApprovedApplication(session.user.id);
   return NextResponse.json({
@@ -54,11 +72,8 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await auth.api.getSession({ headers: req.headers });
-
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const session = await requireMemberSession(req);
+    if (session instanceof NextResponse) return session;
 
     const body = await req.json().catch(() => ({}));
     const workspaceName = body.workspaceName?.trim();
@@ -74,14 +89,14 @@ export async function POST(req: NextRequest) {
     const slug = `${slugify(workspaceName)}-${workspaceId.slice(0, 6)}`;
 
     // Create workspace
-    await db.insert(plannerWorkspace).values({
+    await db.insert(onPoyntWorkspace).values({
       id: workspaceId,
       name: workspaceName,
       slug,
     });
 
     // Add user as owner
-    await db.insert(plannerWorkspaceMember).values({
+    await db.insert(onPoyntWorkspaceMember).values({
       id: crypto.randomUUID(),
       workspaceId,
       userId: session.user.id,
@@ -90,27 +105,27 @@ export async function POST(req: NextRequest) {
 
     // Set as active workspace
     await db
-      .insert(plannerUserPreferences)
+      .insert(onPoyntUserPreferences)
       .values({
         id: crypto.randomUUID(),
         userId: session.user.id,
         activeWorkspaceId: workspaceId,
       })
       .onConflictDoUpdate({
-        target: plannerUserPreferences.userId,
+        target: onPoyntUserPreferences.userId,
         set: { activeWorkspaceId: workspaceId },
       });
 
     // Forhåndsutfyll bedriftsprofilen fra en godkjent søknad, hvis vi har en.
     const application = await getApprovedApplication(session.user.id);
     if (application) {
-      // industryId valideres mot planner_industry (skjemaet er redigerbart).
+      // industryId valideres mot industry (skjemaet er redigerbart).
       let industryId: string | null = null;
       if (application.industryId) {
         const [industry] = await db
-          .select({ id: plannerIndustry.id })
-          .from(plannerIndustry)
-          .where(eq(plannerIndustry.id, application.industryId))
+          .select({ id: onPoyntIndustry.id })
+          .from(onPoyntIndustry)
+          .where(eq(onPoyntIndustry.id, application.industryId))
           .limit(1);
         industryId = industry?.id ?? null;
       }
@@ -124,7 +139,7 @@ export async function POST(req: NextRequest) {
 
       if (hasProfileData) {
         await db
-          .insert(plannerWorkspaceProfile)
+          .insert(onPoyntWorkspaceProfile)
           .values({
             id: crypto.randomUUID(),
             workspaceId,
@@ -135,16 +150,16 @@ export async function POST(req: NextRequest) {
             customContext: application.aboutCompany ?? null,
           })
           .onConflictDoNothing({
-            target: plannerWorkspaceProfile.workspaceId,
+            target: onPoyntWorkspaceProfile.workspaceId,
           });
       }
     }
 
     // Mark onboarding as completed
     await db
-      .update(plannerUser)
+      .update(onPoyntUser)
       .set({ onboardingCompleted: true })
-      .where(eq(plannerUser.id, session.user.id));
+      .where(eq(onPoyntUser.id, session.user.id));
 
     return NextResponse.json({ success: true, workspaceId });
   } catch (error) {

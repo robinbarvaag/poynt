@@ -1,7 +1,7 @@
 import { MembershipPlans } from "@/components/subscription/membership-plans";
 import { getSessionWithMembership } from "@/lib/membership";
 import { hasAiTools } from "@/lib/membership/has-active-access";
-import { membershipTierLabels } from "@poynt/planner-validators";
+import { membershipTierLabels } from "@poynt/on-poynt-validators";
 import { Button } from "@poynt/ui";
 import {
   Card,

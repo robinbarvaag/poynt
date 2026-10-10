@@ -1,7 +1,7 @@
 "use client";
 
-import { inquiryReplyStreamAction } from "@/lib/planner/actions/inquiry-reply";
-import { useToolStream } from "@/lib/planner/use-tool-stream";
+import { inquiryReplyStreamAction } from "@/lib/on-poynt/actions/inquiry-reply";
+import { useToolStream } from "@/lib/on-poynt/use-tool-stream";
 import {
   type InquiryGoal,
   type InquiryReplyRequest,
@@ -16,7 +16,7 @@ import {
   inquirySources,
   replySentimentLabels,
   replySentiments,
-} from "@poynt/planner-validators";
+} from "@poynt/on-poynt-validators";
 import {
   Badge,
   type BadgeProps,

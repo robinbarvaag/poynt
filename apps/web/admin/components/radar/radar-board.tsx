@@ -3,7 +3,7 @@
 import {
   type ContentSuggestionTypeValue,
   contentSuggestionTypeLabels,
-} from "@poynt/planner-validators";
+} from "@poynt/on-poynt-validators";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { runRadarNow, setSuggestionStatus } from "../../actions/radar";

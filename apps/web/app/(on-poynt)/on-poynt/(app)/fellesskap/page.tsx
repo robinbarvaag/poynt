@@ -1,6 +1,6 @@
 import { CommunityClient } from "@/components/community/community-client";
 import { requireFeature } from "@/lib/features/server";
-import { auth } from "@poynt/planner-auth/server";
+import { auth } from "@poynt/on-poynt-auth/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";

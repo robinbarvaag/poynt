@@ -13,7 +13,7 @@ import {
   marketingPlanRequestSchema,
   timeframeLabels,
   timeframeTypes,
-} from "@poynt/planner-validators";
+} from "@poynt/on-poynt-validators";
 import {
   Badge,
   Button,

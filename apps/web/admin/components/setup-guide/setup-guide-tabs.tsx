@@ -322,7 +322,7 @@ invoice.payment_failed`}</CodeBlock>
       <Callout>
         Webhooken håndterer både <strong>produktkjøp</strong> (oppretter
         bestilling i Payload + sender kvittering) og <strong>medlemskap</strong>{" "}
-        (synkes til planner-databasen). Alle hendelser lagres med
+        (synkes til On Poynt-databasen). Alle hendelser lagres med
         idempotens-nøkkel, så dobbeltkjøring er trygt.
       </Callout>
     </Section>
@@ -540,7 +540,10 @@ const ChecklistTab = ({ env }: { env: EnvStatus }) => (
             name: "RESEND_API_KEY",
             desc: "Kvitterings- og bekreftelses-e-poster",
           },
-          { name: "DATABASE_URI", desc: "Postgres (Payload + planner-skjema)" },
+          {
+            name: "DATABASE_URI",
+            desc: "Postgres (Payload + on_poynt-skjema)",
+          },
           { name: "PAYLOAD_SECRET", desc: "Payload-kryptering og innlogging" },
         ]}
       />

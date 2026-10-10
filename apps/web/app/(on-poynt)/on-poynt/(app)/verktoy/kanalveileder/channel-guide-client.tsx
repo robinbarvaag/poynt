@@ -2,14 +2,17 @@
 
 import { GuideQuiz } from "@/components/channel-guide/guide-quiz";
 import { GuideResult } from "@/components/channel-guide/guide-result";
-import { ToolIntro, type ToolIntroStep } from "@/components/planner/tool-intro";
+import {
+  ToolIntro,
+  type ToolIntroStep,
+} from "@/components/on-poynt/tool-intro";
 import {
   type ReadinessField,
   ToolReadiness,
-} from "@/components/planner/tool-readiness";
+} from "@/components/on-poynt/tool-readiness";
 import { stepFade } from "@/lib/motion-variants";
-import { channelGuideStreamAction } from "@/lib/planner/actions/channel-guide";
-import { useToolStream } from "@/lib/planner/use-tool-stream";
+import { channelGuideStreamAction } from "@/lib/on-poynt/actions/channel-guide";
+import { useToolStream } from "@/lib/on-poynt/use-tool-stream";
 import type {
   ChannelGuideClientProps,
   ChannelRecommendation,
@@ -18,13 +21,13 @@ import type {
 import type {
   ChannelGuideRequest,
   ChannelGuideStream,
-} from "@poynt/planner-validators";
+} from "@poynt/on-poynt-validators";
 import {
   mainGoalLabels,
   strengthLabels,
   targetAudienceLabels,
   weeklyTimeLabels,
-} from "@poynt/planner-validators";
+} from "@poynt/on-poynt-validators";
 import { Button, PageShell, toast } from "@poynt/ui";
 import { Icon } from "@poynt/ui/icons";
 import { AnimatePresence, motion } from "framer-motion";

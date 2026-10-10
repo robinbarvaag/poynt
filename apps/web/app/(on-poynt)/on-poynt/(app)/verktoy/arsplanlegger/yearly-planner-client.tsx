@@ -1,21 +1,24 @@
 "use client";
 
-import { ToolIntro, type ToolIntroStep } from "@/components/planner/tool-intro";
+import {
+  ToolIntro,
+  type ToolIntroStep,
+} from "@/components/on-poynt/tool-intro";
 import {
   type ReadinessField,
   ToolReadiness,
-} from "@/components/planner/tool-readiness";
+} from "@/components/on-poynt/tool-readiness";
 import { PlannerForm } from "@/components/yearly-planner/planner-form";
 import { PlannerResult } from "@/components/yearly-planner/planner-result";
 import { stepFade } from "@/lib/motion-variants";
-import { yearlyPlannerStreamAction } from "@/lib/planner/actions/yearly-planner";
-import { useToolStream } from "@/lib/planner/use-tool-stream";
+import { yearlyPlannerStreamAction } from "@/lib/on-poynt/actions/yearly-planner";
+import { useToolStream } from "@/lib/on-poynt/use-tool-stream";
 import {
   type YearlyPlan,
   type YearlyPlanStream,
   type YearlyPlannerRequest,
   audienceLabels,
-} from "@poynt/planner-validators";
+} from "@poynt/on-poynt-validators";
 import { Button, PageShell, toast } from "@poynt/ui";
 import { Icon } from "@poynt/ui/icons";
 import { AnimatePresence, motion } from "framer-motion";

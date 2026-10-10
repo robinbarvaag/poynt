@@ -1,8 +1,8 @@
-import { db, desc, eq, or } from "@poynt/planner-db";
+import { db, desc, eq, or } from "@poynt/on-poynt-db";
 import {
-  plannerContentSuggestion,
-  plannerRadarRun,
-} from "@poynt/planner-db/schema";
+  onPoyntContentSuggestion,
+  onPoyntRadarRun,
+} from "@poynt/on-poynt-db/schema";
 
 /**
  * Delt datahenting for «Bindersen»: brukes både av dashbord-widgeten
@@ -35,32 +35,32 @@ export async function getBindersWidgetData(): Promise<BindersData> {
   const [top, lastRun] = await Promise.all([
     db
       .select({
-        id: plannerContentSuggestion.id,
-        title: plannerContentSuggestion.title,
-        rationale: plannerContentSuggestion.rationale,
-        type: plannerContentSuggestion.type,
-        priority: plannerContentSuggestion.priority,
-        targetCollection: plannerContentSuggestion.targetCollection,
-        targetId: plannerContentSuggestion.targetId,
-        evidence: plannerContentSuggestion.evidence,
+        id: onPoyntContentSuggestion.id,
+        title: onPoyntContentSuggestion.title,
+        rationale: onPoyntContentSuggestion.rationale,
+        type: onPoyntContentSuggestion.type,
+        priority: onPoyntContentSuggestion.priority,
+        targetCollection: onPoyntContentSuggestion.targetCollection,
+        targetId: onPoyntContentSuggestion.targetId,
+        evidence: onPoyntContentSuggestion.evidence,
       })
-      .from(plannerContentSuggestion)
+      .from(onPoyntContentSuggestion)
       .where(
         or(
-          eq(plannerContentSuggestion.status, "new"),
-          eq(plannerContentSuggestion.status, "snoozed")
+          eq(onPoyntContentSuggestion.status, "new"),
+          eq(onPoyntContentSuggestion.status, "snoozed")
         )
       )
-      .orderBy(desc(plannerContentSuggestion.priority))
+      .orderBy(desc(onPoyntContentSuggestion.priority))
       .limit(5),
     db
       .select({
-        startedAt: plannerRadarRun.startedAt,
-        stats: plannerRadarRun.stats,
+        startedAt: onPoyntRadarRun.startedAt,
+        stats: onPoyntRadarRun.stats,
       })
-      .from(plannerRadarRun)
-      .where(eq(plannerRadarRun.status, "ok"))
-      .orderBy(desc(plannerRadarRun.startedAt))
+      .from(onPoyntRadarRun)
+      .where(eq(onPoyntRadarRun.status, "ok"))
+      .orderBy(desc(onPoyntRadarRun.startedAt))
       .limit(1),
   ]);
 

@@ -1,27 +1,27 @@
 import { DefaultTemplate } from "@payloadcms/next/templates";
 import { Gutter, SetStepNav } from "@payloadcms/ui";
 import { getVisibleEntities } from "@payloadcms/ui/shared";
-import { db, desc } from "@poynt/planner-db";
+import { db, desc } from "@poynt/on-poynt-db";
 import {
-  plannerContentSuggestion,
-  plannerRadarRun,
-} from "@poynt/planner-db/schema";
+  onPoyntContentSuggestion,
+  onPoyntRadarRun,
+} from "@poynt/on-poynt-db/schema";
 import type { AdminViewServerProps } from "payload";
 import { RadarBoard } from "../../components/radar/radar-board";
 
 async function getSuggestions() {
   return db
     .select()
-    .from(plannerContentSuggestion)
-    .orderBy(desc(plannerContentSuggestion.priority))
+    .from(onPoyntContentSuggestion)
+    .orderBy(desc(onPoyntContentSuggestion.priority))
     .limit(200);
 }
 
 async function getRuns() {
   return db
     .select()
-    .from(plannerRadarRun)
-    .orderBy(desc(plannerRadarRun.startedAt))
+    .from(onPoyntRadarRun)
+    .orderBy(desc(onPoyntRadarRun.startedAt))
     .limit(5);
 }
 

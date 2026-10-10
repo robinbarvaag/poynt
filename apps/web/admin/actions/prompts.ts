@@ -1,9 +1,9 @@
 "use server";
 
 import { requireAdmin } from "@/lib/require-admin";
-import { defaultPromptTemplates } from "@poynt/planner-api";
-import { db, eq, inArray, sql } from "@poynt/planner-db";
-import { plannerPromptTemplate } from "@poynt/planner-db/schema";
+import { defaultPromptTemplates } from "@poynt/on-poynt-api";
+import { db, eq, inArray, sql } from "@poynt/on-poynt-db";
+import { onPoyntPromptTemplate } from "@poynt/on-poynt-db/schema";
 
 export async function upsertPromptTemplate(data: {
   id: string;
@@ -16,14 +16,14 @@ export async function upsertPromptTemplate(data: {
 }) {
   await requireAdmin();
   const [existing] = await db
-    .select({ id: plannerPromptTemplate.id })
-    .from(plannerPromptTemplate)
-    .where(eq(plannerPromptTemplate.id, data.id))
+    .select({ id: onPoyntPromptTemplate.id })
+    .from(onPoyntPromptTemplate)
+    .where(eq(onPoyntPromptTemplate.id, data.id))
     .limit(1);
 
   if (existing) {
     const [updated] = await db
-      .update(plannerPromptTemplate)
+      .update(onPoyntPromptTemplate)
       .set({
         name: data.name,
         description: data.description,
@@ -32,13 +32,13 @@ export async function upsertPromptTemplate(data: {
         isActive: data.isActive ?? true,
         updatedAt: sql`now()`,
       })
-      .where(eq(plannerPromptTemplate.id, data.id))
+      .where(eq(onPoyntPromptTemplate.id, data.id))
       .returning();
     return updated;
   }
 
   const [created] = await db
-    .insert(plannerPromptTemplate)
+    .insert(onPoyntPromptTemplate)
     .values({
       id: data.id,
       toolId: data.toolId,
@@ -63,9 +63,9 @@ export async function seedPromptTemplates() {
   await requireAdmin();
   const ids = defaultPromptTemplates.map((t) => t.id);
   const existing = await db
-    .select({ id: plannerPromptTemplate.id })
-    .from(plannerPromptTemplate)
-    .where(inArray(plannerPromptTemplate.id, ids));
+    .select({ id: onPoyntPromptTemplate.id })
+    .from(onPoyntPromptTemplate)
+    .where(inArray(onPoyntPromptTemplate.id, ids));
 
   const existingIds = new Set(existing.map((row) => row.id));
   const missing = defaultPromptTemplates.filter((t) => !existingIds.has(t.id));
@@ -75,7 +75,7 @@ export async function seedPromptTemplates() {
   }
 
   const inserted = await db
-    .insert(plannerPromptTemplate)
+    .insert(onPoyntPromptTemplate)
     .values(
       missing.map((t) => ({
         id: t.id,
@@ -120,17 +120,17 @@ export async function resyncPromptTemplate(id: string) {
 export async function togglePromptActive(id: string) {
   await requireAdmin();
   const [current] = await db
-    .select({ isActive: plannerPromptTemplate.isActive })
-    .from(plannerPromptTemplate)
-    .where(eq(plannerPromptTemplate.id, id))
+    .select({ isActive: onPoyntPromptTemplate.isActive })
+    .from(onPoyntPromptTemplate)
+    .where(eq(onPoyntPromptTemplate.id, id))
     .limit(1);
 
   if (!current) return { success: false };
 
   const [updated] = await db
-    .update(plannerPromptTemplate)
+    .update(onPoyntPromptTemplate)
     .set({ isActive: !current.isActive, updatedAt: sql`now()` })
-    .where(eq(plannerPromptTemplate.id, id))
+    .where(eq(onPoyntPromptTemplate.id, id))
     .returning();
 
   return updated;

@@ -2,12 +2,12 @@
 
 import { inngest } from "@/lib/inngest/client";
 import { requireAdmin } from "@/lib/require-admin";
-import { db, eq, sql } from "@poynt/planner-db";
+import { db, eq, sql } from "@poynt/on-poynt-db";
 import {
-  plannerInspirationItem,
-  plannerInspirationSource,
-} from "@poynt/planner-db/schema";
-import type { InspirationSourceTypeValue } from "@poynt/planner-validators";
+  onPoyntInspirationItem,
+  onPoyntInspirationSource,
+} from "@poynt/on-poynt-db/schema";
+import type { InspirationSourceTypeValue } from "@poynt/on-poynt-validators";
 
 /**
  * Inspirasjonskilder — admin-handlinger. Partneren registrerer offentlige
@@ -23,7 +23,7 @@ export async function createInspirationSource(data: {
 }) {
   await requireAdmin();
   const [created] = await db
-    .insert(plannerInspirationSource)
+    .insert(onPoyntInspirationSource)
     .values({
       label: data.label,
       url: data.url,
@@ -46,9 +46,9 @@ export async function updateInspirationSource(
 ) {
   await requireAdmin();
   const [updated] = await db
-    .update(plannerInspirationSource)
+    .update(onPoyntInspirationSource)
     .set({ ...data, updatedAt: sql`now()` })
-    .where(eq(plannerInspirationSource.id, id))
+    .where(eq(onPoyntInspirationSource.id, id))
     .returning();
   return updated;
 }
@@ -57,27 +57,27 @@ export async function deleteInspirationSource(id: string) {
   await requireAdmin();
   // Rydd opp i destillerte items først (ingen FK-cascade i schemaet).
   await db
-    .delete(plannerInspirationItem)
-    .where(eq(plannerInspirationItem.sourceId, id));
+    .delete(onPoyntInspirationItem)
+    .where(eq(onPoyntInspirationItem.sourceId, id));
   await db
-    .delete(plannerInspirationSource)
-    .where(eq(plannerInspirationSource.id, id));
+    .delete(onPoyntInspirationSource)
+    .where(eq(onPoyntInspirationSource.id, id));
   return { success: true };
 }
 
 export async function toggleInspirationSourceActive(id: string) {
   await requireAdmin();
   const [current] = await db
-    .select({ isActive: plannerInspirationSource.isActive })
-    .from(plannerInspirationSource)
-    .where(eq(plannerInspirationSource.id, id))
+    .select({ isActive: onPoyntInspirationSource.isActive })
+    .from(onPoyntInspirationSource)
+    .where(eq(onPoyntInspirationSource.id, id))
     .limit(1);
   if (!current) return { success: false };
 
   const [updated] = await db
-    .update(plannerInspirationSource)
+    .update(onPoyntInspirationSource)
     .set({ isActive: !current.isActive, updatedAt: sql`now()` })
-    .where(eq(plannerInspirationSource.id, id))
+    .where(eq(onPoyntInspirationSource.id, id))
     .returning();
   return updated;
 }

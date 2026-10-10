@@ -1,17 +1,17 @@
 import { DefaultTemplate } from "@payloadcms/next/templates";
 import { Gutter, SetStepNav } from "@payloadcms/ui";
 import { getVisibleEntities } from "@payloadcms/ui/shared";
-import { asc } from "@poynt/planner-db";
-import { db } from "@poynt/planner-db";
-import { plannerIndustry } from "@poynt/planner-db/schema";
+import { asc } from "@poynt/on-poynt-db";
+import { db } from "@poynt/on-poynt-db";
+import { onPoyntIndustry } from "@poynt/on-poynt-db/schema";
 import type { AdminViewServerProps } from "payload";
 import { IndustriesTable } from "../../components/industries/industries-table";
 
 async function getIndustries() {
   const industries = await db
     .select()
-    .from(plannerIndustry)
-    .orderBy(asc(plannerIndustry.sortOrder), asc(plannerIndustry.name));
+    .from(onPoyntIndustry)
+    .orderBy(asc(onPoyntIndustry.sortOrder), asc(onPoyntIndustry.name));
 
   return industries;
 }

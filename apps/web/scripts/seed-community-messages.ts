@@ -10,12 +10,12 @@ import {
   db,
   eq,
   inArray,
-  plannerConversation,
-  plannerMessage,
-  plannerMessageAttachment,
-  plannerMessageReaction,
-  plannerUser,
-} from "@poynt/planner-db";
+  onPoyntConversation,
+  onPoyntMessage,
+  onPoyntMessageAttachment,
+  onPoyntMessageReaction,
+  onPoyntUser,
+} from "@poynt/on-poynt-db";
 
 const DAY = 86_400_000;
 const MIN = 60_000;
@@ -142,19 +142,19 @@ const THREAD: SeedMsg[] = [
 
 async function ensurePerson(key: PersonKey) {
   const p = PEOPLE[key];
-  const existing = await db.query.plannerUser.findFirst({
-    where: eq(plannerUser.email, p.email),
+  const existing = await db.query.onPoyntUser.findFirst({
+    where: eq(onPoyntUser.email, p.email),
   });
   const image = `https://i.pravatar.cc/200?u=${encodeURIComponent(p.email)}`;
   if (existing) {
     await db
-      .update(plannerUser)
+      .update(onPoyntUser)
       .set({ image, name: p.name })
-      .where(eq(plannerUser.id, existing.id));
+      .where(eq(onPoyntUser.id, existing.id));
     return existing.id;
   }
   const id = crypto.randomUUID();
-  await db.insert(plannerUser).values({
+  await db.insert(onPoyntUser).values({
     id,
     name: p.name,
     email: p.email,
@@ -174,8 +174,8 @@ async function run() {
   }
 
   // 2) #generelt
-  const channel = await db.query.plannerConversation.findFirst({
-    where: eq(plannerConversation.slug, "generelt"),
+  const channel = await db.query.onPoyntConversation.findFirst({
+    where: eq(onPoyntConversation.slug, "generelt"),
   });
   if (!channel) {
     console.error(
@@ -186,8 +186,8 @@ async function run() {
 
   // 3) Rydd vekk seed-brukernes gamle meldinger (cascade fjerner vedlegg/reaksjoner)
   await db
-    .delete(plannerMessage)
-    .where(inArray(plannerMessage.authorId, Object.values(ids)));
+    .delete(onPoyntMessage)
+    .where(inArray(onPoyntMessage.authorId, Object.values(ids)));
 
   // 4) Sett inn tråden
   const now = Date.now();
@@ -196,7 +196,7 @@ async function run() {
     const m = THREAD[i] as SeedMsg;
     const messageId = crypto.randomUUID();
     const createdAt = new Date(now - m.daysAgo * DAY - m.minsAgo * MIN);
-    await db.insert(plannerMessage).values({
+    await db.insert(onPoyntMessage).values({
       id: messageId,
       conversationId: channel.id,
       authorId: ids[m.who],
@@ -208,7 +208,7 @@ async function run() {
     insertedIds.push(messageId);
 
     for (const im of m.images ?? []) {
-      await db.insert(plannerMessageAttachment).values({
+      await db.insert(onPoyntMessageAttachment).values({
         id: crypto.randomUUID(),
         messageId,
         url: im.url,
@@ -220,7 +220,7 @@ async function run() {
       });
     }
     for (const f of m.files ?? []) {
-      await db.insert(plannerMessageAttachment).values({
+      await db.insert(onPoyntMessageAttachment).values({
         id: crypto.randomUUID(),
         messageId,
         url: f.url,
@@ -230,7 +230,7 @@ async function run() {
       });
     }
     for (const r of m.reactions ?? []) {
-      await db.insert(plannerMessageReaction).values({
+      await db.insert(onPoyntMessageReaction).values({
         id: crypto.randomUUID(),
         messageId,
         userId: ids[r.who],

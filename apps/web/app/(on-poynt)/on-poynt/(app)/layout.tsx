@@ -1,17 +1,17 @@
-import { AppHeader } from "@/components/planner/app-header";
-import { AppSidebar } from "@/components/planner/app-sidebar";
-import { PlannerProviders } from "@/components/planner/providers";
-import { ShellTour } from "@/components/planner/shell-tour";
+import { AppHeader } from "@/components/on-poynt/app-header";
+import { AppSidebar } from "@/components/on-poynt/app-sidebar";
+import { OnPoyntProviders } from "@/components/on-poynt/providers";
+import { ShellTour } from "@/components/on-poynt/shell-tour";
 import { getFeatureFlags } from "@/lib/features/server";
 import { getSessionWithMembership } from "@/lib/membership";
 import { hasActiveAccess } from "@/lib/membership/has-active-access";
-import { db, eq } from "@poynt/planner-db";
-import { plannerUser } from "@poynt/planner-db/schema";
+import { db, eq } from "@poynt/on-poynt-db";
+import { onPoyntUser } from "@poynt/on-poynt-db/schema";
 import { SidebarInset, SidebarProvider, Toaster } from "@poynt/ui";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-export default async function PlannerAppLayout({
+export default async function OnPoyntAppLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -33,9 +33,9 @@ export default async function PlannerAppLayout({
   }
 
   const users = await db
-    .select({ onboardingCompleted: plannerUser.onboardingCompleted })
-    .from(plannerUser)
-    .where(eq(plannerUser.id, session.user.id))
+    .select({ onboardingCompleted: onPoyntUser.onboardingCompleted })
+    .from(onPoyntUser)
+    .where(eq(onPoyntUser.id, session.user.id))
     .limit(1);
 
   if (users[0] && !users[0].onboardingCompleted) {
@@ -45,7 +45,7 @@ export default async function PlannerAppLayout({
   const features = await getFeatureFlags();
 
   return (
-    <PlannerProviders>
+    <OnPoyntProviders>
       <SidebarProvider>
         <AppSidebar features={features} />
         <SidebarInset>
@@ -55,6 +55,6 @@ export default async function PlannerAppLayout({
         <ShellTour />
         <Toaster />
       </SidebarProvider>
-    </PlannerProviders>
+    </OnPoyntProviders>
   );
 }

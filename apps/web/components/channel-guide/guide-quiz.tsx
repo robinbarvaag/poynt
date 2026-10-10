@@ -13,7 +13,7 @@ import {
   targetAudienceTypes,
   weeklyTimeLabels,
   weeklyTimeTypes,
-} from "@poynt/planner-validators";
+} from "@poynt/on-poynt-validators";
 import { Button } from "@poynt/ui";
 import { CardContent } from "@poynt/ui";
 import { Textarea } from "@poynt/ui";

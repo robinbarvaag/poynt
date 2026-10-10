@@ -1,7 +1,7 @@
-import { TierGate } from "@/components/planner/tier-gate";
+import { TierGate } from "@/components/on-poynt/tier-gate";
 import { requireFeature } from "@/lib/features/server";
-import { createServerCaller } from "@/lib/planner/trpc-server";
-import type { MarketingPlan } from "@poynt/planner-validators";
+import { createServerCaller } from "@/lib/on-poynt/trpc-server";
+import type { MarketingPlan } from "@poynt/on-poynt-validators";
 import { MarketingPlanClient } from "./marketing-plan-client";
 
 interface SavedPlan {

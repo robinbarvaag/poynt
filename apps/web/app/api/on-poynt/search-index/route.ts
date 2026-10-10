@@ -1,5 +1,6 @@
+import { getSessionWithMembership } from "@/lib/membership";
+import { hasActiveAccess } from "@/lib/membership/has-active-access";
 import config from "@/payload.config";
-import { auth } from "@poynt/planner-auth/server";
 import { type NextRequest, NextResponse } from "next/server";
 import { getPayload } from "payload";
 
@@ -12,12 +13,18 @@ export type SearchIndexItem = {
 /**
  * Lett søkeindeks for det globale søket (⌘K): alt publisert Læring-innhold
  * (guider, kurs) som tittel + lenke. Hentes lazy første gang paletten
- * åpnes og caches på klienten. Auth-gated som resten av on-poynt.
+ * åpnes og caches på klienten. Krever aktivt medlemskap som resten av on-poynt.
  */
 export async function GET(req: NextRequest) {
-  const session = await auth.api.getSession({ headers: req.headers });
+  const session = await getSessionWithMembership(req);
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!hasActiveAccess(session.membership)) {
+    return NextResponse.json(
+      { error: "Krever aktivt medlemskap" },
+      { status: 403 }
+    );
   }
 
   try {

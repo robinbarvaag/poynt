@@ -10,12 +10,12 @@ import {
   normalizeChannel,
   parseISODate,
   toISODate,
-} from "@/lib/planner/scheduled-posts";
-import { trpc } from "@/lib/planner/trpc";
+} from "@/lib/on-poynt/scheduled-posts";
+import { trpc } from "@/lib/on-poynt/trpc";
 import type {
   GeneratePostRequest,
   MonthContent,
-} from "@poynt/planner-validators";
+} from "@poynt/on-poynt-validators";
 import {
   Badge,
   Button,

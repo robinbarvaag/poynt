@@ -1,7 +1,7 @@
 "use client";
 
 import { LogoUpload } from "@/components/workspace/logo-upload";
-import { trpc } from "@/lib/planner/trpc";
+import { trpc } from "@/lib/on-poynt/trpc";
 import {
   type BrandColor,
   type BrandColorRole,
@@ -9,7 +9,7 @@ import {
   type BrandIdentity,
   brandColorRoleLabels,
   brandColorRoles,
-} from "@poynt/planner-validators";
+} from "@poynt/on-poynt-validators";
 import {
   BrandHeader,
   Button,

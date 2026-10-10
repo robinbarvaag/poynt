@@ -1,8 +1,11 @@
 "use client";
 
-import { ToolIntro, type ToolIntroStep } from "@/components/planner/tool-intro";
-import { trpc } from "@/lib/planner/trpc";
-import type { PodcastToContentResponse } from "@poynt/planner-validators";
+import {
+  ToolIntro,
+  type ToolIntroStep,
+} from "@/components/on-poynt/tool-intro";
+import { trpc } from "@/lib/on-poynt/trpc";
+import type { PodcastToContentResponse } from "@poynt/on-poynt-validators";
 import {
   Button,
   Checkbox,

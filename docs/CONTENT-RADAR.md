@@ -23,7 +23,7 @@ Leveres som:
 | Hvem | Hvert medlem | Partner / redaksjon |
 | Hvor | On Poynt-appen | Payload admin |
 | Mål | Lag innhold for **min** bedrift | Bestem hva **On Poynt** skal lage |
-| Data | Workspace-profil + brand brief | Payload-collections + `plannerToolResult` + ekstern inspirasjon |
+| Data | Workspace-profil + brand brief | Payload-collections + `onPoyntToolResult` + ekstern inspirasjon |
 
 ## 2. Arkitektur-prinsipper
 
@@ -31,7 +31,7 @@ Leveres som:
    regnes ut i kode. AI bruker kun fakta til å formulere forslag — finner ikke på tall.
 2. **Inngest som durable runtime.** Steps, retries, fan-out, scheduling og
    concurrency-limits på scraping. `inngest dev` lokalt.
-3. **Førstepartsdata foran scraping.** `plannerToolResult` (hva medlemmene faktisk
+3. **Førstepartsdata foran scraping.** `onPoyntToolResult` (hva medlemmene faktisk
    genererer) er sterkere etterspørselssignal enn noe vi scraper.
 4. **Ærlig om analytics-gapet.** Vi har ingen visningsdata. «Promoter på nytt»-forslag
    er proxy-baserte (alder/featured-rotasjon) til vi evt. legger til lettvekts
@@ -41,11 +41,11 @@ Leveres som:
 6. **Alt partneren rører ved er DB-drevet.** Prompts i Prompt-maler, inspirasjons-
    kilder i settings — justerbart uten kode.
 
-## 3. Datamodell (`planner`-schema, via `plannerSchema.table`)
+## 3. Datamodell (`on_poynt`-schema, via `onPoyntSchema.table`)
 
-Følger eksisterende On Poynt-mønster (samme schema som `plannerPromptTemplate`).
+Følger eksisterende On Poynt-mønster (samme schema som `onPoyntPromptTemplate`).
 
-### `planner_content_suggestion`
+### `on_poynt.content_suggestion`
 | felt | type | notat |
 |---|---|---|
 | id | text PK | `crypto.randomUUID()` |
@@ -63,33 +63,33 @@ Følger eksisterende On Poynt-mønster (samme schema som `plannerPromptTemplate`
 | runId | text? | hvilken kjøring som genererte/oppdaterte det |
 | createdAt / updatedAt | timestamp | |
 
-### `planner_inspiration_source`
+### `on_poynt.inspiration_source`
 `id`, `label`, `url`, `type` (`rss` \| `website`), `personName?`, `isActive`,
 `cadence`, `lastFetchedAt`, `createdAt`, `updatedAt`.
 
-### `planner_inspiration_item`
+### `on_poynt.inspiration_item`
 `id`, `sourceId`, `title`, `url`, `summary`, `topics` (jsonb), `publishedAt`,
 `createdAt`.
 
-### `planner_radar_run`
+### `on_poynt.radar_run`
 `id`, `trigger` (`scheduled` \| `manual` \| `heartbeat`), `status`
 (`running` \| `ok` \| `error`), `startedAt`, `finishedAt?`, `stats` (jsonb),
 `error?`. Revisjonsspor for hver kjøring.
 
 ## 4. Signaler radaren regner ut (Lag 1-input)
 
-Leses via **Payload Local API** (innhold) + **Drizzle** (`plannerToolResult`):
+Leses via **Payload Local API** (innhold) + **Drizzle** (`onPoyntToolResult`):
 
 - **Foreldet innhold** — `publishedAt`/`updatedAt` eldre enn N mnd, per collection.
 - **Fastlåste drafts** — `status=draft` som har stått stille.
 - **Kategori-dekning** — antall per `categories` på tvers → underdekte/ubrukte kategorier.
 - **Featured-rotasjon** — featured som har ligget lenge; sterkt innhold aldri featured.
-- **Etterspørsel** — topp-temaer/verktøy fra `plannerToolResult` siste 30/90 dager.
+- **Etterspørsel** — topp-temaer/verktøy fra `onPoyntToolResult` siste 30/90 dager.
 - **Inspirasjons-gap** — eksterne temaer (`inspiration_item`) uten match internt.
 
 ## 5. AI-syntese
 
-`packages/planner-api/lib/content-radar.ts` — samme mønster som de andre verktøyene:
+`packages/on-poynt-api/lib/content-radar.ts` — samme mønster som de andre verktøyene:
 `resolveSystemPrompt("content-radar-system")` → `streamText`/`generateText` med
 `Output.object` + zod. Signalene mates inn som strukturert kontekst; output er en
 liste forslag med `type`, `title`, `rationale`, `priority`.
@@ -120,7 +120,7 @@ Lokalt: `npx inngest-cli dev`.
 
 ## 8. Faseplan
 
-- **Fase 0 — Fundament.** Inngest (klient + route + dev), 4 `planner_*`-tabeller +
+- **Fase 0 — Fundament.** Inngest (klient + route + dev), 4 `on_poynt`-tabeller +
   migrasjon, to nye prompt-maler, `radar/heartbeat` bevis-jobb.
 - **Fase 1 — Radar-motoren.** Signal-innsamling + AI-syntese + upsert + revisjon;
   trigget av event og ukentlig schedule.
@@ -128,7 +128,7 @@ Lokalt: `npx inngest-cli dev`.
 - **Fase 3 — Ekstern inspirasjon. ✅** Kilde-CRUD (`/admin/inspirasjon`) + Inngest
   `inspiration/fetch` (RSS uten avhengighet + Firecrawl for nettsider) → distill →
   `inspiration_item` → `inspiration_gap`-signaler i gap-analysen. Verifisert ende-til-ende.
-- **Fase 4 — Lettvekts visningstelling. ✅** `planner_content_view` (aggregert per dag,
+- **Fase 4 — Lettvekts visningstelling. ✅** `on_poynt.content_view` (aggregert per dag,
   ingen PII, migrasjon 0009), `/api/radar/track`-beacon + `<ViewTracker>` på alle fem
   innholds-detaljsidene (artikler/kurs/ressurser/blogg/podkast), og view-baserte
   `popular`-signaler som gjør «promoter/oppdater/gjenbruk»-forslag datadrevne i stedet
@@ -143,6 +143,6 @@ Lokalt: `npx inngest-cli dev`.
 
 ## 10. Migrasjoner
 
-Nye tabeller i eksisterende `planner`-schema:
-`bun run planner:generate` → review generert SQL → `bun run planner:migrate`.
+Nye tabeller i eksisterende `on_poynt`-schema:
+`bun run on-poynt:generate` → review generert SQL → `bun run on-poynt:migrate`.
 (Ingen `CREATE SCHEMA`-prepend — det gjelder kun baseline.) Se `docs/MIGRATIONS.md`.

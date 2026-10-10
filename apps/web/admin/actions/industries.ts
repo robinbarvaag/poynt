@@ -1,9 +1,9 @@
 "use server";
 
 import { requireAdmin } from "@/lib/require-admin";
-import { db, eq, sql } from "@poynt/planner-db";
-import { plannerIndustry } from "@poynt/planner-db/schema";
-import { defaultIndustries } from "@poynt/planner-validators";
+import { db, eq, sql } from "@poynt/on-poynt-db";
+import { onPoyntIndustry } from "@poynt/on-poynt-db/schema";
+import { defaultIndustries } from "@poynt/on-poynt-validators";
 
 export async function createIndustry(data: {
   id: string;
@@ -15,7 +15,7 @@ export async function createIndustry(data: {
 }) {
   await requireAdmin();
   const [created] = await db
-    .insert(plannerIndustry)
+    .insert(onPoyntIndustry)
     .values({
       id: data.id,
       name: data.name,
@@ -41,33 +41,33 @@ export async function updateIndustry(
 ) {
   await requireAdmin();
   const [updated] = await db
-    .update(plannerIndustry)
+    .update(onPoyntIndustry)
     .set({ ...data, updatedAt: sql`now()` })
-    .where(eq(plannerIndustry.id, id))
+    .where(eq(onPoyntIndustry.id, id))
     .returning();
   return updated;
 }
 
 export async function deleteIndustry(id: string) {
   await requireAdmin();
-  await db.delete(plannerIndustry).where(eq(plannerIndustry.id, id));
+  await db.delete(onPoyntIndustry).where(eq(onPoyntIndustry.id, id));
   return { success: true };
 }
 
 export async function toggleIndustryActive(id: string) {
   await requireAdmin();
   const [current] = await db
-    .select({ isActive: plannerIndustry.isActive })
-    .from(plannerIndustry)
-    .where(eq(plannerIndustry.id, id))
+    .select({ isActive: onPoyntIndustry.isActive })
+    .from(onPoyntIndustry)
+    .where(eq(onPoyntIndustry.id, id))
     .limit(1);
 
   if (!current) return { success: false };
 
   const [updated] = await db
-    .update(plannerIndustry)
+    .update(onPoyntIndustry)
     .set({ isActive: !current.isActive, updatedAt: sql`now()` })
-    .where(eq(plannerIndustry.id, id))
+    .where(eq(onPoyntIndustry.id, id))
     .returning();
 
   return updated;
@@ -76,8 +76,8 @@ export async function toggleIndustryActive(id: string) {
 export async function seedIndustries() {
   await requireAdmin();
   const existing = await db
-    .select({ id: plannerIndustry.id })
-    .from(plannerIndustry)
+    .select({ id: onPoyntIndustry.id })
+    .from(onPoyntIndustry)
     .limit(1);
 
   if (existing.length > 0) {
@@ -85,7 +85,7 @@ export async function seedIndustries() {
   }
 
   const inserted = await db
-    .insert(plannerIndustry)
+    .insert(onPoyntIndustry)
     .values(
       defaultIndustries.map((i) => ({ ...i, relatedKeywords: undefined }))
     )

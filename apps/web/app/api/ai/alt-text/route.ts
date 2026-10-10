@@ -10,7 +10,7 @@ import { getPayload } from "payload";
  * `multipart/form-data` med et `file`-felt for å sende inn et bilde direkte.
  *
  * Selve kallet går via Vercel AI Gateway (samme oppsett som de andre
- * AI-verktøyene, se packages/planner-api/lib/models.ts). Modellen må kunne
+ * AI-verktøyene, se packages/on-poynt-api/lib/models.ts). Modellen må kunne
  * lese bilder — claude-sonnet-4-6 gjør det. Selve modell-kallet ligger i
  * `lib/ai/alt-text.ts`, delt med `beforeChange`-hooken på Media.
  */

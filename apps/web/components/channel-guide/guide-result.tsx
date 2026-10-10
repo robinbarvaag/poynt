@@ -6,7 +6,7 @@ import type { ChannelRecommendation, GuideResultProps } from "@/lib/types";
 import {
   channelMatchLevelLabels,
   resolveChannelMatchLevel,
-} from "@poynt/planner-validators";
+} from "@poynt/on-poynt-validators";
 import {
   Accordion,
   AccordionContent,
@@ -28,7 +28,7 @@ import type { DriveStep } from "driver.js";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { TourButton } from "../planner/tour";
+import { TourButton } from "../on-poynt/tour";
 
 const levelBadgeVariant = {
   strong: "soft-primary",

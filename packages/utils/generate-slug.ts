@@ -2,7 +2,7 @@
  * Lager en URL-vennlig slug fra fritekst. Håndterer norske tegn (æ/ø/å).
  *
  * Brukes både av Payload-collections (artikler, sider, produkter osv.) og av
- * planner-api (workspace/bedrift-slugs). Workspace-slugs vil ha en lengdegrense
+ * on-poynt-api (workspace/bedrift-slugs). Workspace-slugs vil ha en lengdegrense
  * — send `{ maxLength: 50 }` for det.
  */
 export function generateSlug(

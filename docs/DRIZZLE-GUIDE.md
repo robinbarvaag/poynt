@@ -19,14 +19,14 @@ bun run db:push        # Ser Payload sine typar og prøver slette dei!
 ## Struktur
 
 ```
-packages/planner-db/
+packages/on-poynt-db/
 ├── index.ts              # DB-tilkopling + eksporterer db, eq, and, sql, etc.
-├── drizzle.config.ts     # Konfig med tablesFilter: ["planner_*"]
+├── drizzle.config.ts     # Konfig med schemaFilter: ["on_poynt"]
 ├── schema/
 │   ├── index.ts          # Re-eksporterer alle schema-filer
-│   ├── auth.ts           # planner_user, planner_session, planner_account, planner_verification
-│   ├── workspace.ts      # planner_subscription, planner_workspace, planner_tool_result, etc.
-│   ├── webhook.ts        # planner_webhook_event
+│   ├── auth.ts           # on_poynt.user, on_poynt.session, on_poynt.account, on_poynt.verification
+│   ├── workspace.ts      # on_poynt.subscription, on_poynt.workspace, on_poynt.tool_result, etc.
+│   ├── webhook.ts        # on_poynt.webhook_event
 │   └── admin.ts          # Admin-relaterte tabellar
 └── drizzle/
     └── 0000_initial-schema.sql   # Generert migrasjon
@@ -36,18 +36,18 @@ packages/planner-db/
 
 ```typescript
 // Importer db + helpers
-import { db, eq } from "@poynt/planner-db";
-import { plannerUser, plannerSubscription } from "@poynt/planner-db/schema";
+import { db, eq } from "@poynt/on-poynt-db";
+import { onPoyntUser, onPoyntSubscription } from "@poynt/on-poynt-db/schema";
 
 // Select
 const users = await db
   .select()
-  .from(plannerUser)
-  .where(eq(plannerUser.id, userId))
+  .from(onPoyntUser)
+  .where(eq(onPoyntUser.id, userId))
   .limit(1);
 
 // Insert
-await db.insert(plannerSubscription).values({
+await db.insert(onPoyntSubscription).values({
   id: crypto.randomUUID(),
   userId,
   tier: "community",
@@ -56,16 +56,16 @@ await db.insert(plannerSubscription).values({
 
 // Update
 await db
-  .update(plannerUser)
+  .update(onPoyntUser)
   .set({ onboardingCompleted: true })
-  .where(eq(plannerUser.id, userId));
+  .where(eq(onPoyntUser.id, userId));
 
 // Upsert (insert or update on conflict)
 await db
-  .insert(plannerSubscription)
+  .insert(onPoyntSubscription)
   .values({ id: crypto.randomUUID(), userId, tier, status })
   .onConflictDoUpdate({
-    target: plannerSubscription.userId,
+    target: onPoyntSubscription.userId,
     set: { tier, status, updatedAt: sql`now()` },
   });
 ```
@@ -73,7 +73,7 @@ await db
 ## Legge til eit nytt felt
 
 1. Rediger schema-fila (t.d. `schema/workspace.ts`)
-2. Køyr frå `packages/planner-db/`:
+2. Køyr frå `packages/on-poynt-db/`:
    ```bash
    bun run db:generate
    ```
@@ -87,13 +87,13 @@ await db
 
 1. Lag tabellen i rett schema-fil (eller lag ny fil i `schema/`)
 2. Om ny fil: eksporter den frå `schema/index.ts`
-3. Alle tabellnamn **må** starte med `planner_` (pga. `tablesFilter`)
+3. Bruk `onPoyntSchema.table(...)` (ikkje `pgTable`) så tabellen hamnar i `on_poynt`-skjemaet; inga prefiks i namnet
 4. Køyr `db:generate` → `db:migrate`
 
 ## Drizzle Studio (database-GUI)
 
 ```bash
-cd packages/planner-db
+cd packages/on-poynt-db
 bun run db:studio
 ```
 

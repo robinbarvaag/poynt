@@ -1,26 +1,26 @@
 import { DefaultTemplate } from "@payloadcms/next/templates";
 import { Gutter, SetStepNav } from "@payloadcms/ui";
 import { getVisibleEntities } from "@payloadcms/ui/shared";
-import { db, desc, sql } from "@poynt/planner-db";
-import { plannerMembershipApplication } from "@poynt/planner-db/schema";
+import { db, desc, sql } from "@poynt/on-poynt-db";
+import { onPoyntMembershipApplication } from "@poynt/on-poynt-db/schema";
 import type { AdminViewServerProps } from "payload";
 import { ApplicationTable } from "../../components/applications/application-table";
 
 async function getApplications() {
   const applications = await db
     .select({
-      id: plannerMembershipApplication.id,
-      status: plannerMembershipApplication.status,
-      fullName: plannerMembershipApplication.fullName,
-      email: plannerMembershipApplication.email,
-      companyName: plannerMembershipApplication.companyName,
-      createdAt: plannerMembershipApplication.createdAt,
+      id: onPoyntMembershipApplication.id,
+      status: onPoyntMembershipApplication.status,
+      fullName: onPoyntMembershipApplication.fullName,
+      email: onPoyntMembershipApplication.email,
+      companyName: onPoyntMembershipApplication.companyName,
+      createdAt: onPoyntMembershipApplication.createdAt,
     })
-    .from(plannerMembershipApplication)
+    .from(onPoyntMembershipApplication)
     .orderBy(
       // Ubehandlede søknader øverst, deretter nyeste først.
-      desc(sql`(${plannerMembershipApplication.status} = 'pending')`),
-      desc(plannerMembershipApplication.createdAt)
+      desc(sql`(${onPoyntMembershipApplication.status} = 'pending')`),
+      desc(onPoyntMembershipApplication.createdAt)
     );
 
   return applications.map((a) => ({

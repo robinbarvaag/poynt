@@ -6,7 +6,7 @@
  * 1.0 (sannsynligvis menneske). Vi avviser alt under terskelen.
  *
  * Ligger i @poynt/utils fordi både Next-API-rutene, Payload-konfigurasjonen
- * og innloggingen (@poynt/planner-auth) må kunne sjekke det samme tokenet.
+ * og innloggingen (@poynt/on-poynt-auth) må kunne sjekke det samme tokenet.
  *
  * Uten RECAPTCHA_SECRET_KEY slipper alt gjennom (fail open) — nettstedet skal
  * ikke slutte å ta imot skjemaer fordi en nøkkel mangler. Raten-grensene i

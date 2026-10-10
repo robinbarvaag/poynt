@@ -9,8 +9,8 @@
  *
  *   bun run --cwd apps/web payload run scripts/seed-inspiration-sources.ts
  */
-import { db } from "@poynt/planner-db";
-import { plannerInspirationSource } from "@poynt/planner-db/schema";
+import { db } from "@poynt/on-poynt-db";
+import { onPoyntInspirationSource } from "@poynt/on-poynt-db/schema";
 
 type Seed = {
   label: string;
@@ -63,8 +63,8 @@ const SOURCES: Seed[] = [
 ];
 
 const existing = await db
-  .select({ url: plannerInspirationSource.url })
-  .from(plannerInspirationSource);
+  .select({ url: onPoyntInspirationSource.url })
+  .from(onPoyntInspirationSource);
 const seen = new Set(existing.map((e) => e.url));
 
 let created = 0;
@@ -73,7 +73,7 @@ for (const s of SOURCES) {
     console.log(`– hopper over (finnes): ${s.label}`);
     continue;
   }
-  await db.insert(plannerInspirationSource).values({
+  await db.insert(onPoyntInspirationSource).values({
     label: s.label,
     url: s.url,
     type: s.type,

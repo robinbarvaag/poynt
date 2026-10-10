@@ -1,12 +1,12 @@
 import { DefaultTemplate } from "@payloadcms/next/templates";
 import { Gutter, SetStepNav } from "@payloadcms/ui";
 import { getVisibleEntities } from "@payloadcms/ui/shared";
-import { db, desc, eq } from "@poynt/planner-db";
+import { db, desc, eq } from "@poynt/on-poynt-db";
 import {
-  plannerSession,
-  plannerSubscription,
-  plannerUser,
-} from "@poynt/planner-db/schema";
+  onPoyntSession,
+  onPoyntSubscription,
+  onPoyntUser,
+} from "@poynt/on-poynt-db/schema";
 import type { AdminViewServerProps } from "payload";
 import type React from "react";
 import { MemberActions } from "../../components/members/member-actions";
@@ -15,27 +15,27 @@ import { MemberDetailCard } from "../../components/members/member-detail-card";
 async function getMember(userId: string) {
   const [user] = await db
     .select()
-    .from(plannerUser)
-    .where(eq(plannerUser.id, userId))
+    .from(onPoyntUser)
+    .where(eq(onPoyntUser.id, userId))
     .limit(1);
 
   if (!user) return null;
 
   const [subscription] = await db
     .select()
-    .from(plannerSubscription)
-    .where(eq(plannerSubscription.userId, userId))
+    .from(onPoyntSubscription)
+    .where(eq(onPoyntSubscription.userId, userId))
     .limit(1);
 
   const recentSessions = await db
     .select({
-      createdAt: plannerSession.createdAt,
-      ipAddress: plannerSession.ipAddress,
-      userAgent: plannerSession.userAgent,
+      createdAt: onPoyntSession.createdAt,
+      ipAddress: onPoyntSession.ipAddress,
+      userAgent: onPoyntSession.userAgent,
     })
-    .from(plannerSession)
-    .where(eq(plannerSession.userId, userId))
-    .orderBy(desc(plannerSession.createdAt))
+    .from(onPoyntSession)
+    .where(eq(onPoyntSession.userId, userId))
+    .orderBy(desc(onPoyntSession.createdAt))
     .limit(5);
 
   return {

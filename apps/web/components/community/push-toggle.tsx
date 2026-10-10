@@ -1,6 +1,6 @@
 "use client";
 
-import { trpc } from "@/lib/planner/trpc";
+import { trpc } from "@/lib/on-poynt/trpc";
 import { toast } from "@poynt/ui";
 import { Icon } from "@poynt/ui/icons";
 import { useEffect, useState } from "react";

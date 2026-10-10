@@ -1,14 +1,15 @@
 "use server";
 
 import { canonicalizeEmail } from "@/lib/email-normalize";
+import { findOnPoyntUserByEmail } from "@/lib/membership/find-user-by-email";
 import { requireAdmin } from "@/lib/require-admin";
 import { sendMemberWelcomeEmail } from "@poynt/email";
-import { db, eq, sql } from "@poynt/planner-db";
+import { db, eq, sql } from "@poynt/on-poynt-db";
 import {
-  plannerMembershipApplication,
-  plannerSubscription,
-  plannerUser,
-} from "@poynt/planner-db/schema";
+  onPoyntMembershipApplication,
+  onPoyntSubscription,
+  onPoyntUser,
+} from "@poynt/on-poynt-db/schema";
 
 type MembershipTier = "community" | "community_ai";
 
@@ -32,8 +33,8 @@ export async function approveMembershipApplication(
   await requireAdmin();
   const [application] = await db
     .select()
-    .from(plannerMembershipApplication)
-    .where(eq(plannerMembershipApplication.id, applicationId))
+    .from(onPoyntMembershipApplication)
+    .where(eq(onPoyntMembershipApplication.id, applicationId))
     .limit(1);
 
   if (!application) {
@@ -47,18 +48,15 @@ export async function approveMembershipApplication(
     application.canonicalEmail || canonicalizeEmail(application.email);
 
   // 1. Finn eller opprett Better Auth-brukeren (samme mønster som gjeste-kjøp).
-  const existing = await db
-    .select()
-    .from(plannerUser)
-    .where(eq(plannerUser.canonicalEmail, canonical))
-    .limit(1);
+  // Oppslaget tåler kontoer med tom canonicalEmail — se findOnPoyntUserByEmail.
+  const existing = await findOnPoyntUserByEmail(application.email);
 
   let userId: string;
-  if (existing.length > 0) {
-    userId = existing[0].id;
+  if (existing) {
+    userId = existing.id;
   } else {
     userId = crypto.randomUUID();
-    await db.insert(plannerUser).values({
+    await db.insert(onPoyntUser).values({
       id: userId,
       name: application.fullName || application.email.split("@")[0],
       email: application.email,
@@ -70,7 +68,7 @@ export async function approveMembershipApplication(
 
   // 2. Aktiver abonnementet (userId er unikt → upsert).
   await db
-    .insert(plannerSubscription)
+    .insert(onPoyntSubscription)
     .values({
       id: crypto.randomUUID(),
       userId,
@@ -78,13 +76,13 @@ export async function approveMembershipApplication(
       status: "active",
     })
     .onConflictDoUpdate({
-      target: plannerSubscription.userId,
+      target: onPoyntSubscription.userId,
       set: { tier, status: "active", updatedAt: sql`now()` },
     });
 
   // 3. Merk søknaden som godkjent.
   await db
-    .update(plannerMembershipApplication)
+    .update(onPoyntMembershipApplication)
     .set({
       status: "approved",
       approvedTier: tier,
@@ -92,7 +90,7 @@ export async function approveMembershipApplication(
       reviewedAt: sql`now()`,
       updatedAt: sql`now()`,
     })
-    .where(eq(plannerMembershipApplication.id, applicationId));
+    .where(eq(onPoyntMembershipApplication.id, applicationId));
 
   // 4. Velkomst-e-post med onboarding-lenke (no-op uten RESEND_API_KEY).
   try {
@@ -114,9 +112,9 @@ export async function approveMembershipApplication(
 export async function rejectMembershipApplication(applicationId: string) {
   await requireAdmin();
   await db
-    .update(plannerMembershipApplication)
+    .update(onPoyntMembershipApplication)
     .set({ status: "rejected", reviewedAt: sql`now()`, updatedAt: sql`now()` })
-    .where(eq(plannerMembershipApplication.id, applicationId));
+    .where(eq(onPoyntMembershipApplication.id, applicationId));
 
   return { success: true };
 }

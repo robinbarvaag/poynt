@@ -4,7 +4,7 @@ import {
   type PlaygroundChunk,
   loadWorkspaceInputAction,
   streamPlaygroundModelAction,
-} from "@/lib/planner/actions/playground";
+} from "@/lib/on-poynt/actions/playground";
 import { readStreamableValue } from "@ai-sdk/rsc";
 import {
   Badge,

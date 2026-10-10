@@ -40,11 +40,11 @@ bun run payload          # Payload CLI
 bun run payload:status         # Show applied Payload migrations
 bun run payload:migrate:create # Generate a Payload migration from schema changes
 bun run payload:migrate        # Apply pending Payload migrations
-bun run planner:generate       # Generate a Drizzle (planner_*) migration
-bun run planner:migrate        # Apply Drizzle (planner_*) migrations
+bun run on-poynt:generate      # Generate a Drizzle (on_poynt schema) migration
+bun run on-poynt:migrate       # Apply Drizzle (on_poynt schema) migrations
 ```
 
-**Migrations**: Payload (`public` schema) and Better-Auth/Drizzle (`planner` schema) are
+**Migrations**: Payload (`public` schema) and Better-Auth/Drizzle (`on_poynt` schema) are
 isolated into separate Postgres schemas, so each migration tool only sees its own objects.
 Payload runs with `push: false` — schema changes go through committed migration files
 (`payload:migrate:create` → review the generated `up()` → `payload:migrate`). Migrations remain
@@ -77,11 +77,11 @@ Linting and formatting are handled entirely by **Biome** (`biome.json` at root) 
   - Collections: Users (admin only), Products, Orders, Pages, Media, BlogPosts
   - Users collection is for admin/partner only — no customer data here
 - **Better Auth + Drizzle**: Customer auth, membership, AI tools
-  - Lives in its own `planner` **Postgres schema** (`pgSchema("planner")` in `packages/planner-db/schema/_schema.ts`), physically isolated from Payload's `public` schema
-  - Tables: planner_user, planner_subscription, planner_session, planner_workspace, etc.
+  - Lives in its own `on_poynt` **Postgres schema** (`pgSchema("on_poynt")` in `packages/on-poynt-db/schema/_schema.ts`), physically isolated from Payload's `public` schema
+  - Tables: on_poynt.user, on_poynt.subscription, on_poynt.session, on_poynt.workspace, etc.
   - Auth: Google OAuth + magic link (no email+password)
-  - Drizzle config: `packages/planner-db/drizzle.config.ts` with `schemaFilter: ["planner"]` — drizzle-kit can't see Payload's `public` objects, so cross-schema collisions are impossible
-  - Migrations: `drizzle-kit generate` → `bun run db:migrate` from packages/planner-db (prefer over `push`; the generated `0000_*.sql` needs `CREATE SCHEMA IF NOT EXISTS "planner";` prepended — see `docs/MIGRATIONS.md`)
+  - Drizzle config: `packages/on-poynt-db/drizzle.config.ts` with `schemaFilter: ["on_poynt"]` — drizzle-kit can't see Payload's `public` objects, so cross-schema collisions are impossible
+  - Migrations: `drizzle-kit generate` → `bun run db:migrate` from packages/on-poynt-db (prefer over `push`; the generated `0000_*.sql` needs `CREATE SCHEMA IF NOT EXISTS "on_poynt";` prepended — see `docs/MIGRATIONS.md`)
 
 ### Key Patterns
 

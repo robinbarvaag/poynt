@@ -1,18 +1,18 @@
 import { DefaultTemplate } from "@payloadcms/next/templates";
 import { Gutter, SetStepNav } from "@payloadcms/ui";
 import { getVisibleEntities } from "@payloadcms/ui/shared";
-import { asc, db } from "@poynt/planner-db";
-import { plannerPromptTemplate } from "@poynt/planner-db/schema";
+import { asc, db } from "@poynt/on-poynt-db";
+import { onPoyntPromptTemplate } from "@poynt/on-poynt-db/schema";
 import type { AdminViewServerProps } from "payload";
 import { PromptsTable } from "../../components/prompts/prompts-table";
 
 async function getPromptTemplates() {
   const templates = await db
     .select()
-    .from(plannerPromptTemplate)
+    .from(onPoyntPromptTemplate)
     .orderBy(
-      asc(plannerPromptTemplate.toolId),
-      asc(plannerPromptTemplate.name)
+      asc(onPoyntPromptTemplate.toolId),
+      asc(onPoyntPromptTemplate.name)
     );
 
   return templates;

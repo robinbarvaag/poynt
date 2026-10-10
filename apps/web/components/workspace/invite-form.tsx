@@ -1,12 +1,12 @@
 "use client";
 
-import { trpc } from "@/lib/planner/trpc";
+import { trpc } from "@/lib/on-poynt/trpc";
 import {
   type InviteMemberInput,
   inviteMemberSchema,
   workspaceRoleDescriptions,
   workspaceRoleLabels,
-} from "@poynt/planner-validators";
+} from "@poynt/on-poynt-validators";
 import { Button } from "@poynt/ui";
 import {
   Form,

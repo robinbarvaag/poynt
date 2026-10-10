@@ -92,7 +92,7 @@ function clampQuantity(quantity: number, max?: number): number {
 
 **Out of scope** (do NOT touch):
 - Any source file under `apps/web` or `packages/*` other than the two new test files and the two `package.json` scripts. This plan adds tests; it never changes runtime behavior.
-- `apps/web/lib/membership/sync-subscription.ts` — its pure functions are tempting to test, but the file imports `@poynt/planner-db` at module level, which reads `DATABASE_URI` at import time. Testing it is deferred (see Maintenance notes).
+- `apps/web/lib/membership/sync-subscription.ts` — its pure functions are tempting to test, but the file imports `@poynt/on-poynt-db` at module level, which reads `DATABASE_URI` at import time. Testing it is deferred (see Maintenance notes).
 - Running `next build` in CI — the Payload/Next build needs a database and secrets; deploy builds happen on Vercel. Do not add a build step to CI.
 
 ## Git workflow
@@ -201,7 +201,7 @@ Stop and report back (do not improvise) if:
 
 ## Maintenance notes
 
-- Deferred: unit tests for `getTierFromSubscription`/`mapSubscriptionStatus` in `apps/web/lib/membership/sync-subscription.ts` — blocked on that file's module-level import of `@poynt/planner-db`. Plan 002/005 touch that file; when someone extracts the pure functions into a DB-free module, add the tests.
+- Deferred: unit tests for `getTierFromSubscription`/`mapSubscriptionStatus` in `apps/web/lib/membership/sync-subscription.ts` — blocked on that file's module-level import of `@poynt/on-poynt-db`. Plan 002/005 touch that file; when someone extracts the pure functions into a DB-free module, add the tests.
 - Deferred: a CI build step (needs either a disposable Postgres service container + env stubs, or acceptance that Vercel is the build gate).
 - Deferred: `bun audit` as a non-blocking CI step (known transitive advisories under Payload/inngest trees — see plans/README.md backlog).
 - Reviewers: watch that future packages add a `test` script so turbo picks them up.

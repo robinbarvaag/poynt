@@ -9,22 +9,22 @@
  *   bun run --cwd apps/web payload run scripts/seed-membership-application.ts
  */
 import config from "@payload-config";
-import { asc, db, eq } from "@poynt/planner-db";
-import { plannerIndustry } from "@poynt/planner-db/schema";
+import { asc, db, eq } from "@poynt/on-poynt-db";
+import { onPoyntIndustry } from "@poynt/on-poynt-db/schema";
 import { getPayload } from "payload";
 import { richText } from "./_lexical";
 
 const FORM_TITLE = "Medlemskapssøknad";
 const PAGE_SLUG = "bli-medlem";
 
-// Bransje-valg hentes fra planner_industry slik at value = industry-id (matcher
+// Bransje-valg hentes fra industry slik at value = industry-id (matcher
 // det godkjenning forhåndsutfyller i bedriftsprofilen). Skjemaet er fortsatt
 // partner-redigerbart etterpå.
 const industries = await db
-  .select({ id: plannerIndustry.id, name: plannerIndustry.name })
-  .from(plannerIndustry)
-  .where(eq(plannerIndustry.isActive, true))
-  .orderBy(asc(plannerIndustry.sortOrder));
+  .select({ id: onPoyntIndustry.id, name: onPoyntIndustry.name })
+  .from(onPoyntIndustry)
+  .where(eq(onPoyntIndustry.isActive, true))
+  .orderBy(asc(onPoyntIndustry.sortOrder));
 
 const bransjeOptions = industries.map((i) => ({
   label: i.name,

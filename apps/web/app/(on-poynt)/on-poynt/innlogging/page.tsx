@@ -5,7 +5,8 @@ import {
   recaptchaHeader,
   useRecaptcha,
 } from "@/components/recaptcha";
-import { authClient } from "@poynt/planner-auth/client";
+import { authClient } from "@poynt/on-poynt-auth/client";
+import { UNKNOWN_MEMBER_MESSAGE } from "@poynt/on-poynt-auth/messages";
 import {
   Button,
   Card,
@@ -17,13 +18,36 @@ import {
   Label,
 } from "@poynt/ui";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
 
-export default function PlannerLoginPage() {
-  const router = useRouter();
+/**
+ * Better Auth sender oss tilbake hit med ?error=… når Google-innloggingen
+ * feiler. `signup_disabled` = Google-kontoen har ingen medlemskonto hos oss.
+ */
+function messageForAuthError(code: string | null): string {
+  if (!code) return "";
+  if (code === "signup_disabled" || code === "new_user_signup_disabled") {
+    return UNKNOWN_MEMBER_MESSAGE;
+  }
+  return "Google-innlogging feilet. Prøv igjen.";
+}
+
+export default function OnPoyntLoginPage() {
+  // useSearchParams krever en Suspense-grense med cacheComponents.
+  return (
+    <Suspense fallback={null}>
+      <LoginCard />
+    </Suspense>
+  );
+}
+
+function LoginCard() {
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError] = useState(() =>
+    messageForAuthError(searchParams.get("error"))
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [magicLinkSent, setMagicLinkSent] = useState(false);
   const getRecaptchaToken = useRecaptcha("innlogging");
@@ -36,6 +60,7 @@ export default function PlannerLoginPage() {
       await authClient.signIn.social({
         provider: "google",
         callbackURL: "/on-poynt/oversikt",
+        errorCallbackURL: "/on-poynt/innlogging",
       });
     } catch {
       setError("Google-innlogging feilet. Prøv igjen.");
@@ -101,7 +126,8 @@ export default function PlannerLoginPage() {
         <CardHeader>
           <CardTitle>Logg inn</CardTitle>
           <CardDescription>
-            Innlogging er for godkjente medlemmer. Bruk e-posten du søkte med.
+            Innlogging er for godkjente medlemmer. Bruk e-posten du søkte med —
+            andre adresser slipper ikke inn.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

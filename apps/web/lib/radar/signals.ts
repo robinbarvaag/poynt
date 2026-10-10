@@ -1,11 +1,14 @@
 import type { Guide } from "@/payload-types";
 import config from "@payload-config";
-import { count, db, desc, gte } from "@poynt/planner-db";
+import { count, db, desc, gte } from "@poynt/on-poynt-db";
 import {
-  plannerInspirationItem,
-  plannerToolResult,
-} from "@poynt/planner-db/schema";
-import { type RadarSignalInput, toolIdLabels } from "@poynt/planner-validators";
+  onPoyntInspirationItem,
+  onPoyntToolResult,
+} from "@poynt/on-poynt-db/schema";
+import {
+  type RadarSignalInput,
+  toolIdLabels,
+} from "@poynt/on-poynt-validators";
 import { getPayload } from "payload";
 import {
   hashGuideContent,
@@ -292,10 +295,10 @@ export async function gatherSignals(): Promise<RadarSignalInput[]> {
   // Etterspørsel: medlemmenes verktøybruk siste 90 dager.
   const since = new Date(Date.now() - DEMAND_DAYS * 24 * 3600 * 1000);
   const toolUsage = await db
-    .select({ toolId: plannerToolResult.toolId, n: count() })
-    .from(plannerToolResult)
-    .where(gte(plannerToolResult.createdAt, since))
-    .groupBy(plannerToolResult.toolId);
+    .select({ toolId: onPoyntToolResult.toolId, n: count() })
+    .from(onPoyntToolResult)
+    .where(gte(onPoyntToolResult.createdAt, since))
+    .groupBy(onPoyntToolResult.toolId);
 
   for (const row of toolUsage) {
     if (row.n < 2) continue; // for lite til å være et signal
@@ -370,11 +373,11 @@ async function inspirationGapSignals(
 ): Promise<RadarSignalInput[]> {
   const items = await db
     .select({
-      title: plannerInspirationItem.title,
-      topics: plannerInspirationItem.topics,
+      title: onPoyntInspirationItem.title,
+      topics: onPoyntInspirationItem.topics,
     })
-    .from(plannerInspirationItem)
-    .orderBy(desc(plannerInspirationItem.createdAt))
+    .from(onPoyntInspirationItem)
+    .orderBy(desc(onPoyntInspirationItem.createdAt))
     .limit(MAX_INSPIRATION_ITEMS);
 
   if (items.length === 0) return [];

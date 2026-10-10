@@ -1,7 +1,7 @@
-import { canonicalizeEmail } from "@/lib/email-normalize";
-import { db, eq, sql } from "@poynt/planner-db";
-import { plannerSubscription, plannerUser } from "@poynt/planner-db/schema";
-import type { MembershipTier } from "@poynt/planner-validators";
+import { findOnPoyntUserByEmail } from "@/lib/membership/find-user-by-email";
+import { db, sql } from "@poynt/on-poynt-db";
+import { onPoyntSubscription } from "@poynt/on-poynt-db/schema";
+import type { MembershipTier } from "@poynt/on-poynt-validators";
 import type Stripe from "stripe";
 
 export type { MembershipTier };
@@ -72,7 +72,7 @@ interface SyncSubscriptionParams {
 }
 
 /**
- * Sync subscription data to Drizzle planner_subscription table.
+ * Sync subscription data to Drizzle subscription table.
  * Finds the Better Auth user by canonical email, then upserts the subscription.
  */
 export async function syncSubscriptionToDrizzle(
@@ -89,27 +89,21 @@ export async function syncSubscriptionToDrizzle(
     cancelAtPeriodEnd,
   } = params;
 
-  const canonical = canonicalizeEmail(email);
-
   // Find Better Auth user
-  const existingUser = await db
-    .select()
-    .from(plannerUser)
-    .where(eq(plannerUser.canonicalEmail, canonical))
-    .limit(1);
+  const existingUser = await findOnPoyntUserByEmail(email);
 
-  if (existingUser.length === 0) {
+  if (!existingUser) {
     console.log(
       `No Better Auth user found for ${email}, skipping subscription sync`
     );
     return;
   }
 
-  const userId = existingUser[0].id;
+  const userId = existingUser.id;
 
   // Upsert subscription (userId is unique)
   await db
-    .insert(plannerSubscription)
+    .insert(onPoyntSubscription)
     .values({
       id: crypto.randomUUID(),
       userId,
@@ -122,7 +116,7 @@ export async function syncSubscriptionToDrizzle(
       cancelAtPeriodEnd: cancelAtPeriodEnd ?? false,
     })
     .onConflictDoUpdate({
-      target: plannerSubscription.userId,
+      target: onPoyntSubscription.userId,
       set: {
         tier,
         status,

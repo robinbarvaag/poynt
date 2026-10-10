@@ -11,7 +11,7 @@ import {
   publishChannelLabels,
   publishChannelTypes,
   yearlyPlannerRequestSchema,
-} from "@poynt/planner-validators";
+} from "@poynt/on-poynt-validators";
 import {
   Badge,
   Button,

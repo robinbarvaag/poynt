@@ -1,11 +1,11 @@
 import { DefaultTemplate } from "@payloadcms/next/templates";
 import { Gutter, Pill, SetStepNav } from "@payloadcms/ui";
 import { getVisibleEntities } from "@payloadcms/ui/shared";
-import { db, eq } from "@poynt/planner-db";
+import { db, eq } from "@poynt/on-poynt-db";
 import {
-  plannerIndustry,
-  plannerMembershipApplication,
-} from "@poynt/planner-db/schema";
+  onPoyntIndustry,
+  onPoyntMembershipApplication,
+} from "@poynt/on-poynt-db/schema";
 import type { AdminViewServerProps } from "payload";
 import type React from "react";
 import { ApplicationActions } from "../../components/applications/application-actions";
@@ -32,8 +32,8 @@ const statusLabels: Record<string, string> = {
 async function getApplication(id: string) {
   const [application] = await db
     .select()
-    .from(plannerMembershipApplication)
-    .where(eq(plannerMembershipApplication.id, id))
+    .from(onPoyntMembershipApplication)
+    .where(eq(onPoyntMembershipApplication.id, id))
     .limit(1);
 
   if (!application) return null;
@@ -41,9 +41,9 @@ async function getApplication(id: string) {
   let industryName: string | null = null;
   if (application.industryId) {
     const [industry] = await db
-      .select({ name: plannerIndustry.name })
-      .from(plannerIndustry)
-      .where(eq(plannerIndustry.id, application.industryId))
+      .select({ name: onPoyntIndustry.name })
+      .from(onPoyntIndustry)
+      .where(eq(onPoyntIndustry.id, application.industryId))
       .limit(1);
     industryName = industry?.name ?? application.industryId;
   }

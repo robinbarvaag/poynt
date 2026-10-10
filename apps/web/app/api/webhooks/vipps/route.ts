@@ -14,7 +14,7 @@ import {
 import { claimWebhookEvent, releaseWebhookEvent } from "@/lib/webhook-events";
 import config from "@/payload.config";
 import { sendOrderConfirmation, sendSaleNotification } from "@poynt/email";
-import { db } from "@poynt/planner-db";
+import { db } from "@poynt/on-poynt-db";
 import { type NextRequest, NextResponse } from "next/server";
 import { getPayload } from "payload";
 

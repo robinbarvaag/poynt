@@ -29,7 +29,7 @@ Current code:
 ```
 
 ```tsx
-// apps/web/components/planner/tasks/tasks-card.tsx:163-166 — animates WIDTH of a progress fill, 500ms
+// apps/web/components/on-poynt/tasks/tasks-card.tsx:163-166 — animates WIDTH of a progress fill, 500ms
 <div
   className="h-full bg-primary transition-all duration-500"
   style={{ width: `${total ? (doneCount / total) * 100 : 0}%` }}
@@ -97,7 +97,7 @@ Current code:
 
 1. `packages/ui/components/marketing/feature-grid.tsx:149`: apply target A (scale-x bar).
 2. `packages/ui/components/marketing/service-showcase.tsx:120,163,171`, `service-card.tsx:90`, `path-card.tsx:139`: apply the gap→icon-translate pattern (target A). Open each site, find the trailing icon element inside the same flex row, and move the motion there.
-3. `apps/web/components/planner/tasks/tasks-card.tsx:163-166`: apply target B.
+3. `apps/web/components/on-poynt/tasks/tasks-card.tsx:163-166`: apply target B.
 4. `packages/ui/components/card.tsx:14`, `packages/ui/components/dashboard/toolbox-card.tsx:33`, `packages/ui/components/guide/download-card.tsx:41`, `apps/web/components/footer.tsx:147`: apply target C line-for-line.
 
 ## Boundaries
@@ -110,7 +110,7 @@ Current code:
 
 ## Verification
 
-- **Mechanical**: `bun run typecheck` + `bun run check:ci` pass. `grep -rn "hover:gap-\|group-hover.*:gap-" packages/ui apps/web --include="*.tsx"` → no hits (excluding `.claude/`). `grep -n "transition-all" packages/ui/components/card.tsx apps/web/components/planner/tasks/tasks-card.tsx` → no hits.
+- **Mechanical**: `bun run typecheck` + `bun run check:ci` pass. `grep -rn "hover:gap-\|group-hover.*:gap-" packages/ui apps/web --include="*.tsx"` → no hits (excluding `.claude/`). `grep -n "transition-all" packages/ui/components/card.tsx apps/web/components/on-poynt/tasks/tasks-card.tsx` → no hits.
 - **Feel check**:
   - Marketing pages (forside, /tjenester): hover a feature card — the accent bar still grows to full width, from the left, smoothly; link rows still nudge their arrow on hover. In DevTools Performance panel, hovering no longer produces purple Layout blocks per frame.
   - Planner tasks card: checking a task animates the progress fill smoothly (~200ms), sliding rather than resizing.

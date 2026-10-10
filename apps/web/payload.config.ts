@@ -835,12 +835,12 @@ export default buildConfig({
                   const applicantEmail = get(["dinepost", "epost", "email"]);
                   if (!applicantEmail) return doc;
 
-                  // Speil søknaden inn i planner_membership_application slik at
+                  // Speil søknaden inn i membership_application slik at
                   // partneren får en strukturert «pending → godkjenn»-innboks.
                   try {
-                    const { db } = await import("@poynt/planner-db");
-                    const { plannerMembershipApplication } = await import(
-                      "@poynt/planner-db/schema"
+                    const { db } = await import("@poynt/on-poynt-db");
+                    const { onPoyntMembershipApplication } = await import(
+                      "@poynt/on-poynt-db/schema"
                     );
                     const { canonicalizeEmail } = await import(
                       "@poynt/utils/email-normalize"
@@ -867,7 +867,7 @@ export default buildConfig({
                       ? (audienceRaw as "b2b" | "b2c" | "both")
                       : null;
 
-                    await db.insert(plannerMembershipApplication).values({
+                    await db.insert(onPoyntMembershipApplication).values({
                       id: crypto.randomUUID(),
                       status: "pending",
                       fullName:

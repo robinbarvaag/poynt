@@ -57,10 +57,10 @@
         "@payloadcms/ui": "3.87.0",
         "@poynt/cart": "workspace:*",
         "@poynt/email": "workspace:*",
-        "@poynt/planner-api": "workspace:*",
-        "@poynt/planner-auth": "workspace:*",
-        "@poynt/planner-db": "workspace:*",
-        "@poynt/planner-validators": "workspace:*",
+        "@poynt/on-poynt-api": "workspace:*",
+        "@poynt/on-poynt-auth": "workspace:*",
+        "@poynt/on-poynt-db": "workspace:*",
+        "@poynt/on-poynt-validators": "workspace:*",
         "@poynt/stripe": "workspace:*",
         "@poynt/tailwind-config": "workspace:*",
         "@poynt/types": "workspace:*",
@@ -137,13 +137,13 @@
         "@types/react": "^19.2.14",
       },
     },
-    "packages/planner-api": {
-      "name": "@poynt/planner-api",
+    "packages/on-poynt-api": {
+      "name": "@poynt/on-poynt-api",
       "version": "0.0.1",
       "dependencies": {
         "@ai-sdk/openai": "^3.0.2",
-        "@poynt/planner-db": "workspace:*",
-        "@poynt/planner-validators": "workspace:*",
+        "@poynt/on-poynt-db": "workspace:*",
+        "@poynt/on-poynt-validators": "workspace:*",
         "@poynt/utils": "workspace:*",
         "@trpc/server": "^11.0.0",
         "ai": "^6.0.5",
@@ -159,13 +159,13 @@
         "typescript": "^5.7.2",
       },
     },
-    "packages/planner-auth": {
-      "name": "@poynt/planner-auth",
+    "packages/on-poynt-auth": {
+      "name": "@poynt/on-poynt-auth",
       "version": "0.0.1",
       "dependencies": {
         "@better-fetch/fetch": "^1.1.12",
         "@poynt/email": "workspace:*",
-        "@poynt/planner-db": "workspace:*",
+        "@poynt/on-poynt-db": "workspace:*",
         "@poynt/utils": "workspace:*",
         "better-auth": "^1.2.5",
         "zod": "^4.4.3",
@@ -176,8 +176,8 @@
         "typescript": "^5.7.2",
       },
     },
-    "packages/planner-db": {
-      "name": "@poynt/planner-db",
+    "packages/on-poynt-db": {
+      "name": "@poynt/on-poynt-db",
       "version": "0.0.1",
       "dependencies": {
         "dotenv": "^17.2.3",
@@ -191,8 +191,8 @@
         "typescript": "^5.7.2",
       },
     },
-    "packages/planner-validators": {
-      "name": "@poynt/planner-validators",
+    "packages/on-poynt-validators": {
+      "name": "@poynt/on-poynt-validators",
       "version": "0.0.0",
       "dependencies": {
         "zod": "^4.3.6",
@@ -983,13 +983,13 @@
 
     "@poynt/email": ["@poynt/email@workspace:packages/email"],
 
-    "@poynt/planner-api": ["@poynt/planner-api@workspace:packages/planner-api"],
+    "@poynt/on-poynt-api": ["@poynt/on-poynt-api@workspace:packages/on-poynt-api"],
 
-    "@poynt/planner-auth": ["@poynt/planner-auth@workspace:packages/planner-auth"],
+    "@poynt/on-poynt-auth": ["@poynt/on-poynt-auth@workspace:packages/on-poynt-auth"],
 
-    "@poynt/planner-db": ["@poynt/planner-db@workspace:packages/planner-db"],
+    "@poynt/on-poynt-db": ["@poynt/on-poynt-db@workspace:packages/on-poynt-db"],
 
-    "@poynt/planner-validators": ["@poynt/planner-validators@workspace:packages/planner-validators"],
+    "@poynt/on-poynt-validators": ["@poynt/on-poynt-validators@workspace:packages/on-poynt-validators"],
 
     "@poynt/storybook": ["@poynt/storybook@workspace:apps/storybook"],
 
@@ -2839,7 +2839,7 @@
 
     "@payloadcms/ui/sonner": ["sonner@1.7.4", "", { "peerDependencies": { "react": "^18.0.0 || ^19.0.0 || ^19.0.0-rc", "react-dom": "^18.0.0 || ^19.0.0 || ^19.0.0-rc" } }, "sha512-DIS8z4PfJRbIyfVFDVnK9rO3eYDtse4Omcm6bt0oEr5/jtLgysmjuBl1frJ9E/EQZrFmKx2A8m/s5s9CRXIzhw=="],
 
-    "@poynt/planner-db/@types/node": ["@types/node@20.19.43", "", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-6oYBAi5ikg4Pl+kGsoYtawUMBT2zZMCvPNF7pVLnHZfd1zf38DRiWn/gT01RYCdUqkv7Fhr+C9ot4/tb+2sVvA=="],
+    "@poynt/on-poynt-db/@types/node": ["@types/node@20.19.43", "", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-6oYBAi5ikg4Pl+kGsoYtawUMBT2zZMCvPNF7pVLnHZfd1zf38DRiWn/gT01RYCdUqkv7Fhr+C9ot4/tb+2sVvA=="],
 
     "@poynt/typescript-config/@types/node": ["@types/node@20.19.43", "", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-6oYBAi5ikg4Pl+kGsoYtawUMBT2zZMCvPNF7pVLnHZfd1zf38DRiWn/gT01RYCdUqkv7Fhr+C9ot4/tb+2sVvA=="],
 

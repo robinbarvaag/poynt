@@ -1,9 +1,9 @@
-import { TierGate } from "@/components/planner/tier-gate";
+import { TierGate } from "@/components/on-poynt/tier-gate";
 import { requireFeature } from "@/lib/features/server";
-import { getCalendarFeedUrls } from "@/lib/planner/calendar-feed";
-import { faviconFor } from "@/lib/planner/scheduled-posts";
-import { createServerCaller } from "@/lib/planner/trpc-server";
-import type { YearlyPlan } from "@poynt/planner-validators";
+import { getCalendarFeedUrls } from "@/lib/on-poynt/calendar-feed";
+import { faviconFor } from "@/lib/on-poynt/scheduled-posts";
+import { createServerCaller } from "@/lib/on-poynt/trpc-server";
+import type { YearlyPlan } from "@poynt/on-poynt-validators";
 import { YearlyPlannerClient } from "./yearly-planner-client";
 
 interface SavedPlan {

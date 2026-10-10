@@ -2,7 +2,7 @@
 
 import { priorityConfig } from "@/lib/constants";
 import { sectionReveal } from "@/lib/motion-variants";
-import type { MarketingPlanStream } from "@poynt/planner-validators";
+import type { MarketingPlanStream } from "@poynt/on-poynt-validators";
 import {
   Badge,
   Button,
@@ -22,7 +22,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
-import { TourButton } from "../planner/tour";
+import { TourButton } from "../on-poynt/tour";
 
 interface PlanResultProps {
   // Under streaming er planen et delobjekt (felter fylles inn bit for bit), så

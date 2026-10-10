@@ -1,11 +1,11 @@
 import { DefaultTemplate } from "@payloadcms/next/templates";
 import { Gutter, SetStepNav } from "@payloadcms/ui";
 import { getVisibleEntities } from "@payloadcms/ui/shared";
-import { db, desc } from "@poynt/planner-db";
+import { db, desc } from "@poynt/on-poynt-db";
 import {
-  plannerInspirationItem,
-  plannerInspirationSource,
-} from "@poynt/planner-db/schema";
+  onPoyntInspirationItem,
+  onPoyntInspirationSource,
+} from "@poynt/on-poynt-db/schema";
 import type { AdminViewServerProps } from "payload";
 import { getItemCountBySource } from "../../../lib/radar/inspiration";
 import { InspirationSourcesTable } from "../../components/inspiration/sources-table";
@@ -13,22 +13,22 @@ import { InspirationSourcesTable } from "../../components/inspiration/sources-ta
 async function getSources() {
   return db
     .select()
-    .from(plannerInspirationSource)
-    .orderBy(desc(plannerInspirationSource.createdAt));
+    .from(onPoyntInspirationSource)
+    .orderBy(desc(onPoyntInspirationSource.createdAt));
 }
 
 async function getRecentItems() {
   return db
     .select({
-      id: plannerInspirationItem.id,
-      title: plannerInspirationItem.title,
-      url: plannerInspirationItem.url,
-      summary: plannerInspirationItem.summary,
-      topics: plannerInspirationItem.topics,
-      createdAt: plannerInspirationItem.createdAt,
+      id: onPoyntInspirationItem.id,
+      title: onPoyntInspirationItem.title,
+      url: onPoyntInspirationItem.url,
+      summary: onPoyntInspirationItem.summary,
+      topics: onPoyntInspirationItem.topics,
+      createdAt: onPoyntInspirationItem.createdAt,
     })
-    .from(plannerInspirationItem)
-    .orderBy(desc(plannerInspirationItem.createdAt))
+    .from(onPoyntInspirationItem)
+    .orderBy(desc(onPoyntInspirationItem.createdAt))
     .limit(12);
 }
 

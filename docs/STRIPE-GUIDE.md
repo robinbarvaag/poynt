@@ -160,8 +160,8 @@ For alle testkort:
 
 **Sjekk at det fungerte:**
 - Terminal 2 viser `checkout.session.completed` + `customer.subscription.created`
-- DB: `planner_user` oppretta (om ny brukar)
-- DB: `planner_subscription` med rett tier og status=active
+- DB: `on_poynt.user` oppretta (om ny brukar)
+- DB: `on_poynt.subscription` med rett tier og status=active
 - Velkomstepost sendt
 
 ### Test C: Logg inn og sjå membership
@@ -187,7 +187,7 @@ For alle testkort:
 stripe trigger invoice.payment_failed
 ```
 
-Sjekk at `planner_subscription.status` vert `past_due` i databasen.
+Sjekk at `on_poynt.subscription.status` vert `past_due` i databasen.
 
 ### Test F: Simuler fornying
 
@@ -249,7 +249,7 @@ Når alt fungerer i test-modus:
 → Er `stripe listen` køyrande? Sjekk at den viser "Ready!"
 
 **"Customer not found" i Customer Portal**
-→ Brukaren har ikkje ein `stripeCustomerId` i `planner_subscription`. Skjer om webhook ikkje vart prosessert.
+→ Brukaren har ikkje ein `stripeCustomerId` i `on_poynt.subscription`. Skjer om webhook ikkje vart prosessert.
 
 **Betaling godkjent men ingen ordre/subscription i DB**
 → Sjekk Terminal 2 for feilmeldingar. Sjekk Stripe Dashboard → Webhooks → sjå event-historikk og response.

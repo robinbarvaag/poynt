@@ -9,7 +9,7 @@ import {
   situationTypes,
   toneTypeLabels,
   toneTypes,
-} from "@poynt/planner-validators";
+} from "@poynt/on-poynt-validators";
 import {
   Button,
   Checkbox,

@@ -1,8 +1,8 @@
-import { BrandGlimpseCard } from "@/components/planner/dashboard/brand-glimpse-card";
-import { UpcomingPostsCard } from "@/components/planner/dashboard/upcoming-posts-card";
-import { TasksCard } from "@/components/planner/tasks/tasks-card";
+import { BrandGlimpseCard } from "@/components/on-poynt/dashboard/brand-glimpse-card";
+import { UpcomingPostsCard } from "@/components/on-poynt/dashboard/upcoming-posts-card";
+import { TasksCard } from "@/components/on-poynt/tasks/tasks-card";
 import { getFeatureFlags } from "@/lib/features/server";
-import { getDashboardState } from "@/lib/planner/dashboard-state";
+import { getDashboardState } from "@/lib/on-poynt/dashboard-state";
 import {
   Card,
   CardContent,

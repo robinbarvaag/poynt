@@ -1,45 +1,45 @@
 import { DefaultTemplate } from "@payloadcms/next/templates";
 import { Gutter, SetStepNav } from "@payloadcms/ui";
 import { getVisibleEntities } from "@payloadcms/ui/shared";
-import { db, desc, eq, sql } from "@poynt/planner-db";
+import { db, desc, eq, sql } from "@poynt/on-poynt-db";
 import {
-  plannerSession,
-  plannerSubscription,
-  plannerUser,
-} from "@poynt/planner-db/schema";
+  onPoyntSession,
+  onPoyntSubscription,
+  onPoyntUser,
+} from "@poynt/on-poynt-db/schema";
 import type { AdminViewServerProps } from "payload";
 import { MemberTable } from "../../components/members/member-table";
 
 async function getMembers() {
   const members = await db
     .select({
-      id: plannerUser.id,
-      name: plannerUser.name,
-      email: plannerUser.email,
-      image: plannerUser.image,
-      onboardingCompleted: plannerUser.onboardingCompleted,
-      createdAt: plannerUser.createdAt,
-      tier: plannerSubscription.tier,
-      status: plannerSubscription.status,
-      stripeCustomerId: plannerSubscription.stripeCustomerId,
-      currentPeriodEnd: plannerSubscription.currentPeriodEnd,
-      cancelAtPeriodEnd: plannerSubscription.cancelAtPeriodEnd,
+      id: onPoyntUser.id,
+      name: onPoyntUser.name,
+      email: onPoyntUser.email,
+      image: onPoyntUser.image,
+      onboardingCompleted: onPoyntUser.onboardingCompleted,
+      createdAt: onPoyntUser.createdAt,
+      tier: onPoyntSubscription.tier,
+      status: onPoyntSubscription.status,
+      stripeCustomerId: onPoyntSubscription.stripeCustomerId,
+      currentPeriodEnd: onPoyntSubscription.currentPeriodEnd,
+      cancelAtPeriodEnd: onPoyntSubscription.cancelAtPeriodEnd,
     })
-    .from(plannerUser)
+    .from(onPoyntUser)
     .leftJoin(
-      plannerSubscription,
-      eq(plannerUser.id, plannerSubscription.userId)
+      onPoyntSubscription,
+      eq(onPoyntUser.id, onPoyntSubscription.userId)
     )
-    .orderBy(desc(plannerUser.createdAt));
+    .orderBy(desc(onPoyntUser.createdAt));
 
   // Get last session per user
   const sessions = await db
     .select({
-      userId: plannerSession.userId,
-      lastLogin: sql<string>`max(${plannerSession.createdAt})`.as("last_login"),
+      userId: onPoyntSession.userId,
+      lastLogin: sql<string>`max(${onPoyntSession.createdAt})`.as("last_login"),
     })
-    .from(plannerSession)
-    .groupBy(plannerSession.userId);
+    .from(onPoyntSession)
+    .groupBy(onPoyntSession.userId);
 
   const sessionMap = new Map(sessions.map((s) => [s.userId, s.lastLogin]));
 

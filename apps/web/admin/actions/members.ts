@@ -2,13 +2,13 @@
 
 import { findSoloWorkspaces, purgeMember } from "@/lib/members/delete-member";
 import { requireAdmin } from "@/lib/require-admin";
-import { count, db, eq, inArray, sql } from "@poynt/planner-db";
+import { count, db, eq, inArray, sql } from "@poynt/on-poynt-db";
 import {
-  plannerSubscription,
-  plannerUser,
-  plannerWorkspace,
-  plannerWorkspaceMember,
-} from "@poynt/planner-db/schema";
+  onPoyntSubscription,
+  onPoyntUser,
+  onPoyntWorkspace,
+  onPoyntWorkspaceMember,
+} from "@poynt/on-poynt-db/schema";
 import { getStripe } from "@poynt/stripe";
 
 type MembershipTier = "none" | "community" | "community_ai" | "agency";
@@ -19,15 +19,15 @@ export async function changeMemberTier(
 ) {
   await requireAdmin();
   await db
-    .update(plannerSubscription)
+    .update(onPoyntSubscription)
     .set({ tier: newTier, updatedAt: sql`now()` })
-    .where(eq(plannerSubscription.userId, userId));
+    .where(eq(onPoyntSubscription.userId, userId));
 
   // Update Stripe metadata if subscription exists
   const [sub] = await db
     .select()
-    .from(plannerSubscription)
-    .where(eq(plannerSubscription.userId, userId))
+    .from(onPoyntSubscription)
+    .where(eq(onPoyntSubscription.userId, userId))
     .limit(1);
 
   if (sub?.stripeSubscriptionId) {
@@ -56,8 +56,8 @@ export async function setMemberStatus(
 
   const [sub] = await db
     .select()
-    .from(plannerSubscription)
-    .where(eq(plannerSubscription.userId, userId))
+    .from(onPoyntSubscription)
+    .where(eq(onPoyntSubscription.userId, userId))
     .limit(1);
 
   if (!sub) {
@@ -67,9 +67,9 @@ export async function setMemberStatus(
   }
 
   await db
-    .update(plannerSubscription)
+    .update(onPoyntSubscription)
     .set({ status, updatedAt: sql`now()` })
-    .where(eq(plannerSubscription.userId, userId));
+    .where(eq(onPoyntSubscription.userId, userId));
 
   return { success: true };
 }
@@ -83,8 +83,8 @@ export async function endMembership(userId: string) {
   await requireAdmin();
   const [sub] = await db
     .select()
-    .from(plannerSubscription)
-    .where(eq(plannerSubscription.userId, userId))
+    .from(onPoyntSubscription)
+    .where(eq(onPoyntSubscription.userId, userId))
     .limit(1);
 
   // Cancel Stripe subscription first (if exists)
@@ -99,13 +99,13 @@ export async function endMembership(userId: string) {
 
   // Update Drizzle
   await db
-    .update(plannerSubscription)
+    .update(onPoyntSubscription)
     .set({
       tier: "none",
       status: "canceled",
       updatedAt: sql`now()`,
     })
-    .where(eq(plannerSubscription.userId, userId));
+    .where(eq(onPoyntSubscription.userId, userId));
 
   return { success: true };
 }
@@ -132,16 +132,16 @@ export async function previewMemberDeletion(
 
   const [user] = await db
     .select()
-    .from(plannerUser)
-    .where(eq(plannerUser.id, userId))
+    .from(onPoyntUser)
+    .where(eq(onPoyntUser.id, userId))
     .limit(1);
 
   if (!user) return null;
 
   const [sub] = await db
     .select()
-    .from(plannerSubscription)
-    .where(eq(plannerSubscription.userId, userId))
+    .from(onPoyntSubscription)
+    .where(eq(onPoyntSubscription.userId, userId))
     .limit(1);
 
   return {
@@ -166,8 +166,8 @@ export async function deleteMember(userId: string, confirmEmail: string) {
 
   const [user] = await db
     .select()
-    .from(plannerUser)
-    .where(eq(plannerUser.id, userId))
+    .from(onPoyntUser)
+    .where(eq(onPoyntUser.id, userId))
     .limit(1);
 
   if (!user) {

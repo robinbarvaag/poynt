@@ -1,4 +1,4 @@
-import { createServerCaller } from "@/lib/planner/trpc-server";
+import { createServerCaller } from "@/lib/on-poynt/trpc-server";
 import { redirect } from "next/navigation";
 import { AdminFeedbackClient } from "./admin-feedback-client";
 

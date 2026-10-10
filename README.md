@@ -49,7 +49,7 @@ packages/
   stripe/                 # Stripe SDK-wrapper
   types/                  # Delte TypeScript-typer
   ui/                     # Radix UI + Tailwind-komponenter
-  planner-*/              # Better Auth, Drizzle DB, API, validators
+  on-poynt-*/              # Better Auth, Drizzle DB, API, validators
 tooling/                  # Tailwind- og TypeScript-presets
 docs/                     # Prosjektdokumentasjon (se under)
 ```
@@ -70,6 +70,6 @@ docs/                     # Prosjektdokumentasjon (se under)
 To uavhengige datasystemer uten bru mellom seg:
 
 - **Payload CMS + PostgreSQL** — innhold og admin (partners verktøy). `Users`-collection er kun for admin.
-- **Better Auth + Drizzle** — all kunde-/medlemsdata, auth (Google OAuth + magic link), abonnement. Tabeller med `planner_*`-prefiks.
+- **Better Auth + Drizzle** — all kunde-/medlemsdata, auth (Google OAuth + magic link), abonnement. Tabeller med `on_poynt`-skjema.
 
 Se [docs/](docs/) for detaljer.

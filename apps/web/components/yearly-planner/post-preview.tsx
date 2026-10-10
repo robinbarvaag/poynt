@@ -5,7 +5,7 @@ import {
   channelMeta,
   normalizeChannel,
   stripTrailingHashtags,
-} from "@/lib/planner/scheduled-posts";
+} from "@/lib/on-poynt/scheduled-posts";
 import { Icon } from "@poynt/ui/icons";
 import { cn } from "@poynt/ui/lib/utils";
 

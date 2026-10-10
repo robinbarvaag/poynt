@@ -10,7 +10,7 @@
 - Blokk-basert sidebyggar (Hero, Content, Media, Features, Archive, etc.)
 - Nettbutikk med handlekurv + Stripe checkout (digitale produkt)
 - Better Auth med Google OAuth + magic link
-- Drizzle-basert membership-system (planner_subscription)
+- Drizzle-basert membership-system (on_poynt.subscription)
 - Stripe webhook: membership-kjøp, subscription lifecycle, produktordrar
 - Velkomst-epost (React Email + Resend)
 - Onboarding-flow for nye medlemmer
@@ -20,7 +20,7 @@
 - Medlemsadministrasjon i Payload admin (custom views med Drizzle-data)
 - Innhaldssystem: Articles-collection, oversiktsside med kategorifilter + søk, artikkelside med TOC
 - Vis detaljar: e-post, tier, Stripe-status, siste innlogging
-- Liste over alle On Poynt-medlemmer (frå Drizzle planner_user + planner_subscription)
+- Liste over alle On Poynt-medlemmer (frå Drizzle on_poynt.user + on_poynt.subscription)
 - Endre tier / deaktiver medlemskap
 - **Tilgangskontroll**: `community_ai`-sjekk på alle AI-verktøy (tRPC + TierGate UI), kansellert-innen-periode-fix, past_due grace period
 - **Podcast-to-Content**: lydfil-opplasting → Whisper-transkripsjon → blogginnlegg + sosiale postar + kapittelmerke (`/verktoy/podcast-til-innhald`)
@@ -46,7 +46,7 @@
 
 ## Notat
 
-- Drizzle-migrasjonar: `drizzle-kit generate` → `bun run db:migrate` frå packages/planner-db (ALDRI `push`)
+- Drizzle-migrasjonar: `drizzle-kit generate` → `bun run db:migrate` frå packages/on-poynt-db (ALDRI `push`)
 - Payload Users = berre admin. Medlemsdata = Drizzle.
 - Stripe handterer både produktkjøp (Payload orders) og membership (Drizzle)
 - Prismodell: 1m=999kr, 3m=899kr, 6m=849kr, 12m=799kr per månad

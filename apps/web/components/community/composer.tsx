@@ -1,7 +1,7 @@
 "use client";
 
-import { trpc } from "@/lib/planner/trpc";
-import type { MessageAttachmentInput } from "@poynt/planner-validators";
+import { trpc } from "@/lib/on-poynt/trpc";
+import type { MessageAttachmentInput } from "@poynt/on-poynt-validators";
 import {
   Attachment,
   AttachmentAction,

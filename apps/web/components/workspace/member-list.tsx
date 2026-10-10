@@ -1,7 +1,7 @@
 "use client";
 
-import { trpc } from "@/lib/planner/trpc";
-import { workspaceRoleLabels } from "@poynt/planner-validators";
+import { trpc } from "@/lib/on-poynt/trpc";
+import { workspaceRoleLabels } from "@poynt/on-poynt-validators";
 import { Avatar, AvatarFallback, AvatarImage } from "@poynt/ui";
 import { Button } from "@poynt/ui";
 import {

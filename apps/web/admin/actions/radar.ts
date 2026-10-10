@@ -7,11 +7,11 @@ import {
 } from "@/lib/radar/widget-data";
 import { requireAdmin } from "@/lib/require-admin";
 import config from "@/payload.config";
-import { db, eq } from "@poynt/planner-db";
+import { db, eq } from "@poynt/on-poynt-db";
 import {
   type ContentSuggestionStatus,
-  plannerContentSuggestion,
-} from "@poynt/planner-db/schema";
+  onPoyntContentSuggestion,
+} from "@poynt/on-poynt-db/schema";
 import { headers } from "next/headers";
 import { getPayload } from "payload";
 
@@ -41,10 +41,10 @@ export async function setSuggestionStatus(
 ) {
   await requireAdmin();
   const [updated] = await db
-    .update(plannerContentSuggestion)
+    .update(onPoyntContentSuggestion)
     .set({ status })
-    .where(eq(plannerContentSuggestion.id, id))
-    .returning({ id: plannerContentSuggestion.id });
+    .where(eq(onPoyntContentSuggestion.id, id))
+    .returning({ id: onPoyntContentSuggestion.id });
   return { success: Boolean(updated) };
 }
 

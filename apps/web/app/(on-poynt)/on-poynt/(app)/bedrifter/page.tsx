@@ -1,6 +1,6 @@
-import { MyCompany } from "@/components/planner/crm/my-company";
+import { MyCompany } from "@/components/on-poynt/crm/my-company";
 import { requireFeature } from "@/lib/features/server";
-import { createServerCaller } from "@/lib/planner/trpc-server";
+import { createServerCaller } from "@/lib/on-poynt/trpc-server";
 import { Card, CardDescription, CardHeader, CardTitle } from "@poynt/ui";
 import { Icon } from "@poynt/ui/icons";
 

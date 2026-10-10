@@ -1,5 +1,6 @@
 import { snapshotConsent } from "@/lib/checkout-consent-server";
 import { canonicalizeEmail } from "@/lib/email-normalize";
+import { findOnPoyntUserByEmail } from "@/lib/membership/find-user-by-email";
 import {
   type MembershipTier,
   getTierFromSubscription,
@@ -18,8 +19,8 @@ import {
   sendOrderConfirmation,
   sendSaleNotification,
 } from "@poynt/email";
-import { db, eq } from "@poynt/planner-db";
-import { plannerUser } from "@poynt/planner-db/schema";
+import { db, eq } from "@poynt/on-poynt-db";
+import { onPoyntUser } from "@poynt/on-poynt-db/schema";
 import { stripe } from "@poynt/stripe";
 import { type NextRequest, NextResponse } from "next/server";
 import { getPayload } from "payload";
@@ -56,26 +57,22 @@ async function handleMembershipPurchase(session: Stripe.Checkout.Session) {
     // User was logged in at checkout — use their Better Auth ID directly
     const user = await db
       .select()
-      .from(plannerUser)
-      .where(eq(plannerUser.id, userIdFromMeta))
+      .from(onPoyntUser)
+      .where(eq(onPoyntUser.id, userIdFromMeta))
       .limit(1);
     if (user.length > 0) userId = user[0].id;
   }
 
   if (!userId) {
     // Fall back to email lookup
-    const existingUser = await db
-      .select()
-      .from(plannerUser)
-      .where(eq(plannerUser.canonicalEmail, canonical))
-      .limit(1);
+    const existingUser = await findOnPoyntUserByEmail(email);
 
-    if (existingUser.length > 0) {
-      userId = existingUser[0].id;
+    if (existingUser) {
+      userId = existingUser.id;
     } else {
       // Create user as last resort (guest purchase)
       userId = crypto.randomUUID();
-      await db.insert(plannerUser).values({
+      await db.insert(onPoyntUser).values({
         id: userId,
         name: session.customer_details?.name || email.split("@")[0],
         email,

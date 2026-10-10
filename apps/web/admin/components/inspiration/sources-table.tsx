@@ -4,7 +4,7 @@ import {
   type InspirationSourceTypeValue,
   inspirationSourceTypeLabels,
   inspirationSourceTypes,
-} from "@poynt/planner-validators";
+} from "@poynt/on-poynt-validators";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {

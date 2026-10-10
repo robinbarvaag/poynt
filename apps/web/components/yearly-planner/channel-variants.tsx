@@ -1,12 +1,12 @@
 "use client";
 
-import { adaptPostStreamAction } from "@/lib/planner/actions/adapt-post";
+import { adaptPostStreamAction } from "@/lib/on-poynt/actions/adapt-post";
 import { readStreamableValue } from "@ai-sdk/rsc";
 import {
   type AdaptedPostsStream,
   publishChannelLabels,
   publishChannelTypes,
-} from "@poynt/planner-validators";
+} from "@poynt/on-poynt-validators";
 import { Badge, Button, Skeleton, toast } from "@poynt/ui";
 import { Icon } from "@poynt/ui/icons";
 import type { DeepPartial } from "ai";

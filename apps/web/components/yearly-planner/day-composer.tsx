@@ -6,9 +6,9 @@ import {
   SCHEDULED_POST_TOOL_ID,
   SELECTABLE_CHANNELS,
   parseISODate,
-} from "@/lib/planner/scheduled-posts";
-import { trpc } from "@/lib/planner/trpc";
-import type { GeneratePostRequest } from "@poynt/planner-validators";
+} from "@/lib/on-poynt/scheduled-posts";
+import { trpc } from "@/lib/on-poynt/trpc";
+import type { GeneratePostRequest } from "@poynt/on-poynt-validators";
 import {
   Button,
   Dialog,

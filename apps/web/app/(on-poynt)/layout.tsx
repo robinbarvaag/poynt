@@ -58,7 +58,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function PlannerRootLayout({
+export default function OnPoyntRootLayout({
   children,
 }: {
   children: React.ReactNode;

@@ -2,8 +2,8 @@
 
 import { DeclineForm } from "@/components/decline-generator/decline-form";
 import { DeclineResult } from "@/components/decline-generator/decline-result";
-import { trpc } from "@/lib/planner/trpc";
-import type { DeclineRequest } from "@poynt/planner-validators";
+import { trpc } from "@/lib/on-poynt/trpc";
+import type { DeclineRequest } from "@poynt/on-poynt-validators";
 import { PageShell, toast } from "@poynt/ui";
 import { useState } from "react";
 

@@ -7,15 +7,17 @@ workflow to use.
 | Postgres schema | Owned by | Tables | Migration tool |
 | --- | --- | --- | --- |
 | `public` | **Payload CMS** | `pages`, `homepage`, `products`, `orders`, `media`, `*_blocks_*`, `payload_*`, … | `payload migrate` |
-| `planner` | **Better Auth + Drizzle** | `planner_*` only | `drizzle-kit` + custom `migrate.ts` |
+| `on_poynt` | **Better Auth + Drizzle** | `on_poynt.*` only | `drizzle-kit` + custom `migrate.ts` |
 
-They are **physically isolated**: all Better-Auth/planner objects live in a dedicated `planner`
-Postgres schema (`pgSchema("planner")` in `packages/planner-db/schema/_schema.ts`), and
-drizzle-kit is scoped to it via `schemaFilter: ["planner"]` in `drizzle.config.ts`. Drizzle-kit
+They are **physically isolated**: all Better-Auth/On Poynt objects live in a dedicated `on_poynt`
+Postgres schema (`pgSchema("on_poynt")` in `packages/on-poynt-db/schema/_schema.ts`), and
+drizzle-kit is scoped to it via `schemaFilter: ["on_poynt"]` in `drizzle.config.ts`. Drizzle-kit
 **cannot see** Payload's tables/enums (they live in `public`), and Payload never touches
-`planner`. This makes the old "push fights our own schema" enum-rename collision *structurally
-impossible* rather than merely unlikely. The `planner_` table-name prefix is now redundant but
-kept to avoid reserved words (e.g. `user`) and to keep all app/query code unchanged.
+`on_poynt`. This makes the old "push fights our own schema" enum-rename collision *structurally
+impossible* rather than merely unlikely. Tables carry no prefix (`on_poynt.user`,
+`on_poynt.workspace`, …) — the schema namespaces them. The whole area was renamed from
+`planner`/`planner_*` in Drizzle migration `0021_rename_planner_to_on_poynt` (2026-10-06), a
+hand-written in-place rename that keeps all data.
 
 `push` is **`false`** in `apps/web/payload.config.ts`. Schema changes go through committed
 migration files, not dev-time auto-push.
@@ -34,12 +36,12 @@ bun run payload:migrate:down     # roll back the last batch
 bun run payload:types            # regenerate payload-types.ts
 ```
 
-### Planner (Better Auth members, subscriptions, workspaces — `planner_*`)
+### On Poynt (Better Auth members, subscriptions, workspaces — `on_poynt.*`)
 
 ```bash
-bun run planner:generate         # generate a Drizzle migration from schema changes
-bun run planner:migrate          # apply Drizzle migrations (custom migrate.ts, uses postgres.js)
-bun run planner:studio           # open Drizzle Studio
+bun run on-poynt:generate         # generate a Drizzle migration from schema changes
+bun run on-poynt:migrate          # apply Drizzle migrations (custom migrate.ts, uses postgres.js)
+bun run on-poynt:studio           # open Drizzle Studio
 ```
 
 > The root scripts delegate via `bun run --cwd <pkg> …`, so they work from anywhere in the repo.
@@ -59,31 +61,31 @@ bun run planner:studio           # open Drizzle Studio
    the migration.
 4. `bun run payload:migrate` — applies it. Commit the migration files.
 
-### I changed the planner (Drizzle) schema
+### I changed the On Poynt (Drizzle) schema
 
-1. Edit the schema in `packages/planner-db`.
-2. `bun run planner:generate`
-3. `bun run planner:migrate`
+1. Edit the schema in `packages/on-poynt-db`.
+2. `bun run on-poynt:generate`
+3. `bun run on-poynt:migrate`
 4. Commit the generated SQL.
 
 ---
 
 ## Hard rules / gotchas
 
-- **Still prefer `generate` + `migrate` over `drizzle-kit push`.** With `schemaFilter: ["planner"]`
-  push is now scoped to the `planner` schema and can no longer see Payload's objects, so the old
+- **Still prefer `generate` + `migrate` over `drizzle-kit push`.** With `schemaFilter: ["on_poynt"]`
+  push is now scoped to the `on_poynt` schema and can no longer see Payload's objects, so the old
   cross-schema drop/rename hazard is gone. But migrations remain the source of truth for
   reproducible deploys — only reach for push for throwaway local experiments, never against a DB
   you care about.
-- **Drizzle migrations include `CREATE SCHEMA IF NOT EXISTS "planner";`** as their first
+- **Drizzle migrations include `CREATE SCHEMA IF NOT EXISTS "on_poynt";`** as their first
   statement. drizzle-kit (0.30) does **not** emit this automatically when using `pgSchema`, so it
   is prepended to the generated `0000_*.sql` by hand. If you regenerate the baseline from scratch,
-  re-add that line at the top or the `CREATE TABLE "planner".*` statements fail on a fresh DB.
+  re-add that line at the top or the `CREATE TABLE "on_poynt".*` statements fail on a fresh DB.
 - Payload `push` stays **`false`**. Even though the schema split removes the enum-collision
   hazard, committed migration files are still how production schema changes are tracked.
 - `payload migrate` runs the migration file's raw SQL — it does **not** run drizzle-kit's
   diff/push, so it never triggers the enum-rename prompt. It's the safe path.
-- `drizzle-kit migrate` silently no-ops here (wrong driver). `planner:migrate` runs the custom
+- `drizzle-kit migrate` silently no-ops here (wrong driver). `on-poynt:migrate` runs the custom
   `migrate.ts` (postgres.js) instead — use that.
 
 ---

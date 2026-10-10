@@ -43,7 +43,7 @@
 - [x] Bruk testkort `4242 4242 4242 4242` → Betaling godkjent
 - [x] Omdirigert til `/kvittering`
 - [x] Webhook logg viser: `checkout.session.completed` + `customer.subscription.created`
-- [x] Sjekk Drizzle DB: `planner_user` oppretta, `planner_subscription` med tier=community, status=active
+- [x] Sjekk Drizzle DB: `on_poynt.user` oppretta, `on_poynt.subscription` med tier=community, status=active
 - [x] Velkomstepost motteke
 
 ## 6. Innlogging & Auth

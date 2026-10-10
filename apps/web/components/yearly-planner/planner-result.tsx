@@ -5,12 +5,12 @@ import {
   SCHEDULED_POST_TOOL_ID,
   type ScheduledPost,
   parseISODate,
-} from "@/lib/planner/scheduled-posts";
-import { trpc } from "@/lib/planner/trpc";
+} from "@/lib/on-poynt/scheduled-posts";
+import { trpc } from "@/lib/on-poynt/trpc";
 import type {
   GeneratePostRequest,
   YearlyPlanStream,
-} from "@poynt/planner-validators";
+} from "@poynt/on-poynt-validators";
 import {
   Button,
   Card,
@@ -30,7 +30,7 @@ import type { DeepPartial } from "ai";
 import type { DriveStep } from "driver.js";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { TourButton } from "../planner/tour";
+import { TourButton } from "../on-poynt/tour";
 import { PlannerCalendar } from "./planner-calendar";
 import { PostComposer } from "./post-composer";
 import { SavedPostsDialog } from "./saved-posts-dialog";

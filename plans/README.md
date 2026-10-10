@@ -24,7 +24,7 @@ Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJE
 ## Dependency notes
 
 - 002 and 003 want 001 first so their changes land behind a working test/CI gate; 003's dependency is nominal (it can technically go first).
-- 005 must follow 003: both edit `packages/planner-api/trpc.ts` (003 adds `memberProcedure`; 005 changes `aiProtectedProcedure`'s tier check). Doing them out of order invites merge conflicts and scope bleed.
+- 005 must follow 003: both edit `packages/on-poynt-api/trpc.ts` (003 adds `memberProcedure`; 005 changes `aiProtectedProcedure`'s tier check). Doing them out of order invites merge conflicts and scope bleed.
 - 004 is independent and can run any time, in parallel with anything.
 
 ## Backlog — vetted findings not planned this round
@@ -32,18 +32,18 @@ Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJE
 Worth doing, deliberately deferred (re-run `/improve plan <item>` to turn one into a plan):
 
 - **SSRF / cookie-forwarding in AI fetchers** (SECURITY-02, MED): `apps/web/app/api/ai/alt-text/route.ts:26-42` forwards the caller's cookie header to ANY host when given a free-form `imageUrl`; `apps/web/app/api/og/route.ts` and `og-image` fetch arbitrary URLs. Admin-gated, so actor pool is small — fix by only forwarding cookies same-origin and allowlisting outbound hosts.
-- **Hardcoded default admin allowlist** (SECURITY-03, S): `packages/planner-api/lib/admin-access.ts:11` and `apps/web/lib/planner/playground-access.ts` default to the owner's personal email when `ADMIN_EMAILS` is unset. Fail closed to an empty allowlist instead.
+- **Hardcoded default admin allowlist** (SECURITY-03, S): `packages/on-poynt-api/lib/admin-access.ts:11` and `apps/web/lib/on-poynt/playground-access.ts` default to the owner's personal email when `ADMIN_EMAILS` is unset. Fail closed to an empty allowlist instead.
 - **Unauthenticated abuse surfaces** (SECURITY-04, M): `/api/coupon` (promo-code enumeration against Stripe), `/api/newsletter` (subscribe-anyone), `/api/radar/track` (untrusted `contentId` inflates analytics). Needs rate limiting + `contentId` existence check. Note: coupon discounts are re-applied authoritatively in `/api/checkout`, so this is enumeration/cost abuse, not a pricing hole.
 - **`past_due` payment-failed email** (DIRECTION-01, S–M): `handleInvoicePaymentFailed` (`apps/web/app/api/webhooks/stripe/route.ts:433`) syncs status but sends nothing; ROADMAP names this as the top outstanding access-control item. Build after 002 lands (must be idempotent per invoice under retry semantics).
 - **`.env.example` + env var docs** (DX-02, S): ~20 required env vars undocumented (Vipps, Deepgram, VAPID, Pexels/Giphy, Firecrawl, Resend audience, etc.); note the DB var is `DATABASE_URI`, not `DATABASE_URL`.
 - **Per-request session memoization** (PERF-02, S–M): `getSessionWithMembership` and `createServerCaller` each resolve the session independently — wrap in React `cache()`; also `Promise.all` the sequential awaits in the on-poynt layout.
-- **zod v3/v4 split** (DEPS-03, M): `planner-api`/`planner-validators` on v3, everything else on v4 — align on v4.
+- **zod v3/v4 split** (DEPS-03, M): `on-poynt-api`/`on-poynt-validators` on v3, everything else on v4 — align on v4.
 - **turbo.json gaps** (DX-04/05, S): `globalEnv` misses most build-affecting vars (esp. `NEXT_PUBLIC_*`); `typecheck` doesn't guarantee fresh `payload-types.ts`.
 - **Unpinned `turbo: latest` + unused `puppeteer`** (DEPS-01/02, S): pin turbo; remove puppeteer from root devDeps after confirming no ad-hoc use. Also orphaned `playwright` in `apps/storybook` with never-running `play` tests (TEST-02).
 - **`bun audit` advisories** (DEPS-04): high-severity transitive advisories (undici, brace-expansion) under the pinned Payload/inngest trees — add audit to CI as non-blocking, apply targeted overrides carefully.
 - **Duplicate `ServiceCard` + price formatter** (DEBT-01, M): `apps/web/components/service-card.tsx` duplicates `@poynt/ui`'s card and `formatServicePrice`; consolidation needs design sign-off.
 - **Docs drift** (DOCS-01..04, S each): ROADMAP pricing (four-tier vs actual flat 2 000 kr/mnd), ON-POYNT-VERKTOY.md model provider (says gpt-4o; code uses Claude Sonnet 4.6 flagship + gpt-4o-mini utility), CLAUDE.md collections list (6 of 12), CONTENT-RADAR.md status header.
-- **Direction options** (owner's call, from the direction audit): bulk alt-text over the media library; per-bransje prompt overrides (infra exists); record an ADR that membership is Stripe-only vs. building Vipps recurring; AI cost dashboard reusing `estimatePlaygroundCost` + `planner_tool_result`.
+- **Direction options** (owner's call, from the direction audit): bulk alt-text over the media library; per-bransje prompt overrides (infra exists); record an ADR that membership is Stripe-only vs. building Vipps recurring; AI cost dashboard reusing `estimatePlaygroundCost` + `on_poynt.tool_result`.
 
 ## Findings considered and rejected
 

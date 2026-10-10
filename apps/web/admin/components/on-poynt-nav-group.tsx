@@ -16,7 +16,7 @@ const links = [
     href: "/admin/collections/courses",
     label: "Kurs",
   },
-  // Egenbygde admin-views (leser fra planner-skjemaet).
+  // Egenbygde admin-views (leser fra on_poynt-skjemaet).
   {
     href: "/admin/soknader",
     label: "Søknader",

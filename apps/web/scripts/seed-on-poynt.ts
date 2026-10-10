@@ -1,6 +1,6 @@
 /**
  * Seeder den OFFENTLIGE salgssiden for On Poynt-medlemskapet på /on-poynt.
- * Ruta eies av (frontend)/[...slug] (den gamle statiske planner-landingssiden
+ * Ruta eies av (frontend)/[...slug] (den gamle statiske On Poynt-landingssiden
  * er slettet), så siden får vanlig site-header/footer og indekseres — kun
  * undersidene (/on-poynt/…) er medlemsområde, jf. robots.ts. Idempotent:
  * oppdaterer hvis slug finnes. Norsk utkast-tekst — finpuss i admin.

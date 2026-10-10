@@ -1,19 +1,19 @@
 "use client";
 
-import { generatePostStreamAction } from "@/lib/planner/actions/generate-post";
+import { generatePostStreamAction } from "@/lib/on-poynt/actions/generate-post";
 import {
   type BusinessIdentity,
   SCHEDULED_POST_TOOL_ID,
   channelMeta,
   parseISODate,
-} from "@/lib/planner/scheduled-posts";
-import { trpc } from "@/lib/planner/trpc";
+} from "@/lib/on-poynt/scheduled-posts";
+import { trpc } from "@/lib/on-poynt/trpc";
 import { readStreamableValue } from "@ai-sdk/rsc";
 import {
   type GeneratePostRequest,
   type PostAngle,
   postAngleLabels,
-} from "@poynt/planner-validators";
+} from "@poynt/on-poynt-validators";
 import {
   Badge,
   Button,

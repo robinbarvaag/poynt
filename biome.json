@@ -19,7 +19,7 @@
       "apps/web/payload-types.ts",
       "apps/web/app/(payload)/**",
       "apps/web/migrations/**",
-      "packages/planner-db/drizzle/**"
+      "packages/on-poynt-db/drizzle/**"
     ]
   },
   "formatter": {

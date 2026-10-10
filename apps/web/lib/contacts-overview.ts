@@ -1,10 +1,10 @@
 import { listAllNewsletterContacts } from "@poynt/email";
-import { db, eq } from "@poynt/planner-db";
+import { db, eq } from "@poynt/on-poynt-db";
 import {
-  plannerMembershipApplication,
-  plannerSubscription,
-  plannerUser,
-} from "@poynt/planner-db/schema";
+  onPoyntMembershipApplication,
+  onPoyntSubscription,
+  onPoyntUser,
+} from "@poynt/on-poynt-db/schema";
 import { canonicalizeEmail } from "@poynt/utils/email-normalize";
 import type { Payload } from "payload";
 
@@ -161,17 +161,17 @@ export async function getContactsOverview(
   // 3) On Poynt-medlemmer (Better Auth + abonnement).
   const members = await db
     .select({
-      id: plannerUser.id,
-      email: plannerUser.email,
-      name: plannerUser.name,
-      createdAt: plannerUser.createdAt,
-      tier: plannerSubscription.tier,
-      status: plannerSubscription.status,
+      id: onPoyntUser.id,
+      email: onPoyntUser.email,
+      name: onPoyntUser.name,
+      createdAt: onPoyntUser.createdAt,
+      tier: onPoyntSubscription.tier,
+      status: onPoyntSubscription.status,
     })
-    .from(plannerUser)
+    .from(onPoyntUser)
     .leftJoin(
-      plannerSubscription,
-      eq(plannerSubscription.userId, plannerUser.id)
+      onPoyntSubscription,
+      eq(onPoyntSubscription.userId, onPoyntUser.id)
     )
     .catch(() => []);
   for (const member of members) {
@@ -188,14 +188,14 @@ export async function getContactsOverview(
   // 4) Medlemssøknader.
   const applications = await db
     .select({
-      id: plannerMembershipApplication.id,
-      email: plannerMembershipApplication.email,
-      fullName: plannerMembershipApplication.fullName,
-      status: plannerMembershipApplication.status,
-      companyName: plannerMembershipApplication.companyName,
-      createdAt: plannerMembershipApplication.createdAt,
+      id: onPoyntMembershipApplication.id,
+      email: onPoyntMembershipApplication.email,
+      fullName: onPoyntMembershipApplication.fullName,
+      status: onPoyntMembershipApplication.status,
+      companyName: onPoyntMembershipApplication.companyName,
+      createdAt: onPoyntMembershipApplication.createdAt,
     })
-    .from(plannerMembershipApplication)
+    .from(onPoyntMembershipApplication)
     .catch(() => []);
   for (const application of applications) {
     const row = rowFor(application.email, application.fullName);

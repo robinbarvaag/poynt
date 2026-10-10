@@ -1,5 +1,5 @@
-import { db, gte, sql } from "@poynt/planner-db";
-import { plannerContentView } from "@poynt/planner-db/schema";
+import { db, gte, sql } from "@poynt/on-poynt-db";
+import { onPoyntContentView } from "@poynt/on-poynt-db/schema";
 
 /**
  * Lettvekts visningstelling (Fase 4). Aggregert per (collection, contentId, dag)
@@ -20,7 +20,7 @@ export async function recordView(input: {
   slug?: string | null;
 }): Promise<void> {
   await db
-    .insert(plannerContentView)
+    .insert(onPoyntContentView)
     .values({
       collection: input.collection,
       contentId: input.contentId,
@@ -30,13 +30,13 @@ export async function recordView(input: {
     })
     .onConflictDoUpdate({
       target: [
-        plannerContentView.collection,
-        plannerContentView.contentId,
-        plannerContentView.day,
+        onPoyntContentView.collection,
+        onPoyntContentView.contentId,
+        onPoyntContentView.day,
       ],
       set: {
-        count: sql`${plannerContentView.count} + 1`,
-        slug: sql`coalesce(${plannerContentView.slug}, excluded.slug)`,
+        count: sql`${onPoyntContentView.count} + 1`,
+        slug: sql`coalesce(${onPoyntContentView.slug}, excluded.slug)`,
         updatedAt: sql`now()`,
       },
     });
@@ -59,14 +59,14 @@ export async function getViewAggregates(
 
   const rows = await db
     .select({
-      collection: plannerContentView.collection,
-      contentId: plannerContentView.contentId,
-      slug: sql<string | null>`max(${plannerContentView.slug})`,
-      views: sql<number>`sum(${plannerContentView.count})::int`,
+      collection: onPoyntContentView.collection,
+      contentId: onPoyntContentView.contentId,
+      slug: sql<string | null>`max(${onPoyntContentView.slug})`,
+      views: sql<number>`sum(${onPoyntContentView.count})::int`,
     })
-    .from(plannerContentView)
-    .where(gte(plannerContentView.day, since))
-    .groupBy(plannerContentView.collection, plannerContentView.contentId);
+    .from(onPoyntContentView)
+    .where(gte(onPoyntContentView.day, since))
+    .groupBy(onPoyntContentView.collection, onPoyntContentView.contentId);
 
   return rows.map((r) => ({ ...r, views: Number(r.views) }));
 }

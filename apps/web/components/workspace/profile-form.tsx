@@ -1,6 +1,6 @@
 "use client";
 
-import { trpc } from "@/lib/planner/trpc";
+import { trpc } from "@/lib/on-poynt/trpc";
 import {
   type ProfileAudienceType,
   type ProfileCompanySize,
@@ -14,7 +14,7 @@ import {
   strengthTypes,
   weeklyTimeLabels,
   weeklyTimeTypes,
-} from "@poynt/planner-validators";
+} from "@poynt/on-poynt-validators";
 import {
   Button,
   Form,

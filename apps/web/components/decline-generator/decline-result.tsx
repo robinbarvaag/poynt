@@ -1,6 +1,6 @@
 "use client";
 
-import { trpc } from "@/lib/planner/trpc";
+import { trpc } from "@/lib/on-poynt/trpc";
 import { Button } from "@poynt/ui";
 import { toast } from "@poynt/ui";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@poynt/ui";

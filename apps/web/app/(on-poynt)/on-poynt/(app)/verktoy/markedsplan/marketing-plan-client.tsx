@@ -2,21 +2,24 @@
 
 import { PlanForm } from "@/components/marketing-plan/plan-form";
 import { PlanResult } from "@/components/marketing-plan/plan-result";
-import { ToolIntro, type ToolIntroStep } from "@/components/planner/tool-intro";
+import {
+  ToolIntro,
+  type ToolIntroStep,
+} from "@/components/on-poynt/tool-intro";
 import {
   type ReadinessField,
   ToolReadiness,
-} from "@/components/planner/tool-readiness";
+} from "@/components/on-poynt/tool-readiness";
 import { stepFade } from "@/lib/motion-variants";
-import { marketingPlanStreamAction } from "@/lib/planner/actions/marketing-plan";
-import { trpc } from "@/lib/planner/trpc";
-import { useToolStream } from "@/lib/planner/use-tool-stream";
+import { marketingPlanStreamAction } from "@/lib/on-poynt/actions/marketing-plan";
+import { trpc } from "@/lib/on-poynt/trpc";
+import { useToolStream } from "@/lib/on-poynt/use-tool-stream";
 import {
   type MarketingPlan,
   type MarketingPlanRequest,
   type MarketingPlanStream,
   profileCompanySizeLabels,
-} from "@poynt/planner-validators";
+} from "@poynt/on-poynt-validators";
 import { Button, PageShell, toast } from "@poynt/ui";
 import { Icon } from "@poynt/ui/icons";
 import type { DeepPartial } from "ai";

@@ -1,6 +1,6 @@
-import { synthesizeSuggestions } from "@poynt/planner-api/lib/content-radar";
-import { db, eq } from "@poynt/planner-db";
-import { plannerRadarRun } from "@poynt/planner-db/schema";
+import { synthesizeSuggestions } from "@poynt/on-poynt-api/lib/content-radar";
+import { db, eq } from "@poynt/on-poynt-db";
+import { onPoyntRadarRun } from "@poynt/on-poynt-db/schema";
 import { persistSuggestions } from "../../radar/persist";
 import { gatherSignals } from "../../radar/signals";
 import { inngest } from "../client";
@@ -23,9 +23,9 @@ export const radarAnalyze = inngest.createFunction(
 
     const runId = await step.run("start-run", async () => {
       const [row] = await db
-        .insert(plannerRadarRun)
+        .insert(onPoyntRadarRun)
         .values({ trigger, status: "running" })
-        .returning({ id: plannerRadarRun.id });
+        .returning({ id: onPoyntRadarRun.id });
       return row.id;
     });
 
@@ -35,13 +35,13 @@ export const radarAnalyze = inngest.createFunction(
       if (signals.length === 0) {
         await step.run("finish-empty", async () => {
           await db
-            .update(plannerRadarRun)
+            .update(onPoyntRadarRun)
             .set({
               status: "ok",
               finishedAt: new Date(),
               stats: { signals: 0, note: "ingen signaler" },
             })
-            .where(eq(plannerRadarRun.id, runId));
+            .where(eq(onPoyntRadarRun.id, runId));
         });
         return { runId, signals: 0 };
       }
@@ -56,13 +56,13 @@ export const radarAnalyze = inngest.createFunction(
 
       await step.run("finish-run", async () => {
         await db
-          .update(plannerRadarRun)
+          .update(onPoyntRadarRun)
           .set({
             status: "ok",
             finishedAt: new Date(),
             stats: { signals: signals.length, ...stats },
           })
-          .where(eq(plannerRadarRun.id, runId));
+          .where(eq(onPoyntRadarRun.id, runId));
       });
 
       return { runId, signals: signals.length, ...stats };
@@ -70,9 +70,9 @@ export const radarAnalyze = inngest.createFunction(
       const message = err instanceof Error ? err.message : String(err);
       await step.run("finish-error", async () => {
         await db
-          .update(plannerRadarRun)
+          .update(onPoyntRadarRun)
           .set({ status: "error", finishedAt: new Date(), error: message })
-          .where(eq(plannerRadarRun.id, runId));
+          .where(eq(onPoyntRadarRun.id, runId));
       });
       throw err;
     }

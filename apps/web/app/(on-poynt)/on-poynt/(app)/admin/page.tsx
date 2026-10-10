@@ -1,4 +1,4 @@
-import { createServerCaller } from "@/lib/planner/trpc-server";
+import { createServerCaller } from "@/lib/on-poynt/trpc-server";
 import { Card, CardContent, CardHeader, CardTitle, PageShell } from "@poynt/ui";
 import { Icon, type IconName } from "@poynt/ui/icons";
 import Link from "next/link";

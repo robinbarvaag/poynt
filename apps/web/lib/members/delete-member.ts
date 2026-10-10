@@ -1,10 +1,10 @@
-import { count, db, eq, inArray } from "@poynt/planner-db";
+import { count, db, eq, inArray } from "@poynt/on-poynt-db";
 import {
-  plannerSubscription,
-  plannerUser,
-  plannerWorkspace,
-  plannerWorkspaceMember,
-} from "@poynt/planner-db/schema";
+  onPoyntSubscription,
+  onPoyntUser,
+  onPoyntWorkspace,
+  onPoyntWorkspaceMember,
+} from "@poynt/on-poynt-db/schema";
 import { getStripe } from "@poynt/stripe";
 
 /**
@@ -24,7 +24,7 @@ export interface SoloWorkspace {
 /**
  * Bedriftene der personen er eneste medlem.
  *
- * `planner_workspace` har ingen eier-kolonne — eierskap ligger bare i
+ * `workspace` har ingen eier-kolonne — eierskap ligger bare i
  * medlemskapstabellen. Sletter vi brukeren uten å rydde, forsvinner
  * medlemskapsraden (cascade), og bedriften blir stående igjen uten et eneste
  * medlem: usynlig for alle, men fortsatt med merkevaredata og
@@ -34,24 +34,24 @@ export async function findSoloWorkspaces(
   userId: string
 ): Promise<SoloWorkspace[]> {
   const memberships = await db
-    .select({ workspaceId: plannerWorkspaceMember.workspaceId })
-    .from(plannerWorkspaceMember)
-    .where(eq(plannerWorkspaceMember.userId, userId));
+    .select({ workspaceId: onPoyntWorkspaceMember.workspaceId })
+    .from(onPoyntWorkspaceMember)
+    .where(eq(onPoyntWorkspaceMember.userId, userId));
 
   const solo: SoloWorkspace[] = [];
 
   for (const { workspaceId } of memberships) {
     const [{ total }] = await db
       .select({ total: count() })
-      .from(plannerWorkspaceMember)
-      .where(eq(plannerWorkspaceMember.workspaceId, workspaceId));
+      .from(onPoyntWorkspaceMember)
+      .where(eq(onPoyntWorkspaceMember.workspaceId, workspaceId));
 
     if (total > 1) continue;
 
     const [workspace] = await db
-      .select({ id: plannerWorkspace.id, name: plannerWorkspace.name })
-      .from(plannerWorkspace)
-      .where(eq(plannerWorkspace.id, workspaceId))
+      .select({ id: onPoyntWorkspace.id, name: onPoyntWorkspace.name })
+      .from(onPoyntWorkspace)
+      .where(eq(onPoyntWorkspace.id, workspaceId))
       .limit(1);
 
     if (workspace) solo.push(workspace);
@@ -76,8 +76,8 @@ export async function purgeMember(userId: string) {
   // fakturert videre for et medlemskap som ikke finnes lenger.
   const [sub] = await db
     .select()
-    .from(plannerSubscription)
-    .where(eq(plannerSubscription.userId, userId))
+    .from(onPoyntSubscription)
+    .where(eq(onPoyntSubscription.userId, userId))
     .limit(1);
 
   if (sub?.stripeSubscriptionId) {
@@ -95,15 +95,15 @@ export async function purgeMember(userId: string) {
 
   const soloWorkspaces = await findSoloWorkspaces(userId);
   if (soloWorkspaces.length > 0) {
-    await db.delete(plannerWorkspace).where(
+    await db.delete(onPoyntWorkspace).where(
       inArray(
-        plannerWorkspace.id,
+        onPoyntWorkspace.id,
         soloWorkspaces.map((workspace) => workspace.id)
       )
     );
   }
 
-  await db.delete(plannerUser).where(eq(plannerUser.id, userId));
+  await db.delete(onPoyntUser).where(eq(onPoyntUser.id, userId));
 
   return { deletedWorkspaces: soloWorkspaces.map((w) => w.name) };
 }

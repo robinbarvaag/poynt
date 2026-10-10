@@ -4,7 +4,7 @@ import {
   membershipTierLabels,
   membershipTierTaglines,
   paidMembershipTiers,
-} from "@poynt/planner-validators";
+} from "@poynt/on-poynt-validators";
 import {
   Badge,
   Button,

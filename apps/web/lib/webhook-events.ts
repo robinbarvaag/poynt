@@ -1,6 +1,6 @@
-import type { Database } from "@poynt/planner-db";
-import { eq, lt } from "@poynt/planner-db";
-import { plannerWebhookEvent } from "@poynt/planner-db/schema";
+import type { Database } from "@poynt/on-poynt-db";
+import { eq, lt } from "@poynt/on-poynt-db";
+import { onPoyntWebhookEvent } from "@poynt/on-poynt-db/schema";
 
 /** Behandlede events eldre enn dette trengs ikke lenger for idempotens. */
 const RETENTION_DAYS = 60;
@@ -17,17 +17,17 @@ export async function claimWebhookEvent(
   type: string
 ): Promise<boolean> {
   const inserted = await db
-    .insert(plannerWebhookEvent)
+    .insert(onPoyntWebhookEvent)
     .values({ id: crypto.randomUUID(), eventId, type })
-    .onConflictDoNothing({ target: plannerWebhookEvent.eventId })
-    .returning({ eventId: plannerWebhookEvent.eventId });
+    .onConflictDoNothing({ target: onPoyntWebhookEvent.eventId })
+    .returning({ eventId: onPoyntWebhookEvent.eventId });
 
   // Opportunistisk opprydding: uten dette vokser tabellen for alltid.
   // Leverandørene retryer i dager, ikke måneder, så 60 dager er rikelig.
   // Fire-and-forget med svelget feil — oppryddingen skal aldri velte eventet.
   const cutoff = new Date(Date.now() - RETENTION_DAYS * 24 * 60 * 60 * 1000);
-  db.delete(plannerWebhookEvent)
-    .where(lt(plannerWebhookEvent.processedAt, cutoff))
+  db.delete(onPoyntWebhookEvent)
+    .where(lt(onPoyntWebhookEvent.processedAt, cutoff))
     .catch((error: unknown) => {
       console.error("Opprydding av webhook-events feilet:", error);
     });
@@ -44,6 +44,6 @@ export async function releaseWebhookEvent(
   eventId: string
 ): Promise<void> {
   await db
-    .delete(plannerWebhookEvent)
-    .where(eq(plannerWebhookEvent.eventId, eventId));
+    .delete(onPoyntWebhookEvent)
+    .where(eq(onPoyntWebhookEvent.eventId, eventId));
 }

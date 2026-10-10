@@ -1,10 +1,10 @@
 import { AdminBar } from "@/components/admin-bar";
 import { MediaCredit } from "@/components/media-credit";
+import { CoursePlayer } from "@/components/on-poynt/courses/course-player";
 import { PayloadImage } from "@/components/payload-image";
-import { CoursePlayer } from "@/components/planner/courses/course-player";
 import { ViewTracker } from "@/components/radar/view-tracker";
 import { requireFeature } from "@/lib/features/server";
-import { createServerCaller } from "@/lib/planner/trpc-server";
+import { createServerCaller } from "@/lib/on-poynt/trpc-server";
 import type { Category, Course, Media } from "@/payload-types";
 import config from "@/payload.config";
 import { type ContentMetaItem, CourseHero } from "@poynt/ui";

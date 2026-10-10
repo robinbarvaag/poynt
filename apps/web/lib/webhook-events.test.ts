@@ -1,7 +1,7 @@
 import { describe, expect, it, mock } from "bun:test";
-import type { Database } from "@poynt/planner-db";
+import type { Database } from "@poynt/on-poynt-db";
 
-// "@poynt/planner-db" oppretter en postgres-tilkobling (lat, kobler ikke før
+// "@poynt/on-poynt-db" oppretter en postgres-tilkobling (lat, kobler ikke før
 // første spørring) når modulen lastes, og krever DATABASE_URI. Sett en
 // dummy-verdi før dynamisk import av modulen under test, slik at testen kan
 // kjøre uten en ekte database - vi bruker likevel bare den falske db-en under.

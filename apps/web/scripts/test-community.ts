@@ -5,8 +5,8 @@
  *
  *   bun apps/web/scripts/test-community.ts   (fra repo-rot)
  */
-import { appRouter } from "@poynt/planner-api";
-import { db, eq, plannerConversation, plannerUser } from "@poynt/planner-db";
+import { appRouter } from "@poynt/on-poynt-api";
+import { db, eq, onPoyntConversation, onPoyntUser } from "@poynt/on-poynt-db";
 
 function log(msg: string) {
   console.log(`  ✓ ${msg}`);
@@ -17,20 +17,20 @@ function assert(cond: unknown, msg: string) {
 }
 
 async function ensureUser(email: string, name: string, role: "user" | "admin") {
-  const existing = await db.query.plannerUser.findFirst({
-    where: eq(plannerUser.email, email),
+  const existing = await db.query.onPoyntUser.findFirst({
+    where: eq(onPoyntUser.email, email),
   });
   if (existing) {
     if (existing.role !== role) {
       await db
-        .update(plannerUser)
+        .update(onPoyntUser)
         .set({ role })
-        .where(eq(plannerUser.id, existing.id));
+        .where(eq(onPoyntUser.id, existing.id));
     }
     return existing.id;
   }
   const id = crypto.randomUUID();
-  await db.insert(plannerUser).values({
+  await db.insert(onPoyntUser).values({
     id,
     name,
     email,
@@ -257,15 +257,15 @@ async function run() {
     // reaksjoner/medlemmer), deretter test-brukerne.
     for (const id of createdConversationIds) {
       await db
-        .delete(plannerConversation)
-        .where(eq(plannerConversation.id, id));
+        .delete(onPoyntConversation)
+        .where(eq(onPoyntConversation.id, id));
     }
     await db
-      .delete(plannerUser)
-      .where(eq(plannerUser.email, "community-test-a@poynt.test"));
+      .delete(onPoyntUser)
+      .where(eq(onPoyntUser.email, "community-test-a@poynt.test"));
     await db
-      .delete(plannerUser)
-      .where(eq(plannerUser.email, "community-test-b@poynt.test"));
+      .delete(onPoyntUser)
+      .where(eq(onPoyntUser.email, "community-test-b@poynt.test"));
     console.log("🧹 Ryddet opp testdata.");
   }
 }

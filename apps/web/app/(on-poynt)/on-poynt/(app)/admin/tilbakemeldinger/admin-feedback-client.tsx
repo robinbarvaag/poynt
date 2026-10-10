@@ -1,13 +1,13 @@
 "use client";
 
-import { trpc } from "@/lib/planner/trpc";
+import { trpc } from "@/lib/on-poynt/trpc";
 import {
   type FeedbackCategory,
   type FeedbackStatus,
   feedbackCategoryLabels,
   feedbackStatusLabels,
   feedbackStatuses,
-} from "@poynt/planner-validators";
+} from "@poynt/on-poynt-validators";
 import {
   Badge,
   type BadgeProps,

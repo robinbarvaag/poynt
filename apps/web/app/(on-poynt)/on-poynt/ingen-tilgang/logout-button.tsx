@@ -1,6 +1,6 @@
 "use client";
 
-import { authClient } from "@poynt/planner-auth/client";
+import { authClient } from "@poynt/on-poynt-auth/client";
 import { Button } from "@poynt/ui";
 import { useRouter } from "next/navigation";
 import { useState } from "react";

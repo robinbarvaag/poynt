@@ -119,7 +119,7 @@ container med `data-recaptcha`.
 | Påmelding til event | `paamelding` | `/api/eventer/[id]/pamelding` |
 | Bokporten (ordrenummer) | `boktilgang` | `/api/book-access` |
 | Rabattkode i handlekurven | `rabattkode` | `/api/coupon` |
-| Innlogging med magic link | `innlogging` | `hooks.before` i `packages/planner-auth/server.ts` |
+| Innlogging med magic link | `innlogging` | `hooks.before` i `packages/on-poynt-auth/server.ts` |
 
 Google-innlogging går via OAuth-redirect og trenger ingen sjekk. Skjemaene
 inne i On Poynt (verktøy, bedriftsprofil, invitasjoner) krever innlogging og er

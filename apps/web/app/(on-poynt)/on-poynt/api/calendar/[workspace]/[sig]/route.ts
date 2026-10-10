@@ -4,10 +4,10 @@ import {
   scheduledIdeaSet,
   scheduledPostsToEvents,
   verifyWorkspaceSig,
-} from "@/lib/planner/calendar-feed";
-import { and, db, desc, eq } from "@poynt/planner-db";
-import { plannerToolResult } from "@poynt/planner-db/schema";
-import type { YearlyPlan } from "@poynt/planner-validators";
+} from "@/lib/on-poynt/calendar-feed";
+import { and, db, desc, eq } from "@poynt/on-poynt-db";
+import { onPoyntToolResult } from "@poynt/on-poynt-db/schema";
+import type { YearlyPlan } from "@poynt/on-poynt-validators";
 
 /**
  * Offentlig (signert) .ics-abonnementsfeed for et arbeidsområdes årshjul.
@@ -30,23 +30,23 @@ export async function GET(
   // Sist lagrede årshjul + alle planlagte/lagrede innlegg parallelt.
   const [[planRow], scheduledRows] = await Promise.all([
     db
-      .select({ result: plannerToolResult.result })
-      .from(plannerToolResult)
+      .select({ result: onPoyntToolResult.result })
+      .from(onPoyntToolResult)
       .where(
         and(
-          eq(plannerToolResult.workspaceId, workspace),
-          eq(plannerToolResult.toolId, "yearly-planner")
+          eq(onPoyntToolResult.workspaceId, workspace),
+          eq(onPoyntToolResult.toolId, "yearly-planner")
         )
       )
-      .orderBy(desc(plannerToolResult.createdAt))
+      .orderBy(desc(onPoyntToolResult.createdAt))
       .limit(1),
     db
-      .select({ id: plannerToolResult.id, result: plannerToolResult.result })
-      .from(plannerToolResult)
+      .select({ id: onPoyntToolResult.id, result: onPoyntToolResult.result })
+      .from(onPoyntToolResult)
       .where(
         and(
-          eq(plannerToolResult.workspaceId, workspace),
-          eq(plannerToolResult.toolId, "generated-post")
+          eq(onPoyntToolResult.workspaceId, workspace),
+          eq(onPoyntToolResult.toolId, "generated-post")
         )
       ),
   ]);

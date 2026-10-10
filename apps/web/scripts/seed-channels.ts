@@ -4,8 +4,8 @@
  *
  *   bun run --cwd apps/web payload run scripts/seed-channels.ts
  */
-import { db } from "@poynt/planner-db";
-import { plannerConversation } from "@poynt/planner-db/schema";
+import { db } from "@poynt/on-poynt-db";
+import { onPoyntConversation } from "@poynt/on-poynt-db/schema";
 
 const channels = [
   {
@@ -33,7 +33,7 @@ const channels = [
 async function run() {
   for (const c of channels) {
     await db
-      .insert(plannerConversation)
+      .insert(onPoyntConversation)
       .values({
         id: crypto.randomUUID(),
         type: "channel",
@@ -41,7 +41,7 @@ async function run() {
         slug: c.slug,
         description: c.description,
       })
-      .onConflictDoNothing({ target: plannerConversation.slug });
+      .onConflictDoNothing({ target: onPoyntConversation.slug });
     console.log(`✓ #${c.slug}`);
   }
 

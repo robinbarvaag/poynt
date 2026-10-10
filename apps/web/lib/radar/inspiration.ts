@@ -2,19 +2,19 @@ import config from "@payload-config";
 import {
   distillInspiration,
   scrapeWebsite,
-} from "@poynt/planner-api/lib/inspiration";
-import { db, eq } from "@poynt/planner-db";
+} from "@poynt/on-poynt-api/lib/inspiration";
+import { db, eq } from "@poynt/on-poynt-db";
 import {
-  plannerInspirationItem,
-  plannerInspirationSource,
-} from "@poynt/planner-db/schema";
-import type { PlannerInspirationSource } from "@poynt/planner-db/schema";
+  onPoyntInspirationItem,
+  onPoyntInspirationSource,
+} from "@poynt/on-poynt-db/schema";
+import type { OnPoyntInspirationSource } from "@poynt/on-poynt-db/schema";
 import { getPayload } from "payload";
 
 /**
  * Inspirasjon — henting + destillering. Henter offentlig innhold fra registrerte
  * kilder (RSS-feed eller nettside via Firecrawl), lar AI-en destillere det til
- * tema-taggede notater, og lagrer dem som `planner_inspiration_item`. Disse
+ * tema-taggede notater, og lagrer dem som `inspiration_item`. Disse
  * mates inn i gap-analysen (signals.ts) som `inspiration_gap`-signaler.
  *
  * Bevisst KUN offentlige feeds — aldri auth-gated profiler (LinkedIn/Twitter).
@@ -44,17 +44,17 @@ export async function getOwnCategoryNames(): Promise<string[]> {
 /** Aktive kilder (eventuelt filtrert til én id ved on-demand-henting). */
 export async function listActiveSources(
   sourceId?: string
-): Promise<PlannerInspirationSource[]> {
+): Promise<OnPoyntInspirationSource[]> {
   if (sourceId) {
     return db
       .select()
-      .from(plannerInspirationSource)
-      .where(eq(plannerInspirationSource.id, sourceId));
+      .from(onPoyntInspirationSource)
+      .where(eq(onPoyntInspirationSource.id, sourceId));
   }
   return db
     .select()
-    .from(plannerInspirationSource)
-    .where(eq(plannerInspirationSource.isActive, true));
+    .from(onPoyntInspirationSource)
+    .where(eq(onPoyntInspirationSource.isActive, true));
 }
 
 /**
@@ -202,11 +202,11 @@ export async function processSource(
     // Eksisterende url-er/titler for denne kilden → dedup.
     const existing = await db
       .select({
-        url: plannerInspirationItem.url,
-        title: plannerInspirationItem.title,
+        url: onPoyntInspirationItem.url,
+        title: onPoyntInspirationItem.title,
       })
-      .from(plannerInspirationItem)
-      .where(eq(plannerInspirationItem.sourceId, source.id));
+      .from(onPoyntInspirationItem)
+      .where(eq(onPoyntInspirationItem.sourceId, source.id));
     const seenUrls = new Set(existing.map((e) => e.url).filter(Boolean));
     const seenTitles = new Set(existing.map((e) => e.title));
 
@@ -218,7 +218,7 @@ export async function processSource(
         base.skipped += 1;
         continue;
       }
-      await db.insert(plannerInspirationItem).values({
+      await db.insert(onPoyntInspirationItem).values({
         sourceId: source.id,
         title: item.title,
         url: item.url,
@@ -240,16 +240,16 @@ export async function processSource(
 
 async function markFetched(sourceId: string) {
   await db
-    .update(plannerInspirationSource)
+    .update(onPoyntInspirationSource)
     .set({ lastFetchedAt: new Date() })
-    .where(eq(plannerInspirationSource.id, sourceId));
+    .where(eq(onPoyntInspirationSource.id, sourceId));
 }
 
 /** Antall lagrede inspirasjons-items per kilde (til admin-tabellen). */
 export async function getItemCountBySource(): Promise<Record<string, number>> {
   const rows = await db
-    .select({ sourceId: plannerInspirationItem.sourceId })
-    .from(plannerInspirationItem);
+    .select({ sourceId: onPoyntInspirationItem.sourceId })
+    .from(onPoyntInspirationItem);
   const counts: Record<string, number> = {};
   for (const r of rows) {
     counts[r.sourceId] = (counts[r.sourceId] ?? 0) + 1;

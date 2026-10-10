@@ -1,10 +1,10 @@
 "use client";
 
-import { trpc } from "@/lib/planner/trpc";
+import { trpc } from "@/lib/on-poynt/trpc";
 import {
   type MessageAttachmentInput,
   reactionEmojis,
-} from "@poynt/planner-validators";
+} from "@poynt/on-poynt-validators";
 import {
   Attachment,
   AttachmentContent,

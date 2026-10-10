@@ -138,7 +138,7 @@ export function SiteHeader({
   // nå — 4rem når den vises, 0 når den har skjult seg ved scroll nedover — så
   // de kan feste seg rett under i stedet for å havne bak den. Publiseres som
   // CSS-variabel på <html>, slik at komponenter i @poynt/ui kan lese den uten
-  // å kjenne headeren; utenfor denne headeren (Storybook, planner) faller de
+  // å kjenne headeren; utenfor denne headeren (Storybook, On Poynt) faller de
   // tilbake til 0.
   React.useEffect(() => {
     const root = document.documentElement;

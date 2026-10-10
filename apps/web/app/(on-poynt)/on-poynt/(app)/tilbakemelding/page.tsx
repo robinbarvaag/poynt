@@ -1,5 +1,5 @@
 import { requireFeature } from "@/lib/features/server";
-import { createServerCaller } from "@/lib/planner/trpc-server";
+import { createServerCaller } from "@/lib/on-poynt/trpc-server";
 import { FeedbackClient } from "./feedback-client";
 
 export default async function FeedbackPage() {

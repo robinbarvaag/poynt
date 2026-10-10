@@ -1,6 +1,6 @@
-import { auth } from "@poynt/planner-auth/server";
-import { db, eq } from "@poynt/planner-db";
-import { plannerSubscription } from "@poynt/planner-db/schema";
+import { auth } from "@poynt/on-poynt-auth/server";
+import { db, eq } from "@poynt/on-poynt-db";
+import { onPoyntSubscription } from "@poynt/on-poynt-db/schema";
 import { getStripe } from "@poynt/stripe";
 import { type NextRequest, NextResponse } from "next/server";
 
@@ -15,8 +15,8 @@ export async function POST(req: NextRequest) {
     // Get stripeCustomerId from Drizzle subscription
     const subscriptions = await db
       .select()
-      .from(plannerSubscription)
-      .where(eq(plannerSubscription.userId, session.user.id))
+      .from(onPoyntSubscription)
+      .where(eq(onPoyntSubscription.userId, session.user.id))
       .limit(1);
 
     const sub = subscriptions[0];

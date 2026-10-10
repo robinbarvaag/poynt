@@ -7,7 +7,7 @@
 > in `plans/README.md` — unless a reviewer dispatched you and told you they
 > maintain the index.
 >
-> **Drift check (run first)**: `git diff --stat 4d57496..HEAD -- packages/planner-api/trpc.ts packages/planner-api/routers/chat.ts apps/web/app/api/on-poynt`
+> **Drift check (run first)**: `git diff --stat 4d57496..HEAD -- packages/on-poynt-api/trpc.ts packages/on-poynt-api/routers/chat.ts apps/web/app/api/on-poynt`
 > If any in-scope file changed since this plan was written, compare the
 > "Current state" excerpts against the live code before proceeding; on a
 > mismatch, treat it as a STOP condition.
@@ -23,20 +23,20 @@
 
 ## Why this matters
 
-The member portal's paywall is enforced only in the page layout (`apps/web/app/(on-poynt)/on-poynt/(app)/layout.tsx:31-33` redirects when `hasActiveAccess` fails). The APIs underneath do not check membership — only that a session exists. Signup is open (Google OAuth / magic link), so **any registered account with no paid membership** can call the tRPC chat API directly to: enumerate the full member directory (including confirming whether a given email belongs to a member, via substring search on `planner_user.email`), read and post in all community channels, open DMs to any member, and upload files to Vercel Blob via the upload routes. This defeats the paywall for the fellesskap (which exists to replace a members-only Facebook group) and exposes member PII to non-paying accounts. After this plan, every chat procedure and both upload routes require an active membership using the exact same access rules as the page layout.
+The member portal's paywall is enforced only in the page layout (`apps/web/app/(on-poynt)/on-poynt/(app)/layout.tsx:31-33` redirects when `hasActiveAccess` fails). The APIs underneath do not check membership — only that a session exists. Signup is open (Google OAuth / magic link), so **any registered account with no paid membership** can call the tRPC chat API directly to: enumerate the full member directory (including confirming whether a given email belongs to a member, via substring search on `on_poynt.user.email`), read and post in all community channels, open DMs to any member, and upload files to Vercel Blob via the upload routes. This defeats the paywall for the fellesskap (which exists to replace a members-only Facebook group) and exposes member PII to non-paying accounts. After this plan, every chat procedure and both upload routes require an active membership using the exact same access rules as the page layout.
 
 ## Current state
 
-- `packages/planner-api/trpc.ts` — tRPC procedure definitions.
+- `packages/on-poynt-api/trpc.ts` — tRPC procedure definitions.
   - `protectedProcedure` (lines 30-44) checks only `ctx.userId` (session).
-  - `aiProtectedProcedure` (lines 50-~95) is the template to copy from: it queries `plannerSubscription` by `ctx.userId` and enforces status rules:
+  - `aiProtectedProcedure` (lines 50-~95) is the template to copy from: it queries `onPoyntSubscription` by `ctx.userId` and enforces status rules:
 
 ```ts
 // trpc.ts:58-84 (excerpt)
 const [sub] = await db
   .select()
-  .from(plannerSubscription)
-  .where(eq(plannerSubscription.userId, ctx.userId))
+  .from(onPoyntSubscription)
+  .where(eq(onPoyntSubscription.userId, ctx.userId))
   .limit(1);
 
 if (!sub || sub.tier !== "community_ai") {
@@ -47,8 +47,8 @@ const allowedStatuses = ["active", "canceled", "past_due"] as const;
 // ... for "canceled": only allow if sub.currentPeriodEnd > new Date()
 ```
 
-- The canonical access rules live in `apps/web/lib/membership/has-active-access.ts` (`hasActiveAccess`): tier `"none"` → no access; `"active"` → access; `"canceled"` with `currentPeriodEnd` in the future → access; `"past_due"` → access (grace period); everything else → no. **`packages/planner-api` cannot import from `apps/web`** — the new procedure must re-implement these rules inside `trpc.ts` (the same duplication `aiProtectedProcedure` already accepts).
-- `packages/planner-api/routers/chat.ts` — the community/chat router; **26 uses of `protectedProcedure`** (channels, messages, DMs, groups, uploads-metadata, `listMembers` at line 886 which selects from `plannerUser` with `ilike` search on name/email, `unreadCount` at 918, etc.). All of it is member-only surface by design.
+- The canonical access rules live in `apps/web/lib/membership/has-active-access.ts` (`hasActiveAccess`): tier `"none"` → no access; `"active"` → access; `"canceled"` with `currentPeriodEnd` in the future → access; `"past_due"` → access (grace period); everything else → no. **`packages/on-poynt-api` cannot import from `apps/web`** — the new procedure must re-implement these rules inside `trpc.ts` (the same duplication `aiProtectedProcedure` already accepts).
+- `packages/on-poynt-api/routers/chat.ts` — the community/chat router; **26 uses of `protectedProcedure`** (channels, messages, DMs, groups, uploads-metadata, `listMembers` at line 886 which selects from `onPoyntUser` with `ilike` search on name/email, `unreadCount` at 918, etc.). All of it is member-only surface by design.
 - `apps/web/app/api/on-poynt/community-upload/route.ts` — community attachment upload to Vercel Blob; auth is session-only:
 
 ```ts
@@ -84,17 +84,17 @@ if (!hasActiveAccess(session.membership)) redirect("/on-poynt/ingen-tilgang");
 ## Scope
 
 **In scope** (the only files you should modify or create):
-- `packages/planner-api/trpc.ts` (add `memberProcedure` + extracted status helper)
-- `packages/planner-api/routers/chat.ts` (swap `protectedProcedure` → `memberProcedure`)
+- `packages/on-poynt-api/trpc.ts` (add `memberProcedure` + extracted status helper)
+- `packages/on-poynt-api/routers/chat.ts` (swap `protectedProcedure` → `memberProcedure`)
 - `apps/web/app/api/on-poynt/community-upload/route.ts` (membership gate)
 - `apps/web/app/api/on-poynt/upload/route.ts` (membership gate)
 - `plans/README.md` (status row)
 
 **Out of scope** (do NOT touch):
 - `aiProtectedProcedure`'s tier condition (`sub.tier !== "community_ai"`) — plan 005 fixes the agency-tier gap there; changing it here creates a merge collision. You MAY extract the shared status-check helper it uses, but keep its tier condition byte-identical.
-- Other routers in `packages/planner-api/routers/` — some procedures there may be intentionally available to logged-in-but-not-yet-member users (e.g. onboarding, application flows). Only `chat.ts` is in scope.
+- Other routers in `packages/on-poynt-api/routers/` — some procedures there may be intentionally available to logged-in-but-not-yet-member users (e.g. onboarding, application flows). Only `chat.ts` is in scope.
 - The page-layer gating in `layout.tsx` — already correct.
-- `packages/planner-api/lib/admin-access.ts` — admin gating is separate (backlog item).
+- `packages/on-poynt-api/lib/admin-access.ts` — admin gating is separate (backlog item).
 
 ## Git workflow
 
@@ -104,7 +104,7 @@ if (!hasActiveAccess(session.membership)) redirect("/on-poynt/ingen-tilgang");
 
 ## Steps
 
-### Step 1: Add `memberProcedure` to `packages/planner-api/trpc.ts`
+### Step 1: Add `memberProcedure` to `packages/on-poynt-api/trpc.ts`
 
 Below `protectedProcedure`, add a procedure that:
 
@@ -124,9 +124,9 @@ Optionally extract the shared "allowed status" logic used by both `memberProcedu
 
 ### Step 2: Swap the chat router onto `memberProcedure`
 
-In `packages/planner-api/routers/chat.ts`, replace every `protectedProcedure` with `memberProcedure` (update the import from `../trpc`). Expected count: 26 replacements.
+In `packages/on-poynt-api/routers/chat.ts`, replace every `protectedProcedure` with `memberProcedure` (update the import from `../trpc`). Expected count: 26 replacements.
 
-**Verify**: `grep -c "protectedProcedure" packages/planner-api/routers/chat.ts` → `0`; `grep -c "memberProcedure" packages/planner-api/routers/chat.ts` → ≥26; `bun run typecheck` → exit 0.
+**Verify**: `grep -c "protectedProcedure" packages/on-poynt-api/routers/chat.ts` → `0`; `grep -c "memberProcedure" packages/on-poynt-api/routers/chat.ts` → ≥26; `bun run typecheck` → exit 0.
 
 ### Step 3: Gate both upload routes on active membership
 
@@ -150,7 +150,7 @@ Imports: `getSessionWithMembership` from `@/lib/membership`, `hasActiveAccess` f
 
 **Verify**: `bun run test`, `bun run typecheck`, `bun run check:ci` all exit 0 from root.
 
-Manual smoke for the operator (document, do not block): log in with a Better Auth account that has no `planner_subscription` row, then POST to `/on-poynt/api/trpc/chat.listMembers` and to `/api/on-poynt/community-upload` — both must now return 403/FORBIDDEN instead of data.
+Manual smoke for the operator (document, do not block): log in with a Better Auth account that has no `on_poynt.subscription` row, then POST to `/on-poynt/api/trpc/chat.listMembers` and to `/api/on-poynt/community-upload` — both must now return 403/FORBIDDEN instead of data.
 
 ## Test plan
 
@@ -160,10 +160,10 @@ Manual smoke for the operator (document, do not block): log in with a Better Aut
 
 ## Done criteria
 
-- [ ] `grep -c "protectedProcedure" packages/planner-api/routers/chat.ts` → 0
-- [ ] `memberProcedure` exists in `packages/planner-api/trpc.ts` and implements the four access rules above
+- [ ] `grep -c "protectedProcedure" packages/on-poynt-api/routers/chat.ts` → 0
+- [ ] `memberProcedure` exists in `packages/on-poynt-api/trpc.ts` and implements the four access rules above
 - [ ] Both upload routes return 403 for session-without-membership (code path present: `hasActiveAccess` referenced in each)
-- [ ] `aiProtectedProcedure`'s tier condition is unchanged (`grep -n 'tier !== "community_ai"' packages/planner-api/trpc.ts` → still present)
+- [ ] `aiProtectedProcedure`'s tier condition is unchanged (`grep -n 'tier !== "community_ai"' packages/on-poynt-api/trpc.ts` → still present)
 - [ ] `bun run typecheck`, `bun run test`, `bun run check:ci` exit 0
 - [ ] `git status` shows no files modified outside the in-scope list
 - [ ] `plans/README.md` status row updated
@@ -179,6 +179,6 @@ Stop and report back (do not improvise) if:
 
 ## Maintenance notes
 
-- The access rules now exist in two places by necessity (`apps/web/lib/membership/has-active-access.ts` and the copy in `packages/planner-api/trpc.ts`). If the grace-period policy changes (e.g. `past_due` loses access), BOTH must change. A future refactor could move `hasActiveAccess` into `@poynt/planner-validators` (which both sides already import) to end the duplication — good follow-up, deliberately not done here to keep this change small.
-- Any new router serving member-only data must use `memberProcedure`, not `protectedProcedure` — reviewers should check this on every planner-api PR.
+- The access rules now exist in two places by necessity (`apps/web/lib/membership/has-active-access.ts` and the copy in `packages/on-poynt-api/trpc.ts`). If the grace-period policy changes (e.g. `past_due` loses access), BOTH must change. A future refactor could move `hasActiveAccess` into `@poynt/on-poynt-validators` (which both sides already import) to end the duplication — good follow-up, deliberately not done here to keep this change small.
+- Any new router serving member-only data must use `memberProcedure`, not `protectedProcedure` — reviewers should check this on every on-poynt-api PR.
 - Deferred: rate limiting on the upload routes and a per-user storage quota (cost control) — see backlog.
