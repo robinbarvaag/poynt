@@ -75,8 +75,8 @@ const CLOSED = {
     peek: { w: 68, ry: 30, spacing: 42, scale: 0.95 },
   },
   narrow: {
-    rest: { w: 38, ry: 18, spacing: 30, scale: 0.66 },
-    peek: { w: 48, ry: 22, spacing: 34, scale: 0.76 },
+    rest: { w: 44, ry: 20, spacing: 34, scale: 0.76 },
+    peek: { w: 54, ry: 24, spacing: 38, scale: 0.86 },
   },
 } as const;
 
@@ -206,6 +206,7 @@ export function SocialFab({
   const [openW, setOpenW] = useState(272);
   const [narrow, setNarrow] = useState(false);
   const [viewportH, setViewportH] = useState(0);
+  const [bottomBarH, setBottomBarH] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -238,6 +239,21 @@ export function SocialFab({
     onResize();
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  // Faste linjer nederst (kjøpslinja på produktsider) publiserer høyden sin
+  // som `--sticky-bar-height` på <html>. Formen løfter seg over dem.
+  useEffect(() => {
+    const root = document.documentElement;
+    const read = () =>
+      setBottomBarH(
+        Number.parseFloat(root.style.getPropertyValue("--sticky-bar-height")) ||
+          0
+      );
+    read();
+    const observer = new MutationObserver(read);
+    observer.observe(root, { attributes: true, attributeFilter: ["style"] });
+    return () => observer.disconnect();
   }, []);
 
   useEffect(() => {
@@ -399,7 +415,8 @@ export function SocialFab({
           : `min(${ANCHOR_SVH}svh, calc(100svh - ${panelH / 2 + 56}px))`,
       }}
       initial={false}
-      animate={{ y: lift }}
+      // Kjøpslinja glir inn og ut — fjæra lar formen følge den i stedet for å hoppe.
+      animate={{ y: lift - bottomBarH }}
       transition={{ type: "spring", ...spring }}
     >
       <svg

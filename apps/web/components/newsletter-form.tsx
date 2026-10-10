@@ -115,7 +115,7 @@ export function NewsletterForm({
           tekstfarge fra flaten — dempet/gjennomskinnelig tekst feiler
           kontrastkravet. */}
       <div className="mt-4 text-balance">
-        <PrivacyNotice purpose="Vi bruker e-posten kun til nyhetsbrevet, og du kan melde deg av når som helst." />
+        <PrivacyNotice purpose="E-posten brukes kun til nyhetsbrev, og du kan melde deg av når som helst." />
         <RecaptchaNotice className="mt-3" />
       </div>
     </form>

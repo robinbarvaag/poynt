@@ -19,7 +19,7 @@ export type NewsletterConsentSource =
 
 export const NEWSLETTER_CONSENT_TEXTS = {
   newsletterForm:
-    "Påmelding til nyhetsbrev med tips om markedsføring, AI og kommunikasjon. Vi bruker e-posten kun til nyhetsbrevet, og du kan melde deg av når som helst.",
+    "Påmelding til nyhetsbrev med tips om markedsføring, AI og kommunikasjon. E-posten brukes kun til nyhetsbrev, og du kan melde deg av når som helst.",
   bookAccess: "Send meg nye ressurser og tips på e-post",
   checkout:
     "Ja takk, jeg vil motta nyhetsbrev med tips og tilbud fra Poynt. Du kan melde deg av når som helst.",
