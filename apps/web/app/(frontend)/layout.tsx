@@ -16,7 +16,6 @@ import { UILinkProvider } from "@/components/ui-link-provider";
 import { getSiteGlobals } from "@/lib/site-globals";
 import { organizationSchema, websiteSchema } from "@/lib/structured-data";
 import { Grain, cn } from "@poynt/ui";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
 import { Bricolage_Grotesque, Poppins } from "next/font/google";
 
@@ -178,7 +177,6 @@ export default async function FrontendLayout({
             samtykke, så de ligger utenfor ConsentProvider og måler alle besøk
             – bortsett fra våre egne (se site-analytics.tsx, `?va=off`). */}
         <SiteAnalytics />
-        <SpeedInsights />
       </body>
     </html>
   );

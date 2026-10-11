@@ -15,7 +15,6 @@ import { CheckoutConsentProvider } from "@/lib/checkout-consent";
 import { getSiteGlobals, getUniverseGlobal } from "@/lib/site-globals";
 import { UNIVERSE } from "@/lib/universe";
 import { Grain, cn } from "@poynt/ui";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
 import { Bricolage_Grotesque, Poppins } from "next/font/google";
 
@@ -130,7 +129,6 @@ export default async function UniverseLayout({
         </ConsentProvider>
         <Grain fixed />
         <SiteAnalytics />
-        <SpeedInsights />
       </body>
     </html>
   );
