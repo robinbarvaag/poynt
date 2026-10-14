@@ -30,8 +30,11 @@ export const BookAccess: CollectionConfig = {
       type: "text",
       required: true,
       index: true,
-      label: "Ordrenummer",
-      admin: { readOnly: true },
+      label: "Ordrenummer / navn",
+      admin: {
+        readOnly: true,
+        description: "Ved «Gave» står navnet leseren skrev inn her.",
+      },
     },
     {
       name: "store",

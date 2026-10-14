@@ -34,6 +34,15 @@ export function isPlausibleOrderNumber(normalized: string): boolean {
   return /^[A-Z0-9-]{5,30}$/.test(normalized) && /\d{4,}/.test(normalized);
 }
 
+/** Navn for «Gave» — trimmet, enkle mellomrom, så samme navn gir samme rad. */
+export function normalizeGiftName(input: string): string {
+  return input.trim().replace(/\s+/g, " ");
+}
+
+export function isPlausibleGiftName(normalized: string): boolean {
+  return normalized.length >= 2 && normalized.length <= 80;
+}
+
 function secret(): string {
   const value = process.env.PAYLOAD_SECRET;
   if (!value) throw new Error("PAYLOAD_SECRET er ikke satt");

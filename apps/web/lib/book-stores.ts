@@ -8,12 +8,17 @@ export const BOOK_STORES = [
   { value: "ark", label: "ARK" },
   { value: "norli", label: "Norli" },
   { value: "poynt", label: "poynt.no" },
+  // Lesereksemplarer og gaver har ikke ordrenummer — da skrives navnet inn.
+  { value: "gave", label: "Gave" },
 ] as const;
 
 export type BookStore = (typeof BOOK_STORES)[number]["value"];
 
-/** Rekkefølgen knappene vises i på boksiden — Norli først. */
-const DISPLAY_ORDER: BookStore[] = ["norli", "ark", "poynt"];
+/** Rekkefølgen knappene vises i på boksiden — Norli først, gave sist. */
+const DISPLAY_ORDER: BookStore[] = ["norli", "ark", "poynt", "gave"];
+
+/** Fikk boka uten kjøp — da er navnet nøkkelen i stedet for ordrenummeret. */
+export const GIFT_STORE: BookStore = "gave";
 
 export const BOOK_STORES_DISPLAY = [...BOOK_STORES].sort(
   (a, b) => DISPLAY_ORDER.indexOf(a.value) - DISPLAY_ORDER.indexOf(b.value)

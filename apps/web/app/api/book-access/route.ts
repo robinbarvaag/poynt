@@ -3,9 +3,12 @@ import {
   BOOK_STORES,
   bookCookieName,
   createBookCookieValue,
+  isPlausibleGiftName,
   isPlausibleOrderNumber,
+  normalizeGiftName,
   normalizeOrderNumber,
 } from "@/lib/book-access";
+import { GIFT_STORE } from "@/lib/book-stores";
 import { subscribeWithConsent } from "@/lib/newsletter-consent";
 import { NEWSLETTER_CONSENT_TEXTS } from "@/lib/newsletter-consent-texts";
 import config from "@/payload.config";
@@ -40,8 +43,12 @@ export async function POST(request: NextRequest) {
     };
 
     const pageId = Number(body.pageId);
-    const orderNumber = normalizeOrderNumber(String(body.orderNumber ?? ""));
     const store = BOOK_STORES.find((s) => s.value === body.store)?.value;
+    const isGift = store === GIFT_STORE;
+    // For «Gave» er det navnet som sendes og lagres i ordrenummer-feltet.
+    const orderNumber = isGift
+      ? normalizeGiftName(String(body.orderNumber ?? ""))
+      : normalizeOrderNumber(String(body.orderNumber ?? ""));
     const email =
       typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
     const newsletter = body.newsletter === true && Boolean(email);
@@ -52,7 +59,13 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    if (!isPlausibleOrderNumber(orderNumber)) {
+    if (isGift && !isPlausibleGiftName(orderNumber)) {
+      return NextResponse.json(
+        { error: "Skriv inn navnet ditt." },
+        { status: 400 }
+      );
+    }
+    if (!isGift && !isPlausibleOrderNumber(orderNumber)) {
       return NextResponse.json(
         {
           error:

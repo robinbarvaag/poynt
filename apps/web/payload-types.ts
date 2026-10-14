@@ -3263,8 +3263,11 @@ export interface Order {
  */
 export interface BookAccess {
   id: number;
+  /**
+   * Ved «Gave» står navnet leseren skrev inn her.
+   */
   orderNumber: string;
-  store: 'ark' | 'norli' | 'poynt';
+  store: 'ark' | 'norli' | 'poynt' | 'gave';
   page?: (number | null) | Page;
   email?: string | null;
   newsletterOptIn?: boolean | null;

@@ -5,6 +5,7 @@ import {
   BOOK_STORES_DISPLAY,
   type BookStore,
   DEFAULT_BOOK_STORE,
+  GIFT_STORE,
 } from "@/lib/book-stores";
 import { NEWSLETTER_CONSENT_TEXTS } from "@/lib/newsletter-consent-texts";
 import { Button, Checkbox, Input, Label } from "@poynt/ui";
@@ -55,6 +56,7 @@ export function BookGate({ pageId, title }: { pageId: number; title: string }) {
   };
 
   const loading = status === "loading";
+  const isGift = store === GIFT_STORE;
 
   return (
     <section className="flex min-h-[70vh] items-center justify-center px-4 py-16">
@@ -64,15 +66,17 @@ export function BookGate({ pageId, title }: { pageId: number; title: string }) {
         </div>
         <h1 className="font-semibold text-2xl tracking-tight">{title}</h1>
         <p className="mt-2 text-muted-foreground">
-          Denne siden er for deg som har kjøpt boka. Skriv inn ordrenummeret
-          ditt, så er du inne — du trenger bare gjøre det én gang på denne
-          enheten.
+          Denne siden er for deg som har boka. Skriv inn ordrenummeret ditt —
+          eller navnet ditt hvis du fikk den i gave — så er du inne. Du trenger
+          bare gjøre det én gang på denne enheten.
         </p>
 
         <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-5">
           <fieldset className="flex flex-col gap-2" disabled={loading}>
-            <legend className="mb-2 font-medium text-sm">Kjøpt hos</legend>
-            <div className="grid grid-cols-3 gap-2">
+            <legend className="mb-2 font-medium text-sm">
+              Hvor har du boka fra?
+            </legend>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               {BOOK_STORES_DISPLAY.map((s) => (
                 <button
                   key={s.value}
@@ -88,13 +92,17 @@ export function BookGate({ pageId, title }: { pageId: number; title: string }) {
           </fieldset>
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="book-order">Ordrenummer</Label>
+            <Label htmlFor="book-order">
+              {isGift ? "Navn" : "Ordrenummer"}
+            </Label>
             <Input
               id="book-order"
               value={orderNumber}
               onChange={(e) => setOrderNumber(e.target.value)}
-              placeholder="Står i ordrebekreftelsen"
-              autoComplete="off"
+              placeholder={
+                isGift ? "Fornavn og etternavn" : "Står i ordrebekreftelsen"
+              }
+              autoComplete={isGift ? "name" : "off"}
               required
               disabled={loading}
             />
@@ -138,7 +146,7 @@ export function BookGate({ pageId, title }: { pageId: number; title: string }) {
           </div>
 
           <PrivacyNotice
-            purpose="Ordrenummeret brukes bare til å gi deg tilgang. E-posten brukes kun til nyhetsbrevet hvis du krysser av, og du kan melde deg av når som helst."
+            purpose="Ordrenummeret eller navnet brukes bare til å gi deg tilgang. E-posten brukes kun til nyhetsbrevet hvis du krysser av, og du kan melde deg av når som helst."
             className="text-muted-foreground"
           />
           <RecaptchaNotice className="text-muted-foreground" />
