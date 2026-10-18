@@ -8,6 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@poynt/ui";
+import { tidspunkt } from "./format";
 
 /**
  * Endringsloggen: hva som faktisk har skjedd ute i butikkene, nyeste først.
@@ -38,15 +39,6 @@ const TYPE_VARIANT: Record<
 
 const SOURCE_LABEL: Record<string, string> = { norli: "Norli", ark: "ARK" };
 
-function formatMoment(value: string): string {
-  return new Date(value).toLocaleString("nb-NO", {
-    day: "numeric",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
 export function EventLog({ events }: { events: RecentEvent[] }) {
   if (events.length === 0) {
     return (
@@ -73,7 +65,7 @@ export function EventLog({ events }: { events: RecentEvent[] }) {
           {events.map((event) => (
             <TableRow key={event.id}>
               <TableCell className="text-muted-foreground">
-                {formatMoment(event.occurredAt)}
+                {tidspunkt(event.occurredAt)}
               </TableCell>
               <TableCell>
                 <Badge

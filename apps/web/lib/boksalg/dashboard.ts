@@ -19,6 +19,7 @@ import {
   labelFor,
   storeStatus,
 } from "./constants";
+import { dayKey, daysFromToday } from "./dates";
 import {
   type BreakEven,
   type ChannelRates,
@@ -264,10 +265,6 @@ type Channel = ChannelRates & {
   active: boolean;
   presaleLink: string | null;
 };
-
-function dayKey(value: string): string {
-  return new Date(value).toISOString().slice(0, 10);
-}
 
 type ChannelRow = NonNullable<BookEconomy["channels"]>[number];
 
@@ -604,7 +601,6 @@ export async function getBookDashboard(
   const returnable: ChannelVolumes = {};
   const presales: PresaleSummary[] = [];
   let kickbackTotal = 0;
-  const today = dayKey(new Date().toISOString());
 
   const channelSummaries: ChannelSummary[] = channels.map((channel) => {
     const manual = manualByChannel.get(channel.key) ?? 0;
@@ -650,11 +646,7 @@ export async function getBookDashboard(
       const reward = kickback(settings, terms, kickbackCopies);
       kickbackTotal += reward.amount;
       const daysLeft = terms.kickbackUntil
-        ? Math.round(
-            (new Date(dayKey(terms.kickbackUntil)).getTime() -
-              new Date(today).getTime()) /
-              (1000 * 60 * 60 * 24)
-          )
+        ? daysFromToday(dayKey(terms.kickbackUntil))
         : null;
       const marketingAt = terms.marketingPackageAt;
       presale = {
@@ -776,6 +768,20 @@ export async function getBookDashboard(
     warnings.push(
       "Ingen lagerbilder er hentet ennå. Første henting skjer i morgen tidlig, eller med «Hent nå»."
     );
+  }
+
+  // En kilde som ikke har gitt nytt lagerbilde på over halvannet døgn har
+  // feilet minst én morgen (ARK svarer 429 i perioder). Tallene står, men
+  // de er gamle — si det, så ingen leser «ingen endring» som «ingen salg».
+  const STALE_AFTER_MS = 36 * 60 * 60 * 1000;
+  for (const entry of stock) {
+    if (!entry.fetchedAt) continue;
+    const age = Date.now() - new Date(entry.fetchedAt).getTime();
+    if (age > STALE_AFTER_MS) {
+      warnings.push(
+        `${entry.label} har ikke gitt nytt lagerbilde på ${Math.floor(age / (24 * 60 * 60 * 1000))} dager — tallene derfra er fra ${dayKey(entry.fetchedAt)}. Prøv «Hent nå»; svarer de fortsatt ikke, blokkerer de hentingen midlertidig.`
+      );
+    }
   }
 
   // ---- Tidslinjer ---------------------------------------------------------

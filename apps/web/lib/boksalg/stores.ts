@@ -89,17 +89,39 @@ export function deriveStoreRow(
 }
 
 /**
+ * Butikkrader hos oss som IKKE var med i denne hentingen, men fortsatt står
+ * med eksemplarer. Kjeden har tatt dem ut av lista (stengt, eller boka er
+ * ikke lenger bestillbar der) — da har de ikke boka «nå», og skal ikke telle
+ * som «har boka» på kart og i fylketabellen. Ren funksjon, testet.
+ */
+export function staleStoreIds(
+  existing: Pick<BookStore, "storeId" | "currentQty">[],
+  fetched: StoreStock[]
+): string[] {
+  const fetchedIds = new Set(fetched.map((store) => store.storeId));
+  return existing
+    .filter((doc) => !fetchedIds.has(doc.storeId) && (doc.currentQty ?? 0) > 0)
+    .map((doc) => doc.storeId);
+}
+
+/**
  * Skriver alle butikkene fra én henting til samlingen. Én oppdatering per
  * butikk (197 hos Norli) — det er greit for en jobb som kjører én gang i
  * døgnet, og enklere å resonnere om enn en bulk-upsert med ulike verdier.
+ *
+ * `clearMissing`: butikker som sto med eksemplarer sist, men mangler i denne
+ * lista, settes til 0 nå (maxQty og solgt-estimatet beholdes — det er
+ * historikk). Slås av når lista er en lånt katalog (før lansering), for da
+ * sier lista ingenting om beholdningen.
  */
 export async function syncStores(
   payload: Payload,
   sourceKey: SourceKey,
   stores: StoreStock[],
   events: StockEvent[],
-  seenAt: string
-): Promise<{ created: number; updated: number }> {
+  seenAt: string,
+  options: { clearMissing?: boolean } = {}
+): Promise<{ created: number; updated: number; cleared: number }> {
   const { docs } = await payload.find({
     collection: "book-stores",
     where: { sourceKey: { equals: sourceKey } },
@@ -113,8 +135,14 @@ export async function syncStores(
 
   let created = 0;
   let updated = 0;
+  let cleared = 0;
+  const seen = new Set<string>();
 
   for (const store of stores) {
+    // Samme butikk to ganger i lista skal aldri bli to rader.
+    if (seen.has(store.storeId)) continue;
+    seen.add(store.storeId);
+
     const existing = existingById.get(store.storeId) ?? null;
     const data = deriveStoreRow(sourceKey, store, existing, events, seenAt);
 
@@ -131,5 +159,18 @@ export async function syncStores(
     }
   }
 
-  return { created, updated };
+  if (options.clearMissing) {
+    for (const storeId of staleStoreIds(docs as BookStore[], stores)) {
+      const doc = existingById.get(storeId);
+      if (!doc) continue;
+      await payload.update({
+        collection: "book-stores",
+        id: doc.id,
+        data: { currentQty: 0 },
+      });
+      cleared += 1;
+    }
+  }
+
+  return { created, updated, cleared };
 }

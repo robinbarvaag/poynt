@@ -9,6 +9,7 @@ import {
 } from "@poynt/ui";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { ESTIMATE, EXACT, HATCH_ID } from "./chart-tokens";
+import { kortDag } from "./format";
 import { HatchPattern } from "./hatch-pattern";
 
 /**
@@ -20,13 +21,6 @@ import { HatchPattern } from "./hatch-pattern";
  * som et totaltall — og de samme bøkene talt to ganger. Derfor egen graf hver,
  * og estimatet er skravert så usikkerheten leses uten farge.
  */
-
-function formatDay(date: string): string {
-  return new Date(date).toLocaleDateString("nb-NO", {
-    day: "numeric",
-    month: "short",
-  });
-}
 
 export function SalesChart({
   points,
@@ -58,7 +52,7 @@ export function SalesChart({
 
   const data = points.map((point) => ({
     ...point,
-    label: formatDay(point.date),
+    label: kortDag(point.date),
   }));
 
   return (

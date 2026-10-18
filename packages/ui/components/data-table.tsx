@@ -158,8 +158,14 @@ export interface DataTableProps<TData extends RowData> {
   getRowId?: (row: TData) => string;
   /** Plassholder i søkefeltet. Uten denne vises ikke søk. */
   searchPlaceholder?: string;
-  /** Innhold i verktøylinja ved siden av søket — filtre, handlinger. */
+  /** Innhold i verktøylinja ved siden av søket — filtre. */
   toolbar?: (table: DataTableInstance<TData>) => React.ReactNode;
+  /**
+   * Handlinger som gjelder radene (kopier, eksporter …). Vises på egen linje
+   * under filtrene, så de ikke blandes med dem — og ikke havner på rad fire
+   * på en telefon.
+   */
+  actions?: (table: DataTableInstance<TData>) => React.ReactNode;
   /** Kolonnefiltre styrt utenfra (f.eks. fra et kart). */
   columnFilters?: ColumnFiltersState;
   onColumnFiltersChange?: (filters: ColumnFiltersState) => void;
@@ -185,6 +191,7 @@ export function DataTable<TData extends RowData>({
   getRowId,
   searchPlaceholder,
   toolbar,
+  actions,
   columnFilters: controlledFilters,
   onColumnFiltersChange,
   onSelectionChange,
@@ -220,6 +227,15 @@ export function DataTable<TData extends RowData>({
     },
     [columnFilters, onColumnFiltersChange]
   );
+
+  // Filtre satt utenfra (kartet) går utenom `setColumnFilters` over — da må
+  // sida nullstilles her, ellers står man på side 3 av en liste med fem rader.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: effekten skal kjøre når filtrene endres, ikke lese dem
+  React.useEffect(() => {
+    setPagination((old) =>
+      old.pageIndex === 0 ? old : { ...old, pageIndex: 0 }
+    );
+  }, [columnFilters]);
 
   const table = useTable({
     features: dataTableFeatures,
@@ -309,6 +325,12 @@ export function DataTable<TData extends RowData>({
               </DropdownMenuContent>
             </DropdownMenu>
           )}
+        </div>
+      )}
+
+      {actions && (
+        <div className="flex flex-wrap items-center gap-2">
+          {actions(table)}
         </div>
       )}
 
@@ -496,16 +518,36 @@ export function DataTableFacetedFilter({
     (column.getFilterValue() as string[] | undefined) ?? []
   );
   const facets = column.getFacetedUniqueValues();
-  const visible = options.filter((option) => facets.has(option.value));
+  // Valgte verdier vises alltid, også når de ikke finnes i radene lenger —
+  // ellers kan de ikke velges bort igjen.
+  const visible = options.filter(
+    (option) => facets.has(option.value) || selected.has(option.value)
+  );
+  const selectedLabels = options
+    .filter((option) => selected.has(option.value))
+    .map((option) => option.label);
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm">
+        <Button
+          variant="outline"
+          size="sm"
+          className={cn(selected.size > 0 && "border-primary bg-primary/5")}
+          aria-label={
+            selected.size > 0
+              ? `${title}: ${selectedLabels.join(", ")}`
+              : `Filtrer på ${title.toLowerCase()}`
+          }
+        >
           {title}
           {selected.size > 0 && (
-            <span className="bg-primary text-primary-foreground ml-1 rounded-full px-1.5 text-xs tabular-nums">
-              {selected.size}
+            // Hva som er valgt skal kunne leses uten å åpne menyen: ett eller
+            // to valg skrives ut, flere blir et tall.
+            <span className="border-border ml-1 max-w-40 truncate border-l pl-2 font-normal">
+              {selected.size <= 2
+                ? selectedLabels.join(", ")
+                : `${selected.size} valgt`}
             </span>
           )}
         </Button>

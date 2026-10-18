@@ -5,8 +5,11 @@ import {
   type FollowUpStatus,
 } from "@/lib/boksalg/constants";
 import { runStockSnapshot } from "@/lib/boksalg/snapshot";
+import { findSource } from "@/lib/boksalg/sources";
 import { requireAdmin } from "@/lib/require-admin";
 import { revalidatePath } from "next/cache";
+
+const SOURCE_LABELS: Record<string, string> = { norli: "Norli", ark: "ARK" };
 
 /**
  * Setter oppfølgingsstatus på én butikk rett fra tabellen, så Susanne slipper
@@ -59,6 +62,10 @@ export async function refreshStockAction(): Promise<{
   try {
     const result = await runStockSnapshot(payload);
     const failed = result.sources.filter((source) => !source.ok);
+    const skipped = result.sources.filter((source) => source.skipped);
+    const fetched = result.sources.filter(
+      (source) => source.ok && !source.skipped
+    );
     const events = result.sources.reduce(
       (sum, source) => sum + (source.events ?? 0),
       0
@@ -66,19 +73,37 @@ export async function refreshStockAction(): Promise<{
 
     revalidatePath("/intern/boksalg");
 
-    if (failed.length > 0) {
-      return {
-        ok: false,
-        message: `Hentet, men ${failed.map((source) => source.sourceKey).join(" og ")} feilet: ${failed[0]?.error ?? "ukjent feil"}`,
-      };
+    const label = (key: string) => SOURCE_LABELS[key] ?? key;
+    const parts: string[] = [];
+
+    if (fetched.length > 0) {
+      parts.push(
+        events === 0
+          ? `${fetched.map((s) => label(s.sourceKey)).join(" og ")} hentet — ingenting har endret seg siden sist.`
+          : `${fetched.map((s) => label(s.sourceKey)).join(" og ")} hentet — ${events} ${events === 1 ? "endring" : "endringer"} registrert.`
+      );
+    }
+    for (const source of skipped) {
+      parts.push(
+        `${label(source.sourceKey)} ble hentet for ${source.lastFetchedMinutesAgo ?? 0} min siden og hoppes over (henter ikke oftere enn hvert ${Math.round(
+          (findSource(source.sourceKey)?.minIntervalMs ?? 0) / 60_000
+        )}. minutt — de blokkerer oss ellers).`
+      );
+    }
+    for (const source of failed) {
+      parts.push(
+        source.transient
+          ? `${label(source.sourceKey)}: ${source.error}`
+          : `${label(source.sourceKey)} feilet: ${source.error ?? "ukjent feil"}`
+      );
     }
 
+    // Midlertidig avvisning (429) er ikke en feil hos oss — vis det som
+    // informasjon, ikke som rød feilmelding, så lenge minst én kilde gikk.
+    const hardFailure = failed.some((source) => !source.transient);
     return {
-      ok: true,
-      message:
-        events === 0
-          ? "Hentet — ingenting har endret seg siden sist."
-          : `Hentet — ${events} ${events === 1 ? "endring" : "endringer"} registrert.`,
+      ok: !hardFailure && (fetched.length > 0 || skipped.length > 0),
+      message: parts.join(" ") || "Ingen aktive kilder å hente fra.",
     };
   } catch (error) {
     return {

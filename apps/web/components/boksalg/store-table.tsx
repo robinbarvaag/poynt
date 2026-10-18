@@ -22,7 +22,7 @@ import {
   createDataTableColumnHelper,
   dataTableSelectionColumn,
 } from "@poynt/ui";
-import { CopyIcon, ExternalLinkIcon, PhoneIcon } from "lucide-react";
+import { CopyIcon, ExternalLinkIcon, PhoneIcon, XIcon } from "lucide-react";
 import { useMemo, useState, useTransition } from "react";
 import { STATUS_COLORS } from "./chart-tokens";
 
@@ -33,25 +33,20 @@ import { STATUS_COLORS } from "./chart-tokens";
  * «Til oppfølging» er snarveien: butikkene som ikke har boka nå. Velg dem,
  * kopier e-postadressene, send én samlet e-post. Oppfølgingsstatusen settes
  * rett i tabellen, så hun slipper å åpne admin for hver butikk hun ringer.
+ *
+ * Filtrene (fylke, status, oppfølging) ligger i verktøylinja; handlingene
+ * (kopier e-post) på egen linje under. Fylkesfilteret deles med kartet via
+ * `columnFilters`, så prikk, fylkesrad og chip er samme valg.
+ *
+ * På små skjermer skjules fylke, solgt og adresse med CSS (de er fortsatt i
+ * «Kolonner»-menyen og i filtrene) — navn, status, antall, kontakt og
+ * oppfølging er det man trenger med telefonen i hånda.
  */
 
 const helper = createDataTableColumnHelper<StoreRow>();
 
-const REGION_OPTIONS_CACHE = new Map<
-  string,
-  { value: string; label: string }[]
->();
-
-function regionOptions(stores: StoreRow[]) {
-  const key = String(stores.length);
-  const cached = REGION_OPTIONS_CACHE.get(key);
-  if (cached) return cached;
-  const regions = [...new Set(stores.map((store) => store.region ?? "Ukjent"))]
-    .sort((a, b) => a.localeCompare(b, "nb"))
-    .map((region) => ({ value: region, label: region }));
-  REGION_OPTIONS_CACHE.set(key, regions);
-  return regions;
-}
+/** Fylket slik det filtreres på — tomt fylke er også en verdi man kan velge. */
+const UNKNOWN_REGION = "Ukjent";
 
 function FollowUpSelect({ store }: { store: StoreRow }) {
   const [value, setValue] = useState<FollowUpStatus>(store.followUpStatus);
@@ -71,7 +66,7 @@ function FollowUpSelect({ store }: { store: StoreRow }) {
       disabled={pending}
     >
       <SelectTrigger
-        className="h-8 w-44 text-xs"
+        className="h-8 w-40 text-xs"
         aria-label={`Oppfølging for ${store.name}`}
       >
         <SelectValue />
@@ -95,7 +90,7 @@ const columns = [
       <DataTableColumnHeader column={column} title="Butikk" />
     ),
     cell: ({ row }) => (
-      <div className="flex flex-col">
+      <div className="flex min-w-32 flex-col">
         <span className="font-medium">{row.original.name}</span>
         {row.original.city && (
           <span className="text-muted-foreground text-xs">
@@ -107,13 +102,19 @@ const columns = [
     enableHiding: false,
     sortFn: "text",
   }),
-  helper.accessor("region", {
+  helper.accessor((row) => row.region ?? UNKNOWN_REGION, {
+    id: "region",
     header: "Fylke",
     cell: ({ getValue }) => (
-      <span className="text-muted-foreground">{getValue() ?? "–"}</span>
+      <span className="text-muted-foreground">{getValue()}</span>
     ),
     filterFn: "oneOf",
     enableGlobalFilter: false,
+    sortFn: "text",
+    meta: {
+      headerClassName: "hidden md:table-cell",
+      cellClassName: "hidden md:table-cell",
+    },
   }),
   helper.accessor("status", {
     header: "Status",
@@ -162,7 +163,10 @@ const columns = [
     ),
     sortFn: "basic",
     enableGlobalFilter: false,
-    meta: { headerClassName: "text-right" },
+    meta: {
+      headerClassName: "hidden text-right sm:table-cell",
+      cellClassName: "hidden sm:table-cell",
+    },
   }),
   helper.accessor("email", {
     header: "Kontakt",
@@ -171,7 +175,7 @@ const columns = [
         {row.original.email && (
           <a
             href={`mailto:${row.original.email}`}
-            className="text-primary hover:underline"
+            className="text-primary break-all hover:underline"
           >
             {row.original.email}
           </a>
@@ -179,7 +183,7 @@ const columns = [
         {row.original.phone && (
           <a
             href={`tel:${row.original.phone.replace(/\s+/g, "")}`}
-            className="text-muted-foreground flex items-center gap-1 hover:underline"
+            className="text-muted-foreground flex items-center gap-1 whitespace-nowrap hover:underline"
           >
             <PhoneIcon className="size-3" aria-hidden />
             {row.original.phone}
@@ -206,7 +210,11 @@ const columns = [
       </div>
     ),
     enableSorting: false,
-    meta: { label: "Adresse" },
+    meta: {
+      label: "Adresse",
+      headerClassName: "hidden xl:table-cell",
+      cellClassName: "hidden xl:table-cell",
+    },
   }),
   helper.accessor("followUpStatus", {
     header: "Oppfølging",
@@ -247,16 +255,22 @@ export function StoreTable({
 }) {
   const [selected, setSelected] = useState<StoreRow[]>([]);
   const [copied, setCopied] = useState<string | null>(null);
-  const regions = useMemo(() => regionOptions(stores), [stores]);
 
-  const followUpActive = columnFilters.some(
-    (filter) =>
-      filter.id === "status" &&
-      Array.isArray(filter.value) &&
-      filter.value.length === 2 &&
-      filter.value.includes("gatt_tom") &&
-      filter.value.includes("ikke_hatt")
+  const regions = useMemo(
+    () =>
+      [...new Set(stores.map((store) => store.region ?? UNKNOWN_REGION))]
+        .sort((a, b) => a.localeCompare(b, "nb"))
+        .map((region) => ({ value: region, label: region })),
+    [stores]
   );
+
+  const statusFilter = columnFilters.find((filter) => filter.id === "status");
+  const followUpActive =
+    Array.isArray(statusFilter?.value) &&
+    statusFilter.value.length === 2 &&
+    statusFilter.value.includes("gatt_tom") &&
+    statusFilter.value.includes("ikke_hatt");
+  const anyFilter = columnFilters.length > 0;
 
   return (
     <DataTable
@@ -268,7 +282,7 @@ export function StoreTable({
       onColumnFiltersChange={onColumnFiltersChange}
       onSelectionChange={setSelected}
       pageSize={50}
-      emptyText="Ingen butikker matcher."
+      emptyText="Ingen butikker matcher filtrene."
       caption="«Gått tom» betyr at butikken har hatt boka i en tidligere måling, men har 0 nå. «Ikke hatt boka» betyr 0 i alle målingene — de kan likevel ha solgt ut før første måling."
       toolbar={(table) => (
         <>
@@ -288,8 +302,11 @@ export function StoreTable({
             options={[...FOLLOW_UP_OPTIONS]}
           />
           <Button
-            variant={followUpActive ? "default" : "outline"}
+            type="button"
+            variant="outline"
             size="sm"
+            className={followUpActive ? "border-primary bg-primary/5" : ""}
+            aria-pressed={followUpActive}
             onClick={() =>
               onColumnFiltersChange(
                 followUpActive
@@ -305,7 +322,23 @@ export function StoreTable({
           >
             Til oppfølging
           </Button>
+          {anyFilter && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => onColumnFiltersChange([])}
+            >
+              <XIcon aria-hidden />
+              Nullstill
+            </Button>
+          )}
+        </>
+      )}
+      actions={(table) => (
+        <>
           <Button
+            type="button"
             variant="outline"
             size="sm"
             onClick={async () => {
@@ -331,9 +364,20 @@ export function StoreTable({
           >
             <CopyIcon aria-hidden />
             Kopier e-postadresser
+            {selected.length > 0 && (
+              <span className="text-muted-foreground font-normal tabular-nums">
+                ({selected.length} valgt)
+              </span>
+            )}
           </Button>
-          {copied && (
+          {copied ? (
             <output className="text-muted-foreground text-sm">{copied}</output>
+          ) : (
+            <span className="text-muted-foreground text-xs">
+              {selected.length > 0
+                ? "Kopierer de valgte radene."
+                : "Ingen valgt — kopierer alle i lista slik den er filtrert."}
+            </span>
           )}
         </>
       )}

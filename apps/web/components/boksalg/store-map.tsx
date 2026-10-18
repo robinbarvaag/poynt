@@ -21,16 +21,27 @@ import { NORWAY_PATH, NORWAY_VIEWBOX, projectNorway } from "./norway-map";
  * Butikker som har solgt de siste sju dagene får en pulserende ring.
  *
  * Klikk på en prikk velger fylket: tabellen under filtreres, og kartet zoomer
- * inn på butikkene i fylket. Deretter: hjul eller pluss/minus for å zoome
- * videre, dra for å flytte, «hele landet» nullstiller. Tett på (fra ~10×)
- * tones omrisset ned og butikknavnene skrives ut — det er der Oslo-butikkene
- * kan skilles fra hverandre.
+ * inn på butikkene i fylket. Deretter: hjul, klem (mobil) eller pluss/minus
+ * for å zoome videre, dra for å flytte, «hele landet» nullstiller. Tett på
+ * (fra ~10×) tones omrisset ned og butikknavnene skrives ut — det er der
+ * Oslo-butikkene kan skilles fra hverandre.
  *
  * Zoomen er en SVG-transform på en <g>, animert med requestAnimationFrame.
  * Ikke CSS-transition med vilje: Chrome rasteriserer et CSS-transformert lag
  * i lav oppløsning mens det beveger seg, og ved 40× blir kartet grøt.
  * SVG-attributtet tegnes som vektor hver frame. Prikker og streker deles på
  * skalaen så de holder synlig størrelse.
+ *
+ * Tre ting er lært den harde veien, og står her så de ikke må læres igjen:
+ *  - Dra regnes mot en ref (`targetRef`), ikke mot React-state: flere
+ *    pointermove mellom to render ville ellers lest samme utgangspunkt og
+ *    kartet hakket.
+ *  - Hjulet zoomer bare når kartet er «i bruk» (fylke valgt / zoomet inn) eller
+ *    med Ctrl/⌘ — ellers stjeler kartet sidescrollen for alle som ruller forbi.
+ *    Trackpad-klem sender hjul med ctrlKey, så den virker alltid.
+ *  - På mobil er `touch-action: none` bare på når kartet er zoomet inn. Ved
+ *    hele landet får sida scrolle — et kart i full bredde som fanger alle
+ *    sveip gjør sida umulig å bla i.
  */
 
 const { width: W, height: H } = NORWAY_VIEWBOX;
@@ -45,6 +56,8 @@ const REGION_MAX_ZOOM = 12;
 const LABEL_ZOOM = 10;
 const LABEL_SIZE = 10;
 const ANIMATION_MS = 550;
+/** Så langt kan fingeren/pekeren flytte seg før et trykk regnes som dra. */
+const CLICK_SLOP_PX = { mouse: 4, touch: 10 };
 
 interface View {
   scale: number;
@@ -101,6 +114,24 @@ function viewForRegion(dots: Dot[], region: string): View | null {
     scale: clamp(Math.min(W / boxW, H / boxH), MIN_ZOOM, REGION_MAX_ZOOM),
     cx: (minX + maxX) / 2,
     cy: (minY + maxY) / 2,
+  };
+}
+
+/**
+ * Zoomer et utsnitt med en faktor og holder punktet (px, py i kartenheter)
+ * i ro på skjermen. Ren regning, så hjul, knapper og klem bruker samme.
+ */
+function zoomView(base: View, factor: number, px: number, py: number): View {
+  const s2 = clamp(base.scale * factor, MIN_ZOOM, MAX_ZOOM);
+  if (s2 === MIN_ZOOM) return WHOLE_COUNTRY;
+  const ttx = W / 2 - base.scale * base.cx;
+  const tty = H / 2 - base.scale * base.cy;
+  const wx = (px - ttx) / base.scale;
+  const wy = (py - tty) / base.scale;
+  return {
+    scale: s2,
+    cx: wx - (px - W / 2) / s2,
+    cy: wy - (py - H / 2) / s2,
   };
 }
 
@@ -183,6 +214,12 @@ function placeLabels(
   return result;
 }
 
+interface Pointer {
+  x: number;
+  y: number;
+  type: string;
+}
+
 export function StoreMap({
   stores,
   selectedRegion,
@@ -201,7 +238,16 @@ export function StoreMap({
     view: View;
   } | null>(null);
   const [dragging, setDragging] = useState(false);
+
+  // Aktive pekere (mus, finger, penn). To fingre = klem.
+  const pointers = useRef(new Map<number, Pointer>());
   const drag = useRef<{ x: number; y: number; moved: boolean } | null>(null);
+  const pinch = useRef<{
+    dist: number;
+    mx: number;
+    my: number;
+    base: View;
+  } | null>(null);
   const lastDragMoved = useRef(false);
 
   const dots = useMemo<Dot[]>(
@@ -227,6 +273,11 @@ export function StoreMap({
     manual && manual.region === selectedRegion
       ? manual.view
       : (regionView ?? WHOLE_COUNTRY);
+
+  // Samme mål som ref, så dra og klem kan regne videre fra siste verdi
+  // mellom to render — ikke fra det React rakk å tegne.
+  const targetRef = useRef(target);
+  targetRef.current = target;
 
   /** Det som faktisk tegnes akkurat nå — animeres mot målet. */
   const [shown, setShown] = useState<View>(WHOLE_COUNTRY);
@@ -269,11 +320,10 @@ export function StoreMap({
 
   const setView = (next: View) => {
     const s = clamp(next.scale, MIN_ZOOM, MAX_ZOOM);
-    setManual({
-      region: selectedRegion,
-      view:
-        s === MIN_ZOOM ? WHOLE_COUNTRY : { scale: s, cx: next.cx, cy: next.cy },
-    });
+    const view =
+      s === MIN_ZOOM ? WHOLE_COUNTRY : { scale: s, cx: next.cx, cy: next.cy };
+    targetRef.current = view;
+    setManual({ region: selectedRegion, view });
   };
 
   /** Piksler i nettleseren → kartenheter (viewBox skalerer med bredden). */
@@ -282,75 +332,167 @@ export function StoreMap({
     return rect && rect.width > 0 ? W / rect.width : 1;
   };
 
+  /** Et punkt på skjermen → kartenheter. */
+  const toMapUnits = (clientX: number, clientY: number) => {
+    const rect = svgRef.current?.getBoundingClientRect();
+    if (!rect || rect.width === 0) return { px: W / 2, py: H / 2 };
+    const upp = W / rect.width;
+    return {
+      px: (clientX - rect.left) * upp,
+      py: (clientY - rect.top) * upp,
+    };
+  };
+
   /** Zoom med faktoren, og hold punktet (px, py i kartenheter) i ro. */
   const zoomAt = (factor: number, px = W / 2, py = H / 2) => {
-    const s2 = clamp(target.scale * factor, MIN_ZOOM, MAX_ZOOM);
-    if (s2 === target.scale) return;
-    const ttx = W / 2 - target.scale * target.cx;
-    const tty = H / 2 - target.scale * target.cy;
-    const wx = (px - ttx) / target.scale;
-    const wy = (py - tty) / target.scale;
-    setView({
-      scale: s2,
-      cx: wx - (px - W / 2) / s2,
-      cy: wy - (py - H / 2) / s2,
-    });
+    const base = targetRef.current;
+    const next = zoomView(base, factor, px, py);
+    if (sameView(next, base)) return;
+    setView(next);
   };
 
   const reset = () => {
     setManual(null);
+    setHover(null);
     onSelectRegion(null);
   };
 
+  const engaged = selectedRegion !== null || target.scale > MIN_ZOOM;
+
   // Hjulet må kunne stoppe sidescrollen — det krever en ikke-passiv lytter,
   // og React sine onWheel er passive. Uten avhengighetsliste med vilje: den
-  // bindes på nytt hver render, så den alltid ser gjeldende zoom.
+  // bindes på nytt hver render, så den alltid ser gjeldende tilstand.
   useEffect(() => {
     const svg = svgRef.current;
     if (!svg) return;
     const onWheel = (event: WheelEvent) => {
+      // Vanlig rulling over et kart som ikke er i bruk skal bla sida, ikke
+      // zoome. Ctrl/⌘ + hjul (og trackpad-klem, som sender ctrlKey) zoomer
+      // alltid.
+      if (!(engaged || event.ctrlKey || event.metaKey)) return;
       event.preventDefault();
-      const rect = svg.getBoundingClientRect();
-      const upp = W / rect.width;
-      zoomAt(
-        Math.exp(-event.deltaY * 0.0015),
-        (event.clientX - rect.left) * upp,
-        (event.clientY - rect.top) * upp
-      );
+      const { px, py } = toMapUnits(event.clientX, event.clientY);
+      zoomAt(Math.exp(-event.deltaY * 0.0015), px, py);
     };
     svg.addEventListener("wheel", onWheel, { passive: false });
     return () => svg.removeEventListener("wheel", onWheel);
   });
 
+  const endPointer = (pointerId: number) => {
+    pointers.current.delete(pointerId);
+    if (pointers.current.size < 2 && pinch.current) {
+      pinch.current = null;
+      // Én finger igjen etter en klem: fortsett som dra fra DER den fingeren
+      // er — ikke fra (0, 0), som ville kastet kartet av gårde.
+      const remaining = [...pointers.current.values()][0];
+      if (remaining) {
+        drag.current = { x: remaining.x, y: remaining.y, moved: true };
+      }
+    }
+    if (pointers.current.size === 0) {
+      // click kommer ETTER pointerup — husk om dette var et drag, så prikkens
+      // onClick kan ignorere det.
+      lastDragMoved.current = drag.current?.moved ?? false;
+      drag.current = null;
+      setDragging(false);
+    }
+  };
+
   // Uten pointer capture med vilje: med capture går click-hendelsen til
   // svg-en i stedet for prikken, og klikk på butikker slutter å virke.
   const onPointerDown = (event: ReactPointerEvent<SVGSVGElement>) => {
-    if (event.button !== 0) return;
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+    pointers.current.set(event.pointerId, {
+      x: event.clientX,
+      y: event.clientY,
+      type: event.pointerType,
+    });
+
+    if (pointers.current.size === 2) {
+      // To fingre: klem. Avbryt et eventuelt dra, og husk utgangspunktet.
+      const [a, b] = [...pointers.current.values()];
+      if (!(a && b)) return;
+      const mid = toMapUnits((a.x + b.x) / 2, (a.y + b.y) / 2);
+      pinch.current = {
+        dist: Math.hypot(a.x - b.x, a.y - b.y),
+        mx: mid.px,
+        my: mid.py,
+        base: targetRef.current,
+      };
+      drag.current = { x: 0, y: 0, moved: true };
+      setDragging(true);
+      return;
+    }
+
     drag.current = { x: event.clientX, y: event.clientY, moved: false };
     lastDragMoved.current = false;
   };
+
   const onPointerMove = (event: ReactPointerEvent<SVGSVGElement>) => {
+    const known = pointers.current.get(event.pointerId);
+    if (!known) return;
+    known.x = event.clientX;
+    known.y = event.clientY;
+
+    const activePinch = pinch.current;
+    if (activePinch && pointers.current.size >= 2) {
+      const [a, b] = [...pointers.current.values()];
+      if (!(a && b)) return;
+      const dist = Math.hypot(a.x - b.x, a.y - b.y);
+      if (activePinch.dist === 0) return;
+      const mid = toMapUnits((a.x + b.x) / 2, (a.y + b.y) / 2);
+      // Zoom rundt klemmens startpunkt, og flytt med midtpunktet.
+      const zoomed = zoomView(
+        activePinch.base,
+        dist / activePinch.dist,
+        activePinch.mx,
+        activePinch.my
+      );
+      if (zoomed.scale === MIN_ZOOM) {
+        setView(zoomed);
+        return;
+      }
+      setView({
+        scale: zoomed.scale,
+        cx: zoomed.cx - (mid.px - activePinch.mx) / zoomed.scale,
+        cy: zoomed.cy - (mid.py - activePinch.my) / zoomed.scale,
+      });
+      return;
+    }
+
     const start = drag.current;
     if (!start) return;
     const dx = event.clientX - start.x;
     const dy = event.clientY - start.y;
-    if (!start.moved && Math.hypot(dx, dy) < 4) return;
+    const slop =
+      event.pointerType === "mouse" ? CLICK_SLOP_PX.mouse : CLICK_SLOP_PX.touch;
+    if (!start.moved && Math.hypot(dx, dy) < slop) return;
+    // Ved hele landet på mobil lar vi sida scrolle (touch-action: pan-y) —
+    // da får vi pointercancel i stedet for move, så dette er trygt å gjøre.
     start.moved = true;
     setDragging(true);
     const upp = unitsPerPixel();
+    const base = targetRef.current;
     setView({
-      scale: target.scale,
-      cx: target.cx - (dx * upp) / target.scale,
-      cy: target.cy - (dy * upp) / target.scale,
+      scale: base.scale,
+      cx: base.cx - (dx * upp) / base.scale,
+      cy: base.cy - (dy * upp) / base.scale,
     });
     drag.current = { x: event.clientX, y: event.clientY, moved: true };
   };
-  const onPointerUp = () => {
-    // click kommer ETTER pointerup — husk om dette var et drag, så prikkens
-    // onClick kan ignorere det.
-    lastDragMoved.current = drag.current?.moved ?? false;
-    drag.current = null;
-    setDragging(false);
+
+  const onPointerUp = (event: ReactPointerEvent<SVGSVGElement>) => {
+    const wasDrag = drag.current?.moved ?? false;
+    endPointer(event.pointerId);
+    // Trykk på bakgrunnen (ikke en prikk, ikke et dra) lukker tooltipen — på
+    // mobil finnes ingen «musa forlot prikken».
+    if (
+      event.type === "pointerup" &&
+      !wasDrag &&
+      event.target === svgRef.current
+    ) {
+      setHover(null);
+    }
   };
 
   const counts = useMemo(() => {
@@ -434,13 +576,16 @@ export function StoreMap({
         <svg
           ref={svgRef}
           viewBox={`0 0 ${W} ${H}`}
-          className={`bg-background h-auto w-full touch-none overflow-hidden rounded-xl select-none ${dragging ? "cursor-grabbing" : "cursor-grab"}`}
+          className={`bg-background h-auto w-full overflow-hidden rounded-xl select-none ${
+            engaged ? "touch-none" : "touch-pan-y"
+          } ${dragging ? "cursor-grabbing" : "cursor-grab"}`}
           role="img"
           aria-label={`Kart over Norge med ${stores.length} butikker. ${counts.har_boka} har boka, ${counts.gatt_tom} har gått tom, ${counts.ikke_hatt} har ikke hatt den.${selectedRegion ? ` Zoomet inn på ${selectedRegion}.` : ""}`}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
           onPointerCancel={onPointerUp}
+          onPointerLeave={onPointerUp}
         >
           <title>Butikker i Norge</title>
           <g transform={`translate(${tx} ${ty}) scale(${scale})`}>
@@ -456,10 +601,12 @@ export function StoreMap({
               const dimmed =
                 selectedRegion !== null && store.region !== selectedRegion;
               const r = (radius(store.currentQty) * dotScale) / scale;
-              const select = () =>
+              const select = () => {
+                setHover(store);
                 onSelectRegion(
                   store.region === selectedRegion ? null : store.region
                 );
+              };
               return (
                 <g key={store.id}>
                   {store.recentSales > 0 && !dimmed && (
@@ -567,6 +714,7 @@ export function StoreMap({
             type="button"
             variant="outline"
             size="icon-sm"
+            className="[@media(hover:none)]:size-10"
             onClick={() => zoomAt(ZOOM_STEP)}
             disabled={target.scale >= MAX_ZOOM}
             aria-label="Zoom inn"
@@ -577,6 +725,7 @@ export function StoreMap({
             type="button"
             variant="outline"
             size="icon-sm"
+            className="[@media(hover:none)]:size-10"
             onClick={() => zoomAt(1 / ZOOM_STEP)}
             disabled={target.scale <= MIN_ZOOM}
             aria-label="Zoom ut"
@@ -587,6 +736,7 @@ export function StoreMap({
             type="button"
             variant="outline"
             size="icon-sm"
+            className="[@media(hover:none)]:size-10"
             onClick={reset}
             disabled={target.scale === MIN_ZOOM && selectedRegion === null}
             aria-label="Vis hele landet"
@@ -595,8 +745,17 @@ export function StoreMap({
           </Button>
         </div>
 
-        <p className="text-muted-foreground pointer-events-none absolute bottom-2 left-2 text-xs">
-          Hjul for å zoome · dra for å flytte
+        <p className="text-muted-foreground pointer-events-none absolute bottom-2 left-2 max-w-[60%] text-xs">
+          <span className="hidden [@media(hover:hover)]:inline">
+            {engaged
+              ? "Hjul for å zoome · dra for å flytte"
+              : "Klikk på en prikk · Ctrl + hjul for å zoome"}
+          </span>
+          <span className="inline [@media(hover:hover)]:hidden">
+            {engaged
+              ? "Klem for å zoome · dra for å flytte"
+              : "Trykk på en prikk for å zoome inn"}
+          </span>
         </p>
 
         {hover && (
@@ -635,8 +794,8 @@ export function StoreMap({
             )}
             <p className="text-muted-foreground mt-1 text-xs">
               {hover.region === selectedRegion
-                ? "Klikk for å vise hele landet"
-                : `Klikk for å zoome inn på ${hover.region}`}
+                ? "Klikk igjen for å vise hele landet"
+                : `Klikk for å zoome inn på ${hover.region ?? "fylket"}`}
             </p>
           </div>
         )}

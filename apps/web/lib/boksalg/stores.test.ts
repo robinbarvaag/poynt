@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { deriveStoreRow } from "./stores";
+import { deriveStoreRow, staleStoreIds } from "./stores";
 import type { StockEvent, StoreStock } from "./types";
 
 const jekta: StoreStock = {
@@ -94,5 +94,25 @@ describe("deriveStoreRow", () => {
     expect(row).not.toHaveProperty("followUpStatus");
     expect(row).not.toHaveProperty("followUpAt");
     expect(row).not.toHaveProperty("notes");
+  });
+});
+
+describe("staleStoreIds", () => {
+  test("butikker med eksemplarer som mangler i lista skal nullstilles", () => {
+    const existing = [
+      { storeId: "1", currentQty: 3 },
+      { storeId: "2", currentQty: 0 },
+      { storeId: "3", currentQty: 5 },
+      { storeId: "4", currentQty: null },
+    ];
+    const fetched: StoreStock[] = [{ storeId: "1", name: "A", qty: 2 }];
+    // 3 mangler og hadde bøker; 2 og 4 mangler, men sto allerede på 0.
+    expect(staleStoreIds(existing, fetched)).toEqual(["3"]);
+  });
+
+  test("ingen butikker mangler → ingenting å nullstille", () => {
+    const existing = [{ storeId: "1", currentQty: 3 }];
+    const fetched: StoreStock[] = [{ storeId: "1", name: "A", qty: 0 }];
+    expect(staleStoreIds(existing, fetched)).toEqual([]);
   });
 });

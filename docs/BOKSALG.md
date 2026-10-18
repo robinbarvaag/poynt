@@ -253,6 +253,16 @@ setter statusfilteret til gått tom + ikke hatt. Velg rader og «Kopier
 e-postadresser» (ingen valgt = alle i lista). Oppfølgingsstatus settes rett i
 tabellen (`setStoreFollowUpAction`); notater skrives i admin via lenka på raden.
 
+Filtrene viser hva som er valgt rett i chipen («Fylke · Oslo»; tre eller flere
+blir «3 valgt»), valgte verdier står i menyen selv om de ikke finnes i radene
+lenger (ellers kunne de ikke velges bort), «Nullstill» fjerner alle filtre —
+også kartets fylkesvalg, siden det er samme ting. Et filter satt utenfra
+(kartet) nullstiller sidetallet i `DataTable`, ellers sto man på side 3 av en
+liste med fem rader. Butikker uten fylke filtreres som «Ukjent». Handlingene
+(kopier e-post) ligger på egen linje under filtrene (`actions`-propen på
+`DataTable`). På små skjermer skjules fylke, solgt og adresse med CSS — navn,
+status, antall, kontakt og oppfølging er det man trenger med telefonen i hånda.
+
 ## Kildene
 
 Én fil per bokhandel i `lib/boksalg/sources/`. Å legge til en ny er å skrive en
@@ -263,12 +273,50 @@ tabellen (`setStoreFollowUpAction`); notater skrives i admin via lenka på raden
 GraphQL-endepunkt nettbutikken selv bruker. `pickupStores` gir antall eksemplarer
 per fysisk butikk — 197 butikker. Produkt-ID slås opp fra ISBN, ikke hardkodes.
 
+Tallene fra Norli normaliseres før de telles, fordi tre ting kan gi feil tall
+uten at noe feiler (alle tre er testet i `sources/norli.test.ts`):
+
+- `id` i `pickupStores.products` og `id` fra produktoppslaget sammenlignes som
+  **strenger** — er den ene Int og den andre String, matcher ingen butikk og
+  alt teller 0.
+- `qty_in_store` kan komme som streng, desimal, null eller **negativt**
+  (restordre). `normalizeQty` gjør alt til heltall ≥ 0; et negativt tall ville
+  ellers blitt lest som et salg i diff-en.
+- Samme butikk i flere regiongrupper telles **én gang** (høyeste beholdning).
+  Uten dedupe ble den talt dobbelt, fikk doble salgshendelser og to rader.
+
+Butikker som sto med eksemplarer sist, men mangler i dagens liste, settes til 0
+nå (`clearMissing` i `syncStores`) — ellers blir de stående som «har boka» for
+alltid. `maxQty` og solgt-estimatet beholdes. Dette skjer ikke når lista er
+en lånt katalog (før lansering), for da sier lista ingenting om beholdningen.
+
 **ARK** (`ark.ts`) har ikke noe API. Produktsiden `ark.no/produkt/<isbn>` bærer to
 maskinlesbare kilder: JSON-LD (pris, schema.org-tilgjengelighet) og Next.js-
 nyttelasten med ARKs egen tilstand (`availability.online.state`,
 `availability.store.state`). ARK oppgir **ikke** antall per butikk — så lenge
 `store.state` er `unavailable` finnes det ingen butikkliste. Når boka kommer i
 butikk må adapteren utvides; inntil da er ARKs bidrag status og pris.
+
+ARK har **botvern** og svarte 429 («for mange forespørsler») etter lansering.
+Tre lag mot det, alle i `sources/http.ts` og `ark.ts`:
+
+1. Fullt sett nettleser-headere (`browserHeaders()`), ikke bare User-Agent —
+   det er de manglende `Accept-Language`/`Sec-Fetch-*` som avslører en bot.
+2. Ett nytt forsøk etter `Retry-After` (maks 8 s, så «Hent nå» ikke henger).
+   Er svaret fortsatt 429/403, kastes `SourceUnavailableError`: en midlertidig
+   blokkering, ikke en parsefeil. Forrige lagerbilde står, neste kjøring
+   prøver igjen, og dashbordet viser det som informasjon, ikke rød feil.
+3. `minIntervalMs` på kilden (ARK: 30 min). Er forrige lagerbilde ferskere,
+   hopper hentingen over kilden og sier fra — så ti trykk på «Hent nå» ikke
+   blir ti kall til ARK. `fetch-book-stock.ts --force` overstyrer.
+
+Har en kilde ikke gitt nytt lagerbilde på over 36 timer, varsler dashbordet
+om det øverst, så gamle tall ikke leses som «ingen endring».
+
+**Tidssone.** Alle dagnøkler og tidspunkt regnes i `Europe/Oslo`
+(`lib/boksalg/dates.ts`, `components/boksalg/format.ts`). Vercel kjører i UTC;
+uten dette havnet en henting kl. 00:30 på gårsdagen, «sist hentet» sto to
+timer feil, og server og nettleser formaterte ulikt (hydreringsavvik).
 
 **Adlibris og Bokkilden** er rene nettbutikker uten butikklager. Der finnes det
 ikke noe tall å telle — på sikt er salgsrangering det nærmeste, og det er en
@@ -288,9 +336,10 @@ lagerbilde ved feil — neste kjøring ville lest det som «alle butikker tømt�
 ## Kommandoer
 
 ```bash
-# Hent lagerstatus nå (alle kilder, eller én)
+# Hent lagerstatus nå (alle kilder, eller én; --force ignorerer minsteintervallet)
 bun run --cwd apps/web payload run scripts/fetch-book-stock.ts
 bun run --cwd apps/web payload run scripts/fetch-book-stock.ts norli
+bun run --cwd apps/web payload run scripts/fetch-book-stock.ts ark --force
 
 # Seed utgiftene (create-only — rører aldri noe som finnes)
 bun run --cwd apps/web payload run scripts/seed-book-expenses.ts
@@ -305,7 +354,8 @@ bun test apps/web/lib/boksalg
 | --- | --- |
 | `lib/boksalg/economy.ts` | Netto per bok, break-even, dekning. Ren regning, testet |
 | `lib/boksalg/diff.ts` | Salg vs. påfyll vs. delisting. Ren logikk, testet |
-| `lib/boksalg/sources/` | Én adapter per bokhandel |
+| `lib/boksalg/sources/` | Én adapter per bokhandel; `http.ts` har nettleser-headere, `Retry-After` og `SourceUnavailableError` |
+| `lib/boksalg/dates.ts` | Dagnøkler og dager-til i norsk tid. Testet |
 | `lib/boksalg/snapshot.ts` | Henter, lagrer lagerbilde, skriver endringslogg |
 | `lib/boksalg/dashboard.ts` | Samler alt dashbordet trenger i ett kall |
 | `lib/inngest/functions/book-stock.ts` | Cron |
@@ -362,14 +412,31 @@ gir ulik 16. desimal på server og klient).
 animert med `requestAnimationFrame` (logaritmisk på skalaen). *Ikke*
 CSS-transition: Chrome rasteriserer et CSS-transformert lag i lav oppløsning
 mens det beveger seg, og ved 40× blir kartet grøt. Velges et fylke, regnes
-utsnittet fra butikkenes bbox (`viewForRegion`, maks 12×). Hjul zoomer rundt
-pekeren (ikke-passiv lytter, så siden ikke scroller), pluss/minus rundt
-midten, dra flytter; alt manuelt gjelder bare for det valgte fylket. Maks 80×
-— nok til å skille Oslo-butikkene. Prikkene deles på skalaen så de holder
-synlig størrelse (vokser med √skala, tak 1,8×). Fokusrammen på sirklene er
-slått av og erstattet med strek — nettleserens outline tegnes som en boks og
-skaleres med transformen. Pointer capture er med vilje IKKE brukt: da går
-`click` til svg-en og prikkene slutter å reagere.
+utsnittet fra butikkenes bbox (`viewForRegion`, maks 12×). Pluss/minus zoomer
+rundt midten, dra flytter, klem (to fingre) zoomer på mobil; alt manuelt
+gjelder bare for det valgte fylket. Maks 80× — nok til å skille
+Oslo-butikkene. Prikkene deles på skalaen så de holder synlig størrelse
+(vokser med √skala, tak 1,8×). Fokusrammen på sirklene er slått av og
+erstattet med strek — nettleserens outline tegnes som en boks og skaleres med
+transformen. Pointer capture er med vilje IKKE brukt: da går `click` til
+svg-en og prikkene slutter å reagere.
+
+Tre ting som var feil, og hvordan de er løst:
+
+- **Dra hakket.** Dra ble regnet fra React-state; flere `pointermove` mellom
+  to render leste samme utgangspunkt. Nå regnes dra og klem fra `targetRef`,
+  som oppdateres synkront i `setView`. Dra avsluttes også på `pointerleave`,
+  så et dra ut av kartet ikke henger igjen.
+- **Kartet stjal scrollen.** Hjulet zoomet alltid (ikke-passiv lytter med
+  `preventDefault`), så sida stoppet for alle som rullet forbi — og på mobil
+  fanget `touch-action: none` hvert sveip over et kart i full bredde. Nå
+  zoomer hjulet bare når kartet er «i bruk» (fylke valgt eller zoomet inn)
+  eller med Ctrl/⌘ (trackpad-klem sender ctrlKey). På mobil er `touch-none`
+  bare på når kartet er zoomet; ved hele landet er det `touch-pan-y`, så sida
+  scroller. Hint-teksten under kartet skifter med `@media (hover)`.
+- **Tooltip på mobil.** Trykk på en prikk setter tooltipen (ikke bare hover),
+  trykk på bakgrunnen lukker den. Terskelen for «dette var et dra, ikke et
+  trykk» er 10 px for finger, 4 px for mus.
 
 **Navn og «lys».** Fra 10× tones omrisset ned og butikknavnene tegnes i et
 eget `<g>` utenfor zoom-gruppa, i skjermenheter, med enkel grådig
