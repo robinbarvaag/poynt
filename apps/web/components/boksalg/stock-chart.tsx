@@ -9,6 +9,7 @@ import {
 } from "@poynt/ui";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { EXACT } from "./chart-tokens";
+import { kortDag } from "./format";
 
 /**
  * Eksemplarer ute i butikk over tid. Én serie, så ingen legendeboks — tittelen
@@ -24,13 +25,6 @@ const config = {
   copies: { label: "Eksemplarer i butikk", color: EXACT },
 } satisfies ChartConfig;
 
-function formatDay(date: string): string {
-  return new Date(date).toLocaleDateString("nb-NO", {
-    day: "numeric",
-    month: "short",
-  });
-}
-
 export function StockChart({ points }: { points: StockHistoryPoint[] }) {
   if (points.length < 2) {
     return (
@@ -42,7 +36,7 @@ export function StockChart({ points }: { points: StockHistoryPoint[] }) {
 
   const data = points.map((point) => ({
     ...point,
-    label: formatDay(point.date),
+    label: kortDag(point.date),
   }));
 
   return (

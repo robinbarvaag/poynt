@@ -10,14 +10,25 @@ import { getPayload } from "payload";
 import { runStockSnapshot } from "../lib/boksalg/snapshot";
 
 const payload = await getPayload({ config });
-const sourceKey = process.argv[2];
+const args = process.argv.slice(2);
+const force = args.includes("--force");
+const sourceKey = args.find((arg) => !arg.startsWith("--"));
 
-const result = await runStockSnapshot(payload, { sourceKey });
+// --force henter selv om kilden ble hentet nylig (ARK venter ellers 30 min).
+const result = await runStockSnapshot(payload, { sourceKey, force });
 
 console.log(`\nISBN ${result.isbn}`);
 for (const source of result.sources) {
   if (!source.ok) {
-    console.log(`  ${source.sourceKey}: FEIL — ${source.error}`);
+    console.log(
+      `  ${source.sourceKey}: ${source.transient ? "UTILGJENGELIG" : "FEIL"} — ${source.error}`
+    );
+    continue;
+  }
+  if (source.skipped) {
+    console.log(
+      `  ${source.sourceKey}: hoppet over — hentet for ${source.lastFetchedMinutesAgo} min siden (bruk --force)`
+    );
     continue;
   }
   console.log(

@@ -2,6 +2,7 @@ import type { BookStockSnapshot } from "@/payload-types";
 import type { Payload } from "payload";
 import { diffSnapshots } from "./diff";
 import { findSource } from "./sources";
+import { isTransientSourceError } from "./sources/http";
 import { syncStores } from "./stores";
 import type { SourceSnapshot, StockEvent, StoreStock } from "./types";
 
@@ -21,6 +22,15 @@ export interface SourceResult {
   sourceKey: SourceKey;
   ok: boolean;
   error?: string;
+  /**
+   * Kilden svarte, men ville ikke snakke med oss (429/403/botsjekk). Ikke en
+   * feil i koden — forrige lagerbilde står, neste kjøring prøver igjen.
+   */
+  transient?: boolean;
+  /** Hoppet over fordi forrige lagerbilde er ferskere enn kildens minsteintervall. */
+  skipped?: boolean;
+  /** Hvor gammelt forrige lagerbilde var da vi hoppet over, i minutter. */
+  lastFetchedMinutesAgo?: number;
   online?: string;
   storesWithStock?: number;
   totalCopies?: number;
@@ -28,7 +38,7 @@ export interface SourceResult {
   estimatedSales?: number;
   /** Butikk-katalogen ble hentet via et lånt produkt (boka er ikke i hentesystemet ennå). */
   directoryFallback?: boolean;
-  storesSynced?: { created: number; updated: number };
+  storesSynced?: { created: number; updated: number; cleared: number };
 }
 
 export interface SnapshotRunResult {
@@ -39,19 +49,24 @@ export interface SnapshotRunResult {
 /** Butikklista slik den ble lagret som JSON på lagerbildet. */
 function readStores(value: BookStockSnapshot["stores"]): StoreStock[] {
   if (!Array.isArray(value)) return [];
+  const seen = new Set<string>();
   return value.flatMap((entry) => {
     if (!entry || typeof entry !== "object") return [];
     const store = entry as Record<string, unknown>;
     if (typeof store.storeId !== "string" || typeof store.name !== "string") {
       return [];
     }
+    // Eldre lagerbilder kan ha samme butikk to ganger — tell den én gang.
+    if (seen.has(store.storeId)) return [];
+    seen.add(store.storeId);
+    const qty = typeof store.qty === "number" ? store.qty : Number(store.qty);
     return [
       {
         storeId: store.storeId,
         name: store.name,
         city: typeof store.city === "string" ? store.city : undefined,
         region: typeof store.region === "string" ? store.region : undefined,
-        qty: typeof store.qty === "number" ? store.qty : 0,
+        qty: Number.isFinite(qty) ? Math.max(0, Math.floor(qty)) : 0,
       },
     ];
   });
@@ -111,9 +126,16 @@ async function writeEvents(
   }
 }
 
+export interface RunOptions {
+  /** Hent bare denne kilden. */
+  sourceKey?: string;
+  /** Hent selv om forrige lagerbilde er ferskere enn kildens minsteintervall. */
+  force?: boolean;
+}
+
 export async function runStockSnapshot(
   payload: Payload,
-  options: { sourceKey?: string } = {}
+  options: RunOptions = {}
 ): Promise<SnapshotRunResult> {
   const economy = await payload.findGlobal({ slug: "book-economy", depth: 0 });
   const isbn = (economy.isbn ?? "").trim();
@@ -142,8 +164,29 @@ export async function runStockSnapshot(
     }
 
     try {
-      const snapshot = await source.fetchSnapshot(isbn);
+      // Forrige bilde leses FØR vi spør kilden: det avgjør både om vi skal
+      // spørre i det hele tatt (minsteintervall) og hva vi sammenligner mot.
       const previous = await previousSnapshot(payload, sourceKey);
+
+      if (!options.force && source.minIntervalMs && previous) {
+        const age = Date.now() - new Date(previous.fetchedAt).getTime();
+        if (age >= 0 && age < source.minIntervalMs) {
+          results.push({
+            sourceKey,
+            ok: true,
+            skipped: true,
+            lastFetchedMinutesAgo: Math.round(age / 60_000),
+            online: previous.online,
+            storesWithStock: previous.storesWithStock,
+            totalCopies: previous.totalCopies,
+            events: 0,
+            estimatedSales: 0,
+          });
+          continue;
+        }
+      }
+
+      const snapshot = await source.fetchSnapshot(isbn);
       const events = diffSnapshots(previous, snapshot);
 
       await payload.create({
@@ -181,7 +224,10 @@ export async function runStockSnapshot(
               sourceKey,
               stores,
               events,
-              snapshot.fetchedAt
+              snapshot.fetchedAt,
+              // Med lånt katalog vet vi ingenting om beholdningen — da skal
+              // butikker som mangler i lista ikke nullstilles.
+              { clearMissing: !directoryFallback }
             )
           : undefined;
 
@@ -203,8 +249,13 @@ export async function runStockSnapshot(
       // resultatet og logges — vi skriver bevisst ikke et tomt lagerbilde,
       // for da ville neste kjøring lest det som «alle butikker tømt».
       const message = error instanceof Error ? error.message : String(error);
-      payload.logger.error(`[boksalg] ${sourceKey} feilet: ${message}`);
-      results.push({ sourceKey, ok: false, error: message });
+      const transient = isTransientSourceError(error);
+      if (transient) {
+        payload.logger.warn(`[boksalg] ${sourceKey} utilgjengelig: ${message}`);
+      } else {
+        payload.logger.error(`[boksalg] ${sourceKey} feilet: ${message}`);
+      }
+      results.push({ sourceKey, ok: false, error: message, transient });
     }
   }
 

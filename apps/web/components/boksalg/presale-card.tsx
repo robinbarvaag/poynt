@@ -166,10 +166,18 @@ export function PresaleCard({
               {tiers.map((tier) => {
                 const left = Math.min(100, (tier.copies / scale) * 100);
                 const reached = presale.kickbackCopies >= tier.copies;
+                // Etikettene ytterst på trappa må ikke stikke utenfor kortet
+                // på en smal skjerm — de henger innover fra kanten i stedet.
+                const edge =
+                  left > 88
+                    ? "-translate-x-full items-end"
+                    : left < 12
+                      ? "translate-x-0 items-start"
+                      : "-translate-x-1/2 items-center";
                 return (
                   <div
                     key={tier.copies}
-                    className="absolute top-0 flex -translate-x-1/2 flex-col items-center"
+                    className={cn("absolute top-0 flex flex-col", edge)}
                     style={{ left: `${left}%` }}
                   >
                     <span

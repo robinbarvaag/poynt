@@ -4,6 +4,7 @@ import type {
   StockSource,
   StoreStock,
 } from "../types";
+import { SourceUnavailableError, browserHeaders } from "./http";
 
 /**
  * Norli. Magento-basert, med et åpent GraphQL-endepunkt som nettbutikken selv
@@ -15,18 +16,21 @@ import type {
  *
  * Vi slår opp produkt-ID fra ISBN i stedet for å hardkode den — Magento-IDer
  * er ikke garantert stabile, og pocket/ny utgave får uansett sin egen ISBN.
+ *
+ * Tallene fra Norli skal ikke stoles blindt på. Tre ting har vist seg å
+ * kunne gå galt, og alle tre ville talt feil uten å feile:
+ *  - `id` i `pickupStores.products` og `id` fra produktoppslaget er ikke
+ *    nødvendigvis samme type (Int vs String). Sammenlignes de med `===`,
+ *    matcher ingen butikk og alt teller 0. Vi sammenligner som strenger.
+ *  - `qty_in_store` kan komme som streng, desimaltall, null — eller negativt
+ *    (Magento tillater negativ beholdning ved restordre). En negativ verdi
+ *    ville blitt lest som «salg» i diff-en. Alt normaliseres til et heltall
+ *    ≥ 0 i `normalizeQty`.
+ *  - Samme butikk kan stå i flere regiongrupper. Uten dedupe telles den
+ *    dobbelt i totalen, får doble salgshendelser, og lagres som to rader.
  */
 
 const ENDPOINT = "https://www.norli.no/graphql";
-
-// Norli svarer med tom liste på ukjent User-Agent i perioder; vi oppfører oss
-// som en vanlig nettleser og spør sjelden (én gang i døgnet).
-const HEADERS = {
-  "Content-Type": "application/json",
-  Accept: "application/json",
-  "User-Agent":
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0 Safari/537.36",
-};
 
 // Dollartegnene er GraphQL-variabler, ikke JS-interpolasjon — derfor vanlige
 // strenger og ikke template-literaler.
@@ -40,40 +44,47 @@ const PICKUP_QUERY =
   "query pickupStores($productIds:[Int]$storeIds:[Int]=[]){pickupStores(productIds:$productIds storeIds:$storeIds){name stores{address city email latitude longitude name phone postcode region schedule stockist_id products{id qty_in_store}}}}";
 
 interface NorliProduct {
-  id: number;
+  id: number | string;
   sku: string;
   name: string;
   stock_status?: string;
   price_range?: { minimum_price?: { final_price?: { value?: number } } };
 }
 
-interface NorliStore {
+export interface NorliStore {
   address?: string | null;
   city?: string | null;
   email?: string | null;
-  latitude?: string | null;
-  longitude?: string | null;
+  latitude?: string | number | null;
+  longitude?: string | number | null;
   name: string;
   phone?: string | null;
   postcode?: string | null;
   region?: string | null;
   schedule?: string | null;
-  stockist_id: number;
-  products: { id: number; qty_in_store: number }[];
+  stockist_id: number | string;
+  products?:
+    | { id: number | string; qty_in_store: number | string | null }[]
+    | null;
 }
 
-interface NorliRegion {
+export interface NorliRegion {
   name: string;
-  stores: NorliStore[];
+  stores?: NorliStore[] | null;
 }
 
 async function graphql<T>(query: string, variables: unknown): Promise<T> {
   const response = await fetch(ENDPOINT, {
     method: "POST",
-    headers: HEADERS,
+    headers: browserHeaders("json"),
     body: JSON.stringify({ query, variables }),
     signal: AbortSignal.timeout(20_000),
   });
+  if (response.status === 429 || response.status === 403) {
+    throw new SourceUnavailableError(
+      `Norli avviser oss midlertidig (${response.status}). Forrige lagerbilde beholdes, og vi prøver igjen ved neste henting.`
+    );
+  }
   if (!response.ok) {
     throw new Error(`Norli svarte ${response.status}`);
   }
@@ -93,10 +104,23 @@ function toAvailability(stockStatus: string | undefined): Availability {
   return "unknown";
 }
 
-function toNumber(value: string | null | undefined): number | undefined {
+function toNumber(
+  value: string | number | null | undefined
+): number | undefined {
   if (value == null || value === "") return undefined;
-  const parsed = Number(value);
+  const parsed = typeof value === "number" ? value : Number(value);
   return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+/**
+ * Beholdning slik vi teller den: et heltall som aldri er negativt. Null,
+ * tomme strenger og tull blir 0 — «vet ikke» og «ingen» er det samme for en
+ * hylle. Negative tall (restordre) er heller ikke bøker på hylla.
+ */
+export function normalizeQty(value: unknown): number {
+  const parsed = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(parsed)) return 0;
+  return Math.max(0, Math.floor(parsed));
 }
 
 /** Norli skriver «\r\n» mellom åpningstidslinjene; vi normaliserer til «\n». */
@@ -111,23 +135,29 @@ function cleanText(value: string | null | undefined): string | undefined {
   return cleaned || undefined;
 }
 
-function toStoreStock(
+/** Produkt-ID-er sammenlignes som strenger — Int og String skal matche. */
+function sameId(a: number | string, b: number | string): boolean {
+  return String(a).trim() === String(b).trim();
+}
+
+export function toStoreStock(
   store: NorliStore,
   regionName: string,
-  productId: number | null
+  productId: number | string | null
 ): StoreStock {
-  const qty = productId
-    ? (store.products.find((p) => p.id === productId)?.qty_in_store ?? 0)
-    : 0;
+  const match =
+    productId === null
+      ? undefined
+      : (store.products ?? []).find((p) => sameId(p.id, productId));
   return {
     storeId: String(store.stockist_id),
     // Norli setter «Norli » foran alle navn; det er støy i en liste som bare
     // inneholder Norli-butikker.
-    name: store.name.replace(/^Norli\s+/i, ""),
-    city: store.city ?? undefined,
+    name: store.name.replace(/^Norli\s+/i, "").trim(),
+    city: cleanText(store.city),
     // Regionen på butikken er ofte tom; fall tilbake på gruppenavnet (fylket).
-    region: store.region || regionName,
-    qty,
+    region: cleanText(store.region) || cleanText(regionName),
+    qty: normalizeQty(match?.qty_in_store),
     address: cleanText(store.address),
     postcode: cleanText(store.postcode),
     email: cleanText(store.email),
@@ -138,18 +168,57 @@ function toStoreStock(
   };
 }
 
-async function fetchStores(productId: number): Promise<StoreStock[]> {
-  const data = await graphql<{ pickupStores: NorliRegion[] }>(PICKUP_QUERY, {
-    storeIds: [],
-    productIds: [productId],
-  });
-  const stores: StoreStock[] = [];
-  for (const region of data.pickupStores ?? []) {
+/**
+ * Flater regiongruppene ut til én liste med én rad per butikk. Står en
+ * butikk i to grupper, beholdes den første — men med høyeste beholdning, så
+ * en gruppe med «0» ikke nuller ut en med tall.
+ */
+export function parsePickupStores(
+  regions: NorliRegion[] | null | undefined,
+  productId: number | string | null
+): StoreStock[] {
+  const byId = new Map<string, StoreStock>();
+  for (const region of regions ?? []) {
     for (const store of region.stores ?? []) {
-      stores.push(toStoreStock(store, region.name, productId));
+      if (store?.stockist_id == null || !store.name) continue;
+      const row = toStoreStock(store, region.name, productId);
+      const existing = byId.get(row.storeId);
+      if (existing) {
+        existing.qty = Math.max(existing.qty, row.qty);
+        continue;
+      }
+      byId.set(row.storeId, row);
     }
   }
-  return stores;
+  return [...byId.values()];
+}
+
+/** Summene snapshot-raden lagrer, regnet fra butikklista. */
+export function summarizeStores(stores: StoreStock[]): {
+  storesWithStock: number;
+  totalCopies: number;
+} {
+  let storesWithStock = 0;
+  let totalCopies = 0;
+  for (const store of stores) {
+    if (store.qty > 0) {
+      storesWithStock += 1;
+      totalCopies += store.qty;
+    }
+  }
+  return { storesWithStock, totalCopies };
+}
+
+async function fetchStores(productId: number | string): Promise<StoreStock[]> {
+  const numericId = Number(productId);
+  const data = await graphql<{ pickupStores: NorliRegion[] | null }>(
+    PICKUP_QUERY,
+    {
+      storeIds: [],
+      productIds: [Number.isFinite(numericId) ? numericId : productId],
+    }
+  );
+  return parsePickupStores(data.pickupStores, productId);
 }
 
 export const norliSource: StockSource = {
@@ -163,7 +232,10 @@ export const norliSource: StockSource = {
       PRODUCT_QUERY,
       { sku: isbn }
     );
-    const product = productData.products.items[0];
+    // Filteret er eksakt på SKU, men ta den som faktisk matcher om Norli
+    // skulle begynne å svare med flere (pocket, e-bok med egen SKU).
+    const items = productData.products?.items ?? [];
+    const product = items.find((item) => item.sku === isbn) ?? items[0];
 
     if (!product) {
       return {
@@ -180,7 +252,7 @@ export const norliSource: StockSource = {
     }
 
     const stores = await fetchStores(product.id);
-    const withStock = stores.filter((s) => s.qty > 0);
+    const { storesWithStock, totalCopies } = summarizeStores(stores);
 
     return {
       sourceKey: "norli",
@@ -189,8 +261,8 @@ export const norliSource: StockSource = {
       externalId: String(product.id),
       price: product.price_range?.minimum_price?.final_price?.value ?? null,
       stores,
-      storesWithStock: withStock.length,
-      totalCopies: withStock.reduce((sum, s) => sum + s.qty, 0),
+      storesWithStock,
+      totalCopies,
       // Tom liste betyr at boka ikke er i Norlis hentesystem ennå — ikke at
       // hentingen feilet. Skriv det ned, så slipper vi å lure på det senere.
       note:
@@ -213,7 +285,7 @@ export const norliSource: StockSource = {
       SEARCH_QUERY,
       { q: "kokebok" }
     );
-    for (const candidate of search.products.items) {
+    for (const candidate of search.products?.items ?? []) {
       const stores = await fetchStores(candidate.id);
       if (stores.length > 0) {
         // Beholdningen gjelder lånt produkt, ikke vår bok — nullstill den.

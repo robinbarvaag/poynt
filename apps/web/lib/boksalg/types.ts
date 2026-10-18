@@ -62,6 +62,13 @@ export interface SourceSnapshot {
 export interface StockSource {
   key: string;
   label: string;
+  /**
+   * Minste tid mellom to hentinger fra denne kilden. Er forrige lagerbilde
+   * ferskere enn dette, hopper hentingen over kilden (og sier det) i stedet
+   * for å spørre igjen — for kjeder med botvern som svarer 429 på gjentatte
+   * «Hent nå». Udefinert = ingen grense.
+   */
+  minIntervalMs?: number;
   /** Kaster ved nettverks-/parsefeil; kalleren fanger per kilde. */
   fetchSnapshot(isbn: string): Promise<SourceSnapshot>;
   /**
