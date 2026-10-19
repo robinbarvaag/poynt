@@ -54,7 +54,9 @@ export function CartDrawer() {
   const [consentOpen, setConsentOpen] = useState(false);
   const needsConsent = cartNeedsConsent(items);
   // Fysiske varer trenger leveringsadresse — den fylles inn på handlekurv-
-  // siden, så Vipps-knappen her sender kunden dit i stedet for rett til Vipps.
+  // siden, så Vipps-knappen gjemmes her: en Vipps-knapp som ikke starter en
+  // Vipps-betaling er forvirrende og på kant med Vipps' retningslinjer.
+  // «Gå til kassen» er veien videre, og Vipps velges der etter adressen.
   const needsShipping = cartNeedsShipping(items);
   const router = useRouter();
 
@@ -118,24 +120,25 @@ export function CartDrawer() {
               </Link>
             </Button>
             {/* Offisiell Vipps-knapp — retningslinjene tillater ikke egen design. */}
-            <VippsButton
-              stretched
-              loading={vippsLoading}
-              onClick={() => {
-                setCheckoutError(null);
-                if (needsShipping) {
-                  setOpen(false);
-                  router.push("/handlekurv");
-                  return;
-                }
-                if (needsConsent) {
-                  setConsentOpen(true);
-                  return;
-                }
-                void handleVippsCheckout();
-              }}
-            />
-            {needsConsent && (
+            {needsShipping ? (
+              <p className="text-center text-muted-foreground text-sm">
+                Leveringsadresse og betaling med Vipps eller kort i kassen.
+              </p>
+            ) : (
+              <VippsButton
+                stretched
+                loading={vippsLoading}
+                onClick={() => {
+                  setCheckoutError(null);
+                  if (needsConsent) {
+                    setConsentOpen(true);
+                    return;
+                  }
+                  void handleVippsCheckout();
+                }}
+              />
+            )}
+            {needsConsent && !needsShipping && (
               <CheckoutConsentDialog
                 open={consentOpen}
                 onOpenChange={setConsentOpen}

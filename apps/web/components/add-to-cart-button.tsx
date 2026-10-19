@@ -2,7 +2,7 @@
 
 import { trackEvent } from "@/lib/analytics";
 import { useCartReady } from "@/lib/use-cart-ready";
-import { useCart, useCartUi } from "@poynt/cart";
+import { lineKey, useCart, useCartUi } from "@poynt/cart";
 import { Button } from "@poynt/ui";
 import { Check } from "lucide-react";
 import { useState } from "react";
@@ -56,7 +56,7 @@ export function AddToCartButton({
   const ready = useCartReady();
   const [added, setAdded] = useState(false);
 
-  const key = variantValue ? `${product.id}::${variantValue}` : product.id;
+  const key = lineKey(product.id, variantValue);
 
   // Behandle som «ikke i kurv» til klienten har montert (unngår hydration-
   // mismatch på knapptilstanden — se useCartReady).

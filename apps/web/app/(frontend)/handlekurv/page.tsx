@@ -146,6 +146,17 @@ export default function CartPage() {
     });
     return false;
   };
+  // «Kjøp nå» på produktsiden lenker til /handlekurv#levering. Skjemaet
+  // finnes ikke før kurven er hentet fra localStorage, så nettleserens egen
+  // ankerhopp treffer ingenting — vi scroller selv når skjemaet er på plass.
+  useEffect(() => {
+    if (!(ready && needsShipping)) return;
+    if (window.location.hash !== "#levering") return;
+    shippingRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  }, [ready, needsShipping]);
   /** Serveren krevde adresse vi ikke sendte — vis skjemaet og pek på det. */
   const handleShippingRequired = () => {
     setShippingForced(true);
@@ -496,7 +507,7 @@ export default function CartPage() {
               </label>
 
               {needsShipping && (
-                <div ref={shippingRef}>
+                <div ref={shippingRef} id="levering">
                   <ShippingAddressForm
                     className="mt-5 rounded-2xl bg-accent-3/30 p-4"
                     value={shippingInput}

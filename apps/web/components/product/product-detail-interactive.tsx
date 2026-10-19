@@ -4,9 +4,10 @@ import { CheckoutConsentDialog } from "@/components/checkout-consent-dialog";
 import { CheckoutConsentNotice } from "@/components/checkout-consent-notice";
 import { type MediaResource, PayloadImage } from "@/components/payload-image";
 import { VippsButton } from "@/components/vipps-button";
+import { trackEvent } from "@/lib/analytics";
 import { startVippsBuyNow } from "@/lib/vipps-checkout-client";
 import type { Product } from "@/payload-types";
-import { useCart } from "@poynt/cart";
+import { lineKey, useCart } from "@poynt/cart";
 import { Button, Container, Text } from "@poynt/ui";
 import { Minus, Plus } from "lucide-react";
 import Link from "next/link";
@@ -43,8 +44,8 @@ export interface ProductPurchaseInfo {
   /** Digitalt innhold som leveres umiddelbart: Vipps-knappen går via
       samtykkevinduet, og linja i kurven krever avkryssing. */
   instantDelivery: boolean;
-  /** Fysisk vare: Vipps-knappen går via handlekurven, der kunden fyller inn
-      leveringsadresse før betaling. */
+  /** Fysisk vare: ingen Vipps-hurtigkasse. «Kjøp nå» legger varen i kurven
+      og hopper til adresseskjemaet i handlekurven, der Vipps og kort velges. */
   requiresShipping: boolean;
   /** Variant-spørsmål, f.eks. «Signert?». Tom = ingen varianter. */
   variantLabel?: string;
@@ -364,6 +365,7 @@ function ProductDetailInteractive({
   const { isSoldOut, allowQuantity, instantDelivery, requiresShipping } = info;
   const router = useRouter();
   const addItem = useCart((state) => state.addItem);
+  const cartItems = useCart((state) => state.items);
 
   // Kjøpsboksen observeres av den sticky kjøpslinja: når boksen scrolles ut
   // av viewporten (oppover), glir linja inn nederst.
@@ -389,6 +391,7 @@ function ProductDetailInteractive({
 
   // Vipps-hurtigkasse rett fra produktsiden: hopper over handlekurven og
   // sender kun dette produktet (medlemskap støttes ikke — API-et avviser).
+  // Fysiske varer har ingen hurtigkasse (se handleBuyNowViaCart).
   const [vippsLoading, setVippsLoading] = useState(false);
   const [vippsError, setVippsError] = useState<string | null>(null);
   // Vipps-knappene (kjøpsboks + sticky linje) åpner først samtykkevinduet
@@ -398,28 +401,6 @@ function ProductDetailInteractive({
   const handleVippsBuyNow = async () => {
     setVippsLoading(true);
     setVippsError(null);
-    // Fysiske varer trenger leveringsadresse før betaling. Den fylles inn i
-    // handlekurven, så «Kjøp nå» legger varen i kurven og går dit i stedet.
-    if (requiresShipping) {
-      addItem(
-        {
-          id: info.id,
-          name: info.name,
-          price: effectivePrice,
-          image: cartImageUrl,
-          variantLabel: hasVariants
-            ? (info.variantLabel ?? undefined)
-            : undefined,
-          variantValue: selectedVariant,
-          maxQuantity,
-          instantDelivery,
-          requiresShipping,
-        },
-        quantity
-      );
-      router.push("/handlekurv");
-      return;
-    }
     try {
       await startVippsBuyNow(
         {
@@ -442,6 +423,47 @@ function ProductDetailInteractive({
       return;
     }
     void handleVippsBuyNow();
+  };
+
+  // Fysiske varer har ingen Vipps-hurtigkasse: leveringsadressen fylles inn i
+  // handlekurven, og en Vipps-knapp som bare sender kunden dit starter ingen
+  // Vipps-betaling — det er forvirrende og på kant med Vipps' retningslinjer
+  // for knappen. «Kjøp nå» legger varen i kurven (ligger den der alt, røres
+  // ikke antallet) og hopper rett til adresseskjemaet; Vipps og kort velges der.
+  const handleBuyNowViaCart = () => {
+    const key = lineKey(info.id, selectedVariant);
+    if (!cartItems.some((item) => item.key === key)) {
+      addItem(
+        {
+          id: info.id,
+          name: info.name,
+          price: effectivePrice,
+          image: cartImageUrl,
+          variantLabel: hasVariants
+            ? (info.variantLabel ?? undefined)
+            : undefined,
+          variantValue: selectedVariant,
+          maxQuantity,
+          instantDelivery,
+          requiresShipping,
+        },
+        quantity
+      );
+      trackEvent("add_to_cart", {
+        currency: "NOK",
+        value: effectivePrice * quantity,
+        items: [
+          {
+            item_id: info.id,
+            item_name: info.name,
+            price: effectivePrice,
+            quantity,
+            item_variant: selectedVariant,
+          },
+        ],
+      });
+    }
+    router.push("/handlekurv#levering");
   };
 
   const priceInKr = effectivePrice.toLocaleString("nb-NO");
@@ -544,17 +566,37 @@ function ProductDetailInteractive({
                 </div>
               )}
 
-              {/* Vipps-hurtigkasse under kjøpsknappen — offisiell knapp
-                (retningslinjene tillater ikke egen design). Deaktivert til
-                variant er valgt, samme regel som kjøpsknappen. */}
-              {info.type !== "membership" && !isSoldOut && (
-                <VippsButton
-                  stretched
-                  loading={vippsLoading}
-                  disabled={needsVariant}
-                  onClick={onVippsClick}
-                />
-              )}
+              {/* Under kjøpsknappen: Vipps-hurtigkasse (offisiell knapp —
+                retningslinjene tillater ikke egen design), eller «Kjøp nå»
+                rett til adresseskjemaet for varer som krever frakt.
+                Deaktivert til variant er valgt, samme regel som kjøpsknappen. */}
+              {info.type !== "membership" &&
+                !isSoldOut &&
+                (requiresShipping ? (
+                  <div className="space-y-3">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="lg"
+                      className="w-full rounded-full"
+                      disabled={needsVariant}
+                      onClick={handleBuyNowViaCart}
+                    >
+                      Kjøp nå
+                    </Button>
+                    <Text variant="muted" customStyles="text-sm">
+                      Du fyller inn leveringsadresse i kassen og betaler med
+                      Vipps eller kort.
+                    </Text>
+                  </div>
+                ) : (
+                  <VippsButton
+                    stretched
+                    loading={vippsLoading}
+                    disabled={needsVariant}
+                    onClick={onVippsClick}
+                  />
+                ))}
               {info.type !== "membership" && !isSoldOut && instantDelivery && (
                 <CheckoutConsentNotice className="mt-3" />
               )}
@@ -614,7 +656,8 @@ function ProductDetailInteractive({
           ) : (
             /* Samme samlede pill som i kjøpsboksen (kompakt stepper), så
                antall kan justeres uten å scrolle tilbake opp — pluss kompakt
-               Vipps-hurtigkasse ved siden av. */
+               Vipps-hurtigkasse ved siden av, eller «Kjøp nå» til
+               adresseskjemaet for varer som krever frakt. */
             <div className="flex items-center gap-2">
               <div
                 className={
@@ -652,12 +695,24 @@ function ProductDetailInteractive({
                   }
                 />
               </div>
-              <VippsButton
-                compact
-                loading={vippsLoading}
-                onClick={onVippsClick}
-                className="shrink-0"
-              />
+              {requiresShipping ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="lg"
+                  className="shrink-0 rounded-full"
+                  onClick={handleBuyNowViaCart}
+                >
+                  Kjøp nå
+                </Button>
+              ) : (
+                <VippsButton
+                  compact
+                  loading={vippsLoading}
+                  onClick={onVippsClick}
+                  className="shrink-0"
+                />
+              )}
             </div>
           )}
         </StickyBuyBar>
