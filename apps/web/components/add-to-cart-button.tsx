@@ -15,6 +15,8 @@ interface Product {
   image?: string;
   /** Digitalt innhold som leveres umiddelbart — utløser samtykke i kassen. */
   instantDelivery?: boolean;
+  /** Fysisk vare — utløser adresseskjema i handlekurven. */
+  requiresShipping?: boolean;
 }
 
 interface AddToCartButtonProps {
@@ -73,6 +75,7 @@ export function AddToCartButton({
         variantValue,
         maxQuantity,
         instantDelivery: product.instantDelivery,
+        requiresShipping: product.requiresShipping,
       },
       quantity
     );

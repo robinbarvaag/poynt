@@ -5,7 +5,12 @@ import {
 import { resolveCheckoutItems } from "@/lib/checkout-items";
 import { resolveCoupon } from "@/lib/coupon";
 import { getSessionWithMembership } from "@/lib/membership";
-import { SHIPPING_COUNTRIES, cartNeedsShipping } from "@/lib/shipping";
+import {
+  SHIPPING_REQUIRED_ERROR,
+  cartNeedsShipping,
+  shippingToStripeMetadata,
+  validateShippingInput,
+} from "@/lib/shipping";
 import config from "@/payload.config";
 import { stripe } from "@poynt/stripe";
 import { type NextRequest, NextResponse } from "next/server";
@@ -36,7 +41,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { items, couponCode, newsletterOptIn, termsAccepted } =
+    const { items, couponCode, newsletterOptIn, termsAccepted, shipping } =
       await req.json();
 
     // Try to get logged-in user (optional — guests can buy products too)
@@ -169,20 +174,25 @@ export async function POST(req: NextRequest) {
         quantity: p.quantity,
       }));
 
-    // Fysiske varer: la Stripe samle inn leveringsadresse + telefon i kassen.
-    // Webhooken leser svaret fra `collected_information.shipping_details` og
-    // lagrer det på ordren. Flagget i metadata gjør at ordren merkes «skal
-    // sendes» selv om adressen uventet skulle mangle.
+    // Fysiske varer: kunden fylte inn leveringsadressen i handlekurven. Den
+    // valideres her (samme regler som skjemaet) og reiser som metadata på
+    // sesjonen, siden ordren først opprettes i webhooken.
     const needsShipping = cartNeedsShipping(products);
-    const shippingParams: Partial<Stripe.Checkout.SessionCreateParams> =
-      needsShipping
-        ? {
-            shipping_address_collection: {
-              allowed_countries: SHIPPING_COUNTRIES,
-            },
-            phone_number_collection: { enabled: true },
-          }
-        : {};
+    let shippingMeta: Record<string, string> = {};
+    if (needsShipping) {
+      const parsed = validateShippingInput(shipping);
+      if (!parsed.ok) {
+        return NextResponse.json(
+          {
+            error: SHIPPING_REQUIRED_ERROR,
+            shippingRequired: true,
+            shippingErrors: parsed.errors,
+          },
+          { status: 400 }
+        );
+      }
+      shippingMeta = shippingToStripeMetadata(parsed.address);
+    }
 
     // Kompakt kurv-samandrag på sesjonen, så webhooken kan lagre antal +
     // variant på ordren (Stripe-line-items ber ikkje variantvalet).
@@ -196,14 +206,13 @@ export async function POST(req: NextRequest) {
 
     const session = await stripe.checkout.sessions.create({
       ...sessionDefaults,
-      ...shippingParams,
       mode: "payment",
       line_items: lineItems,
       ...(discounts && { discounts }),
       ...(authSession && { customer_email: authSession.user.email }),
       metadata: {
         ...(cartMeta.length <= 500 && { cart: cartMeta }),
-        ...(needsShipping && { ship: "1" }),
+        ...(needsShipping && { ship: "1", ...shippingMeta }),
         ...termsMeta,
         ...(newsletterOptIn === true && { newsletter: "1" }),
       },

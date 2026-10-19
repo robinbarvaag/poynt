@@ -24,6 +24,12 @@ export interface CartItem {
    * angrerett (angrerettloven § 22 n) før betaling.
    */
   instantDelivery?: boolean;
+  /**
+   * Fysisk vare som skal sendes (produktets «Krever frakt» i admin). Har
+   * kurven minst én slik linje, må kunden fylle inn leveringsadresse i
+   * handlekurven før betaling.
+   */
+  requiresShipping?: boolean;
 }
 
 /** Rabattkode validert av serveren (/api/coupon) — følger kurven i alle kasser. */
@@ -44,11 +50,17 @@ export interface AddToCartInput {
   variantValue?: string;
   maxQuantity?: number;
   instantDelivery?: boolean;
+  requiresShipping?: boolean;
 }
 
 /** True når minst én linje er digitalt innhold med umiddelbar levering. */
 export function cartNeedsConsent(items: Pick<CartItem, "instantDelivery">[]) {
   return items.some((item) => item.instantDelivery === true);
+}
+
+/** True når minst én linje er en fysisk vare som skal sendes. */
+export function cartNeedsShipping(items: Pick<CartItem, "requiresShipping">[]) {
+  return items.some((item) => item.requiresShipping === true);
 }
 
 function lineKey(id: string, variantValue?: string): string {
@@ -119,6 +131,7 @@ export const useCart = create<CartState>()(
                 variantValue: input.variantValue,
                 maxQuantity: input.maxQuantity,
                 instantDelivery: input.instantDelivery,
+                requiresShipping: input.requiresShipping,
               },
             ],
           };

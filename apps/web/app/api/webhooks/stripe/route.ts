@@ -11,7 +11,7 @@ import { subscribeWithConsent } from "@/lib/newsletter-consent";
 import { NEWSLETTER_CONSENT_TEXTS } from "@/lib/newsletter-consent-texts";
 import { getNotificationEmails } from "@/lib/notification-emails";
 import { buildOrderEmailExtras } from "@/lib/order-email";
-import { shippingFromStripeSession } from "@/lib/shipping";
+import { shippingFromStripeMetadata } from "@/lib/shipping";
 import { calculateVatTotal, parseVatRate } from "@/lib/vat";
 import { claimWebhookEvent, releaseWebhookEvent } from "@/lib/webhook-events";
 import config from "@/payload.config";
@@ -284,11 +284,13 @@ async function handleProductPurchase(session: Stripe.Checkout.Session) {
 
   const total = Math.round((session.amount_total || 0) / 100);
 
-  // Leveringsadresse for fysiske varer — samlet inn av Stripe når kassen ba om
-  // det (metadata.ship). Mangler den likevel, merkes ordren «skal sendes» uten
-  // adresse, så det er synlig i admin og salgsvarselet.
+  // Leveringsadresse for fysiske varer — fylt inn i handlekurven og sendt
+  // som metadata av /api/checkout. Mangler den likevel, merkes ordren «skal
+  // sendes» uten adresse, så det er synlig i admin og salgsvarselet.
   const requiresShipping = session.metadata?.ship === "1";
-  const shipping = requiresShipping ? shippingFromStripeSession(session) : null;
+  const shipping = requiresShipping
+    ? shippingFromStripeMetadata(session.metadata)
+    : null;
   if (requiresShipping && !shipping) {
     console.error(
       `Stripe-session ${session.id} krever frakt men mangler leveringsadresse`

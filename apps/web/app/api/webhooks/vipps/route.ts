@@ -5,10 +5,7 @@ import { subscribeWithConsent } from "@/lib/newsletter-consent";
 import { NEWSLETTER_CONSENT_TEXTS } from "@/lib/newsletter-consent-texts";
 import { getNotificationEmails } from "@/lib/notification-emails";
 import { buildOrderEmailExtras } from "@/lib/order-email";
-import {
-  type ShippingAddress,
-  shippingFromVippsUserinfo,
-} from "@/lib/shipping";
+import { shippingFromStored } from "@/lib/shipping";
 import {
   captureVippsPayment,
   getVippsPayment,
@@ -175,26 +172,16 @@ export async function POST(req: NextRequest) {
           .filter(Boolean)
           .join(" ");
 
-        // Leveringsadressa finst berre i userinfo-API-et, så for fysiske varer
-        // hentar vi profilen uansett om userDetails hadde e-post.
-        let shipping: ShippingAddress | null = null;
-        const needsUserinfo =
-          !!payment.profile?.sub &&
-          (!customerEmail || order.requiresShipping === true);
-        if (needsUserinfo && payment.profile?.sub) {
+        if (!customerEmail && payment.profile?.sub) {
           const userinfo = await getVippsUserinfo(payment.profile.sub);
-          customerEmail = customerEmail || (userinfo?.email ?? undefined);
+          customerEmail = userinfo?.email ?? undefined;
           customerName = customerName || (userinfo?.name ?? "");
-          if (order.requiresShipping) {
-            shipping = shippingFromVippsUserinfo(userinfo, {
-              name: customerName || undefined,
-              phone: payment.userDetails?.mobileNumber,
-            });
-          }
         }
+
+        // Leveringsadressa vart lagra på pending-ordren av /api/vipps/checkout
+        // (skjemaet i handlekurven). Manglar ho likevel, skal det synast.
+        const shipping = shippingFromStored(order.shipping);
         if (order.requiresShipping && !shipping) {
-          // Kunden kan ha avslått å dele adressa i appen — ordren står som
-          // «skal sendes» utan adresse, så ho må kontaktast.
           console.error(
             `Vipps-ordre ${order.id} krever frakt men mangler leveringsadresse`
           );
@@ -210,7 +197,6 @@ export async function POST(req: NextRequest) {
             status: "paid",
             ...(customerEmail && { customerEmail }),
             ...(customerName && { customerName }),
-            ...(shipping && { shipping }),
           },
         });
 
