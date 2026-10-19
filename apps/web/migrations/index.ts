@@ -87,6 +87,7 @@ import * as migration_20260930_171853_norli_presale from './20260930_171853_norl
 import * as migration_20260930_205838_media_show_whole from './20260930_205838_media_show_whole';
 import * as migration_20261014_174144_book_store_gave from './20261014_174144_book_store_gave';
 import * as migration_20261019_084007_shipping_address from './20261019_084007_shipping_address';
+import * as migration_20261019_190943_shipping_status from './20261019_190943_shipping_status';
 
 export const migrations = [
   {
@@ -532,6 +533,11 @@ export const migrations = [
   {
     up: migration_20261019_084007_shipping_address.up,
     down: migration_20261019_084007_shipping_address.down,
-    name: '20261019_084007_shipping_address'
+    name: '20261019_084007_shipping_address',
+  },
+  {
+    up: migration_20261019_190943_shipping_status.up,
+    down: migration_20261019_190943_shipping_status.down,
+    name: '20261019_190943_shipping_status'
   },
 ];
