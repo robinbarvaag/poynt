@@ -388,6 +388,11 @@ bun run --cwd apps/web payload run scripts/fetch-book-stock.ts ark --force
 # Seed utgiftene (create-only — rører aldri noe som finnes)
 bun run --cwd apps/web payload run scripts/seed-book-expenses.ts
 
+# Avstemmingen mot Forlagssentralen 19.10.2026 (tørrkjøring uten «apply»;
+# bibliotek=NN er Biblioteksentralens andel fra fakturaen). Kan kjøres flere ganger.
+bun run --cwd apps/web payload run scripts/fix-book-sales-2026-10.ts
+bun run --cwd apps/web payload run scripts/fix-book-sales-2026-10.ts apply bibliotek=45
+
 # Testene for økonomi og diff-logikk
 bun test apps/web/lib/boksalg
 ```
