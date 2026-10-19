@@ -12,12 +12,15 @@ import { toGaItems, trackEvent } from "@/lib/analytics";
 import { formatPrice } from "@/lib/format";
 import { NEWSLETTER_CONSENT_TEXTS } from "@/lib/newsletter-consent-texts";
 import {
-  EMPTY_SHIPPING_INPUT,
   type ShippingAddress,
   type ShippingAddressInput,
   type ShippingErrors,
   validateShippingInput,
 } from "@/lib/shipping-address";
+import {
+  readStoredShipping,
+  writeStoredShipping,
+} from "@/lib/shipping-storage";
 import { useCartReady } from "@/lib/use-cart-ready";
 import {
   CheckoutRequestError,
@@ -42,22 +45,6 @@ import {
 import { ArrowLeft, ShieldCheck, ShoppingBag, Tag, X, Zap } from "lucide-react";
 import Link from "next/link";
 import { type FormEvent, useEffect, useRef, useState } from "react";
-
-// Adressen huskes i sessionStorage (ikke localStorage: det er persondata) så
-// den overlever en avbrutt betaling og «tilbake» fra Stripe/Vipps.
-const SHIPPING_STORAGE_KEY = "poynt-shipping";
-
-function readStoredShipping(): ShippingAddressInput {
-  if (typeof window === "undefined") return EMPTY_SHIPPING_INPUT;
-  try {
-    const raw = window.sessionStorage.getItem(SHIPPING_STORAGE_KEY);
-    if (!raw) return EMPTY_SHIPPING_INPUT;
-    const parsed = JSON.parse(raw) as Partial<ShippingAddressInput>;
-    return { ...EMPTY_SHIPPING_INPUT, ...parsed };
-  } catch {
-    return EMPTY_SHIPPING_INPUT;
-  }
-}
 
 /** Rabatt i kr ut fra dagens delsum — så den følger antalsendringer. */
 function couponDiscount(
@@ -109,22 +96,15 @@ export default function CartPage() {
   // serveren `shippingRequired`, og vi viser skjemaet likevel.
   const [shippingForced, setShippingForced] = useState(false);
   const needsShipping = cartNeedsShipping(items) || shippingForced;
+  // Adressen huskes i sessionStorage (delt med Vipps-vinduet på produktsiden
+  // og i kurvskuffen) så den overlever en avbrutt betaling.
   const [shippingInput, setShippingInput] =
     useState<ShippingAddressInput>(readStoredShipping);
   const [shippingErrors, setShippingErrors] = useState<ShippingErrors>({});
   const shippingRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    try {
-      window.sessionStorage.setItem(
-        SHIPPING_STORAGE_KEY,
-        JSON.stringify(shippingInput)
-      );
-    } catch {
-      // Privat modus / full lagring — adressen lever da bare i skjemaet.
-    }
-  }, [shippingInput]);
   const updateShipping = (next: ShippingAddressInput) => {
     setShippingInput(next);
+    writeStoredShipping(next);
     // Fjern feilen på feltet kunden retter, la de andre stå.
     setShippingErrors((errors) => {
       const cleared: ShippingErrors = { ...errors };
@@ -146,17 +126,6 @@ export default function CartPage() {
     });
     return false;
   };
-  // «Kjøp nå» på produktsiden lenker til /handlekurv#levering. Skjemaet
-  // finnes ikke før kurven er hentet fra localStorage, så nettleserens egen
-  // ankerhopp treffer ingenting — vi scroller selv når skjemaet er på plass.
-  useEffect(() => {
-    if (!(ready && needsShipping)) return;
-    if (window.location.hash !== "#levering") return;
-    shippingRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "center",
-    });
-  }, [ready, needsShipping]);
   /** Serveren krevde adresse vi ikke sendte — vis skjemaet og pek på det. */
   const handleShippingRequired = () => {
     setShippingForced(true);
@@ -507,7 +476,7 @@ export default function CartPage() {
               </label>
 
               {needsShipping && (
-                <div ref={shippingRef} id="levering">
+                <div ref={shippingRef}>
                   <ShippingAddressForm
                     className="mt-5 rounded-2xl bg-accent-3/30 p-4"
                     value={shippingInput}

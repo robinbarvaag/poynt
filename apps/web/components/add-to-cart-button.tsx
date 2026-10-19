@@ -42,10 +42,6 @@ interface AddToCartButtonProps {
       den faste kjøpslinja på mobil, der stepper + kjøp + hurtigkasse deler
       én rad. */
   compact?: boolean;
-  /** Emfase. `default` (fylt) når dette er hovedhandlingen; `outline`/`ghost`
-      når «Kjøp nå» er den primære (varer med frakt). `ghost` er for knappen
-      inne i stepper-pillen, som allerede har ramme og flate. */
-  variant?: "default" | "outline" | "ghost";
 }
 
 export function AddToCartButton({
@@ -59,7 +55,6 @@ export function AddToCartButton({
   disabledLabel = "Velg et alternativ",
   className,
   compact = false,
-  variant = "default",
 }: AddToCartButtonProps) {
   const { addItem, items } = useCart();
   const openCart = useCartUi((state) => state.openCart);
@@ -112,7 +107,7 @@ export function AddToCartButton({
 
   if (disabled) {
     return (
-      <Button variant={variant} size={size} className={buttonClasses} disabled>
+      <Button size={size} className={buttonClasses} disabled>
         {disabledLabel}
       </Button>
     );
@@ -121,7 +116,7 @@ export function AddToCartButton({
   // Digitale engangsprodukter: én av hver – lås når den ligger i kurven.
   if (!allowQuantity && isInCart) {
     return (
-      <Button variant={variant} size={size} className={buttonClasses} disabled>
+      <Button size={size} className={buttonClasses} disabled>
         <Check className="mr-2 h-5 w-5" />
         {compact ? "I kurven" : "Allerede i handlekurven"}
       </Button>
@@ -129,12 +124,7 @@ export function AddToCartButton({
   }
 
   return (
-    <Button
-      variant={variant}
-      size={size}
-      className={buttonClasses}
-      onClick={handleAddToCart}
-    >
+    <Button size={size} className={buttonClasses} onClick={handleAddToCart}>
       {/* key-remount + swap-in gir en myk blur-fade mellom tilstandene i
           stedet for at teksten snapper. */}
       <span

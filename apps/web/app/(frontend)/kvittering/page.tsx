@@ -65,6 +65,10 @@ export default async function ReceiptPage({ searchParams }: Props) {
   // Ordreverdi i kroner til GA4 `purchase` (kun sendt ved samtykke).
   let orderValue: number | null = null;
   let orderCurrency = "NOK";
+  // Produktene i ordren — kurven ryddes bare for disse. Vipps-hurtigkassen
+  // fra produktsiden kjøper én vare utenom kurven, og resten skal bli
+  // liggende. Stripe tar alltid hele kurven, så der tømmes alt (undefined).
+  let purchasedIds: string[] | undefined;
   if (sessionId) {
     // Stripe: slå opp sesjonen og sjekk at den faktisk er betalt. En ugyldig
     // eller påfunnet session_id skal ikke gi en suksess-side.
@@ -100,6 +104,11 @@ export default async function ReceiptPage({ searchParams }: Props) {
       redirect("/");
     }
     orderValue = order.total;
+    purchasedIds = (order.items ?? []).map((line) =>
+      typeof line.product === "object"
+        ? String(line.product.id)
+        : String(line.product)
+    );
 
     if (order.status === "paid") {
       state = "paid";
@@ -233,7 +242,7 @@ export default async function ReceiptPage({ searchParams }: Props) {
 
   return (
     <div className="flex min-h-[75vh] items-center justify-center px-4 py-16">
-      {state === "paid" && <ClearCart />}
+      {state === "paid" && <ClearCart purchasedIds={purchasedIds} />}
       {restoreLines.length > 0 && <RestoreCart lines={restoreLines} />}
       {state === "paid" && reference && orderValue !== null && (
         <TrackPurchase
