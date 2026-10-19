@@ -1,7 +1,10 @@
 "use client";
 
-import { CheckoutConsentDialog } from "@/components/checkout-consent-dialog";
 import { VippsButton } from "@/components/vipps-button";
+import {
+  type VippsCheckoutConfirmation,
+  VippsCheckoutDialog,
+} from "@/components/vipps-checkout-dialog";
 import { formatPrice } from "@/lib/format";
 import { useCartReady } from "@/lib/use-cart-ready";
 import {
@@ -16,7 +19,7 @@ import {
 } from "@poynt/cart";
 import { Button, CartDrawer as CartDrawerShell, CartLineItem } from "@poynt/ui";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
 // usePathname er runtime-data under prerendering (cacheComponents) og leses
@@ -48,25 +51,36 @@ export function CartDrawer() {
   } = useCart();
   const [vippsLoading, setVippsLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
-  // Har kurven digitalt innhold med umiddelbar levering, åpner Vipps-knappen
-  // først samtykkevinduet (angrerettloven § 22 n) og betalingen starter fra
-  // Vipps-knappen inne i vinduet. Ellers går den rett til Vipps.
-  const [consentOpen, setConsentOpen] = useState(false);
+  // Trenger kurven leveringsadresse (frakt) eller samtykke til umiddelbar
+  // levering (angrerettloven § 22 n), åpner Vipps-knappen først «Før du
+  // betaler» og betalingen starter fra Vipps-knappen inne i vinduet. Ellers
+  // går den rett til Vipps.
+  const [dialogOpen, setDialogOpen] = useState(false);
   const needsConsent = cartNeedsConsent(items);
-  // Fysiske varer trenger leveringsadresse — den fylles inn på handlekurv-
-  // siden, så Vipps-knappen her sender kunden dit i stedet for rett til Vipps.
-  const needsShipping = cartNeedsShipping(items);
-  const router = useRouter();
+  // Kurvlinjer lagt til før «Krever frakt» fantes mangler flagget lokalt, så
+  // serveren er den som sier fra (`shippingRequired`) — da tvinger vi skjemaet.
+  const [shippingForced, setShippingForced] = useState(false);
+  const needsShipping = cartNeedsShipping(items) || shippingForced;
+  const dialogNeeded = needsConsent || needsShipping;
 
   // Inntil klienten har montert behandler vi kurven som tom (se useCartReady).
   const cartItems = ready ? items : [];
 
-  const handleVippsCheckout = async () => {
+  const handleVippsCheckout = async ({
+    termsAccepted,
+    shipping,
+  }: VippsCheckoutConfirmation) => {
     setVippsLoading(true);
     setCheckoutError(null);
     try {
       // Rabattkoden fra handlekurv-siden følger med (bor i cart-storen).
-      await startVippsCheckout(items, coupon?.code, false, needsConsent);
+      await startVippsCheckout(
+        items,
+        coupon?.code,
+        false,
+        termsAccepted,
+        shipping
+      );
     } catch (error) {
       console.error("Vipps checkout error:", error);
       if (
@@ -75,14 +89,9 @@ export function CartDrawer() {
       ) {
         removeProducts(error.unavailableIds);
       }
-      // Kurvlinjer lagt til før «Krever frakt» fantes mangler flagget lokalt,
-      // så serveren er den som sier fra. Adresseskjemaet bor på handlekurv-
-      // siden — send kunden dit i stedet for å vise en feil uten skjema.
       if (error instanceof CheckoutRequestError && error.shippingRequired) {
-        setVippsLoading(false);
-        setOpen(false);
-        router.push("/handlekurv");
-        return;
+        setShippingForced(true);
+        setDialogOpen(true);
       }
       setCheckoutError(
         error instanceof Error ? error.message : "Noe gikk galt"
@@ -104,7 +113,7 @@ export function CartDrawer() {
         onClear={clearCart}
         checkout={
           <div className="space-y-2">
-            {checkoutError && !consentOpen && (
+            {checkoutError && !dialogOpen && (
               <p
                 role="alert"
                 className="rounded-2xl bg-destructive/10 px-4 py-2.5 text-destructive text-sm"
@@ -123,27 +132,22 @@ export function CartDrawer() {
               loading={vippsLoading}
               onClick={() => {
                 setCheckoutError(null);
-                if (needsShipping) {
-                  setOpen(false);
-                  router.push("/handlekurv");
+                if (dialogNeeded) {
+                  setDialogOpen(true);
                   return;
                 }
-                if (needsConsent) {
-                  setConsentOpen(true);
-                  return;
-                }
-                void handleVippsCheckout();
+                void handleVippsCheckout({ termsAccepted: false });
               }}
             />
-            {needsConsent && (
-              <CheckoutConsentDialog
-                open={consentOpen}
-                onOpenChange={setConsentOpen}
-                onConfirm={handleVippsCheckout}
-                loading={vippsLoading}
-                error={checkoutError}
-              />
-            )}
+            <VippsCheckoutDialog
+              open={dialogOpen}
+              onOpenChange={setDialogOpen}
+              needsConsent={needsConsent}
+              needsShipping={needsShipping}
+              onConfirm={handleVippsCheckout}
+              loading={vippsLoading}
+              error={checkoutError}
+            />
           </div>
         }
         emptyAction={

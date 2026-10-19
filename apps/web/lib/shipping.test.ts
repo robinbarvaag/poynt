@@ -1,7 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import {
   cartNeedsShipping,
-  normalizePhone,
   shippingFromStored,
   shippingFromStripeMetadata,
   shippingToStripeMetadata,
@@ -14,7 +13,6 @@ const valid = {
   line2: "",
   postalCode: "0155",
   city: "Oslo",
-  phone: "+47 999 99 999",
 };
 
 describe("cartNeedsShipping", () => {
@@ -37,20 +35,6 @@ describe("cartNeedsShipping", () => {
   });
 });
 
-describe("normalizePhone", () => {
-  test("godtar norske nummer med og uten landkode", () => {
-    expect(normalizePhone("99999999")).toBe("99999999");
-    expect(normalizePhone("+47 999 99 999")).toBe("99999999");
-    expect(normalizePhone("0047 99999999")).toBe("99999999");
-  });
-
-  test("avviser for korte, for lange og utenlandske nummer", () => {
-    expect(normalizePhone("9999999")).toBeNull();
-    expect(normalizePhone("+46 70 123 45 67")).toBeNull();
-    expect(normalizePhone("abc")).toBeNull();
-  });
-});
-
 describe("validateShippingInput", () => {
   test("normaliserer en gyldig adresse", () => {
     expect(validateShippingInput({ ...valid, line2: " Leil. 4 " })).toEqual({
@@ -62,7 +46,6 @@ describe("validateShippingInput", () => {
         postalCode: "0155",
         city: "Oslo",
         country: "NO",
-        phone: "99999999",
       },
     });
   });
@@ -72,15 +55,20 @@ describe("validateShippingInput", () => {
       ...valid,
       name: "",
       postalCode: "15",
-      phone: "",
     });
     expect(result.ok).toBe(false);
     if (result.ok) return;
-    expect(Object.keys(result.errors).sort()).toEqual([
-      "name",
-      "phone",
-      "postalCode",
-    ]);
+    expect(Object.keys(result.errors).sort()).toEqual(["name", "postalCode"]);
+  });
+
+  test("ignorerer telefon fra eldre klienter", () => {
+    const result = validateShippingInput({
+      ...valid,
+      phone: "99999999",
+    } as typeof valid);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect("phone" in result.address).toBe(false);
   });
 
   test("tåler null og rare typer", () => {
@@ -107,7 +95,7 @@ describe("Stripe-metadata", () => {
 });
 
 describe("shippingFromStored", () => {
-  test("gjenskaper adressen fra ordren", () => {
+  test("gjenskaper adressen fra ordren, med telefon bare der den finnes", () => {
     expect(
       shippingFromStored({
         name: "Ola",
@@ -126,6 +114,15 @@ describe("shippingFromStored", () => {
       country: "NO",
       phone: "91234567",
     });
+    expect(
+      shippingFromStored({
+        name: "Ola",
+        line1: "Gata 1",
+        postalCode: "5003",
+        city: "Bergen",
+        phone: null,
+      })
+    ).not.toHaveProperty("phone");
   });
 
   test("gir null når ordren ikke har adresse", () => {

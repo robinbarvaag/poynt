@@ -60,7 +60,8 @@ export async function startVippsCheckout(
 
 /**
  * «Kjøp nå» med Vipps rett frå produktsida: hoppar over handlekurven og
- * sender eitt enkelt produkt til hurtigkassa.
+ * sender eitt enkelt produkt til hurtigkassa. Varer med frakt sender
+ * leveringsadressa frå «Før du betaler»-vindauget med.
  */
 export async function startVippsBuyNow(
   item: {
@@ -68,10 +69,17 @@ export async function startVippsBuyNow(
     quantity: number;
     variant?: string;
   },
-  termsAccepted: boolean
+  termsAccepted: boolean,
+  shipping?: ShippingAddress
 ): Promise<void> {
   trackEvent("begin_checkout", { method: "vipps_kjop_na" });
-  await postVippsCheckout([item], termsAccepted);
+  await postVippsCheckout(
+    [item],
+    termsAccepted,
+    undefined,
+    undefined,
+    shipping
+  );
 }
 
 async function postVippsCheckout(

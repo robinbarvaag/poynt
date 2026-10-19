@@ -47,7 +47,8 @@ const FIELDS: FieldSpec[] = [
     autoComplete: "address-level2",
     span: "half",
   },
-  { name: "phone", label: "Telefon", autoComplete: "tel", inputMode: "tel" },
+  // Ikke telefon: vi sender som brev uten sporing, og Vipps/Stripe gir oss
+  // kontaktinfo uansett. Minst mulig persondata.
 ];
 
 /**

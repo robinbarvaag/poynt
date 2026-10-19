@@ -1,12 +1,16 @@
 "use client";
 import { AddToCartButton } from "@/components/add-to-cart-button";
-import { CheckoutConsentDialog } from "@/components/checkout-consent-dialog";
 import { CheckoutConsentNotice } from "@/components/checkout-consent-notice";
 import { type MediaResource, PayloadImage } from "@/components/payload-image";
 import { VippsButton } from "@/components/vipps-button";
+import {
+  type VippsCheckoutConfirmation,
+  VippsCheckoutDialog,
+} from "@/components/vipps-checkout-dialog";
+import { trackEvent } from "@/lib/analytics";
 import { startVippsBuyNow } from "@/lib/vipps-checkout-client";
 import type { Product } from "@/payload-types";
-import { useCart } from "@poynt/cart";
+import { lineKey, useCart } from "@poynt/cart";
 import { Button, Container, Text } from "@poynt/ui";
 import { Minus, Plus } from "lucide-react";
 import Link from "next/link";
@@ -43,8 +47,8 @@ export interface ProductPurchaseInfo {
   /** Digitalt innhold som leveres umiddelbart: Vipps-knappen går via
       samtykkevinduet, og linja i kurven krever avkryssing. */
   instantDelivery: boolean;
-  /** Fysisk vare: Vipps-knappen går via handlekurven, der kunden fyller inn
-      leveringsadresse før betaling. */
+  /** Fysisk vare: Vipps-knappen åpner «Før du betaler» med adresseskjemaet,
+      og betalingen starter fra Vipps-knappen i vinduet. */
   requiresShipping: boolean;
   /** Variant-spørsmål, f.eks. «Signert?». Tom = ingen varianter. */
   variantLabel?: string;
@@ -107,9 +111,19 @@ function QuantityStepper({
   setQuantity: Dispatch<SetStateAction<number>>;
   compact?: boolean;
 }) {
-  const buttonSize = compact ? "size-8" : "size-9";
+  // Kompakt: lavere knapper og smalere tall, så stepper + kjøp + hurtigkasse
+  // får plass på én rad i kjøpslinja på en smal mobil (~360 px).
+  const buttonSize = compact ? "size-7" : "size-9";
   return (
-    <fieldset aria-label="Antall" className="flex items-center gap-0.5 px-1.5">
+    /* Høyre-kanten skiller antall fra kjøpsknappen i den delte pillen —
+       nødvendig når knappen er ghost (varer med frakt), der de ellers
+       flyter sammen på samme flate. */
+    <fieldset
+      aria-label="Antall"
+      className={`flex items-center gap-0.5 border-border border-r ${
+        compact ? "px-1" : "px-1.5"
+      }`}
+    >
       <Button
         type="button"
         variant="ghost"
@@ -123,7 +137,7 @@ function QuantityStepper({
       </Button>
       <span
         className={`text-center font-medium tabular-nums ${
-          compact ? "min-w-6 text-sm" : "min-w-8"
+          compact ? "min-w-5 text-sm" : "min-w-8"
         }`}
       >
         {quantity}
@@ -364,6 +378,7 @@ function ProductDetailInteractive({
   const { isSoldOut, allowQuantity, instantDelivery, requiresShipping } = info;
   const router = useRouter();
   const addItem = useCart((state) => state.addItem);
+  const cartItems = useCart((state) => state.items);
 
   // Kjøpsboksen observeres av den sticky kjøpslinja: når boksen scrolles ut
   // av viewporten (oppover), glir linja inn nederst.
@@ -391,16 +406,53 @@ function ProductDetailInteractive({
   // sender kun dette produktet (medlemskap støttes ikke — API-et avviser).
   const [vippsLoading, setVippsLoading] = useState(false);
   const [vippsError, setVippsError] = useState<string | null>(null);
-  // Vipps-knappene (kjøpsboks + sticky linje) åpner først samtykkevinduet
-  // (angrerettloven § 22 n) når produktet leveres umiddelbart; betalingen
-  // starter da fra Vipps-knappen i vinduet. Andre produkter går rett til Vipps.
-  const [consentOpen, setConsentOpen] = useState(false);
-  const handleVippsBuyNow = async () => {
+  // Vipps-knappene (kjøpsboks + sticky linje) åpner først «Før du betaler»
+  // når det er noe å avklare: leveringsadresse (frakt), samtykke til
+  // umiddelbar levering (angrerettloven § 22 n), eller at handlekurven har
+  // andre varer som IKKE blir med (hurtigkassen kjøper bare denne). Betalingen
+  // starter da fra Vipps-knappen i vinduet. Ellers går den rett til Vipps.
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const otherItemsCount = cartItems.filter(
+    (item) => item.id !== info.id
+  ).length;
+  const dialogNeeded =
+    instantDelivery || requiresShipping || otherItemsCount > 0;
+  const handleVippsBuyNow = async ({
+    termsAccepted,
+    shipping,
+  }: VippsCheckoutConfirmation) => {
     setVippsLoading(true);
     setVippsError(null);
-    // Fysiske varer trenger leveringsadresse før betaling. Den fylles inn i
-    // handlekurven, så «Kjøp nå» legger varen i kurven og går dit i stedet.
-    if (requiresShipping) {
+    try {
+      await startVippsBuyNow(
+        {
+          id: info.id,
+          quantity,
+          variant: selectedVariant,
+        },
+        termsAccepted,
+        shipping
+      );
+    } catch (error) {
+      console.error("Vipps checkout error:", error);
+      setVippsError(error instanceof Error ? error.message : "Noe gikk galt");
+      setVippsLoading(false);
+    }
+  };
+  const onVippsClick = () => {
+    setVippsError(null);
+    if (dialogNeeded) {
+      setDialogOpen(true);
+      return;
+    }
+    void handleVippsBuyNow({ termsAccepted: false });
+  };
+
+  // Snarveien i vinduet når kurven har andre varer: legg denne i kurven (om
+  // den ikke alt ligger der) og gå til handlekurven, så alt kjøpes samlet.
+  const handleBuyTogether = () => {
+    const key = lineKey(info.id, selectedVariant);
+    if (!cartItems.some((item) => item.key === key)) {
       addItem(
         {
           id: info.id,
@@ -417,31 +469,22 @@ function ProductDetailInteractive({
         },
         quantity
       );
-      router.push("/handlekurv");
-      return;
+      trackEvent("add_to_cart", {
+        currency: "NOK",
+        value: effectivePrice * quantity,
+        items: [
+          {
+            item_id: info.id,
+            item_name: info.name,
+            price: effectivePrice,
+            quantity,
+            item_variant: selectedVariant,
+          },
+        ],
+      });
     }
-    try {
-      await startVippsBuyNow(
-        {
-          id: info.id,
-          quantity,
-          variant: selectedVariant,
-        },
-        instantDelivery
-      );
-    } catch (error) {
-      console.error("Vipps checkout error:", error);
-      setVippsError(error instanceof Error ? error.message : "Noe gikk galt");
-      setVippsLoading(false);
-    }
-  };
-  const onVippsClick = () => {
-    setVippsError(null);
-    if (instantDelivery) {
-      setConsentOpen(true);
-      return;
-    }
-    void handleVippsBuyNow();
+    setDialogOpen(false);
+    router.push("/handlekurv");
   };
 
   const priceInKr = effectivePrice.toLocaleString("nb-NO");
@@ -558,7 +601,7 @@ function ProductDetailInteractive({
               {info.type !== "membership" && !isSoldOut && instantDelivery && (
                 <CheckoutConsentNotice className="mt-3" />
               )}
-              {vippsError && !consentOpen && (
+              {vippsError && !dialogOpen && (
                 <p
                   role="alert"
                   className="rounded-xl bg-destructive/10 px-3 py-2 text-destructive text-sm"
@@ -574,7 +617,14 @@ function ProductDetailInteractive({
           </div>
         </div>
 
-        {storySections}
+        {/* Fragmentet er med vilje. `storySections` lages på serveren og
+            kommer hit via Flight som en lat (lazy) referanse til klient-
+            modulen; React 19.2 mister «nøkkel validert»-merket på slike når
+            de ligger rett i en søskenliste, og klager på manglende key «from
+            ProductDetail». Som eneste barn i et fragment valideres den aldri
+            som listeelement. */}
+        {/* biome-ignore lint/complexity/noUselessFragments: se kommentaren over — fragmentet unngår en falsk key-advarsel */}
+        <>{storySections}</>
 
         {related}
       </Container>
@@ -647,6 +697,7 @@ function ProductDetailInteractive({
                   quantity={quantity}
                   maxQuantity={maxQuantity}
                   allowQuantity={allowQuantity}
+                  compact
                   className={
                     allowQuantity ? "min-w-0 rounded-none" : "rounded-full"
                   }
@@ -663,10 +714,14 @@ function ProductDetailInteractive({
         </StickyBuyBar>
       )}
 
-      {info.type !== "membership" && !isSoldOut && instantDelivery && (
-        <CheckoutConsentDialog
-          open={consentOpen}
-          onOpenChange={setConsentOpen}
+      {info.type !== "membership" && !isSoldOut && (
+        <VippsCheckoutDialog
+          open={dialogOpen}
+          onOpenChange={setDialogOpen}
+          needsConsent={instantDelivery}
+          needsShipping={requiresShipping}
+          otherItemsCount={otherItemsCount}
+          onBuyTogether={handleBuyTogether}
           onConfirm={handleVippsBuyNow}
           loading={vippsLoading}
           error={vippsError}

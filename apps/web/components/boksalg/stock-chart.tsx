@@ -23,6 +23,7 @@ import { kortDag } from "./format";
 
 const config = {
   copies: { label: "Eksemplarer i butikk", color: EXACT },
+  stores: { label: "Butikker med boka", color: EXACT },
 } satisfies ChartConfig;
 
 export function StockChart({ points }: { points: StockHistoryPoint[] }) {
@@ -33,6 +34,13 @@ export function StockChart({ points }: { points: StockHistoryPoint[] }) {
       </p>
     );
   }
+
+  // ARK oppgir bare hvor mange butikker som fører boka, aldri eksemplarer.
+  // Da er en flat nullinje for eksemplarer misvisende — tegn butikkantallet.
+  const storesOnly =
+    points.every((point) => point.copies === 0) &&
+    points.some((point) => point.stores > 0);
+  const metric = storesOnly ? "stores" : "copies";
 
   const data = points.map((point) => ({
     ...point,
@@ -65,23 +73,31 @@ export function StockChart({ points }: { points: StockHistoryPoint[] }) {
           content={
             <ChartTooltipContent
               hideLabel
-              formatter={(value, _name, _item, _index, payload) => (
-                <span className="text-foreground">
-                  <strong className="tabular-nums">{String(value)}</strong>{" "}
-                  eksemplarer i{" "}
-                  <strong className="tabular-nums">
-                    {String(payload?.stores ?? 0)}
-                  </strong>{" "}
-                  butikker
-                </span>
-              )}
+              formatter={(value, _name, _item, _index, payload) =>
+                storesOnly ? (
+                  <span className="text-foreground">
+                    Boka i{" "}
+                    <strong className="tabular-nums">{String(value)}</strong>{" "}
+                    butikker
+                  </span>
+                ) : (
+                  <span className="text-foreground">
+                    <strong className="tabular-nums">{String(value)}</strong>{" "}
+                    eksemplarer i{" "}
+                    <strong className="tabular-nums">
+                      {String(payload?.stores ?? 0)}
+                    </strong>{" "}
+                    butikker
+                  </span>
+                )
+              }
             />
           }
         />
         <Area
-          dataKey="copies"
+          dataKey={metric}
           type="monotone"
-          stroke="var(--color-copies)"
+          stroke={`var(--color-${metric})`}
           strokeWidth={2}
           fill="url(#boksalg-stock-fill)"
           dot={false}

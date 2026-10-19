@@ -63,7 +63,8 @@ export function cartNeedsShipping(items: Pick<CartItem, "requiresShipping">[]) {
   return items.some((item) => item.requiresShipping === true);
 }
 
-function lineKey(id: string, variantValue?: string): string {
+/** Nøkkelen for en kurvlinje: produkt-id, pluss variant når den er valgt. */
+export function lineKey(id: string, variantValue?: string): string {
   return variantValue ? `${id}::${variantValue}` : id;
 }
 

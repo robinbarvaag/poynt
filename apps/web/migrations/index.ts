@@ -90,6 +90,7 @@ import * as migration_20261019_084007_shipping_address from './20261019_084007_s
 import * as migration_20261019_190943_shipping_status from './20261019_190943_shipping_status';
 import * as migration_20261019_191748_hyllesalg from './20261019_191748_hyllesalg';
 import * as migration_20261019_193426_bibliotek from './20261019_193426_bibliotek';
+import * as migration_20261019_205245_orders_items_name_internal_note from './20261019_205245_orders_items_name_internal_note';
 
 export const migrations = [
   {
@@ -550,6 +551,11 @@ export const migrations = [
   {
     up: migration_20261019_193426_bibliotek.up,
     down: migration_20261019_193426_bibliotek.down,
-    name: '20261019_193426_bibliotek'
+    name: '20261019_193426_bibliotek',
+  },
+  {
+    up: migration_20261019_205245_orders_items_name_internal_note.up,
+    down: migration_20261019_205245_orders_items_name_internal_note.down,
+    name: '20261019_205245_orders_items_name_internal_note'
   },
 ];

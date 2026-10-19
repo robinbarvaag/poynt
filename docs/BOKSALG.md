@@ -337,22 +337,37 @@ en lånt katalog (før lansering), for da sier lista ingenting om beholdningen.
 **ARK** (`ark.ts`) har ikke noe API. Produktsiden `ark.no/produkt/<isbn>` bærer to
 maskinlesbare kilder: JSON-LD (pris, schema.org-tilgjengelighet) og Next.js-
 nyttelasten med ARKs egen tilstand (`availability.online.state`,
-`availability.store.state`). ARK oppgir **ikke** antall per butikk — så lenge
-`store.state` er `unavailable` finnes det ingen butikkliste. Når boka kommer i
-butikk må adapteren utvides; inntil da er ARKs bidrag status og pris.
+`availability.store.state`). Verdiene har byttet skrivemåte etter lansering
+(`available` → `inStock`, butikk `orderable`), så parseren tar begge. ARK oppgir
+**ikke** antall per butikk, men etter lansering ligger
+`availability.store.count` der: hvor mange butikker som fører boka (147 den
+19.10.2026, mot Forlagssentralens 145). Det lagres som `storesWithStock` og
+`storeCount` på lagerbildet, `totalCopies` forblir 0, og dashbordet skriver
+«Finnes i 147 butikker» og tegner butikkantallet i stedet for en flat
+eksemplar-linje (`StockChart` bytter serie når alle punktene har 0 eksemplarer).
 
-ARK har **botvern** og svarte 429 («for mange forespørsler») etter lansering.
-Tre lag mot det, alle i `sources/http.ts` og `ark.ts`:
+ARK har **botvern**, og det er en IP-blokk, ikke en ratebegrensning: fra Vercel
+(Frankfurt) svarer de 429 på 60–170 ms, mens samme forespørsel fra en vanlig
+maskin går gjennom. Ingen headere eller ventetid hjelper mot det. Derfor hentes
+produktsida **via Firecrawl** (`FIRECRAWL_API_KEY`, samme nøkkel som
+inspirasjonskildene bruker): `POST /v2/scrape` med `formats: ["rawHtml"]`, så
+JSON-LD og Next-nyttelasten overlever, og ARKs egentlige statuskode leses fra
+`metadata.statusCode`. Én henting koster én kreditt og tar ~3 s. Uten nøkkel
+(lokalt) hentes sida direkte. Lagene mot botvern ellers, alle i
+`sources/http.ts` og `ark.ts`:
 
-1. Fullt sett nettleser-headere (`browserHeaders()`), ikke bare User-Agent —
-   det er de manglende `Accept-Language`/`Sec-Fetch-*` som avslører en bot.
+1. Fullt sett nettleser-headere (`browserHeaders()`) på direktehenting, ikke
+   bare User-Agent — det er de manglende `Accept-Language`/`Sec-Fetch-*` som
+   avslører en bot.
 2. Ett nytt forsøk etter `Retry-After` (maks 8 s, så «Hent nå» ikke henger).
-   Er svaret fortsatt 429/403, kastes `SourceUnavailableError`: en midlertidig
+   Er svaret fortsatt 429/403 — fra ARK direkte, fra ARK via Firecrawl, eller
+   402/429 fra Firecrawl selv — kastes `SourceUnavailableError`: en midlertidig
    blokkering, ikke en parsefeil. Forrige lagerbilde står, neste kjøring
    prøver igjen, og dashbordet viser det som informasjon, ikke rød feil.
 3. `minIntervalMs` på kilden (ARK: 30 min). Er forrige lagerbilde ferskere,
    hopper hentingen over kilden og sier fra — så ti trykk på «Hent nå» ikke
-   blir ti kall til ARK. `fetch-book-stock.ts --force` overstyrer.
+   blir ti kall til ARK (og ti kreditter). `fetch-book-stock.ts --force`
+   overstyrer.
 
 Har en kilde ikke gitt nytt lagerbilde på over 36 timer, varsler dashbordet
 om det øverst, så gamle tall ikke leses som «ingen endring».
@@ -387,6 +402,11 @@ bun run --cwd apps/web payload run scripts/fetch-book-stock.ts ark --force
 
 # Seed utgiftene (create-only — rører aldri noe som finnes)
 bun run --cwd apps/web payload run scripts/seed-book-expenses.ts
+
+# Avstemmingen mot Forlagssentralen 19.10.2026 (tørrkjøring uten «apply»;
+# bibliotek=NN er Biblioteksentralens andel fra fakturaen). Kan kjøres flere ganger.
+bun run --cwd apps/web payload run scripts/fix-book-sales-2026-10.ts
+bun run --cwd apps/web payload run scripts/fix-book-sales-2026-10.ts apply bibliotek=45
 
 # Testene for økonomi og diff-logikk
 bun test apps/web/lib/boksalg

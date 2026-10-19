@@ -3,8 +3,8 @@ import Link from "next/link";
 /**
  * Informasjonslinje under betalingsknappene på produktsiden. Selve
  * samtykket (angrerettloven § 22 bokstav n) gis aktivt i
- * CheckoutConsentCheckbox — i handlekurven, eller i CheckoutConsentDialog
- * som Vipps-knappen åpner her. Denne linja forbereder kunden på det og
+ * CheckoutConsentCheckbox — i handlekurven, eller i VippsCheckoutDialog
+ * («Før du betaler») som Vipps-knappen åpner her. Denne linja forbereder kunden på det og
  * lenker til vilkårene. Samme forbehold gjentas i ordrebekreftelsen.
  */
 export function CheckoutConsentNotice({

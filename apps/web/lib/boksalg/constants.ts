@@ -165,7 +165,7 @@ export const SALE_SOURCE_HELP: Record<SaleSource, string> = {
   innkjop:
     "Norli eller ARK har bestilt et antall bøker gjennom Forlagssentralen — én rad per ordre der, med ordrenummeret som referanse. Dette er bøkene de kan sende tilbake. Bøker som selges i butikken etterpå skal IKKE føres her; de er allerede betalt.",
   forhandssalg:
-    "Kunder bestilte via bokhandelens forhåndssalgslenke (bok.norli.no). Bokhandelen bestiller disse i tillegg til innkjøpet, så de kommer oppå de 400/300 — og kommer ikke i retur. Hos Norli tar de 45 % i stedet for 50 %, og over 50 bøker gir kickback. Fyll inn hvor mange som er signert: bare de bestilles til signering i butikk.",
+    "Kunder bestilte via bokhandelens forhåndssalgslenke (bok.norli.no). Bokhandelen bestiller disse i tillegg til innkjøpet (hos Norli: egne ordrer til Pottemakerveien hos Forlagssentralen) — og de kommer ikke i retur. Hos Norli tar de 45 % i stedet for 50 %, og over 50 bøker gir kickback. Fyll inn hvor mange som er signert: bare de bestilles til signering i butikk.",
   avregning:
     "Oppgjøret fra Forlagsentralen. Bruk bare hvis du ikke har ført innkjøpene enkeltvis — ellers telles bøkene to ganger.",
   foredrag: "Bøker du solgte selv på foredrag eller kurs.",
