@@ -34,10 +34,14 @@ export function StockTabs({ stock }: { stock: StockSummary[] }) {
           className="flex flex-col gap-3 pt-2"
         >
           <p className="text-muted-foreground text-sm">
-            {entry.storesWithStock > 0
+            {entry.storesWithStock > 0 && entry.totalCopies > 0
               ? `${antall(entry.totalCopies)} eksemplarer i ${antall(entry.storesWithStock)} av ${antall(entry.storeCount)} butikker.`
-              : (entry.note?.replace(/\.?$/, ".") ??
-                "Ingen butikker fører boka ennå.")}{" "}
+              : entry.storesWithStock > 0
+                ? // ARK: vi vet hvor mange butikker som fører boka, ikke hvor mange
+                  // eksemplarer de har. Si det, i stedet for «0 eksemplarer».
+                  `Finnes i ${antall(entry.storesWithStock)} butikker. ${entry.label} oppgir ikke antall per butikk.`
+                : (entry.note?.replace(/\.?$/, ".") ??
+                  "Ingen butikker fører boka ennå.")}{" "}
             Sist hentet {tidspunkt(entry.fetchedAt)}.
           </p>
           <StockChart points={entry.history} />

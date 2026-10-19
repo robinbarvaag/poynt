@@ -197,7 +197,7 @@ export async function runStockSnapshot(
           online: snapshot.online,
           externalId: snapshot.externalId,
           price: snapshot.price,
-          storeCount: snapshot.stores.length,
+          storeCount: snapshot.storeCount ?? snapshot.stores.length,
           storesWithStock: snapshot.storesWithStock,
           totalCopies: snapshot.totalCopies,
           note: snapshot.note ?? null,

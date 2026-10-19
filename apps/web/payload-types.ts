@@ -3203,7 +3203,7 @@ export interface Course {
   _status?: ('draft' | 'published') | null;
 }
 /**
- * Bestillinger opprettes av betalingen. Bøker som skal i posten: bruk «Skal sendes» over lista, og sett «Forsendelse» til «Sendt» når pakken er levert inn.
+ * Bestillinger opprettes av betalingen og kan ikke lages for hånd. Det du styrer selv: forsendelsen (bøker og andre varer som skal i posten), leveringsadressen og et internt notat. Bruk «Skal sendes» over lista for å se hva som venter.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "orders".
@@ -3211,50 +3211,35 @@ export interface Course {
 export interface Order {
   id: number;
   /**
-   * Settes ved betaling — Vipps-ordrer får e-post først når kunden har godkjent i appen
+   * Settes ved betaling. Vipps-ordrer får e-post først når kunden har godkjent i appen.
    */
   customerEmail?: string | null;
+  /**
+   * Fra betalingen. Tomt om kunden ikke oppga navn — da står mottakeren under leveringsadressen.
+   */
   customerName?: string | null;
   items: {
     product: number | Product;
+    name?: string | null;
     quantity: number;
+    priceAtPurchase: number;
+    vatRate?: number | null;
     /**
-     * Valgt variant, t.d. «Signert: Ja» (om aktuelt)
+     * F.eks. «Signert: Ja»
      */
     variant?: string | null;
-    priceAtPurchase: number;
-    /**
-     * Satsen produktet hadde da ordren ble lagt
-     */
-    vatRate?: number | null;
     id?: string | null;
   }[];
   /**
-   * Inkludert MVA
+   * Inkludert MVA og etter eventuell rabattkode
    */
   total: number;
   /**
-   * Beregnet fra varelinjene og produktenes MVA-sats, fordelt på eventuell rabatt
+   * Beregnet fra varelinjene og produktenes MVA-sats
    */
   vatTotal?: number | null;
   /**
-   * Kunden huket aktivt av for umiddelbar levering og bortfall av angrerett før betaling (angrerettloven § 22 n)
-   */
-  termsAccepted?: boolean | null;
-  /**
-   * Tidspunktet kunden huket av boksen i kassen
-   */
-  termsAcceptedAt?: string | null;
-  /**
-   * Kopi av teksten ved avkryssingsboksen slik den var da kjøpet ble gjort — dokumentasjon ved en eventuell tvist
-   */
-  termsAcceptedText?: string | null;
-  /**
-   * Minst ett produkt i bestillingen er merket «Krever frakt». Mangler adressen under, må kunden kontaktes.
-   */
-  requiresShipping?: boolean | null;
-  /**
-   * Fylt inn av kunden i handlekurven før betaling (gjelder både kort og Vipps).
+   * Fylt inn av kunden i handlekurven før betaling. Kan rettes her om kunden tar kontakt.
    */
   shipping?: {
     name?: string | null;
@@ -3269,7 +3254,26 @@ export interface Order {
     phone?: string | null;
   };
   /**
-   * Sett til «Sendt» når pakken er levert inn. Da forsvinner bestillingen fra «Skal sendes».
+   * Bare for deg — kunden ser det ikke. F.eks. «ringte kunden om adressen» eller «sendt som brev».
+   */
+  internalNote?: string | null;
+  termsAccepted?: boolean | null;
+  termsAcceptedAt?: string | null;
+  /**
+   * Kopi av teksten ved avkryssingsboksen slik den var da kjøpet ble gjort — dokumentasjon ved en eventuell tvist.
+   */
+  termsAcceptedText?: string | null;
+  /**
+   * Settes av betalingen. «Avventer» er en Vipps-betaling kunden ikke har fullført i appen ennå.
+   */
+  status: 'paid' | 'pending' | 'cancelled';
+  paymentProvider: 'stripe' | 'vipps';
+  /**
+   * Minst én vare er merket «Krever frakt». Mangler leveringsadressen, må kunden kontaktes.
+   */
+  requiresShipping?: boolean | null;
+  /**
+   * Sett til «Sendt» når pakken er levert inn, og lagre. Da forsvinner bestillingen fra «Skal sendes».
    */
   shippingStatus?: ('pending' | 'shipped') | null;
   /**
@@ -3280,14 +3284,15 @@ export interface Order {
    * Valgfritt. F.eks. sporingsnummer fra Posten.
    */
   shippingNote?: string | null;
-  status: 'pending' | 'paid' | 'cancelled';
   /**
-   * Kunden krysset aktivt av for nyhetsbrev i utsjekken (dokumentert samtykke)
+   * Kunden krysset av for nyhetsbrev i kassen og er meldt på i Resend.
    */
   newsletterOptIn?: boolean | null;
-  paymentProvider: 'stripe' | 'vipps';
   vippsReference?: string | null;
   stripeSessionId?: string | null;
+  /**
+   * Søk på denne i Stripe-dashbordet for å se eller refundere betalingen.
+   */
   stripePaymentIntentId?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -5313,18 +5318,15 @@ export interface OrdersSelect<T extends boolean = true> {
     | T
     | {
         product?: T;
+        name?: T;
         quantity?: T;
-        variant?: T;
         priceAtPurchase?: T;
         vatRate?: T;
+        variant?: T;
         id?: T;
       };
   total?: T;
   vatTotal?: T;
-  termsAccepted?: T;
-  termsAcceptedAt?: T;
-  termsAcceptedText?: T;
-  requiresShipping?: T;
   shipping?:
     | T
     | {
@@ -5336,12 +5338,17 @@ export interface OrdersSelect<T extends boolean = true> {
         country?: T;
         phone?: T;
       };
+  internalNote?: T;
+  termsAccepted?: T;
+  termsAcceptedAt?: T;
+  termsAcceptedText?: T;
+  status?: T;
+  paymentProvider?: T;
+  requiresShipping?: T;
   shippingStatus?: T;
   shippedAt?: T;
   shippingNote?: T;
-  status?: T;
   newsletterOptIn?: T;
-  paymentProvider?: T;
   vippsReference?: T;
   stripeSessionId?: T;
   stripePaymentIntentId?: T;

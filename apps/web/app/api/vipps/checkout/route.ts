@@ -125,6 +125,7 @@ export async function POST(req: NextRequest) {
         customerName: authSession?.user.name || undefined,
         items: products.map((p) => ({
           product: p.product.id,
+          name: p.product.name,
           quantity: p.quantity,
           variant:
             p.variant && p.product.variantLabel

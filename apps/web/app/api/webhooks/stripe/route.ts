@@ -306,7 +306,7 @@ async function handleProductPurchase(session: Stripe.Checkout.Session) {
       customerName: session.customer_details?.name || undefined,
       requiresShipping,
       ...(shipping && { shipping }),
-      items: orderItems.map(({ name: _name, ...item }) => item),
+      items: orderItems,
       total,
       vatTotal: calculateVatTotal(
         orderItems.map((item) => ({

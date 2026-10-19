@@ -1,16 +1,26 @@
 "use client";
 
-import { Button, Switch, Text } from "@poynt/ui";
-import { Cookie, X } from "lucide-react";
+import {
+  Button,
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetTitle,
+  Switch,
+  Text,
+  useIsMobile,
+} from "@poynt/ui";
+import { Cookie } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useId, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useConsent } from "./consent-provider";
 
 /**
  * Samtykkebanner for informasjonskapsler.
  *
  * Krav (ekomloven § 3-15 / GDPR, Datatilsynets veiledning):
- *  - «Avvis alle» og «Godta alle» er likestilte, like synlige knapper.
+ *  - «Avvis alle» og «Godta alle» er likestilte, like synlige knapper i
+ *    samme lag — ett trykk for å avvise, ett for å godta.
  *  - Ingen forhåndsavkryssede valg utover nødvendige.
  *  - Valget kan endres senere (lenke i footer åpner dette på nytt).
  *  - Ingen sporing før valget er tatt (GoogleAnalytics/MetaPixel venter på
@@ -18,16 +28,23 @@ import { useConsent } from "./consent-provider";
  *    berettiget interesse) — den er opplyst om i teksten og i
  *    personvernerklæringen.
  *
- * Banneret blokkerer ikke siden — det er et ikke-modalt dialog-kort nederst.
+ * Presentasjon:
+ *  - Mobil: bunn-skuff (modal) med bakteppe og låst scroll, maks 85 % av
+ *    høyden — innholdet ruller inne i skuffen, så «Tilpass» aldri havner
+ *    utenfor skjermen.
+ *  - Desktop: lite, ikke-modalt kort nede til venstre. Siden kan brukes som
+ *    vanlig mens kortet står der.
+ *  - Før første valg kan banneret ikke lukkes (ingen X, Escape eller klikk
+ *    utenfor). Åpnet fra footeren kan det lukkes på alle måter.
  */
 export function CookieBanner() {
   const { consent, settingsOpen, closeSettings, acceptAll, rejectAll, save } =
     useConsent();
+  const isMobile = useIsMobile();
   const [showDetails, setShowDetails] = useState(false);
   const [analytics, setAnalytics] = useState(false);
   const [marketing, setMarketing] = useState(false);
-  const titleId = useId();
-  const descId = useId();
+  const contentRef = useRef<HTMLDivElement>(null);
 
   // Når innstillingene åpnes fra footeren: start på det som faktisk er lagret.
   useEffect(() => {
@@ -40,137 +57,153 @@ export function CookieBanner() {
 
   // undefined = ikke lest ennå (SSR); satt + ikke åpnet = ingenting å vise.
   if (consent === undefined) return null;
-  if (consent !== null && !settingsOpen) return null;
 
+  const open = consent === null || settingsOpen;
   const canDismiss = consent !== null;
 
   return (
-    // biome-ignore lint/a11y/useSemanticElements: ikke-modalt kort; <dialog> gir top-layer/backdrop-semantikk vi ikke vil ha
-    <div
-      role="dialog"
-      aria-labelledby={titleId}
-      aria-describedby={descId}
-      className="fixed inset-x-4 bottom-4 z-[60] mx-auto max-w-lg rounded-3xl border border-border bg-card p-5 shadow-xl motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-4 motion-safe:duration-500 sm:inset-x-auto sm:left-6 sm:bottom-6 sm:p-6"
+    <Sheet
+      open={open}
+      // Mobil: modal skuff (bakteppe, låst scroll, fokusfelle).
+      // Desktop: ikke-modalt kort — siden er fortsatt klikkbar bak.
+      modal={isMobile}
+      onOpenChange={(next) => {
+        if (!next && canDismiss) closeSettings();
+      }}
     >
-      <div className="flex items-start gap-3">
-        <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-          <Cookie className="size-5" aria-hidden="true" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <h2 id={titleId} className="font-semibold text-foreground">
-            Informasjonskapsler
-          </h2>
-          <p id={descId} className="mt-1 text-sm text-muted-foreground">
-            Vi bruker nødvendige informasjonskapsler for at handlekurv og
-            innlogging skal virke, og teller besøk og klikk anonymt, uten
-            informasjonskapsler, for å se hva som er nyttig. Med ditt samtykke
-            bruker vi også Google Analytics for å forstå hvordan siden brukes,
-            og Meta Pixel for å måle annonser på Facebook og Instagram.{" "}
-            <Link
-              href="/personvern"
-              className="underline underline-offset-4 hover:text-foreground"
+      <SheetContent
+        ref={contentRef}
+        side="bottom"
+        hideClose={!canDismiss}
+        tabIndex={-1}
+        // Radix flytter ellers fokus til første lenke i brødteksten; vi
+        // fokuserer dialogen selv så skjermleseren leser tittel + tekst først.
+        onOpenAutoFocus={(event) => {
+          event.preventDefault();
+          contentRef.current?.focus();
+        }}
+        onEscapeKeyDown={(event) => {
+          if (!canDismiss) event.preventDefault();
+        }}
+        onInteractOutside={(event) => {
+          if (!canDismiss) event.preventDefault();
+        }}
+        className="flex max-h-[85dvh] flex-col rounded-t-3xl border-t bg-card p-0 outline-none md:inset-x-auto md:bottom-6 md:left-6 md:max-h-[calc(100dvh-3rem)] md:w-104 md:rounded-3xl md:border md:border-border"
+      >
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pt-6 md:px-6">
+          <div className="flex items-start gap-3">
+            <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <Cookie className="size-5" aria-hidden="true" />
+            </span>
+            <div className="min-w-0 flex-1 pr-8 md:pr-6">
+              <SheetTitle className="text-base font-semibold">
+                Informasjonskapsler
+              </SheetTitle>
+              <SheetDescription className="mt-1">
+                Nødvendige informasjonskapsler holder handlekurv og innlogging i
+                gang. Besøk telles anonymt uten informasjonskapsler. Med ditt
+                samtykke bruker vi også Google Analytics (statistikk) og Meta
+                Pixel (annonser på Facebook og Instagram).{" "}
+                <Link
+                  href="/personvern"
+                  className="underline underline-offset-4 hover:text-foreground"
+                >
+                  Les mer i personvernerklæringen
+                </Link>
+                .
+              </SheetDescription>
+            </div>
+          </div>
+
+          {showDetails && (
+            <ul className="mt-4 space-y-3 border-t border-border pt-4">
+              <li className="flex items-center justify-between gap-4">
+                <div>
+                  <Text weight="medium" customStyles="text-sm">
+                    Nødvendige
+                  </Text>
+                  <Text variant="muted" customStyles="text-xs">
+                    Handlekurv, innlogging, betaling og ditt samtykkevalg.
+                  </Text>
+                </div>
+                <Switch checked disabled aria-label="Nødvendige (alltid på)" />
+              </li>
+              <li className="flex items-center justify-between gap-4">
+                <div>
+                  <label
+                    htmlFor="consent-analytics"
+                    className="block text-sm font-medium text-foreground"
+                  >
+                    Statistikk
+                  </label>
+                  <Text variant="muted" customStyles="text-xs">
+                    Google Analytics. Anonymiserte besøkstall som hjelper oss å
+                    forbedre siden.
+                  </Text>
+                </div>
+                <Switch
+                  id="consent-analytics"
+                  checked={analytics}
+                  onCheckedChange={setAnalytics}
+                />
+              </li>
+              <li className="flex items-center justify-between gap-4">
+                <div>
+                  <label
+                    htmlFor="consent-marketing"
+                    className="block text-sm font-medium text-foreground"
+                  >
+                    Markedsføring
+                  </label>
+                  <Text variant="muted" customStyles="text-xs">
+                    Meta Pixel. Måler om annonser på Facebook og Instagram fører
+                    til kjøp, påmeldinger og henvendelser, og kan brukes til å
+                    vise deg relevante annonser der.
+                  </Text>
+                </div>
+                <Switch
+                  id="consent-marketing"
+                  checked={marketing}
+                  onCheckedChange={setMarketing}
+                />
+              </li>
+            </ul>
+          )}
+        </div>
+
+        {/* Knappene står fast nederst, over hjemknappen på iPhone. */}
+        <div className="shrink-0 space-y-2 px-5 pt-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] md:px-6 md:pb-6">
+          <div className="grid grid-cols-2 gap-2">
+            <Button type="button" variant="outline" onClick={rejectAll}>
+              Avvis alle
+            </Button>
+            <Button type="button" onClick={acceptAll}>
+              Godta alle
+            </Button>
+          </div>
+          {showDetails ? (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="w-full"
+              onClick={() => save({ analytics, marketing })}
             >
-              Les mer i personvernerklæringen
-            </Link>
-            .
-          </p>
+              Lagre valg
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="w-full"
+              onClick={() => setShowDetails(true)}
+            >
+              Tilpass
+            </Button>
+          )}
         </div>
-        {canDismiss && (
-          <button
-            type="button"
-            onClick={closeSettings}
-            aria-label="Lukk"
-            className="-mr-1 -mt-1 rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-          >
-            <X className="size-4" />
-          </button>
-        )}
-      </div>
-
-      {showDetails && (
-        <ul className="mt-4 space-y-3 border-t border-border pt-4">
-          <li className="flex items-center justify-between gap-4">
-            <div>
-              <Text weight="medium" customStyles="text-sm">
-                Nødvendige
-              </Text>
-              <Text variant="muted" customStyles="text-xs">
-                Handlekurv, innlogging, betaling og ditt samtykkevalg.
-              </Text>
-            </div>
-            <Switch checked disabled aria-label="Nødvendige (alltid på)" />
-          </li>
-          <li className="flex items-center justify-between gap-4">
-            <div>
-              <label
-                htmlFor="consent-analytics"
-                className="block text-sm font-medium text-foreground"
-              >
-                Statistikk
-              </label>
-              <Text variant="muted" customStyles="text-xs">
-                Google Analytics. Anonymiserte besøkstall som hjelper oss å
-                forbedre siden.
-              </Text>
-            </div>
-            <Switch
-              id="consent-analytics"
-              checked={analytics}
-              onCheckedChange={setAnalytics}
-            />
-          </li>
-          <li className="flex items-center justify-between gap-4">
-            <div>
-              <label
-                htmlFor="consent-marketing"
-                className="block text-sm font-medium text-foreground"
-              >
-                Markedsføring
-              </label>
-              <Text variant="muted" customStyles="text-xs">
-                Meta Pixel. Måler om annonser på Facebook og Instagram fører til
-                kjøp, påmeldinger og henvendelser, og kan brukes til å vise deg
-                relevante annonser der.
-              </Text>
-            </div>
-            <Switch
-              id="consent-marketing"
-              checked={marketing}
-              onCheckedChange={setMarketing}
-            />
-          </li>
-        </ul>
-      )}
-
-      <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
-        {showDetails ? (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => save({ analytics, marketing })}
-          >
-            Lagre valg
-          </Button>
-        ) : (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowDetails(true)}
-          >
-            Tilpass
-          </Button>
-        )}
-        <div className="flex flex-col gap-2 sm:flex-row">
-          <Button type="button" variant="outline" onClick={rejectAll}>
-            Avvis alle
-          </Button>
-          <Button type="button" onClick={acceptAll}>
-            Godta alle
-          </Button>
-        </div>
-      </div>
-    </div>
+      </SheetContent>
+    </Sheet>
   );
 }
