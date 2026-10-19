@@ -112,9 +112,14 @@ function QuantityStepper({
   // får plass på én rad i kjøpslinja på en smal mobil (~360 px).
   const buttonSize = compact ? "size-7" : "size-9";
   return (
+    /* Høyre-kanten skiller antall fra kjøpsknappen i den delte pillen —
+       nødvendig når knappen er ghost (varer med frakt), der de ellers
+       flyter sammen på samme flate. */
     <fieldset
       aria-label="Antall"
-      className={`flex items-center gap-0.5 ${compact ? "px-1" : "px-1.5"}`}
+      className={`flex items-center gap-0.5 border-border border-r ${
+        compact ? "px-1" : "px-1.5"
+      }`}
     >
       <Button
         type="button"
