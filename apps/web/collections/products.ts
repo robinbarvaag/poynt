@@ -377,8 +377,8 @@ export const Products: CollectionConfig = {
       },
     },
     {
-      // Styrer om kassene samler inn leveringsadresse. Stripe viser sitt eget
-      // adresseskjema; Vipps ber kunden dele adressen i appen (profile sharing).
+      // Styrer om handlekurven krever leveringsadresse før betaling (samme
+      // skjema for kort og Vipps — vi stoler ikke på betalingsleverandøren).
       name: "requiresShipping",
       type: "checkbox",
       defaultValue: false,

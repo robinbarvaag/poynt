@@ -75,6 +75,15 @@ export function CartDrawer() {
       ) {
         removeProducts(error.unavailableIds);
       }
+      // Kurvlinjer lagt til før «Krever frakt» fantes mangler flagget lokalt,
+      // så serveren er den som sier fra. Adresseskjemaet bor på handlekurv-
+      // siden — send kunden dit i stedet for å vise en feil uten skjema.
+      if (error instanceof CheckoutRequestError && error.shippingRequired) {
+        setVippsLoading(false);
+        setOpen(false);
+        router.push("/handlekurv");
+        return;
+      }
       setCheckoutError(
         error instanceof Error ? error.message : "Noe gikk galt"
       );

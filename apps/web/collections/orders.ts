@@ -144,7 +144,7 @@ export const Orders: CollectionConfig = {
       admin: {
         condition: (data) => data?.requiresShipping === true,
         description:
-          "Samlet inn av Stripe (adresseskjema i kassen) eller Vipps (kunden deler adressen i appen).",
+          "Fylt inn av kunden i handlekurven før betaling (gjelder både kort og Vipps).",
       },
       fields: [
         { name: "name", type: "text", label: "Mottaker" },
