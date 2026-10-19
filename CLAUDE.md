@@ -103,6 +103,8 @@ Linting and formatting are handled entirely by **Biome** (`biome.json` at root) 
 
 **Sporing (analytics)**: Én `trackEvent(name, params)` i `apps/web/lib/analytics.ts` sender til Vercel Web Analytics (alltid, cookieløs — Pro tillater bare 2 egenskaper, valgt i `VERCEL_PROPS`), GA4 (statistikk-samtykke) og Meta Pixel (markedsførings-samtykke). Knapp-lenker (`<Button asChild>` → `data-slot="button"`), utgående lenker og mailto/tel spores automatisk av en global klikklytter i `components/site-analytics.tsx`; `data-track="navn"` / `data-no-track` overstyrer. Ny hendelse → legg til i `TrackedEvent` + `VERCEL_PROPS`. Aldri persondata i parametrene.
 
+**Leveringsadresse (fysiske varer)**: Produkter merket «Krever frakt» (`requiresShipping`) får adresse + telefon samlet inn av betalingsleverandøren — Stripe via `shipping_address_collection`/`phone_number_collection` (leses fra `collected_information.shipping_details` i webhooken), Vipps via profile sharing-scopet `address` (leses fra userinfo-API-et). Normalisering i `apps/web/lib/shipping.ts` (testet), lagres i `orders.shipping` og vises i kvitterings-e-post og salgsvarsel. Mangler adressen likevel, står ordren som «Skal sendes» uten adresse og salgsvarselet advarer.
+
 **Cart constraint**: Digital products limited to 1 per item in cart. Cart state persists to localStorage as "poynt-cart".
 
 **Stripe sync**: Products and prices automatically sync to Stripe via Payload plugin. Stripe IDs stored on Product and User documents.

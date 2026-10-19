@@ -377,6 +377,20 @@ export const Products: CollectionConfig = {
       },
     },
     {
+      // Styrer om kassene samler inn leveringsadresse. Stripe viser sitt eget
+      // adresseskjema; Vipps ber kunden dele adressen i appen (profile sharing).
+      name: "requiresShipping",
+      type: "checkbox",
+      defaultValue: false,
+      label: "Krever frakt (fysisk vare)",
+      admin: {
+        position: "sidebar",
+        description:
+          "Kunden må oppgi leveringsadresse og telefon i kassen. Adressen lagres på bestillingen og sendes med i salgsvarselet.",
+        condition: (data) => data?.deliveryType !== "instant",
+      },
+    },
+    {
       name: "recurringInterval",
       type: "number",
       label: "Faktureringsintervall (måneder)",

@@ -1671,6 +1671,10 @@ export interface Product {
    */
   deliveryType: 'instant' | 'standard';
   /**
+   * Kunden må oppgi leveringsadresse og telefon i kassen. Adressen lagres på bestillingen og sendes med i salgsvarselet.
+   */
+  requiresShipping?: boolean | null;
+  /**
    * Antall måneder mellom hver fakturering (f.eks. 1, 3, 6, 12)
    */
   recurringInterval?: number | null;
@@ -3243,6 +3247,25 @@ export interface Order {
    * Kopi av teksten ved avkryssingsboksen slik den var da kjøpet ble gjort — dokumentasjon ved en eventuell tvist
    */
   termsAcceptedText?: string | null;
+  /**
+   * Minst ett produkt i bestillingen er merket «Krever frakt». Mangler adressen under, må kunden kontaktes.
+   */
+  requiresShipping?: boolean | null;
+  /**
+   * Samlet inn av Stripe (adresseskjema i kassen) eller Vipps (kunden deler adressen i appen).
+   */
+  shipping?: {
+    name?: string | null;
+    line1?: string | null;
+    line2?: string | null;
+    postalCode?: string | null;
+    city?: string | null;
+    /**
+     * Landkode, f.eks. NO
+     */
+    country?: string | null;
+    phone?: string | null;
+  };
   status: 'pending' | 'paid' | 'cancelled';
   /**
    * Kunden krysset aktivt av for nyhetsbrev i utsjekken (dokumentert samtykke)
@@ -5173,6 +5196,7 @@ export interface ProductsSelect<T extends boolean = true> {
   slug?: T;
   type?: T;
   deliveryType?: T;
+  requiresShipping?: T;
   recurringInterval?: T;
   membershipTier?: T;
   applyUrl?: T;
@@ -5286,6 +5310,18 @@ export interface OrdersSelect<T extends boolean = true> {
   termsAccepted?: T;
   termsAcceptedAt?: T;
   termsAcceptedText?: T;
+  requiresShipping?: T;
+  shipping?:
+    | T
+    | {
+        name?: T;
+        line1?: T;
+        line2?: T;
+        postalCode?: T;
+        city?: T;
+        country?: T;
+        phone?: T;
+      };
   status?: T;
   newsletterOptIn?: T;
   paymentProvider?: T;

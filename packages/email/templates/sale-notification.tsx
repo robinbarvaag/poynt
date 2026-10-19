@@ -1,6 +1,10 @@
 import { Button, Column, Row, Section, Text } from "@react-email/components";
 import * as React from "react";
 import { EmailShell, brand, emailStyles } from "./_layout";
+import {
+  type OrderShippingAddress,
+  shippingAddressLines,
+} from "./order-confirmation";
 import { RichContent } from "./rich-content";
 
 export interface SaleNotificationItem {
@@ -21,6 +25,10 @@ export interface SaleNotificationProps {
   total?: number;
   /** «Stripe» eller «Vipps». */
   paymentProvider?: string;
+  /** Bestillingen har fysiske varer som skal sendes. */
+  requiresShipping?: boolean;
+  /** Leveringsadressen kunden oppga. Mangler den når requiresShipping er satt, vises en advarsel. */
+  shipping?: OrderShippingAddress;
   /** Lenke til ordren i admin. */
   adminUrl?: string;
   /**
@@ -39,6 +47,8 @@ export default function SaleNotificationEmail({
   items,
   total,
   paymentProvider,
+  requiresShipping,
+  shipping,
   adminUrl,
   introHtml,
 }: SaleNotificationProps) {
@@ -69,6 +79,24 @@ export default function SaleNotificationEmail({
           <>
             <Text style={emailStyles.label}>Betalt med</Text>
             <Text style={emailStyles.value}>{paymentProvider}</Text>
+          </>
+        ) : null}
+
+        {shipping ? (
+          <>
+            <Text style={emailStyles.label}>Sendes til</Text>
+            {shippingAddressLines(shipping).map((line) => (
+              <Text key={line} style={{ ...emailStyles.value, margin: 0 }}>
+                {line}
+              </Text>
+            ))}
+          </>
+        ) : requiresShipping ? (
+          <>
+            <Text style={emailStyles.label}>Sendes til</Text>
+            <Text style={{ ...emailStyles.value, fontWeight: "800" }}>
+              Adresse mangler – kontakt kunden før varen sendes.
+            </Text>
           </>
         ) : null}
       </Section>

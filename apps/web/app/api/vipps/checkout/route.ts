@@ -6,6 +6,7 @@ import {
 import { resolveCheckoutItems } from "@/lib/checkout-items";
 import { discountedTotal, resolveCoupon } from "@/lib/coupon";
 import { getSessionWithMembership } from "@/lib/membership";
+import { cartNeedsShipping } from "@/lib/shipping";
 import { calculateVatTotal, parseVatRate } from "@/lib/vat";
 import { createVippsPayment } from "@/lib/vipps";
 import config from "@/payload.config";
@@ -65,6 +66,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Fysiske varer: be kunden dele adressen i appen òg. Webhooken hentar
+    // henne frå userinfo-API-et og lagrar på ordren.
+    const needsShipping = cartNeedsShipping(products);
+
     let total = products.reduce((sum, p) => sum + p.unitPrice * p.quantity, 0);
 
     // Rabattkodane bur i Stripe — delt kupongmodul (samme vakter som
@@ -121,6 +126,7 @@ export async function POST(req: NextRequest) {
         ),
         status: "pending",
         paymentProvider: "vipps",
+        requiresShipping: needsShipping,
         newsletterOptIn: newsletterOptIn === true,
         // Dokumentasjon på samtykket: huket av, når, og teksten kunden så.
         ...(termsAccepted === true
@@ -147,8 +153,11 @@ export async function POST(req: NextRequest) {
       amountValue,
       description,
       returnUrl: `${process.env.NEXT_PUBLIC_URL}/kvittering?ref=${reference}`,
-      // Hurtigkasse: kunden deler kontaktinfo i appen i staden for skjema hos oss
-      profileScope: "name email phoneNumber",
+      // Hurtigkasse: kunden deler kontaktinfo i appen i staden for skjema hos
+      // oss — og adressa når kurven har fysiske varer.
+      profileScope: needsShipping
+        ? "name email phoneNumber address"
+        : "name email phoneNumber",
     });
 
     return NextResponse.json({ url: payment.redirectUrl });

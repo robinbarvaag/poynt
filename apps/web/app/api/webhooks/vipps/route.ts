@@ -6,6 +6,10 @@ import { NEWSLETTER_CONSENT_TEXTS } from "@/lib/newsletter-consent-texts";
 import { getNotificationEmails } from "@/lib/notification-emails";
 import { buildOrderEmailExtras } from "@/lib/order-email";
 import {
+  type ShippingAddress,
+  shippingFromVippsUserinfo,
+} from "@/lib/shipping";
+import {
   captureVippsPayment,
   getVippsPayment,
   getVippsUserinfo,
@@ -171,10 +175,29 @@ export async function POST(req: NextRequest) {
           .filter(Boolean)
           .join(" ");
 
-        if (!customerEmail && payment.profile?.sub) {
+        // Leveringsadressa finst berre i userinfo-API-et, så for fysiske varer
+        // hentar vi profilen uansett om userDetails hadde e-post.
+        let shipping: ShippingAddress | null = null;
+        const needsUserinfo =
+          !!payment.profile?.sub &&
+          (!customerEmail || order.requiresShipping === true);
+        if (needsUserinfo && payment.profile?.sub) {
           const userinfo = await getVippsUserinfo(payment.profile.sub);
-          customerEmail = userinfo?.email ?? undefined;
+          customerEmail = customerEmail || (userinfo?.email ?? undefined);
           customerName = customerName || (userinfo?.name ?? "");
+          if (order.requiresShipping) {
+            shipping = shippingFromVippsUserinfo(userinfo, {
+              name: customerName || undefined,
+              phone: payment.userDetails?.mobileNumber,
+            });
+          }
+        }
+        if (order.requiresShipping && !shipping) {
+          // Kunden kan ha avslått å dele adressa i appen — ordren står som
+          // «skal sendes» utan adresse, så ho må kontaktast.
+          console.error(
+            `Vipps-ordre ${order.id} krever frakt men mangler leveringsadresse`
+          );
         }
 
         // Digital levering skjer umiddelbart — capture med ein gong.
@@ -187,6 +210,7 @@ export async function POST(req: NextRequest) {
             status: "paid",
             ...(customerEmail && { customerEmail }),
             ...(customerName && { customerName }),
+            ...(shipping && { shipping }),
           },
         });
 
@@ -211,6 +235,7 @@ export async function POST(req: NextRequest) {
             orderDate: order.createdAt,
             customerName: customerName || order.customerName || undefined,
             paymentMethod: "Vipps",
+            shipping: shipping ?? undefined,
             items: (order.items ?? []).map((item) => {
               const productId =
                 typeof item.product === "object"
@@ -278,6 +303,8 @@ export async function POST(req: NextRequest) {
             })),
             total: order.total,
             paymentProvider: "Vipps",
+            requiresShipping: order.requiresShipping === true,
+            shipping: shipping ?? undefined,
             adminUrl: `${process.env.NEXT_PUBLIC_URL}/admin/collections/orders/${order.id}`,
           });
         } catch (notifyError) {

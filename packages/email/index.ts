@@ -4,6 +4,7 @@ import type {
   OrderConfirmationItem,
   OrderConfirmationLegal,
   OrderConfirmationSeller,
+  OrderShippingAddress,
 } from "./templates/order-confirmation";
 
 export type {
@@ -11,6 +12,7 @@ export type {
   OrderConfirmationItem,
   OrderConfirmationLegal,
   OrderConfirmationSeller,
+  OrderShippingAddress,
 };
 export {
   renderEmailPreviews,
@@ -197,6 +199,8 @@ export async function sendOrderConfirmation(params: {
   customerName?: string;
   /** «Vipps» eller «Kort (Stripe)» — vises i ordrefakta. */
   paymentMethod?: string;
+  /** Leveringsadresse — bare for bestillinger med fysiske varer. */
+  shipping?: OrderShippingAddress;
   items: OrderConfirmationItem[];
   /** Totalsum i kr, inkl. MVA, etter rabatt. */
   total: number;
@@ -227,6 +231,7 @@ export async function sendOrderConfirmation(params: {
       customerName: params.customerName,
       customerEmail: params.email,
       paymentMethod: params.paymentMethod,
+      shipping: params.shipping,
       items: params.items,
       total: params.total,
       discount: params.discount,
@@ -277,6 +282,10 @@ export async function sendSaleNotification(params: {
   /** Totalsum i kr. */
   total?: number;
   paymentProvider?: string;
+  /** Bestillingen skal sendes (fysisk vare). */
+  requiresShipping?: boolean;
+  /** Leveringsadressen kunden oppga. */
+  shipping?: OrderShippingAddress;
   /** Lenke til ordren i admin. */
   adminUrl?: string;
 }) {

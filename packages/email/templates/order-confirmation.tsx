@@ -37,6 +37,34 @@ export interface OrderConfirmationSeller {
   supportPhone?: string;
 }
 
+/** Leveringsadresse for fysiske varer — vises som egen boks i e-posten. */
+export interface OrderShippingAddress {
+  name?: string;
+  line1: string;
+  line2?: string;
+  postalCode: string;
+  city: string;
+  /** Landkode (ISO 3166-1 alpha-2). «NO» skjules i visningen. */
+  country: string;
+  phone?: string;
+}
+
+/** Adressen som tekstlinjer: mottaker, gate, «0150 Oslo», land (utenom NO), telefon. */
+export function shippingAddressLines(shipping: OrderShippingAddress): string[] {
+  const country =
+    shipping.country.toUpperCase() !== "NO"
+      ? shipping.country.toUpperCase()
+      : undefined;
+  return [
+    shipping.name,
+    shipping.line1,
+    shipping.line2,
+    `${shipping.postalCode} ${shipping.city}`,
+    country,
+    shipping.phone ? `Tlf. ${shipping.phone}` : undefined,
+  ].filter((line): line is string => !!line);
+}
+
 /** Juridiske tekster og lenker. */
 export interface OrderConfirmationLegal {
   /** Angrerett-forbehold for digitalt innhold. */
@@ -54,6 +82,8 @@ export interface OrderConfirmationProps {
   customerEmail?: string;
   /** «Vipps» eller «Kort (Stripe)». */
   paymentMethod?: string;
+  /** Leveringsadresse — bare for bestillinger med fysiske varer. */
+  shipping?: OrderShippingAddress;
   items: OrderConfirmationItem[];
   /** Totalsum i kr, inkludert MVA, etter rabatt. */
   total: number;
@@ -118,6 +148,7 @@ export default function OrderConfirmationEmail({
   orderDate,
   customerName,
   paymentMethod,
+  shipping,
   items,
   total,
   discount,
@@ -203,6 +234,19 @@ export default function OrderConfirmationEmail({
           </tbody>
         </table>
       </Section>
+
+      {shipping ? (
+        <Section style={factsPanel}>
+          <Text style={{ ...emailStyles.label, margin: "0 0 4px" }}>
+            Sendes til
+          </Text>
+          {shippingAddressLines(shipping).map((line) => (
+            <Text key={line} style={{ ...emailStyles.value, margin: 0 }}>
+              {line}
+            </Text>
+          ))}
+        </Section>
+      ) : null}
 
       {/* Varelinjer */}
       <Section style={itemsPanel}>

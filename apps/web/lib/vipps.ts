@@ -8,6 +8,7 @@
  * scripts/register-vipps-webhook.ts).
  */
 import crypto from "node:crypto";
+import type { VippsUserinfoAddress } from "./shipping";
 
 const API_URL = process.env.VIPPS_API_URL || "https://apitest.vipps.no";
 
@@ -201,10 +202,25 @@ export async function refundVippsPayment(
   }
 }
 
-/** Fallback når userDetails manglar på betalinga: hent profil via sub. */
+export type VippsUserinfo = {
+  email?: string;
+  name?: string;
+  given_name?: string;
+  family_name?: string;
+  phone_number?: string;
+  /** Registrert adresse — berre med når `address` er i profile-scopet. */
+  address?: VippsUserinfoAddress | null;
+  other_addresses?: VippsUserinfoAddress[] | null;
+};
+
+/**
+ * Hent profilen kunden delte (name/email/phoneNumber/address) via profile.sub.
+ * Fallback for namn/e-post når userDetails manglar på betalinga, og einaste
+ * kjelde for leveringsadressa.
+ */
 export async function getVippsUserinfo(
   sub: string
-): Promise<{ email?: string; name?: string } | null> {
+): Promise<VippsUserinfo | null> {
   const token = await getVippsAccessToken();
   const res = await fetch(`${API_URL}/vipps-userinfo-api/userinfo/${sub}`, {
     headers: {
@@ -214,7 +230,7 @@ export async function getVippsUserinfo(
     },
   });
   if (!res.ok) return null;
-  return (await res.json()) as { email?: string; name?: string };
+  return (await res.json()) as VippsUserinfo;
 }
 
 /**
