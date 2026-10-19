@@ -6,6 +6,12 @@ import {
 import { resolveCheckoutItems } from "@/lib/checkout-items";
 import { discountedTotal, resolveCoupon } from "@/lib/coupon";
 import { getSessionWithMembership } from "@/lib/membership";
+import {
+  SHIPPING_REQUIRED_ERROR,
+  type ShippingAddress,
+  cartNeedsShipping,
+  validateShippingInput,
+} from "@/lib/shipping";
 import { calculateVatTotal, parseVatRate } from "@/lib/vat";
 import { createVippsPayment } from "@/lib/vipps";
 import config from "@/payload.config";
@@ -29,7 +35,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { items, couponCode, newsletterOptIn, termsAccepted } =
+    const { items, couponCode, newsletterOptIn, termsAccepted, shipping } =
       await req.json();
 
     const authSession = await getSessionWithMembership(req);
@@ -63,6 +69,26 @@ export async function POST(req: NextRequest) {
         { error: "Medlemskap må kjøpast med kort" },
         { status: 400 }
       );
+    }
+
+    // Fysiske varer: kunden fylte inn leveringsadressa i handlekurven. Ho
+    // validerast her (same reglar som skjemaet) og lagrast på pending-ordren,
+    // så ho er på plass før kunden i det heile kjem til Vipps.
+    const needsShipping = cartNeedsShipping(products);
+    let shippingAddress: ShippingAddress | null = null;
+    if (needsShipping) {
+      const parsed = validateShippingInput(shipping);
+      if (!parsed.ok) {
+        return NextResponse.json(
+          {
+            error: SHIPPING_REQUIRED_ERROR,
+            shippingRequired: true,
+            shippingErrors: parsed.errors,
+          },
+          { status: 400 }
+        );
+      }
+      shippingAddress = parsed.address;
     }
 
     let total = products.reduce((sum, p) => sum + p.unitPrice * p.quantity, 0);
@@ -121,6 +147,8 @@ export async function POST(req: NextRequest) {
         ),
         status: "pending",
         paymentProvider: "vipps",
+        requiresShipping: needsShipping,
+        ...(shippingAddress && { shipping: shippingAddress }),
         newsletterOptIn: newsletterOptIn === true,
         // Dokumentasjon på samtykket: huket av, når, og teksten kunden så.
         ...(termsAccepted === true
@@ -147,7 +175,9 @@ export async function POST(req: NextRequest) {
       amountValue,
       description,
       returnUrl: `${process.env.NEXT_PUBLIC_URL}/kvittering?ref=${reference}`,
-      // Hurtigkasse: kunden deler kontaktinfo i appen i staden for skjema hos oss
+      // Hurtigkasse: kunden deler kontaktinfo i appen i staden for skjema hos
+      // oss. Leveringsadressa kjem IKKJE herfrå — kunden kan avslå deling, så
+      // ho er allereie lagra på ordren frå skjemaet i handlekurven.
       profileScope: "name email phoneNumber",
     });
 

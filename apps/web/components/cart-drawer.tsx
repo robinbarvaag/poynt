@@ -8,10 +8,15 @@ import {
   CheckoutRequestError,
   startVippsCheckout,
 } from "@/lib/vipps-checkout-client";
-import { cartNeedsConsent, useCart, useCartUi } from "@poynt/cart";
+import {
+  cartNeedsConsent,
+  cartNeedsShipping,
+  useCart,
+  useCartUi,
+} from "@poynt/cart";
 import { Button, CartDrawer as CartDrawerShell, CartLineItem } from "@poynt/ui";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
 // usePathname er runtime-data under prerendering (cacheComponents) og leses
@@ -48,6 +53,10 @@ export function CartDrawer() {
   // Vipps-knappen inne i vinduet. Ellers går den rett til Vipps.
   const [consentOpen, setConsentOpen] = useState(false);
   const needsConsent = cartNeedsConsent(items);
+  // Fysiske varer trenger leveringsadresse — den fylles inn på handlekurv-
+  // siden, så Vipps-knappen her sender kunden dit i stedet for rett til Vipps.
+  const needsShipping = cartNeedsShipping(items);
+  const router = useRouter();
 
   // Inntil klienten har montert behandler vi kurven som tom (se useCartReady).
   const cartItems = ready ? items : [];
@@ -65,6 +74,15 @@ export function CartDrawer() {
         error.unavailableIds.length
       ) {
         removeProducts(error.unavailableIds);
+      }
+      // Kurvlinjer lagt til før «Krever frakt» fantes mangler flagget lokalt,
+      // så serveren er den som sier fra. Adresseskjemaet bor på handlekurv-
+      // siden — send kunden dit i stedet for å vise en feil uten skjema.
+      if (error instanceof CheckoutRequestError && error.shippingRequired) {
+        setVippsLoading(false);
+        setOpen(false);
+        router.push("/handlekurv");
+        return;
       }
       setCheckoutError(
         error instanceof Error ? error.message : "Noe gikk galt"
@@ -105,6 +123,11 @@ export function CartDrawer() {
               loading={vippsLoading}
               onClick={() => {
                 setCheckoutError(null);
+                if (needsShipping) {
+                  setOpen(false);
+                  router.push("/handlekurv");
+                  return;
+                }
                 if (needsConsent) {
                   setConsentOpen(true);
                   return;

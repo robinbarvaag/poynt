@@ -163,6 +163,7 @@ export default async function ReceiptPage({ searchParams }: Props) {
         variantValue,
         maxQuantity: product.allowQuantity ? undefined : 1,
         instantDelivery: product.deliveryType === "instant",
+        requiresShipping: product.requiresShipping === true,
       });
     }
   }

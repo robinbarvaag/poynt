@@ -6,16 +6,29 @@ import {
   recaptchaHeader,
   useRecaptcha,
 } from "@/components/recaptcha";
+import { ShippingAddressForm } from "@/components/shipping-address-form";
 import { VippsButton } from "@/components/vipps-button";
 import { toGaItems, trackEvent } from "@/lib/analytics";
 import { formatPrice } from "@/lib/format";
 import { NEWSLETTER_CONSENT_TEXTS } from "@/lib/newsletter-consent-texts";
+import {
+  EMPTY_SHIPPING_INPUT,
+  type ShippingAddress,
+  type ShippingAddressInput,
+  type ShippingErrors,
+  validateShippingInput,
+} from "@/lib/shipping-address";
 import { useCartReady } from "@/lib/use-cart-ready";
 import {
   CheckoutRequestError,
   startVippsCheckout,
 } from "@/lib/vipps-checkout-client";
-import { type AppliedCoupon, cartNeedsConsent, useCart } from "@poynt/cart";
+import {
+  type AppliedCoupon,
+  cartNeedsConsent,
+  cartNeedsShipping,
+  useCart,
+} from "@poynt/cart";
 import {
   Button,
   CartLineItem,
@@ -28,7 +41,23 @@ import {
 } from "@poynt/ui";
 import { ArrowLeft, ShieldCheck, ShoppingBag, Tag, X, Zap } from "lucide-react";
 import Link from "next/link";
-import { type FormEvent, useRef, useState } from "react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
+
+// Adressen huskes i sessionStorage (ikke localStorage: det er persondata) så
+// den overlever en avbrutt betaling og «tilbake» fra Stripe/Vipps.
+const SHIPPING_STORAGE_KEY = "poynt-shipping";
+
+function readStoredShipping(): ShippingAddressInput {
+  if (typeof window === "undefined") return EMPTY_SHIPPING_INPUT;
+  try {
+    const raw = window.sessionStorage.getItem(SHIPPING_STORAGE_KEY);
+    if (!raw) return EMPTY_SHIPPING_INPUT;
+    const parsed = JSON.parse(raw) as Partial<ShippingAddressInput>;
+    return { ...EMPTY_SHIPPING_INPUT, ...parsed };
+  } catch {
+    return EMPTY_SHIPPING_INPUT;
+  }
+}
 
 /** Rabatt i kr ut fra dagens delsum — så den følger antalsendringer. */
 function couponDiscount(
@@ -73,6 +102,59 @@ export default function CartPage() {
     setTermsError(true);
     termsRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
     return false;
+  };
+
+  // Leveringsadresse: kreves når kurven har en fysisk vare («Krever frakt» i
+  // admin). Kurvlinjer fra før flagget fantes mangler det — da svarer
+  // serveren `shippingRequired`, og vi viser skjemaet likevel.
+  const [shippingForced, setShippingForced] = useState(false);
+  const needsShipping = cartNeedsShipping(items) || shippingForced;
+  const [shippingInput, setShippingInput] =
+    useState<ShippingAddressInput>(readStoredShipping);
+  const [shippingErrors, setShippingErrors] = useState<ShippingErrors>({});
+  const shippingRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    try {
+      window.sessionStorage.setItem(
+        SHIPPING_STORAGE_KEY,
+        JSON.stringify(shippingInput)
+      );
+    } catch {
+      // Privat modus / full lagring — adressen lever da bare i skjemaet.
+    }
+  }, [shippingInput]);
+  const updateShipping = (next: ShippingAddressInput) => {
+    setShippingInput(next);
+    // Fjern feilen på feltet kunden retter, la de andre stå.
+    setShippingErrors((errors) => {
+      const cleared: ShippingErrors = { ...errors };
+      for (const key of Object.keys(errors) as (keyof ShippingErrors)[]) {
+        if (next[key] !== shippingInput[key]) delete cleared[key];
+      }
+      return cleared;
+    });
+  };
+  /** Validert adresse, undefined når kurven ikke trenger frakt, false ved feil. */
+  const requireShipping = (): ShippingAddress | undefined | false => {
+    if (!needsShipping) return undefined;
+    const result = validateShippingInput(shippingInput);
+    if (result.ok) return result.address;
+    setShippingErrors(result.errors);
+    shippingRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+    return false;
+  };
+  /** Serveren krevde adresse vi ikke sendte — vis skjemaet og pek på det. */
+  const handleShippingRequired = () => {
+    setShippingForced(true);
+    requestAnimationFrame(() => {
+      shippingRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    });
   };
 
   // Rabattkode (selve koden bor i cart-storen så alle kasser ser den)
@@ -130,6 +212,8 @@ export default function CartPage() {
 
   const handleCheckout = async () => {
     if (!requireTerms()) return;
+    const shipping = requireShipping();
+    if (shipping === false) return;
     setIsLoading(true);
     setCheckoutError(null);
     trackEvent("begin_checkout", {
@@ -153,6 +237,7 @@ export default function CartPage() {
           couponCode: coupon?.code,
           newsletterOptIn,
           termsAccepted: needsConsent && termsAccepted,
+          ...(shipping && { shipping }),
         }),
       });
 
@@ -163,6 +248,7 @@ export default function CartPage() {
         if (Array.isArray(data.unavailableIds) && data.unavailableIds.length) {
           removeProducts(data.unavailableIds);
         }
+        if (data.shippingRequired === true) handleShippingRequired();
         throw new Error(data.error || "Noe gikk galt");
       }
 
@@ -181,6 +267,8 @@ export default function CartPage() {
 
   const handleVippsCheckout = async () => {
     if (!requireTerms()) return;
+    const shipping = requireShipping();
+    if (shipping === false) return;
     setVippsLoading(true);
     setCheckoutError(null);
     try {
@@ -188,7 +276,8 @@ export default function CartPage() {
         items,
         coupon?.code,
         newsletterOptIn,
-        needsConsent && termsAccepted
+        needsConsent && termsAccepted,
+        shipping
       );
     } catch (error) {
       console.error("Vipps checkout error:", error);
@@ -197,6 +286,9 @@ export default function CartPage() {
         error.unavailableIds.length
       ) {
         removeProducts(error.unavailableIds);
+      }
+      if (error instanceof CheckoutRequestError && error.shippingRequired) {
+        handleShippingRequired();
       }
       setCheckoutError(
         error instanceof Error ? error.message : "Noe gikk galt"
@@ -402,6 +494,17 @@ export default function CartPage() {
                 />
                 <span>{NEWSLETTER_CONSENT_TEXTS.checkout}</span>
               </label>
+
+              {needsShipping && (
+                <div ref={shippingRef}>
+                  <ShippingAddressForm
+                    className="mt-5 rounded-2xl bg-accent-3/30 p-4"
+                    value={shippingInput}
+                    errors={shippingErrors}
+                    onChange={updateShipping}
+                  />
+                </div>
+              )}
 
               {needsConsent && (
                 <div ref={termsRef}>

@@ -11,6 +11,7 @@ import { subscribeWithConsent } from "@/lib/newsletter-consent";
 import { NEWSLETTER_CONSENT_TEXTS } from "@/lib/newsletter-consent-texts";
 import { getNotificationEmails } from "@/lib/notification-emails";
 import { buildOrderEmailExtras } from "@/lib/order-email";
+import { shippingFromStripeMetadata } from "@/lib/shipping";
 import { calculateVatTotal, parseVatRate } from "@/lib/vat";
 import { claimWebhookEvent, releaseWebhookEvent } from "@/lib/webhook-events";
 import config from "@/payload.config";
@@ -283,6 +284,19 @@ async function handleProductPurchase(session: Stripe.Checkout.Session) {
 
   const total = Math.round((session.amount_total || 0) / 100);
 
+  // Leveringsadresse for fysiske varer — fylt inn i handlekurven og sendt
+  // som metadata av /api/checkout. Mangler den likevel, merkes ordren «skal
+  // sendes» uten adresse, så det er synlig i admin og salgsvarselet.
+  const requiresShipping = session.metadata?.ship === "1";
+  const shipping = requiresShipping
+    ? shippingFromStripeMetadata(session.metadata)
+    : null;
+  if (requiresShipping && !shipping) {
+    console.error(
+      `Stripe-session ${session.id} krever frakt men mangler leveringsadresse`
+    );
+  }
+
   // Opprett ordre med kundeinfo frå Stripe (utan e-post-feltet `name`)
   const order = await payload.create({
     collection: "orders",
@@ -290,6 +304,8 @@ async function handleProductPurchase(session: Stripe.Checkout.Session) {
     data: {
       customerEmail,
       customerName: session.customer_details?.name || undefined,
+      requiresShipping,
+      ...(shipping && { shipping }),
       items: orderItems.map(({ name: _name, ...item }) => item),
       total,
       vatTotal: calculateVatTotal(
@@ -356,6 +372,7 @@ async function handleProductPurchase(session: Stripe.Checkout.Session) {
       orderDate: order.createdAt,
       customerName: session.customer_details?.name || undefined,
       paymentMethod: "Kort (Stripe)",
+      shipping: shipping ?? undefined,
       items: orderItems.map((item) => ({
         name: item.name,
         quantity: item.quantity,
@@ -395,6 +412,8 @@ async function handleProductPurchase(session: Stripe.Checkout.Session) {
       })),
       total,
       paymentProvider: "Stripe",
+      requiresShipping,
+      shipping: shipping ?? undefined,
       adminUrl: `${process.env.NEXT_PUBLIC_URL}/admin/collections/orders/${order.id}`,
     });
   } catch (error) {

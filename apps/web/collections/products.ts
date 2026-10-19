@@ -377,6 +377,20 @@ export const Products: CollectionConfig = {
       },
     },
     {
+      // Styrer om handlekurven krever leveringsadresse før betaling (samme
+      // skjema for kort og Vipps — vi stoler ikke på betalingsleverandøren).
+      name: "requiresShipping",
+      type: "checkbox",
+      defaultValue: false,
+      label: "Krever frakt (fysisk vare)",
+      admin: {
+        position: "sidebar",
+        description:
+          "Kunden må oppgi leveringsadresse og telefon i kassen. Adressen lagres på bestillingen og sendes med i salgsvarselet.",
+        condition: (data) => data?.deliveryType !== "instant",
+      },
+    },
+    {
       name: "recurringInterval",
       type: "number",
       label: "Faktureringsintervall (måneder)",

@@ -128,6 +128,45 @@ export const Orders: CollectionConfig = {
       },
     },
     {
+      name: "requiresShipping",
+      type: "checkbox",
+      defaultValue: false,
+      label: "Skal sendes",
+      admin: {
+        description:
+          "Minst ett produkt i bestillingen er merket «Krever frakt». Mangler adressen under, må kunden kontaktes.",
+      },
+    },
+    {
+      name: "shipping",
+      type: "group",
+      label: "Leveringsadresse",
+      admin: {
+        condition: (data) => data?.requiresShipping === true,
+        description:
+          "Fylt inn av kunden i handlekurven før betaling (gjelder både kort og Vipps).",
+      },
+      fields: [
+        { name: "name", type: "text", label: "Mottaker" },
+        { name: "line1", type: "text", label: "Adresse" },
+        { name: "line2", type: "text", label: "Adresse, linje 2" },
+        {
+          type: "row",
+          fields: [
+            { name: "postalCode", type: "text", label: "Postnummer" },
+            { name: "city", type: "text", label: "Poststed" },
+          ],
+        },
+        {
+          name: "country",
+          type: "text",
+          label: "Land",
+          admin: { description: "Landkode, f.eks. NO" },
+        },
+        { name: "phone", type: "text", label: "Telefon" },
+      ],
+    },
+    {
       name: "status",
       type: "select",
       required: true,

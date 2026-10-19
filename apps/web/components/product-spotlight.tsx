@@ -114,6 +114,7 @@ export async function ProductSpotlightCard({
               slug: product.slug,
               image: resolveMediaUrl(media),
               instantDelivery: product.deliveryType === "instant",
+              requiresShipping: product.requiresShipping === true,
             }}
             allowQuantity={Boolean(product.allowQuantity)}
             maxQuantity={product.allowQuantity ? undefined : 1}

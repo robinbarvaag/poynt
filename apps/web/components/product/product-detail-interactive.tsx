@@ -6,9 +6,11 @@ import { type MediaResource, PayloadImage } from "@/components/payload-image";
 import { VippsButton } from "@/components/vipps-button";
 import { startVippsBuyNow } from "@/lib/vipps-checkout-client";
 import type { Product } from "@/payload-types";
+import { useCart } from "@poynt/cart";
 import { Button, Container, Text } from "@poynt/ui";
 import { Minus, Plus } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   type Dispatch,
   type ReactNode,
@@ -41,6 +43,9 @@ export interface ProductPurchaseInfo {
   /** Digitalt innhold som leveres umiddelbart: Vipps-knappen går via
       samtykkevinduet, og linja i kurven krever avkryssing. */
   instantDelivery: boolean;
+  /** Fysisk vare: Vipps-knappen går via handlekurven, der kunden fyller inn
+      leveringsadresse før betaling. */
+  requiresShipping: boolean;
   /** Variant-spørsmål, f.eks. «Signert?». Tom = ingen varianter. */
   variantLabel?: string;
   variantOptions: ProductVariantOption[];
@@ -356,7 +361,9 @@ function ProductDetailInteractive({
   storySections,
   related,
 }: ProductDetailInteractiveProps) {
-  const { isSoldOut, allowQuantity, instantDelivery } = info;
+  const { isSoldOut, allowQuantity, instantDelivery, requiresShipping } = info;
+  const router = useRouter();
+  const addItem = useCart((state) => state.addItem);
 
   // Kjøpsboksen observeres av den sticky kjøpslinja: når boksen scrolles ut
   // av viewporten (oppover), glir linja inn nederst.
@@ -391,6 +398,28 @@ function ProductDetailInteractive({
   const handleVippsBuyNow = async () => {
     setVippsLoading(true);
     setVippsError(null);
+    // Fysiske varer trenger leveringsadresse før betaling. Den fylles inn i
+    // handlekurven, så «Kjøp nå» legger varen i kurven og går dit i stedet.
+    if (requiresShipping) {
+      addItem(
+        {
+          id: info.id,
+          name: info.name,
+          price: effectivePrice,
+          image: cartImageUrl,
+          variantLabel: hasVariants
+            ? (info.variantLabel ?? undefined)
+            : undefined,
+          variantValue: selectedVariant,
+          maxQuantity,
+          instantDelivery,
+          requiresShipping,
+        },
+        quantity
+      );
+      router.push("/handlekurv");
+      return;
+    }
     try {
       await startVippsBuyNow(
         {
@@ -497,6 +526,7 @@ function ProductDetailInteractive({
                       slug: info.slug,
                       image: cartImageUrl,
                       instantDelivery,
+                      requiresShipping,
                     }}
                     variantLabel={
                       hasVariants ? (info.variantLabel ?? undefined) : undefined
@@ -608,6 +638,7 @@ function ProductDetailInteractive({
                     slug: info.slug,
                     image: cartImageUrl,
                     instantDelivery,
+                    requiresShipping,
                   }}
                   variantLabel={
                     hasVariants ? (info.variantLabel ?? undefined) : undefined

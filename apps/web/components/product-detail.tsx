@@ -116,6 +116,7 @@ function ProductDetail({ product, relatedProducts = [] }: ProductDetailProps) {
         isSoldOut,
         allowQuantity: Boolean(product.allowQuantity),
         instantDelivery: product.deliveryType === "instant",
+        requiresShipping: product.requiresShipping === true,
         variantLabel: product.variantLabel ?? undefined,
         variantOptions,
         applyUrl: product.applyUrl ?? undefined,

@@ -201,10 +201,18 @@ export async function refundVippsPayment(
   }
 }
 
+export type VippsUserinfo = {
+  email?: string;
+  name?: string;
+  given_name?: string;
+  family_name?: string;
+  phone_number?: string;
+};
+
 /** Fallback når userDetails manglar på betalinga: hent profil via sub. */
 export async function getVippsUserinfo(
   sub: string
-): Promise<{ email?: string; name?: string } | null> {
+): Promise<VippsUserinfo | null> {
   const token = await getVippsAccessToken();
   const res = await fetch(`${API_URL}/vipps-userinfo-api/userinfo/${sub}`, {
     headers: {
@@ -214,7 +222,7 @@ export async function getVippsUserinfo(
     },
   });
   if (!res.ok) return null;
-  return (await res.json()) as { email?: string; name?: string };
+  return (await res.json()) as VippsUserinfo;
 }
 
 /**

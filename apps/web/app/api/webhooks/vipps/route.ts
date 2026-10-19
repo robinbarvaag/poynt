@@ -5,6 +5,7 @@ import { subscribeWithConsent } from "@/lib/newsletter-consent";
 import { NEWSLETTER_CONSENT_TEXTS } from "@/lib/newsletter-consent-texts";
 import { getNotificationEmails } from "@/lib/notification-emails";
 import { buildOrderEmailExtras } from "@/lib/order-email";
+import { shippingFromStored } from "@/lib/shipping";
 import {
   captureVippsPayment,
   getVippsPayment,
@@ -177,6 +178,15 @@ export async function POST(req: NextRequest) {
           customerName = customerName || (userinfo?.name ?? "");
         }
 
+        // Leveringsadressa vart lagra på pending-ordren av /api/vipps/checkout
+        // (skjemaet i handlekurven). Manglar ho likevel, skal det synast.
+        const shipping = shippingFromStored(order.shipping);
+        if (order.requiresShipping && !shipping) {
+          console.error(
+            `Vipps-ordre ${order.id} krever frakt men mangler leveringsadresse`
+          );
+        }
+
         // Digital levering skjer umiddelbart — capture med ein gong.
         await captureVippsPayment(reference, Math.round(order.total * 100));
 
@@ -211,6 +221,7 @@ export async function POST(req: NextRequest) {
             orderDate: order.createdAt,
             customerName: customerName || order.customerName || undefined,
             paymentMethod: "Vipps",
+            shipping: shipping ?? undefined,
             items: (order.items ?? []).map((item) => {
               const productId =
                 typeof item.product === "object"
@@ -278,6 +289,8 @@ export async function POST(req: NextRequest) {
             })),
             total: order.total,
             paymentProvider: "Vipps",
+            requiresShipping: order.requiresShipping === true,
+            shipping: shipping ?? undefined,
             adminUrl: `${process.env.NEXT_PUBLIC_URL}/admin/collections/orders/${order.id}`,
           });
         } catch (notifyError) {

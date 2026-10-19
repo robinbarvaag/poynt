@@ -1,14 +1,22 @@
 import type { CartItem } from "@poynt/cart";
 import { toGaItems, trackEvent } from "./analytics";
+import type { ShippingAddress } from "./shipping-address";
 
 /** Kassefeil med nok kontekst til at klienten kan rydde kurven. */
 export class CheckoutRequestError extends Error {
   /** Produkt-id-er serveren avviste (slettet/utsolgt) — fjernes fra kurven. */
   unavailableIds: string[];
+  /** Serveren krever leveringsadresse (kurven har en vare med frakt). */
+  shippingRequired: boolean;
 
-  constructor(message: string, unavailableIds: string[] = []) {
+  constructor(
+    message: string,
+    unavailableIds: string[] = [],
+    shippingRequired = false
+  ) {
     super(message);
     this.unavailableIds = unavailableIds;
+    this.shippingRequired = shippingRequired;
   }
 }
 
@@ -26,7 +34,9 @@ export async function startVippsCheckout(
   newsletterOptIn?: boolean,
   // Aldri utleidd frå kurven her: berre kallaren veit om boksen faktisk vart
   // huka av.
-  termsAccepted = false
+  termsAccepted = false,
+  // Leveringsadresse — påkravd av serveren når kurven har fysiske varer.
+  shipping?: ShippingAddress
 ): Promise<void> {
   trackEvent("begin_checkout", {
     method: "vipps",
@@ -43,7 +53,8 @@ export async function startVippsCheckout(
     })),
     termsAccepted,
     couponCode,
-    newsletterOptIn
+    newsletterOptIn,
+    shipping
   );
 }
 
@@ -67,7 +78,8 @@ async function postVippsCheckout(
   items: { id: string; quantity: number; variant?: string }[],
   termsAccepted: boolean,
   couponCode?: string,
-  newsletterOptIn?: boolean
+  newsletterOptIn?: boolean,
+  shipping?: ShippingAddress
 ): Promise<void> {
   const response = await fetch("/api/vipps/checkout", {
     method: "POST",
@@ -79,6 +91,7 @@ async function postVippsCheckout(
       // Samtykke til bortfall av angrerett (angrerettloven § 22 n) — kravet
       // avgjerast på serveren ut frå produkta i kurven.
       termsAccepted: termsAccepted === true,
+      ...(shipping && { shipping }),
     }),
   });
 
@@ -86,7 +99,8 @@ async function postVippsCheckout(
   if (!response.ok) {
     throw new CheckoutRequestError(
       data.error || "Noe gikk galt",
-      Array.isArray(data.unavailableIds) ? data.unavailableIds : []
+      Array.isArray(data.unavailableIds) ? data.unavailableIds : [],
+      data.shippingRequired === true
     );
   }
   if (!data.url) {
