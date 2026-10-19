@@ -616,7 +616,14 @@ function ProductDetailInteractive({
           </div>
         </div>
 
-        {storySections}
+        {/* Fragmentet er med vilje. `storySections` lages på serveren og
+            kommer hit via Flight som en lat (lazy) referanse til klient-
+            modulen; React 19.2 mister «nøkkel validert»-merket på slike når
+            de ligger rett i en søskenliste, og klager på manglende key «from
+            ProductDetail». Som eneste barn i et fragment valideres den aldri
+            som listeelement. */}
+        {/* biome-ignore lint/complexity/noUselessFragments: se kommentaren over — fragmentet unngår en falsk key-advarsel */}
+        <>{storySections}</>
 
         {related}
       </Container>
