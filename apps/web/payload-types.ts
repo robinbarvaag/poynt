@@ -3203,6 +3203,8 @@ export interface Course {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Bestillinger opprettes av betalingen. Bøker som skal i posten: bruk «Skal sendes» over lista, og sett «Forsendelse» til «Sendt» når pakken er levert inn.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "orders".
  */
@@ -3252,7 +3254,7 @@ export interface Order {
    */
   requiresShipping?: boolean | null;
   /**
-   * Samlet inn av Stripe (adresseskjema i kassen) eller Vipps (kunden deler adressen i appen).
+   * Fylt inn av kunden i handlekurven før betaling (gjelder både kort og Vipps).
    */
   shipping?: {
     name?: string | null;
@@ -3266,6 +3268,18 @@ export interface Order {
     country?: string | null;
     phone?: string | null;
   };
+  /**
+   * Sett til «Sendt» når pakken er levert inn. Da forsvinner bestillingen fra «Skal sendes».
+   */
+  shippingStatus?: ('pending' | 'shipped') | null;
+  /**
+   * Settes automatisk når forsendelsen markeres som sendt.
+   */
+  shippedAt?: string | null;
+  /**
+   * Valgfritt. F.eks. sporingsnummer fra Posten.
+   */
+  shippingNote?: string | null;
   status: 'pending' | 'paid' | 'cancelled';
   /**
    * Kunden krysset aktivt av for nyhetsbrev i utsjekken (dokumentert samtykke)
@@ -3358,8 +3372,8 @@ export interface BookSale {
   /**
    * Avgjør hvilke kutt som trekkes fra.
    */
-  channel: 'norli' | 'ark' | 'egen' | 'foredrag' | 'direkte' | 'annet';
-  saleSource: 'innkjop' | 'forhandssalg' | 'avregning' | 'foredrag' | 'direkte' | 'retur' | 'annet';
+  channel: 'norli' | 'ark' | 'egen' | 'foredrag' | 'direkte' | 'bibliotek' | 'annet';
+  saleSource: 'innkjop' | 'forhandssalg' | 'avregning' | 'foredrag' | 'direkte' | 'hyllesalg' | 'retur' | 'annet';
   /**
    * Kunder som krysset av for «signert». Bare disse bestilles inn til signering i butikk — og bare disse kan du ta med på lanseringsfesten.
    */
@@ -5322,6 +5336,9 @@ export interface OrdersSelect<T extends boolean = true> {
         country?: T;
         phone?: T;
       };
+  shippingStatus?: T;
+  shippedAt?: T;
+  shippingNote?: T;
   status?: T;
   newsletterOptIn?: T;
   paymentProvider?: T;
@@ -6368,7 +6385,7 @@ export interface BookEconomy {
   editorBasis: 'brutto' | 'netto';
   channels?:
     | {
-        key: 'norli' | 'ark' | 'egen' | 'foredrag' | 'direkte' | 'annet';
+        key: 'norli' | 'ark' | 'egen' | 'foredrag' | 'direkte' | 'bibliotek' | 'annet';
         label: string;
         active?: boolean | null;
         /**

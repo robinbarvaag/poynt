@@ -76,6 +76,19 @@ async function BookSalesContent() {
   const { book, coverage, totals, channels, expenses, stock, events } = data;
   const storesWithBook = data.stores.filter((s) => s.currentQty > 0).length;
 
+  // Forhåndssalgsavtalen er noe å påvirke bare mens den løper. Da står kortet
+  // øverst; etter fristen blir det en kort oppsummering nederst, ved økonomien.
+  const activePresales = data.presales.filter(
+    (presale) => presale.daysLeft === null || presale.daysLeft >= 0
+  );
+  const closedPresales = data.presales.filter(
+    (presale) => !activePresales.includes(presale)
+  );
+  const purchasedFor = (channelKey: string) =>
+    channels
+      .find((channel) => channel.key === channelKey)
+      ?.bySource.find((part) => part.source === "innkjop")?.copies ?? 0;
+
   return (
     <main className="mx-auto flex max-w-6xl flex-col gap-10 px-4 py-10 sm:px-6 lg:px-8">
       {/* ---- Topp ---------------------------------------------------- */}
@@ -145,15 +158,11 @@ async function BookSalesContent() {
       )}
 
       {/* ---- Forhåndssalg via bokhandelens program (Norli) ----------- */}
-      {data.presales.map((presale) => (
+      {activePresales.map((presale) => (
         <PresaleCard
           key={presale.channelKey}
           presale={presale}
-          purchasedCopies={
-            channels
-              .find((channel) => channel.key === presale.channelKey)
-              ?.bySource.find((part) => part.source === "innkjop")?.copies ?? 0
-          }
+          purchasedCopies={purchasedFor(presale.channelKey)}
         />
       ))}
 
@@ -169,16 +178,104 @@ async function BookSalesContent() {
         printRun={book.printRun}
       />
 
-      {/* ---- Milepæler ----------------------------------------------- */}
+      {/* ---- Ut av hyllene ------------------------------------------- */}
       <Card>
         <CardHeader>
-          <CardTitle>Milepæler</CardTitle>
+          <CardTitle>Ut av hyllene</CardTitle>
           <CardDescription>
-            Små seire underveis — og hva som er neste.
+            <strong>{antall(data.sellThroughTotal)} bøker</strong> har forlatt
+            en butikkhylle siden sporingen startet, utledet av at lageret gikk
+            ned. Dette er <em>ikke</em> omsetning — de bøkene fikk du betalt for
+            da bokhandelen kjøpte dem inn. Tallet sier hvor fort boka går, og
+            dermed når det kommer en etterbestilling.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-6">
+          <SalesChart
+            points={data.sellThroughTimeline}
+            variant="sellthrough"
+            emptyText="Ingenting har flyttet seg i butikkhyllene ennå."
+          />
+
+          {/* Det Susanne selv solgte fra hylla — festen og signeringene.
+              Lagerhentingen fanger de samme bøkene, så dette er en
+              fortelling om hvem som solgte dem, ikke et tall i tillegg. */}
+          {data.shelfSales.copies > 0 && (
+            <div className="border-border flex flex-col gap-3 rounded-xl border p-4">
+              <p className="text-sm">
+                <strong>{antall(data.shelfSales.copies)} av dem</strong> solgte
+                du selv, på lanseringsfest og signeringer. De er med i tallet
+                over — dette er bare hvem som sto bak disken.
+              </p>
+              <ul className="flex flex-col gap-1 text-sm">
+                {data.shelfSales.rows.map((row) => (
+                  <li
+                    key={row.id}
+                    className="flex flex-wrap justify-between gap-x-4"
+                  >
+                    <span>
+                      <span className="tabular-nums">{dato(row.date)}</span>
+                      {" · "}
+                      {row.channelLabel}
+                      {row.note ? ` · ${row.note}` : ""}
+                    </span>
+                    <span className="font-semibold tabular-nums">
+                      {antall(row.copies)} bøker
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* ---- Ute i butikk -------------------------------------------- */}
+      {stock.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Ute i butikk</CardTitle>
+            <CardDescription>
+              Eksemplarer i butikkhyllene dag for dag, kjede for kjede. Går
+              linja ned uten at det kommer påfyll, er det på tide å ringe.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <StockTabs stock={stock} />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* ---- Butikker ------------------------------------------------ */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Butikkene</CardTitle>
+          <CardDescription>
+            {antall(data.stores.length)} butikker med kontaktinfo.{" "}
+            {storesWithBook > 0
+              ? `${antall(storesWithBook)} har boka nå.`
+              : "Ingen har boka ennå — men lista er klar, så du kan begynne å ringe."}{" "}
+            Klikk på kartet eller et fylke for å filtrere. «Til oppfølging»
+            viser de som ikke har boka; velg dem og kopier e-postadressene til
+            én samlet e-post.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Milestones items={data.milestones} />
+          <StoresSection stores={data.stores} regions={data.regions} />
+        </CardContent>
+      </Card>
+
+      {/* ---- Endringslogg -------------------------------------------- */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Hva har skjedd</CardTitle>
+          <CardDescription>
+            Hver morgen sammenlignes butikkenes lager med gårsdagens. Bare
+            faktiske endringer havner her.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <EventLog events={events} />
         </CardContent>
       </Card>
 
@@ -202,6 +299,19 @@ async function BookSalesContent() {
             points={data.timeline}
             emptyText="Ingen salg ført ennå. Har Norli eller ARK kjøpt inn et antall, legg det inn under Boksalg — det er da du får betalt."
           />
+        </CardContent>
+      </Card>
+
+      {/* ---- Milepæler ----------------------------------------------- */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Milepæler</CardTitle>
+          <CardDescription>
+            Små seire underveis — og hva som er neste.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Milestones items={data.milestones} />
         </CardContent>
       </Card>
 
@@ -356,75 +466,14 @@ async function BookSalesContent() {
         </CardContent>
       </Card>
 
-      {/* ---- Ut av hyllene ------------------------------------------- */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Ut av hyllene</CardTitle>
-          <CardDescription>
-            <strong>{antall(data.sellThroughTotal)} bøker</strong> har forlatt
-            en butikkhylle siden sporingen startet, utledet av at lageret gikk
-            ned. Dette er <em>ikke</em> omsetning — de bøkene fikk du betalt for
-            da bokhandelen kjøpte dem inn. Tallet sier hvor fort boka går, og
-            dermed når det kommer en etterbestilling.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <SalesChart
-            points={data.sellThroughTimeline}
-            variant="sellthrough"
-            emptyText="Ingenting har flyttet seg i butikkhyllene ennå."
-          />
-        </CardContent>
-      </Card>
-
-      {/* ---- Ute i butikk -------------------------------------------- */}
-      {stock.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Ute i butikk</CardTitle>
-            <CardDescription>
-              Eksemplarer i butikkhyllene dag for dag, kjede for kjede. Går
-              linja ned uten at det kommer påfyll, er det på tide å ringe.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <StockTabs stock={stock} />
-          </CardContent>
-        </Card>
-      )}
-
-      {/* ---- Butikker ------------------------------------------------ */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Butikkene</CardTitle>
-          <CardDescription>
-            {antall(data.stores.length)} butikker med kontaktinfo.{" "}
-            {storesWithBook > 0
-              ? `${antall(storesWithBook)} har boka nå.`
-              : "Ingen har boka ennå — men lista er klar, så du kan begynne å ringe."}{" "}
-            Klikk på kartet eller et fylke for å filtrere. «Til oppfølging»
-            viser de som ikke har boka; velg dem og kopier e-postadressene til
-            én samlet e-post.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <StoresSection stores={data.stores} regions={data.regions} />
-        </CardContent>
-      </Card>
-
-      {/* ---- Endringslogg -------------------------------------------- */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Hva har skjedd</CardTitle>
-          <CardDescription>
-            Hver morgen sammenlignes butikkenes lager med gårsdagens. Bare
-            faktiske endringer havner her.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <EventLog events={events} />
-        </CardContent>
-      </Card>
+      {/* ---- Forhåndssalg, avsluttet --------------------------------- */}
+      {closedPresales.map((presale) => (
+        <PresaleCard
+          key={presale.channelKey}
+          presale={presale}
+          purchasedCopies={purchasedFor(presale.channelKey)}
+        />
+      ))}
 
       {/* ---- Utgifter ------------------------------------------------ */}
       <Card>

@@ -95,6 +95,37 @@ egen nettbutikk). Velg den ut fra *hvem som betalte deg*.
 - **Retur fra bokhandel** trekkes fra i stedet for å legges til. Antallet føres
   positivt; typen gjør resten. Den senker både «solgt inn» og grunnlaget
   bokhandelen kan returnere fra.
+- **Solgt fra bokhandelens hylle** (`hyllesalg`, `SHELF_SOURCE`) er bøker
+  Susanne selv solgte eller signerte i en bokhandel — lanseringsfesten,
+  signeringer. De kom fra butikkens lager og er allerede betalt gjennom
+  innkjøpet, så de holdes **helt utenfor** økonomien, tidslinja for solgt inn
+  og returgrunnlaget. Dashbordet viser dem for seg under «Ut av hyllene»
+  (`shelfSales`), som en fortelling om hvem som sto bak disken. Lagerhentingen
+  fanger de samme bøkene (Norli Stavanger gikk 219 → 196 lanseringshelga), så
+  de legges heller ikke til «ut av hyllene»-tallet. Bakgrunnen: 15 + 7 slike
+  bøker lå som «innkjøp» etter lanseringen og ble talt tre ganger.
+
+### Forlagssentralen er fasiten for innkjøp
+
+Poynt har tilgang til Forlagssentralens portal (Ordre → Ordresøk, filtrer på
+ISBN). Alt Norli og ARK kjøper går som ordrer der, og det er de ordrene Susanne
+får oppgjør for. Regelen er derfor: **én «Innkjøp fra bokhandel»-rad per
+Forlagssentralen-ordre, med ordrenummeret som referanse** — og aldri en rad for
+noe som selges i en butikk etterpå. Sterkeste kontroll: opplaget (2000) minus
+lageret hos Forlagssentralen (Øyeblikksrapport) minus Susannes egne eksemplarer
+skal være summen av innkjøpsradene. Forhåndssalgene via bok.norli.no skal
+ligge som egne Norli-ordrer **i tillegg** til innkjøpet.
+
+Øyeblikksrapporten «Artikkel – ordreinfo» 19.10.2026 viste fasiten for første
+runde: Norli 360 (300 Nygata Stavanger, 56 Pottemakerveien = nettlageret og
+forhåndssalget, 2 + 2 til to butikker), ARK 303 fordelt på 145 butikker à 2–3,
+Biblioteksentralen 4. Boksalg hadde 400 + 94 på Norli — 134 for mye. Regelen
+som følger av det: kjør rapporten ukentlig, og hver linje som har økt i
+«Kontert» siden sist blir én rad i Boksalg med kundenummeret som referanse.
+
+Biblioteksentralen er egen kanal (`bibliotek`): de kjøper på vegne av
+bibliotekene med egen rabatt, så satsen må legges inn under *Kanaler* i
+Bokøkonomi (fra fakturaen) før radene kan prises.
 
 Et forhåndssalg er et salg med `saleSource = forhandssalg` — men still
 kontrollspørsmålet først: har bokhandelen kjøpt bøkene av deg, eller har kunder
@@ -152,9 +183,22 @@ personlig signert»; dashbordet summerer dem til «Til signering» og sier fra o
 rader som mangler tallet. De som glemte å velge signert får boka i posten.
 
 Kortet «Forhåndssalg via Norli» (`components/boksalg/presale-card.tsx`) ligger
-øverst i dashbordet fram til lansering: antall, kickback-trinn og beløp, dager
-igjen av avtalen, til signering, trappa med markører og markedspakka. Hvert
-trinn og markedspakka er også milepæler.
+øverst i dashbordet **mens avtalen løper**: antall, kickback-trinn og beløp,
+dager igjen av avtalen, til signering, trappa med markører og markedspakka.
+Hvert trinn og markedspakka er også milepæler. Etter fristen er det ingenting
+å påvirke, så kortet blir en kort oppsummering (tre tall, én setning) og
+flyttes ned til økonomidelen — `page.tsx` skiller `activePresales` fra
+`closedPresales` på `daysLeft`.
+
+### Rekkefølgen på sida
+
+Etter lansering er det bevegelsen ute i butikkene Susanne kan gjøre noe med, så
+sida går fra *hvor står vi* til *hva skjer nå* til *bakgrunn*: nøkkeltall med
+returscenario → ut av hyllene → ute i butikk → butikkene (kart og oppfølging)
+→ endringslogg → solgt inn per dag → milepæler → hva hver kanal er verdt →
+avsluttet forhåndssalg → utgifter. Seksjonene er merket med
+`{/* ---- Navn ---- */}`-kommentarer i `page.tsx`, så en omrokering er å
+flytte blokker, ikke å skrive dem om.
 
 > Salg ført på en kanal som ikke finnes under *Kanaler* i Bokøkonomi (f.eks.
 > «Annet») kan ikke prises og holdes utenfor totalene. Dashbordet varsler om

@@ -14,6 +14,7 @@ import {
   type FollowUpStatus,
   RETURNABLE_SOURCES,
   RETURN_SOURCE,
+  SHELF_SOURCE,
   type SaleSource,
   type StoreStatus,
   labelFor,
@@ -188,6 +189,24 @@ export interface TimelinePoint {
   copies: number;
 }
 
+/**
+ * Bøker Susanne solgte eller signerte for hånd i en bokhandel (lanseringsfest,
+ * signering). De kom fra butikkens hylle og er allerede betalt gjennom
+ * innkjøpet — så de står under «Ut av hyllene», aldri i omsetningen.
+ */
+export interface ShelfSaleRow {
+  id: number;
+  date: string;
+  copies: number;
+  channelLabel: string;
+  note: string | null;
+}
+
+export interface ShelfSales {
+  copies: number;
+  rows: ShelfSaleRow[];
+}
+
 export interface RecentEvent {
   id: string;
   occurredAt: string;
@@ -242,6 +261,8 @@ export interface BookDashboardData {
   sellThroughTimeline: TimelinePoint[];
   /** Sum bøker ut av hyllene, på tvers av kilder. */
   sellThroughTotal: number;
+  /** Det Susanne selv solgte fra bokhandelens hylle. Del av «ut av hyllene», ikke omsetning. */
+  shelfSales: ShelfSales;
   events: RecentEvent[];
   warnings: string[];
 }
@@ -255,6 +276,7 @@ const SALE_SOURCE_SHORT: Record<SaleSource, string> = {
   avregning: "avregning",
   foredrag: "foredrag",
   direkte: "direkte",
+  hyllesalg: "fra hylla",
   retur: "retur",
   annet: "annet",
 };
@@ -444,9 +466,26 @@ export async function getBookDashboard(
     channels.map((channel) => [channel.key, channel])
   );
   const unknownChannels = new Map<string, number>();
+  const shelfSales: ShelfSales = { copies: 0, rows: [] };
 
   for (const doc of manualDocs.docs as BookSale[]) {
     const source = doc.saleSource as SaleSource;
+
+    // Solgt fra bokhandelens hylle: bøkene er betalt i innkjøpet, så de skal
+    // verken prises, inn i tidslinja for solgt inn eller i returgrunnlaget.
+    // De samles for seg og vises under «Ut av hyllene».
+    if (source === SHELF_SOURCE) {
+      shelfSales.copies += doc.copies;
+      shelfSales.rows.push({
+        id: doc.id,
+        date: doc.date,
+        copies: doc.copies,
+        channelLabel: labelFor(CHANNEL_OPTIONS, doc.channel),
+        note: doc.notes || doc.reference || null,
+      });
+      continue;
+    }
+
     // En retur trekkes fra — og fra innkjøpet, siden det er innkjøpet som har
     // returrett. Forhåndssalg og avregninger er bøker som har gått til en
     // kunde og kommer ikke tilbake.
@@ -799,6 +838,7 @@ export async function getBookDashboard(
     (sum, value) => sum + value,
     0
   );
+  shelfSales.rows.sort((a, b) => b.date.localeCompare(a.date));
 
   // ---- Endringslogg -------------------------------------------------------
   const eventDocs = await payload.find({
@@ -882,6 +922,7 @@ export async function getBookDashboard(
     timeline,
     sellThroughTimeline,
     sellThroughTotal,
+    shelfSales,
     events,
     warnings,
   };

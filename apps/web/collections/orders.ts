@@ -1,4 +1,63 @@
-import type { CollectionConfig } from "payload";
+import type { CollectionBeforeChangeHook, CollectionConfig } from "payload";
+import type { Order } from "../payload-types";
+
+/**
+ * Felt som settes av betalingen (kassene og webhookene). Partneren kan åpne
+ * og lagre en bestilling for å sette forsendelsesstatus eller rette adressen,
+ * men disse skal aldri endres fra admin — `readOnly` i skjemaet, og hooken
+ * under setter dem tilbake til lagret verdi uansett hva som sendes inn.
+ */
+const PAYMENT_FIELDS = [
+  "items",
+  "total",
+  "vatTotal",
+  "termsAccepted",
+  "termsAcceptedAt",
+  "termsAcceptedText",
+  "requiresShipping",
+  "status",
+  "newsletterOptIn",
+  "paymentProvider",
+  "vippsReference",
+  "stripeSessionId",
+  "stripePaymentIntentId",
+] as const satisfies readonly (keyof Order)[];
+
+const guardOrderChanges: CollectionBeforeChangeHook<Order> = ({
+  data,
+  originalDoc,
+  operation,
+  req,
+}) => {
+  // Fra admin (innlogget bruker): betalingsfeltene låses. Webhookene bruker
+  // det lokale API-et uten bruker og får oppdatere status som før.
+  if (operation === "update" && req.user && originalDoc) {
+    for (const key of PAYMENT_FIELDS) {
+      (data as Record<string, unknown>)[key] = originalDoc[key];
+    }
+  }
+
+  // Forsendelse: bare bestillinger med fysiske varer har en status. Nye
+  // ordrer starter som «Under behandling»; «Sendt» stempler tidspunktet.
+  const requiresShipping =
+    data.requiresShipping ?? originalDoc?.requiresShipping ?? false;
+  if (!requiresShipping) {
+    data.shippingStatus = null;
+    data.shippedAt = null;
+    return data;
+  }
+  const next = data.shippingStatus ?? originalDoc?.shippingStatus ?? "pending";
+  data.shippingStatus = next;
+  if (next === "shipped") {
+    const alreadyShipped = originalDoc?.shippingStatus === "shipped";
+    data.shippedAt =
+      (alreadyShipped ? (data.shippedAt ?? originalDoc?.shippedAt) : null) ??
+      new Date().toISOString();
+  } else {
+    data.shippedAt = null;
+  }
+  return data;
+};
 
 export const Orders: CollectionConfig = {
   slug: "orders",
@@ -9,12 +68,33 @@ export const Orders: CollectionConfig = {
   admin: {
     useAsTitle: "customerEmail",
     group: "Nettbutikk",
+    description:
+      "Bestillinger opprettes av betalingen. Bøker som skal i posten: bruk «Skal sendes» over lista, og sett «Forsendelse» til «Sendt» når pakken er levert inn.",
+    defaultColumns: [
+      "customerEmail",
+      "customerName",
+      "status",
+      "shippingStatus",
+      "total",
+      "createdAt",
+    ],
+    listSearchableFields: ["customerEmail", "customerName", "vippsReference"],
+    // «Grupper etter» i lista, f.eks. etter forsendelsesstatus.
+    groupBy: true,
+    components: {
+      beforeListTable: ["/admin/components/orders/order-filters#OrderFilters"],
+    },
   },
   access: {
     create: () => false,
-    update: () => false,
+    // Partneren trenger å lagre forsendelsesstatus og rette adressen —
+    // betalingsfeltene låses i `guardOrderChanges`.
+    update: ({ req: { user } }) => !!user,
     delete: () => false,
     read: ({ req: { user } }) => !!user,
+  },
+  hooks: {
+    beforeChange: [guardOrderChanges],
   },
   fields: [
     {
@@ -36,6 +116,7 @@ export const Orders: CollectionConfig = {
       type: "array",
       required: true,
       label: "Produkter",
+      admin: { readOnly: true },
       fields: [
         {
           name: "product",
@@ -80,13 +161,14 @@ export const Orders: CollectionConfig = {
       type: "number",
       required: true,
       label: "Totalpris (kr)",
-      admin: { description: "Inkludert MVA" },
+      admin: { description: "Inkludert MVA", readOnly: true },
     },
     {
       name: "vatTotal",
       type: "number",
       label: "Herav MVA (kr)",
       admin: {
+        readOnly: true,
         description:
           "Beregnet fra varelinjene og produktenes MVA-sats, fordelt på eventuell rabatt",
       },
@@ -98,6 +180,7 @@ export const Orders: CollectionConfig = {
       label: "Godtok vilkår og bortfall av angrerett",
       admin: {
         position: "sidebar",
+        readOnly: true,
         description:
           "Kunden huket aktivt av for umiddelbar levering og bortfall av angrerett før betaling (angrerettloven § 22 n)",
       },
@@ -133,6 +216,7 @@ export const Orders: CollectionConfig = {
       defaultValue: false,
       label: "Skal sendes",
       admin: {
+        readOnly: true,
         description:
           "Minst ett produkt i bestillingen er merket «Krever frakt». Mangler adressen under, må kunden kontaktes.",
       },
@@ -167,6 +251,50 @@ export const Orders: CollectionConfig = {
       ],
     },
     {
+      // Partnerens arbeidsflyt for fysiske varer. Settes til «Under
+      // behandling» av hooken når ordren opprettes, og til «Sendt» av
+      // partneren når pakken er levert inn. Hurtigfiltrene over lista
+      // («Skal sendes» / «Sendt») bygger på dette feltet.
+      name: "shippingStatus",
+      type: "select",
+      label: "Forsendelse",
+      options: [
+        { label: "Under behandling", value: "pending" },
+        { label: "Sendt", value: "shipped" },
+      ],
+      admin: {
+        position: "sidebar",
+        condition: (data) => data?.requiresShipping === true,
+        description:
+          "Sett til «Sendt» når pakken er levert inn. Da forsvinner bestillingen fra «Skal sendes».",
+      },
+    },
+    {
+      name: "shippedAt",
+      type: "date",
+      label: "Sendt",
+      admin: {
+        position: "sidebar",
+        readOnly: true,
+        condition: (data) => data?.shippingStatus === "shipped",
+        date: {
+          pickerAppearance: "dayAndTime",
+          displayFormat: "d. MMM yyyy HH:mm",
+        },
+        description: "Settes automatisk når forsendelsen markeres som sendt.",
+      },
+    },
+    {
+      name: "shippingNote",
+      type: "text",
+      label: "Sporingsnummer / notat",
+      admin: {
+        position: "sidebar",
+        condition: (data) => data?.requiresShipping === true,
+        description: "Valgfritt. F.eks. sporingsnummer fra Posten.",
+      },
+    },
+    {
       name: "status",
       type: "select",
       required: true,
@@ -177,6 +305,7 @@ export const Orders: CollectionConfig = {
         { label: "Avbrutt", value: "cancelled" },
       ],
       label: "Status",
+      admin: { readOnly: true },
     },
     {
       name: "newsletterOptIn",
@@ -185,6 +314,7 @@ export const Orders: CollectionConfig = {
       label: "Ønsker nyhetsbrev",
       admin: {
         position: "sidebar",
+        readOnly: true,
         description:
           "Kunden krysset aktivt av for nyhetsbrev i utsjekken (dokumentert samtykke)",
       },
@@ -201,6 +331,7 @@ export const Orders: CollectionConfig = {
       label: "Betalingsleverandør",
       admin: {
         position: "sidebar",
+        readOnly: true,
       },
     },
     {
@@ -210,6 +341,7 @@ export const Orders: CollectionConfig = {
       index: true,
       admin: {
         position: "sidebar",
+        readOnly: true,
       },
     },
     {
@@ -218,6 +350,7 @@ export const Orders: CollectionConfig = {
       label: "Stripe Session ID",
       admin: {
         position: "sidebar",
+        readOnly: true,
       },
     },
     {
@@ -226,6 +359,7 @@ export const Orders: CollectionConfig = {
       label: "Stripe Payment Intent ID",
       admin: {
         position: "sidebar",
+        readOnly: true,
       },
     },
   ],
