@@ -39,6 +39,62 @@ export function PresaleCard({
   const toSign = presale.signedCopies + presale.personallySignedCopies;
   const deadlinePassed = presale.daysLeft !== null && presale.daysLeft < 0;
 
+  // Etter fristen er det ingenting å påvirke lenger: trappa, markedspakka og
+  // rådene om festen er historie. Da holder tre tall og én setning.
+  if (deadlinePassed) {
+    return (
+      <Card>
+        <CardHeader>
+          <div className="flex flex-wrap items-center gap-2">
+            <CardTitle>Forhåndssalg via {presale.channelLabel}</CardTitle>
+            <Badge variant="soft-saffron">
+              Avsluttet {dato(terms.kickbackUntil)}
+            </Badge>
+          </div>
+          <CardDescription>
+            Bøkene kom i tillegg til innkjøpet, til {terms.retailerPercent} % i
+            stedet for bokhandelens vanlige andel, og kan ikke returneres.
+            Kickbacken regner {presale.channelLabel} ut selv og trekker fra salg
+            via betalte kanaler — tallet her er et øvre anslag til avregningen
+            kommer på e-post.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <Stat
+              label="Forhåndssalg"
+              value={antall(presale.kickbackCopies)}
+              hint={
+                presale.copiesAfterDeadline > 0
+                  ? `+ ${antall(presale.copiesAfterDeadline)} etter fristen`
+                  : `${kr(presale.unit.net, 2)} til Susanne per bok`
+              }
+            />
+            <Stat
+              label="Kickback, anslag"
+              value={kickback.amount > 0 ? kr(kickback.amount) : "0 kr"}
+              hint={
+                kickback.tier
+                  ? `${kickback.percent} % av fullpris på alle ${antall(kickback.copies)}`
+                  : "under første trinn"
+              }
+              tone={kickback.amount > 0 ? "good" : "neutral"}
+            />
+            <Stat
+              label="Signert i butikk"
+              value={antall(toSign)}
+              hint={
+                toSign > 0
+                  ? `${antall(presale.signedCopies)} signert · ${antall(presale.personallySignedCopies)} personlig`
+                  : "ikke ført"
+              }
+            />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>

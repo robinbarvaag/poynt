@@ -12,6 +12,7 @@ export const CHANNEL_KEYS = {
   egen: "egen",
   foredrag: "foredrag",
   direkte: "direkte",
+  bibliotek: "bibliotek",
   annet: "annet",
 } as const;
 
@@ -23,6 +24,9 @@ export const CHANNEL_OPTIONS: { label: string; value: ChannelKey }[] = [
   { label: "Egen nettbutikk", value: "egen" },
   { label: "Foredrag og kurs", value: "foredrag" },
   { label: "Direktesalg", value: "direkte" },
+  // Biblioteksentralen kjøper på vegne av bibliotekene, via Forlagssentralen.
+  // Satsen står på fakturaen derfra og legges inn under Kanaler i Bokøkonomi.
+  { label: "Bibliotek (Biblioteksentralen)", value: "bibliotek" },
   { label: "Annet", value: "annet" },
 ];
 
@@ -145,6 +149,7 @@ export const SALE_SOURCE_OPTIONS = [
   { label: "Avregning fra distributør", value: "avregning" },
   { label: "Solgt på foredrag", value: "foredrag" },
   { label: "Direktesalg", value: "direkte" },
+  { label: "Solgt fra bokhandelens hylle", value: "hyllesalg" },
   { label: "Retur fra bokhandel", value: "retur" },
   { label: "Annet", value: "annet" },
 ] as const;
@@ -158,19 +163,28 @@ export type SaleSource = (typeof SALE_SOURCE_OPTIONS)[number]["value"];
  */
 export const SALE_SOURCE_HELP: Record<SaleSource, string> = {
   innkjop:
-    "Norli eller ARK har bestilt et antall bøker. Dette er bøkene de kan sende tilbake.",
+    "Norli eller ARK har bestilt et antall bøker gjennom Forlagssentralen — én rad per ordre der, med ordrenummeret som referanse. Dette er bøkene de kan sende tilbake. Bøker som selges i butikken etterpå skal IKKE føres her; de er allerede betalt.",
   forhandssalg:
     "Kunder bestilte via bokhandelens forhåndssalgslenke (bok.norli.no). Bokhandelen bestiller disse i tillegg til innkjøpet, så de kommer oppå de 400/300 — og kommer ikke i retur. Hos Norli tar de 45 % i stedet for 50 %, og over 50 bøker gir kickback. Fyll inn hvor mange som er signert: bare de bestilles til signering i butikk.",
   avregning:
     "Oppgjøret fra Forlagsentralen. Bruk bare hvis du ikke har ført innkjøpene enkeltvis — ellers telles bøkene to ganger.",
   foredrag: "Bøker du solgte selv på foredrag eller kurs.",
   direkte: "Solgt rett til en bedrift eller person, utenom nettbutikken.",
+  hyllesalg:
+    "Bøker du solgte eller signerte i en bokhandel — på lanseringsfest eller signering. De kom fra bokhandelens eget lager og er allerede betalt gjennom innkjøpet, så de teller ikke som omsetning. Vises under «Ut av hyllene» i dashbordet.",
   retur: "Bøker som kom tilbake fra bokhandelen. Trekkes fra.",
   annet: "Alt som ikke passer over. Skriv hva det var i referansefeltet.",
 };
 
 /** Salgstypen som trekkes fra i stedet for å legges til. */
 export const RETURN_SOURCE: SaleSource = "retur";
+
+/**
+ * Bøker Susanne solgte for hånd fra bokhandelens hylle. De er «ut av hyllene»,
+ * ikke «solgt inn»: bokhandelen betalte for dem i innkjøpet, så i totalene
+ * ville de blitt talt to ganger. Holdes utenfor økonomien og vises for seg.
+ */
+export const SHELF_SOURCE: SaleSource = "hyllesalg";
 
 /**
  * Salgstypene bokhandelen kan returnere fra. Forhåndssalg og avregninger er
