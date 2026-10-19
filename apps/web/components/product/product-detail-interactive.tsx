@@ -108,9 +108,14 @@ function QuantityStepper({
   setQuantity: Dispatch<SetStateAction<number>>;
   compact?: boolean;
 }) {
-  const buttonSize = compact ? "size-8" : "size-9";
+  // Kompakt: lavere knapper og smalere tall, så stepper + kjøp + hurtigkasse
+  // får plass på én rad i kjøpslinja på en smal mobil (~360 px).
+  const buttonSize = compact ? "size-7" : "size-9";
   return (
-    <fieldset aria-label="Antall" className="flex items-center gap-0.5 px-1.5">
+    <fieldset
+      aria-label="Antall"
+      className={`flex items-center gap-0.5 ${compact ? "px-1" : "px-1.5"}`}
+    >
       <Button
         type="button"
         variant="ghost"
@@ -124,7 +129,7 @@ function QuantityStepper({
       </Button>
       <span
         className={`text-center font-medium tabular-nums ${
-          compact ? "min-w-6 text-sm" : "min-w-8"
+          compact ? "min-w-5 text-sm" : "min-w-8"
         }`}
       >
         {quantity}
@@ -697,6 +702,7 @@ function ProductDetailInteractive({
                   quantity={quantity}
                   maxQuantity={maxQuantity}
                   allowQuantity={allowQuantity}
+                  compact
                   className={
                     allowQuantity ? "min-w-0 rounded-none" : "rounded-full"
                   }
@@ -706,8 +712,7 @@ function ProductDetailInteractive({
                 <Button
                   type="button"
                   variant="outline"
-                  size="lg"
-                  className="shrink-0 rounded-full"
+                  className="shrink-0 rounded-full px-4"
                   onClick={handleBuyNowViaCart}
                 >
                   Kjøp nå

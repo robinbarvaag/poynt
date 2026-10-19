@@ -38,6 +38,10 @@ interface AddToCartButtonProps {
   /** Ekstra klasser på knappen – brukes når den bygges inn i en samlet
       kontroll (f.eks. antall-stepper + knapp i samme pill). */
   className?: string;
+  /** Lavere knapp og kortere tekster («Legg i kurv») for trange flater som
+      den faste kjøpslinja på mobil, der stepper + kjøp + hurtigkasse deler
+      én rad. */
+  compact?: boolean;
 }
 
 export function AddToCartButton({
@@ -50,6 +54,7 @@ export function AddToCartButton({
   disabled = false,
   disabledLabel = "Velg et alternativ",
   className,
+  compact = false,
 }: AddToCartButtonProps) {
   const { addItem, items } = useCart();
   const openCart = useCartUi((state) => state.openCart);
@@ -63,6 +68,7 @@ export function AddToCartButton({
   const isInCart = ready && items.some((item) => item.key === key);
 
   const buttonClasses = className ? `w-full ${className}` : "w-full";
+  const size = compact ? "default" : "lg";
 
   const handleAddToCart = () => {
     addItem(
@@ -101,7 +107,7 @@ export function AddToCartButton({
 
   if (disabled) {
     return (
-      <Button size="lg" className={buttonClasses} disabled>
+      <Button size={size} className={buttonClasses} disabled>
         {disabledLabel}
       </Button>
     );
@@ -110,15 +116,15 @@ export function AddToCartButton({
   // Digitale engangsprodukter: én av hver – lås når den ligger i kurven.
   if (!allowQuantity && isInCart) {
     return (
-      <Button size="lg" className={buttonClasses} disabled>
+      <Button size={size} className={buttonClasses} disabled>
         <Check className="mr-2 h-5 w-5" />
-        Allerede i handlekurven
+        {compact ? "I kurven" : "Allerede i handlekurven"}
       </Button>
     );
   }
 
   return (
-    <Button size="lg" className={buttonClasses} onClick={handleAddToCart}>
+    <Button size={size} className={buttonClasses} onClick={handleAddToCart}>
       {/* key-remount + swap-in gir en myk blur-fade mellom tilstandene i
           stedet for at teksten snapper. */}
       <span
@@ -130,6 +136,8 @@ export function AddToCartButton({
             <Check className="mr-2 h-5 w-5" />
             Lagt til!
           </>
+        ) : compact ? (
+          "Legg i kurv"
         ) : (
           "Legg i handlekurv"
         )}
