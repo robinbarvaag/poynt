@@ -12,7 +12,9 @@ export interface ShippingAddress {
   city: string;
   /** ISO 3166-1 alpha-2. Vi sender bare innenlands. */
   country: "NO";
-  phone: string;
+  /** Spørres ikke lenger (vi sender som brev uten sporing, og Vipps/Stripe
+      gir oss kontaktinfo uansett) — finnes bare på eldre ordrer. */
+  phone?: string;
 }
 
 /** Feltene kunden fyller inn (alt tekst, før validering). */
@@ -22,7 +24,6 @@ export type ShippingAddressInput = {
   line2: string;
   postalCode: string;
   city: string;
-  phone: string;
 };
 
 export const EMPTY_SHIPPING_INPUT: ShippingAddressInput = {
@@ -31,7 +32,6 @@ export const EMPTY_SHIPPING_INPUT: ShippingAddressInput = {
   line2: "",
   postalCode: "",
   city: "",
-  phone: "",
 };
 
 export type ShippingField = keyof ShippingAddressInput;
@@ -46,13 +46,6 @@ const MAX_LEN = 120;
 
 const str = (value: unknown): string =>
   typeof value === "string" ? value.trim().slice(0, MAX_LEN) : "";
-
-/** Norsk mobil/fastnummer: 8 sifre, valgfritt +47 / 0047 foran. */
-export function normalizePhone(value: string): string | null {
-  const digits = value.replace(/[\s().-]/g, "");
-  const match = /^(?:\+47|0047)?(\d{8})$/.exec(digits);
-  return match ? match[1] : null;
-}
 
 /**
  * Valider det kunden skrev. Returnerer feil per felt (til skjemaet) eller en
@@ -69,7 +62,6 @@ export function validateShippingInput(
   const line2 = str(input?.line2);
   const postalCode = str(input?.postalCode).replace(/\s/g, "");
   const city = str(input?.city);
-  const phoneRaw = str(input?.phone);
 
   const errors: ShippingErrors = {};
   if (!name) errors.name = "Skriv inn navnet på mottakeren.";
@@ -78,14 +70,8 @@ export function validateShippingInput(
     errors.postalCode = "Postnummeret må være fire sifre.";
   }
   if (!city) errors.city = "Skriv inn poststedet.";
-  const phone = phoneRaw ? normalizePhone(phoneRaw) : null;
-  if (!phone) {
-    errors.phone = phoneRaw
-      ? "Skriv inn et norsk telefonnummer med åtte sifre."
-      : "Skriv inn telefonnummeret (for sporing og levering).";
-  }
 
-  if (Object.keys(errors).length > 0 || !phone) {
+  if (Object.keys(errors).length > 0) {
     return { ok: false, errors };
   }
   return {
@@ -97,7 +83,6 @@ export function validateShippingInput(
       postalCode,
       city,
       country: "NO",
-      phone,
     },
   };
 }
@@ -116,7 +101,6 @@ export function shippingToStripeMetadata(
     ship_postal: address.postalCode,
     ship_city: address.city,
     ship_country: address.country,
-    ship_phone: address.phone,
   };
 }
 
@@ -130,7 +114,6 @@ export function shippingFromStripeMetadata(
     line2: metadata.ship_line2 ?? "",
     postalCode: metadata.ship_postal ?? "",
     city: metadata.ship_city ?? "",
-    phone: metadata.ship_phone ?? "",
   });
   return result.ok ? result.address : null;
 }
@@ -161,6 +144,6 @@ export function shippingFromStored(
     postalCode: stored.postalCode ?? "",
     city: stored.city ?? "",
     country: "NO",
-    phone: stored.phone ?? "",
+    ...(stored.phone && { phone: stored.phone }),
   };
 }
