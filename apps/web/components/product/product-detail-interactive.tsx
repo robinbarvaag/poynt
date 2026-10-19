@@ -394,6 +394,16 @@ function ProductDetailInteractive({
   const [quantity, setQuantity] = useState(1);
   const maxQuantity = allowQuantity ? undefined : 1;
 
+  // Varer med frakt: «Kjøp nå» (rett til adresseskjemaet) er hovedhandlingen
+  // og fylles; «Legg i kurv» trer tilbake. Inne i stepper-pillen (som selv
+  // har ramme og flate) holder ghost, ellers outline. Uten frakt er
+  // «Legg i handlekurv» primær og Vipps-knappen har sin egen farge.
+  const addToCartVariant = requiresShipping
+    ? allowQuantity
+      ? "ghost"
+      : "outline"
+    : "default";
+
   // Vipps-hurtigkasse rett fra produktsiden: hopper over handlekurven og
   // sender kun dette produktet (medlemskap støttes ikke — API-et avviser).
   // Fysiske varer har ingen hurtigkasse (se handleBuyNowViaCart).
@@ -564,6 +574,7 @@ function ProductDetailInteractive({
                     allowQuantity={allowQuantity}
                     disabled={needsVariant}
                     disabledLabel={`Velg ${info.variantLabel ?? "alternativ"}`}
+                    variant={addToCartVariant}
                     className={
                       allowQuantity ? "min-w-0 rounded-none" : "rounded-full"
                     }
@@ -581,7 +592,6 @@ function ProductDetailInteractive({
                   <div className="space-y-3">
                     <Button
                       type="button"
-                      variant="outline"
                       size="lg"
                       className="w-full rounded-full"
                       disabled={needsVariant}
@@ -703,6 +713,7 @@ function ProductDetailInteractive({
                   maxQuantity={maxQuantity}
                   allowQuantity={allowQuantity}
                   compact
+                  variant={addToCartVariant}
                   className={
                     allowQuantity ? "min-w-0 rounded-none" : "rounded-full"
                   }
@@ -711,7 +722,6 @@ function ProductDetailInteractive({
               {requiresShipping ? (
                 <Button
                   type="button"
-                  variant="outline"
                   className="shrink-0 rounded-full px-4"
                   onClick={handleBuyNowViaCart}
                 >
