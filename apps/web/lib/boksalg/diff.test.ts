@@ -120,4 +120,31 @@ describe("diffSnapshots", () => {
     expect(events.filter((e) => e.type === "availability")).toHaveLength(1);
     expect(countSales(events)).toBe(0);
   });
+
+  test("butikk som sto med 0 og aldri har hatt boka: «kom i butikk», ikke påfyll", () => {
+    // Norli Kvadrat, Sandnes 19.10: sto i lista med 0 siden lansering, fikk
+    // 2 eksemplarer — det er første levering, ikke påfyll etter utsolgt.
+    const events = diffSnapshots(
+      snapshot([oslo(4), bergen(0)]),
+      snapshot([oslo(4), bergen(2)]),
+      { everStocked: new Set(["133"]) }
+    );
+    expect(events).toHaveLength(1);
+    expect(events[0]?.type).toBe("listed");
+    expect(events[0]?.delta).toBe(2);
+    expect(events[0]?.note).toBe("Boka kom inn i butikken");
+  });
+
+  test("butikk som har hatt boka før og går fra 0: påfyll etter utsolgt", () => {
+    const events = diffSnapshots(snapshot([bergen(0)]), snapshot([bergen(2)]), {
+      everStocked: new Set(["46"]),
+    });
+    expect(events[0]?.type).toBe("restock");
+    expect(events[0]?.note).toBe("Påfyll etter utsolgt");
+  });
+
+  test("uten historikk regnes 0 → N fortsatt som påfyll", () => {
+    const events = diffSnapshots(snapshot([bergen(0)]), snapshot([bergen(2)]));
+    expect(events[0]?.type).toBe("restock");
+  });
 });

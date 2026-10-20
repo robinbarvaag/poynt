@@ -52,11 +52,6 @@ export interface SourceSnapshot {
   price: number | null;
   /** Fysiske butikker med boka. Tom liste før distribusjonen har rullet ut. */
   stores: StoreStock[];
-  /**
-   * Antall butikker kjeden oppgir, når det ikke følger av `stores`. ARK gir
-   * et butikkantall uten butikkliste; utelatt = `stores.length`.
-   */
-  storeCount?: number;
   storesWithStock: number;
   totalCopies: number;
   /** Fritekst fra kilden når noe er verdt å notere (f.eks. utgivelsesdato). */

@@ -19,9 +19,20 @@ function byId(stores: StoreStock[]): Map<string, StoreStock> {
   return new Map(stores.map((store) => [store.storeId, store]));
 }
 
+export interface DiffOptions {
+  /**
+   * Butikker som noen gang har hatt boka (fra butikk-katalogens `maxQty`).
+   * Kjedene lister alle butikkene sine med 0 før boka er kommet, så «0 → 2»
+   * alene sier ikke om det er første levering eller påfyll etter utsolgt.
+   * Uten denne lista regnes 0 → N som påfyll, slik det var.
+   */
+  everStocked?: ReadonlySet<string>;
+}
+
 export function diffSnapshots(
   previous: SourceSnapshot | null,
-  current: SourceSnapshot
+  current: SourceSnapshot,
+  options: DiffOptions = {}
 ): StockEvent[] {
   const events: StockEvent[] = [];
   const sourceKey = current.sourceKey;
@@ -66,7 +77,16 @@ export function diffSnapshots(
       to,
     };
 
-    if (!old && to > 0) {
+    // Første gang boka står i butikken: enten var butikken ikke på lista i
+    // det hele tatt, eller den sto der med 0 og har aldri hatt boka før.
+    const firstArrival =
+      to > 0 &&
+      (!old ||
+        (from === 0 &&
+          options.everStocked !== undefined &&
+          !options.everStocked.has(store.storeId)));
+
+    if (firstArrival) {
       events.push({
         ...common,
         type: "listed",

@@ -14,7 +14,7 @@ const args = process.argv.slice(2);
 const force = args.includes("--force");
 const sourceKey = args.find((arg) => !arg.startsWith("--"));
 
-// --force henter selv om kilden ble hentet nylig (ARK venter ellers 30 min).
+// --force henter selv om kilden ble hentet nylig (gjelder kilder med minIntervalMs).
 const result = await runStockSnapshot(payload, { sourceKey, force });
 
 console.log(`\nISBN ${result.isbn}`);

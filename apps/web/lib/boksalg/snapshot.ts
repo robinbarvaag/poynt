@@ -101,6 +101,32 @@ async function previousSnapshot(
   return doc ? toSourceSnapshot(doc) : null;
 }
 
+/**
+ * Butikker hos kjeden som noen gang har hatt boka. Kjedene lister alle
+ * butikkene sine med 0 før boka er kommet, så diff-en trenger dette for å
+ * skille «boka kom inn» fra «påfyll etter utsolgt». `maxQty` på butikkraden
+ * beholdes selv når lageret settes til 0, så den er den riktige kilden.
+ */
+async function everStockedStoreIds(
+  payload: Payload,
+  sourceKey: SourceKey
+): Promise<Set<string>> {
+  const { docs } = await payload.find({
+    collection: "book-stores",
+    where: {
+      and: [
+        { sourceKey: { equals: sourceKey } },
+        { maxQty: { greater_than: 0 } },
+      ],
+    },
+    limit: 1000,
+    pagination: false,
+    depth: 0,
+    select: { storeId: true },
+  });
+  return new Set(docs.map((doc) => doc.storeId));
+}
+
 async function writeEvents(
   payload: Payload,
   events: StockEvent[],
@@ -187,7 +213,9 @@ export async function runStockSnapshot(
       }
 
       const snapshot = await source.fetchSnapshot(isbn);
-      const events = diffSnapshots(previous, snapshot);
+      const events = diffSnapshots(previous, snapshot, {
+        everStocked: await everStockedStoreIds(payload, sourceKey),
+      });
 
       await payload.create({
         collection: "book-stock-snapshots",
@@ -197,7 +225,7 @@ export async function runStockSnapshot(
           online: snapshot.online,
           externalId: snapshot.externalId,
           price: snapshot.price,
-          storeCount: snapshot.storeCount ?? snapshot.stores.length,
+          storeCount: snapshot.stores.length,
           storesWithStock: snapshot.storesWithStock,
           totalCopies: snapshot.totalCopies,
           note: snapshot.note ?? null,

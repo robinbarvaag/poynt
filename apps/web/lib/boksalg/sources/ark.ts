@@ -1,363 +1,308 @@
-import type { Availability, SourceSnapshot, StockSource } from "../types";
-import { SourceUnavailableError, browserHeaders, retryAfterMs } from "./http";
+import type {
+  Availability,
+  SourceSnapshot,
+  StockSource,
+  StoreStock,
+} from "../types";
+import { SourceUnavailableError, browserHeaders } from "./http";
+import { normalizeQty, summarizeStores } from "./norli";
+import { regionFromPostcode } from "./postcode-region";
 
 /**
- * ARK. Ingen åpent API, men produktsiden bærer to maskinlesbare kilder:
+ * ARK. Nettbutikken er bygd på et åpent «experience»-API som butikkvelgeren
+ * («Velg butikk» på produktsida) selv snakker med, og det gir oss det samme
+ * som Norlis GraphQL: antall eksemplarer per fysisk butikk, pluss e-post,
+ * telefon, adresse, åpningstider og koordinater for alle 155 butikkene.
  *
- *  1. JSON-LD (`@type: ["Product","Book"]`) med pris og schema.org-tilgjengelighet.
- *  2. Next.js-nyttelasten, som inneholder ARKs egen tilstand:
- *     `availability.online.state`, `availability.store.state` og — etter
- *     lansering — `availability.store.count`: hvor mange butikker som har boka.
+ *  - `GET  /api/product/sku/<isbn>`      → pris, nettstatus, antall butikker
+ *  - `POST /api/store/availabilities`    → alle butikker med
+ *    `productAvailability[isbn].availableQuantityInStore`
  *
- * Vi leser begge og lar JSON-LD vinne på pris, ARK-tilstanden på status —
- * JSON-LD skiller ikke «i salg» fra «utsolgt i butikk, kan bestilles».
+ * Selve www.ark.no står bak en WAF som avviser Vercels IP-område med 429, men
+ * API-et (experience.api.ark.no) gjør det ikke — det svarer til og med på
+ * forespørsler uten nettleser-headere. Vi sender dem likevel, for det koster
+ * ingenting og skiller oss ikke ut. 429/403 kastes som
+ * `SourceUnavailableError`: forrige lagerbilde beholdes, neste kjøring prøver
+ * igjen.
  *
- * ARK oppgir IKKE antall eksemplarer per butikk slik Norli gjør, bare hvor
- * mange butikker som fører boka (`store.count`, 147 ved lansering). Det tallet
- * lagres som `storesWithStock`/`storeCount`; `totalCopies` og butikklista
- * forblir tomme, og dashbordet sier det rett ut.
- *
- * **Transport.** ARKs WAF avviser Vercels IP-område med 429 på millisekunder —
- * ikke en ratebegrensning, men en blokk som verken nettleser-headere eller
- * `Retry-After` hjelper mot. Derfor hentes sida via Firecrawl når
- * `FIRECRAWL_API_KEY` er satt (én kreditt per henting, ~3 s), og direkte bare
- * når nøkkelen mangler (lokal utvikling). Begge veier ender i samme parser.
- *
- * Mot botvern ellers:
- *  - fullt sett nettleser-headere på direktehenting (ikke bare User-Agent),
- *  - ett nytt forsøk etter `Retry-After` (begrenset, så en server action
- *    ikke henger),
- *  - `minIntervalMs`: hentingen hopper over ARK hvis forrige lagerbilde er
- *    ferskere enn dette, så gjentatte «Hent nå» ikke hamrer på dem,
- *  - 429/403 kastes som `SourceUnavailableError` — en midlertidig blokkering,
- *    ikke en parsefeil. Forrige lagerbilde beholdes, og neste kjøring prøver
- *    igjen.
+ * Tallene normaliseres på samme måte som Norlis (`normalizeQty`): null, tomt
+ * og negativt blir 0, så en manglende verdi aldri leses som salg.
  */
 
-const PRODUCT_URL = (isbn: string) => `https://www.ark.no/produkt/${isbn}`;
+const API = "https://experience.api.ark.no/api";
 
-const FIRECRAWL_URL = "https://api.firecrawl.dev/v2/scrape";
-
-/** Lengste pause vi venter på ARK før vi gir opp denne kjøringen. */
-const MAX_RETRY_WAIT_MS = 8_000;
-
-interface ProductJsonLd {
+interface ArkProduct {
+  sku?: string;
   name?: string;
-  isbn?: string;
-  offers?: { price?: number | string; availability?: string };
+  pricesNokOre?: { customerPrice?: { price?: number | null } | null } | null;
+  variantAvailability?: {
+    onlineAvailability?: string | null;
+    cncAvailability?: string | null;
+    /** Butikker med boka på hylla akkurat nå. */
+    cncAvailableInStoresCount?: number | null;
+    /** Butikker boka kan bestilles til (Klikk&Hent). */
+    orderCncAvailableStoresCount?: number | null;
+    marketPublicationDate?: string | null;
+  } | null;
 }
 
-/** Plukker ut JSON-LD-blokka for selve boka (ikke organisasjon/brødsmuler). */
-export function parseJsonLd(html: string): ProductJsonLd | null {
-  // Bok-blokka kan stå med «Product» alene eller sammen med «Book», og med
-  // eller uten mellomrom etter kolon — ARK har byttet begge deler før.
-  const scripts = html.match(
-    /<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g
-  );
-  for (const script of scripts ?? []) {
-    const body = script
-      .replace(/^<script[^>]*>/, "")
-      .replace(/<\/script>$/, "");
-    try {
-      const parsed = JSON.parse(body) as unknown;
-      const found = findProduct(parsed);
-      if (found) return found;
-    } catch {
-      // Ikke gyldig JSON — hopp videre til neste blokk.
-    }
+interface ArkOpeningHours {
+  isOpen?: boolean | null;
+  openFrom?: string | null;
+  openTo?: string | null;
+}
+
+export interface ArkStore {
+  id: string | number;
+  name: string;
+  address?: {
+    streetName?: string | null;
+    streetNumber?: string | null;
+    city?: string | null;
+    zipcode?: string | null;
+    municipality?: string | null;
+  } | null;
+  latitude?: string | number | null;
+  longitude?: string | number | null;
+  phoneNumber?: string | null;
+  email?: string | null;
+  mondayOpeningHours?: ArkOpeningHours | null;
+  tuesdayOpeningHours?: ArkOpeningHours | null;
+  wednesdayOpeningHours?: ArkOpeningHours | null;
+  thursdayOpeningHours?: ArkOpeningHours | null;
+  fridayOpeningHours?: ArkOpeningHours | null;
+  saturdayOpeningHours?: ArkOpeningHours | null;
+  sundayOpeningHours?: ArkOpeningHours | null;
+  productAvailability?: Record<
+    string,
+    {
+      isCnCAvailable?: boolean | null;
+      isCncOrderAvailable?: boolean | null;
+      availableQuantityInStore?: number | string | null;
+    } | null
+  > | null;
+}
+
+interface ArkAvailabilities {
+  values?: ArkStore[] | null;
+}
+
+async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const response = await fetch(`${API}${path}`, {
+    ...init,
+    headers: {
+      ...browserHeaders("json"),
+      Origin: "https://www.ark.no",
+      Referer: "https://www.ark.no/",
+      ...init.headers,
+    },
+    signal: AbortSignal.timeout(20_000),
+  });
+  if (response.status === 429 || response.status === 403) {
+    throw new SourceUnavailableError(
+      `ARK avviser oss midlertidig (${response.status}). Forrige lagerbilde beholdes, og vi prøver igjen ved neste henting.`
+    );
   }
-  return null;
-}
-
-function findProduct(value: unknown): ProductJsonLd | null {
-  if (Array.isArray(value)) {
-    for (const entry of value) {
-      const found = findProduct(entry);
-      if (found) return found;
-    }
-    return null;
+  if (response.status === 404) {
+    throw new NotFoundError(path);
   }
-  if (!value || typeof value !== "object") return null;
-  const record = value as Record<string, unknown>;
-  const type = record["@type"];
-  const types = Array.isArray(type) ? type : [type];
-  if (types.includes("Product") || types.includes("Book")) {
-    return record as ProductJsonLd;
+  if (!response.ok) {
+    throw new Error(`ARK svarte ${response.status} på ${path}`);
   }
-  if (Array.isArray(record["@graph"])) return findProduct(record["@graph"]);
-  return null;
+  return (await response.json()) as T;
 }
 
-export interface ArkState {
-  online: string | null;
-  store: string | null;
-  /** Antall butikker som fører boka, når ARK oppgir det. */
-  storeCount: number | null;
-  releaseDate: string | null;
+class NotFoundError extends Error {
+  constructor(path: string) {
+    super(`ARK fant ikke ${path}`);
+    this.name = "NotFoundError";
+  }
 }
 
-/**
- * ARKs egen tilstand ligger i Next.js-nyttelasten med escapede hermetegn
- * (\"online\":{\"state\":\"inStock\"}). Vi regexer den ut framfor å parse hele
- * flight-payloaden — den er ustabil mellom deployer, tilstandsfeltene er ikke.
- *
- * Verdiene har byttet skrivemåte før (`available` → `inStock`, `orderable`),
- * så regexen tar både små og store bokstaver. Sida har også anbefalte bøker
- * med samme felt; vår bok står først i nyttelasten, så første treff gjelder.
- */
-export function parseArkState(html: string): ArkState {
-  const first = (patterns: RegExp[]): string | null => {
-    for (const pattern of patterns) {
-      const hit = html.match(pattern)?.[1];
-      if (hit) return hit;
-    }
-    return null;
-  };
-
-  const online = first([
-    /\\"online\\":\{\\"state\\":\\"([A-Za-z_]+)\\"/,
-    /"online":\{"state":"([A-Za-z_]+)"/,
-  ]);
-  const storeBlock = first([/\\"store\\":\{([^}]*)\}/, /"store":\{([^}]*)\}/]);
-  const store = storeBlock
-    ? (storeBlock.match(/state\\?":\\?"([A-Za-z_]+)/)?.[1] ?? null)
-    : null;
-  const count = storeBlock
-    ? (storeBlock.match(/count\\?":(\d+)/)?.[1] ?? null)
-    : null;
-  const releaseDate = first([
-    /\\"releaseDate\\":\\"(\d{4}-\d{2}-\d{2})/,
-    /"releaseDate":"(\d{4}-\d{2}-\d{2})/,
-  ]);
-
-  return {
-    online,
-    store,
-    storeCount: count === null ? null : Number(count),
-    releaseDate,
-  };
-}
-
-export function toAvailability(
-  arkState: string | null,
-  schemaAvailability: string | undefined
-): Availability {
-  switch (arkState?.toLowerCase()) {
+/** ARKs status-ord → våre. Store/små bokstaver har byttet før, så vi senker. */
+export function toAvailability(state: string | null | undefined): Availability {
+  switch (state?.toLowerCase()) {
     case "preorder":
+    case "pre_order":
       return "preorder";
     case "available":
     case "instock":
     case "in_stock":
-    case "orderable":
       return "in_stock";
     case "unavailable":
+    case "soldout":
+    case "sold_out":
     case "outofstock":
     case "out_of_stock":
-    case "soldout":
       return "out_of_stock";
     default:
-      break;
+      return "unknown";
   }
-  if (schemaAvailability?.includes("PreOrder")) return "preorder";
-  if (schemaAvailability?.includes("InStock")) return "in_stock";
-  if (schemaAvailability?.includes("OutOfStock")) return "out_of_stock";
-  return "unknown";
 }
 
-function toPrice(value: number | string | undefined): number | null {
-  if (value == null) return null;
+/** Pris i øre → kroner. Null og tull blir null, ikke 0 — 0 kr er ikke en pris. */
+export function toPrice(ore: number | null | undefined): number | null {
+  if (ore == null || !Number.isFinite(ore) || ore <= 0) return null;
+  return Math.round(ore) / 100;
+}
+
+function toNumber(
+  value: string | number | null | undefined
+): number | undefined {
+  if (value == null || value === "") return undefined;
   const parsed = typeof value === "number" ? value : Number(value);
-  return Number.isFinite(parsed) ? parsed : null;
+  return Number.isFinite(parsed) ? parsed : undefined;
 }
 
-const sleep = (ms: number) =>
-  new Promise<void>((resolve) => setTimeout(resolve, ms));
-
-/** Det parseren trenger fra en henting, uansett hvilken vei den gikk. */
-interface ProductPage {
-  status: number;
-  html: string;
+function cleanText(value: string | null | undefined): string | undefined {
+  const cleaned = value?.trim();
+  return cleaned || undefined;
 }
 
-function throwIfBlocked(status: number, via: string): void {
-  if (status === 429) {
-    throw new SourceUnavailableError(
-      `ARK avviser oss midlertidig (429 – for mange forespørsler${via}). Forrige lagerbilde beholdes, og vi prøver igjen ved neste henting.`
-    );
-  }
-  if (status === 403) {
-    throw new SourceUnavailableError(
-      `ARK blokkerer automatisk henting akkurat nå (403${via}). Forrige lagerbilde beholdes, og vi prøver igjen ved neste henting.`
-    );
-  }
-}
+const DAYS: [keyof ArkStore, string][] = [
+  ["mondayOpeningHours", "Mandag"],
+  ["tuesdayOpeningHours", "Tirsdag"],
+  ["wednesdayOpeningHours", "Onsdag"],
+  ["thursdayOpeningHours", "Torsdag"],
+  ["fridayOpeningHours", "Fredag"],
+  ["saturdayOpeningHours", "Lørdag"],
+  ["sundayOpeningHours", "Søndag"],
+];
+
+/** «10:00:00» → «10:00». */
+const clock = (value: string | null | undefined) =>
+  (value ?? "").slice(0, 5) || null;
 
 /**
- * Henter produktsida via Firecrawl, som henter fra sine egne adresser i stedet
- * for Vercels. Vi ber om rå HTML (ikke markdown) så JSON-LD og Next-nyttelasten
- * overlever, og leser ARKs egentlige statuskode fra metadataene.
+ * Åpningstider som én linje per dag, samme format som Norlis fritekst. Dager
+ * uten data hoppes over; en butikk uten noen dager får ingen tekst.
  */
-async function fetchViaFirecrawl(
-  isbn: string,
-  apiKey: string
-): Promise<ProductPage> {
-  const response = await fetch(FIRECRAWL_URL, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      url: PRODUCT_URL(isbn),
-      formats: ["rawHtml"],
-      onlyMainContent: false,
-    }),
-    signal: AbortSignal.timeout(60_000),
-  });
+export function toSchedule(store: ArkStore): string | undefined {
+  const lines: string[] = [];
+  for (const [key, label] of DAYS) {
+    const hours = store[key] as ArkOpeningHours | null | undefined;
+    if (!hours) continue;
+    if (hours.isOpen === false) {
+      lines.push(`${label} stengt`);
+      continue;
+    }
+    const from = clock(hours.openFrom);
+    const to = clock(hours.openTo);
+    if (from && to) lines.push(`${label} ${from}–${to}`);
+  }
+  return lines.length > 0 ? lines.join("\n") : undefined;
+}
 
-  // Firecrawls egne grenser (kvote, samtidighet) er midlertidige — ikke noe
-  // å fikse i koden. Alt annet fra dem er en ekte feil vi vil se.
-  if (response.status === 402 || response.status === 429) {
-    throw new SourceUnavailableError(
-      `Firecrawl avviste hentingen (${response.status} – kvote eller for mange samtidige kall). Forrige lagerbilde beholdes, og vi prøver igjen ved neste henting.`
-    );
-  }
-  if (!response.ok) {
-    throw new Error(`Firecrawl svarte ${response.status} for ARK-sida`);
-  }
-
-  const body = (await response.json()) as {
-    success?: boolean;
-    error?: string;
-    data?: { rawHtml?: string; metadata?: { statusCode?: number } };
-  };
-  if (!body.success) {
-    throw new Error(
-      `Firecrawl klarte ikke hente ARK-sida: ${body.error ?? "ukjent feil"}`
-    );
-  }
+export function toStoreStock(store: ArkStore, isbn: string): StoreStock {
+  const address = store.address ?? {};
+  const street = [
+    cleanText(address.streetName),
+    cleanText(address.streetNumber),
+  ]
+    .filter(Boolean)
+    .join(" ");
+  const postcode = cleanText(address.zipcode);
   return {
-    status: body.data?.metadata?.statusCode ?? 200,
-    html: body.data?.rawHtml ?? "",
+    storeId: String(store.id),
+    // ARK setter «ARK » foran alle navn; det er støy i en liste som bare
+    // inneholder ARK-butikker.
+    name: store.name.replace(/^ARK\s+/i, "").trim(),
+    city: cleanText(address.city),
+    // ARK oppgir kommune, ikke fylke — fylket utledes av postnummeret, så
+    // butikkene kan stå i samme fylkestabell som Norlis.
+    region: regionFromPostcode(postcode) ?? cleanText(address.municipality),
+    qty: normalizeQty(
+      store.productAvailability?.[isbn]?.availableQuantityInStore
+    ),
+    address: street || undefined,
+    postcode,
+    email: cleanText(store.email),
+    phone: cleanText(store.phoneNumber),
+    schedule: toSchedule(store),
+    latitude: toNumber(store.latitude),
+    longitude: toNumber(store.longitude),
   };
 }
 
-/**
- * Henter produktsida direkte. 429/403 prøves én gang til etter `Retry-After`
- * (eller en kort pause) — er svaret fortsatt 429/403, er vi blokkert for denne
- * kjøringen. Brukes bare uten Firecrawl-nøkkel; fra Vercel blir dette 429.
- */
-async function fetchDirect(isbn: string): Promise<ProductPage> {
-  const get = () =>
-    fetch(PRODUCT_URL(isbn), {
-      headers: browserHeaders(),
-      redirect: "follow",
-      signal: AbortSignal.timeout(20_000),
-    });
-
-  let response = await get();
-  if (response.status === 429 || response.status === 403) {
-    const wait = Math.min(
-      retryAfterMs(response.headers.get("retry-after")) ?? 3_000,
-      MAX_RETRY_WAIT_MS
-    );
-    await sleep(wait);
-    response = await get();
+/** Én rad per butikk; samme ID to ganger beholder høyeste beholdning. */
+export function parseStores(
+  values: ArkStore[] | null | undefined,
+  isbn: string
+): StoreStock[] {
+  const byId = new Map<string, StoreStock>();
+  for (const store of values ?? []) {
+    if (store?.id == null || !store.name) continue;
+    const row = toStoreStock(store, isbn);
+    const existing = byId.get(row.storeId);
+    if (existing) {
+      existing.qty = Math.max(existing.qty, row.qty);
+      continue;
+    }
+    byId.set(row.storeId, row);
   }
-
-  return {
-    status: response.status,
-    html: response.ok ? await response.text() : "",
-  };
-}
-
-async function fetchProductPage(isbn: string): Promise<ProductPage> {
-  const apiKey = process.env.FIRECRAWL_API_KEY;
-  if (apiKey) {
-    const page = await fetchViaFirecrawl(isbn, apiKey);
-    throwIfBlocked(page.status, ", via Firecrawl");
-    return page;
-  }
-  const page = await fetchDirect(isbn);
-  throwIfBlocked(page.status, "");
-  return page;
+  return [...byId.values()];
 }
 
 export const arkSource: StockSource = {
   key: "ark",
   label: "ARK",
-  // ARK har botvern — hent aldri oftere enn dette, uansett hvor mange ganger
-  // noen trykker «Hent nå». Lagertallene deres endrer seg uansett ikke
-  // oftere, og hver henting via Firecrawl koster en kreditt.
-  minIntervalMs: 30 * 60 * 1000,
 
   async fetchSnapshot(isbn: string): Promise<SourceSnapshot> {
     const fetchedAt = new Date().toISOString();
 
-    const page = await fetchProductPage(isbn);
-
-    if (page.status === 404) {
-      return {
-        sourceKey: "ark",
-        fetchedAt,
-        online: "not_listed",
-        externalId: null,
-        price: null,
-        stores: [],
-        storesWithStock: 0,
-        totalCopies: 0,
-        note: "Boka finnes ikke i ARKs katalog",
-      };
+    let product: ArkProduct;
+    try {
+      product = await api<ArkProduct>(
+        `/product/sku/${encodeURIComponent(isbn)}`
+      );
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        return {
+          sourceKey: "ark",
+          fetchedAt,
+          online: "not_listed",
+          externalId: null,
+          price: null,
+          stores: [],
+          storesWithStock: 0,
+          totalCopies: 0,
+          note: "Boka finnes ikke i ARKs katalog",
+        };
+      }
+      throw error;
     }
-    if (page.status < 200 || page.status >= 300) {
-      throw new Error(`ARK svarte ${page.status}`);
-    }
 
-    const html = page.html;
-    const jsonLd = parseJsonLd(html);
-    const state = parseArkState(html);
+    const availabilities = await api<ArkAvailabilities>(
+      "/store/availabilities",
+      { method: "POST", body: JSON.stringify({ skus: [isbn] }) }
+    );
+    const stores = parseStores(availabilities.values, isbn);
+    const { storesWithStock, totalCopies } = summarizeStores(stores);
 
-    // Verken JSON-LD eller tilstandsfeltene funnet: ARK har lagt om sida,
-    // eller vi fikk en «er du et menneske?»-side med status 200. Kast heller
-    // enn å lagre et falskt «ukjent» snapshot som ser ut som data.
-    if (!jsonLd && !state.online) {
-      const looksLikeChallenge =
-        /captcha|challenge|access denied|bot/i.test(html.slice(0, 5000)) &&
-        html.length < 50_000;
-      throw new (looksLikeChallenge ? SourceUnavailableError : Error)(
-        looksLikeChallenge
-          ? "ARK viste en botsjekk i stedet for produktsida. Forrige lagerbilde beholdes, og vi prøver igjen ved neste henting."
-          : "Fant verken JSON-LD eller tilstand på ARK-sida — sjekk parseren"
+    // Tom butikkliste fra et API som ellers alltid gir alle 155: da har ARK
+    // lagt om, og vi vil heller feile enn å lagre «alle butikker tømt».
+    if (stores.length === 0) {
+      throw new Error(
+        "ARK ga ingen butikker for boka — sjekk /store/availabilities-parseren"
       );
     }
 
-    const storeCount = state.storeCount ?? 0;
-
+    const variant = product.variantAvailability ?? {};
+    const orderable = variant.orderCncAvailableStoresCount ?? 0;
     const notes: string[] = [];
-    // Utgivelsesdatoen er bare interessant så lenge den ligger foran oss.
-    if (state.releaseDate && state.releaseDate > fetchedAt.slice(0, 10)) {
-      notes.push(`Utgivelse ${state.releaseDate}`);
-    }
-    if (storeCount > 0) {
-      notes.push(
-        `Finnes i ${storeCount} butikker — ARK oppgir ikke antall per butikk`
-      );
-    } else if (state.store) {
-      notes.push(`Butikk: ${state.store}`);
+    if (orderable > storesWithStock) {
+      notes.push(`Kan bestilles til ${orderable} butikker`);
     }
 
     return {
       sourceKey: "ark",
       fetchedAt,
-      online: toAvailability(state.online, jsonLd?.offers?.availability),
-      externalId: jsonLd?.isbn ?? isbn,
-      price: toPrice(jsonLd?.offers?.price),
-      // ARK oppgir ikke antall per butikk — se filkommentaren. Butikkantallet
-      // er det eneste tallet, så det er «butikker med boka».
-      stores: [],
-      storeCount,
-      storesWithStock: storeCount,
-      totalCopies: 0,
+      online: toAvailability(variant.onlineAvailability),
+      externalId: product.sku ?? isbn,
+      price: toPrice(product.pricesNokOre?.customerPrice?.price),
+      stores,
+      storesWithStock,
+      totalCopies,
       note: notes.length > 0 ? notes.join(" · ") : undefined,
     };
   },

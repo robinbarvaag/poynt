@@ -245,6 +245,8 @@ har boka sannsynligvis forlatt hylla. Går det opp, er det påfyll.
 | 4 → 2 | `sale` (2) | ja |
 | 2 → 0 | `sale` (2), merket «utsolgt» | ja |
 | 2 → 12 | `restock` (10) | nei |
+| 0 → 2, butikken har hatt boka før | `restock` (2), merket «påfyll etter utsolgt» | nei |
+| 0 → 2, butikken har **aldri** hatt boka | `listed` (2) | nei |
 | ny butikk på lista | `listed` | nei |
 | butikk forsvinner fra lista | `delisted` | **nei** — vi vet ikke om den solgte ut eller stengte |
 | forhåndssalg → i salg | `availability` | nei |
@@ -255,6 +257,12 @@ Kjente begrensninger, så de ikke må gjenoppdages:
   samme dag ser ut som ett salg. Det er prisen for å lese lager i stedet for
   kassaapparater.
 - **Første snapshot gir null.** Det er en nullstilling, ikke et døgns salg.
+- **Kjedene lister alle butikkene sine med 0 før boka er kommet.** Derfor kan
+  ikke «0 → 2» alene si om det er første levering eller påfyll etter utsolgt.
+  `diffSnapshots` får `everStocked` (butikker med `maxQty > 0` i
+  butikk-katalogen) og kaller det `listed` når butikken aldri har hatt boka.
+  Norli Kvadrat, Sandnes 19.10.2026 ble feilaktig «påfyll» før denne regelen
+  kom; raden er rettet for hånd.
 - **Tallet påvirker aldri økonomien.** Det er med vilje: se skillet over.
 
 ## Butikkene og oppfølgingen
@@ -334,40 +342,33 @@ nå (`clearMissing` i `syncStores`) — ellers blir de stående som «har boka»
 alltid. `maxQty` og solgt-estimatet beholdes. Dette skjer ikke når lista er
 en lånt katalog (før lansering), for da sier lista ingenting om beholdningen.
 
-**ARK** (`ark.ts`) har ikke noe API. Produktsiden `ark.no/produkt/<isbn>` bærer to
-maskinlesbare kilder: JSON-LD (pris, schema.org-tilgjengelighet) og Next.js-
-nyttelasten med ARKs egen tilstand (`availability.online.state`,
-`availability.store.state`). Verdiene har byttet skrivemåte etter lansering
-(`available` → `inStock`, butikk `orderable`), så parseren tar begge. ARK oppgir
-**ikke** antall per butikk, men etter lansering ligger
-`availability.store.count` der: hvor mange butikker som fører boka (147 den
-19.10.2026, mot Forlagssentralens 145). Det lagres som `storesWithStock` og
-`storeCount` på lagerbildet, `totalCopies` forblir 0, og dashbordet skriver
-«Finnes i 147 butikker» og tegner butikkantallet i stedet for en flat
-eksemplar-linje (`StockChart` bytter serie når alle punktene har 0 eksemplarer).
+**ARK** (`ark.ts`) har et åpent «experience»-API som nettbutikkens butikkvelger
+(«Velg butikk» på produktsida) selv bruker, og det gir det samme som Norli:
+antall eksemplarer per fysisk butikk pluss e-post, telefon, adresse,
+åpningstider og koordinater for alle 155 butikkene.
 
-ARK har **botvern**, og det er en IP-blokk, ikke en ratebegrensning: fra Vercel
-(Frankfurt) svarer de 429 på 60–170 ms, mens samme forespørsel fra en vanlig
-maskin går gjennom. Ingen headere eller ventetid hjelper mot det. Derfor hentes
-produktsida **via Firecrawl** (`FIRECRAWL_API_KEY`, samme nøkkel som
-inspirasjonskildene bruker): `POST /v2/scrape` med `formats: ["rawHtml"]`, så
-JSON-LD og Next-nyttelasten overlever, og ARKs egentlige statuskode leses fra
-`metadata.statusCode`. Én henting koster én kreditt og tar ~3 s. Uten nøkkel
-(lokalt) hentes sida direkte. Lagene mot botvern ellers, alle i
-`sources/http.ts` og `ark.ts`:
+| Kall | Gir |
+| --- | --- |
+| `GET experience.api.ark.no/api/product/sku/<isbn>` | pris (`pricesNokOre`, øre), nettstatus (`variantAvailability.onlineAvailability`), butikker med boka (`cncAvailableInStoresCount`) og butikker den kan bestilles til (`orderCncAvailableStoresCount`) |
+| `POST …/api/store/availabilities` `{ skus: [isbn] }` | alle butikker, hver med `productAvailability[isbn].availableQuantityInStore` |
 
-1. Fullt sett nettleser-headere (`browserHeaders()`) på direktehenting, ikke
-   bare User-Agent — det er de manglende `Accept-Language`/`Sec-Fetch-*` som
-   avslører en bot.
-2. Ett nytt forsøk etter `Retry-After` (maks 8 s, så «Hent nå» ikke henger).
-   Er svaret fortsatt 429/403 — fra ARK direkte, fra ARK via Firecrawl, eller
-   402/429 fra Firecrawl selv — kastes `SourceUnavailableError`: en midlertidig
-   blokkering, ikke en parsefeil. Forrige lagerbilde står, neste kjøring
-   prøver igjen, og dashbordet viser det som informasjon, ikke rød feil.
-3. `minIntervalMs` på kilden (ARK: 30 min). Er forrige lagerbilde ferskere,
-   hopper hentingen over kilden og sier fra — så ti trykk på «Hent nå» ikke
-   blir ti kall til ARK (og ti kreditter). `fetch-book-stock.ts --force`
-   overstyrer.
+ARK oppgir kommune, ikke fylke. Fylket utledes av postnummeret
+(`sources/postcode-region.ts`, testet), så ARK-butikkene står i samme
+fylkestabell som Norlis; kommunen er reserve. «Kan bestilles til N butikker»
+havner i notatet når N er større enn antall butikker med boka — det er
+Klikk&Hent-dekningen, ikke hyller med bøker.
+
+Historikk: fram til 20.10.2026 skrapet adapteren produktsida, og det gikk
+galt på to måter. Sida bærer bare status og pris (ikke per butikk), og
+www.ark.no står bak en WAF som avviser Vercels IP-område med 429 på
+millisekunder — en IP-blokk, ikke en ratebegrensning, så verken
+nettleser-headere, `Retry-After` eller Firecrawl-omvei var en god løsning.
+API-et står **ikke** bak den blokken (det svarer selv på forespørsler uten
+nettleser-headere), så det brukes direkte. Svarer det likevel 429/403, kastes
+`SourceUnavailableError`: forrige lagerbilde står, neste kjøring prøver igjen,
+og dashbordet viser det som informasjon, ikke rød feil. En tom butikkliste
+kastes også som feil — API-et gir alltid alle butikkene, så tom liste betyr at
+ARK har lagt om, ikke at alle hyllene er tomme.
 
 Har en kilde ikke gitt nytt lagerbilde på over 36 timer, varsler dashbordet
 om det øverst, så gamle tall ikke leses som «ingen endring».

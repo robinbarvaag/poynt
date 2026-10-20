@@ -1,98 +1,183 @@
 import { describe, expect, test } from "bun:test";
-import { parseArkState, parseJsonLd, toAvailability } from "./ark";
+import {
+  type ArkStore,
+  parseStores,
+  toAvailability,
+  toPrice,
+  toSchedule,
+  toStoreStock,
+} from "./ark";
 import { retryAfterMs } from "./http";
 
-describe("parseJsonLd", () => {
-  test("finner bok-blokka blant flere JSON-LD-skript", () => {
-    const html = `
-      <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"ARK"}</script>
-      <script type="application/ld+json">{"@context":"https://schema.org","@type":["Product","Book"],"name":"Verdifull vekst","isbn":"9788230375334","offers":{"@type":"Offer","price":399,"availability":"https://schema.org/InStock"}}</script>
-    `;
-    const parsed = parseJsonLd(html);
-    expect(parsed?.isbn).toBe("9788230375334");
-    expect(parsed?.offers?.price).toBe(399);
+const ISBN = "9788230375334";
+
+/** Slik ARK svarte 20.10.2026, nedkortet. */
+const akerBrygge: ArkStore = {
+  id: "3100",
+  name: "ARK Aker Brygge",
+  address: {
+    streetName: "Holmens gate 8",
+    streetNumber: "",
+    city: "Oslo",
+    zipcode: "0250",
+    municipality: "Oslo",
+  },
+  latitude: "59.9100975",
+  longitude: "10.7257317",
+  mondayOpeningHours: {
+    isOpen: true,
+    openFrom: "10:00:00",
+    openTo: "20:00:00",
+  },
+  tuesdayOpeningHours: {
+    isOpen: true,
+    openFrom: "10:00:00",
+    openTo: "20:00:00",
+  },
+  saturdayOpeningHours: {
+    isOpen: true,
+    openFrom: "10:00:00",
+    openTo: "18:00:00",
+  },
+  sundayOpeningHours: {
+    isOpen: false,
+    openFrom: "00:00:00",
+    openTo: "00:00:00",
+  },
+  phoneNumber: "96 91 85 84",
+  email: "aker.brygge@ark.no",
+  productAvailability: {
+    [ISBN]: {
+      isCnCAvailable: true,
+      isCncOrderAvailable: true,
+      availableQuantityInStore: 2,
+    },
+  },
+};
+
+describe("toStoreStock", () => {
+  test("mapper ARKs butikk til vår rad, uten «ARK »-prefiks og med fylke", () => {
+    expect(toStoreStock(akerBrygge, ISBN)).toEqual({
+      storeId: "3100",
+      name: "Aker Brygge",
+      city: "Oslo",
+      region: "Oslo",
+      qty: 2,
+      address: "Holmens gate 8",
+      postcode: "0250",
+      email: "aker.brygge@ark.no",
+      phone: "96 91 85 84",
+      schedule:
+        "Mandag 10:00–20:00\nTirsdag 10:00–20:00\nLørdag 10:00–18:00\nSøndag stengt",
+      latitude: 59.9100975,
+      longitude: 10.7257317,
+    });
   });
 
-  test("tåler Product alene, @graph og pris som streng", () => {
-    const html = `<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList"},{"@type":"Product","isbn":"123","offers":{"price":"399.00","availability":"https://schema.org/PreOrder"}}]}</script>`;
-    const parsed = parseJsonLd(html);
-    expect(parsed?.isbn).toBe("123");
-    expect(parsed?.offers?.price).toBe("399.00");
-  });
-
-  test("gir null uten bok-blokk eller ved ugyldig JSON", () => {
-    expect(parseJsonLd("<html></html>")).toBeNull();
+  test("beholdning for en annen ISBN, null og negativt teller som 0", () => {
+    const other = {
+      ...akerBrygge,
+      productAvailability: { "999": { availableQuantityInStore: 5 } },
+    };
+    expect(toStoreStock(other, ISBN).qty).toBe(0);
     expect(
-      parseJsonLd(`<script type="application/ld+json">{not json</script>`)
-    ).toBeNull();
+      toStoreStock(
+        {
+          ...akerBrygge,
+          productAvailability: { [ISBN]: { availableQuantityInStore: null } },
+        },
+        ISBN
+      ).qty
+    ).toBe(0);
+    expect(
+      toStoreStock(
+        {
+          ...akerBrygge,
+          productAvailability: { [ISBN]: { availableQuantityInStore: -1 } },
+        },
+        ISBN
+      ).qty
+    ).toBe(0);
+    expect(
+      toStoreStock(
+        {
+          ...akerBrygge,
+          productAvailability: { [ISBN]: { availableQuantityInStore: "3" } },
+        },
+        ISBN
+      ).qty
+    ).toBe(3);
+  });
+
+  test("faller tilbake på kommunen når postnummeret mangler", () => {
+    const store = {
+      ...akerBrygge,
+      address: { city: "Oslo", municipality: "Oslo", zipcode: null },
+    };
+    const row = toStoreStock(store, ISBN);
+    expect(row.region).toBe("Oslo");
+    expect(row.postcode).toBeUndefined();
+    expect(row.address).toBeUndefined();
+  });
+
+  test("setter sammen gate og nummer", () => {
+    const store = {
+      ...akerBrygge,
+      address: { streetName: "Torvet", streetNumber: "6", zipcode: "2000" },
+    };
+    const row = toStoreStock(store, ISBN);
+    expect(row.address).toBe("Torvet 6");
+    expect(row.region).toBe("Akershus");
   });
 });
 
-describe("parseArkState", () => {
-  test("leser escapede felt i Next-nyttelasten (før lansering)", () => {
-    const html = String.raw`self.__next_f.push([1,"{\"availability\":{\"online\":{\"state\":\"available\"},\"store\":{\"state\":\"unavailable\"}},\"releaseDate\":\"2026-10-15T00:00:00\"}"])`;
-    expect(parseArkState(html)).toEqual({
-      online: "available",
-      store: "unavailable",
-      storeCount: null,
-      releaseDate: "2026-10-15",
-    });
+describe("toSchedule", () => {
+  test("tom uten åpningstider", () => {
+    expect(toSchedule({ id: 1, name: "ARK X" })).toBeUndefined();
+  });
+});
+
+describe("parseStores", () => {
+  test("dedupliserer på ID og beholder høyeste beholdning", () => {
+    const twice = [
+      akerBrygge,
+      {
+        ...akerBrygge,
+        productAvailability: { [ISBN]: { availableQuantityInStore: 0 } },
+      },
+    ];
+    const stores = parseStores(twice, ISBN);
+    expect(stores).toHaveLength(1);
+    expect(stores[0]?.qty).toBe(2);
   });
 
-  test("leser camelCase-tilstander og butikkantall (etter lansering)", () => {
-    // Slik sida så ut 19.10.2026: ARK byttet «available» → «inStock» og la
-    // til «count» på butikkfeltet.
-    const html = String.raw`\"availability\":{\"isPurchasable\":true,\"online\":{\"state\":\"inStock\"},\"store\":{\"state\":\"orderable\",\"count\":147},\"expectedDelivery\":\"Sendes innen 1-2 virkedager\"}`;
-    expect(parseArkState(html)).toEqual({
-      online: "inStock",
-      store: "orderable",
-      storeCount: 147,
-      releaseDate: null,
-    });
-  });
-
-  test("tar første treff når anbefalte bøker har samme felt", () => {
-    const html = String.raw`\"store\":{\"state\":\"orderable\",\"count\":147}} … \"store\":{\"state\":\"unavailable\"}`;
-    const state = parseArkState(html);
-    expect(state.store).toBe("orderable");
-    expect(state.storeCount).toBe(147);
-  });
-
-  test("leser også uescapede felt", () => {
-    const html =
-      '{"availability":{"online":{"state":"preorder"},"store":{"state":"unavailable"}}}';
-    expect(parseArkState(html).online).toBe("preorder");
-    expect(parseArkState(html).storeCount).toBeNull();
-  });
-
-  test("gir null når feltene mangler", () => {
-    expect(parseArkState("<html>Access denied</html>")).toEqual({
-      online: null,
-      store: null,
-      storeCount: null,
-      releaseDate: null,
-    });
+  test("hopper over rader uten ID eller navn, tåler null", () => {
+    expect(parseStores(null, ISBN)).toEqual([]);
+    expect(
+      parseStores([{ id: null as unknown as string, name: "ARK X" }], ISBN)
+    ).toEqual([]);
   });
 });
 
 describe("toAvailability", () => {
-  test("ARK-tilstanden vinner over schema.org", () => {
-    expect(toAvailability("available", "https://schema.org/PreOrder")).toBe(
-      "in_stock"
-    );
-    expect(toAvailability("unavailable", undefined)).toBe("out_of_stock");
+  test("forstår ARKs ord uavhengig av store og små bokstaver", () => {
+    expect(toAvailability("Available")).toBe("in_stock");
+    expect(toAvailability("inStock")).toBe("in_stock");
+    expect(toAvailability("PreOrder")).toBe("preorder");
+    expect(toAvailability("Unavailable")).toBe("out_of_stock");
+    expect(toAvailability("SoldOut")).toBe("out_of_stock");
+    expect(toAvailability(null)).toBe("unknown");
+    expect(toAvailability("Something")).toBe("unknown");
   });
+});
 
-  test("forstår ARKs camelCase-verdier", () => {
-    expect(toAvailability("inStock", undefined)).toBe("in_stock");
-    expect(toAvailability("orderable", undefined)).toBe("in_stock");
-    expect(toAvailability("preOrder", undefined)).toBe("preorder");
-    expect(toAvailability("outOfStock", undefined)).toBe("out_of_stock");
-  });
-
-  test("faller tilbake på schema.org, ellers ukjent", () => {
-    expect(toAvailability(null, "https://schema.org/InStock")).toBe("in_stock");
-    expect(toAvailability(null, undefined)).toBe("unknown");
+describe("toPrice", () => {
+  test("øre → kroner, uten å gjøre 0 og null til en pris", () => {
+    expect(toPrice(39900)).toBe(399);
+    expect(toPrice(39950)).toBe(399.5);
+    expect(toPrice(0)).toBeNull();
+    expect(toPrice(null)).toBeNull();
+    expect(toPrice(undefined)).toBeNull();
   });
 });
 
