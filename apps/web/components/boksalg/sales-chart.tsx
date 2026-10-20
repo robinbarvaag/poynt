@@ -1,9 +1,11 @@
 "use client";
 
-import type { TimelinePoint } from "@/lib/boksalg/dashboard";
+import type { DailyPoint } from "@/lib/boksalg/dashboard";
 import {
   type ChartConfig,
   ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from "@poynt/ui";
@@ -13,42 +15,81 @@ import { kortDag } from "./format";
 import { HatchPattern } from "./hatch-pattern";
 
 /**
- * Bøker per dag. Én serie per graf — bevisst.
+ * Bøker dag for dag — solgt inn og ut av hyllene i samme graf, men som to
+ * søyler ved siden av hverandre, aldri stablet.
  *
  * «Solgt inn» (bokhandelens innkjøp, avregninger, nettbutikken) og «ut av
  * hyllene» (utledet av at butikklageret gikk ned) er to stadier i samme reise,
- * ikke to deler av en sum. Sto de stablet i samme graf, ville de blitt lest
- * som et totaltall — og de samme bøkene talt to ganger. Derfor egen graf hver,
- * og estimatet er skravert så usikkerheten leses uten farge.
+ * ikke to deler av en sum. Stablet ville de blitt lest som et totaltall og de
+ * samme bøkene talt to ganger. Side om side kan Susanne se det hun egentlig
+ * lurer på: rører det seg litt hver dag, eller kommer alt i rykk? Derfor står
+ * også de tomme dagene på aksen. Estimatet er skravert så usikkerheten leses
+ * uten farge.
  */
+
+/** Liten fylt rute — ikonet for eksakte tall i legende og tooltip. */
+function ExactSwatch() {
+  return (
+    <svg viewBox="0 0 12 12" aria-hidden="true" width="12" height="12">
+      <rect width="12" height="12" rx="2" fill={EXACT} />
+    </svg>
+  );
+}
+
+/** Samme rute skravert — ikonet for estimater. Egen pattern-id, så den
+ *  virker utenfor grafens `<svg>` (legenden og tooltipen er egne elementer). */
+function EstimateSwatch() {
+  return (
+    <svg viewBox="0 0 12 12" aria-hidden="true" width="12" height="12">
+      <defs>
+        <pattern
+          id="boksalg-hatch-swatch"
+          width="4"
+          height="4"
+          patternUnits="userSpaceOnUse"
+          patternTransform="rotate(45)"
+        >
+          <rect width="4" height="4" fill={ESTIMATE} />
+          <line
+            x1="0"
+            y1="0"
+            x2="0"
+            y2="4"
+            stroke="#ffffff"
+            strokeWidth="1.6"
+            opacity="0.55"
+          />
+        </pattern>
+      </defs>
+      <rect width="12" height="12" rx="2" fill="url(#boksalg-hatch-swatch)" />
+    </svg>
+  );
+}
+
+const config = {
+  soldIn: { label: "Solgt inn", color: EXACT, icon: ExactSwatch },
+  sellThrough: {
+    label: "Ut av hyllene",
+    color: ESTIMATE,
+    icon: EstimateSwatch,
+  },
+} satisfies ChartConfig;
 
 export function SalesChart({
   points,
-  variant = "revenue",
   emptyText,
 }: {
-  points: TimelinePoint[];
-  /** «revenue» = solgt inn (eksakt). «sellthrough» = estimat, skraveres. */
-  variant?: "revenue" | "sellthrough";
+  points: DailyPoint[];
   emptyText?: string;
 }) {
-  const estimated = variant === "sellthrough";
-
   if (points.length === 0) {
     return (
       <p className="text-muted-foreground py-10 text-center text-sm">
         {emptyText ??
-          "Ingen salg registrert ennå. Grafen fylles så snart boka begynner å bevege seg."}
+          "Ingenting registrert ennå. Grafen fylles så snart boka begynner å bevege seg."}
       </p>
     );
   }
-
-  const config = {
-    copies: {
-      label: estimated ? "Ut av hyllene" : "Solgt inn",
-      color: estimated ? ESTIMATE : EXACT,
-    },
-  } satisfies ChartConfig;
 
   const data = points.map((point) => ({
     ...point,
@@ -56,8 +97,8 @@ export function SalesChart({
   }));
 
   return (
-    <ChartContainer config={config} className="h-55 w-full">
-      <BarChart data={data} accessibilityLayer barCategoryGap={4}>
+    <ChartContainer config={config} className="h-60 w-full">
+      <BarChart data={data} accessibilityLayer barCategoryGap={4} barGap={1}>
         <HatchPattern />
         <CartesianGrid vertical={false} />
         <XAxis
@@ -74,13 +115,20 @@ export function SalesChart({
         />
         <ChartTooltip
           cursor={{ fillOpacity: 0.35 }}
-          content={<ChartTooltipContent color={estimated ? ESTIMATE : EXACT} />}
+          content={<ChartTooltipContent />}
+        />
+        <ChartLegend content={<ChartLegendContent />} />
+        <Bar
+          dataKey="soldIn"
+          fill="var(--color-soldIn)"
+          radius={4}
+          maxBarSize={20}
         />
         <Bar
-          dataKey="copies"
-          fill={estimated ? `url(#${HATCH_ID})` : "var(--color-copies)"}
+          dataKey="sellThrough"
+          fill={`url(#${HATCH_ID})`}
           radius={4}
-          maxBarSize={28}
+          maxBarSize={20}
         />
       </BarChart>
     </ChartContainer>

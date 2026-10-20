@@ -75,8 +75,11 @@ Hit hører:
 **Ut av hyllene** er når kunden kjøper boka i butikken, utledet av at Norlis
 lagertall gikk ned. Det er **ikke omsetning** — de bøkene ble betalt for da
 bokhandelen kjøpte dem inn. Legges de to sammen, telles de samme bøkene to
-ganger, og det er nettopp derfor dashbordet holder dem i hver sin seksjon og hver
-sin graf.
+ganger. Derfor står de i samme graf («Dag for dag», `sales-chart.tsx`) som to
+søyler *ved siden av* hverandre — aldri stablet, aldri summert — og de holdes
+i hver sin del av økonomien. Grafen viser alle dager fra første bevegelse til
+i dag, også de tomme (`buildDaily` i `dashboard.ts`), fordi spørsmålet den
+skal svare på er «rører det seg litt hver dag, eller kommer alt i rykk?».
 
 Ut av hyllene er likevel det mest handlingsrettede tallet: går hyllene fort
 tomme, kommer det en etterbestilling — og *den* er omsetning.
@@ -194,9 +197,9 @@ flyttes ned til økonomidelen — `page.tsx` skiller `activePresales` fra
 
 Etter lansering er det bevegelsen ute i butikkene Susanne kan gjøre noe med, så
 sida går fra *hvor står vi* til *hva skjer nå* til *bakgrunn*: nøkkeltall med
-returscenario → ut av hyllene → ute i butikk → butikkene (kart og oppfølging)
-→ endringslogg → solgt inn per dag → milepæler → hva hver kanal er verdt →
-avsluttet forhåndssalg → utgifter. Seksjonene er merket med
+returscenario → dag for dag (solgt inn og ut av hyllene i én graf) → ute i
+butikk → butikkene (kart og oppfølging) → endringslogg → milepæler → hva hver
+kanal er verdt → avsluttet forhåndssalg → utgifter. Seksjonene er merket med
 `{/* ---- Navn ---- */}`-kommentarer i `page.tsx`, så en omrokering er å
 flytte blokker, ikke å skrive dem om.
 

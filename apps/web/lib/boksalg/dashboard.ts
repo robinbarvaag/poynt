@@ -20,7 +20,7 @@ import {
   labelFor,
   storeStatus,
 } from "./constants";
-import { dayKey, daysFromToday } from "./dates";
+import { dayKey, daysFromToday, eachDay } from "./dates";
 import {
   type BreakEven,
   type ChannelRates,
@@ -184,10 +184,21 @@ export interface RegionSummary {
   sold: number;
 }
 
-export interface TimelinePoint {
+/**
+ * Én dag i grafen «Dag for dag». De to tallene er to stadier i samme reise —
+ * solgt inn er det Susanne fikk betalt for, ut av hyllene er de samme bøkene
+ * på vei til en leser — og skal aldri summeres.
+ */
+export interface DailyPoint {
   date: string;
-  copies: number;
+  /** Bøker Susanne fikk betalt for denne dagen (eksakt). */
+  soldIn: number;
+  /** Bøker som forlot en butikkhylle denne dagen (estimat). */
+  sellThrough: number;
 }
+
+/** Så mange dager bakover grafen «Dag for dag» viser. */
+const DAILY_DAYS = 90;
 
 /**
  * Bøker Susanne solgte eller signerte for hånd i en bokhandel (lanseringsfest,
@@ -255,10 +266,11 @@ export interface BookDashboardData {
   /** Alle butikker vi kjenner, med kontaktinfo og oppfølging. */
   stores: StoreRow[];
   regions: RegionSummary[];
-  /** Solgt inn per dag — det Susanne har fått betalt for. */
-  timeline: TimelinePoint[];
-  /** Ut av butikkhyllene per dag. Etterspørsel, ikke omsetning. */
-  sellThroughTimeline: TimelinePoint[];
+  /**
+   * Solgt inn og ut av hyllene dag for dag, med alle dager fra første
+   * bevegelse til i dag — også de uten noe, så hullene synes.
+   */
+  daily: DailyPoint[];
   /** Sum bøker ut av hyllene, på tvers av kilder. */
   sellThroughTotal: number;
   /** Det Susanne selv solgte fra bokhandelens hylle. Del av «ut av hyllene», ikke omsetning. */
@@ -826,14 +838,10 @@ export async function getBookDashboard(
   // ---- Tidslinjer ---------------------------------------------------------
   // To adskilte serier, bevisst ikke slått sammen: den ene er penger inn, den
   // andre er etterspørsel ute i butikkene.
-  const toTimeline = (byDay: Map<string, number>): TimelinePoint[] =>
-    [...byDay.keys()]
-      .sort()
-      .slice(-90)
-      .map((date) => ({ date, copies: byDay.get(date) ?? 0 }));
-
-  const timeline = toTimeline(soldInByDay);
-  const sellThroughTimeline = toTimeline(sellThroughByDay);
+  // Hver dag fra første bevegelse til i dag, også de tomme: poenget med grafen
+  // er å se om det rører seg litt hver dag, og det kan den bare vise når
+  // dagene uten noe står der som hull.
+  const daily = buildDaily(soldInByDay, sellThroughByDay);
   const sellThroughTotal = [...sellThroughBySource.values()].reduce(
     (sum, value) => sum + value,
     0
@@ -919,11 +927,35 @@ export async function getBookDashboard(
     stock,
     stores,
     regions,
-    timeline,
-    sellThroughTimeline,
+    daily,
     sellThroughTotal,
     shelfSales,
     events,
     warnings,
   };
+}
+
+/**
+ * Slår de to dag-kartene sammen til én sammenhengende tidslinje: fra den
+ * første dagen med bevegelse til i dag (norsk tid), hver dag representert,
+ * de siste `DAILY_DAYS` dagene.
+ */
+export function buildDaily(
+  soldInByDay: Map<string, number>,
+  sellThroughByDay: Map<string, number>,
+  now = new Date()
+): DailyPoint[] {
+  const days = [...soldInByDay.keys(), ...sellThroughByDay.keys()].filter(
+    Boolean
+  );
+  if (days.length === 0) return [];
+  const first = days.sort()[0];
+  const today = dayKey(now);
+  return eachDay(first, today < first ? first : today)
+    .slice(-DAILY_DAYS)
+    .map((date) => ({
+      date,
+      soldIn: soldInByDay.get(date) ?? 0,
+      sellThrough: sellThroughByDay.get(date) ?? 0,
+    }));
 }

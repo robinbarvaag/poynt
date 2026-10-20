@@ -32,3 +32,19 @@ export function daysFromToday(targetDay: string, now = new Date()): number {
       86_400_000
   );
 }
+
+/**
+ * Alle dagnøkler fra `from` til og med `to` («2026-10-13», «2026-10-14», …).
+ * Brukes til å fylle tidslinjene med tomme dager, så en dag uten bevegelse
+ * vises som et hull i grafen i stedet for å forsvinne fra aksen.
+ */
+export function eachDay(from: string, to: string): string[] {
+  const start = Date.parse(`${from}T00:00:00Z`);
+  const end = Date.parse(`${to}T00:00:00Z`);
+  if (Number.isNaN(start) || Number.isNaN(end) || start > end) return [];
+  const days: string[] = [];
+  for (let t = start; t <= end; t += 86_400_000) {
+    days.push(new Date(t).toISOString().slice(0, 10));
+  }
+  return days;
+}

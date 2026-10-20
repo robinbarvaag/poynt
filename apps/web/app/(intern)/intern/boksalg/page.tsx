@@ -178,23 +178,31 @@ async function BookSalesContent() {
         printRun={book.printRun}
       />
 
-      {/* ---- Ut av hyllene ------------------------------------------- */}
+      {/* ---- Dag for dag: solgt inn + ut av hyllene ------------------ */}
       <Card>
         <CardHeader>
-          <CardTitle>Ut av hyllene</CardTitle>
+          <CardTitle>Dag for dag</CardTitle>
           <CardDescription>
             <strong>{antall(data.sellThroughTotal)} bøker</strong> har forlatt
             en butikkhylle siden sporingen startet, utledet av at lageret gikk
-            ned. Dette er <em>ikke</em> omsetning — de bøkene fikk du betalt for
-            da bokhandelen kjøpte dem inn. Tallet sier hvor fort boka går, og
-            dermed når det kommer en etterbestilling.
+            ned. Det er <em>ikke</em> omsetning — de bøkene fikk du betalt for
+            da bokhandelen kjøpte dem inn, og det er de innkjøpene (pluss
+            avregninger, foredragssalg og nettbutikken) som er «solgt inn».
+            Søylene står ved siden av hverandre, ikke oppå: de er samme bøker på
+            to stadier. Tomme dager vises som hull, så du ser om det rører seg
+            litt hver dag eller kommer i rykk.{" "}
+            <Link
+              href="/admin/collections/book-sales/create"
+              className="hover:text-foreground underline"
+            >
+              Legg inn et salg
+            </Link>
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
           <SalesChart
-            points={data.sellThroughTimeline}
-            variant="sellthrough"
-            emptyText="Ingenting har flyttet seg i butikkhyllene ennå."
+            points={data.daily}
+            emptyText="Ingenting har flyttet seg ennå. Har Norli eller ARK kjøpt inn et antall, legg det inn under Boksalg — det er da du får betalt."
           />
 
           {/* Det Susanne selv solgte fra hylla — festen og signeringene.
@@ -276,29 +284,6 @@ async function BookSalesContent() {
         </CardHeader>
         <CardContent>
           <EventLog events={events} />
-        </CardContent>
-      </Card>
-
-      {/* ---- Solgt inn over tid -------------------------------------- */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Solgt inn per dag</CardTitle>
-          <CardDescription>
-            Bøker du har fått betalt for: bokhandlernes innkjøp, avregninger fra
-            distributøren, foredragssalg og bestillinger i nettbutikken.{" "}
-            <Link
-              href="/admin/collections/book-sales/create"
-              className="hover:text-foreground underline"
-            >
-              Legg inn et salg
-            </Link>
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <SalesChart
-            points={data.timeline}
-            emptyText="Ingen salg ført ennå. Har Norli eller ARK kjøpt inn et antall, legg det inn under Boksalg — det er da du får betalt."
-          />
         </CardContent>
       </Card>
 

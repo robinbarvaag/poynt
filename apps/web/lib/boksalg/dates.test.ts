@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { dayKey, daysFromToday } from "./dates";
+import { dayKey, daysFromToday, eachDay } from "./dates";
 
 describe("dayKey", () => {
   test("regner dagen i norsk tid, ikke UTC", () => {
@@ -28,5 +28,22 @@ describe("daysFromToday", () => {
     // 23:30 UTC 14. oktober = 15. oktober i Norge → 3 dager til den 18.
     const now = new Date("2026-10-14T23:30:00.000Z");
     expect(daysFromToday("2026-10-18", now)).toBe(3);
+  });
+});
+
+describe("eachDay", () => {
+  test("gir hver dag fra og med start til og med slutt", () => {
+    expect(eachDay("2026-10-30", "2026-11-02")).toEqual([
+      "2026-10-30",
+      "2026-10-31",
+      "2026-11-01",
+      "2026-11-02",
+    ]);
+    expect(eachDay("2026-10-15", "2026-10-15")).toEqual(["2026-10-15"]);
+  });
+
+  test("tom når slutt er før start eller en dato er ugyldig", () => {
+    expect(eachDay("2026-10-16", "2026-10-15")).toEqual([]);
+    expect(eachDay("", "2026-10-15")).toEqual([]);
   });
 });
