@@ -23,6 +23,7 @@ export const Products: CollectionConfig = {
       edit: {
         beforeDocumentControls: [
           "/admin/components/open-on-site-button#OpenOnSiteButton",
+          "/admin/components/share-link-button#ShareLinkButton",
         ],
       },
     },

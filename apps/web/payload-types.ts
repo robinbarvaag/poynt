@@ -3266,7 +3266,7 @@ export interface Order {
   /**
    * Settes av betalingen. «Avventer» er en Vipps-betaling kunden ikke har fullført i appen ennå.
    */
-  status: 'paid' | 'pending' | 'cancelled';
+  status: 'pending' | 'paid' | 'cancelled';
   paymentProvider: 'stripe' | 'vipps';
   /**
    * Minst én vare er merket «Krever frakt». Mangler leveringsadressen, må kunden kontaktes.

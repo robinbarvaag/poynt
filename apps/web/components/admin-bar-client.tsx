@@ -1,6 +1,7 @@
 "use client";
 
 import { ANALYTICS_OPT_OUT_KEY } from "@/components/site-analytics";
+import { SHARE_CHANNELS, buildShareUrl } from "@/lib/share-link";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,8 +11,10 @@ import {
   DropdownMenuTrigger,
 } from "@poynt/ui";
 import {
+  Check,
   ExternalLink,
   LayoutDashboard,
+  Link2,
   LogOut,
   MoreHorizontal,
   Pencil,
@@ -55,6 +58,7 @@ const COLLAPSE_KEY = "poynt-adminbar-collapsed";
 export function AdminBarClient(props: AdminBarProps) {
   const [user, setUser] = useState<MeUser | undefined>(undefined);
   const [collapsed, setCollapsed] = useState(false);
+  const [copied, setCopied] = useState<string | null>(null);
 
   useEffect(() => {
     setCollapsed(
@@ -88,6 +92,22 @@ export function AdminBarClient(props: AdminBarProps) {
     ? `/admin/globals/${props.global}`
     : `/admin/collections/${props.collection}/${props.id}`;
   const label = props.singular ?? "denne siden";
+
+  // Delingslenke for siden som vises nå — UTM-merket per kanal
+  // (lib/share-link.ts), så vi ser i Vercel hvilken kanal som ga besøk.
+  const copyShareLink = async (channelKey: string) => {
+    const channel = SHARE_CHANNELS.find((c) => c.key === channelKey);
+    if (!channel) return;
+    const link = buildShareUrl(window.location.href, channel);
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopied(channel.label);
+    } catch {
+      window.prompt("Kopier lenken:", link);
+      return;
+    }
+    window.setTimeout(() => setCopied(null), 2500);
+  };
 
   const setCollapsedPersisted = (next: boolean) => {
     setCollapsed(next);
@@ -125,6 +145,37 @@ export function AdminBarClient(props: AdminBarProps) {
           <Pencil className="size-3.5" />
           Rediger {label}
         </a>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            aria-label="Kopier lenke for deling"
+            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 font-medium text-background text-sm transition hover:bg-background/10"
+          >
+            {copied ? (
+              <Check className="size-3.5" />
+            ) : (
+              <Link2 className="size-3.5" />
+            )}
+            {copied ? "Kopiert!" : "Del"}
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" side="top" className="w-64">
+            <DropdownMenuLabel className="font-normal text-muted-foreground text-xs">
+              Hvor skal du dele?
+            </DropdownMenuLabel>
+            {SHARE_CHANNELS.map((channel) => (
+              <DropdownMenuItem
+                key={channel.key}
+                onSelect={() => void copyShareLink(channel.key)}
+                className="flex-col items-start gap-0"
+              >
+                <span className="font-medium">{channel.label}</span>
+                <span className="text-muted-foreground text-xs">
+                  {channel.hint}
+                </span>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         <DropdownMenu>
           <DropdownMenuTrigger

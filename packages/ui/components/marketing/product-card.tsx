@@ -110,7 +110,12 @@ function ImageFrame({
   seed: string;
 }) {
   return (
-    <div className={cn("relative p-3", featured && "md:h-full")}>
+    <div
+      className={cn(
+        "relative p-3",
+        featured && "md:flex md:h-full md:flex-col"
+      )}
+    >
       {/* Lekent blob-pek bak bildet — form/plassering varierer per produkt */}
       <DecoBlob
         seed={seed}
@@ -134,7 +139,10 @@ function ImageFrame({
           featured
             ? // A5-format (148:210) – matcher boka og hovedbildet på produktsiden.
               // Bildet fyller rammen (`object-cover`) og beskjæres etter fokuspunkt.
-              "aspect-[148/210] bg-background/50"
+              // A5 er minstehøyden; er nabokortet i raden høyere, vokser rammen
+              // (`flex-1`) så bildet fyller kortet i stedet for å etterlate et
+              // tomrom under.
+              "aspect-[148/210] bg-background/50 md:flex-1"
             : // Kvadratisk ramme med luft: hele bildet vises (`object-contain`)
               // på en dempet flate, så omslag og forsider aldri kuttes. Kvadrat
               // (ikke 4:5) fordi bilde + tekst da matcher høyden på det
@@ -222,7 +230,9 @@ export function ProductCard({
           <div
             className={cn(
               "flex flex-col gap-2 px-5 pt-3 pb-5",
-              featured && "md:py-10 md:pr-8 md:pl-0"
+              // Teksten sentreres vertikalt ved det høye bildet, med prisen rett
+              // under beskrivelsen — ikke limt til bunnen av kortet.
+              featured && "md:justify-center md:py-10 md:pr-8 md:pl-0"
             )}
           >
             {eyebrow && (
@@ -255,7 +265,7 @@ export function ProductCard({
               <div
                 className={cn(
                   "mt-2 flex items-center gap-2",
-                  featured && "md:mt-auto md:pt-6"
+                  featured && "md:mt-4"
                 )}
               >
                 <span

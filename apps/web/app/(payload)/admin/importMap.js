@@ -30,6 +30,7 @@ import { MetaDescriptionComponent as MetaDescriptionComponent_a8a977ebc872c5d5ea
 import { MetaImageComponent as MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { SeoPreview as SeoPreview_ed93029457eb2f3e08b012fe21d95953 } from '../../../admin/components/seo/seo-preview'
 import { OpenOnSiteButton as OpenOnSiteButton_fb0f337f3ab45b4d6e02970dc5b51a64 } from '../../../admin/components/open-on-site-button'
+import { ShareLinkButton as ShareLinkButton_ad637d0b290021657f96436fa784f9ea } from '../../../admin/components/share-link-button'
 import { StockFieldButton as StockFieldButton_e1d51fcd745605f9c32df95d9becf02c } from '../../../admin/components/media/stock-field-button'
 import { BlocksFeatureClient as BlocksFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { TextCheck as TextCheck_4aa3d66cdcd5d7ba843b8519bee12971 } from '../../../admin/components/text-check'
@@ -117,6 +118,7 @@ export const importMap = {
   "@payloadcms/plugin-seo/client#MetaImageComponent": MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "/admin/components/seo/seo-preview#SeoPreview": SeoPreview_ed93029457eb2f3e08b012fe21d95953,
   "/admin/components/open-on-site-button#OpenOnSiteButton": OpenOnSiteButton_fb0f337f3ab45b4d6e02970dc5b51a64,
+  "/admin/components/share-link-button#ShareLinkButton": ShareLinkButton_ad637d0b290021657f96436fa784f9ea,
   "/admin/components/media/stock-field-button#StockFieldButton": StockFieldButton_e1d51fcd745605f9c32df95d9becf02c,
   "@payloadcms/richtext-lexical/client#BlocksFeatureClient": BlocksFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "/admin/components/text-check#TextCheck": TextCheck_4aa3d66cdcd5d7ba843b8519bee12971,
