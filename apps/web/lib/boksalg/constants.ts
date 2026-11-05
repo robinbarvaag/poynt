@@ -13,6 +13,7 @@ export const CHANNEL_KEYS = {
   foredrag: "foredrag",
   direkte: "direkte",
   bibliotek: "bibliotek",
+  akademika: "akademika",
   annet: "annet",
 } as const;
 
@@ -27,6 +28,9 @@ export const CHANNEL_OPTIONS: { label: string; value: ChannelKey }[] = [
   // Biblioteksentralen kjøper på vegne av bibliotekene, via Forlagssentralen.
   // Satsen står på fakturaen derfra og legges inn under Kanaler i Bokøkonomi.
   { label: "Bibliotek (Biblioteksentralen)", value: "bibliotek" },
+  // Akademika kjøper via Forlagssentralen som Norli og ARK, men med egen
+  // rabatt. Satsen står på fakturaen og legges inn under Kanaler i Bokøkonomi.
+  { label: "Akademika", value: "akademika" },
   { label: "Annet", value: "annet" },
 ];
 

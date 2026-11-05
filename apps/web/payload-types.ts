@@ -3377,7 +3377,7 @@ export interface BookSale {
   /**
    * Avgjør hvilke kutt som trekkes fra.
    */
-  channel: 'norli' | 'ark' | 'egen' | 'foredrag' | 'direkte' | 'bibliotek' | 'annet';
+  channel: 'norli' | 'ark' | 'egen' | 'foredrag' | 'direkte' | 'bibliotek' | 'akademika' | 'annet';
   saleSource: 'innkjop' | 'forhandssalg' | 'avregning' | 'foredrag' | 'direkte' | 'hyllesalg' | 'retur' | 'annet';
   /**
    * Kunder som krysset av for «signert». Bare disse bestilles inn til signering i butikk — og bare disse kan du ta med på lanseringsfesten.
@@ -6392,7 +6392,7 @@ export interface BookEconomy {
   editorBasis: 'brutto' | 'netto';
   channels?:
     | {
-        key: 'norli' | 'ark' | 'egen' | 'foredrag' | 'direkte' | 'bibliotek' | 'annet';
+        key: 'norli' | 'ark' | 'egen' | 'foredrag' | 'direkte' | 'bibliotek' | 'akademika' | 'annet';
         label: string;
         active?: boolean | null;
         /**

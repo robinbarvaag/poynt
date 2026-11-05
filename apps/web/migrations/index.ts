@@ -91,6 +91,7 @@ import * as migration_20261019_190943_shipping_status from './20261019_190943_sh
 import * as migration_20261019_191748_hyllesalg from './20261019_191748_hyllesalg';
 import * as migration_20261019_193426_bibliotek from './20261019_193426_bibliotek';
 import * as migration_20261019_205245_orders_items_name_internal_note from './20261019_205245_orders_items_name_internal_note';
+import * as migration_20261105_220159_akademika_kanal from './20261105_220159_akademika_kanal';
 
 export const migrations = [
   {
@@ -556,6 +557,11 @@ export const migrations = [
   {
     up: migration_20261019_205245_orders_items_name_internal_note.up,
     down: migration_20261019_205245_orders_items_name_internal_note.down,
-    name: '20261019_205245_orders_items_name_internal_note'
+    name: '20261019_205245_orders_items_name_internal_note',
+  },
+  {
+    up: migration_20261105_220159_akademika_kanal.up,
+    down: migration_20261105_220159_akademika_kanal.down,
+    name: '20261105_220159_akademika_kanal'
   },
 ];

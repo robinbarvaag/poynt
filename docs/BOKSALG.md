@@ -128,7 +128,19 @@ som følger av det: kjør rapporten ukentlig, og hver linje som har økt i
 
 Biblioteksentralen er egen kanal (`bibliotek`): de kjøper på vegne av
 bibliotekene med egen rabatt, så satsen må legges inn under *Kanaler* i
-Bokøkonomi (fra fakturaen) før radene kan prises.
+Bokøkonomi (fra fakturaen) før radene kan prises. Det samme gjelder
+**Akademika** (`akademika`, fra 05.11.2026): de kjøper via Forlagssentralen som
+Norli og ARK, men med egen rabatt.
+
+**Poynt AS (kunde 906029) er ikke salg.** Det er Susannes eget uttak fra
+lageret: forsendelser fra egen nettbutikk (de telles allerede fra `orders`),
+gaver og skadde bøker. Linja føres aldri i Boksalg — den hører hjemme i
+opplagskontrollen (opplag − lager − eget uttak = sum innkjøp).
+
+Avstemming nr. 2 (ordresøk 05.11.2026, `scripts/fix-book-sales-2026-11.ts`):
+Norli 373 (ni nye butikker à 1, Pottemakerveien 60), ARK 307 (Tasta 2 → 6),
+Biblioteksentralen 11, Akademika Stavanger 2, Poynt AS 20 + 1. Søk med
+fra-dato 01.01, ikke 01.09 — fire av forhåndssalgene har ordredato i august.
 
 Et forhåndssalg er et salg med `saleSource = forhandssalg` — men still
 kontrollspørsmålet først: har bokhandelen kjøpt bøkene av deg, eller har kunder
