@@ -6167,6 +6167,9 @@ export interface SiteSetting {
      * Kobler bedriften til Brønnøysundregistrene.
      */
     orgNumber?: string | null;
+    /**
+     * Skriv datoen som dag.måned.år, for eksempel 25.01.2023. Bare årstallet (2023) går også fint.
+     */
     foundingDate?: string | null;
     areaServed?: string | null;
     slogan?: string | null;
@@ -6180,7 +6183,7 @@ export interface SiteSetting {
         }[]
       | null;
     /**
-     * Personen bak bedriften. Styrker troverdigheten (E-E-A-T) i søk og AI-svar.
+     * Personen bak bedriften. Styrker troverdigheten (E-E-A-T) i søk og AI-svar. Navn, tittel og portrett vises også som forfatter på blogginnlegg og kundehistorier.
      */
     founder?: {
       name?: string | null;
@@ -6382,7 +6385,7 @@ export interface BookEconomy {
    */
   printRun?: number | null;
   /**
-   * Knytt til produktet på poynt.no. Da telles faktiske bestillinger med i dashbordet — de er eksakte, i motsetning til butikk-estimatene.
+   * Knytt til produktet på poynt.no. Da telles faktiske bestillinger med i dashbordet — de er eksakte, i motsetning til butikk-estimatene. ISBN og utgivelsesdato vises da også på produktsiden.
    */
   shopProduct?: (number | null) | Product;
   editorPercent: number;
