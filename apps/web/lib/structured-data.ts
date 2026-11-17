@@ -22,6 +22,14 @@ export const WEBSITE_ID = `${SITE_URL}/#website`;
 export const FOUNDER_ID = `${SITE_URL}/#founder`;
 const LOGO_ID = `${SITE_URL}/#logo`;
 
+/**
+ * «Om»-siden er grunnleggerens profilside. Stien er fast (CMS-siden med slug
+ * `om`), så forfatterlenker og Person-noden kan peke hit uten et eget felt.
+ */
+export const ABOUT_SLUG = "om";
+export const ABOUT_PATH = `/${ABOUT_SLUG}`;
+const ABOUT_URL = `${SITE_URL}${ABOUT_PATH}`;
+
 const nonEmpty = (value: string | null | undefined): value is string =>
   typeof value === "string" && value.trim() !== "";
 
@@ -52,6 +60,67 @@ export function parseNorwegianAddress(address: string): {
   };
 }
 
+const pad2 = (n: number) => String(n).padStart(2, "0");
+
+/** Finnes datoen i kalenderen? (31.02 og måned 13 gjør ikke det.) */
+function isRealDate(year: number, month: number, day: number): boolean {
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return (
+    date.getUTCFullYear() === year &&
+    date.getUTCMonth() === month - 1 &&
+    date.getUTCDate() === day
+  );
+}
+
+const osloDate = new Intl.DateTimeFormat("sv-SE", {
+  timeZone: "Europe/Oslo",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+/**
+ * schema.org vil ha datoer som ISO 8601. Feltene i admin er fritekst eller
+ * Payload-datoer, så vi godtar det folk faktisk skriver: `2023-01-25`,
+ * `25.01.2023` (norsk skrivemåte), bare årstall (`2023`) og fulle tidsstempler
+ * (leses som dato i norsk tid). Alt annet gir `undefined`, så egenskapen
+ * utelates i stedet for å sendes ut som noe søkemotorene ikke kan tolke.
+ */
+export function toIsoDate(
+  value: string | null | undefined
+): string | undefined {
+  if (!nonEmpty(value)) return undefined;
+  const text = value.trim();
+
+  if (/^\d{4}$/.test(text)) return text;
+
+  const iso = /^(\d{4})-(\d{2})(?:-(\d{2}))?$/.exec(text);
+  if (iso) {
+    const month = Number(iso[2]);
+    if (iso[3] === undefined) {
+      return month >= 1 && month <= 12 ? text : undefined;
+    }
+    return isRealDate(Number(iso[1]), month, Number(iso[3])) ? text : undefined;
+  }
+
+  const norwegian = /^(\d{1,2})[./](\d{1,2})[./](\d{4})$/.exec(text);
+  if (norwegian) {
+    const day = Number(norwegian[1]);
+    const month = Number(norwegian[2]);
+    const year = Number(norwegian[3]);
+    return isRealDate(year, month, day)
+      ? `${year}-${pad2(month)}-${pad2(day)}`
+      : undefined;
+  }
+
+  if (/^\d{4}-\d{2}-\d{2}T/.test(text)) {
+    const date = new Date(text);
+    return Number.isNaN(date.getTime()) ? undefined : osloDate.format(date);
+  }
+
+  return undefined;
+}
+
 /** Fakta om bedriften fra «Bedrift»-fanen i nettsted-innstillingene. */
 export interface CompanyInfo {
   legalName?: string | null;
@@ -67,6 +136,48 @@ export interface CompanyInfo {
     image?: MediaInput;
     sameAs?: { url?: string | null }[] | null;
   } | null;
+}
+
+export type FounderInfo = NonNullable<CompanyInfo["founder"]>;
+
+/**
+ * Personen bak bedriften, som egen node. Samme `@id` overalt, så forfatter på
+ * artikler, forfatter av boka og hovedpersonen på «Om»-siden blir én og samme
+ * enhet for søkemotorer og AI-tjenester. `null` uten navn.
+ */
+export function founderSchema(founder: FounderInfo | null | undefined) {
+  if (!nonEmpty(founder?.name)) return null;
+  const image = absoluteMediaUrl(founder.image);
+  const sameAs = (founder.sameAs ?? []).map((s) => s.url).filter(nonEmpty);
+
+  return {
+    "@type": "Person",
+    "@id": FOUNDER_ID,
+    name: founder.name.trim(),
+    url: ABOUT_URL,
+    ...(nonEmpty(founder.jobTitle) ? { jobTitle: founder.jobTitle } : {}),
+    ...(nonEmpty(founder.description)
+      ? { description: founder.description }
+      : {}),
+    ...(image ? { image } : {}),
+    ...(sameAs.length ? { sameAs } : {}),
+    worksFor: { "@id": ORG_ID },
+  };
+}
+
+/**
+ * Kort henvisning til grunnleggeren (forfatter-felt). Navn og url gjentas med
+ * vilje: Google krever `author.name` på artikler og anbefaler `author.url`,
+ * og ikke alle lesere slår sammen noder på tvers av script-blokker.
+ */
+export function founderReference(founder: FounderInfo | null | undefined) {
+  if (!nonEmpty(founder?.name)) return null;
+  return {
+    "@type": "Person",
+    "@id": FOUNDER_ID,
+    name: founder.name.trim(),
+    url: ABOUT_URL,
+  };
 }
 
 /**
@@ -103,11 +214,8 @@ export function organizationSchema(opts: {
       : null,
   ].filter(nonEmpty);
 
-  const founder = company.founder;
-  const founderImage = absoluteMediaUrl(founder?.image);
-  const founderSameAs = (founder?.sameAs ?? [])
-    .map((s) => s.url)
-    .filter(nonEmpty);
+  const founder = founderSchema(company.founder);
+  const foundingDate = toIsoDate(company.foundingDate);
   const knowsAbout = (company.knowsAbout ?? [])
     .map((k) => k.topic)
     .filter(nonEmpty);
@@ -148,32 +256,13 @@ export function organizationSchema(opts: {
           },
         }
       : {}),
-    ...(nonEmpty(company.foundingDate)
-      ? { foundingDate: company.foundingDate.trim() }
-      : {}),
+    ...(foundingDate ? { foundingDate } : {}),
     areaServed: {
       "@type": "Country",
       name: company.areaServed?.trim() || "Norge",
     },
     ...(knowsAbout.length ? { knowsAbout } : {}),
-    ...(nonEmpty(founder?.name)
-      ? {
-          founder: {
-            "@type": "Person",
-            "@id": FOUNDER_ID,
-            name: founder.name,
-            ...(nonEmpty(founder.jobTitle)
-              ? { jobTitle: founder.jobTitle }
-              : {}),
-            ...(nonEmpty(founder.description)
-              ? { description: founder.description }
-              : {}),
-            ...(founderImage ? { image: founderImage } : {}),
-            ...(founderSameAs.length ? { sameAs: founderSameAs } : {}),
-            worksFor: { "@id": ORG_ID },
-          },
-        }
-      : {}),
+    ...(founder ? { founder } : {}),
     ...(sameAs.length ? { sameAs } : {}),
     ...(opts.email || opts.phone
       ? {
@@ -216,21 +305,74 @@ export function websiteSchema(opts: {
   };
 }
 
-/** Bloggartikkel / redaksjonelt innhold. */
+/**
+ * «Om»-siden: profilside med grunnleggeren som hovedperson. `ProfilePage` er
+ * typen Google dokumenterer for «om meg»-sider; `AboutPage` sier det samme til
+ * alle som leser schema.org. Brukes bare der siden faktisk presenterer
+ * personen — `null` uten navn i «Bedrift»-fanen.
+ */
+export function aboutPageSchema(opts: {
+  name: string;
+  description?: string | null;
+  founder: FounderInfo | null | undefined;
+  dateCreated?: string | null;
+  dateModified?: string | null;
+}) {
+  const person = founderSchema(opts.founder);
+  if (!person) return null;
+
+  return {
+    "@context": "https://schema.org",
+    "@type": ["ProfilePage", "AboutPage"],
+    "@id": `${ABOUT_URL}#webpage`,
+    url: ABOUT_URL,
+    name: opts.name,
+    ...(opts.description ? { description: opts.description } : {}),
+    ...(opts.dateCreated ? { dateCreated: opts.dateCreated } : {}),
+    ...(opts.dateModified ? { dateModified: opts.dateModified } : {}),
+    mainEntity: person,
+    about: { "@id": ORG_ID },
+    isPartOf: { "@id": WEBSITE_ID },
+    inLanguage: "nb-NO",
+  };
+}
+
+/**
+ * Bloggartikkel / redaksjonelt innhold. Forfatteren er en person når vi vet
+ * hvem (grunnleggeren fra «Bedrift»-fanen) — det er personen, ikke firmaet,
+ * som bærer faglig troverdighet. Organisasjonen er alltid utgiver.
+ */
 export function articleSchema(opts: {
+  /** `BlogPosting` for blogginnlegg, `Article` for annet redaksjonelt. */
+  type?: "Article" | "BlogPosting";
   title: string;
   description?: string | null;
   image?: MediaInput | string;
   url: string;
   datePublished?: string | null;
   dateModified?: string | null;
+  /** Grunnleggeren fra nettsted-innstillingene — gir forfatter med `@id`. */
+  author?: FounderInfo | null;
   authorName?: string | null;
+  /** Kategorinavn, slik de vises som merkelapper på siden. */
+  sections?: (string | null | undefined)[] | null;
 }) {
   const imageUrl = absoluteMediaUrl(opts.image);
+  const sections = (opts.sections ?? []).filter(nonEmpty);
+  const author =
+    founderReference(opts.author) ??
+    (nonEmpty(opts.authorName)
+      ? { "@type": "Person", name: opts.authorName }
+      : {
+          "@type": "Organization",
+          "@id": ORG_ID,
+          name: SITE_NAME,
+          url: SITE_URL,
+        });
 
   return {
     "@context": "https://schema.org",
-    "@type": "Article",
+    "@type": opts.type ?? "Article",
     headline: opts.title,
     ...(opts.description ? { description: opts.description } : {}),
     ...(imageUrl ? { image: imageUrl } : {}),
@@ -238,14 +380,8 @@ export function articleSchema(opts: {
     url: opts.url,
     ...(opts.datePublished ? { datePublished: opts.datePublished } : {}),
     ...(opts.dateModified ? { dateModified: opts.dateModified } : {}),
-    author: opts.authorName
-      ? { "@type": "Person", name: opts.authorName }
-      : {
-          "@type": "Organization",
-          "@id": ORG_ID,
-          name: SITE_NAME,
-          url: SITE_URL,
-        },
+    ...(sections.length ? { articleSection: sections } : {}),
+    author,
     publisher: { "@id": ORG_ID },
     isPartOf: { "@id": WEBSITE_ID },
     inLanguage: "nb-NO",
@@ -284,24 +420,62 @@ export function serviceSchema(opts: {
   };
 }
 
-/** Digitalt produkt med pris og tilgjengelighet. */
+/** Det vi vet om boka: fra «Bokøkonomi» + grunnleggeren som forfatter. */
+export interface BookInfo {
+  isbn?: string | null;
+  /** Utgivelsesdato (Payload-dato eller ISO). */
+  datePublished?: string | null;
+  author?: FounderInfo | null;
+}
+
+/** ISBN skrives ofte med bindestreker; schema.org vil ha bare sifrene. */
+export function normalizeIsbn(
+  value: string | null | undefined
+): string | undefined {
+  const digits = value?.replace(/[\s-]/g, "") ?? "";
+  return /^(?:\d{13}|\d{9}[\dXx])$/.test(digits)
+    ? digits.toUpperCase()
+    : undefined;
+}
+
+/**
+ * Produkt med pris og tilgjengelighet. Med `book` blir noden både `Product`
+ * og `Book` — slik Google ber om for bøker med ISBN — og får forfatter,
+ * utgiver og utgivelsesdato. Bare felt vi faktisk har sendes ut.
+ */
 export function productSchema(opts: {
   name: string;
   description?: string | null;
   image?: MediaInput | string;
   url: string;
   price?: number | null;
+  book?: BookInfo | null;
 }) {
   const imageUrl = absoluteMediaUrl(opts.image);
+  const book = opts.book;
+  const isbn = normalizeIsbn(book?.isbn);
+  const bookAuthor = founderReference(book?.author);
+  const datePublished = toIsoDate(book?.datePublished);
 
   return {
     "@context": "https://schema.org",
-    "@type": "Product",
+    "@type": book ? ["Product", "Book"] : "Product",
+    ...(book ? { "@id": `${opts.url}#book` } : {}),
     name: opts.name,
     ...(opts.description ? { description: opts.description } : {}),
     ...(imageUrl ? { image: imageUrl } : {}),
     url: opts.url,
     brand: { "@id": ORG_ID },
+    ...(book
+      ? {
+          ...(isbn ? { isbn } : {}),
+          ...(bookAuthor ? { author: bookAuthor } : {}),
+          // Poynt gir ut boka selv (Poynt forlag), jf. docs/BOKSALG.md.
+          publisher: { "@id": ORG_ID },
+          ...(datePublished ? { datePublished } : {}),
+          inLanguage: "nb",
+        }
+      : {}),
     ...(typeof opts.price === "number"
       ? {
           offers: {

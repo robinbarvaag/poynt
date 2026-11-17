@@ -139,6 +139,11 @@ test("findDuplicates grupperer likt innhold", () => {
   expect(d.descriptions).toEqual([]);
 });
 
+test("parseHeadExtras leser @type som liste (Product + Book)", () => {
+  const html = `<script type="application/ld+json">{"@type":["Product","Book"]}</script>`;
+  expect(parseHeadExtras(html).jsonLdTypes).toEqual(["Product", "Book"]);
+});
+
 test("parseHeadExtras + analyseRendered", () => {
   const html = `<head><link rel="canonical" href="https://poynt.no/om"/>
     <script type="application/ld+json">{"@context":"x","@graph":[{"@type":"Organization"},{"@type":"FAQPage"}]}</script>

@@ -3,7 +3,13 @@ import { JsonLd } from "@/components/json-ld";
 import { ProductDetail } from "@/components/product-detail";
 import { toProductGridItem } from "@/lib/product";
 import { SITE_URL, buildMetadata, notFoundMetadata } from "@/lib/seo";
-import { breadcrumbSchema, productSchema } from "@/lib/structured-data";
+import { getSiteGlobals } from "@/lib/site-globals";
+import {
+  breadcrumbSchema,
+  normalizeIsbn,
+  productSchema,
+  toIsoDate,
+} from "@/lib/structured-data";
 import { isAdminViewer, notTestProduct } from "@/lib/test-products";
 import config from "@/payload.config";
 import type { Metadata } from "next";
@@ -76,7 +82,30 @@ async function getProductPageData(slug: string) {
     });
   }
 
-  return { product, related };
+  // Er dette boka? «Bokøkonomi» peker ut produktet («Boka i nettbutikken») og
+  // har ISBN og utgivelsesdato. Globalen er ellers intern (boksalg-dashbordet),
+  // så vi henter KUN disse tre feltene — alle er offentlige opplysninger om
+  // boka, og ingenting av økonomien følger med ut på siden.
+  const economy = await payload
+    .findGlobal({
+      slug: "book-economy",
+      depth: 0,
+      select: { isbn: true, releaseDate: true, shopProduct: true },
+    })
+    .catch(() => null);
+  const shopProductId =
+    economy?.shopProduct && typeof economy.shopProduct === "object"
+      ? economy.shopProduct.id
+      : economy?.shopProduct;
+  const book =
+    economy && shopProductId === product.id
+      ? {
+          isbn: normalizeIsbn(economy.isbn),
+          published: toIsoDate(economy.releaseDate),
+        }
+      : null;
+
+  return { product, related, book };
 }
 
 export async function generateMetadata({
@@ -118,7 +147,8 @@ async function ProductPageContent({ params }: ProductPageProps) {
     notFound();
   }
 
-  const { product, related } = data;
+  const { product, related, book } = data;
+  const { siteSettings } = await getSiteGlobals();
   const relatedProducts = related.docs.map(toProductGridItem);
 
   const productUrl = `${SITE_URL}/produkter/${slug}`;
@@ -129,6 +159,14 @@ async function ProductPageContent({ params }: ProductPageProps) {
       image: product.featuredImage,
       url: productUrl,
       price: product.price,
+      // Boka: noden blir Product + Book med ISBN, forfatter og utgivelsesdato.
+      book: book
+        ? {
+            isbn: book.isbn,
+            datePublished: book.published,
+            author: siteSettings?.company?.founder,
+          }
+        : null,
     }),
     breadcrumbSchema([
       { name: "Hjem", url: SITE_URL },
@@ -151,7 +189,11 @@ async function ProductPageContent({ params }: ProductPageProps) {
           du er logget inn i admin.
         </div>
       ) : null}
-      <ProductDetail product={product} relatedProducts={relatedProducts} />
+      <ProductDetail
+        product={product}
+        relatedProducts={relatedProducts}
+        bookFacts={book}
+      />
     </>
   );
 }

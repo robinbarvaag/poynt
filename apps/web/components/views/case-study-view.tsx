@@ -1,10 +1,12 @@
 import { AdminBar } from "@/components/admin-bar";
+import { AuthorByline } from "@/components/author-byline";
 import { BlogRichText } from "@/components/blog-rich-text";
 import { JsonLd } from "@/components/json-ld";
 import { MediaCredit } from "@/components/media-credit";
 import { PayloadImage } from "@/components/payload-image";
 import { resolveMedia } from "@/lib/payload";
 import { SITE_URL } from "@/lib/seo";
+import { getSiteGlobals } from "@/lib/site-globals";
 import { articleSchema, breadcrumbSchema } from "@/lib/structured-data";
 import { detailBreadcrumbs } from "@/lib/ui-text";
 import type { CaseStudy } from "@/payload-types";
@@ -26,11 +28,15 @@ import Link from "next/link";
  * løftet fram: kunde-badge, resultat-tall og sitat — og en «Ta en prat»-CTA
  * nederst, siden dette er salgsbevis, ikke fagstoff.
  */
-export function CaseStudyView({ story }: { story: CaseStudy }) {
+export async function CaseStudyView({ story }: { story: CaseStudy }) {
   const slug = story.slug;
   const featuredImage = resolveMedia(story.featuredImage);
   const results = story.results ?? [];
   const quote = story.quote;
+  // Forfatteren er grunnleggeren fra Nettsted-innstillinger → Bedrift — vist
+  // i forfatterlinja og oppgitt som `author` i JSON-LD-en.
+  const { siteSettings } = await getSiteGlobals();
+  const founder = siteSettings?.company?.founder;
 
   const storyUrl = `${SITE_URL}/kundehistorier/${slug}`;
   const jsonLd = [
@@ -41,6 +47,7 @@ export function CaseStudyView({ story }: { story: CaseStudy }) {
       url: storyUrl,
       datePublished: story.publishedAt,
       dateModified: story.updatedAt,
+      author: founder,
     }),
     breadcrumbSchema([
       { name: "Hjem", url: SITE_URL },
@@ -76,6 +83,12 @@ export function CaseStudyView({ story }: { story: CaseStudy }) {
             <Text variant="lead" customStyles="mt-4">
               {story.excerpt}
             </Text>
+          )}
+
+          {founder?.name && (
+            <div className="mt-6">
+              <AuthorByline founder={founder} />
+            </div>
           )}
         </header>
 

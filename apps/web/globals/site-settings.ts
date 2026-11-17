@@ -170,8 +170,10 @@ export const SiteSettings: GlobalConfig = {
                       type: "text",
                       label: "Etablert",
                       admin: {
-                        placeholder: "2020 eller 2020-03-01",
+                        placeholder: "25.01.2023",
                         width: "50%",
+                        description:
+                          "Skriv datoen som dag.måned.år, for eksempel 25.01.2023. Bare årstallet (2023) går også fint.",
                       },
                     },
                     {
@@ -212,7 +214,7 @@ export const SiteSettings: GlobalConfig = {
                   label: "Grunnlegger / daglig leder",
                   admin: {
                     description:
-                      "Personen bak bedriften. Styrker troverdigheten (E-E-A-T) i søk og AI-svar.",
+                      "Personen bak bedriften. Styrker troverdigheten (E-E-A-T) i søk og AI-svar. Navn, tittel og portrett vises også som forfatter på blogginnlegg og kundehistorier.",
                   },
                   fields: [
                     {
