@@ -51,6 +51,8 @@ Payload runs with `push: false` — schema changes go through committed migratio
 the source of truth for both sides; only use `drizzle-kit push` for throwaway local experiments.
 Full workflow and rationale in `docs/MIGRATIONS.md`.
 
+**Ytelsesmåling**: Lighthouse mot produksjon kjøres av `.github/workflows/lighthouse.yml` (manuelt + ukentlig, median av 3, ikke i PR-CI) — se `docs/PERFORMANCE.md`.
+
 ## Architecture
 
 ### Monorepo Structure

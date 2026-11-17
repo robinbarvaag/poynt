@@ -1,0 +1,70 @@
+name: Lighthouse
+
+# Måler produksjon (eller en preview) med Lighthouse — median av 3 kjøringer per side.
+# Ikke en del av PR-CI: tallene gjelder det som ligger ute, ikke koden i en PR.
+# Les resultatet i oppsummeringen på kjøringen. Bakgrunn: docs/PERFORMANCE.md
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "Adresse som skal måles (f.eks. en Vercel-preview). Tom = https://www.poynt.no"
+        required: false
+        default: ""
+        type: string
+  schedule:
+    - cron: "0 5 * * 1" # mandager 05:00 UTC
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lighthouse
+  cancel-in-progress: false
+
+env:
+  LHCI_VERSION: "0.16.1" # @lhci/cli — låst, så Lighthouse-versjonen ikke endrer seg mellom kjøringer
+
+jobs:
+  measure:
+    name: ${{ matrix.form_factor }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        form_factor: [mobile, desktop]
+    env:
+      LHCI_FORM_FACTOR: ${{ matrix.form_factor }}
+      LHCI_BASE_URL: ${{ inputs.base_url || 'https://www.poynt.no' }}
+      LHCI_OUTPUT_DIR: lighthouse-reports/${{ matrix.form_factor }}
+      # Valgfri: bare nødvendig for å måle previews som ligger bak Vercel Deployment Protection.
+      VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Mål med Lighthouse
+        run: npx --yes "@lhci/cli@${LHCI_VERSION}" collect --config=.github/lighthouse/lighthouserc.cjs
+
+      # Alle grensene er "warn", så dette steget feiler ikke på dårlige tall.
+      - name: Sjekk budsjett (kun varsler)
+        run: npx --yes "@lhci/cli@${LHCI_VERSION}" assert --config=.github/lighthouse/lighthouserc.cjs
+
+      - name: Lagre rapporter
+        if: ${{ !cancelled() }}
+        run: npx --yes "@lhci/cli@${LHCI_VERSION}" upload --config=.github/lighthouse/lighthouserc.cjs
+
+      - name: Oppsummering
+        if: ${{ !cancelled() }}
+        run: node .github/lighthouse/summary.mjs >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: lighthouse-${{ matrix.form_factor }}
+          path: lighthouse-reports/${{ matrix.form_factor }}
+          if-no-files-found: warn
+          retention-days: 90
