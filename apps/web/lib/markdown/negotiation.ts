@@ -7,6 +7,11 @@
  * - `.md` på slutten av adressen (`/tjenester/radgivning.md`, forsiden: `/index.md`)
  * - `?format=md`
  * - `Accept: text/markdown` med høyere (eller lik) prioritet enn HTML
+ *
+ * De to siste gjelder bare faktiske sider. Filer (`/llms.txt`, `/robots.txt`,
+ * `/sitemap.xml`, `/favicon.ico`) og Nexts metadata-ruter skal svare som
+ * vanlig selv om klienten ber om markdown — AI-hentere sender gjerne
+ * `Accept: text/markdown` på alt, også når de henter `/llms.txt`.
  */
 
 /** Stier som ikke har en offentlig markdown-versjon. */
@@ -19,6 +24,21 @@ const EXCLUDED_PREFIXES = [
   "/handlekurv",
   "/kvittering",
 ];
+
+/** Siste ledd har filendelse (`/llms.txt`, `/sitemap.xml`, `/bilde.png`). */
+const FILE_EXTENSION = /\.[^/.]+$/;
+
+/**
+ * Nexts metadata-ruter uten filendelse (`opengraph-image.tsx`, `icon.tsx` …).
+ * I rutegrupper får de et hash-suffiks (`/opengraph-image-1ow20b`), og med
+ * `generateImageMetadata` et id-ledd bak (`/icon/liten`). De med filendelse
+ * (`/manifest.webmanifest`, `/robots.txt`) fanges av FILE_EXTENSION.
+ *
+ * Hashen er seks tegn (base36), så en side med slug som `icon-design` tas
+ * for en metadata-rute og må hentes med `.md`-suffiks i stedet.
+ */
+const METADATA_ROUTE =
+  /\/(?:opengraph-image|twitter-image|apple-icon|icon)(?:-[a-z0-9]{6})?(?:\/[^/]+)?$/;
 
 /** Q-verdien (0–1) for én medietype i en Accept-header, eller 0 om den mangler. */
 function qualityFor(accept: string, types: string[]): number {
@@ -66,8 +86,19 @@ function isExcluded(pathname: string): boolean {
 }
 
 /**
+ * Er stien en fil eller metadata-rute, altså noe annet enn en side? Slike
+ * skal aldri innholdsforhandles — de har ingen markdown-versjon, og en
+ * rewrite ville gitt 404 i stedet for selve fila.
+ */
+export function isNonPagePath(pathname: string): boolean {
+  const clean = pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;
+  return FILE_EXTENSION.test(clean) || METADATA_ROUTE.test(clean);
+}
+
+/**
  * Sidestien (uten `.md`) når forespørselen gjelder markdown, ellers `null`.
- * `/index.md` er forsiden.
+ * `/index.md` er forsiden. `?format=md` og Accept-headeren gjelder bare sider
+ * (se `isNonPagePath`); et eksplisitt `.md`-suffiks gjelder alltid.
  */
 export function markdownPathFor(request: {
   pathname: string;
@@ -81,6 +112,8 @@ export function markdownPathFor(request: {
     pathname = pathname.slice(0, -".md".length);
     if (pathname === "/index" || pathname === "") pathname = "/";
     wanted = true;
+  } else if (isNonPagePath(pathname)) {
+    return null;
   } else if (request.format === "md" || prefersMarkdown(request.accept)) {
     wanted = true;
   }

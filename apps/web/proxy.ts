@@ -29,12 +29,17 @@ export const config = {
   matcher: [
     // `/tjenester/radgivning.md`, `/index.md`
     "/((?!_next/|api/|admin).*\\.md)",
+    // `?format=md` og Accept-headeren gjelder bare sider: stier der siste
+    // ledd har filendelse (`/llms.txt`, `/sitemap.xml`, `/favicon.ico`)
+    // slipper forbi proxyen. Metadata-ruter uten filendelse stoppes i
+    // `markdownPathFor`. Punktum skrives `[.]` fordi path-to-regexp spiser
+    // omvendt skråstrek inne i grupper.
     {
-      source: "/((?!_next/|api/|admin).*)",
+      source: "/((?!_next/|api/|admin|.*[.][^/]*$).*)",
       has: [{ type: "query", key: "format", value: "md" }],
     },
     {
-      source: "/((?!_next/|api/|admin).*)",
+      source: "/((?!_next/|api/|admin|.*[.][^/]*$).*)",
       has: [{ type: "header", key: "accept", value: ".*markdown.*" }],
     },
   ],
