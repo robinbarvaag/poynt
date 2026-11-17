@@ -71,6 +71,10 @@ typings/
 # Next.js build output
 .next
 
+# Lighthouse-målinger kjørt lokalt (se docs/PERFORMANCE.md)
+lighthouse-reports
+.lighthouseci
+
 # Nuxt.js build / generate output
 .nuxt
 dist

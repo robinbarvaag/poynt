@@ -5,7 +5,8 @@ uke til uke. Oppsettet ligger i `.github/workflows/lighthouse.yml` og `.github/l
 
 ## Kjøre målingen
 
-- **Automatisk:** hver mandag kl. 05:00 UTC mot https://www.poynt.no.
+- **Automatisk:** hver mandag kl. 05:00 UTC mot https://www.poynt.no, og etter hver
+  vellykkede produksjons-deploy på Vercel. Preview-deploys vises som hoppet over i Actions.
 - **Manuelt:** GitHub → Actions → «Lighthouse» → «Run workflow». La adressefeltet stå tomt
   for produksjon, eller lim inn en Vercel-preview (`https://poynt-xyz.vercel.app`) for å måle
   en endring før den går ut. Ligger previewen bak Vercel Deployment Protection, må
