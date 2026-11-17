@@ -1,4 +1,5 @@
 import { AdminBar } from "@/components/admin-bar";
+import { AuthorByline } from "@/components/author-byline";
 import { BlogRichText } from "@/components/blog-rich-text";
 import { JsonLd } from "@/components/json-ld";
 import { MediaCredit } from "@/components/media-credit";
@@ -8,6 +9,7 @@ import { RelatedPosts } from "@/components/related-posts";
 import { formatLongDate } from "@/lib/format";
 import { resolveMedia, resolveRelations } from "@/lib/payload";
 import { SITE_URL } from "@/lib/seo";
+import { getSiteGlobals } from "@/lib/site-globals";
 import { articleSchema, breadcrumbSchema } from "@/lib/structured-data";
 import { detailBreadcrumbs } from "@/lib/ui-text";
 import type { BlogPost } from "@/payload-types";
@@ -24,8 +26,12 @@ import {
  * Delt rendring av et blogginnlegg — brukes både av den offentlige
  * /blogg/[slug]-ruta (publisert, statisk) og /forhandsvisning (utkast).
  * `isDraft` skrur av visnings-sporing så forhåndsvisninger ikke teller.
+ *
+ * Forfatteren er grunnleggeren fra Nettsted-innstillinger → Bedrift (cachet
+ * sammen med resten av rammen), både i den synlige forfatterlinja og som
+ * `author` i JSON-LD-en.
  */
-export function BlogPostView({
+export async function BlogPostView({
   post,
   isDraft = false,
 }: {
@@ -35,16 +41,23 @@ export function BlogPostView({
   const slug = post.slug;
   const featuredImage = resolveMedia(post.featuredImage);
   const relatedPosts = resolveRelations<BlogPost>(post.relatedPosts);
+  const { siteSettings } = await getSiteGlobals();
+  const founder = siteSettings?.company?.founder;
 
   const postUrl = `${SITE_URL}/blogg/${slug}`;
   const jsonLd = [
     articleSchema({
+      type: "BlogPosting",
       title: post.title,
       description: post.meta?.description || post.excerpt,
       image: featuredImage,
       url: postUrl,
       datePublished: post.publishedAt,
       dateModified: post.updatedAt,
+      author: founder,
+      sections: (post.categories ?? []).map((cat) =>
+        typeof cat === "object" ? cat.name : null
+      ),
     }),
     breadcrumbSchema([
       { name: "Hjem", url: SITE_URL },
@@ -102,8 +115,10 @@ export function BlogPostView({
               </Text>
             )}
 
-            <div className="mt-6 flex items-center gap-4">
-              <Text variant="muted">{formatLongDate(post.publishedAt)}</Text>
+            <div className="mt-6">
+              <AuthorByline founder={founder}>
+                {formatLongDate(post.publishedAt)}
+              </AuthorByline>
             </div>
           </header>
 

@@ -4,7 +4,8 @@ import { PageHero } from "@/components/page-hero";
 import { RenderBlocks } from "@/components/render-blocks";
 import { slugifyAnchor } from "@/lib/format";
 import { isHeroBlockType } from "@/lib/kontakt-page";
-import { faqSchema } from "@/lib/structured-data";
+import { getSiteGlobals } from "@/lib/site-globals";
+import { ABOUT_SLUG, aboutPageSchema, faqSchema } from "@/lib/structured-data";
 import type { Page } from "@/payload-types";
 import {
   Container,
@@ -108,7 +109,7 @@ function hubNavFrom(blocks: Block[]): HubNavItem[] {
  * offentlige [...slug]-ruta (publisert, statisk) og /forhandsvisning (utkast).
  * Ingen draft-logikk her; hvem som mater inn dokumentet avgjør hva som vises.
  */
-export function CmsPageView({ page }: { page: Page }) {
+export async function CmsPageView({ page }: { page: Page }) {
   // Sjekk om første blokk er en hero - da viser vi ikke egen page hero
   const firstBlock = page.layout?.[0];
   const hasHeroBlock = isHeroBlockType(firstBlock?.blockType);
@@ -119,6 +120,20 @@ export function CmsPageView({ page }: { page: Page }) {
     block.blockType === "faq" ? (block.items ?? []) : []
   );
   const faqLd = faqSchema([...(page.faq ?? []), ...layoutFaq]);
+
+  // «Om»-siden presenterer grunnleggeren i jeg-form, så den merkes som
+  // profilside med personen fra Nettsted-innstillinger → Bedrift som
+  // hovedperson. Globalene hentes bare her — de er cachet med rammen.
+  const aboutLd =
+    page.slug === ABOUT_SLUG
+      ? aboutPageSchema({
+          name: page.meta?.title || page.title,
+          description: page.meta?.description,
+          founder: (await getSiteGlobals()).siteSettings?.company?.founder,
+          dateCreated: page.createdAt,
+          dateModified: page.updatedAt,
+        })
+      : null;
 
   // FAQ-en fra SEO-fanen vises synlig nederst — FAQPage-JSON-LD-en skal speile
   // innhold folk faktisk kan lese, ellers er den bare støy for søkemotorene.
@@ -168,6 +183,7 @@ export function CmsPageView({ page }: { page: Page }) {
     <>
       <AdminBar collection="pages" id={String(page.id)} singular="side" />
       {faqLd && <JsonLd data={faqLd} />}
+      {aboutLd && <JsonLd data={aboutLd} />}
       {page.pageType === "landing" ? (
         <LandingCanvas>{body}</LandingCanvas>
       ) : (

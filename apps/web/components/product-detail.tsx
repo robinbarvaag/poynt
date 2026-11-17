@@ -9,6 +9,7 @@ import {
 } from "@/components/product/product-gallery";
 import { ProductStorySections } from "@/components/product/product-story-sections";
 import { RichText } from "@/components/rich-text";
+import { formatLongDate } from "@/lib/format";
 import { PRODUCT_TYPE_LABELS, getProductBadge } from "@/lib/product";
 import { detailBreadcrumbs } from "@/lib/ui-text";
 import type { Product } from "@/payload-types";
@@ -26,6 +27,11 @@ import Link from "next/link";
 interface ProductDetailProps {
   product: Product;
   relatedProducts?: ProductGridItem[];
+  /**
+   * Bokopplysninger (fra «Bokøkonomi») når produktet er boka. Vises under
+   * beskrivelsen, så ISBN og utgivelsesdato i JSON-LD-en også står på siden.
+   */
+  bookFacts?: { isbn?: string; published?: string } | null;
 }
 
 // Status-merkelappens fargetone → Badge-variant på produktsiden.
@@ -43,7 +49,25 @@ const badgeToneToVariant = {
  * `ProductDetailInteractive`, som kun får de minimale serialiserbare feltene
  * kjøpsflyten trenger – ikke hele Payload-dokumentet.
  */
-function ProductDetail({ product, relatedProducts = [] }: ProductDetailProps) {
+function ProductDetail({
+  product,
+  relatedProducts = [],
+  bookFacts,
+}: ProductDetailProps) {
+  const bookFactRows = [
+    bookFacts?.isbn ? { label: "ISBN", value: bookFacts.isbn } : null,
+    bookFacts?.published
+      ? {
+          label: "Utgitt",
+          // Bare årstall/måned formateres ikke — da vises verdien som den er.
+          value:
+            bookFacts.published.length === 10
+              ? formatLongDate(bookFacts.published)
+              : bookFacts.published,
+        }
+      : null,
+  ].filter((row) => row !== null);
+
   const badge = getProductBadge(product);
   const isSoldOut = product.statusBadge === "soldout";
 
@@ -223,14 +247,36 @@ function ProductDetail({ product, relatedProducts = [] }: ProductDetailProps) {
       description={
         /* Brødteksten ligger i høyre kolonne så den fyller plassen ved
            siden av det sticky bildet i stedet for å ligge langt nede. */
-        product.description ? (
+        product.description || bookFactRows.length > 0 ? (
           <div className="mt-10 border-t border-border pt-10">
-            <Heading variant="h4" color="foreground" customStyles="mb-5">
-              Om produktet
-            </Heading>
-            <div className="prose max-w-none prose-headings:text-foreground prose-p:text-foreground prose-a:text-primary prose-strong:text-foreground rich-text">
-              <RichText data={product.description} />
-            </div>
+            {product.description && (
+              <>
+                <Heading variant="h4" color="foreground" customStyles="mb-5">
+                  Om produktet
+                </Heading>
+                <div className="prose max-w-none prose-headings:text-foreground prose-p:text-foreground prose-a:text-primary prose-strong:text-foreground rich-text">
+                  <RichText data={product.description} />
+                </div>
+              </>
+            )}
+            {bookFactRows.length > 0 && (
+              <dl
+                className={
+                  product.description
+                    ? "mt-8 grid gap-1 text-sm"
+                    : "grid gap-1 text-sm"
+                }
+              >
+                {bookFactRows.map((row) => (
+                  <div key={row.label} className="flex gap-2">
+                    <dt className="font-semibold text-foreground">
+                      {row.label}
+                    </dt>
+                    <dd className="text-foreground">{row.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
           </div>
         ) : null
       }

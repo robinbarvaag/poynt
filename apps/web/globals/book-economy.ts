@@ -96,7 +96,7 @@ export const BookEconomy: GlobalConfig = {
               label: "Boka i nettbutikken",
               admin: {
                 description:
-                  "Knytt til produktet på poynt.no. Da telles faktiske bestillinger med i dashbordet — de er eksakte, i motsetning til butikk-estimatene.",
+                  "Knytt til produktet på poynt.no. Da telles faktiske bestillinger med i dashbordet — de er eksakte, i motsetning til butikk-estimatene. ISBN og utgivelsesdato vises da også på produktsiden.",
               },
             },
           ],
