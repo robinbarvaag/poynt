@@ -1,4 +1,5 @@
 import type { PodcastEpisode } from "@/lib/podcast-rss";
+import Image from "next/image";
 import type { ReactNode } from "react";
 
 /**
@@ -40,13 +41,69 @@ export function toPodcastEpisodeCard(
     date: episode.publishedAt
       ? formatEpisodeDate(episode.publishedAt, options?.withYear ?? true)
       : undefined,
-    // RSS-cover kommer fra ukjente domener → vanlig <img> (ikke next/image).
     cover: episode.coverUrl ? (
-      <img
+      <EpisodeCoverImage
         src={episode.coverUrl}
         alt={episode.title}
         className={options?.coverClassName ?? "size-full object-cover"}
       />
     ) : undefined,
   };
+}
+
+/**
+ * Vertene podkast-coverne faktisk kommer fra (Spotify for Creators / Anchor).
+ * Må speile `images.remotePatterns` i next.config.mjs — ellers avviser
+ * bildeoptimaliseringen dem.
+ */
+const OPTIMIZED_COVER_HOSTS = new Set(["d3t3ozftmdmh3i.cloudfront.net"]);
+
+/** Coverne vises i kvadratiske kort: 1 kolonne i Cover Flow, 2–3 i rutenettet. */
+const COVER_SIZES = "(min-width: 1024px) 400px, (min-width: 640px) 50vw, 75vw";
+
+function isOptimizedCoverHost(src: string): boolean {
+  try {
+    return OPTIMIZED_COVER_HOSTS.has(new URL(src).hostname);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Coverne i RSS-feeden er originaler på 3000×3000 px og 1–1,5 MB. Rått og uten
+ * `loading="lazy"` lager React dessuten en preload-lenke for dem, som også
+ * følger med når andre sider forhåndshenter forsiden — da konkurrerer de med
+ * toppbildet (LCP) på hele nettstedet. Derfor: gjennom bildeoptimaliseringen
+ * og alltid lazy. Cover fra en ukjent vert vises rått, men fortsatt lazy.
+ */
+function EpisodeCoverImage({
+  src,
+  alt,
+  className,
+}: {
+  src: string;
+  alt: string;
+  className: string;
+}) {
+  if (!isOptimizedCoverHost(src)) {
+    return (
+      <img
+        src={src}
+        alt={alt}
+        loading="lazy"
+        decoding="async"
+        className={className}
+      />
+    );
+  }
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      width={600}
+      height={600}
+      sizes={COVER_SIZES}
+      className={className}
+    />
+  );
 }

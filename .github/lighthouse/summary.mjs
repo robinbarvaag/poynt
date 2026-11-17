@@ -13,6 +13,7 @@ const formFactor =
   process.env.LHCI_FORM_FACTOR === "desktop" ? "desktop" : "mobile";
 const outputDir = config.upload.outputDir;
 const TOP_OPPORTUNITIES = 3;
+const A11Y = "categories:accessibility";
 
 const METRICS = [
   { id: "largest-contentful-paint", label: "LCP", format: seconds },
@@ -80,6 +81,25 @@ function topOpportunities(lhr) {
   return found.sort((a, b) => b.ms - a.ms).slice(0, TOP_OPPORTUNITIES);
 }
 
+/**
+ * Tilgjengelighetssjekkene som feiler i én kjøring, med antall elementer det
+ * gjelder. Lighthouse dekker bare det som kan sjekkes automatisk (kontrast,
+ * alt-tekst, etiketter, ARIA …) — ikke tastaturflyt eller skjermleser-opplevelse.
+ */
+function accessibilityFailures(lhr) {
+  const found = [];
+  for (const ref of lhr.categories.accessibility?.auditRefs ?? []) {
+    const audit = lhr.audits[ref.id];
+    if (!audit || audit.score === null || audit.score >= 1) continue;
+    if (audit.scoreDisplayMode !== "binary") continue;
+    const count = audit.details?.items?.length ?? 0;
+    const suffix =
+      count > 0 ? ` — ${count} element${count === 1 ? "" : "er"}` : "";
+    found.push({ weight: ref.weight ?? 0, text: `${audit.title}${suffix}` });
+  }
+  return found.sort((a, b) => b.weight - a.weight).map((item) => item.text);
+}
+
 function loadRuns() {
   let manifest;
   try {
@@ -114,6 +134,7 @@ function main() {
   const rows = [];
   const warnings = [];
   const opportunities = [];
+  const a11yIssues = [];
 
   for (const [url, runs] of byUrl) {
     const path = pathOf(url);
@@ -124,7 +145,7 @@ function main() {
 
     if (score === null) {
       const reason = runs[0].runtimeError?.message ?? "ukjent feil";
-      rows.push(`| \`${path}\` | – | – | – | – | – |`);
+      rows.push(`| \`${path}\` | – | – | – | – | – | – |`);
       warnings.push(`\`${path}\`: ingen gyldig måling (${reason})`);
       continue;
     }
@@ -159,6 +180,22 @@ function main() {
         );
       }
     }
+
+    // Tilgjengelighet varierer ikke mellom kjøringer slik ytelse gjør, men
+    // medianen holder tallet på linje med resten av tabellen.
+    const a11y = median(runs.map((lhr) => lhr.categories.accessibility?.score));
+    if (a11y === null) {
+      cells.push("–");
+    } else {
+      const flagged = overBudget(A11Y, a11y);
+      cells.push(`${Math.round(a11y * 100)}${flagged ? " ⚠️" : ""}`);
+      if (flagged) {
+        const { min } = budgetFor(A11Y);
+        warnings.push(
+          `\`${path}\`: tilgjengelighet ${Math.round(a11y * 100)} (mål: minst ${Math.round(min * 100)})`
+        );
+      }
+    }
     rows.push(`| ${cells.join(" | ")} |`);
 
     // Tiltakene hentes fra kjøringen som ligger nærmest median-scoren.
@@ -170,14 +207,17 @@ function main() {
           Math.abs(b.categories.performance.score - score)
       )[0];
     opportunities.push({ path, items: topOpportunities(representative) });
+    a11yIssues.push({ path, items: accessibilityFailures(representative) });
   }
 
   console.log(`## Lighthouse – ${title}\n`);
   console.log(
     `${origin} · median av ${runCount} kjøringer per side · Lighthouse ${first.lighthouseVersion}\n`
   );
-  console.log("| Side | Ytelse | Spredning | LCP | CLS | TBT |");
-  console.log("| --- | --- | --- | --- | --- | --- |");
+  console.log(
+    "| Side | Ytelse | Spredning | LCP | CLS | TBT | Tilgjengelighet |"
+  );
+  console.log("| --- | --- | --- | --- | --- | --- | --- |");
   console.log(rows.join("\n"));
 
   console.log("");
@@ -195,6 +235,20 @@ function main() {
       console.log("- Ingen tiltak med målbar tidsgevinst.");
     }
     for (const item of items) console.log(`- ${item.text}`);
+    console.log("");
+  }
+  console.log("</details>\n");
+
+  const withIssues = a11yIssues.filter(({ items }) => items.length > 0);
+  console.log(
+    "<details><summary>Tilgjengelighet – sjekker som feiler</summary>\n"
+  );
+  if (withIssues.length === 0) {
+    console.log("Ingen automatiske tilgjengelighetssjekker feiler.\n");
+  }
+  for (const { path, items } of withIssues) {
+    console.log(`**\`${path}\`**\n`);
+    for (const item of items) console.log(`- ${item}`);
     console.log("");
   }
   console.log("</details>\n");

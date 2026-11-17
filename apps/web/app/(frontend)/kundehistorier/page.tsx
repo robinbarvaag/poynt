@@ -42,7 +42,7 @@ async function getStories() {
 export default async function CaseStudiesPage() {
   const stories = await getStories();
 
-  const items = stories.docs.map((story) => {
+  const items = stories.docs.map((story, index) => {
     const media = resolveMedia(story.featuredImage);
     return {
       id: story.id,
@@ -55,6 +55,14 @@ export default async function CaseStudiesPage() {
           media={media}
           alt={media.alt || story.title}
           fill
+          // Kortene står i 1/2/3 kolonner. Uten dette antar Next 100vw og
+          // henter et skjermbredt bilde til hvert kort.
+          sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+          // Det første kortet er sidens største bilde (LCP) — last det straks
+          // i stedet for lazy.
+          {...(index === 0
+            ? { loading: "eager" as const, fetchPriority: "high" as const }
+            : {})}
           className="object-cover transition-transform duration-500 group-hover/post:scale-[1.03]"
         />
       ) : undefined,

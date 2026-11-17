@@ -807,6 +807,9 @@ function LogoSlide({ item }: { item: CarouselItem }) {
             src={item.src}
             srcSet={item.srcSet}
             alt={label}
+            // Lazy: ellers lager React en preload-lenke per logo, og de
+            // konkurrerer med toppbildet (LCP) om båndbredden.
+            loading="lazy"
             decoding="async"
             style={{ height: `calc(var(--logo-h) * ${scale})` }}
             // design-unntak: logo-grayscale-effekt, dempet til hover

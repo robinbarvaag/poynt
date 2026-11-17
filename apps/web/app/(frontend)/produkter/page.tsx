@@ -64,7 +64,7 @@ async function TestProductsSection() {
           Testprodukter — kun synlig for deg som er logget inn i admin.
         </p>
         <ProductGrid
-          products={result.docs.map(toProductGridItem)}
+          products={result.docs.map((product) => toProductGridItem(product))}
           featureFirst={false}
         />
       </div>
@@ -102,8 +102,8 @@ export default async function ProductsPage() {
 
   // Samme mønster som bloggen: filter + søk skjer på klienten over hele
   // lista, plassert over gridet — ikke URL-param-filter inne i heroen.
-  const items: ProductExplorerItem[] = products.docs.map((product) => ({
-    ...toProductGridItem(product),
+  const items: ProductExplorerItem[] = products.docs.map((product, index) => ({
+    ...toProductGridItem(product, { priority: index === 0 }),
     type: product.type,
     search: [product.name, product.shortDescription]
       .filter(Boolean)

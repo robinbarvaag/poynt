@@ -47,7 +47,7 @@ export function RelatedPosts({
           {title}
         </Heading>
         <BlogGrid
-          posts={posts.map(toBlogCard)}
+          posts={posts.map((post) => toBlogCard(post))}
           columns={columns}
           featureFirst={featureFirst}
         />

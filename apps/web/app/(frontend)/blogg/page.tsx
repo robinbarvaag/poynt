@@ -69,7 +69,9 @@ export default async function BlogPage() {
     blogPage?.emptyStateText || "Ingen publiserte innlegg ennå.";
 
   const categories = collectBlogCategories(posts.docs);
-  const items = posts.docs.map(toBlogCard);
+  const items = posts.docs.map((post, index) =>
+    toBlogCard(post, { priority: index === 0 })
+  );
 
   return (
     <>

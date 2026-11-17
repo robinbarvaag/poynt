@@ -17,6 +17,39 @@ Sju sider måles: forsiden, `/tjenester`, `/produkter`, `/blogg`, `/kundehistori
 blogginnlegg og én tjenesteside (lista står i `.github/lighthouse/lighthouserc.cjs`). Hver side
 kjøres 3 ganger på mobil og 3 ganger på desktop. En kjøring tar rundt 10 minutter.
 
+## Måle lokalt før deploy
+
+Produksjonsbygget kan kjøres og måles på egen maskin, så en endring kan sjekkes før den går ut:
+
+```bash
+cd apps/web
+bun run build && bun run start        # http://localhost:3000
+# i et annet vindu, fra repo-roten:
+npx lighthouse@13.6.0 http://localhost:3000/tjenester --only-categories=performance --view
+```
+
+Hele sidelista med median av 3 går med samme oppsett som workflowen. Sett miljøvariabelen
+`LHCI_BASE_URL` til `http://localhost:3000` (PowerShell: `$env:LHCI_BASE_URL = "http://localhost:3000"`)
+og kjør `npx @lhci/cli@0.16.1 collect --config=.github/lighthouse/lighthouserc.cjs`.
+`LHCI_PATHS` (f.eks. `/,/blogg`) begrenser til enkeltsider. Rapportene havner i
+`.lighthouseci/`, som er git-ignorert.
+
+Tre ting å vite:
+
+- **Sammenlign bare lokalt mot lokalt.** Mål før og etter endringen på samme maskin. Tallene
+  kan ikke sammenlignes direkte med GitHub-kjøringen.
+- **Kjør hver side én gang før du måler.** Første treff lager de optimaliserte bildene og er
+  mye tregere enn resten.
+- **Bildene optimaliseres ikke lokalt på Windows.** Payload bruker `sharp` 0.34 og Next 0.35,
+  og de to kolliderer i samme prosess. Next sender da originalen urørt (flere MB per bilde)
+  uten å si fra, og LCP blir kunstig høy. Sjekk `Content-Type` på en `/_next/image`-adresse:
+  står det `image/png` eller `image/jpeg` i stedet for `image/webp`, er du rammet. Vercel har
+  sin egen bildeoptimalisering og berøres ikke.
+
+Mobil-LCP i Lighthouse er simulert: alt som lastes ned før toppbildet er tegnet, regnes med
+som om det gikk over tregt 4G. Derfor teller mengden JavaScript og andre tidlige nedlastinger
+mer enn selve bildet. Se etter store filer tidlig i nettverkslista i rapporten.
+
 ## Lese resultatet
 
 Åpne kjøringen og se på **Summary**. Der står én tabell for mobil og én for desktop:
@@ -27,9 +60,15 @@ kjøres 3 ganger på mobil og 3 ganger på desktop. En kjøring tar rundt 10 min
 - **LCP** – tiden til det største elementet (som regel toppbildet) er på plass. Mål: under 2,5 s.
 - **CLS** – hvor mye siden hopper mens den laster. Mål: under 0,1.
 - **TBT** – hvor lenge JavaScript blokkerer siden. Mål: under 200 ms.
+- **Tilgjengelighet** – Lighthouse-scoren (0–100) for de automatiske sjekkene: kontrast,
+  alt-tekst, etiketter på skjemafelt, ARIA og overskriftsnivåer. Mål: minst 95. Hvilke sjekker
+  som feiler, står under «Tilgjengelighet – sjekker som feiler». Automatikken finner bare en
+  del av feilene — tastaturnavigasjon og skjermleser må fortsatt prøves for hånd.
 
 ⚠️ betyr at tallet er utenfor startbudsjettet (ytelse minst 80 på mobil og 90 på desktop, pluss
-grensene over). Det er bare et varsel — workflowen feiler aldri på dårlige tall. Under
+grensene over). LCP og CLS er to av de tre Core Web Vitals. Den tredje, INP (hvor raskt
+siden svarer på trykk), kan ikke måles i en labkjøring — TBT er nærmeste erstatning. Ekte Core
+Web Vitals krever feltdata, se under. Det er bare et varsel — workflowen feiler aldri på dårlige tall. Under
 «Største forbedringsmuligheter» står de tre tiltakene Lighthouse mener sparer mest tid per side.
 De fullstendige rapportene (HTML og JSON for alle kjøringene) ligger som artifacts nederst på
 kjøringen og kan åpnes i nettleseren.

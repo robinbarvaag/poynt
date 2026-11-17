@@ -19,6 +19,12 @@ const nextConfig = {
         hostname: "*.public.blob.vercel-storage.com",
       },
       {
+        // Podkast-cover fra RSS-feeden (Spotify for Creators / Anchor).
+        // Speiler OPTIMIZED_COVER_HOSTS i lib/podcast-cards.tsx.
+        protocol: "https",
+        hostname: "d3t3ozftmdmh3i.cloudfront.net",
+      },
+      {
         // Egen app-host: Payload serverer media som absolutt URL
         // (https://<host>/api/media/file/...), så Next sin image-optimizer må
         // godta hosten. *.vercel.app dekker både prod-aliaset og preview-deploys.

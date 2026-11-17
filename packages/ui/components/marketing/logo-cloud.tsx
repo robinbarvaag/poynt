@@ -53,6 +53,8 @@ export function LogoCloud({
                 <img
                   src={logo.src}
                   alt={logo.name}
+                  loading="lazy"
+                  decoding="async"
                   className={cn(
                     "max-h-full w-auto max-w-[120px] object-contain transition-all duration-300",
                     // design-unntak: logo-bilder dempes til hover (grayscale-effekt)

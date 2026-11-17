@@ -149,7 +149,9 @@ async function ProductPageContent({ params }: ProductPageProps) {
 
   const { product, related, book } = data;
   const { siteSettings } = await getSiteGlobals();
-  const relatedProducts = related.docs.map(toProductGridItem);
+  const relatedProducts = related.docs.map((product) =>
+    toProductGridItem(product)
+  );
 
   const productUrl = `${SITE_URL}/produkter/${slug}`;
   const jsonLd = [

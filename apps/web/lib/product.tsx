@@ -50,8 +50,14 @@ export function getProductBadge(product: Product): ProductBadge | undefined {
  * Gjør eit Payload-produkt om til kortdataene `ProductGrid` treng. Felles for
  * produktoversikt, produkt-arkivblokk og «Andre produkter» på produktsida, slik
  * at merkelapp, bilde og pris ser likt ut overalt.
+ *
+ * `priority` settes på det første kortet i en oversikt: bildet der er sidens
+ * største (LCP) og skal lastes straks i stedet for lazy.
  */
-export function toProductGridItem(product: Product): ProductGridItem {
+export function toProductGridItem(
+  product: Product,
+  options?: { priority?: boolean }
+): ProductGridItem {
   const media = resolveMedia(product.featuredImage);
 
   return {
@@ -70,6 +76,9 @@ export function toProductGridItem(product: Product): ProductGridItem {
         fill
         // Speiler ProductGrid (1 → 2 → 3 kolonner, container ≈ 1152 px).
         sizes="(min-width: 1024px) 380px, (min-width: 640px) 50vw, 90vw"
+        {...(options?.priority
+          ? { loading: "eager" as const, fetchPriority: "high" as const }
+          : {})}
         className="object-cover"
       />
     ) : undefined,

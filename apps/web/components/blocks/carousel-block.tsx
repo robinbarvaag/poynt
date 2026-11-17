@@ -61,13 +61,14 @@ const SLIDE_SIZES: Record<number, string> = {
 /**
  * Logoene vises maks ~200 CSS-px brede (se `LogoSlide`). Med fast bredde lager
  * next/image en 1x/2x-srcset gjennom bildeoptimaliseringen, i stedet for at
- * originalen (som kan være flere tusen piksler) lastes rått.
+ * originalen (som kan være flere tusen piksler) lastes rått. 192 gir 256/384 px
+ * — ett hakk over (220) rundes 2x-varianten opp til 640 px og blir 2–3× tyngre.
  *
  * Kilden er `sizes.large` (maks 2400 px), ikke originalen: Vercels
  * bildeoptimalisering gir opp på gigantiske kilder (f.eks. en 13959 px bred
  * logo-PNG) og sender originalen urørt med 60 s cache.
  */
-const LOGO_WIDTH = 220;
+const LOGO_WIDTH = 192;
 
 function logoImageProps(image: MediaResource | null) {
   const source = image ? pickImageSource(image) : null;

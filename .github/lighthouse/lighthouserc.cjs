@@ -49,6 +49,8 @@ const assertions = {
     { maxNumericValue: 0.1, aggregationMethod },
   ],
   "total-blocking-time": ["warn", { maxNumericValue: 200, aggregationMethod }],
+  // Automatiske tilgjengelighetssjekker (kontrast, alt-tekst, etiketter, ARIA).
+  "categories:accessibility": ["warn", { minScore: 0.95, aggregationMethod }],
 };
 
 module.exports = {

@@ -31,8 +31,14 @@ export function collectBlogCategories(
  * Payload-analogen til en Sanity-projeksjon: all narrowing skjer her, så sidene
  * holder seg rene. Bildet sendes som ferdig `next/image`-slot (appen eier
  * `PayloadImage`). Forfatter vises ikke på kortene (bevisst valg).
+ *
+ * `priority` settes på det første kortet i en oversikt: bildet der er sidens
+ * største (LCP) og skal lastes straks i stedet for lazy.
  */
-export function toBlogCard(post: BlogPost): BlogExplorerPost {
+export function toBlogCard(
+  post: BlogPost,
+  options?: { priority?: boolean }
+): BlogExplorerPost {
   const cats = resolveRelations<Category>(post.categories);
   const media = resolveMedia(post.featuredImage);
 
@@ -48,6 +54,12 @@ export function toBlogCard(post: BlogPost): BlogExplorerPost {
         media={media}
         alt={media.alt || post.title}
         fill
+        // Speiler BlogGrid (1 → 2 → 3 kolonner). Uten dette antar Next 100vw
+        // og henter et skjermbredt bilde til hvert kort.
+        sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+        {...(options?.priority
+          ? { loading: "eager" as const, fetchPriority: "high" as const }
+          : {})}
         className="object-cover transition-transform duration-500 group-hover/post:scale-[1.03]"
       />
     ) : undefined,
