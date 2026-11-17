@@ -450,7 +450,13 @@ export function parseHeadExtras(html: string) {
           for (const n of node) collect(n);
         } else if (node && typeof node === "object") {
           const obj = node as { "@type"?: unknown; "@graph"?: unknown };
-          if (typeof obj["@type"] === "string") jsonLdTypes.push(obj["@type"]);
+          // `@type` kan være én type eller en liste (f.eks. Product + Book).
+          const types = Array.isArray(obj["@type"])
+            ? obj["@type"]
+            : [obj["@type"]];
+          for (const type of types) {
+            if (typeof type === "string") jsonLdTypes.push(type);
+          }
           if (obj["@graph"]) collect(obj["@graph"]);
         }
       };
