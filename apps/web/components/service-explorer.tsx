@@ -48,7 +48,7 @@ export function ServiceExplorer({
     rememberServices(services);
   }, [services]);
 
-  const items: ServiceShowcaseItem[] = services.map((s) => ({
+  const items: ServiceShowcaseItem[] = services.map((s, index) => ({
     id: s.id,
     name: s.name,
     href: `/tjenester/${s.slug}`,
@@ -62,6 +62,14 @@ export function ServiceExplorer({
         alt={s.image.alt || s.name}
         fill
         className="object-cover"
+        // Kortene står i 1/2/3 kolonner. Uten dette antar Next 100vw og
+        // henter et skjermbredt bilde til hvert kort.
+        sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+        // Det første kortet er sidens største bilde (LCP) — last det straks
+        // i stedet for lazy.
+        {...(index === 0
+          ? { loading: "eager" as const, fetchPriority: "high" as const }
+          : {})}
       />
     ) : undefined,
   }));
