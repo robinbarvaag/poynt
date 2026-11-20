@@ -11,7 +11,8 @@
     "STRIPE_WEBHOOK_SECRET",
     "RESEND_API_KEY",
     "BLOB_READ_WRITE_TOKEN",
-    "PODCAST_RSS_URL"
+    "PODCAST_RSS_URL",
+    "VERCEL_ENV"
   ],
   "tasks": {
     "build": {

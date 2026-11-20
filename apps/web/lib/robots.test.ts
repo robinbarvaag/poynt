@@ -94,4 +94,10 @@ describe("robots.txt", () => {
     expect(isAllowed("/on-poynt")).toBe(true);
     expect(isAllowed("/blogg/et-innlegg")).toBe(true);
   });
+
+  test("staging/preview stenger alt", () => {
+    expect(
+      buildRobots("https://staging.poynt.no", { indexable: false })
+    ).toEqual({ rules: { userAgent: "*", disallow: "/" } });
+  });
 });

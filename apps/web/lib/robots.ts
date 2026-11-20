@@ -13,7 +13,14 @@ export const CONTENT_SIGNAL = "search=yes, ai-input=yes, ai-train=yes";
  * Innholdet i `/robots.txt`. Ren funksjon (testet); `app/robots.ts` sender
  * inn nettadressen.
  */
-export function buildRobots(siteUrl: string): MetadataRoute.Robots {
+export function buildRobots(
+  siteUrl: string,
+  options: { indexable?: boolean } = {}
+): MetadataRoute.Robots {
+  // Staging/preview (f.eks. staging.poynt.no) skal aldri havne i søk.
+  if (options.indexable === false) {
+    return { rules: { userAgent: "*", disallow: "/" } };
+  }
   return {
     rules: {
       userAgent: "*",
