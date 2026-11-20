@@ -59,6 +59,15 @@ export function holdExpiresAt(
 }
 
 /**
+ * Når opprydderen skal se på en holdt plass: to minutter etter fristen. Da er
+ * også Stripe-kassen stengt (den lever minst 31 min, se under), så ingen
+ * rekker å betale for en plass som nettopp ble frigjort.
+ */
+export function paymentCheckAt(expiresAt: Date): Date {
+  return new Date(expiresAt.getTime() + 2 * MINUTE_MS);
+}
+
+/**
  * `expires_at` for Stripe Checkout (sekunder). Stripe krever mellom 30 min og
  * 24 t fram i tid, så fristen klemmes inn i det vinduet.
  */

@@ -268,7 +268,7 @@ export async function processExpiredPayments(
         `Betalingssjekk feilet for påmelding ${registration.id}:`,
         error instanceof Error ? error.message : error
       );
-      // Leverandøren svarer ikke: la plassen stå til neste runde.
+      // Leverandøren svarer ikke: la plassen stå til timesjekken.
       continue;
     }
     if (sync.state === "confirmed") {

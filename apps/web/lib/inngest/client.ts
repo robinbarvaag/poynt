@@ -21,9 +21,14 @@ type Events = {
   "events/reminders.requested": {
     data: { dryRun?: boolean };
   };
-  // Frigjør ubetalte plasser på betalte eventer (kjører også hvert 5. minutt).
+  // Frigjør ubetalte plasser på betalte eventer nå (kjører også hver time).
   "events/payments.requested": {
     data: Record<string, never>;
+  };
+  // En plass holdes av til betaling: rydd når fristen går ut
+  // (sendes fra lib/events/payment-schedule.ts).
+  "events/payment.hold-started": {
+    data: { expiresAt: string };
   };
   // Hent lagerstatus for boka hos Norli/ARK (kjører også hver morgen).
   "boksalg/snapshot.requested": {

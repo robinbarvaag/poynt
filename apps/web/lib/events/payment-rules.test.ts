@@ -4,6 +4,7 @@ import {
   holdExpiresAt,
   isEventVippsReference,
   partyAmountKr,
+  paymentCheckAt,
   paymentMethodsFor,
   stripeSessionExpiry,
   vippsEventReference,
@@ -52,6 +53,16 @@ describe("betalte eventer", () => {
     );
     expect(stripeSessionExpiry(new Date("2026-10-05T12:00:00Z"), now)).toBe(
       seconds("2026-10-02T11:55:00Z")
+    );
+  });
+
+  test("opprydderen ser på plassen etter at Stripe-kassen er stengt", () => {
+    const now = new Date("2026-10-01T12:00:00Z");
+    const hold = holdExpiresAt("checkout", now);
+    const check = paymentCheckAt(hold);
+    expect(check.toISOString()).toBe("2026-10-01T12:32:00.000Z");
+    expect(check.getTime() / 1000).toBeGreaterThan(
+      stripeSessionExpiry(hold, now)
     );
   });
 

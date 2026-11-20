@@ -39,7 +39,8 @@ export async function syncAndNotify(
 }
 
 /**
- * Opprydding for betalte eventer, kjørt av Inngest hvert 5. minutt
+ * Opprydding for betalte eventer, kjørt av Inngest når en betalingsfrist går
+ * ut, pluss én gang i timen som sikkerhetsnett
  * (lib/inngest/functions/event-payments.ts): ubetalte plasser frigjøres, og de
  * som rykker opp får e-post. Rapporten har bare antall.
  */

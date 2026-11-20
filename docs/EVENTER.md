@@ -312,8 +312,11 @@ og tmp-scriptene etter demoen.
 - [x] Bekreftelse uten å være avhengig av webhook: `syncPayment` spørs fra Stripe-/Vipps-webhooken,
       billettsiden (retur fra kassen), statusruten og opprydderen. Idempotent; Vipps capture etter at
       plassen er bekreftet. Betalt etter fristen → tas tilbake hvis plass, ellers automatisk refusjon
-- [x] Opprydding: Inngest `event-payments` hvert 5. min frigjør utløpte plasser (sjekker hos
-      leverandøren først) og gir dem til ventelista
+- [x] Opprydding: Inngest `event-payments` frigjør utløpte plasser (sjekker hos leverandøren først)
+      og gir dem til ventelista. Hendelsesdrevet: `schedulePaymentChecks`
+      (`lib/events/payment-schedule.ts`) sender `events/payment.hold-started` når en plass holdes av,
+      og funksjonen sover til fristen + 2 min. Timesjekk som sikkerhetsnett. Ikke gå tilbake til
+      hyppig cron — den holdt Neon våken hele døgnet
 - [x] Venteliste på betalt event: opprykk gir `pending_payment` med 24 t frist og «Det ble plass,
       betal innen …»-e-post; betaling fra billettsiden (`POST /api/eventer/billett/[token]/betaling`)
 - [x] Kvittering (salgsdokument via ordrebekreftelse-malen, MVA, selgeropplysninger, angrerett § 22 m),

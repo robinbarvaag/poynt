@@ -24,6 +24,7 @@ import {
   partyAmountKr,
   paymentMethodsFor,
 } from "./payment-rules";
+import { schedulePaymentChecks } from "./payment-schedule";
 
 /**
  * All skriving av påmeldinger går hit: påmelding, avmelding, opprykk fra
@@ -35,6 +36,10 @@ import {
  * Funksjonene her sender IKKE e-post. De returnerer det som skjedde, og
  * kalleren (API-rutene) sender e-post via lib/events/notify.ts etter at
  * transaksjonen er fullført — en treg e-posttjeneste skal aldri holde låsen.
+ *
+ * Unntaket er `schedulePaymentChecks`: hver gang en plass havner i
+ * `pending_payment` (påmelding eller opprykk), planlegges oppryddingen til
+ * fristen — også det etter at transaksjonen er fullført.
  */
 
 /** Fast «navnerom» for event-låsene, så de ikke kolliderer med andre låser. */
@@ -389,6 +394,9 @@ export async function registerForEvent(input: {
     );
   }
   revalidateEventSeats(event.id);
+  if (!result.alreadyRegistered) {
+    await schedulePaymentChecks([result.registration]);
+  }
   return { ok: true, event, ...result };
 }
 
@@ -551,7 +559,10 @@ export async function cancelRegistration({
     };
   });
 
-  if (result) revalidateEventSeats(eventId);
+  if (result) {
+    revalidateEventSeats(eventId);
+    await schedulePaymentChecks(result.promoted);
+  }
   return result;
 }
 
@@ -688,6 +699,7 @@ export async function promoteRegistration(
     );
   });
   revalidateEventSeats(eventId);
+  await schedulePaymentChecks([updated]);
   return updated;
 }
 
@@ -891,6 +903,7 @@ export async function releaseUnpaidRegistration(
     };
   });
   revalidateEventSeats(eventId);
+  await schedulePaymentChecks(result.promoted);
   return result;
 }
 
@@ -972,6 +985,7 @@ export async function markRegistrationRefunded(
     };
   });
   revalidateEventSeats(eventId);
+  await schedulePaymentChecks(result.promoted);
   return result;
 }
 
