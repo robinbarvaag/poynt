@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { applyEmailDelivery, isEmailLive } from "./delivery";
 import type {
   OrderConfirmationContent,
   OrderConfirmationItem,
@@ -160,7 +161,10 @@ type SendPayload = Parameters<Resend["emails"]["send"]>[0];
  * (den returnerer `{ data, error }`), så uten denne sjekken feiler utsending
  * stille og kallere tror alt gikk bra.
  */
-async function sendEmail(payload: SendPayload) {
+async function sendEmail(original: SendPayload) {
+  // Utenfor prod: omdiriger til EMAIL_DEV_REDIRECT eller stopp (se delivery.ts).
+  const payload = applyEmailDelivery(original);
+  if (!payload) return { id: "ikke-sendt-utenfor-prod" };
   const { data, error } = await getResend().emails.send(payload);
   if (error) {
     console.error("Resend e-post feilet:", {
@@ -535,6 +539,14 @@ export async function subscribeToNewsletter(
     return { success: false, error: "RESEND_API_KEY is not configured" };
   }
 
+  // Utenfor prod skal testpåmeldinger ikke havne i den ekte abonnentlista.
+  if (!isEmailLive()) {
+    console.info(
+      `[e-post] Nyhetsbrev-påmelding ikke lagret (ikke prod): ${email}`
+    );
+    return { success: true };
+  }
+
   try {
     // Står adressen allerede som aktiv abonnent, rører vi den ikke — da skal
     // det heller ikke gå ut et «ny på nyhetsbrevet»-varsel.
@@ -760,6 +772,18 @@ export async function resolveBroadcastTarget(): Promise<
   }
 }
 
+/**
+ * Broadcasts går til den ekte lista i Resend uansett hvilken database vi står
+ * mot, så de er sperret utenfor prod (se delivery.ts).
+ */
+function assertBroadcastAllowed() {
+  if (!isEmailLive()) {
+    throw new Error(
+      "Nyhetsbrev kan bare sendes fra produksjon. Dette miljøet (dev/preview) sender ikke til abonnentlista."
+    );
+  }
+}
+
 /** Opprett en broadcast med ferdig HTML og send den med én gang. */
 async function createAndSendBroadcast(params: {
   target: { audienceId: string } | { segmentId: string };
@@ -767,6 +791,7 @@ async function createAndSendBroadcast(params: {
   name: string;
   html: string;
 }): Promise<{ broadcastId: string }> {
+  assertBroadcastAllowed();
   const created = await getResend().broadcasts.create({
     ...params.target,
     from: buildFrom("Poynt"),
@@ -801,6 +826,7 @@ export async function sendNewsletterBroadcast(params: {
   preview: string;
   contentHtml: string;
 }): Promise<{ broadcastId: string }> {
+  assertBroadcastAllowed();
   const target = await resolveBroadcastTarget();
   if (!target) {
     throw new Error(
@@ -842,6 +868,7 @@ export async function sendNewsletterTestBroadcast(params: {
   preview: string;
   contentHtml: string;
 }): Promise<{ broadcastId: string }> {
+  assertBroadcastAllowed();
   const resend = getResend();
   const email = params.to.trim().toLowerCase();
 
@@ -1330,8 +1357,14 @@ export async function sendEventMessageEmails(params: {
       }))
     );
     try {
-      const { error } = await getResend().batch.send(emails);
-      if (error) throw new Error(error.message ?? "ukjent feil");
+      // Utenfor prod omdirigeres/stoppes hver enkelt (se delivery.ts).
+      const deliverable = emails
+        .map((email) => applyEmailDelivery(email))
+        .filter((email) => email !== null);
+      if (deliverable.length > 0) {
+        const { error } = await getResend().batch.send(deliverable);
+        if (error) throw new Error(error.message ?? "ukjent feil");
+      }
       sent += chunk.length;
     } catch (error) {
       console.error(

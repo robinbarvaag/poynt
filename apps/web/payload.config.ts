@@ -5,6 +5,7 @@ import { resendAdapter } from "@payloadcms/email-resend";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
 import { vercelBlobStorage } from "@payloadcms/storage-vercel-blob";
 import { nb } from "@payloadcms/translations/languages/nb";
+import { applyEmailDelivery } from "@poynt/email/delivery";
 import { APIError, buildConfig } from "payload";
 import sharp from "sharp";
 import { withPoyntLinks } from "./lib/lexical/link-feature";
@@ -93,6 +94,26 @@ function parseEmailFrom(): { name: string; address: string } {
 const emailFromParts = parseEmailFrom();
 
 /**
+ * Pakk Payloads e-postadapter i samme leveringsvern som @poynt/email, så
+ * skjema-e-poster o.l. heller ikke går til ekte mottakere fra dev/preview.
+ */
+function guardEmailAdapter(
+  adapter: ReturnType<typeof resendAdapter>
+): ReturnType<typeof resendAdapter> {
+  return (args) => {
+    const base = adapter(args);
+    return {
+      ...base,
+      sendEmail: async (message) => {
+        const deliverable = applyEmailDelivery(message);
+        if (!deliverable) return { id: "ikke-sendt-utenfor-prod" };
+        return base.sendEmail(deliverable);
+      },
+    };
+  };
+}
+
+/**
  * Norske etiketter på form-builder-pluginens «emails»-felt (Skjemaer). Pluginen
  * bruker engelske i18n-nøkler; her får partneren hverdagsspråk i stedet.
  */
@@ -155,11 +176,14 @@ export default buildConfig({
   // form-builder-pluginen). Bruker samme EMAIL_FROM som @poynt/email, slik at
   // alt går fra samme verifiserte adresse. Uten EMAIL_FROM: Resend-sandboxen,
   // som bare leverer til kontoens egen adresse.
-  email: resendAdapter({
-    defaultFromName: emailFromParts.name,
-    defaultFromAddress: emailFromParts.address,
-    apiKey: process.env.RESEND_API_KEY || "",
-  }),
+  // Utenfor prod omdirigeres/stoppes utsendingen (se @poynt/email/delivery).
+  email: guardEmailAdapter(
+    resendAdapter({
+      defaultFromName: emailFromParts.name,
+      defaultFromAddress: emailFromParts.address,
+      apiKey: process.env.RESEND_API_KEY || "",
+    })
+  ),
   db: postgresAdapter({
     pool: {
       connectionString: process.env.DATABASE_URI || "",
