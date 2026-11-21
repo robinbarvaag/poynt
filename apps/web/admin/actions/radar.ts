@@ -1,6 +1,6 @@
 "use server";
 
-import { inngest } from "@/lib/inngest/client";
+import { events, inngest } from "@/lib/inngest/client";
 import {
   type BindersData,
   getBindersWidgetData,
@@ -55,10 +55,9 @@ export async function setSuggestionStatus(
 export async function runRadarNow() {
   await requireAdmin();
   try {
-    await inngest.send({
-      name: "radar/analyze.requested",
-      data: { trigger: "manual" },
-    });
+    await inngest.send(
+      events.radarAnalyzeRequested.create({ trigger: "manual" })
+    );
     return { success: true };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

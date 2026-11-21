@@ -1,5 +1,5 @@
 import { applyRegistrationRetention } from "../../events/retention-job";
-import { inngest } from "../client";
+import { events, inngest } from "../client";
 
 /**
  * Sletter personopplysninger fra påmeldinger til eventer etter fristene i
@@ -12,11 +12,14 @@ import { inngest } from "../client";
  * blitt ryddet).
  */
 export const eventRetention = inngest.createFunction(
-  { id: "event-retention", name: "Eventer – slett gamle påmeldinger" },
-  [
-    { cron: "TZ=Europe/Oslo 15 3 * * *" },
-    { event: "events/retention.requested" },
-  ],
+  {
+    id: "event-retention",
+    name: "Eventer – slett gamle påmeldinger",
+    triggers: [
+      { cron: "TZ=Europe/Oslo 15 3 * * *" },
+      events.eventsRetentionRequested,
+    ],
+  },
   async ({ event, step }) => {
     // Gjelder både eget event og «Invoke» fra dashbordet (som sender
     // `inngest/function.invoked` med samme data); cron har ikke feltet.

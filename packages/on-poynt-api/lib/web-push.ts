@@ -1,7 +1,7 @@
 import { db } from "@poynt/on-poynt-db";
 import { onPoyntPushSubscription } from "@poynt/on-poynt-db/schema";
 import { eq } from "drizzle-orm";
-import webpush from "web-push";
+import * as webpush from "web-push";
 
 /**
  * Web Push uten ekstern tjeneste: vi signerer med våre egne VAPID-nøkler og

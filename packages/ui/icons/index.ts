@@ -47,7 +47,6 @@ export {
   DollarSign,
   ExternalLink,
   Eye,
-  Facebook,
   FileText,
   Flame,
   GraduationCap,
@@ -58,12 +57,10 @@ export {
   Heart,
   Home,
   Image,
-  Instagram,
   Landmark,
   Layers,
   LayoutList,
   Lightbulb,
-  Linkedin,
   Loader2,
   LogOut,
   Mail,
@@ -98,9 +95,9 @@ export {
   Users,
   Wallet,
   X,
-  Youtube,
   Zap,
 } from "lucide-react";
+export { Facebook, Instagram, Linkedin, Youtube } from "./brand";
 
 // Re-export type for icon components
 export type { LucideIcon, LucideProps } from "lucide-react";

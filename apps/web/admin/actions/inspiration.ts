@@ -1,6 +1,6 @@
 "use server";
 
-import { inngest } from "@/lib/inngest/client";
+import { events, inngest } from "@/lib/inngest/client";
 import { requireAdmin } from "@/lib/require-admin";
 import { db, eq, sql } from "@poynt/on-poynt-db";
 import {
@@ -89,10 +89,9 @@ export async function toggleInspirationSourceActive(id: string) {
 export async function fetchInspirationNow(sourceId?: string) {
   await requireAdmin();
   try {
-    await inngest.send({
-      name: "inspiration/fetch.requested",
-      data: sourceId ? { sourceId } : {},
-    });
+    await inngest.send(
+      events.inspirationFetchRequested.create(sourceId ? { sourceId } : {})
+    );
     return { success: true };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

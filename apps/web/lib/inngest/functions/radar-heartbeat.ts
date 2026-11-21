@@ -9,8 +9,11 @@ import { inngest } from "../client";
  * Kjører ukentlig (mandag 06:00) som en enkel hjerteslagsjekk.
  */
 export const radarHeartbeat = inngest.createFunction(
-  { id: "radar-heartbeat", name: "Radar – hjerteslag" },
-  { cron: "0 6 * * 1" },
+  {
+    id: "radar-heartbeat",
+    name: "Radar – hjerteslag",
+    triggers: [{ cron: "0 6 * * 1" }],
+  },
   async ({ step }) => {
     const runId = await step.run("start-run", async () => {
       const [row] = await db

@@ -1,4 +1,4 @@
-import { inngest } from "@/lib/inngest/client";
+import { events, inngest } from "@/lib/inngest/client";
 import type { EventRegistration } from "@/payload-types";
 
 /**
@@ -24,10 +24,9 @@ export async function schedulePaymentChecks(
 
   try {
     await inngest.send(
-      [...deadlines].map((expiresAt) => ({
-        name: "events/payment.hold-started" as const,
-        data: { expiresAt },
-      }))
+      [...deadlines].map((expiresAt) =>
+        events.eventsPaymentHoldStarted.create({ expiresAt })
+      )
     );
   } catch (error) {
     console.warn(

@@ -68,7 +68,7 @@ export async function generateAltText({
         role: "user",
         content: [
           { type: "text", text: "Skriv alt-tekst for dette bildet." },
-          { type: "image", image: image.bytes, mediaType: image.mediaType },
+          { type: "file", data: image.bytes, mediaType: image.mediaType },
         ],
       },
     ],

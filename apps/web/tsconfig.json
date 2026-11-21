@@ -1,6 +1,7 @@
 {
   "extends": "@poynt/typescript-config/nextjs.json",
   "compilerOptions": {
+    "types": ["node", "bun"],
     "paths": {
       "@/*": ["./*"],
       "@payload-config": ["./payload.config.ts"]

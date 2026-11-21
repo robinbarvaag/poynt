@@ -36,14 +36,16 @@ export async function resolveCoupon(
     code: trimmed,
     active: true,
     limit: 1,
+    // Stripe flyttet rabatten fra `promo.coupon` til `promo.promotion.coupon`,
+    // og sender bare ID-en med mindre vi ber om hele objektet.
+    expand: ["data.promotion.coupon"],
   });
   const promo = promos.data[0];
+  const coupon = promo?.promotion?.coupon;
 
-  if (!promo || !promo.coupon.valid) {
+  if (!promo || !coupon || typeof coupon === "string" || !coupon.valid) {
     return { ok: false, error: "Ugyldig eller utløpt kode" };
   }
-
-  const { coupon } = promo;
 
   // Kronebeløp-koder må være i samme valuta som butikken (NOK).
   if (coupon.amount_off && coupon.currency && coupon.currency !== "nok") {

@@ -3,7 +3,7 @@ import {
   listActiveSources,
   processSource,
 } from "../../radar/inspiration";
-import { inngest } from "../client";
+import { events, inngest } from "../client";
 
 /**
  * Inspirasjon — henter og destillerer eksterne, offentlige kilder, lagrer dem
@@ -20,8 +20,8 @@ export const inspirationFetch = inngest.createFunction(
     id: "inspiration-fetch",
     name: "Inspirasjon – hent & destiller",
     concurrency: { limit: 3 },
+    triggers: [{ cron: "0 5 * * 1" }, events.inspirationFetchRequested],
   },
-  [{ cron: "0 5 * * 1" }, { event: "inspiration/fetch.requested" }],
   async ({ event, step }) => {
     const sourceId =
       event.name === "inspiration/fetch.requested"
@@ -53,10 +53,10 @@ export const inspirationFetch = inngest.createFunction(
 
     // Be radaren regenerere forslag så ferske inspirasjons-gap kommer med.
     if (inserted > 0) {
-      await step.sendEvent("trigger-analyze", {
-        name: "radar/analyze.requested",
-        data: { trigger: "scheduled" },
-      });
+      await step.sendEvent(
+        "trigger-analyze",
+        events.radarAnalyzeRequested.create({ trigger: "scheduled" })
+      );
     }
 
     return {

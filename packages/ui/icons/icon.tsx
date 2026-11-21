@@ -33,7 +33,6 @@ import {
   Download,
   ExternalLink,
   Eye,
-  Facebook,
   FileText,
   Flame,
   GraduationCap,
@@ -44,13 +43,11 @@ import {
   Heart,
   Home,
   Image,
-  Instagram,
   Landmark,
   Layers,
   LayoutList,
   Lightbulb,
   Link as LinkIcon,
-  Linkedin,
   Loader2,
   LogOut,
   type LucideProps,
@@ -100,9 +97,9 @@ import {
   Wallet,
   Wrench,
   X,
-  Youtube,
   Zap,
 } from "lucide-react";
+import { Facebook, Instagram, Linkedin, Youtube } from "./brand";
 
 /**
  * Map of all available icons
