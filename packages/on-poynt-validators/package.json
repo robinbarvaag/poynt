@@ -41,10 +41,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "zod": "^4.3.6"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@poynt/typescript-config": "workspace:*",
-    "typescript": "^5.7.2"
+    "typescript": "^5.9.3"
   }
 }

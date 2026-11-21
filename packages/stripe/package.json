@@ -7,7 +7,7 @@
     ".": "./index.ts"
   },
   "dependencies": {
-    "stripe": "^20.1.2"
+    "stripe": "^20.4.1"
   },
   "devDependencies": {
     "@poynt/typescript-config": "workspace:*"

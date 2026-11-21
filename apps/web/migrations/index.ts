@@ -93,6 +93,7 @@ import * as migration_20261019_193426_bibliotek from './20261019_193426_bibliote
 import * as migration_20261019_205245_orders_items_name_internal_note from './20261019_205245_orders_items_name_internal_note';
 import * as migration_20261105_220159_akademika_kanal from './20261105_220159_akademika_kanal';
 import * as migration_20261121_105227_objectkey from './20261121_105227_objectkey';
+import * as migration_20261121_111001 from './20261121_111001_payload_394_fk_names';
 
 export const migrations = [
   {
@@ -568,6 +569,11 @@ export const migrations = [
   {
     up: migration_20261121_105227_objectkey.up,
     down: migration_20261121_105227_objectkey.down,
-    name: '20261121_105227_objectkey'
+    name: '20261121_105227_objectkey',
+  },
+  {
+    up: migration_20261121_111001.up,
+    down: migration_20261121_111001.down,
+    name: '20261121_111001_payload_394_fk_names'
   },
 ];

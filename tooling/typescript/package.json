@@ -12,7 +12,7 @@
     "./react.json": "./react.json"
   },
   "devDependencies": {
-    "typescript": "^5.3.3",
-    "@types/node": "^20.10.6"
+    "typescript": "^5.9.3",
+    "@types/node": "^20.19.43"
   }
 }
