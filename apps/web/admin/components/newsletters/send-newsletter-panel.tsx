@@ -12,12 +12,20 @@ import { useState } from "react";
  *   virker som i den ekte utsendingen
  * - «Send til alle abonnenter»: Resend Broadcast til hele lista. Kan ikke
  *   angres, så knappen åpner en bekreftelse i panelet som viser emne og
- *   antall mottakere og krever at man skriver SEND. Sperret når skjemaet har
+ *   antall mottakere og krever at man skriver SEND. Finnes det flere
+ *   mottakerlister i Resend (f.eks. en ettersending til dem som ikke fikk
+ *   forrige utsending), kan man velge en av dem der. Sperret når skjemaet har
  *   ulagrede endringer (ellers ville den lagrede, gamle versjonen gått ut).
  *   Etter utsending markeres dokumentet som sendt server-side, så vi laster
  *   siden på nytt for å vise oppdatert status.
  */
 type Mode = "test" | "test-broadcast" | "send";
+
+interface Segment {
+  id: string;
+  name: string;
+  subscribers: number;
+}
 
 const CONFIRM_WORD = "SEND";
 
@@ -41,6 +49,10 @@ export const SendNewsletterPanel = () => {
   const [confirming, setConfirming] = useState(false);
   const [typed, setTyped] = useState("");
   const [recipients, setRecipients] = useState<number | null>(null);
+  // Andre mottakerlister i Resend enn «alle abonnenter» — tom = ingen valg.
+  const [segments, setSegments] = useState<Segment[]>([]);
+  const [segmentId, setSegmentId] = useState("");
+  const segment = segments.find((s) => s.id === segmentId);
 
   const isSent = status === "sent";
   const unsaved = id === undefined || id === null || modified;
@@ -50,12 +62,20 @@ export const SendNewsletterPanel = () => {
     setMessage(null);
     setTyped("");
     setRecipients(null);
+    setSegments([]);
+    setSegmentId("");
     setConfirming(true);
     try {
       const res = await fetch("/api/newsletter-broadcast");
-      const data = (await res.json()) as { subscribers?: number };
+      const data = (await res.json()) as {
+        subscribers?: number;
+        segments?: Segment[];
+      };
       if (res.ok && typeof data.subscribers === "number") {
         setRecipients(data.subscribers);
+      }
+      if (res.ok && Array.isArray(data.segments)) {
+        setSegments(data.segments);
       }
     } catch {
       // Antallet er bare til orientering — bekreftelsen virker uten.
@@ -74,7 +94,11 @@ export const SendNewsletterPanel = () => {
       const res = await fetch("/api/newsletter-broadcast", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, mode }),
+        body: JSON.stringify({
+          id,
+          mode,
+          ...(mode === "send" && segmentId && { segmentId }),
+        }),
       });
       const data = (await res.json()) as {
         error?: string;
@@ -91,7 +115,11 @@ export const SendNewsletterPanel = () => {
         );
       } else {
         setConfirming(false);
-        setMessage("Nyhetsbrevet er sendt til alle abonnenter! 🎉");
+        setMessage(
+          segment
+            ? `Nyhetsbrevet er sendt til «${segment.name}»! 🎉`
+            : "Nyhetsbrevet er sendt til alle abonnenter! 🎉"
+        );
         // Status/sentAt er oppdatert server-side — hent dokumentet på nytt.
         setTimeout(() => window.location.reload(), 1500);
       }
@@ -133,12 +161,45 @@ export const SendNewsletterPanel = () => {
           }}
         >
           <p style={{ fontSize: "0.85rem", fontWeight: 600, margin: 0 }}>
-            Send til alle abonnenter?
+            {segment ? "Send til denne lista?" : "Send til alle abonnenter?"}
           </p>
+          {segments.length > 0 ? (
+            <label style={{ ...hint, display: "block" }}>
+              Send til
+              <select
+                value={segmentId}
+                onChange={(e) => setSegmentId(e.target.value)}
+                disabled={busy !== null}
+                style={{
+                  display: "block",
+                  width: "100%",
+                  marginTop: "0.25rem",
+                  padding: "0.4rem 0.5rem",
+                  fontSize: "0.9rem",
+                  border: "1px solid var(--theme-elevation-250)",
+                  borderRadius: "var(--style-radius-s, 4px)",
+                  background: "var(--theme-input-bg)",
+                  color: "inherit",
+                }}
+              >
+                <option value="">
+                  Alle abonnenter
+                  {recipients === null ? "" : ` (${recipients})`}
+                </option>
+                {segments.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name} ({s.subscribers})
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
           <p style={{ fontSize: "0.85rem", margin: 0 }}>
             «{subject || "(uten emne)"}» sendes nå til{" "}
             <strong>
-              {recipients === null ? "alle" : `${recipients}`} abonnenter
+              {segment
+                ? `${segment.subscribers} abonnenter i «${segment.name}»`
+                : `${recipients === null ? "alle" : recipients} abonnenter`}
             </strong>
             . Dette kan ikke angres.
           </p>
@@ -172,6 +233,12 @@ export const SendNewsletterPanel = () => {
           >
             {busy === "send" ? "Sender …" : "Ja, send nå"}
           </button>
+          {busy === "send" ? (
+            <p style={hint}>
+              Gjør klar mottakerlista og sender. Det kan ta et minutt — ikke
+              lukk siden.
+            </p>
+          ) : null}
           <button
             type="button"
             onClick={() => setConfirming(false)}

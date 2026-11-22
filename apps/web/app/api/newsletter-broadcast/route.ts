@@ -2,7 +2,9 @@ import { lexicalToEmailHtml } from "@/lib/newsletter-html";
 import config from "@/payload.config";
 import type { SerializedEditorState } from "@payloadcms/richtext-lexical/lexical";
 import {
+  type NewsletterSegment,
   getNewsletterAudienceStats,
+  listExtraNewsletterSegments,
   sendNewsletterBroadcast,
   sendNewsletterTest,
   sendNewsletterTestBroadcast,
@@ -15,17 +17,24 @@ import { getPayload } from "payload";
  * - "test": vanlig e-post til den innloggede admin-brukeren
  * - "test-broadcast": ekte Resend Broadcast, men bare til admin-brukeren (via
  *   test-segmentet) — avmeldingslenke og flettefelt virker som i den ekte
- * - "send": Resend Broadcast til hele lista — markerer deretter dokumentet
- *   som sendt (status/sentAt/broadcastId)
+ * - "send": Resend Broadcast til hele lista (eller til segmentet i
+ *   `segmentId`) — markerer deretter dokumentet som sendt
+ *   (status/sentAt/broadcastId)
  * Brukes av send-panelet på Nyhetsbrev-dokumentet i admin (Payload-auth).
  */
+
+// Før utsending legges kontaktene i Resend-segmentet, ett kall per kontakt som
+// mangler (Resend tillater bare et par kall i sekundet) — første gang, eller
+// etter mange nye påmeldinger, kan det ta et minutt eller to.
+export const maxDuration = 300;
 
 const MODES = ["test", "test-broadcast", "send"] as const;
 type Mode = (typeof MODES)[number];
 
 /**
  * Antall aktive abonnenter — vises i bekreftelsen før «Send til alle», så
- * partneren ser hvor mange som faktisk får e-posten.
+ * partneren ser hvor mange som faktisk får e-posten. `segments` er andre
+ * mottakerlister i Resend (f.eks. en ettersending) som kan velges i stedet.
  */
 export async function GET(req: NextRequest) {
   const payload = await getPayload({ config });
@@ -35,7 +44,14 @@ export async function GET(req: NextRequest) {
   }
   try {
     const stats = await getNewsletterAudienceStats();
-    return NextResponse.json({ subscribers: stats.subscribed });
+    // Ekstra segmenter er et tillegg — feiler oppslaget, sender vi til alle.
+    const segments = await listExtraNewsletterSegments().catch(
+      (error: unknown): NewsletterSegment[] => {
+        console.error("Kunne ikke hente Resend-segmenter:", error);
+        return [];
+      }
+    );
+    return NextResponse.json({ subscribers: stats.subscribed, segments });
   } catch (error) {
     console.error("Kunne ikke telle abonnenter:", error);
     return NextResponse.json(
@@ -53,7 +69,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Ikke innlogget" }, { status: 401 });
     }
 
-    const body = (await req.json()) as { id?: string | number; mode?: string };
+    const body = (await req.json()) as {
+      id?: string | number;
+      mode?: string;
+      segmentId?: string;
+    };
     const { id } = body;
     const mode = body.mode as Mode | undefined;
     if (!id || !mode || !MODES.includes(mode)) {
@@ -109,6 +129,8 @@ export async function POST(req: NextRequest) {
       subject: newsletter.subject,
       preview,
       contentHtml,
+      ...(typeof body.segmentId === "string" &&
+        body.segmentId && { segmentId: body.segmentId }),
     });
 
     await payload.update({
