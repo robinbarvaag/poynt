@@ -3,7 +3,11 @@ import {
   EMAIL_CONTENT_WIDTH,
   inlineRichTextStyles,
 } from "@poynt/email/rich-text-styles";
-import { emailImageHtml, pickEmailImage } from "./newsletter-html";
+import {
+  emailImageHtml,
+  pickEmailImage,
+  tagNewsletterLinks,
+} from "./newsletter-html";
 
 /** Et mobilbilde slik Payload lagrer det: diger original + genererte størrelser. */
 const phonePhoto = {
@@ -133,5 +137,28 @@ describe("inlineRichTextStyles", () => {
   test("rører ikke tagger som bare begynner likt", () => {
     const html = "<picture><pre>kode</pre></picture><article>x</article>";
     expect(inlineRichTextStyles(html)).toBe(html);
+  });
+});
+
+describe("tagNewsletterLinks", () => {
+  const options = {
+    site: "https://www.poynt.no",
+    now: new Date("2026-10-29T12:00:00Z"),
+  };
+
+  test("merker lenker til eget nettsted og escaper &", () => {
+    const html = tagNewsletterLinks(
+      '<a style="color:red;" href="https://www.poynt.no/om?a=1&amp;b=2">Om</a>',
+      options
+    );
+    expect(html).toBe(
+      '<a style="color:red;" href="https://www.poynt.no/om?a=1&amp;b=2&amp;utm_source=nyhetsbrev&amp;utm_medium=e-post&amp;utm_campaign=om&amp;utm_content=2026-10-29">Om</a>'
+    );
+  });
+
+  test("lar eksterne lenker, e-post og bilder stå helt urørt", () => {
+    const html =
+      '<a href="https://norli.no/bok?a=1&amp;b=2">Norli</a><a href="mailto:hei@poynt.no">Skriv</a><img src="https://www.poynt.no/api/media/file/a.jpg" />';
+    expect(tagNewsletterLinks(html, options)).toBe(html);
   });
 });

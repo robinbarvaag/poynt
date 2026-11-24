@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { broadcastName } from "./broadcast-name";
 import { applyEmailDelivery, isEmailLive } from "./delivery";
 import type {
   OrderConfirmationContent,
@@ -978,7 +979,7 @@ export async function sendNewsletterBroadcast(params: {
     return createAndSendBroadcast({
       target: { segmentId: chosen.id },
       subject: params.subject,
-      name: `${params.subject} (${chosen.name})`,
+      name: broadcastName(params.subject, { suffix: ` (${chosen.name})` }),
       html: await renderNewsletterHtml({
         preview: params.preview,
         contentHtml: params.contentHtml,
@@ -1012,7 +1013,7 @@ export async function sendNewsletterBroadcast(params: {
   return createAndSendBroadcast({
     target,
     subject: params.subject,
-    name: params.subject,
+    name: broadcastName(params.subject),
     html,
   });
 }
@@ -1100,7 +1101,7 @@ export async function sendNewsletterTestBroadcast(params: {
   return createAndSendBroadcast({
     target: { segmentId },
     subject: `[TEST] ${params.subject}`,
-    name: `[TEST] ${params.subject}`,
+    name: broadcastName(params.subject, { prefix: "[TEST] " }),
     html,
   });
 }

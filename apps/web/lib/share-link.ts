@@ -108,3 +108,49 @@ export function buildShareUrl(
   url.searchParams.set("utm_content", todayInOslo(now));
   return url.toString();
 }
+
+/** «www.poynt.no» og «poynt.no» er samme nettsted. */
+function bareHost(hostname: string): string {
+  return hostname.replace(/^www\./, "").toLowerCase();
+}
+
+/**
+ * Merk en lenke i et nyhetsbrev med samme UTM-er som «Nyhetsbrev»-kanalen i
+ * del-lenka, så vi ser hvor mange besøk hvert nyhetsbrev gir — uten
+ * sporingspiksler eller omskrevne lenker. Merkingen er lik for alle mottakere
+ * (kanal, side, utsendingsdato), så den sier ingenting om hvem som klikket og
+ * krever ikke samtykke.
+ *
+ * Bare lenker til eget nettsted merkes. Lenker Susanne alt har merket selv,
+ * eksterne lenker, mailto/tel og filer under /api/ står urørt. Ankeret (#…)
+ * beholdes.
+ */
+export function tagNewsletterUrl(
+  href: string,
+  siteUrl: string,
+  now: Date = new Date()
+): string {
+  const channel = SHARE_CHANNELS.find((c) => c.key === "nyhetsbrev");
+  if (!channel) return href;
+
+  let url: URL;
+  let site: URL;
+  try {
+    url = new URL(href);
+    site = new URL(siteUrl);
+  } catch {
+    return href;
+  }
+  if (url.protocol !== "http:" && url.protocol !== "https:") return href;
+  if (bareHost(url.hostname) !== bareHost(site.hostname)) return href;
+  if (url.pathname.startsWith("/api/")) return href;
+  for (const key of url.searchParams.keys()) {
+    if (key.startsWith("utm_")) return href;
+  }
+
+  url.searchParams.set("utm_source", channel.source);
+  url.searchParams.set("utm_medium", channel.medium);
+  url.searchParams.set("utm_campaign", campaignFromPath(url.pathname));
+  url.searchParams.set("utm_content", todayInOslo(now));
+  return url.toString();
+}

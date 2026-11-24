@@ -111,8 +111,13 @@ describe("buildNewsletterHtml", () => {
 
     expect(html).toContain('href="https://norli.no/bok"');
     expect(html).toContain('href="mailto:hei@poynt.no"');
-    expect(html).toContain(`href="${siteUrl}/"`);
-    expect(html).toContain(`href="${siteUrl}/om"`);
+    // Lenker til eget nettsted UTM-merkes (besøk per nyhetsbrev, ikke per person).
+    expect(html).toContain(
+      `href="${siteUrl}/?utm_source=nyhetsbrev&amp;utm_medium=e-post&amp;utm_campaign=forside&amp;utm_content=`
+    );
+    expect(html).toContain(
+      `href="${siteUrl}/om?utm_source=nyhetsbrev&amp;utm_medium=e-post&amp;utm_campaign=om&amp;utm_content=`
+    );
     // Uløselig intern lenke blir ren tekst, ikke en død lenke.
     expect(html).toContain("Slettet side");
     expect(html).not.toContain('href="#"');
