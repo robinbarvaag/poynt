@@ -3,6 +3,7 @@
   "compilerOptions": {
     "outDir": "./dist",
     "jsx": "react",
+    "types": ["node"],
     "module": "esnext"
   },
   "include": ["./**/*"],

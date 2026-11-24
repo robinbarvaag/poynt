@@ -1,4 +1,7 @@
-import { buildNewsletterHtml } from "@/lib/newsletter-html";
+import {
+  buildNewsletterHtml,
+  populateNewsletterContent,
+} from "@/lib/newsletter-html";
 import config from "@/payload.config";
 import type { SerializedEditorState } from "@payloadcms/richtext-lexical/lexical";
 import { type NextRequest, NextResponse } from "next/server";
@@ -29,6 +32,10 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Skjemaet sender bare id-er for bilder og interne lenker — hent dem, så
+    // forhåndsvisningen viser det samme som den ekte utsendingen.
+    await populateNewsletterContent(payload, body.content);
 
     const html = await buildNewsletterHtml({
       content: body.content,

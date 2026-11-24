@@ -1,7 +1,7 @@
 import config from "@/payload.config";
 import { getPayload } from "payload";
 import { runStockSnapshot } from "../../boksalg/snapshot";
-import { inngest } from "../client";
+import { events, inngest } from "../client";
 
 /**
  * Boksalg — henter lagerstatus for «Verdifull vekst» hos Norli og ARK, lagrer
@@ -23,8 +23,8 @@ export const bookStockSnapshot = inngest.createFunction(
     // begge ville lest samme «forrige bilde» og skrevet endringene dobbelt.
     concurrency: { limit: 1 },
     retries: 2,
+    triggers: [{ cron: "0 6 * * *" }, events.boksalgSnapshotRequested],
   },
-  [{ cron: "0 6 * * *" }, { event: "boksalg/snapshot.requested" }],
   async ({ event, step }) => {
     const sourceKey =
       event.name === "boksalg/snapshot.requested"

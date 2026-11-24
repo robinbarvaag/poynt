@@ -134,6 +134,40 @@ function toDate(ts: number | undefined | null): Date | undefined {
 }
 
 /**
+ * Stripe har flyttet to felt vi leser: abonnementsperioden ligger nå på
+ * abonnementslinjene (ikke på abonnementet), og fakturaens abonnement ligger
+ * under `parent.subscription_details`. Webhook-nyttelasten følger API-versjonen
+ * endepunktet er satt opp med i Stripe, mens oppslag via SDK-en følger SDK-ens
+ * versjon — de to kan være ulike, så vi leser ny plassering først og faller
+ * tilbake på den gamle.
+ */
+function subscriptionPeriod(subscription: Stripe.Subscription) {
+  const legacy = subscription as Stripe.Subscription & {
+    current_period_start?: number | null;
+    current_period_end?: number | null;
+  };
+  const item = subscription.items?.data?.[0];
+  return {
+    currentPeriodStart: toDate(
+      item?.current_period_start ?? legacy.current_period_start
+    ),
+    currentPeriodEnd: toDate(
+      item?.current_period_end ?? legacy.current_period_end
+    ),
+  };
+}
+
+function invoiceSubscriptionId(invoice: Stripe.Invoice): string | null {
+  const legacy = invoice as Stripe.Invoice & {
+    subscription?: string | { id: string } | null;
+  };
+  const subscription =
+    invoice.parent?.subscription_details?.subscription ?? legacy.subscription;
+  if (!subscription) return null;
+  return typeof subscription === "string" ? subscription : subscription.id;
+}
+
+/**
  * Extract customer email from Stripe customer ID.
  */
 async function getCustomerEmail(
@@ -442,8 +476,7 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
           ? subscription.customer
           : subscription.customer.id,
       stripeSubscriptionId: subscription.id,
-      currentPeriodStart: toDate(subscription.current_period_start),
-      currentPeriodEnd: toDate(subscription.current_period_end),
+      ...subscriptionPeriod(subscription),
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
     });
 
@@ -502,8 +535,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
           ? subscription.customer
           : subscription.customer.id,
       stripeSubscriptionId: subscription.id,
-      currentPeriodStart: toDate(subscription.current_period_start),
-      currentPeriodEnd: toDate(subscription.current_period_end),
+      ...subscriptionPeriod(subscription),
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
     });
 
@@ -533,8 +565,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
           ? subscription.customer
           : subscription.customer.id,
       stripeSubscriptionId: subscription.id,
-      currentPeriodStart: toDate(subscription.current_period_start),
-      currentPeriodEnd: toDate(subscription.current_period_end),
+      ...subscriptionPeriod(subscription),
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
     });
 
@@ -552,15 +583,11 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 async function handleInvoicePaid(invoice: Stripe.Invoice) {
   try {
     // Only process subscription invoices
-    if (!invoice.subscription) {
+    const subscriptionId = invoiceSubscriptionId(invoice);
+    if (!subscriptionId) {
       console.log("Invoice paid event is not for a subscription, skipping");
       return;
     }
-
-    const subscriptionId =
-      typeof invoice.subscription === "string"
-        ? invoice.subscription
-        : invoice.subscription.id;
 
     // Retrieve full subscription to get current status
     const subscription = await stripe.subscriptions.retrieve(subscriptionId);
@@ -577,8 +604,7 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
           ? subscription.customer
           : subscription.customer.id,
       stripeSubscriptionId: subscription.id,
-      currentPeriodStart: toDate(subscription.current_period_start),
-      currentPeriodEnd: toDate(subscription.current_period_end),
+      ...subscriptionPeriod(subscription),
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
     });
 
@@ -598,17 +624,13 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
 async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
   try {
     // Only process subscription invoices
-    if (!invoice.subscription) {
+    const subscriptionId = invoiceSubscriptionId(invoice);
+    if (!subscriptionId) {
       console.log(
         "Invoice payment_failed event is not for a subscription, skipping"
       );
       return;
     }
-
-    const subscriptionId =
-      typeof invoice.subscription === "string"
-        ? invoice.subscription
-        : invoice.subscription.id;
 
     // Retrieve full subscription
     const subscription = await stripe.subscriptions.retrieve(subscriptionId);
@@ -624,8 +646,7 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
           ? subscription.customer
           : subscription.customer.id,
       stripeSubscriptionId: subscription.id,
-      currentPeriodStart: toDate(subscription.current_period_start),
-      currentPeriodEnd: toDate(subscription.current_period_end),
+      ...subscriptionPeriod(subscription),
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
     });
 

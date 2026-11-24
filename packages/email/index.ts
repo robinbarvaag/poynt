@@ -586,11 +586,13 @@ export async function subscribeToNewsletter(
         if (update.error) {
           return { success: false, error: update.error.message };
         }
+        await addToNewsletterSegment(email);
         return { success: true };
       }
       return { success: false, error: result.error.message };
     }
 
+    await addToNewsletterSegment(email);
     return { success: true };
   } catch (error) {
     console.error("Newsletter subscription error:", error);
@@ -611,23 +613,51 @@ export interface NewsletterContact {
 }
 
 /**
+ * Resend har en streng grense på antall kall per sekund og svarer
+ * `rate_limit_exceeded` når vi er for raske. Vent (så lenge `retry-after`
+ * sier, ellers ett sekund) og prøv igjen — inntil fem ganger.
+ */
+async function withRateLimitRetry<
+  T extends {
+    error: { name?: string } | null;
+    headers?: Record<string, string> | null;
+  },
+>(call: () => Promise<T>): Promise<T> {
+  for (let attempt = 0; ; attempt += 1) {
+    const result = await call();
+    if (result.error?.name !== "rate_limit_exceeded" || attempt >= 5) {
+      return result;
+    }
+    const retryAfter = Number(result.headers?.["retry-after"]);
+    const seconds = retryAfter > 0 && retryAfter < 30 ? retryAfter : 1;
+    await new Promise((resolve) => setTimeout(resolve, seconds * 1000));
+  }
+}
+
+/**
  * Hent HELE kontaktlista fra Resend. API-et gir maks 100 per side (standard
  * 20!), så vi blar gjennom alle sidene. Kaster ved API-feil.
  */
 export async function listAllNewsletterContacts(): Promise<
   NewsletterContact[]
 > {
-  const audienceId = process.env.RESEND_AUDIENCE_ID;
+  return listContacts(process.env.RESEND_AUDIENCE_ID);
+}
+
+/** Alle kontakter på kontoen, eller bare de i ett segment. */
+async function listContacts(segmentId?: string): Promise<NewsletterContact[]> {
   const contacts: NewsletterContact[] = [];
   let after: string | undefined;
 
   // Sikkerhetsgrense: 200 sider à 100 = 20 000 kontakter.
   for (let page = 0; page < 200; page += 1) {
-    const result = await getResend().contacts.list({
-      ...(audienceId && { audienceId }),
-      limit: 100,
-      ...(after && { after }),
-    });
+    const result = await withRateLimitRetry(() =>
+      getResend().contacts.list({
+        ...(segmentId && { segmentId }),
+        limit: 100,
+        ...(after && { after }),
+      })
+    );
     if (result.error) throw new Error(result.error.message);
     const batch = result.data?.data ?? [];
     for (const contact of batch) {
@@ -784,6 +814,69 @@ function assertBroadcastAllowed() {
   }
 }
 
+/**
+ * Sørg for at alle kontaktene ligger i segmentet nyhetsbrevet sendes til.
+ *
+ * Kontakter i Resend er globale og havner IKKE i noe segment av seg selv —
+ * heller ikke «General». En broadcast må derimot sendes til et segment, så
+ * uten dette svarer Resend «The audience you are sending has no contacts»
+ * selv om kontolista er full (skjedde 22.11.2026: 131 kontakter, 0 i
+ * «General»). Kjøres før hver utsending og er trygg å kjøre om igjen: bare
+ * de som mangler legges til. Avmeldte tas med — Resend hopper over dem selv.
+ */
+export async function syncNewsletterSegment(
+  segmentId: string
+): Promise<{ total: number; added: number }> {
+  assertBroadcastAllowed();
+  const everyone = await listContacts();
+  const inSegment = new Set(
+    (await listContacts(segmentId)).map((contact) => contact.id)
+  );
+  const missing = everyone.filter((contact) => !inSegment.has(contact.id));
+
+  for (const contact of missing) {
+    const added = await withRateLimitRetry(() =>
+      getResend().contacts.segments.add({ contactId: contact.id, segmentId })
+    );
+    if (added.error && !/already|exists/i.test(added.error.message ?? "")) {
+      throw new Error(
+        `Kunne ikke legge abonnentene i mottakerlista i Resend: ${added.error.message ?? "ukjent feil"}. Ingenting er sendt — prøv igjen.`
+      );
+    }
+  }
+  if (missing.length > 0) {
+    console.info(
+      `[e-post] ${missing.length} kontakter lagt i nyhetsbrev-segmentet før utsending`
+    );
+  }
+  return { total: everyone.length, added: missing.length };
+}
+
+/**
+ * Legg en nypåmeldt i nyhetsbrev-segmentet med én gang, så lista i Resend er
+ * riktig også mellom utsendingene. Skal aldri velte påmeldingen — feiler det,
+ * fanger `syncNewsletterSegment` opp kontakten før neste utsending.
+ */
+async function addToNewsletterSegment(email: string): Promise<void> {
+  try {
+    const target = await resolveBroadcastTarget();
+    // Eldre kontoer (audienceId): kontakten opprettes rett i audiencen.
+    if (!target || !("segmentId" in target)) return;
+    const { segmentId } = target;
+    const added = await withRateLimitRetry(() =>
+      getResend().contacts.segments.add({ email, segmentId })
+    );
+    if (added.error && !/already|exists/i.test(added.error.message ?? "")) {
+      console.error(
+        "Kunne ikke legge kontakten i nyhetsbrev-segmentet:",
+        added.error.message
+      );
+    }
+  } catch (error) {
+    console.error("Kunne ikke legge kontakten i nyhetsbrev-segmentet:", error);
+  }
+}
+
 /** Opprett en broadcast med ferdig HTML og send den med én gang. */
 async function createAndSendBroadcast(params: {
   target: { audienceId: string } | { segmentId: string };
@@ -807,6 +900,10 @@ async function createAndSendBroadcast(params: {
 
   const sent = await getResend().broadcasts.send(created.data.id);
   if (sent.error) {
+    // Ikke la et usendt utkast bli liggende i Resend for hvert mislykket forsøk.
+    await getResend()
+      .broadcasts.remove(created.data.id)
+      .catch(() => undefined);
     throw new Error(
       `Kunne ikke sende broadcast: ${sent.error.message ?? "ukjent feil"}`
     );
@@ -815,23 +912,95 @@ async function createAndSendBroadcast(params: {
   return { broadcastId: created.data.id };
 }
 
+export interface NewsletterSegment {
+  id: string;
+  name: string;
+  /** Aktive (ikke avmeldte) kontakter i segmentet. */
+  subscribers: number;
+}
+
 /**
- * Opprett og send nyhetsbrevet som en Resend Broadcast til hele lista
- * (standard-segmentet, ev. RESEND_AUDIENCE_ID for eldre kontoer). Resend
- * håndterer avmelding per mottaker via `{{{RESEND_UNSUBSCRIBE_URL}}}`-
- * plassholderen i malen.
+ * Andre mottakerlister i Resend enn «alle abonnenter» — f.eks. et segment
+ * med dem som ikke fikk en utsending. Standard-segmentet (hele lista) og
+ * test-segmentet er aldri med. Finnes det slike, kan de velges i send-panelet;
+ * de sendes til som de står, uten synkronisering.
+ */
+export async function listExtraNewsletterSegments(): Promise<
+  NewsletterSegment[]
+> {
+  const target = await resolveBroadcastTarget();
+  const defaultId =
+    target && ("segmentId" in target ? target.segmentId : target.audienceId);
+  const segments = await withRateLimitRetry(() => getResend().segments.list());
+  if (segments.error) throw new Error(segments.error.message);
+
+  const extras: NewsletterSegment[] = [];
+  for (const segment of segments.data?.data ?? []) {
+    if (segment.name === NEWSLETTER_TEST_SEGMENT_NAME) continue;
+    if (segment.id === defaultId) continue;
+    const contacts = await listContacts(segment.id);
+    extras.push({
+      id: segment.id,
+      name: segment.name,
+      subscribers: contacts.filter((contact) => !contact.unsubscribed).length,
+    });
+  }
+  return extras;
+}
+
+/**
+ * Opprett og send nyhetsbrevet som en Resend Broadcast. Uten `segmentId` går
+ * det til hele lista (standard-segmentet, ev. RESEND_AUDIENCE_ID for eldre
+ * kontoer); med `segmentId` bare til det segmentet (må være ett av
+ * `listExtraNewsletterSegments`). Resend håndterer avmelding per mottaker via
+ * `{{{RESEND_UNSUBSCRIBE_URL}}}`-plassholderen i malen.
  */
 export async function sendNewsletterBroadcast(params: {
   subject: string;
   preview: string;
   contentHtml: string;
+  segmentId?: string;
 }): Promise<{ broadcastId: string }> {
   assertBroadcastAllowed();
+
+  if (params.segmentId) {
+    const chosen = (await listExtraNewsletterSegments()).find(
+      (segment) => segment.id === params.segmentId
+    );
+    if (!chosen) {
+      throw new Error(
+        "Fant ikke mottakerlista i Resend. Last siden på nytt og prøv igjen."
+      );
+    }
+    if (chosen.subscribers === 0) {
+      throw new Error(`Det er ingen abonnenter i «${chosen.name}».`);
+    }
+    return createAndSendBroadcast({
+      target: { segmentId: chosen.id },
+      subject: params.subject,
+      name: `${params.subject} (${chosen.name})`,
+      html: await renderNewsletterHtml({
+        preview: params.preview,
+        contentHtml: params.contentHtml,
+        unsubscribeUrl: "{{{RESEND_UNSUBSCRIBE_URL}}}",
+      }),
+    });
+  }
+
   const target = await resolveBroadcastTarget();
   if (!target) {
     throw new Error(
       "Fant ingen mottakerliste i Resend — sjekk at kontoen har et segment (eller sett RESEND_SEGMENT_ID)"
     );
+  }
+
+  // Kontaktene er globale i Resend — legg dem i segmentet før vi sender dit.
+  // (Eldre kontoer med RESEND_AUDIENCE_ID har kontaktene rett i audiencen.)
+  if ("segmentId" in target) {
+    const { total } = await syncNewsletterSegment(target.segmentId);
+    if (total === 0) {
+      throw new Error("Det er ingen abonnenter å sende til ennå.");
+    }
   }
 
   const html = await renderNewsletterHtml({

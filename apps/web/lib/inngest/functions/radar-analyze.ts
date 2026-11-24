@@ -3,7 +3,7 @@ import { db, eq } from "@poynt/on-poynt-db";
 import { onPoyntRadarRun } from "@poynt/on-poynt-db/schema";
 import { persistSuggestions } from "../../radar/persist";
 import { gatherSignals } from "../../radar/signals";
-import { inngest } from "../client";
+import { events, inngest } from "../client";
 
 /**
  * Innholdsradar — analysejobben. Samler deterministiske signaler om biblioteket,
@@ -13,8 +13,11 @@ import { inngest } from "../client";
  * (event `radar/analyze.requested`). Se docs/CONTENT-RADAR.md.
  */
 export const radarAnalyze = inngest.createFunction(
-  { id: "radar-analyze", name: "Radar – analyse" },
-  [{ cron: "0 6 * * 1" }, { event: "radar/analyze.requested" }],
+  {
+    id: "radar-analyze",
+    name: "Radar – analyse",
+    triggers: [{ cron: "0 6 * * 1" }, events.radarAnalyzeRequested],
+  },
   async ({ event, step }) => {
     const trigger: "manual" | "scheduled" =
       event.name === "radar/analyze.requested"

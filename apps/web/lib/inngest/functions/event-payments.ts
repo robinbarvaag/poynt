@@ -1,6 +1,6 @@
 import { runPaymentExpiry } from "../../events/payment-jobs";
 import { paymentCheckAt } from "../../events/payment-rules";
-import { inngest } from "../client";
+import { events, inngest } from "../client";
 
 /**
  * Betalte eventer: frigjør plasser som ikke ble betalt innen fristen (30 min
@@ -18,12 +18,15 @@ import { inngest } from "../client";
  * databasen vekkes én gang, ikke to.
  */
 export const eventPayments = inngest.createFunction(
-  { id: "event-payments", name: "Eventer – frigjør ubetalte plasser" },
-  [
-    { cron: "TZ=Europe/Oslo 5 * * * *" },
-    { event: "events/payments.requested" },
-    { event: "events/payment.hold-started" },
-  ],
+  {
+    id: "event-payments",
+    name: "Eventer – frigjør ubetalte plasser",
+    triggers: [
+      { cron: "TZ=Europe/Oslo 5 * * * *" },
+      events.eventsPaymentsRequested,
+      events.eventsPaymentHoldStarted,
+    ],
+  },
   async ({ event, step }) => {
     if (event.name === "events/payment.hold-started") {
       const expiresAt = new Date(event.data.expiresAt);

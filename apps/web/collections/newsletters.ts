@@ -96,6 +96,9 @@ export const Newsletters: CollectionConfig = {
       type: "select",
       label: "Status",
       defaultValue: "draft",
+      // En kopi av et sendt nyhetsbrev er et nytt utkast — ellers ville
+      // kopien stått som «sendt» og ikke kunne sendes.
+      hooks: { beforeDuplicate: [() => "draft"] },
       options: [
         { label: "Utkast", value: "draft" },
         { label: "Sendt", value: "sent" },
@@ -109,6 +112,7 @@ export const Newsletters: CollectionConfig = {
       name: "sentAt",
       type: "date",
       label: "Sendt",
+      hooks: { beforeDuplicate: [() => null] },
       admin: {
         position: "sidebar",
         readOnly: true,
@@ -119,6 +123,7 @@ export const Newsletters: CollectionConfig = {
       name: "broadcastId",
       type: "text",
       label: "Resend broadcast-ID",
+      hooks: { beforeDuplicate: [() => null] },
       admin: {
         position: "sidebar",
         readOnly: true,

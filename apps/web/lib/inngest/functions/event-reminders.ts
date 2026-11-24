@@ -1,5 +1,5 @@
 import { sendDueReminders } from "../../events/reminders";
-import { inngest } from "../client";
+import { events, inngest } from "../client";
 
 /**
  * Påminnelse på e-post til alle med plass, omtrent et døgn før eventet
@@ -10,11 +10,14 @@ import { inngest } from "../client";
  * `{ "dryRun": true }` for å se hvor mange som ville fått den.
  */
 export const eventReminders = inngest.createFunction(
-  { id: "event-reminders", name: "Eventer – påminnelse dagen før" },
-  [
-    { cron: "TZ=Europe/Oslo 5 * * * *" },
-    { event: "events/reminders.requested" },
-  ],
+  {
+    id: "event-reminders",
+    name: "Eventer – påminnelse dagen før",
+    triggers: [
+      { cron: "TZ=Europe/Oslo 5 * * * *" },
+      events.eventsRemindersRequested,
+    ],
+  },
   async ({ event, step }) => {
     // Gjelder både eget event og «Invoke» fra dashbordet; cron har ikke feltet.
     const dryRun =
