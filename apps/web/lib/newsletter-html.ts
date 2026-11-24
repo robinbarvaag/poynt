@@ -3,6 +3,7 @@ import {
   lexicalLinkHref,
 } from "@/lib/lexical/link-fields";
 import { toRelativeMediaUrl } from "@/lib/media-url";
+import { tagNewsletterUrl } from "@/lib/share-link";
 import {
   type HTMLConvertersFunction,
   convertLexicalToHTML,
@@ -181,10 +182,42 @@ export async function populateNewsletterContent(
   }
 }
 
-/** Lexical-innhold fra Payload → e-postklar HTML (absolutte URL-er). */
+function unescapeAttribute(value: string): string {
+  return value
+    .replace(/&quot;/g, '"')
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&");
+}
+
+/**
+ * UTM-merk lenkene til eget nettsted (se `tagNewsletterUrl`). Dette er
+ * målingen vi har av nyhetsbrevet: antall besøk per utsending, ikke hvem som
+ * åpnet eller klikket. Åpnings-/klikksporing i Resend er bevisst AV: piksler
+ * og omskrevne lenker krever et eget samtykke til måling (ekomloven § 3-15),
+ * og det har vi ikke samlet inn.
+ */
+export function tagNewsletterLinks(
+  html: string,
+  options: { site?: string; now?: Date } = {}
+): string {
+  const site = options.site ?? siteUrl;
+  return html.replace(/href="([^"]*)"/g, (match, raw: string) => {
+    const href = unescapeAttribute(raw);
+    const tagged = tagNewsletterUrl(href, site, options.now);
+    return tagged === href ? match : `href="${escapeAttribute(tagged)}"`;
+  });
+}
+
+/**
+ * Lexical-innhold fra Payload → e-postklar HTML (absolutte URL-er, lenker til
+ * eget nettsted UTM-merket).
+ */
 export function lexicalToEmailHtml(content: SerializedEditorState): string {
-  return absolutizeUrls(
-    convertLexicalToHTML({ data: content, converters: emailConverters })
+  return tagNewsletterLinks(
+    absolutizeUrls(
+      convertLexicalToHTML({ data: content, converters: emailConverters })
+    )
   );
 }
 
